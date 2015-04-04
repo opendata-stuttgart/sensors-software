@@ -24,7 +24,7 @@ boolean trigP2 = false;
 unsigned long trigOnP1;
 unsigned long trigOnP2;
 
-unsigned long sampletime_ms = 30000;
+unsigned long sampletime_ms = 15000;
 unsigned long lowpulseoccupancyP1 = 0;
 unsigned long lowpulseoccupancyP2 = 0;
 
