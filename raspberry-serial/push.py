@@ -27,7 +27,7 @@ def send_data(data):
     headers = {'SENSOR': SENSOR_UID,
                'Content-Type': 'application/json'}
     r = requests.post(url, data=json.dumps(payload),
-                      headers=headers)
+                      headers=headers, verify=False)
     print(r.status_code)
     print(r.text)
 
