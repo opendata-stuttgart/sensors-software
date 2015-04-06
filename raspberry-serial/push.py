@@ -36,6 +36,13 @@ def parse_data(message):
     # mapping for api sensor_types
     message = message.replace('lowpulseoccupancy', 'dur')
     message = message.replace('count', '')
+
+    # some checks to elimanate some of the 400s from the API
+    if ':' not in message or len(message.split(':')) != 7:
+        return False
+    if ';' not in message or len(message.split(';')) != 6:
+        return False
+
     return dict(map(lambda x: x.split(':'), message.split(';')))
 
 
@@ -43,4 +50,5 @@ ser = serial.Serial('/dev/ttyACM0')
 while True:
     message = ser.readline()
     data = parse_data(message)
-    send_data(data)
+    if data:
+        send_data(data)
