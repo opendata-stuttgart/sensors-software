@@ -29,6 +29,7 @@ def log(data):
     dt = str(pytz.timezone('Europe/Berlin').localize(datetime.now()))
     line = "{}| {}\n".format(dt, json.dumps(data))
     with open(filename, "a") as fp:
+        print(line)
         fp.write(line)
 
 
