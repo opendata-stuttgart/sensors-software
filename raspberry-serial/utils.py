@@ -18,8 +18,8 @@ def parse_data(message):
 
 
 def send_data(data, timestamp=None):
-#    url = "https://api.dusti.xyz/v1/push-sensor-data/"
-    url = "http://localhost:8000/v1/push-sensor-data/"
+    url = "https://api.dusti.xyz/v1/push-sensor-data/"
+#    url = "http://localhost:8000/v1/push-sensor-data/"
 
     payload = {
         "sampling_rate": "15000",
