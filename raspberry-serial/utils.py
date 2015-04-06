@@ -7,6 +7,7 @@ def parse_data(message):
     # mapping for api sensor_types
     message = message.replace('lowpulseoccupancy', 'dur')
     message = message.replace('count', '')
+    message = message.strip()
 
     # some checks to elimanate some of the 400s from the API
     if ':' not in message or len(message.split(':')) != 7:
