@@ -10,9 +10,11 @@ def parse_data(message):
     message = message.strip()
 
     # some checks to elimanate some of the 400s from the API
-    if ':' not in message or len(message.split(':')) != 7:
+    if ':' not in message:
         return False
-    if ';' not in message or len(message.split(';')) != 6:
+    if ';' not in message:
+       return False
+    if len(message.split(':')) != len(message.split(';')) + 1:
         return False
 
     return dict(map(lambda x: x.split(':'), message.split(';')))
