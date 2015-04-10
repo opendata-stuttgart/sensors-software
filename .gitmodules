@@ -1,0 +1,3 @@
+[submodule "arduino/libs/SHT1x"]
+	path = arduino/libs/SHT1x
+	url = https://github.com/practicalarduino/SHT1x
