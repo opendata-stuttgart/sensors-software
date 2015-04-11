@@ -19,7 +19,7 @@ class Sensor(object):
         else:
             self.sensor_uid = 'SENSOR_UID'
         if filename:
-            self.filename = "{}_{}".format(self.sensor_type, filename)
+            self.filename = "{}.{}".format(filename, self.sensor_type)
 
     def filter(self, json_data):
         # filter all fields not in whitelist
