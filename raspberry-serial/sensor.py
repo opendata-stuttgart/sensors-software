@@ -9,8 +9,8 @@ class Sensor(object):
 
     sensor_type = None
     sampling_rate = None
-    url = "http://localhost:8000/v1/push-sensor-data/"
-#    url = "https://api.dusti.xyz/v1/push-sensor-data/"
+#    url = "http://localhost:8000/v1/push-sensor-data/"
+    url = "https://api.dusti.xyz/v1/push-sensor-data/"
     whitelist = []
 
     def __init__(self, filename=None):
