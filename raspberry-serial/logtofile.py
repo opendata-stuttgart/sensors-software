@@ -8,15 +8,11 @@
 # Python 2 code!!
 #
 
-from datetime import datetime
-import json
 import os.path
-import pytz
 import serial
 import uuid
 
-from utils import parse_data
-
+from sensor import SensorPPD42NS, SensorSHT10
 
 dirname = os.path.dirname(os.path.abspath(__file__))
 # different filename on each restart
@@ -24,18 +20,15 @@ dirname = os.path.dirname(os.path.abspath(__file__))
 # before uploading the data
 filename = os.path.join(dirname, uuid.uuid4().hex + '.data')
 
-
-def log(data):
-    dt = str(pytz.timezone('Europe/Berlin').localize(datetime.now()))
-    line = "{}| {}\n".format(dt, json.dumps(data))
-    with open(filename, "a") as fp:
-        print(line)
-        fp.write(line)
-
-
 ser = serial.Serial('/dev/ttyACM0')
 while True:
     message = ser.readline()
-    data = parse_data(message)
+    ppd = SensorPPD42NS(filename)
+    data = ppd.parse(message)
     if data:
-        log(data)
+        ppd.log(data)
+
+    sht10 = SensorSHT10(filename)
+    data = sht10.parse(message)
+    if data:
+        sht10.log(data)

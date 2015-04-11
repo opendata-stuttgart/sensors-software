@@ -5,7 +5,7 @@
 import json
 import sys
 
-from utils import send_data
+from sensor import SensorPPD42NS, SensorSHT10
 
 if len(sys.argv) != 2:
     print("python send.py <filename>")
@@ -13,6 +13,15 @@ if len(sys.argv) != 2:
 with open(sys.argv[1], 'r') as fp:
     for line in fp.readlines():
         timestamp = line.split('|')[0]
+
         data = json.loads(line.split('|')[1])
+        ppd = SensorPPD42NS()
+        data = ppd.filter(data)
         if data:
-            send_data(data, timestamp)
+            ppd.send(data, timestamp)
+
+        data = json.loads(line.split('|')[1])
+        sht10 = SensorSHT10()
+        data = sht10.filter(data)
+        if data:
+            sht10.send(data, timestamp)
