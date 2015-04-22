@@ -20,7 +20,15 @@ dirname = os.path.dirname(os.path.abspath(__file__))
 # before uploading the data
 filename = os.path.join(dirname, uuid.uuid4().hex)
 
-ser = serial.Serial('/dev/ttyACM0')
+# FIXME: parameterize ttyACM0 or ttyACM1
+
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("--device", help="device to read from",
+                    default="/dev/ttyACM0")
+args = parser.parse_args()
+
+ser = serial.Serial(args.device)
 while True:
     message = ser.readline()
     ppd = SensorPPD42NS(filename)
