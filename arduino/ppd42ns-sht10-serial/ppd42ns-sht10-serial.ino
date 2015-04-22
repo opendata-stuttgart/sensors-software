@@ -79,7 +79,7 @@ void loop() {
   {
     ratio = lowpulseoccupancyP1/(sampletime_ms*10.0);                 // int percentage 0 to 100
     concentration = 1.1*pow(ratio,3)-3.8*pow(ratio,2)+520*ratio+0.62; // spec sheet curve
-    Serial.print("PPD10NS#durP1:");
+    Serial.print("durP1:");
     Serial.print(lowpulseoccupancyP1);
     Serial.print(";ratioP1:");
     Serial.print(ratio);
@@ -94,9 +94,9 @@ void loop() {
     Serial.print(";ratioP2:");
     Serial.print(ratio);
     Serial.print(";P2:");
-    Serial.println(concentration);
+    Serial.print(concentration);
 
-    Serial.print("SHT10#temperature:");
+    Serial.print("temperature:");
     Serial.print(sht10.readTemperatureC());
     Serial.print(";humidity:");
     Serial.println(sht10.readHumidity());
