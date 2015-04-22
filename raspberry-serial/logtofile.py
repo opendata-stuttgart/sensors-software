@@ -30,18 +30,18 @@ args = parser.parse_args()
 
 ser = serial.Serial(args.device)
 while True:
-    for message in ser.readlines():
-        ppd = SensorPPD42NS(filename)
-        data = ppd.parse(message)
-        if data:
-            ppd.log(data)
+    message = ser.readline()
+    ppd = SensorPPD42NS(filename)
+    data = ppd.parse(message)
+    if data:
+        ppd.log(data)
 
-        sht10 = SensorSHT10(filename)
-        data = sht10.parse(message)
-        if data:
-            sht10.log(data)
+    sht10 = SensorSHT10(filename)
+    data = sht10.parse(message)
+    if data:
+        sht10.log(data)
 
-        gp2y10 = SensorGP2Y10(filename)
-        data = gp2y10.parse(message)
-        if data:
-            gp2y10.log(data)
+    gp2y10 = SensorGP2Y10(filename)
+    data = gp2y10.parse(message)
+    if data:
+        gp2y10.log(data)
