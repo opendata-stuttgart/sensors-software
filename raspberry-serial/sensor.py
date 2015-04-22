@@ -39,6 +39,9 @@ class Sensor(object):
         return True
 
     def parse(self, message):
+        # remove sensor prefix (unused atm)
+        if '#' in message:
+            message = message.split('#')[1]
         if not self.check(message):
             return False
         json_data = dict(map(lambda x: x.split(':'),
@@ -78,16 +81,6 @@ class SensorPPD42NS(Sensor):
     sampling_rate = '15000'
     whitelist = ['P1', 'P2', 'durP1', 'durP2', 'ratioP1', 'ratioP2']
 
-    def filter(self, json_data):
-        for a, b in [('lowpulseoccupancyP1', 'durP1'),
-                     ('lowpulseoccupancyP2', 'durP2'),
-                     ('countP1', 'P1'),
-                     ('countP2', 'P2')]:
-            if a in json_data:
-                json_data[b] = json_data.pop(a)
-        json_data = super(SensorPPD42NS, self).filter(json_data)
-        return json_data
-
 
 class SensorSHT10(Sensor):
 
@@ -95,10 +88,9 @@ class SensorSHT10(Sensor):
     sampling_rate = None
     whitelist = ['temperature', 'humidity']
 
-    def filter(self, json_data):
-        for a, b in [('sht10_humidity', 'humidity'),
-                     ('sht10_temperature', 'temperature')]:
-            if a in json_data:
-                json_data[b] = json_data.pop(a)
-        json_data = super(SensorSHT10, self).filter(json_data)
-        return json_data
+
+class SensorGP2Y10(Sensor):
+
+    sensor_type = 'GP2Y1010AU0F'
+    sampling_rate = '40'
+    whitelist = ['vo_raw', 'voltage', 'dust_density']
