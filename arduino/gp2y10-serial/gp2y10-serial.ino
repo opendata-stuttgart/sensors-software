@@ -37,7 +37,7 @@ void loop(){
   // Chris Nafis (c) 2012
   dustDensity = 0.17 * calcVoltage - 0.1;
   
-  Serial.print("Vo_raw:");
+  Serial.print("GP2Y1010AU0F#vo_raw:");
   Serial.print(voMeasured);
   
   Serial.print(";voltage:");
