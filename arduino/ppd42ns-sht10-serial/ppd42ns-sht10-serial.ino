@@ -96,9 +96,9 @@ void loop() {
     Serial.print(";P2:");
     Serial.println(concentration);
 
-    Serial.print("SHT10#sht10_temperature:");
+    Serial.print("SHT10#temperature:");
     Serial.print(sht10.readTemperatureC());
-    Serial.print(";sht10_humidity:");
+    Serial.print(";humidity:");
     Serial.println(sht10.readHumidity());
 
     lowpulseoccupancyP1 = 0;
