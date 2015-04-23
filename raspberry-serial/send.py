@@ -28,6 +28,6 @@ with open(sys.argv[1], 'r') as fp:
 
         data = json.loads(line.split('|')[1])
         gp2y10 = SensorGP2Y10()
-        data = gp2y10.parse(data)
+        data = gp2y10.filter(data)
         if data:
             gp2y10.send(data, timestamp)
