@@ -12,7 +12,12 @@ import os.path
 import serial
 import uuid
 
-from sensor import SensorPPD42NS, SensorSHT10, SensorGP2Y10
+from sensor import (
+    SensorDSM501A
+    SensorGP2Y10,
+    SensorPPD42NS,
+    SensorSHT10,
+)
 
 dirname = os.path.dirname(os.path.abspath(__file__))
 # different filename on each restart
@@ -45,3 +50,8 @@ while True:
     data = gp2y10.parse(message)
     if data:
         gp2y10.log(data)
+
+    dsm501a = SensorDSM501A(filename)
+    data = dsm501a.parse(message)
+    if data:
+        dsm501a.log(data)
