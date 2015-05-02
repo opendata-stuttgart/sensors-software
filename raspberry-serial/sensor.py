@@ -94,3 +94,10 @@ class SensorGP2Y10(Sensor):
     sensor_type = 'GP2Y1010AU0F'
     sampling_rate = '40'
     whitelist = ['vo_raw', 'voltage', 'dust_density']
+
+
+class SensorDSM501A(Sensor):
+
+    sensor_type = 'dsm501a'
+    sampling_rate = '40'
+    whitelist = ['P10', 'P25', 'durP10', 'durP25', 'ratioP10', 'ratioP25']
