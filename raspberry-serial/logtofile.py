@@ -13,7 +13,7 @@ import serial
 import uuid
 
 from sensor import (
-    SensorDSM501A
+    SensorDSM501A,
     SensorGP2Y10,
     SensorPPD42NS,
     SensorSHT10,
