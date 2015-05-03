@@ -101,3 +101,10 @@ class SensorDSM501A(Sensor):
     sensor_type = 'dsm501a'
     sampling_rate = '40'
     whitelist = ['P10', 'P25', 'durP10', 'durP25', 'ratioP10', 'ratioP25']
+
+
+class SensorBMP180(Sensor):
+
+    sensor_type = 'bmp180'
+    sampling_rate = None
+    whitelist = ['temperature', 'pressure', 'altitude', 'pressure_sealevel',]

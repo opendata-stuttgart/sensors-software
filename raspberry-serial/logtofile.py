@@ -17,6 +17,7 @@ from sensor import (
     SensorGP2Y10,
     SensorPPD42NS,
     SensorSHT10,
+    SensorBMP180,
 )
 
 dirname = os.path.dirname(os.path.abspath(__file__))
@@ -55,3 +56,8 @@ while True:
     data = dsm501a.parse(message)
     if data:
         dsm501a.log(data)
+
+    bmp180 = SensorBMP180(filename)
+    data = bmp180.parse(message)
+    if data:
+        bmp180.log(data)
