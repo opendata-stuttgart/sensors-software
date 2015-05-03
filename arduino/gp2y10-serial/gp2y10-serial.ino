@@ -37,13 +37,13 @@ void loop(){
   // Chris Nafis (c) 2012
   dustDensity = 0.17 * calcVoltage - 0.1;
   
-  Serial.print("GP2Y1010AU0F#vo_raw:");
+  Serial.print("GP2Y1010AU0F_vo_raw:");
   Serial.print(voMeasured);
   
-  Serial.print(";voltage:");
+  Serial.print(";GP2Y1010AU0F_voltage:");
   Serial.print(calcVoltage);
   
-  Serial.print(";dust_density:");
+  Serial.print(";GP2Y1010AU0F_dust_density:");
   Serial.println(dustDensity); // unit: mg/m3
   
   delay(1000);
