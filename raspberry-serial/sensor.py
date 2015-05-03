@@ -99,7 +99,7 @@ class SensorGP2Y10(Sensor):
 class SensorDSM501A(Sensor):
 
     sensor_type = 'dsm501a'
-    sampling_rate = '40'
+    sampling_rate = '15000'
     whitelist = ['P10', 'P25', 'durP10', 'durP25', 'ratioP10', 'ratioP25']
 
 
