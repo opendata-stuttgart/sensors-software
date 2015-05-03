@@ -10,37 +10,28 @@ from sensor import (
     SensorGP2Y10,
     SensorPPD42NS,
     SensorSHT10,
-#    SensorBMP180,
+    SensorBMP180,
 )
 
 if len(sys.argv) != 2:
     print("python send.py <filename>")
 
+# get type from filename
+filename = sys.argv[1]
+for cls in (SensorDSM501A, SensorGP2Y10, SensorPPD42NS,
+            SensorSHT10, SensorBMP180):
+    if filename.lower().endswith(cls.sensor_type.lower()):
+        instance = cls()
+        break
 
-with open(sys.argv[1], 'r') as fp:
+assert instance
+
+with open(filename, 'r') as fp:
     for line in fp.readlines():
         timestamp = line.split('|')[0]
 
         data = json.loads(line.split('|')[1])
-        ppd = SensorPPD42NS()
-        data = ppd.filter(data)
+        data = instance.filter(data)
         if data:
-            ppd.send(data, timestamp)
-
-        data = json.loads(line.split('|')[1])
-        sht10 = SensorSHT10()
-        data = sht10.filter(data)
-        if data:
-            sht10.send(data, timestamp)
-
-        data = json.loads(line.split('|')[1])
-        gp2y10 = SensorGP2Y10()
-        data = gp2y10.filter(data)
-        if data:
-            gp2y10.send(data, timestamp)
-
-        data = json.loads(line.split('|')[1])
-        dsm501a = SensorDSM501A()
-        data = dsm501a.filter(data)
-        if data:
-            dsm501a.send(data, timestamp)
+            print(data)
+#            instance.send(data, timestamp)

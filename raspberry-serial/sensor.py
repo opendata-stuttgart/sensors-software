@@ -21,12 +21,20 @@ class Sensor(object):
         if filename:
             self.filename = "{}.{}".format(filename, self.sensor_type)
 
-    def filter(self, json_data):
+    def filter(self, json_data, prefix=False):
         # filter all fields not in whitelist
+        data = {}
         for key in json_data.keys():
-            if key not in self.whitelist:
-                del json_data[key]
-        return json_data
+            if prefix:
+                key_prefix = key.split('_')[0]
+                if key_prefix.lower() != self.sensor_type.lower():
+                    continue
+                key_suffix = '_'.join(key.split('_')[1:])
+            else:
+                key_suffix = key
+            if key_suffix in self.whitelist:
+                data[key_suffix] = json_data[key]
+        return data
 
     def check(self, message):
         # some checks to elimanate some of the 400s from the API
@@ -39,14 +47,11 @@ class Sensor(object):
         return True
 
     def parse(self, message):
-        # remove sensor prefix (unused atm)
-        if '#' in message:
-            message = message.split('#')[1]
         if not self.check(message):
             return False
         json_data = dict(map(lambda x: x.split(':'),
                              message.strip().split(';')))
-        return self.filter(json_data)
+        return self.filter(json_data, prefix=True)
 
     def send(self, data, timestamp=None):
         payload = {
@@ -105,6 +110,6 @@ class SensorDSM501A(Sensor):
 
 class SensorBMP180(Sensor):
 
-    sensor_type = 'bmp180'
+    sensor_type = 'BMP180'
     sampling_rate = None
-    whitelist = ['temperature', 'pressure', 'altitude', 'pressure_sealevel',]
+    whitelist = ['temperature', 'pressure', 'altitude', 'pressure_sealevel']

@@ -32,30 +32,14 @@ parser.add_argument("--device", help="device to read from",
                     default="/dev/ttyACM0")
 args = parser.parse_args()
 
+classes = (SensorDSM501A, SensorGP2Y10, SensorPPD42NS,
+           SensorSHT10, SensorBMP180)
+
 ser = serial.Serial(args.device)
 while True:
     message = ser.readline()
-    ppd = SensorPPD42NS(filename)
-    data = ppd.parse(message)
-    if data:
-        ppd.log(data)
-
-    sht10 = SensorSHT10(filename)
-    data = sht10.parse(message)
-    if data:
-        sht10.log(data)
-
-    gp2y10 = SensorGP2Y10(filename)
-    data = gp2y10.parse(message)
-    if data:
-        gp2y10.log(data)
-
-    dsm501a = SensorDSM501A(filename)
-    data = dsm501a.parse(message)
-    if data:
-        dsm501a.log(data)
-
-    bmp180 = SensorBMP180(filename)
-    data = bmp180.parse(message)
-    if data:
-        bmp180.log(data)
+    for cls in classes:
+        instance = cls(filename)
+        data = instance.parse(message)
+        if data:
+            instance.log(data)
