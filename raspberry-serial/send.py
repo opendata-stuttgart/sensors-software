@@ -5,10 +5,17 @@
 import json
 import sys
 
-from sensor import SensorPPD42NS, SensorSHT10, SensorGP2Y10
+from sensor import (
+    SensorDSM501A,
+    SensorGP2Y10,
+    SensorPPD42NS,
+    SensorSHT10,
+#    SensorBMP180,
+)
 
 if len(sys.argv) != 2:
     print("python send.py <filename>")
+
 
 with open(sys.argv[1], 'r') as fp:
     for line in fp.readlines():
@@ -31,3 +38,9 @@ with open(sys.argv[1], 'r') as fp:
         data = gp2y10.filter(data)
         if data:
             gp2y10.send(data, timestamp)
+
+        data = json.loads(line.split('|')[1])
+        dsm501a = SensorDSM501A()
+        data = dsm501a.filter(data)
+        if data:
+            dsm501a.send(data, timestamp)
