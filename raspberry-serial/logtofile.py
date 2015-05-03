@@ -26,8 +26,6 @@ dirname = os.path.dirname(os.path.abspath(__file__))
 # before uploading the data
 filename = os.path.join(dirname, uuid.uuid4().hex)
 
-# FIXME: parameterize ttyACM0 or ttyACM1
-
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--device", help="device to read from",
