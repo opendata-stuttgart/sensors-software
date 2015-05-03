@@ -86,31 +86,31 @@ void loop() {
   {
     ratio = lowpulseoccupancyP1/(sampletime_ms*10.0);                 // int percentage 0 to 100
     concentration = 1.1*pow(ratio,3)-3.8*pow(ratio,2)+520*ratio+0.62; // spec sheet curve
-    Serial.print("durP10:");
+    Serial.print("dsm501a_durP10:");
     Serial.print(lowpulseoccupancyP1);
-    Serial.print(";ratioP10:");
+    Serial.print(";dsm501a_ratioP10:");
     Serial.print(ratio);
-    Serial.print(";P10:");
+    Serial.print(";dsm501a_P10:");
     Serial.print(concentration);
 
     ratio = lowpulseoccupancyP2/(sampletime_ms*10.0);
     concentration = 1.1*pow(ratio,3)-3.8*pow(ratio,2)+520*ratio+0.62;
 
-    Serial.print(";durP25:");
+    Serial.print(";dsm501a_durP25:");
     Serial.print(lowpulseoccupancyP2);
-    Serial.print(";ratioP25:");
+    Serial.print(";dsm501a_ratioP25:");
     Serial.print(ratio);
-    Serial.print(";P25:");
+    Serial.print(";dsm501a_P25:");
     Serial.print(concentration);
 
     // bmp180
-    Serial.print(";temperature:");
+    Serial.print(";bmp180_temperature:");
     Serial.print(bmp.readTemperature());
-    Serial.print(";pressure:");
+    Serial.print(";bmp180_pressure:");
     Serial.print(bmp.readPressure());
-    Serial.print(";altitude:");
+    Serial.print(";bmp180_altitude:");
     Serial.print(bmp.readAltitude());
-    Serial.print(";pressure_sealevel:");
+    Serial.print(";bmp180_pressure_sealevel:");
     Serial.println(bmp.readSealevelPressure());
 
     lowpulseoccupancyP1 = 0;
