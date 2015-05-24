@@ -13,7 +13,7 @@ function build_post_request(host, uri, data)
     "Connection: close\r\n"..
     "Content-Type: application/json\r\n"..
     "User-Agent: esp8266\r\n"..
-    "Sensor: "..node.chipid().."\r\n"..
+    "Sensor: esp8266-"..node.chipid().."\r\n"..
     "Content-Length: "..string.len(data).."\r\n"..
     "\r\n"..
     data
