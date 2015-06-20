@@ -12,10 +12,22 @@
 
 */
 
+
+/* ATTENTION: 
+
+   THIS CODE FAILS ON A LEONARDO + RedFly-Wifi-Shield with a DNS ERR.
+   Or a JOIN ERR or a BEGIN ERR. But the best was DNS ERR.
+
+ */
+
+
 #include <RedFly.h>
 #include <RedFlyClient.h>
 
-byte server[]    = {  104, 31, 92, 177 };
+// to store the secret ID used to authenticate the sensor
+#include "sensor_id.h"
+
+byte server[]    = {104, 31, 92, 177 };
 #define HOSTNAME "api.dusti.xyz"  //host
 
 unsigned int len=0; //receive buffer length
@@ -41,6 +53,20 @@ unsigned long trigOnP2;
 unsigned long sampletime_ms = 15000;
 unsigned long lowpulseoccupancyP1 = 0;
 unsigned long lowpulseoccupancyP2 = 0;
+unsigned long counter = 0;
+
+
+String Float2String(float value)
+{
+  // Convert a float to String with two decimals.
+  String s;
+  s = String(int(value));
+  s += '.';
+  s += int((value - int(value)) * 100);
+
+  return s;
+}
+
 
 void setup() {
   Serial.begin(9600);
@@ -50,12 +76,46 @@ void setup() {
 }
 
 
-int send_data()
+void sendData(const String& sensor_id,
+	      const String& data) {
+
+  char buffer[1000];
+  String ln;
+
+  Serial.println("start sending ...");
+
+  client.print_P(PSTR("POST /v1/push-sensor-data/ HTTP/1.1\n"));
+  
+  client.print_P(PSTR("Host: api.dusti.xyz\n"));
+  client.print_P(PSTR("Sensor: "));
+  sensor_id.toCharArray(buffer, sensor_id.length()+1);
+  client.println(buffer);
+  
+  client.println_P(PSTR("User-Agent: Arduino"));
+  client.println_P(PSTR("Accept: text/html"));
+  client.print_P(PSTR("Content-Length: "));
+  ln = String(data.length(), DEC);
+  ln.toCharArray(buffer, ln.length()+1);
+  client.println(buffer);
+  
+  client.print_P(PSTR("Content-Type: text/json\n"));
+  client.println_P(PSTR("Connection: close\n"));
+  
+  data.toCharArray(buffer, data.length()+1);
+  client.println(buffer);
+  
+  counter += 1;
+  Serial.println("sent...");
+}
+
+
+int send_data_via_wifi(const String& data)
 {
   uint8_t ret;
-  String txtMsg;
+  String sensor_id;
+  uint8_t c_ip[4];
 
-  Serial.println("senddata start");
+  Serial.println("wifi connect start");
   //init the WiFi module on the shield
   ret = RedFly.init();
   if(ret)
@@ -88,48 +148,22 @@ int send_data()
       }
       else
       {
+	RedFly.getlocalip(c_ip);
+	Serial.print(c_ip[0]);
+	Serial.print("-");
+	Serial.print(c_ip[1]);
+	Serial.print("-");
+	Serial.print(c_ip[2]);
+	Serial.print("-");
+	Serial.print(c_ip[3]);
+	Serial.print("\n");
+
 	if(RedFly.getip(HOSTNAME, server) == 0) //get ip
 	  {
           if(client.connect(server, 80))
           {
-
-	  // FIXME: add sensor data for ppd42ns
-	    txtMsg = "{ \"count\": ";
-	    txtMsg += count;
-	    for(int j=0;j<count;j++)
-	      {
-		txtMsg += ", \"value";
-		txtMsg += j;
-		txtMsg += "\": ";
-		txtMsg += sensor[j];
-	      }
-	    txtMsg += "}";
-	    txtMsg += "\0";
-
-	    Serial.println(txtMsg);
-
-
-            //make a HTTP request
-	    client.print("POST /v1/ HTTP/1.1\n");
-
-	    client.print("Host: api.dusti.xyz\n");
-	    // add sensor-id
-	    client.print("SENSOR: FIXME\n");
-
-	    client.println("User-Agent: Arduino");
-	    client.println("Accept: text/html");
-	    client.print("Content-Length: ");
-	    client.println(txtMsg.length(), DEC);
-
-	    client.print("Content-Type: text/json\n");
-	    client.println("Connection: close\n");
-
-	    client.println(txtMsg);
-
-	    // MAYBE not here?
-            // reset count of data
-	    count = 0;
-
+	    sensor_id = String(SENSOR_ID) + String("PPD42NS");
+	    sendData(sensor_id, data);
           }
           else
           {
@@ -158,7 +192,8 @@ int send_data()
 void loop() {
   int ret;
   int c;
-  char data[512];  //receive buffer
+  String data;
+  char receive[512];  //receive buffer
 
   float ratio = 0;
   float concentration = 0;
@@ -188,31 +223,32 @@ void loop() {
     trigP2 = false;
   }
 
-  if ((millis()-starttime) > sampletime_ms)
+  if ((millis() - starttime) > sampletime_ms)
   {
     ratio = lowpulseoccupancyP1/(sampletime_ms*10.0);                 // int percentage 0 to 100
     concentration = 1.1*pow(ratio,3)-3.8*pow(ratio,2)+520*ratio+0.62; // spec sheet curve
-    Serial.print("lowpulseoccupancyP1:");
-    Serial.print(lowpulseoccupancyP1);
-    Serial.print(";ratioP1:");
-    Serial.print(ratio);
-    Serial.print(";countP1:");
-    Serial.print(concentration);
+
+    data = "{";
+    data += "\"durP1\":";
+    data += Float2String(lowpulseoccupancyP1);
+    data += "\";ratioP1\":";
+    data += Float2String(ratio);
+    data += "\";P1\":";
+    data += Float2String(concentration);
 
     ratio = lowpulseoccupancyP2/(sampletime_ms*10.0);
     concentration = 1.1*pow(ratio,3)-3.8*pow(ratio,2)+520*ratio+0.62;
 
-    Serial.print(";lowpulseoccupancyP2:");
-    Serial.print(lowpulseoccupancyP2);
-    Serial.print(";ratioP2:");
-    Serial.print(ratio);
-    Serial.print(";countP2:");
-    Serial.println(concentration);
+    data += "\";durP2\":";
+    data += Float2String(lowpulseoccupancyP2);
+    data += "\";ratioP2\":";
+    data += Float2String(ratio);
+    data += "\";P2\":";
+    data += Float2String(concentration);
+    data += "}";
 
     // send data to API
-    // FIXME: add parameters for data
-    ret = send_data();
-    // FIXME: do sth with ret?
+    send_data_via_wifi(data);
   }
 
   //if there are incoming bytes available 
@@ -222,9 +258,9 @@ void loop() {
     do
     {
       c = client.read();
-      if((c != -1) && (len < (sizeof(data)-1)))
+      if((c != -1) && (len < (sizeof(receive)-1)))
       {
-        data[len++] = c;
+        receive[len++] = c;
       }
     }while(c != -1);
   }
@@ -235,8 +271,8 @@ void loop() {
     client.stop();
     RedFly.disconnect();
   
-    data[len] = 0;
-    Serial.print(data);
+    receive[len] = 0;
+    Serial.print(receive);
     
     len = 0;
 
