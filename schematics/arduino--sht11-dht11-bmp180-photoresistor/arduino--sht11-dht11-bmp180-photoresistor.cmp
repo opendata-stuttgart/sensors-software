@@ -1,0 +1,101 @@
+Cmp-Mod V01 Created by CvPcb (2013-jul-07)-stable date = Sa 20 Jun 2015 20:59:57 CEST
+
+BeginCmp
+TimeStamp = /5585AB59;
+Reference = 1mF1;
+ValeurCmp = C;
+IdModule  = C1;
+EndCmp
+
+BeginCmp
+TimeStamp = /5585AB1E;
+Reference = K1;
+ValeurCmp = DHT11;
+IdModule  = PIN_ARRAY_3X1;
+EndCmp
+
+BeginCmp
+TimeStamp = /5585B00E;
+Reference = P1;
+ValeurCmp = 5V;
+IdModule  = PIN_ARRAY_1;
+EndCmp
+
+BeginCmp
+TimeStamp = /5585B008;
+Reference = P2;
+ValeurCmp = 3.3V;
+IdModule  = PIN_ARRAY_1;
+EndCmp
+
+BeginCmp
+TimeStamp = /5585AFF6;
+Reference = P3;
+ValeurCmp = 3.3V;
+IdModule  = PIN_ARRAY_1;
+EndCmp
+
+BeginCmp
+TimeStamp = /5585AB0F;
+Reference = P4;
+ValeurCmp = CONN_5;
+IdModule  = PIN_ARRAY_5x1;
+EndCmp
+
+BeginCmp
+TimeStamp = /5585AF70;
+Reference = P5;
+ValeurCmp = A4;
+IdModule  = PIN_ARRAY_1;
+EndCmp
+
+BeginCmp
+TimeStamp = /5585AF63;
+Reference = P6;
+ValeurCmp = A5;
+IdModule  = PIN_ARRAY_1;
+EndCmp
+
+BeginCmp
+TimeStamp = /5585AEBA;
+Reference = P7;
+ValeurCmp = D2;
+IdModule  = PIN_ARRAY_1;
+EndCmp
+
+BeginCmp
+TimeStamp = /5585A973;
+Reference = P8;
+ValeurCmp = A0;
+IdModule  = PIN_ARRAY_1;
+EndCmp
+
+BeginCmp
+TimeStamp = /5585B019;
+Reference = P9;
+ValeurCmp = GND;
+IdModule  = PIN_ARRAY_1;
+EndCmp
+
+BeginCmp
+TimeStamp = /5585AB3B;
+Reference = R1;
+ValeurCmp = 10k;
+IdModule  = R1;
+EndCmp
+
+BeginCmp
+TimeStamp = /5585AB4A;
+Reference = R2;
+ValeurCmp = 18K;
+IdModule  = R1;
+EndCmp
+
+BeginCmp
+TimeStamp = /5585B733;
+Reference = R3;
+ValeurCmp = PHOTO;
+IdModule  = R3-LARGE_PADS;
+EndCmp
+
+EndListe
