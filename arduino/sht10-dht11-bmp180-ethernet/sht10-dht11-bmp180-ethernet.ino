@@ -93,7 +93,7 @@ void sendData(const String& sensor_id,
     client.println(sensor_id);
 
     client.println("User-Agent: Arduino");
-    client.println("Accept: text/html");
+    client.println("Accept: application/json");
     client.print("Content-Length: ");
     client.println(data.length(), DEC);
 
