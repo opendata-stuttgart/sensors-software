@@ -218,9 +218,9 @@ void loop()
 	data += "\"},{";
 	data += "\"value_type\":\"altitude\",\"value\":\"";
 	data += Float2String(bmp.readAltitude());
-	data += "\"},{";
-	data += "\"value_type\":\"pressure_sealevel\",\"value\":\"";
-	data += Float2String(bmp.readSealevelPressure());
+	//	data += "\"},{";
+	//	data += "\"value_type\":\"pressure_sealevel\",\"value\":\"";
+	//	data += Float2String(bmp.readSealevelPressure());
 	data += "\"}]}";
 	sensor_id = String(SENSOR_ID) + String("BMP180");
 	sendData(sensor_id, data);
