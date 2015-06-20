@@ -238,7 +238,7 @@ void loop()
  	next=5;
 	break;
       case 5:
-	delay(10000);
+	delay(60000);
  	next=1;
 	break;
       }
