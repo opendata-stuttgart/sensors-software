@@ -5,6 +5,8 @@ Connect the DHT22 datapin to GPIO2
 Edit `init.lua` and set your wifi credentials.  
 Then copy `init.lua`, `dht_lib.lua` and `main.lua` to your ESP.
 
+Source of dht_lib.lua: https://github.com/nodemcu/nodemcu-firmware/tree/master/lua_modules/dht22
+
 Restart and see how it pushes your data to the server every minute
 
 
