@@ -10,7 +10,9 @@ local function timerCB()
     if t == nil or h == nil then
         print("Error reading from DHT11/22")
     else
-        drf_api.send_dht22_to_api(t * 0.1, h * 0.1)
+        t = t * 0.1
+        h = h * 0.1
+        drf_api.send_dht22_to_api(t, h)
     end
 end
 
