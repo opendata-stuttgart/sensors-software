@@ -160,7 +160,7 @@ print(p1)
 p1 <- ggplot(filter(dat, type=="PPD42NS"), aes(P1, P2)) + geom_point() +scale_x_log10() + scale_y_log10() + facet_wrap(~location_id)
 print(p1)
 
-p1 <- ggplot(filter(dat, type=="PPD42NS"), aes(P1, P2,color=as.double(timestamp2))) + scale_colour_continuous() + geom_point() +scale_x_log10() + scale_y_log10() + facet_wrap(~location_id)
+p1 <- ggplot(filter(dat, type=="PPD42NS"), aes(P1, P2,color=as.double(timestamp2))) + scale_colour_continuous(high="yellow") + geom_point() +scale_x_log10() + scale_y_log10() + facet_wrap(~location_id)
 print(p1)
 
 p1 <- ggplot(dat, aes(P25, P10)) + geom_point() +scale_x_log10() + scale_y_log10() + facet_wrap(type~location_id, drop=TRUE,shrink=TRUE)
