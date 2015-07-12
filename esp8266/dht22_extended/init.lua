@@ -1,5 +1,4 @@
-tmr.delay(100000)
-
+print('init.lua ver 1.2')
 wifi.setmode(wifi.STATION)
 wifi.sta.autoconnect(1)
 print('set mode=STATION (mode='..wifi.getmode()..')')
