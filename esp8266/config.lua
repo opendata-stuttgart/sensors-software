@@ -3,8 +3,8 @@ return {
     WIFI_KEY = '<KEY>',
 
     PLUGINS = {
-        'dht_reader',
-        'reedswitch',
+        -- 'dht_reader',
+        -- 'reedswitch',
     },
 
     PIN_REED_SWITCH = 5,  -- GPIO 14
