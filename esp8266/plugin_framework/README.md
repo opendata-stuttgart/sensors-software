@@ -6,6 +6,12 @@ Put your wifi credentials in `config.lua` and activate the plugins you want to u
 
 Upload the files `init.lua`, `config.lua`, `wifi_connect.lua` and the plugins (and their dependencies) you activated to your ESP.
 
+```
+./luatool.py -f init.lua
+./luatool.py -f config.lua
+./luatool.py -f wifi_connect.lua
+```
+
 ## Troubleshooting
 
 If you get `Not enough memory` errors compile the lib you want to load (via console on the esp):
