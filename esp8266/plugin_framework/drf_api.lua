@@ -36,7 +36,7 @@ local function send_ppd42ns_to_api(lowpulseoccupancyP1, lowpulseoccupancyP2, sam
 end
 
 local function send_dht22_to_api(temperature, humidity)
-   send_dht22_to_api('{"sensordatavalues":[{"value_type":"temperature","value":"'..temperature..'"},{"value_type":"humidity","value":"'..humidity..'"}]}')
+   send_data_to_api('{"sensordatavalues":[{"value_type":"temperature","value":"'..temperature..'"},{"value_type":"humidity","value":"'..humidity..'"}]}')
 end
 
 return {

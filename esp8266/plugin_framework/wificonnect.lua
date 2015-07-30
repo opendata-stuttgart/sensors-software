@@ -7,7 +7,7 @@ wifi.sta.config(config.WIFI_SSID, config.WIFI_KEY)
 
 print('MAC: ',wifi.sta.getmac())
 
-if not config.PIN_RED_LED == nil and not config.PIN_GREEN_LED == nil then
+if not config.PIN_RED_LED or not config.PIN_GREEN_LED then
     gpio.mode(config.PIN_GREEN_LED, gpio.OUTPUT)
     gpio.mode(config.PIN_RED_LED, gpio.OUTPUT)
     c = gpio.HIGH
@@ -17,7 +17,7 @@ end
 
 tmr.alarm(0, 1000, 1, function()
     if wifi.sta.getip() == nil then
-        if not config.PIN_RED_LED == nil and not config.PIN_GREEN_LED == nil then
+        if not config.PIN_RED_LED or not config.PIN_GREEN_LED then
             status = wifi.sta.status()
             if status == 1 then -- connecting
                 gpio.write(config.PIN_GREEN_LED, c)
@@ -38,12 +38,12 @@ tmr.alarm(0, 1000, 1, function()
         -- print("Connecting to AP...")
     else
         print('IP: ',wifi.sta.getip())
-        if not config.PIN_RED_LED == nil and not config.PIN_GREEN_LED == nil then
+        if not config.PIN_RED_LED or not config.PIN_GREEN_LED then
             gpio.write(config.PIN_RED_LED, gpio.LOW)
             gpio.write(config.PIN_GREEN_LED, gpio.LOW)
         end
         tmr.stop(0)
-        local plugin_loader = require('plugin_loader')
+        local plugin_loader = require('pluginloader')
         plugin_loader.start_plugins()
     end
 end)

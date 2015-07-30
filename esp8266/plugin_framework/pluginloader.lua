@@ -5,7 +5,7 @@ local function start_plugins()
         print("Starting plugin: "..plugin)
         local plugin_lib = require(plugin)
         if plugin_lib == nil then
-            print("error loading plugin: "..plugin)
+            print("error loading plugin")
         else
             plugin_lib.start()
         end

@@ -5,7 +5,7 @@ print('heap: ',node.heap())
 local config = require('config')
 
 function go()
-    dofile('wifi_connect.lua')
+    dofile('wificonnect.lua')
 end
 
 print('Waiting 10 seconds before continuing...')

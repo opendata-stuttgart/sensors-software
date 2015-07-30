@@ -1,9 +1,9 @@
 return {
-    WIFI_SSID = '<SSID>',
-    WIFI_KEY = '<KEY>',
+    WIFI_SSID = 'shack',
+    WIFI_KEY = 'welcome2shack',
 
     PLUGINS = {
-        -- 'dht_reader',
+        'dht_reader',
         -- 'reedswitch',
     },
 
