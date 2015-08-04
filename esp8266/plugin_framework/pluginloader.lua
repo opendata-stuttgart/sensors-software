@@ -3,6 +3,7 @@ local config = require('config')
 local function start_plugins()
     for i, plugin in ipairs(config.PLUGINS) do
         print("Starting plugin: "..plugin)
+        dofile(plugin..".lua")
         local plugin_lib = require(plugin)
         if plugin_lib == nil then
             print("error loading plugin")

@@ -1,27 +1,28 @@
 local config = require('config')
 
-local function intCb(level)
-    print('Reedswitch state: '..level)
-    if level == 1 then
-        gpio.write(config.PIN_GREEN_LED, 0) 
-        gpio.write(config.PIN_RED_LED, 1) 
-    else
-        gpio.write(config.PIN_RED_LED, 0) 
-        gpio.write(config.PIN_GREEN_LED, 1) 
+local last_level = -1
+
+local function tmrCb()
+    local level = gpio.read(config.PIN_REED_SWITCH)
+    if last_level ~= level then
+        last_level = level
+        if level == 0 then
+            ws2812.write(config.PIN_RGB_LED, string.char(0, 255, 0))
+        else
+            ws2812.write(config.PIN_RGB_LED, string.char(255, 0, 0))
+        end
+        tmr.alarm(3, 1000, 0, function ()
+            ws2812.write(config.PIN_RGB_LED, string.char(0, 0, 0))
+        end)
     end
 end
 
 local function start()
-    print('Initializing reedswitch...')
-    -- gpio.mode(config.PIN_GREEN_LED, gpio.OUTPUT)
-    -- gpio.mode(config.PIN_RED_LED, gpio.OUTPUT)
-    gpio.mode(5, gpio.INPUT)
-    print('set mode of '..config.PIN_REED_SWITCH)
-    local state = gpio.read(config.PIN_REED_SWITCH)
-    print('state: '..state)
-    intCb(state)
-    gpio.mode(config.PIN_REED_SWITCH, gpio.INT, gpio.PULLUP)
-    gpio.trig(config.PIN_REED_SWITCH, "both", intCb)
+    print('Configuring reedswitch...')
+    gpio.mode(config.PIN_REED_SWITCH, gpio.INPUT, gpio.PULLUP)
+    tmr.alarm(2, 1000, 1, tmrCb)
 end
 
-return {start = start}
+start()
+
+-- return {start = start}

@@ -7,7 +7,7 @@ wifi.sta.config(config.WIFI_SSID, config.WIFI_KEY)
 
 print('MAC: ',wifi.sta.getmac())
 
-if not config.PIN_RED_LED or not config.PIN_GREEN_LED then
+if config.PIN_RED_LED and config.PIN_GREEN_LED then
     gpio.mode(config.PIN_GREEN_LED, gpio.OUTPUT)
     gpio.mode(config.PIN_RED_LED, gpio.OUTPUT)
     c = gpio.HIGH
@@ -17,8 +17,17 @@ end
 
 tmr.alarm(0, 1000, 1, function()
     if wifi.sta.getip() == nil then
-        if not config.PIN_RED_LED or not config.PIN_GREEN_LED then
-            status = wifi.sta.status()
+        local status = wifi.sta.status()
+        if config.PIN_RGB_LED then
+            if status == 1 then -- connecting
+                ws2812.write(config.PIN_RGB_LED, string.char(0, 0, 255))
+            elseif status <= 4 then
+                ws2812.write(config.PIN_RGB_LED, string.char(255, 0, 0))
+            elseif status == 5 then
+                ws2812.write(config.PIN_RGB_LED, string.char(0, 50, 0))
+            end
+        end
+        if config.PIN_RED_LED and config.PIN_GREEN_LED then
             if status == 1 then -- connecting
                 gpio.write(config.PIN_GREEN_LED, c)
                 if c == gpio.HIGH then
@@ -38,9 +47,12 @@ tmr.alarm(0, 1000, 1, function()
         -- print("Connecting to AP...")
     else
         print('IP: ',wifi.sta.getip())
-        if not config.PIN_RED_LED or not config.PIN_GREEN_LED then
+        if config.PIN_RED_LED and config.PIN_GREEN_LED then
             gpio.write(config.PIN_RED_LED, gpio.LOW)
             gpio.write(config.PIN_GREEN_LED, gpio.LOW)
+        end
+        if config.PIN_RGB_LED then
+            ws2812.write(config.PIN_RGB_LED, string.char(0, 0, 0))
         end
         tmr.stop(0)
         local plugin_loader = require('pluginloader')
