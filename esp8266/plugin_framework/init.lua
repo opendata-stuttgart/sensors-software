@@ -13,7 +13,7 @@ function go()
     else
         dofile('wificonnect.lua')
     end
-    if config.PIN_REED then
+    if config.PIN_REED_SWITCH then
         dofile('reedswitch.lua')
     end
 end
