@@ -4,17 +4,16 @@ pin_P2=5  -- gpio14
 
 sampletime=30000 -- 30 seconds
 filter_time=10000 -- in us
+
 durationP1=0
 trigOnP1=0
 lastTriggerP1=0
 lowpulseoccupancyP1=0
-last_P1 = gpio.HIGH
 
 durationP2=0
-lastHighP2=0
 trigOnP2=0
+lastTriggerP2=0
 lowpulseoccupancyP2=0
-last_P2 = gpio.HIGH
 
 
 PIN_GREEN_LED = 2
@@ -44,20 +43,16 @@ gpio.trig(pin_P1, "both", pin4change)
 
 gpio.mode(pin_P2, gpio.INT, gpio.PULLUP)
 function pin2change(level)
-   if (level == gpio.LOW) and (last_P2 == gpio.HIGH) then
-      if (tmr.now() - trigOnP2) > filter_time then
-	 last_P2 = gpio.LOW
+   if (tmr.now() - lastTriggerP2) > filter_time then	
+      if level == gpio.LOW then
 	 trigOnP2 = tmr.now()
       end
-   end
-   
-   if (level == gpio.HIGH) and (last_P2 == gpio.LOW) then
-      if (tmr.now() - lastHighP2) > filter_time then
-	 last_P2 = gpio.HIGH
-	 lastHighP2 = tmr.now()
-	 durationP2 = lastHighP2 - trigOnP2
+
+      if level == gpio.HIGH then
+	 durationP2 = tmr.now() - trigOnP1
 	 lowpulseoccupancyP2 = lowpulseoccupancyP2 + durationP2
       end
+      lastTriggerP2 = tmr.now()
    end
    gpio.trig(pin_P2, "both")
 end
