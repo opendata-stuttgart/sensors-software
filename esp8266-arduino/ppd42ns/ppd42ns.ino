@@ -7,8 +7,8 @@
 
  pin 1 (grey)  -> GND
  pin 3 (black) -> Vin
- pin 2 (green) -> Pin D5
- pin 4 (white) -> Pin D6
+ pin 2 (green) -> Pin D5 / GPIO14
+ pin 4 (white) -> Pin D6 / GPIO12
  pin 5 (red)   -> unused!
 
 */
@@ -31,8 +31,8 @@ unsigned long lowpulseoccupancyP2 = 0;
 
 void setup() {
   Serial.begin(9600);
-  pinMode(5,INPUT);
-  pinMode(9,INPUT);
+  pinMode(12,INPUT);
+  pinMode(14,INPUT);
   starttime = millis();
 }
 
@@ -40,9 +40,9 @@ void loop() {
   float ratio = 0;
   float concentration = 0;
 
-  valP1 = digitalRead(5);
-  valP2 = digitalRead(6);
-  
+  valP1 = digitalRead(12);
+  valP2 = digitalRead(14);
+
   if(valP1 == LOW && trigP1 == false){
     trigP1 = true;
     trigOnP1 = micros();
