@@ -59,7 +59,7 @@ end
 gpio.trig(pin_P2, "both", pin2change)
 
 
-tmr.alarm(0,sampletime,1,function()
+function send_it()
     if wifi.sta.getip() == nil then
         status = wifi.sta.status()
         if status == 1 then -- connecting
@@ -82,6 +82,10 @@ tmr.alarm(0,sampletime,1,function()
     -- throw it away and try again after samplingtime
     lowpulseoccupancyP1 = 0
     lowpulseoccupancyP2 = 0
-end)
+    tmr.alarm(0, sampletime, 0, send_it)
+end
+
+tmr.alarm(0, sampletime, 0, send_it)
+
 
 dofile('http.lua')
