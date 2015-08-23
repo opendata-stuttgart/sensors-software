@@ -23,7 +23,7 @@ gpio.write(PIN_GREEN_LED, gpio.HIGH)
 c = gpio.HIGH
 
 
-gpio.mode(pin_P1, gpio.INT, gpio.PULLUP)
+gpio.mode(pin_P1, gpio.INT)
 function pin4change(level)
    if (tmr.now() - lastTriggerP1) > filter_time then	
       if level == gpio.LOW then
@@ -41,7 +41,7 @@ end
 gpio.trig(pin_P1, "both", pin4change)
 
 
-gpio.mode(pin_P2, gpio.INT, gpio.PULLUP)
+gpio.mode(pin_P2, gpio.INT)
 function pin2change(level)
    if (tmr.now() - lastTriggerP2) > filter_time then	
       if level == gpio.LOW then
