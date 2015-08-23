@@ -28,9 +28,7 @@ function pin4change(level)
    if (tmr.now() - lastTriggerP1) > filter_time then	
       if level == gpio.LOW then
 	 trigOnP1 = tmr.now()
-      end
-
-      if level == gpio.HIGH then
+      else
 	 durationP1 = tmr.now() - trigOnP1
 	 lowpulseoccupancyP1 = lowpulseoccupancyP1 + durationP1
       end
@@ -46,9 +44,7 @@ function pin2change(level)
    if (tmr.now() - lastTriggerP2) > filter_time then	
       if level == gpio.LOW then
 	 trigOnP2 = tmr.now()
-      end
-
-      if level == gpio.HIGH then
+      else
 	 durationP2 = tmr.now() - trigOnP1
 	 lowpulseoccupancyP2 = lowpulseoccupancyP2 + durationP2
       end
