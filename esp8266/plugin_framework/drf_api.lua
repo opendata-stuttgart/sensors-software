@@ -1,3 +1,5 @@
+local config = require('config')
+
 local function build_post_request(host, uri, data)
     request = "POST "..uri.." HTTP/1.1\r\n"..
     "Host: "..host.."\r\n"..
@@ -13,16 +15,22 @@ local function build_post_request(host, uri, data)
 end
 
 local function send_data_to_api(data)
-   -- print("start api connect")
-   api=net.createConnection(net.TCP, 0)
-   -- print("connect")
-   -- api:on("receive", function(sck, c) print(c) end )
-   api:connect(80, "api.dusti.xyz")
-   api:on("connection", function(sck)
-	     local post_request = build_post_request("api.dusti.xyz", "/v1/push-sensor-data/", data)
-	     sck:send(post_request)
-	     -- print("sent")
-   end)
+    if config.DEBUG then
+        print("start api connect")
+    end
+    api=net.createConnection(net.TCP, 0)
+    if config.DEBUG then
+        print("connect")
+        api:on("receive", function(sck, c) print(c) end )
+    end
+    api:connect(config.API_PORT, config.API_HOST)
+    api:on("connection", function(sck)
+        local post_request = build_post_request(config.API_HOST, "/v1/push-sensor-data/", data)
+        sck:send(post_request)
+        if config.DEBUG then
+            print("sent")
+        end
+    end)
 end
 
 local function send_ppd42ns_to_api(lowpulseoccupancyP1, lowpulseoccupancyP2, sampletime)

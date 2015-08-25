@@ -3,7 +3,7 @@
 --------------------------]]--
 
 ----------- CONFIG -----------
-SSID      = "stuttgart.freifunk.net"   -- later: "Freifunk"
+SSID      = "Freifunk"
 PASSWORD  = ""
 TIMEOUT   = 10000000  -- 10 seconds
 ------------------------------
