@@ -151,19 +151,6 @@ table(dat$type,as.POSIXlt(dat$timestamp2)$yday,sapply(dat$P1,is.na),useNA = "no"
 
 source("readdata_s_mitte.R")
 
-# if(!("sdat" %in% ls())){ # check if we have the data
-#     warning("data not found, check readdata_s_mitte.R to download")
-#     }else{ # plot
-#     pdf("s-mitte.pdf",width=20, height=8)
-#     for (y in names(sdat)[3:length(names(sdat))]){
-#         p<-ggplot(sdat)+
-#             geom_line(aes_string("datelt",y))+
-#             labs(x="Zeit",
-#                  y=attr(sdat,"ylabel")[attr(sdat,"names")==y])
-#         print(p)
-#     }
-#     dev.off()
-# } #  end if sdat
 if(!("sdat" %in% ls())){ # check if we have the data
     warning("data not found, check readdata_s_mitte.R to download")
     }else{ # plot
