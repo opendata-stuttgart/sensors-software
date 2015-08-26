@@ -2,7 +2,10 @@ R_OPTS=--no-save --no-restore --no-init-file --no-site-file # vanilla, but with 
 
 # TODO: define all targets from source files, if possible
 
-all: readdata.RData
+all: readdata.RData luft.RData readdata_s_mitte.R
+
+run-scripts:
+	# run these scripts
 
 %.pdf: %.Rmd 
 	R ${R_OPTS} -e "library(knitr); knit2pdf('$<')"
@@ -25,8 +28,6 @@ all: readdata.RData
 # run R script and save workspace, e.g. 
 # make gendataexample.RData
 %.RData: %.R
-	# delete output (to be created by script)
-	$(RM) $@
 	R ${R_OPTS} -e 'source("$<"); save(list=ls(),file="$@")'
 
 # TODO

@@ -1,5 +1,5 @@
 source("installrequire.R")
-installrequire(c("xlsx","lubridate","dplyr","ggplot2"))
+installrequire(c("lubridate","dplyr","ggplot2"))
 # library(xlsx)
 # library(lubridate)
 # library(dplyr)
@@ -122,7 +122,9 @@ p1<- ggplot(dat) + geom_point(aes(timestamp2,P2,order = sample(seq_along(timesta
 print(p1)
 
 # since we do have dplyr and count, plot the "table" data
-ggplot(count(dat,yday=as.POSIXlt(dat$timestamp2)$yday,type),aes(yday,n,col=type)) + geom_point()
+# TODO: make this work
+# p1<-ggplot(count(dat,yday=as.POSIXlt(dat$timestamp2)$yday,type),aes(yday,n,col=type)) + geom_point()
+# print(p1)
 
 dev.off() # end plot to pdf
 
@@ -144,3 +146,59 @@ table(dat$type,as.POSIXlt(dat$timestamp2)$yday,useNA = "ifany")
 table(dat$type,as.POSIXlt(dat$timestamp2)$yday,sapply(dat$P2,is.na),useNA = "no")
 # how many NA's in P1?
 table(dat$type,as.POSIXlt(dat$timestamp2)$yday,sapply(dat$P1,is.na),useNA = "no")
+
+## official data sets
+
+source("readdata_s_mitte.R")
+
+# if(!("sdat" %in% ls())){ # check if we have the data
+#     warning("data not found, check readdata_s_mitte.R to download")
+#     }else{ # plot
+#     pdf("s-mitte.pdf",width=20, height=8)
+#     for (y in names(sdat)[3:length(names(sdat))]){
+#         p<-ggplot(sdat)+
+#             geom_line(aes_string("datelt",y))+
+#             labs(x="Zeit",
+#                  y=attr(sdat,"ylabel")[attr(sdat,"names")==y])
+#         print(p)
+#     }
+#     dev.off()
+# } #  end if sdat
+if(!("sdat" %in% ls())){ # check if we have the data
+    warning("data not found, check readdata_s_mitte.R to download")
+    }else{ # plot
+    pdf("s-mitte.pdf",width=20, height=8)
+    for (y in names(sdat)[3:length(names(sdat))]){
+        p<-ggplot(sdat)+
+            geom_line(aes_string("datelt",y))+
+            labs(x="Zeit",
+                 y=attr(sdat,"ylabel")[attr(sdat,"names")==y])
+        print(p)
+    }
+    # can you see sylvester? PMx > 500 
+    # lets leave that out
+    y="pm25"
+    p<-ggplot(sdat[sdat$datelt>as.POSIXlt("2015-01-01 08:00:00"),])+
+        geom_line(aes_string("datelt",y))+
+        labs(title="Ohne Sylvester",
+             x="Zeit",
+             y=attr(sdat,"ylabel")[attr(sdat,"names")==y])
+    
+    # PM10 daily means (Tagesmittelwerte), threshold is 50mug
+    sdat.yday<-aggregate(select(sdat,date,pm10),by=list(yday=sdat$datelt$yday),mean)
+    sdat.yday$datelt=as.POSIXlt(sdat.yday$date)
+    sdat.yday$above50<-factor(sdat.yday$pm10>50)
+    print(p) 
+    
+    y="pm10"
+    p<-ggplot(sdat[sdat$datelt>as.POSIXlt("2015-01-01 08:00:00"),])+
+        geom_line(aes_string("datelt",y))+
+        labs(title=paste("Ohne Sylvester, Überschreitungen:",sum(sdat.yday$pm10>50,na.rm=TRUE)),
+             x="Zeit",
+             y=attr(sdat,"ylabel")[attr(sdat,"names")==y])+
+        geom_point(data=sdat.yday,
+                   aes_string("datelt",y,color="above50"))+
+        geom_hline(yintercept=50)
+    print(p) 
+    dev.off()
+} #  end if sdat

@@ -4,7 +4,7 @@
 # filename should match this scripts filename, to be able to use makefile (update only if)
 d.f="readdata.RData"
 
-if(exists(d.f)){
+if(file.exists(d.f)){
     # read that file
     print(paste("loading",d.f))
     load(d.f)
@@ -77,7 +77,5 @@ if(exists(d.f)){
 
 
     # save all stuff currently in workspace
-    #     save(list=ls(all.names = TRUE),file=d.f)
-    # save dat
-    save(dat,file=d.f)
+    save(list=ls(all.names = TRUE),file=d.f)
 } # end else
