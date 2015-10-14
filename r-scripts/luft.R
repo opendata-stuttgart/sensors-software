@@ -184,8 +184,10 @@ if(!("sdat" %in% ls())){ # check if we have the data
              x="Zeit",
              y=attr(sdat,"ylabel")[attr(sdat,"names")==y])+
         geom_point(data=sdat.yday,
-                   aes_string("datelt",y,color="above50"))+
-        geom_hline(yintercept=50)
+                   aes(datelt,pm10,color=above50),size=5)+
+        scale_colour_discrete(h = c(120, 340), c = 100, l = 65, h.start = 30, direction = 1, na.value = "grey50")+
+        geom_hline(yintercept=50,lty=2) 
+
     print(p) 
     dev.off()
 } #  end if sdat
