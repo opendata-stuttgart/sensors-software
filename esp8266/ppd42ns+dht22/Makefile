@@ -6,6 +6,7 @@ upload: upload_main upload_init
 upload_main:
 	luatool.py -f main.lua
 	luatool.py -f http.lua
+	luatool.py -f config.lua
 
 upload_init:
 	luatool.py -f init.lua

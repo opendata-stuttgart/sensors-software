@@ -10,3 +10,7 @@ upload_main:
 upload_init:
 	luatool.py -f init.lua
 
+noop:
+	# upload empty init.lua and reboot
+	luatool.py -r -f noop_init/init.lua
+
