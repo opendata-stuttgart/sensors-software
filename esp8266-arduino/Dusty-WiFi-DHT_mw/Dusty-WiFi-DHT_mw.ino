@@ -79,9 +79,6 @@ int value = 0;
 /* read sensorconfig.h configure your PINs and WIFI there */
 /**********************************************/
 
-#include "sensorconfig.h"
-
-
 // P1 for PM10 & P2 for PM25
 boolean valP1 = HIGH;
 boolean valP2 = HIGH;
@@ -95,12 +92,14 @@ boolean trigP2 = false;
 unsigned long trigOnP1;
 unsigned long trigOnP2;
 
-unsigned long sampletime_ms = 15000;
 unsigned long lowpulseoccupancyP1 = 0;
 unsigned long lowpulseoccupancyP2 = 0;
 
 float ratio = 0;
 float concentration = 0;
+
+#include "sensorconfig.h"
+
 
 DHT dht(DHTPIN, DHTTYPE);
 OneWire  ds(ONEWIRE_PIN);
@@ -132,6 +131,7 @@ void setup() {
 /* And action
 /**********************************************/
 void loop() {
+  String data;
   // Read pins connected to ppd42ns
   valP1 = digitalRead(PPD42_P1_PIN);
   valP2 = digitalRead(PPD42_P2_PIN);
@@ -165,43 +165,60 @@ void loop() {
     concentration = 1.1*pow(ratio,3)-3.8*pow(ratio,2)+520*ratio+0.62; // spec sheet curve
     // Begin printing
     Serial.print("LPO P10     : ");
-    Serial.print(lowpulseoccupancyP1);
-    Serial.print("\n");
+    Serial.println(lowpulseoccupancyP1);
     Serial.print("Ratio PM10  : ");
     Serial.print(ratio);
-    Serial.print(" %");
-    Serial.print("\n");
+    Serial.println(" %");
     Serial.print("PM10 Count  : ");
-    Serial.print(concentration);
-    Serial.println("\n");
+    Serial.println(concentration);
+
+    // json for push to api / P1
+    data = "{\"sensordatavalues\":[{";
+    data += "\"value_type\":\"durP1\",\"value\":\"";
+    data += Float2String(lowpulseoccupancyP1);
+    data += "\"},{";
+    data += "\"value_type\":\"ratioP1\",\"value\":\"";
+    data += Float2String(ratio);
+    data += "\"},{";
+    data += "\"value_type\":\"P1\",\"value\":\"";
+    data += Float2String(concentration);
+    data += "\"},{";
 
     ratio = lowpulseoccupancyP2/(sampletime_ms*10.0);
     concentration = 1.1*pow(ratio,3)-3.8*pow(ratio,2)+520*ratio+0.62;
     // Begin printing
     Serial.print("LPO PM25    : ");
-    Serial.print(lowpulseoccupancyP2);
-    Serial.print("\n");
+    Serial.println(lowpulseoccupancyP2);
     Serial.print("Ratio PM25  : ");
     Serial.print(ratio);
-    Serial.print(" %");
-    Serial.print("\n");
+    Serial.println(" %");
     Serial.print("PM25 Count  : ");
-    Serial.print(concentration);
-    Serial.println("\n");
+    Serial.println(concentration);
+
+    // json for push to api / P2
+    data += "\"value_type\":\"durP2\",\"value\":\"";
+    data += Float2String(lowpulseoccupancyP1);
+    data += "\"},{";
+    data += "\"value_type\":\"ratioP2\",\"value\":\"";
+    data += Float2String(ratio);
+    data += "\"},{";
+    data += "\"value_type\":\"P2\",\"value\":\"";
+    data += Float2String(concentration);
+    data += "\"}]}";
+
+    //sending to dustix api
+    Serial.println("#### Sending to dusti.xyz: ");
+    sendData(data);
     
     // Resetting for next sampling
     lowpulseoccupancyP1 = 0;
     lowpulseoccupancyP2 = 0;
     starttime = millis(); // store the start time
 
-    //connectiong to dusty api
-    // Serial.println("#### Sending to Dusty: ");
-    // connect2API();
-    // Serial.print("\n");
 
+    // FIXME: option to send PIN
     sensorDHT();  // getting temperature and humidity (optional)
-    // Serial.print("------------------------------");
-    // Serial.print("\n");
+    Serial.println("------------------------------");
     sensorDS();
   }
 }
@@ -210,6 +227,7 @@ void loop() {
 /* DHT22 Sensor
 /**********************************************/
 void sensorDHT(){
+  String data;
   float h = dht.readHumidity(); //Read Humidity
   float t = dht.readTemperature(); //Read Temperature
 
@@ -224,9 +242,16 @@ void sensorDHT(){
     Serial.print(t);
     Serial.println(" C");
     
-    //Serial.println("#### Sending to Dusty: ");
-    //connect2API();
-    //Serial.print("\n");
+    // json for push to api: h t
+    data = "{\"sensordatavalues\":[{";
+    data += "\"value_type\":\"temperature\",\"value\":\"";
+    data += Float2String(t);
+    data += "\"},{";
+    data += "\"value_type\":\"humidity\",\"value\":\"";
+    data += Float2String(h);
+    data += "\"}]}";
+    Serial.println("#### Sending to Dusty: ");
+    sendData(data);
   }
 }
 
@@ -243,15 +268,14 @@ void connectWifi() {
     Serial.print(".");
   }
   Serial.println("WiFi connected");
-  Serial.print("IP dsaddress: ");
-  Serial.print(WiFi.localIP());
-  Serial.print('\n');
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
 }
 /**********************************************/
-/* Connect 2 API Script
+/* send data to rest api
 /**********************************************/
-void connect2API() {
-  delay(60000);
+void sendData(const String& data) {
+  //  delay(60000);
   ++value;
 
   Serial.print("connecting to ");
@@ -259,7 +283,6 @@ void connect2API() {
   
   // Use WiFiClient class to create TCP connections
   WiFiClient client;
-  const int httpPort = 8000;
   if (!client.connect(host, httpPort)) {
     Serial.println("connection failed");
     return;
@@ -271,6 +294,7 @@ void connect2API() {
   Serial.print("Requesting URL: ");
   Serial.println(url);
   Serial.println(ESP.getChipId());
+  Serial.println(data);
   
   // send request to the server
   client.print(String("POST ") + url + " HTTP/1.1\r\n" +
@@ -278,7 +302,10 @@ void connect2API() {
                "Content-Type: application/json\r\n" +
                "Sensor: esp8266-");
   client.println(ESP.getChipId());
+  client.print("Content-Length: ");
+  client.println(data.length(), DEC);
   client.println("Connection: close\r\n");
+  client.println(data);
   delay(1);
   
   // Read reply from server and print them
@@ -290,6 +317,18 @@ void connect2API() {
   Serial.println();
   Serial.println("closing connection");
 }
+
+String Float2String(float value)
+{
+  // Convert a float to String with two decimals.
+  String s;
+  s = String(int(value));
+  s += '.';
+  s += int((value - int(value)) * 100);
+
+  return s;
+}
+
 
 void DSinit(){
   byte i;
@@ -337,10 +376,11 @@ void DSinit(){
 }
 
 void sensorDS(){
+  String data;
   byte i;
   byte present = 0;
   byte type_s;
-  byte data[12];
+  byte dat[12];
 //  byte addr[8]; // replaced by dsaddr - a global var
   float celsius = -999;
   float fahrenheit = -999;
@@ -359,27 +399,27 @@ void sensorDS(){
   Serial.print(present, HEX);
   Serial.print(" ");
   for ( i = 0; i < 9; i++) {           // we need 9 bytes
-    data[i] = ds.read();
-    Serial.print(data[i], HEX);
+    dat[i] = ds.read();
+    Serial.print(dat[i], HEX);
     Serial.print(" ");
   }
   Serial.print(" CRC=");
-  Serial.print(OneWire::crc8(data, 8), HEX);
+  Serial.print(OneWire::crc8(dat, 8), HEX);
   Serial.println();
 
-  // Convert the data to actual temperature
+  // Convert the dat to actual temperature
   // because the result is a 16 bit signed integer, it should
   // be stored to an "int16_t" type, which is always 16 bits
   // even when compiled on a 32 bit processor.
-  int16_t raw = (data[1] << 8) | data[0];
+  int16_t raw = (dat[1] << 8) | dat[0];
   if (type_s) {
     raw = raw << 3; // 9 bit resolution default
-    if (data[7] == 0x10) {
+    if (dat[7] == 0x10) {
       // "count remain" gives full 12 bit resolution
-      raw = (raw & 0xFFF0) + 12 - data[6];
+      raw = (raw & 0xFFF0) + 12 - dat[6];
     }
   } else {
-    byte cfg = (data[4] & 0x60);
+    byte cfg = (dat[4] & 0x60);
     // at lower res, the low bits are undefined, so let's zero them
     if (cfg == 0x00) raw = raw & ~7;  // 9 bit resolution, 93.75 ms
     else if (cfg == 0x20) raw = raw & ~3; // 10 bit res, 187.5 ms
@@ -394,6 +434,17 @@ void sensorDS(){
   Serial.print(fahrenheit);
   Serial.println(" Fahrenheit");
   // TODO: call API
+
+    Serial.println("#### Sending to Dusty: ");
+    
+    // json for push to api: h t
+    data = "{\"sensordatavalues\":[{";
+    data += "\"value_type\":\"temperature\",\"value\":\"";
+    data += Float2String(celsius);
+    data += "\"}]}";
+    Serial.println("#### Sending to Dusty: ");
+    sendData(data);
+  
 
 }
 
