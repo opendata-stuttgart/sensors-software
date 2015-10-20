@@ -50,9 +50,9 @@
 /* DHT declaration 
 /**********************************************/
 #include <DHT.h>
+// change the following in sensorconfig.h
 #define DHTPIN 4 // = GPIO PIN, not D
 #define DHTTYPE DHT22
-DHT dht(DHTPIN, DHTTYPE);
 
 /**********************************************/
 /* onewire ds18x20 temperature sensor declaration 
@@ -62,21 +62,26 @@ DHT dht(DHTPIN, DHTTYPE);
 #define ONEWIRE_PIN 15 // 15=D8
 // on pin ONEWIRE_PIN = GPIO (a 4.7K pullup resistor is necessary)
 byte dsaddr[8];
-OneWire  ds(ONEWIRE_PIN);
 
 /**********************************************/
-/* WiFi declarations
+/* WiFi declarations now in sensorconfig.h
 /**********************************************/
 #include <ESP8266WiFi.h>
-
-const char* ssid = "Freifunk";
-const char* password = "";
-const char* host = "api.dusti.xyz";
 int value = 0;
 
 /**********************************************/
-/* Variable Definitions for PPD24NS
+/* Variable Definitions for PPD24NS           */
 /**********************************************/
+#define  PPD42_P1_PIN 12
+#define  PPD42_P2_PIN 14
+
+/**********************************************/
+/* read sensorconfig.h configure your PINs and WIFI there */
+/**********************************************/
+
+#include "sensorconfig.h"
+
+
 // P1 for PM10 & P2 for PM25
 boolean valP1 = HIGH;
 boolean valP2 = HIGH;
@@ -96,6 +101,10 @@ unsigned long lowpulseoccupancyP2 = 0;
 
 float ratio = 0;
 float concentration = 0;
+
+DHT dht(DHTPIN, DHTTYPE);
+OneWire  ds(ONEWIRE_PIN);
+
 
 /**********************************************/
 /* The Setup
@@ -124,8 +133,8 @@ void setup() {
 /**********************************************/
 void loop() {
   // Read pins connected to ppd42ns
-  valP1 = digitalRead(12);
-  valP2 = digitalRead(14);
+  valP1 = digitalRead(PPD42_P1_PIN);
+  valP2 = digitalRead(PPD42_P2_PIN);
 
   if(valP1 == LOW && trigP1 == false){
     trigP1 = true;
