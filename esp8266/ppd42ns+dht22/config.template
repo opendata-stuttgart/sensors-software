@@ -1,0 +1,11 @@
+-- esp8266-12
+pin_P1=6  -- gpio12   black
+pin_P2=5  -- gpio14   white
+-- pin_P2=nil -- to disable sensor
+sampletime=30000 -- 30 seconds
+filter_time=10000 -- in us
+-- set to nil (false) to disable DHT
+PIN_DHT22=3
+PIN_GREEN_LED = 2 -- GPIO4
+PIN_RED_LED = 1
+

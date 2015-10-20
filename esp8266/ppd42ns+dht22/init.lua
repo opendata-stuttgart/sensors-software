@@ -8,6 +8,5 @@ print('chip: ',node.chipid())
 print('heap: ',node.heap())
 
 wifi.sta.config("Freifunk","")
--- wifi.sta.config("shack","welcome2shack")
 
-dofile('main.lua')
+-- dofile('main.lua')
