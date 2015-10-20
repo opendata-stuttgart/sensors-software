@@ -7,8 +7,8 @@ atm without data. but dataset is created.
 
 #include <ESP8266WiFi.h>
 
-const char* ssid     = "shack";
-const char* password = "welcome2shack";
+const char* ssid     = "........";
+const char* password = "........";
 
 const char* host = "api.dusti.xyz";
 
