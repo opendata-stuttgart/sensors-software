@@ -32,9 +32,9 @@ DHT dht(DHTPIN, DHTTYPE);
 /**********************************************/
 #include <ESP8266WiFi.h>
 
-const char* ssid = ".....";
-const char* password = ".....";
-// const char* host = "192.168.1.19";
+const char* ssid = "Freifunk";
+const char* password = "";
+// const char* host = "";
 const char* host = "api.dusti.xyz";
 // const int httpPort = 8000;
 const int httpPort = 80;
@@ -74,6 +74,8 @@ void setup() {
   starttime = millis(); // store the start time
 //  dht.begin(); // Start DHT
   delay(10);
+  Serial.print("chipid: ");
+  Serial.println(ESP.getChipId());
   connectWifi(); // Start ConnecWifi 
   Serial.print("\n"); 
 }
