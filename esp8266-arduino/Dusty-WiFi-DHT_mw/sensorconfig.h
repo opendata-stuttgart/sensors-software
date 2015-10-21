@@ -30,7 +30,7 @@ and change your config here
 // /**********************************************/
 
 /* defines to activate sensors */
-#define DHT_ACTIVE
+// #define DHT_ACTIVE
 #define DS_ACTIVE
 
 /* DHT PIN */
@@ -55,6 +55,7 @@ const int httpPort = 80;
 
 /*
 http://forum.arduino.cc/index.php?topic=37371.0
+
 
 If the include file is meant to be shared by multiple Sketches then...
 Close the Arduino IDE

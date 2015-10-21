@@ -46,38 +46,53 @@
 // 10      GPIO1 (UART TX)
 // 11      GPIO9
 // 12      GPIO10
+
+/**********************************************/
+/* read sensorconfig.h configure your sensors,*/
+/* PINs and WIFI there                        */
+/**********************************************/
+
+#include "sensorconfig.h"
+
+#include <ESP8266WiFi.h>
+int value = 0;
+#include "apifunctions.h"
+
 /**********************************************/
 /* DHT declaration 
 /**********************************************/
+#ifdef DHT_ACTIVE
+// The IDE requires all libraries to be #include’d in the main (.ino) file.
+// http://jamesreubenknowles.com/multiple-source-files-with-the-arduino-ide-1618
 #include <DHT.h>
-// change the following in sensorconfig.h
-#define DHTPIN 4 // = GPIO PIN, not D
-#define DHTTYPE DHT22
+#include "dhtpush.h"
+#endif
 
 /**********************************************/
 /* onewire ds18x20 temperature sensor declaration 
 /**********************************************/
 // derived from https://github.com/esp8266/Arduino/blob/esp8266/libraries/OneWire/examples/DS18x20_Temperature/DS18x20_Temperature.pde
+#ifdef DS_ACTIVE
 #include <OneWire.h>
-#define ONEWIRE_PIN 15 // 15=D8
+#include "ds18x20push.h"
 // on pin ONEWIRE_PIN = GPIO (a 4.7K pullup resistor is necessary)
-byte dsaddr[8];
+# endif
 
 /**********************************************/
-/* WiFi declarations now in sensorconfig.h
+/* WiFi declarations: see sensorconfig.h      */
 /**********************************************/
-#include <ESP8266WiFi.h>
-int value = 0;
+
 
 /**********************************************/
 /* Variable Definitions for PPD24NS           */
 /**********************************************/
+#ifndef PPD42_P1_PIN
 #define  PPD42_P1_PIN 12
-#define  PPD42_P2_PIN 14
+#endif
 
-/**********************************************/
-/* read sensorconfig.h configure your PINs and WIFI there */
-/**********************************************/
+#ifndef PPD42_P2_PIN
+#define  PPD42_P2_PIN 14
+#endif
 
 // P1 for PM10 & P2 for PM25
 boolean valP1 = HIGH;
@@ -98,13 +113,6 @@ unsigned long lowpulseoccupancyP2 = 0;
 float ratio = 0;
 float concentration = 0;
 
-#include "sensorconfig.h"
-
-
-DHT dht(DHTPIN, DHTTYPE);
-OneWire  ds(ONEWIRE_PIN);
-
-
 /**********************************************/
 /* The Setup
 /**********************************************/
@@ -114,15 +122,20 @@ void setup() {
   pinMode(12,INPUT); // Listen at the designated PIN
   pinMode(14,INPUT); //Listen at the designated PIN
   starttime = millis(); // store the start time
+
+#ifdef DHT_ACTIVE
   Serial.print("init DHT");
   Serial.println();
   dht.begin(); // Start DHT
   delay(10);
-  
+#endif
+
+#ifdef DS_ACTIVE
   Serial.print("init DS");
   Serial.println();
   DSinit();
   delay(10);
+#endif
   // connectWifi(); // Start ConnecWifi 
   Serial.print("\n"); 
 }
@@ -217,234 +230,12 @@ void loop() {
 
 
     // FIXME: option to send PIN
+#ifdef DHT_ACTIVE
     sensorDHT();  // getting temperature and humidity (optional)
     Serial.println("------------------------------");
-    sensorDS();
+#endif
+#ifdef DS_ACTIVE    
+    DSpush();
+#endif
   }
 }
-
-/**********************************************/
-/* DHT22 Sensor
-/**********************************************/
-void sensorDHT(){
-  String data;
-  float h = dht.readHumidity(); //Read Humidity
-  float t = dht.readTemperature(); //Read Temperature
-
-  // Check if valid number if non NaN (not a number) will be send.
-  if (isnan(t) || isnan(h)) {
-    Serial.println("DHT22 could not be read");
-  } else {
-    Serial.print("Humidity    : ");
-    Serial.print(h);
-    Serial.print(" %\n");
-    Serial.print("Temperature : ");
-    Serial.print(t);
-    Serial.println(" C");
-    
-    // json for push to api: h t
-    data = "{\"sensordatavalues\":[{";
-    data += "\"value_type\":\"temperature\",\"value\":\"";
-    data += Float2String(t);
-    data += "\"},{";
-    data += "\"value_type\":\"humidity\",\"value\":\"";
-    data += Float2String(h);
-    data += "\"}]}";
-    Serial.println("#### Sending to Dusty: ");
-    sendData(data);
-  }
-}
-
-/**********************************************/
-/* WiFi connecting script
-/**********************************************/
-void connectWifi() {
-  WiFi.begin(ssid, password); // Start WiFI
-  
-  Serial.print("Connecting ");
-  while (WiFi.status() != WL_CONNECTED) 
-  {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("WiFi connected");
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-}
-/**********************************************/
-/* send data to rest api
-/**********************************************/
-void sendData(const String& data) {
-  //  delay(60000);
-  ++value;
-
-  Serial.print("connecting to ");
-  Serial.println(host);
-  
-  // Use WiFiClient class to create TCP connections
-  WiFiClient client;
-  if (!client.connect(host, httpPort)) {
-    Serial.println("connection failed");
-    return;
-  }
-  
-  // create an URI for the request
-  String url = "/v1/push-sensor-data/";
-  
-  Serial.print("Requesting URL: ");
-  Serial.println(url);
-  Serial.println(ESP.getChipId());
-  Serial.println(data);
-  
-  // send request to the server
-  client.print(String("POST ") + url + " HTTP/1.1\r\n" +
-               "Host: " + host + "\r\n" +
-               "Content-Type: application/json\r\n" +
-               "Sensor: esp8266-");
-  client.println(ESP.getChipId());
-  client.print("Content-Length: ");
-  client.println(data.length(), DEC);
-  client.println("Connection: close\r\n");
-  client.println(data);
-  delay(1);
-  
-  // Read reply from server and print them
-  while(client.available()){
-    char c = client.read();
-    Serial.print(c);
-  }
-  
-  Serial.println();
-  Serial.println("closing connection");
-}
-
-String Float2String(float value)
-{
-  // Convert a float to String with two decimals.
-  String s;
-  s = String(int(value));
-  s += '.';
-  s += int((value - int(value)) * 100);
-
-  return s;
-}
-
-
-void DSinit(){
-  byte i;
-  byte type_s;
-    ds.reset_search();
-    if (!ds.search(dsaddr)) {
-    Serial.println("No more addresses. No DS device found");
-    Serial.println();
-    ds.reset_search();
-    delay(250);
-    return;
-  }
-  
-  Serial.print("ROM =");
-  for( i = 0; i < 8; i++) {
-    Serial.write(' ');
-    Serial.print(dsaddr[i], HEX);
-  }
-
-  if (OneWire::crc8(dsaddr, 7) != dsaddr[7]) {
-      Serial.println("CRC is not valid!");
-      return;
-  }
-  Serial.println();
- 
-  // the first ROM byte indicates which chip
-  switch (dsaddr[0]) {
-    case 0x10:
-      Serial.println("  Chip = DS18S20");  // or old DS1820
-      type_s = 1;
-      break;
-    case 0x28:
-      Serial.println("  Chip = DS18B20");
-      type_s = 0;
-      break;
-    case 0x22:
-      Serial.println("  Chip = DS1822");
-      type_s = 0;
-      break;
-    default:
-      Serial.println("Device is not a DS18x20 family device.");
-      return;
-  ds.reset();
-  }
-}
-
-void sensorDS(){
-  String data;
-  byte i;
-  byte present = 0;
-  byte type_s;
-  byte dat[12];
-//  byte addr[8]; // replaced by dsaddr - a global var
-  float celsius = -999;
-  float fahrenheit = -999;
-
-  ds.reset();
-  ds.select(dsaddr);
-  ds.write(0x44, 1);        // start conversion, with parasite power on at the end
-  
-  delay(1000);     // maybe 750ms is enough, maybe not
-  // we might do a ds.depower() here, but the reset will take care of it.
-  
-  present = ds.reset();
-  ds.select(dsaddr);    
-  ds.write(0xBE);         // Read Scratchpad
-  Serial.print("  Data = ");
-  Serial.print(present, HEX);
-  Serial.print(" ");
-  for ( i = 0; i < 9; i++) {           // we need 9 bytes
-    dat[i] = ds.read();
-    Serial.print(dat[i], HEX);
-    Serial.print(" ");
-  }
-  Serial.print(" CRC=");
-  Serial.print(OneWire::crc8(dat, 8), HEX);
-  Serial.println();
-
-  // Convert the dat to actual temperature
-  // because the result is a 16 bit signed integer, it should
-  // be stored to an "int16_t" type, which is always 16 bits
-  // even when compiled on a 32 bit processor.
-  int16_t raw = (dat[1] << 8) | dat[0];
-  if (type_s) {
-    raw = raw << 3; // 9 bit resolution default
-    if (dat[7] == 0x10) {
-      // "count remain" gives full 12 bit resolution
-      raw = (raw & 0xFFF0) + 12 - dat[6];
-    }
-  } else {
-    byte cfg = (dat[4] & 0x60);
-    // at lower res, the low bits are undefined, so let's zero them
-    if (cfg == 0x00) raw = raw & ~7;  // 9 bit resolution, 93.75 ms
-    else if (cfg == 0x20) raw = raw & ~3; // 10 bit res, 187.5 ms
-    else if (cfg == 0x40) raw = raw & ~1; // 11 bit res, 375 ms
-    //// default is 12 bit resolution, 750 ms conversion time
-  }
-  celsius = (float)raw / 16.0;
-  fahrenheit = celsius * 1.8 + 32.0;
-  Serial.print("  Temperature = ");
-  Serial.print(celsius);
-  Serial.print(" Celsius, ");
-  Serial.print(fahrenheit);
-  Serial.println(" Fahrenheit");
-  // TODO: call API
-
-    Serial.println("#### Sending to Dusty: ");
-    
-    // json for push to api: h t
-    data = "{\"sensordatavalues\":[{";
-    data += "\"value_type\":\"temperature\",\"value\":\"";
-    data += Float2String(celsius);
-    data += "\"}]}";
-    Serial.println("#### Sending to Dusty: ");
-    sendData(data);
-  
-
-}
-
