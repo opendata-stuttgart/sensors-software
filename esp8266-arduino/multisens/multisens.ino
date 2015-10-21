@@ -4,52 +4,11 @@
 /*      - Shinyei PPD42NS                              */
 /*      http://www.sca-shinyei.com/pdf/PPD42NS.pdf     */
 /*                                                     */       
-/* Wiring Instruction:                                 */
-/*      Pin 2 of dust sensor PM2.5 -> Digital 6 (PWM)  */
-/*      Pin 3 of dust sensor       -> +5V              */
-/*      Pin 4 of dust sensor PM1   -> Digital 3 (PMW)  */ 
-/*                                                     */
-/*      - PPD42NS Pin 1 (grey)  => GND                 */
-/*      - PPD42NS Pin 2 (green) => Pin D5 /GPIO14      */
-/*        counts particles PM25                        */
-/*      - PPD42NS Pin 3 (black) => Vin                 */
-/*      - PPD42NS Pin 4 (white) => Pin D6 / GPIO12     */
-/*        counts particles PM10                        */
-/*      - PPD42NS Pin 5 (red)   => unused              */
-/*                                                     */
-/*      ATTENTION this is another wiring, from lua version */
-/*      -- esp8266-12                                  */
-/*         pin_P1=6  -- gpio12   black                 */
-/*         pin_P2=5  -- gpio14   white                 */
-/*         green => GND                                */
-/*         yellow => Vin (5V)                          */
-/* see datasheet http://sca-shinyei.com/pdf/PPD42NS.pdf */
-/* CN : S5B-EH(JST) (PINs on sensor board)             */
-/* 1 : COMMON(GND)                                     */
-/* 2 : OUTPUT(P2)                                      */
-/* 3 : INPUT(5VDC 90mA)                                */
-/* 4 : OUTPUT(P1)                                      */
-/* 5 : INPUT(T1)   FOR THRESHOLD FOR [P2]              */
-/*                                                     */
 /*******************************************************/
-// nodemcu pins Dx - GPIOx
-// 0 [*]   GPIO16
-// 1       GPIO5
-// 2       GPIO4
-// 3       GPIO0
-// 4       GPIO2
-// 5       GPIO14 (SPI CLK)
-// 6       GPIO12 (SPI MISO)
-// 7       GPIO13 (SPI MOSI)
-// 8       GPIO15 (SPI CS)
-// 9       GPIO3 (UART RX)
-// 10      GPIO1 (UART TX)
-// 11      GPIO9
-// 12      GPIO10
 
 /**********************************************/
-/* read sensorconfig.h configure your sensors,*/
-/* PINs and WIFI there                        */
+/* configure your sensors,                    */
+/* PINs and WIFI in sensorconfig.h            */
 /**********************************************/
 
 #include "sensorconfig.h"
