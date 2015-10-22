@@ -32,7 +32,7 @@ DHT dht(DHTPIN, DHTTYPE);
 /**********************************************/
 #include <ESP8266WiFi.h>
 
-const char* ssid = "Freifunk";
+const char* ssid = "s71";
 const char* password = "";
 // const char* host = "";
 const char* host = "api.dusti.xyz";
@@ -151,7 +151,7 @@ void loop() {
 
     // json for push to api / P2
     data += "\"value_type\":\"durP2\",\"value\":\"";
-    data += Float2String(lowpulseoccupancyP1);
+    data += Float2String(lowpulseoccupancyP2);
     data += "\"},{";
     data += "\"value_type\":\"ratioP2\",\"value\":\"";
     data += Float2String(ratio);
