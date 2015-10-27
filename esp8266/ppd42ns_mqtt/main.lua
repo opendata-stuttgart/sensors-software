@@ -1,10 +1,3 @@
--- esp8266-12
-pin_P1=6  -- gpio12   black
-pin_P2=5  -- gpio14   white
-
-sampletime=30000 -- 30 seconds
-filter_time=10000 -- in us
-
 durationP1=0
 trigOnP1=0
 lastTriggerP1=0

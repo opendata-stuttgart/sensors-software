@@ -1,5 +1,5 @@
 function build_post_request(host, uri, data)
-    request = "POST "..uri.." HTTP/1.1\r\n"..
+    local request = "POST "..uri.." HTTP/1.1\r\n"..
     "Host: "..host.."\r\n"..
     "Connection: close\r\n"..
     "Content-Type: application/json\r\n"..
@@ -15,7 +15,7 @@ function send_to_dusty(ratioP1, P1, ratioP2, P2)
             ',{"value_type":"durP2","value":"'..lowpulseoccupancyP2..'"},{"value_type":"ratioP2","value":"'..ratioP2..'"},{"value_type":"P2","value":"'..P2..'"}]}'
 
     print("start api connect")
-    api=net.createConnection(net.TCP, 0)
+    local api=net.createConnection(net.TCP, 0)
     print("connect")
 
     api:on("receive", function(sck, c) print(c) end )
@@ -37,7 +37,7 @@ end
 
 -- pub
 pub_sem = 0
-function publish_mqtt(msg)
+function publish_mqtt(msg, cb)
     print("Publish to " .. TOPIC .. ":" .. msg)
     print('heap: ',node.heap())
 
@@ -46,15 +46,19 @@ function publish_mqtt(msg)
         m:publish(TOPIC,msg,0,0,function(conn)
             print("sent mqtt")
             pub_sem = 0
+            -- call next when done
+            if cb ~= nil then
+                cb()
+            end
         end)
     else
-        print("Oh noes! Semaphore was 1, stop nao!")
+        print("Semaphore was 1, skip!")
     end
 end
 
 -- pub to broker
-function send_to_broker(ratioP1, P1, ratioP2, P2)
-    publish_mqtt('{"durP1": "'..lowpulseoccupancyP1..'","ratioP1":"'..ratioP1..'","P1":"'..P1..'","durP2":"'..lowpulseoccupancyP2..'","ratioP2":"'..ratioP2..'","P2":"'..P2..'"}')
+function send_to_broker(ratioP1, P1, ratioP2, P2, cb)
+    publish_mqtt('{"durP1": "'..lowpulseoccupancyP1..'","ratioP1":"'..ratioP1..'","P1":"'..P1..'","durP2":"'..lowpulseoccupancyP2..'","ratioP2":"'..ratioP2..'","P2":"'..P2..'"}', cb)
 end
 
 -- http post
@@ -63,8 +67,13 @@ function send_to_api(lowpulseoccupancyP1, lowpulseoccupancyP2, sampletime)
     local P1 = 1.1*ratioP1*ratioP1*ratioP1-3.8*ratioP1*ratioP1+520*ratioP1+0.62
     local ratioP2 = lowpulseoccupancyP2 / (sampletime*10.0)
     local P2 = 1.1*ratioP2*ratioP2*ratioP2-3.8*ratioP2*ratioP2+520*ratioP2+0.62
-    -- http
-    --send_to_dusty(ratioP1, P1, ratioP2, P2)
+
+    if SEND_TO_DUSTY == true then
+        dustyCallback = function()
+            -- http
+            send_to_dusty(ratioP1, P1, ratioP2, P2)
+        end
+    end
     -- mqtt
-    send_to_broker(ratioP1, P1, ratioP2, P2)
+    send_to_broker(ratioP1, P1, ratioP2, P2, dustyCallback)
 end

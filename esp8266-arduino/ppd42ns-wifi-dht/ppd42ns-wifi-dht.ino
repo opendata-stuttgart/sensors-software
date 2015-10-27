@@ -32,9 +32,9 @@ DHT dht(DHTPIN, DHTTYPE);
 /**********************************************/
 #include <ESP8266WiFi.h>
 
-const char* ssid = "Freifunk";
+const char* ssid = "s71";
 const char* password = "";
-// const char* host = "192.168.1.19";
+// const char* host = "";
 const char* host = "api.dusti.xyz";
 // const int httpPort = 8000;
 const int httpPort = 80;
