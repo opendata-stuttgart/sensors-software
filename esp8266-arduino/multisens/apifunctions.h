@@ -16,6 +16,15 @@ void connectWifi() {
   Serial.println("WiFi connected");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
+  Serial.print("MAC address: ");
+  uint8_t mac[6];
+    for (int i = 0; i < 6; ++i) {
+     Serial.print(String(mac[i], 16));
+    if (i < 5)
+      Serial.print(":");
+    }
+    Serial.println();
+  WiFi.printDiag(Serial);
 }
 /**********************************************/
 /* send data to rest api

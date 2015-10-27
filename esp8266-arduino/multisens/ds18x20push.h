@@ -5,7 +5,11 @@
 #define ONEWIRE_PIN 15 // GPIO15=D8
 #endif
 
-OneWire  ds(ONEWIRE_PIN);
+#define DS18S20_ID 0x10
+#define DS18B20_ID 0x28
+#define DS1822_ID 0x22
+
+OneWire ds(ONEWIRE_PIN);
 
 byte dsaddr[8];
 
@@ -20,7 +24,7 @@ void DSinit(){
     delay(250);
     return;
   }
-  
+
   Serial.print("ROM =");
   for( i = 0; i < 8; i++) {
     Serial.write(' ');
@@ -35,15 +39,15 @@ void DSinit(){
  
   // the first ROM byte indicates which chip
   switch (dsaddr[0]) {
-    case 0x10:
+    case DS18S20_ID:
       Serial.println("  Chip = DS18S20");  // or old DS1820
       type_s = 1;
       break;
-    case 0x28:
+    case DS18B20_ID:
       Serial.println("  Chip = DS18B20");
       type_s = 0;
       break;
-    case 0x22:
+    case DS1822_ID:
       Serial.println("  Chip = DS1822");
       type_s = 0;
       break;
@@ -51,6 +55,8 @@ void DSinit(){
       Serial.println("Device is not a DS18x20 family device.");
       return;
   ds.reset();
+
+
   }
 }
 
@@ -66,9 +72,10 @@ void DSpush(){
 
   ds.reset();
   ds.select(dsaddr);
-  ds.write(0x44, 1);        // start conversion, with parasite power on at the end
+//  ds.write(0x44, 1);        // start conversion, with parasite power on at the end
+  ds.write(0x44, 0);        // start conversion, with parasite power off at the end
   
-  delay(1000);     // maybe 750ms is enough, maybe not
+  delay(750);     // maybe 750ms is enough, maybe not
   // we might do a ds.depower() here, but the reset will take care of it.
   
   present = ds.reset();
@@ -125,4 +132,40 @@ void DSpush(){
     sendData(data);
 }
 
+float DSgetTemperature(){
+    float temp;
+    byte i;
+    byte present = 0;
+    byte data[12];
+    byte addr[8];
+    //find a device
+    if (!ds.search(addr)) {
+        ds.reset_search();
+        delay(250);
+        return -999;
+    }
+    if (OneWire::crc8( addr, 7) != addr[7]) {
+        return -999;
+    }
+    if (addr[0] != DS18S20_ID && addr[0] != DS18B20_ID) {
+        return -999;
+    }
+    ds.reset();
+    ds.select(addr);
+    // Start conversion, 0=non-parasitic,  1= parasitic
+    ds.write(0x44, 0);
+    // Wait some time...
+    delay(150);
+    present = ds.reset();
+    ds.select(addr);
+    // Issue Read scratchpad command
+    ds.write(0xBE);
+    // Receive 9 bytes
+    for ( i = 0; i < 9; i++) {
+        data[i] = ds.read();
+    }
+    // Calculate temperature value
+    temp = ( (data[1] << 8) + data[0] )*0.0625;
+    return temp;
+}
 #endif

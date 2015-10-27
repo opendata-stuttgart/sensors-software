@@ -78,13 +78,15 @@ float concentration = 0;
 void setup() {
   Serial.begin(9600); //Output to Serial at 9600 baud
   delay(10);
-  pinMode(12,INPUT); // Listen at the designated PIN
-  pinMode(14,INPUT); //Listen at the designated PIN
+  pinMode(PPD42_P1_PIN,INPUT); // Listen at the designated PIN
+  pinMode(PPD42_P2_PIN,INPUT); //Listen at the designated PIN
   starttime = millis(); // store the start time
-
+  Serial.println("ESP startup, chipid:");
+  Serial.println(ESP.getChipId());
+  Serial.println("Heap free:");
+  Serial.println(ESP.getFreeHeap());
 #ifdef DHT_ACTIVE
-  Serial.print("init DHT");
-  Serial.println();
+  Serial.println("init DHT");
   dht.begin(); // Start DHT
   delay(10);
 #endif
@@ -193,7 +195,11 @@ void loop() {
     sensorDHT();  // getting temperature and humidity (optional)
     Serial.println("------------------------------");
 #endif
-#ifdef DS_ACTIVE    
+#ifdef DS_ACTIVE
+    float t;
+    t=DSgetTemperature();
+    Serial.print("DSgetTemperature(): t=");
+    Serial.println(t);
     DSpush();
 #endif
   }

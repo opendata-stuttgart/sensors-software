@@ -3,29 +3,33 @@ name this file sensorconfig.h
 and change your config here
 GPIO PINSs <-> nodemcu PINs: see below
 */
+//        0  1  2  3  4   5   6   7   8  9  10  11  12
+int D[]={16, 5, 4, 0, 2, 14, 12, 13, 15, 3,  1,  9, 10};
 
 /* defines to activate sensors */
 #define DHT_ACTIVE
 #define DS_ACTIVE
 
 /* DHT PIN */
-#define DHTPIN 4 // = GPIO PIN, not D
+// #define DHTPIN 4 // = GPIO PIN
+#define DHTPIN D[2] // = Dx on devboard
 #define DHTTYPE DHT22
 
 /* ONEWIRE BUS PIN */
-#define ONEWIRE_PIN 15 // GPIO15=D8
+// #define ONEWIRE_PIN 15 // GPIO15=D8
+#define ONEWIRE_PIN D[4]
 
 /* PPD PINs */
-#define  PPD42_P1_PIN 12 // GPIO12=D6
-#define  PPD42_P2_PIN 14 // GPIO14=D5
-unsigned long sampletime_ms = 15000;
+#define  PPD42_P1_PIN D[6] //12 // GPIO12=D6
+#define  PPD42_P2_PIN D[5] //14 // GPIO14=D5
+unsigned long sampletime_ms = 5000;
 
 
 /* WIFI credentials */
 const char* ssid = "Freifunk";
 const char* password = "";
-//const char* host = "api.dusti.xyz";
-const char* host = "10.42.26.103";
+const char* host = "api.dusti.xyz";
+//const char* host = "10.42.26.103";
 const int httpPort = 80;
 
 
