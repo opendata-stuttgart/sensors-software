@@ -1,4 +1,27 @@
 require("ggplot2")
+#max values for clipping
+Pclip<-list(P1=list(min=0,    max=10000),
+            P2=list(min=0.62, max=1000))
+dateinterval<-list(min=strptime("2015-10-24", format="%Y-%m-%d"), 
+                   max=date())
+
+#' function to clip values above/below thresholds
+clipping<-function(x,min=NULL,max=NULL){
+  if(is.null(min)){
+    min=min(na.omit(x))
+  }
+  if(is.null(max)){
+    max=max(na.omit(x))
+  }
+  if(is.na(max)||is.na(min)){
+    warn("NA for min/max while clipping, no clipping done")
+    return(x)
+  }
+  x[x>max]<-max
+  x[x<min]<-min
+  return(x)
+}
+
 
 ## gaussian filter taps for smoothing function
 # adapted from Juan Carlos Borrás http://grokbase.com/p/r/r-help/117c96hy0z/r-gaussian-low-pass-filter
@@ -9,9 +32,9 @@ gfcoeffs <- function(s, n) {
     # sum(gfiltc)=1
 }
 
-fpattern<-"sensor[0-9]*.csv"
-# get filelist relative to working directory
-filelist<- dir(path = ".",pattern = glob2rx(fpattern),recursive=FALSE,full.names=FALSE, ignore.case = TRUE) ## files in current directory
+fpattern<-"sensor[0-9]+.csv"
+# get filelist relative to working directory, pattern = glob2rx(fpattern)
+filelist<- dir(path = ".",pattern=fpattern,recursive=FALSE,full.names=FALSE, ignore.case = TRUE) ## files in current directory
 
 for (csvfilename in filelist){
 # get/process the data with scripts from repo feinstaub-monitoring-client-python to sensorXX.csv
@@ -30,9 +53,15 @@ sendat$timestamp<-NULL
 # nval=2*60*24*2
 # nval=min(nval,dim(sendat)[1])
 # seldat<-sendat[1:nval,]
-# 
+
+seldat<-sendat
+
 # filter range 0
-# seldat<-seldat[(sendat$P1>0)&(sendat$P1<1000),]
+seldat$P1<-clipping(seldat$P1,Pclip$P1$min,Pclip$P1$max)
+seldat$P2<-clipping(seldat$P2,Pclip$P2$min,Pclip$P2$max)
+seldat$P1[seldat$P1<=Pclip$P1$min]<-NA
+seldat$P2[seldat$P2<=Pclip$P2$min]<-NA
+
 # sendat<-sendat[,]
 
 plotdat<-seldat
