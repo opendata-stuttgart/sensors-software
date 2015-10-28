@@ -8,7 +8,8 @@ function go()
 --     dofile('wificonnect.lua')
 --       dofile('led22_led.lua')
 -- https://github.com/nodemcu/nodemcu-firmware/blob/master/lua_examples/onewire-ds18b20.lua
-       dofile('onewire-ds18b20.lua')
+--        dofile('onewire-ds18b20.lua')
+    readDHT()
 end
 
 print('Waiting 10 seconds before continuing...')

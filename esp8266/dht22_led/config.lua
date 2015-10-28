@@ -1,5 +1,7 @@
 
-local gpio = {[0]=3,
+return {
+
+ gpio = {[0]=3,
               [1]=10,
               [2]=4,
               [3]=9,
@@ -12,7 +14,6 @@ local gpio = {[0]=3,
               [15]=8,
               [16]=0}
 -- ESP-1: GPIO0->3 GPIO2->4
-return {
 
   WIFI_SSID = 'Freifunk',
   WIFI_KEY = '',
@@ -30,7 +31,7 @@ return {
 --     PIN_DHT = gpio[14],
 
     -- on dev-board: Dn == nodemcu n
-    PIN_DHT=3,
+    PIN_DHT=2,
     PIN_REED_SWITCH = nil,  -- 5 -- GPIO 14
     PIN_GREEN_LED = 4, 
     PIN_RED_LED = nil
