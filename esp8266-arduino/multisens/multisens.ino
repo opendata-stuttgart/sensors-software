@@ -78,26 +78,51 @@ float concentration = 0;
 void setup() {
   Serial.begin(9600); //Output to Serial at 9600 baud
   delay(10);
-  pinMode(PPD42_P1_PIN,INPUT); // Listen at the designated PIN
-  pinMode(PPD42_P2_PIN,INPUT); //Listen at the designated PIN
-  starttime = millis(); // store the start time
   Serial.println("ESP startup, chipid:");
   Serial.println(ESP.getChipId());
-  Serial.println("Heap free:");
+  Serial.print("Heap free:");
   Serial.println(ESP.getFreeHeap());
+  Serial.print("sampletime [s]:");
+  Serial.println(Float2String(sampletime_ms/1000.0));
+  int i;
+  Serial.println("GPIOx Dx PIN matching");
+
+  for (i = 0; i < 13; i = i + 1) {
+        Serial.print(i);
+        Serial.print("\t");
+        Serial.println(D[i]);
+    }
+
+#ifdef PPD_ACTIVE
+  pinMode(PPD42_P1_PIN,INPUT); // Listen at the designated PIN
+  pinMode(PPD42_P2_PIN,INPUT); //Listen at the designated PIN
+  Serial.println("Sensortype PPD active");
+  Serial.print("PPD42_P1_PIN: ");
+  Serial.print(PPD42_P1_PIN);
+  Serial.print("PPD42_P2_PIN: ");
+  Serial.print(PPD42_P2_PIN);
+#endif
+  starttime = millis(); // store the start time
+  
 #ifdef DHT_ACTIVE
+  Serial.println("Sensortype DHT active");  
+  Serial.print("DHTPIN: ");
+  Serial.println(DHTPIN);
   Serial.println("init DHT");
   dht.begin(); // Start DHT
   delay(10);
 #endif
 
 #ifdef DS_ACTIVE
+  Serial.println("Sensortype DS active");  
+  Serial.print("ONEWIRE_PIN: ");
+  Serial.println(ONEWIRE_PIN);
   Serial.print("init DS");
   Serial.println();
   DSinit();
   delay(10);
 #endif
-  // connectWifi(); // Start ConnecWifi 
+  connectWifi(); // Start ConnecWifi
   Serial.print("\n"); 
 }
 
@@ -107,6 +132,7 @@ void setup() {
 void loop() {
   String data;
   // Read pins connected to ppd42ns
+#ifdef PPD_ACTIVE
   valP1 = digitalRead(PPD42_P1_PIN);
   valP2 = digitalRead(PPD42_P2_PIN);
 
@@ -131,10 +157,11 @@ void loop() {
     lowpulseoccupancyP2 = lowpulseoccupancyP2 + durationP2;
     trigP2 = false;
   }
-
+#endif
   // Checking if it is time to sample
   if ((millis()-starttime) > sampletime_ms)
   {
+#ifdef PPD_ACTIVE
     ratio = lowpulseoccupancyP1/(sampletime_ms*10.0);                 // int percentage 0 to 100
     concentration = 1.1*pow(ratio,3)-3.8*pow(ratio,2)+520*ratio+0.62; // spec sheet curve
     // Begin printing
@@ -187,6 +214,7 @@ void loop() {
     // Resetting for next sampling
     lowpulseoccupancyP1 = 0;
     lowpulseoccupancyP2 = 0;
+#endif
     starttime = millis(); // store the start time
 
 

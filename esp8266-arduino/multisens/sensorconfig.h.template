@@ -7,8 +7,9 @@ GPIO PINSs <-> nodemcu PINs: see below
 int D[]={16, 5, 4, 0, 2, 14, 12, 13, 15, 3,  1,  9, 10};
 
 /* defines to activate sensors */
-#define DHT_ACTIVE
-#define DS_ACTIVE
+#define PPD_ACTIVE
+//#define DHT_ACTIVE
+//#define DS_ACTIVE
 
 /* DHT PIN */
 // #define DHTPIN 4 // = GPIO PIN
@@ -22,7 +23,7 @@ int D[]={16, 5, 4, 0, 2, 14, 12, 13, 15, 3,  1,  9, 10};
 /* PPD PINs */
 #define  PPD42_P1_PIN D[6] //12 // GPIO12=D6
 #define  PPD42_P2_PIN D[5] //14 // GPIO14=D5
-unsigned long sampletime_ms = 5000;
+unsigned long sampletime_ms = 30000;
 
 
 /* WIFI credentials */
