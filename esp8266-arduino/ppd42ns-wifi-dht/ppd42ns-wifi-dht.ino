@@ -74,8 +74,6 @@ void setup() {
   starttime = millis(); // store the start time
 //  dht.begin(); // Start DHT
   delay(10);
-  Serial.print("chipid: ");
-  Serial.println(ESP.getChipId());
   connectWifi(); // Start ConnecWifi 
   Serial.print("\n"); 
 }
@@ -151,7 +149,7 @@ void loop() {
 
     // json for push to api / P2
     data += "\"value_type\":\"durP2\",\"value\":\"";
-    data += Float2String(lowpulseoccupancyP2);
+    data += Float2String(lowpulseoccupancyP1);
     data += "\"},{";
     data += "\"value_type\":\"ratioP2\",\"value\":\"";
     data += Float2String(ratio);
