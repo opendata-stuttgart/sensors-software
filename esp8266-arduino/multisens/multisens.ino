@@ -72,10 +72,26 @@ unsigned long lowpulseoccupancyP2 = 0;
 float ratio = 0;
 float concentration = 0;
 
+#ifdef PIN_LED_STATUS
+int ledsstate=LOW;
+#endif
+
 /**********************************************/
 /* The Setup
 /**********************************************/
+
 void setup() {
+
+#ifdef PIN_LED_STATUS
+pinMode(PIN_LED_STATUS, OUTPUT);
+digitalWrite(PIN_LED_STATUS, ledsstate);
+#endif
+
+#ifdef PIN_LED_STATUS
+ledsstate=HIGH;
+digitalWrite(PIN_LED_STATUS, ledsstate);
+#endif
+
   Serial.begin(9600); //Output to Serial at 9600 baud
   delay(10);
   Serial.println("ESP startup, chipid:");
@@ -94,6 +110,10 @@ void setup() {
     }
 
 #ifdef PPD_ACTIVE
+#ifdef PIN_LED_STATUS
+ledsstate=LOW;
+digitalWrite(PIN_LED_STATUS, ledsstate);
+#endif
   pinMode(PPD42_P1_PIN,INPUT); // Listen at the designated PIN
   pinMode(PPD42_P2_PIN,INPUT); //Listen at the designated PIN
   Serial.println("Sensortype PPD active");
@@ -101,19 +121,36 @@ void setup() {
   Serial.print(PPD42_P1_PIN);
   Serial.print("PPD42_P2_PIN: ");
   Serial.print(PPD42_P2_PIN);
+#ifdef PIN_LED_STATUS
+ledsstate=HIGH;
+digitalWrite(PIN_LED_STATUS, ledsstate);
+#endif
 #endif
   starttime = millis(); // store the start time
   
 #ifdef DHT_ACTIVE
+#ifdef PIN_LED_STATUS
+ledsstate=LOW;
+digitalWrite(PIN_LED_STATUS, ledsstate);
+#endif
   Serial.println("Sensortype DHT active");  
   Serial.print("DHTPIN: ");
   Serial.println(DHTPIN);
   Serial.println("init DHT");
   dht.begin(); // Start DHT
   delay(10);
+#ifdef PIN_LED_STATUS
+ledsstate=HIGH;
+digitalWrite(PIN_LED_STATUS, ledsstate);
+#endif
 #endif
 
+
 #ifdef DS_ACTIVE
+#ifdef PIN_LED_STATUS
+ledsstate=LOW;
+digitalWrite(PIN_LED_STATUS, ledsstate);
+#endif
   Serial.println("Sensortype DS active");  
   Serial.print("ONEWIRE_PIN: ");
   Serial.println(ONEWIRE_PIN);
@@ -124,6 +161,10 @@ void setup() {
 #endif
   connectWifi(); // Start ConnecWifi
   Serial.print("\n"); 
+#ifdef PIN_LED_STATUS
+ledsstate=HIGH;
+digitalWrite(PIN_LED_STATUS, ledsstate);
+#endif
 }
 
 /**********************************************/

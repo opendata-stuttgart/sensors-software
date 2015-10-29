@@ -10,8 +10,14 @@ void connectWifi() {
   Serial.print("Connecting ");
   while (WiFi.status() != WL_CONNECTED) 
   {
+#ifdef PIN_LED_STATUS
+digitalWrite(PIN_LED_STATUS, LOW);
+#endif
     delay(500);
     Serial.print(".");
+#ifdef PIN_LED_STATUS
+digitalWrite(PIN_LED_STATUS, HIGH);
+#endif
   }
   Serial.println("WiFi connected");
   Serial.print("IP address: ");
@@ -32,6 +38,10 @@ void connectWifi() {
 void sendData(const String& data) {
   //  delay(60000);
   ++value;
+
+#ifdef PIN_LED_STATUS
+digitalWrite(PIN_LED_STATUS, LOW);
+#endif
 
   Serial.print("connecting to ");
   Serial.println(host);
@@ -71,6 +81,9 @@ void sendData(const String& data) {
   
   Serial.println();
   Serial.println("closing connection");
+#ifdef PIN_LED_STATUS
+digitalWrite(PIN_LED_STATUS, HIGH);
+#endif
 }
 
 String Float2String(float value)
