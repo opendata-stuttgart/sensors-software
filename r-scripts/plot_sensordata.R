@@ -54,44 +54,57 @@ sendat$timestamp<-NULL
 # nval=min(nval,dim(sendat)[1])
 # seldat<-sendat[1:nval,]
 
-seldat<-sendat
-
-# filter range 0
-seldat$P1<-clipping(seldat$P1,Pclip$P1$min,Pclip$P1$max)
-seldat$P2<-clipping(seldat$P2,Pclip$P2$min,Pclip$P2$max)
-seldat$P1[seldat$P1<=Pclip$P1$min]<-NA
-seldat$P2[seldat$P2<=Pclip$P2$min]<-NA
-
-# sendat<-sendat[,]
-
-plotdat<-seldat
 pdf(pdffilename)
-# plot(plotdat$timestamplt, log(plotdat$P2))
 
-p<-ggplot(plotdat,aes(timestamplt, P2))+geom_point()+geom_smooth()
-print(p)
-p<-ggplot(plotdat,aes(timestamplt, P2))+geom_point()+scale_y_log10()+geom_smooth()
-print(p)
-p<-ggplot(plotdat,aes(timestamplt, P1))+geom_point()+geom_smooth()
-print(p)
-p<-ggplot(plotdat,aes(timestamplt, P1))+geom_point()+scale_y_log10()+geom_smooth()
-print(p)
+if ("P1" %in% names(sendat)){
+    seldat<-sendat
+    # filter range 0
+    seldat$P1<-clipping(seldat$P1,Pclip$P1$min,Pclip$P1$max)
+    seldat$P2<-clipping(seldat$P2,Pclip$P2$min,Pclip$P2$max)
+    seldat$P1[seldat$P1<=Pclip$P1$min]<-NA
+    seldat$P2[seldat$P2<=Pclip$P2$min]<-NA
 
-ntaps=10
-sigma=4
-gfiltc<-gfcoeffs(sigma,ntaps)
+    # sendat<-sendat[,]
 
-plotdat$P1smoothed<-filter(plotdat$P1,filter=gfiltc)
-plotdat$P2smoothed<-filter(plotdat$P2,filter=gfiltc)
-p<-ggplot(plotdat,aes(timestamplt, P1smoothed))+geom_line()+geom_smooth()
-print(p)
-p<-ggplot(plotdat,aes(timestamplt, P1smoothed))+geom_line()+scale_y_log10()+geom_smooth()
-print(p)
-p<-ggplot(plotdat,aes(timestamplt, P2smoothed))+geom_line()+geom_smooth()
-print(p)
-p<-ggplot(plotdat,aes(timestamplt, P2smoothed))+geom_line()+scale_y_log10()+geom_smooth()
-print(p)
+    plotdat<-seldat
+    # plot(plotdat$timestamplt, log(plotdat$P2))
 
+    p<-ggplot(plotdat,aes(timestamplt, P2))+geom_point()+geom_smooth()
+    print(p)
+    p<-ggplot(plotdat,aes(timestamplt, P2))+geom_point()+scale_y_log10()+geom_smooth()
+    print(p)
+    p<-ggplot(plotdat,aes(timestamplt, P1))+geom_point()+geom_smooth()
+    print(p)
+    p<-ggplot(plotdat,aes(timestamplt, P1))+geom_point()+scale_y_log10()+geom_smooth()
+    print(p)
+
+    ntaps=10
+    sigma=4
+    gfiltc<-gfcoeffs(sigma,ntaps)
+
+    plotdat$P1smoothed<-filter(plotdat$P1,filter=gfiltc)
+    plotdat$P2smoothed<-filter(plotdat$P2,filter=gfiltc)
+    p<-ggplot(plotdat,aes(timestamplt, P1smoothed))+geom_line()+geom_smooth()
+    print(p)
+    p<-ggplot(plotdat,aes(timestamplt, P1smoothed))+geom_line()+scale_y_log10()+geom_smooth()
+    print(p)
+    p<-ggplot(plotdat,aes(timestamplt, P2smoothed))+geom_line()+geom_smooth()
+    print(p)
+    p<-ggplot(plotdat,aes(timestamplt, P2smoothed))+geom_line()+scale_y_log10()+geom_smooth()
+    print(p)
+
+}
+
+if ("temperature" %in% names(sendat)){
+        seldat<-sendat[!is.na(sendat$temperature),]
+        if ("humidity" %in% names(sendat)){
+            seldat<-seldat[!is.na(seldat$humidity),]
+        }
+        p<-ggplot(seldat, aes(timestamplt, temperature))+geom_line()
+        if ("humidity" %in% names(sendat)){
+            p<-p+geom_line(aes(timestamplt, humidity),col=4)
+        }
+        print(p)
+}
 dev.off()
-
 }
