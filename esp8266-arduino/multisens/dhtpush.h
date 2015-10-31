@@ -48,7 +48,7 @@ void sensorDHT(){
     Serial.println(" C");
    
     if ((t>84.99) & (t<85.01)){
-        Serial.println("Temperature looks like a reading after a power reset (85 °C), discarding...")
+        Serial.println("Temperature looks like a reading after a power reset (85 °C), discarding...");
         return;
     }
     // json for push to api: h t
