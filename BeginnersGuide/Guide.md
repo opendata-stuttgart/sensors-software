@@ -60,4 +60,4 @@ Auf den → oder im Menü *Sketch* → *Hochladen* klicken.
 **Werkzeuge** → **Serieller Montior** aktivieren, damit man über USB Schnittstelle die aktuellen Daten lokal anschauen kann.
 Nun kann überprüfen, ob es an einer Stelle zu Fehlern führt, z.B. NodeMCU kann sich nicht ins Wlan einloggen, kann die Daten nicht hochladen,…
 
-![Überprüfen](img/check.jpg)
+![Überprüfen](img/Uberspielen.jpg)
