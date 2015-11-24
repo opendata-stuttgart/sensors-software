@@ -1,0 +1,5 @@
+API_TOKEN = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+PUSHOVER_CLIENT_TOKEN = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+PUSHOVER_API_TOKEN = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+LAST_N_HOURS = 1
+LAST_N_MINUTES = 5
