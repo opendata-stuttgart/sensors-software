@@ -60,7 +60,7 @@ void sensorDHT(){
     data += Float2String(h);
     data += "\"}]}";
     Serial.println("#### Sending to Dusty: ");
-    sendData(data);
+    sendData(data, DHTPIN);
   }
 }
 

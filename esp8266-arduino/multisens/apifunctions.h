@@ -76,7 +76,7 @@ void connectWifi() {
 /**********************************************/
 /* send data to rest api
 /**********************************************/
-void sendData(const String& data) {
+void sendData(const String& data, int pin=-1) {
   //  delay(60000);
   ++value;
 
@@ -101,10 +101,13 @@ digitalWrite(PIN_LED_STATUS, LOW);
   Serial.println(url);
   Serial.println(ESP.getChipId());
   Serial.println(data);
-  
+
+  String pinstr=String('-');
+  if (pin > 0 ){pinstr=String(pin);}
   // send request to the server
   client.print(String("POST ") + url + " HTTP/1.1\r\n" +
                "Host: " + host + "\r\n" +
+               "Pin: " + pinstr + "\r\n" +
                "Content-Type: application/json\r\n" +
                "Sensor: esp8266-");
   client.println(ESP.getChipId());

@@ -255,7 +255,8 @@ void loop() {
 
     //sending to dustix api
     Serial.println("#### Sending to dusti.xyz: ");
-    sendData(data);
+    // -1 -> '-' is default for ppd
+    sendData(data,-1);
     
     // Resetting for next sampling
     lowpulseoccupancyP1 = 0;

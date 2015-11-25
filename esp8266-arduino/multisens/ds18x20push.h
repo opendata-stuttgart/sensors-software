@@ -135,7 +135,7 @@ void DSpush(){
     data += Float2String(celsius);
     data += "\"}]}";
     Serial.println("#### Sending to Dusty: ");
-    sendData(data);
+    sendData(data, ONEWIRE_PIN);
 }
 
 float DSgetTemperature(){
