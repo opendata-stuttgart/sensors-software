@@ -158,6 +158,11 @@ digitalWrite(PIN_LED_STATUS, ledsstate);
   Serial.println();
   DSinit();
   delay(10);
+  // try to read a temperature
+  float t;
+  t=DSgetTemperature();
+  Serial.print("DSgetTemperature(): t=");
+  Serial.println(t);
 #endif
   connectWifi(); // Start ConnecWifi
   Serial.print("\n"); 
@@ -250,7 +255,8 @@ void loop() {
 
     //sending to dustix api
     Serial.println("#### Sending to dusti.xyz: ");
-    sendData(data);
+    // -1 -> '-' is default for ppd
+    sendData(data,-1);
     
     // Resetting for next sampling
     lowpulseoccupancyP1 = 0;
@@ -265,10 +271,6 @@ void loop() {
     Serial.println("------------------------------");
 #endif
 #ifdef DS_ACTIVE
-    float t;
-    t=DSgetTemperature();
-    Serial.print("DSgetTemperature(): t=");
-    Serial.println(t);
     DSpush();
 #endif
   }

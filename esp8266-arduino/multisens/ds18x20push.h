@@ -93,6 +93,12 @@ void DSpush(){
   Serial.print(OneWire::crc8(dat, 8), HEX);
   Serial.println();
 
+  // check CRC, return if invalid
+  if (OneWire::crc8(dat, 8) != dat[8]) {
+      Serial.println("CRC is not valid, no measurement pushed!");
+      return;
+  }
+  
   // Convert the dat to actual temperature
   // because the result is a 16 bit signed integer, it should
   // be stored to an "int16_t" type, which is always 16 bits
@@ -120,7 +126,7 @@ void DSpush(){
   Serial.print(fahrenheit);
   Serial.println(" Fahrenheit");
   // TODO: call API
-
+  
     Serial.println("#### Sending to Dusty: ");
     
     // json for push to api: h t
@@ -129,7 +135,7 @@ void DSpush(){
     data += Float2String(celsius);
     data += "\"}]}";
     Serial.println("#### Sending to Dusty: ");
-    sendData(data);
+    sendData(data, ONEWIRE_PIN);
 }
 
 float DSgetTemperature(){
