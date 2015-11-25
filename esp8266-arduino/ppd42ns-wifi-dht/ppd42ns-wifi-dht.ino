@@ -127,7 +127,7 @@ void loop() {
     // json for push to api / P1
     data = "{\"sensordatavalues\":[{";
     data += "\"value_type\":\"durP1\",\"value\":\"";
-    data += Float2String(lowpulseoccupancyP1);
+    data += long(lowpulseoccupancyP1);
     data += "\"},{";
     data += "\"value_type\":\"ratioP1\",\"value\":\"";
     data += Float2String(ratio);
@@ -149,7 +149,7 @@ void loop() {
 
     // json for push to api / P2
     data += "\"value_type\":\"durP2\",\"value\":\"";
-    data += Float2String(lowpulseoccupancyP1);
+    data += long(lowpulseoccupancyP2);
     data += "\"},{";
     data += "\"value_type\":\"ratioP2\",\"value\":\"";
     data += Float2String(ratio);
@@ -236,6 +236,7 @@ void sendData(const String& data) {
   Serial.println(data);
   
   // send request to the server
+              // "PIN: ": + "-" + "\r\n" +
   client.print(String("POST ") + url + " HTTP/1.1\r\n" +
                "Host: " + host + "\r\n" +
                "Content-Type: application/json\r\n" +
@@ -262,10 +263,12 @@ void sendData(const String& data) {
 String Float2String(float value)
 {
   // Convert a float to String with two decimals.
+  char temp[15];
   String s;
-  s = String(int(value));
-  s += '.';
-  s += int((value - int(value)) * 100);
 
+  dtostrf(value,13, 2, temp);
+  s = String(temp);
+  s.trim();
   return s;
 }
+
