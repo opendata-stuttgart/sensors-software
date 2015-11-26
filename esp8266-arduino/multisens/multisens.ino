@@ -222,7 +222,7 @@ void loop() {
     // json for push to api / P1
     data = "{\"sensordatavalues\":[{";
     data += "\"value_type\":\"durP1\",\"value\":\"";
-    data += Float2String(lowpulseoccupancyP1);
+    data += long(lowpulseoccupancyP1);
     data += "\"},{";
     data += "\"value_type\":\"ratioP1\",\"value\":\"";
     data += Float2String(ratio);
@@ -244,7 +244,7 @@ void loop() {
 
     // json for push to api / P2
     data += "\"value_type\":\"durP2\",\"value\":\"";
-    data += Float2String(lowpulseoccupancyP1);
+    data += long(lowpulseoccupancyP2);
     data += "\"},{";
     data += "\"value_type\":\"ratioP2\",\"value\":\"";
     data += Float2String(ratio);

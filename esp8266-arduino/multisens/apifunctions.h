@@ -133,11 +133,12 @@ digitalWrite(PIN_LED_STATUS, HIGH);
 String Float2String(float value)
 {
   // Convert a float to String with two decimals.
+  char temp[15];
   String s;
-  s = String(int(value));
-  s += '.';
-  s += int((value - int(value)) * 100);
-
+  
+  dtostrf(value,13, 2, temp);
+  s = String(temp);
+  s.trim();
   return s;
 }
 
