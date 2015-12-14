@@ -2,8 +2,8 @@ require("ggplot2")
 #max values for clipping
 Pclip<-list(P1=list(min=0,    max=10000),
             P2=list(min=0.62, max=1000))
-dateinterval<-list(min=strptime("2015-10-24", format="%Y-%m-%d"), 
-                   max=date())
+dateinterval<-list(min=as.POSIXct(strptime("2015-11-24", format="%Y-%m-%d")), 
+                   max=as.POSIXct(Sys.Date()))
 
 #' function to clip values above/below thresholds
 clipping<-function(x,min=NULL,max=NULL){
@@ -37,74 +37,82 @@ fpattern<-"sensor[0-9]+.csv"
 filelist<- dir(path = ".",pattern=fpattern,recursive=FALSE,full.names=FALSE, ignore.case = TRUE) ## files in current directory
 
 for (csvfilename in filelist){
-# get/process the data with scripts from repo feinstaub-monitoring-client-python to sensorXX.csv
-# csvfilename<-paste("sensor",sensorid,".csv",sep="")
-sensorid<-regmatches(csvfilename, regexpr("[0-9]+", csvfilename))
-pdffilename<-paste("plots_sensor",sensorid,".pdf",sep="")
-sendat<-read.csv(csvfilename)
+    # get/process the data with scripts from repo feinstaub-monitoring-client-python to sensorXX.csv
+    # csvfilename<-paste("sensor",sensorid,".csv",sep="")
+    sensorid<-regmatches(csvfilename, regexpr("[0-9]+", csvfilename))
+    pdffilename<-paste("plots_sensor",sensorid,".pdf",sep="")
+    sendat<-read.csv(csvfilename)
 
-# have a proper timestamp
-sendat$timestamplt<-strptime(sendat$timestamp,format="%Y-%m-%dT%H:%M:%OSZ")
-sendat$timestamp<-NULL
+    # have a proper timestamp POSIXct (never use POSIXlt)
+    sendat$timestampct<-as.POSIXct(strptime(sendat$timestamp,format="%Y-%m-%dT%H:%M:%OSZ"))
+    sendat$timestamp<-NULL
 
-#sendat<-sendat[sendat$timestamplt>strptime("2015-10-24", format="%Y-%m-%d"),]
+    #sendat<-sendat[sendat$timestampct>strptime("2015-10-24", format="%Y-%m-%d"),]
 
-# select data of latest 2 days measured values
-# nval=2*60*24*2
-# nval=min(nval,dim(sendat)[1])
-# seldat<-sendat[1:nval,]
+    # select data of latest 2 days measured values
+    # nval=2*60*24*2
+    # nval=min(nval,dim(sendat)[1])
+    # seldat<-sendat[1:nval,]
 
-pdf(pdffilename)
+    # filter date interval
+    seldat<-sendat[sendat$timestampct>dateinterval$min&
+                sendat$timestampct<dateinterval$max,]
+    #     seldat<-sendat
 
-if ("P1" %in% names(sendat)){
-    seldat<-sendat
-    # filter range 0
-    seldat$P1<-clipping(seldat$P1,Pclip$P1$min,Pclip$P1$max)
-    seldat$P2<-clipping(seldat$P2,Pclip$P2$min,Pclip$P2$max)
-    seldat$P1[seldat$P1<=Pclip$P1$min]<-NA
-    seldat$P2[seldat$P2<=Pclip$P2$min]<-NA
+    pdf(pdffilename)
 
-    # sendat<-sendat[,]
+    if ("P1" %in% names(sendat)){
+        
+        # filter range 0
+        seldat$P1<-clipping(seldat$P1,Pclip$P1$min,Pclip$P1$max)
+        seldat$P2<-clipping(seldat$P2,Pclip$P2$min,Pclip$P2$max)
+        seldat$P1[seldat$P1<=Pclip$P1$min]<-NA
+        seldat$P2[seldat$P2<=Pclip$P2$min]<-NA
+        
 
-    plotdat<-seldat
-    # plot(plotdat$timestamplt, log(plotdat$P2))
+        # sendat<-sendat[,]
 
-    p<-ggplot(plotdat,aes(timestamplt, P2))+geom_point()+geom_smooth()
-    print(p)
-    p<-ggplot(plotdat,aes(timestamplt, P2))+geom_point()+scale_y_log10()+geom_smooth()
-    print(p)
-    p<-ggplot(plotdat,aes(timestamplt, P1))+geom_point()+geom_smooth()
-    print(p)
-    p<-ggplot(plotdat,aes(timestamplt, P1))+geom_point()+scale_y_log10()+geom_smooth()
-    print(p)
+        plotdat<-seldat
+        # plot(plotdat$timestampct, log(plotdat$P2))
 
-    ntaps=10
-    sigma=4
-    gfiltc<-gfcoeffs(sigma,ntaps)
-
-    plotdat$P1smoothed<-filter(plotdat$P1,filter=gfiltc)
-    plotdat$P2smoothed<-filter(plotdat$P2,filter=gfiltc)
-    p<-ggplot(plotdat,aes(timestamplt, P1smoothed))+geom_line()+geom_smooth()
-    print(p)
-    p<-ggplot(plotdat,aes(timestamplt, P1smoothed))+geom_line()+scale_y_log10()+geom_smooth()
-    print(p)
-    p<-ggplot(plotdat,aes(timestamplt, P2smoothed))+geom_line()+geom_smooth()
-    print(p)
-    p<-ggplot(plotdat,aes(timestamplt, P2smoothed))+geom_line()+scale_y_log10()+geom_smooth()
-    print(p)
-
-}
-
-if ("temperature" %in% names(sendat)){
-        seldat<-sendat[!is.na(sendat$temperature),]
-        if ("humidity" %in% names(sendat)){
-            seldat<-seldat[!is.na(seldat$humidity),]
-        }
-        p<-ggplot(seldat, aes(timestamplt, temperature))+geom_line()
-        if ("humidity" %in% names(sendat)){
-            p<-p+geom_line(aes(timestamplt, humidity),col=4)
-        }
+        p<-ggplot(plotdat,aes(timestampct, P2))+geom_point()+geom_smooth()
         print(p)
-}
-dev.off()
+        p<-ggplot(plotdat,aes(timestampct, P2))+geom_point()+scale_y_log10()+geom_smooth()
+        print(p)
+        p<-ggplot(plotdat,aes(timestampct, P1))+geom_point()+geom_smooth()
+        print(p)
+        p<-ggplot(plotdat,aes(timestampct, P1))+geom_point()+scale_y_log10()+geom_smooth()
+        print(p)
+
+        ntaps=10
+        sigma=4
+        gfiltc<-gfcoeffs(sigma,ntaps)
+
+        plotdat$P1smoothed<-filter(plotdat$P1,filter=gfiltc)
+        plotdat$P2smoothed<-filter(plotdat$P2,filter=gfiltc)
+        p<-ggplot(plotdat,aes(timestampct, P1smoothed))+geom_line()+geom_smooth()
+        print(p)
+        p<-ggplot(plotdat,aes(timestampct, P1smoothed))+geom_line()+scale_y_log10()+geom_smooth()
+        print(p)
+        p<-ggplot(plotdat,aes(timestampct, P2smoothed))+geom_line()+geom_smooth()
+        print(p)
+        p<-ggplot(plotdat,aes(timestampct, P2smoothed))+geom_line()+scale_y_log10()+geom_smooth()
+        print(p)
+
+    }
+
+
+    if ("temperature" %in% names(sendat)){
+            seldat<-seldat[!is.na(seldat$temperature),]
+            if ("humidity" %in% names(sendat)){
+                seldat<-seldat[!is.na(seldat$humidity),]
+            }
+            p<-ggplot(seldat, aes(timestampct, temperature))+geom_line()
+            print(p)
+            if ("humidity" %in% names(seldat)){
+                p<-ggplot(seldat, aes(timestampct, temperature))+geom_line(aes(timestampct, humidity),col=4)
+            }
+            print(p)
+    }
+    dev.off()
 }
