@@ -19,6 +19,9 @@
 /*                                                          */
 /************************************************************/
 
+// increment on change
+#define SOFTWARE_VERSION "MFA-2015-001"
+
 /**********************************************/
 /* DHT declaration 
 /**********************************************/
@@ -127,7 +130,10 @@ void loop() {
     Serial.println(concentration);
 
     // json for push to api / P1
-    data = "{\"sensordatavalues\":[{";
+    data = "{\"software_version\": \"";
+    data += SOFTWARE_VERSION;
+    data += "\",";
+    data += "\"sensordatavalues\":[{";
     data += "\"value_type\":\"durP1\",\"value\":\"";
     data += long(lowpulseoccupancyP1);
     data += "\"},{";
