@@ -76,6 +76,8 @@ void setup() {
   delay(10);
   connectWifi(); // Start ConnecWifi 
   Serial.print("\n"); 
+  Serial.println("ChipId: ");
+  Serial.println(ESP.getChipId());
 }
 
 /**********************************************/
@@ -232,7 +234,6 @@ void sendData(const String& data) {
   
   Serial.print("Requesting URL: ");
   Serial.println(url);
-  Serial.println(ESP.getChipId());
   Serial.println(data);
   
   // send request to the server
