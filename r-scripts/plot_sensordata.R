@@ -1,4 +1,10 @@
 require("ggplot2")
+usearchive=TRUE # csv data from archive
+sensorid=40
+usearchive=FALSE # timestamp needs fixing (in csv and conversion below)
+if(usearchive){require("RCurl");}
+
+
 #max values for clipping
 Pclip<-list(P1=list(min=0,    max=10000),
             P2=list(min=0.62, max=1000))
@@ -36,16 +42,32 @@ fpattern<-"sensor[0-9]+.csv"
 # get filelist relative to working directory, pattern = glob2rx(fpattern)
 filelist<- dir(path = ".",pattern=fpattern,recursive=FALSE,full.names=FALSE, ignore.case = TRUE) ## files in current directory
 
+
+csvsep=","
+if(usearchive){
+    dates=seq.Date(from=as.Date(dateinterval$min),to=as.Date(dateinterval$max),by=1)
+        u<-paste('http://archive.madflex.de/',
+                   dates,
+                   '/',
+                   dates,'_ppd42ns_sensor_',
+                   sensorid,
+                   '.csv')
+    require("RCurl")
+    filelist=urllist
+    csvsep=";"
+}
+
 for (csvfilename in filelist){
     # get/process the data with scripts from repo feinstaub-monitoring-client-python to sensorXX.csv
     # csvfilename<-paste("sensor",sensorid,".csv",sep="")
     sensorid<-regmatches(csvfilename, regexpr("[0-9]+", csvfilename))
     pdffilename<-paste("plots_sensor",sensorid,".pdf",sep="")
-    sendat<-read.csv(csvfilename)
+    sendat<-read.csv(csvfilename,sep=csvsep)
 
     # have a proper timestamp POSIXct (never use POSIXlt)
     sendat$timestampct<-as.POSIXct(strptime(sendat$timestamp,format="%Y-%m-%dT%H:%M:%OSZ"))
     sendat$timestamp<-NULL
+    if(usearchive)
 
     #sendat<-sendat[sendat$timestampct>strptime("2015-10-24", format="%Y-%m-%d"),]
 
