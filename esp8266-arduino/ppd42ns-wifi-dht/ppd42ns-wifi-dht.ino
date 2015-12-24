@@ -19,6 +19,9 @@
 /*                                                          */
 /************************************************************/
 
+// increment on change
+#define SOFTWARE_VERSION "MFA-2015-001"
+
 /**********************************************/
 /* DHT declaration 
 /**********************************************/
@@ -76,6 +79,8 @@ void setup() {
   delay(10);
   connectWifi(); // Start ConnecWifi 
   Serial.print("\n"); 
+  Serial.println("ChipId: ");
+  Serial.println(ESP.getChipId());
 }
 
 /**********************************************/
@@ -125,7 +130,10 @@ void loop() {
     Serial.println(concentration);
 
     // json for push to api / P1
-    data = "{\"sensordatavalues\":[{";
+    data = "{\"software_version\": \"";
+    data += SOFTWARE_VERSION;
+    data += "\",";
+    data += "\"sensordatavalues\":[{";
     data += "\"value_type\":\"durP1\",\"value\":\"";
     data += long(lowpulseoccupancyP1);
     data += "\"},{";
@@ -232,7 +240,6 @@ void sendData(const String& data) {
   
   Serial.print("Requesting URL: ");
   Serial.println(url);
-  Serial.println(ESP.getChipId());
   Serial.println(data);
   
   // send request to the server
