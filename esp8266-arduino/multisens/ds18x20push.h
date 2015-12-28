@@ -130,7 +130,12 @@ void DSpush(){
     Serial.println("#### Sending to Dusty: ");
     
     // json for push to api: h t
-    data = "{\"sensordatavalues\":[{";
+    data = "{\"software_version\": \"";
+    data += SOFTWARE_VERSION_INITIALS;
+    data += "_";
+    data += SOFTWARE_VERSION_NUMBER;
+    data += "\",";
+    data += "\"sensordatavalues\":[{";
     data += "\"value_type\":\"temperature\",\"value\":\"";
     data += Float2String(celsius);
     data += "\"}]}";

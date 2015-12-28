@@ -3,6 +3,9 @@ name this file sensorconfig.h
 and change your config here
 GPIO PINSs <-> nodemcu PINs: see below
 */
+#include "softwareversion.h"
+#define SOFTWARE_VERSION_INITIALS XX
+
 //          0  1  2  3  4   5   6   7   8  9  10  11  12
 int D[13]={16, 5, 4, 0, 2, 14, 12, 13, 15, 3,  1,  9, 10};
 

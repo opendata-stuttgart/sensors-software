@@ -10,7 +10,6 @@
 /* configure your sensors,                    */
 /* PINs and WIFI in sensorconfig.h            */
 /**********************************************/
-
 #include "sensorconfig.h"
 
 #include <ESP8266WiFi.h>
@@ -220,7 +219,12 @@ void loop() {
     Serial.println(concentration);
 
     // json for push to api / P1
-    data = "{\"sensordatavalues\":[{";
+    data = "{\"software_version\": \"";
+    data += SOFTWARE_VERSION_INITIALS;
+    data += "_";
+    data += SOFTWARE_VERSION_NUMBER;
+    data += "\",";
+    data += "\"sensordatavalues\":[{";
     data += "\"value_type\":\"durP1\",\"value\":\"";
     data += long(lowpulseoccupancyP1);
     data += "\"},{";
