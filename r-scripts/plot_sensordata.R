@@ -4,11 +4,10 @@ sensorid=40
 usearchive=FALSE # timestamp needs fixing (in csv and conversion below)
 if(usearchive){require("RCurl");}
 
-
 #max values for clipping
 Pclip<-list(P1=list(min=0,    max=10000),
             P2=list(min=0.62, max=1000))
-dateinterval<-list(min=as.POSIXct(strptime("2015-11-24", format="%Y-%m-%d")), 
+dateinterval<-list(min=as.POSIXct(strptime("2015-12-30", format="%Y-%m-%d")), 
                    max=as.POSIXct(Sys.Date()))
 
 #' function to clip values above/below thresholds

@@ -81,6 +81,7 @@ void DSpush(){
   present = ds.reset();
   ds.select(dsaddr);    
   ds.write(0xBE);         // Read Scratchpad
+  Serial.print("---- DS ----");
   Serial.print("  Data = ");
   Serial.print(present, HEX);
   Serial.print(" ");
