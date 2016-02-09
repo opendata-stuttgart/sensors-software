@@ -326,7 +326,7 @@ String sensorPPD() {
   // Checking if it is time to sample
   if ((act_milli-starttime) > sampletime_ms) {
     ratio = lowpulseoccupancyP1/(sampletime_ms*10.0);                 // int percentage 0 to 100
-    concentration = (1.1*pow(ratio,3)-3.8*pow(ratio,2)+520*ratio+0.62)*1000/283.16846592; // spec sheet curve
+    concentration = (1.1*pow(ratio,3)-3.8*pow(ratio,2)+520*ratio+0.62); // spec sheet curve
     // Begin printing
     Serial.print("LPO P10     : ");
 	Serial.println(lowpulseoccupancyP1);
@@ -348,7 +348,7 @@ String sensorPPD() {
     s += "\"},";
 
     ratio = lowpulseoccupancyP2/(sampletime_ms*10.0);
-    concentration = (1.1*pow(ratio,3)-3.8*pow(ratio,2)+520*ratio+0.62)*1000/283.16846592;
+    concentration = (1.1*pow(ratio,3)-3.8*pow(ratio,2)+520*ratio+0.62);
     // Begin printing
     Serial.print("LPO PM25    : ");
 	Serial.println(lowpulseoccupancyP2);
