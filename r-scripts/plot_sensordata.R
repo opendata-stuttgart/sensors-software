@@ -2,7 +2,8 @@ require("ggplot2")
 usearchive=TRUE # csv data from archive
 sensorid=40
 usearchive=FALSE # timestamp needs fixing (in csv and conversion below)
-if(usearchive){require("RCurl");}
+usearchive=TRUE # timestamp needs fixing (in csv and conversion below)
+#if(usearchive){require("RCurl");}
 
 #max values for clipping
 Pclip<-list(P1=list(min=0,    max=10000),
@@ -44,17 +45,28 @@ filelist<- dir(path = ".",pattern=fpattern,recursive=FALSE,full.names=FALSE, ign
 
 csvsep=","
 if(usearchive){
-    dates=seq.Date(from=as.Date(dateinterval$min),to=as.Date(dateinterval$max),by=1)
-        u<-paste('http://archive.madflex.de/',
-                   dates,
-                   '/',
-                   dates,'_ppd42ns_sensor_',
-                   sensorid,
-                   '.csv')
-    require("RCurl")
-    filelist=urllist
-    csvsep=";"
+    fpattern<-"*.csv"
+    # get filelist relative to working directory, pattern = glob2rx(fpattern)
+    filelist<- dir(path = "archive.luftdaten.info",pattern=glob2rx(fpattern),recursive=TRUE,full.names=TRUE, ignore.case = TRUE) ## files in current directory
+    arcdat<-NULL
+    for (csvfilename in filelist){
+        rdat<-read.csv(csvfilename, sep=";", dec=".", header=TRUE)
+        arcdat<-rbindlist(arcdat,rdat)
+    }
+
+    #     dates=seq.Date(from=as.Date(dateinterval$min),to=as.Date(dateinterval$max),by=1)
+    #         u<-paste('http://archive.madflex.de/',
+    #                    dates,
+    #                    '/',
+    #                    dates,'_ppd42ns_sensor_',
+    #                    sensorid,
+    #                    '.csv')
+    #     require("RCurl")
+    #     filelist=urllist
+    #     csvsep=";"
 }
+
+stop("manual break")
 
 for (csvfilename in filelist){
     # get/process the data with scripts from repo feinstaub-monitoring-client-python to sensorXX.csv
@@ -66,7 +78,6 @@ for (csvfilename in filelist){
     # have a proper timestamp POSIXct (never use POSIXlt)
     sendat$timestampct<-as.POSIXct(strptime(sendat$timestamp,format="%Y-%m-%dT%H:%M:%OSZ"))
     sendat$timestamp<-NULL
-    if(usearchive)
 
     #sendat<-sendat[sendat$timestampct>strptime("2015-10-24", format="%Y-%m-%d"),]
 

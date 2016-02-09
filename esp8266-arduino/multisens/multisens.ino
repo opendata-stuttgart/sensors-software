@@ -93,6 +93,11 @@ digitalWrite(PIN_LED_STATUS, ledsstate);
 
   Serial.begin(9600); //Output to Serial at 9600 baud
   delay(10);
+  Serial.print("Software version: ");
+  Serial.print(SOFTWARE_VERSION_INITIALS);
+  Serial.print("_");
+  Serial.println(SOFTWARE_VERSION_NUMBER);
+
   Serial.println("ESP startup, chipid:");
   Serial.println(ESP.getChipId());
   Serial.print("Heap free:");

@@ -39,6 +39,7 @@ void PrintMacAddress(void) {
 }
 
 void connectWifi() {
+#ifdef WIRELESS_ACTIVE
   PrintMacAddress();
   WiFi.begin(ssid, password); // Start WiFI
   Serial.print("Connecting to ");
@@ -72,6 +73,19 @@ void connectWifi() {
   //  }
     Serial.println();
   WiFi.printDiag(Serial);
+#endif
+#ifndef WIRELESS_ACTIVE
+    #ifdef PIN_LED_STATUS
+    digitalWrite(PIN_LED_STATUS, LOW);
+    delay(100);
+    digitalWrite(PIN_LED_STATUS, HIGH);
+    delay(100);
+    digitalWrite(PIN_LED_STATUS, LOW);
+    delay(100);
+    digitalWrite(PIN_LED_STATUS, HIGH);
+    delay(100);
+    #endif
+#endif
 }
 /**********************************************/
 /* send data to rest api
@@ -84,6 +98,7 @@ void sendData(const String& data, int pin=-1) {
 digitalWrite(PIN_LED_STATUS, LOW);
 #endif
 
+#ifdef WIRELESS_ACTIVE
   Serial.print("connecting to ");
   Serial.println(host);
   
@@ -125,6 +140,7 @@ digitalWrite(PIN_LED_STATUS, LOW);
   
   Serial.println();
   Serial.println("closing connection");
+#endif
 #ifdef PIN_LED_STATUS
 digitalWrite(PIN_LED_STATUS, HIGH);
 #endif

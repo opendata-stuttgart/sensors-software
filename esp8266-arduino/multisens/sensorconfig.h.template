@@ -30,11 +30,15 @@ unsigned long sampletime_ms = 30000;
 
 
 /* WIFI credentials */
+#define WIRELESS_ACTIVE
+
+#ifdef WIRELESS_ACTIVE
 const char* ssid = "Freifunk";
 const char* password = "";
 const char* host = "api.dusti.xyz";
 //const char* host = "10.42.26.103";
 const int httpPort = 80;
+#endif
 
 #define PIN_LED_STATUS D[8] // the GPIO of the LED pin
 
