@@ -45,7 +45,7 @@
 /*                                                               */
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-003"
+#define SOFTWARE_VERSION "NRZ-2016-004"
 
 #include "FS.h"
 
@@ -60,7 +60,9 @@
 /* WiFi declarations                          */
 /**********************************************/
 #include <ESP8266WiFi.h>
-#include <WiFiClientSecure.h>
+#include <DNSServer.h>
+#include <ESP8266WebServer.h>
+#include <WiFiManager.h>
 #include <ArduinoJson.h>
 
 char wlanssid[64] = "Freifunk";
@@ -467,6 +469,17 @@ void autoUpdate() {
 /* WifiConfig                                 */
 /**********************************************/
 void wifiConfig() {
+
+	WiFiManager wifiManager;
+	WiFiManagerParameter custom_dht_read("dht_read", "DHT Sensor (0/1) ?", "0", 1);
+	wifiManager.addParameter(&custom_dht_read);
+	WiFiManagerParameter custom_ppd_read("ppd_read", "PPD42NS Sensor (0/1) ?", "1", 1);
+	wifiManager.addParameter(&custom_ppd_read);
+	WiFiManagerParameter custom_sds_read("sds_read", "SDS Sensor (0/1) ?", "0", 1);
+	wifiManager.addParameter(&custom_sds_read);
+
+    wifiManager.startConfigPortal("OnDemandAP");
+    Serial.println("connected...yeey :)");
 }
 
 /**********************************************/
@@ -476,8 +489,9 @@ void setup() {
   Serial.begin(9600); //Output to Serial at 9600 baud
   copyExtDef();
   readConfig();
+
   pinMode(PPDPINP1,INPUT_PULLUP); // Listen at the designated PIN
-  pinMode(PPDPINP2,INPUT_PULLUP); //Listen at the designated PIN
+  pinMode(PPDPINP2,INPUT_PULLUP); // Listen at the designated PIN
   dht.begin(); // Start DHT
   delay(10);
   connectWifi(); // Start ConnecWifi 
@@ -532,10 +546,10 @@ void loop() {
     data += "]}";
 
     //sending to api
-    Serial.println("#### Sending to madavi.de: ");
-    sendData(data,host_madavi,httpPort,url_madavi);
-    //Serial.println("#### Sending to dusti.xyz: ");
-    //sendData(data,host_dusti,httpPort,url_dusti);
+    //Serial.println("#### Sending to madavi.de: ");
+    //sendData(data,host_madavi,httpPort,url_madavi);
+    Serial.println("#### Sending to dusti.xyz: ");
+    sendData(data,host_dusti,httpPort,url_dusti);
     
     // Resetting for next sampling
     lowpulseoccupancyP1 = 0;
