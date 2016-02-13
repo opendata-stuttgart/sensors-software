@@ -9,28 +9,18 @@ Configure your sensors in sensorconfig.h (copy sensorconfig.h.template if not ye
 * WiFi credentials
 * server name, api to push to
 
-# TODOs
+You will need to set the additional boards manager URL in file->settings (Datei->Voreinstellungen):
+http://arduino.esp8266.com/stable/package_esp8266com_index.json
 
-# optimised Onewire code: 
-http://www.cupidcontrols.com/2014/10/moteino-arduino-and-1wire-optimize-your-read-for-speed/
-see also Asynchronous vs. Synchronous read/write on
-http://playground.arduino.cc/Learning/OneWire
+for the esp8266 board then select:
 
-* non-parasitic mode read? is it really
-ds.write(0x44, 0);        // start conversion, with parasite power off at the end
-From the header file OneWire.h:
-    
-    // Write a byte. If 'power' is one then the wire is held high at
-    // the end for parasitically powered devices.
-    
-http://openenergymonitor.org/emon/buildingblocks/DS18B20-temperature-sensing
-what lib is this?
-//  int numberOfDevices = ds.getDeviceCount();
-//  Serial.print("Found ");
-//  Serial.print(numberOfDevices, DEC);
-//  Serial.println(" devices.");
+* select in Werkzeuge->Platine->BoardsManager (tools->boards->BoardsManager): esp8266
+* select board "NodeMCU 0.9 (ESP-12 Module)"
 
-//  Serial.print("Parasite power is: "); 
-//  if (ds.isParasitePowerMode()) Serial.println("ON");
-//  else Serial.println("OFF");
+Libraries:
+
+* Sketch -> Include library -> Library manager 
+* Add "DHT sensor library"
+* "OneWire" should be there already
+* Adafruit MQTT Library (to be implemented), see https://github.com/adafruit/Adafruit_MQTT_Library/
 

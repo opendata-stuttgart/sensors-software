@@ -1,0 +1,12 @@
+
+Other repos with MQTT implementations:
+
+git clone https://github.com/Pfannex/AktSen
+git clone https://github.com/tuanpmt/espduino
+git clone https://github.com/adafruit/Adafruit_MQTT_Library/
+git clone https://github.com/tuanpmt/esp_mqtt
+
+http://pubsubclient.knolleary.net/
+Arduino Client for MQTT
+git clone https://github.com/knolleary/pubsubclient/
+

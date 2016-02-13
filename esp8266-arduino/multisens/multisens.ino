@@ -40,6 +40,15 @@ int value = 0;
 /* WiFi declarations: see sensorconfig.h      */
 /**********************************************/
 
+/**********************************************/
+/* MQTT declarations: see sensorconfig.h      */
+/**********************************************/
+#ifdef PUSHTO_MQTT
+#include "Adafruit_MQTT.h"
+#include "Adafruit_MQTT_Client.h"
+#include "mqttfunctions.h"
+
+#endif
 
 /**********************************************/
 /* Variable Definitions for PPD24NS           */

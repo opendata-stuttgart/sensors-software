@@ -1,4 +1,5 @@
 require("ggplot2")
+require("dplyr")
 usearchive=TRUE # csv data from archive
 sensorid=40
 usearchive=FALSE # timestamp needs fixing (in csv and conversion below)
@@ -10,6 +11,8 @@ Pclip<-list(P1=list(min=0,    max=10000),
             P2=list(min=0.62, max=1000))
 dateinterval<-list(min=as.POSIXct(strptime("2015-12-30", format="%Y-%m-%d")), 
                    max=as.POSIXct(Sys.Date()))
+plotdir="plots/"
+if(!dir.exists(plotdir)){dir.create(plotdir, showWarnings = TRUE, recursive = TRUE, mode = "0755")}
 
 #' function to clip values above/below thresholds
 clipping<-function(x,min=NULL,max=NULL){
@@ -38,21 +41,58 @@ gfcoeffs <- function(s, n) {
     # sum(gfiltc)=1
 }
 
-fpattern<-"sensor[0-9]+.csv"
-# get filelist relative to working directory, pattern = glob2rx(fpattern)
-filelist<- dir(path = ".",pattern=fpattern,recursive=FALSE,full.names=FALSE, ignore.case = TRUE) ## files in current directory
-
-
 csvsep=","
 if(usearchive){
+    arcdat_filename<-"arcdat.RData"
+    if (file.exists(arcdat_filename)){
+        load(arcdat_filename)
+        arcdat_filename_mtime<-file.mtime(arcdat_filename)
+    }else{
+        arcdat<-NULL
+        arcdat_filename_mtime<-as.POSIXct(as.Date("2000-01-01"))
+    }
     fpattern<-"*.csv"
     # get filelist relative to working directory, pattern = glob2rx(fpattern)
     filelist<- dir(path = "archive.luftdaten.info",pattern=glob2rx(fpattern),recursive=TRUE,full.names=TRUE, ignore.case = TRUE) ## files in current directory
-    arcdat<-NULL
-    for (csvfilename in filelist){
-        rdat<-read.csv(csvfilename, sep=";", dec=".", header=TRUE)
-        arcdat<-rbindlist(arcdat,rdat)
+    # only read files newer than arcdat_filename
+    for (csvfilename in filelist[file.mtime(filelist)>arcdat_filename_mtime]){
+            print(paste("reading ", csvfilename))
+            rdat<-read.csv(csvfilename, sep=";", dec=".", header=TRUE)
+            arcdat<-dplyr::bind_rows(arcdat,rdat)
     }
+    arcdat$timestampct<-as.POSIXct(strptime(arcdat$timestamp,format="%Y-%m-%dT%H:%M:%OS"))
+    arctbl<-table(arcdat$sensor_id,as.Date(arcdat$timestamp))#$yday+1000*(as.POSIXlt(arcdat$timestamp)$year+1990))
+    save(arcdat, arctbl ,file=arcdat_filename)
+    pdf(file.path(plotdir,"plots_sensordata_overview.pdf"),width=12,height=9)
+    ggplot(as.data.frame(arctbl), aes(Var2,Var1,size=Freq)) + geom_point()+
+        labs(x="year, doy", y="sensor id")+
+        theme(axis.text.x  = element_text(angle=90, vjust=0.5, size=6))
+    dev.off()
+    for (sid in unique(arcdat$sensor_id)){
+        print(sid)
+        sdat<-dplyr::filter(arcdat, sensor_id==sid)
+        sdat<-sdat[order(sdat$timestampct),] # sort by timestampct
+        sdat$P2diff1=sdat$P2-sdat$P1
+        sdat$durP2diff1=sdat$durP2-sdat$durP1
+        
+        print(dim(sdat))
+        # stats::filter the data 
+        # create a gaussian smoothing
+        sigma=5
+        ntaps=10
+        gc<-gfcoeffs(sigma,ntaps)
+        
+        pdffilename=file.path(plotdir,paste("plots_sensor_",sid,".pdf",sep=""))
+        pdf(pdffilename, width=25, height=10)
+        for (coln in c("P1", "durP1", "ratioP1", "P2", "durP2", "ratioP2", "P2diff1", "durP2diff1")){        
+            sdat$plotdat<-stats::filter(sdat[,coln],gfcoeffs(sigma,ntaps))
+            ggplot(sdat, aes(timestampct,plotdat))+geom_line()+
+            geom_smooth()+ labs(x="Time",y=coln)
+        }
+        dev.off()
+    }# sensor_id
+}# usearchive
+
 
     #     dates=seq.Date(from=as.Date(dateinterval$min),to=as.Date(dateinterval$max),by=1)
     #         u<-paste('http://archive.madflex.de/',
@@ -64,9 +104,14 @@ if(usearchive){
     #     require("RCurl")
     #     filelist=urllist
     #     csvsep=";"
+
+if(usearchive){
+    stop("manual break for archive plots")
 }
 
-stop("manual break")
+fpattern<-"sensor[0-9]+.csv"
+# get filelist relative to working directory, pattern = glob2rx(fpattern)
+filelist<- dir(path = ".",pattern=fpattern,recursive=FALSE,full.names=FALSE, ignore.case = TRUE) ## files in current directory
 
 for (csvfilename in filelist){
     # get/process the data with scripts from repo feinstaub-monitoring-client-python to sensorXX.csv

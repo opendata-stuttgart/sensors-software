@@ -64,7 +64,6 @@ void sensorDHT(){
     data += "\"value_type\":\"humidity\",\"value\":\"";
     data += Float2String(h);
     data += "\"}]}";
-    Serial.println("#### Sending to Dusty: ");
     sendData(data, DHTPIN);
   }
 }
