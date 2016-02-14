@@ -18,8 +18,8 @@ DHT dht(DHTPIN, DHTTYPE);
 /**********************************************/
 #include <ESP8266WiFi.h>
 
-const char* ssid = "shack";
-const char* password = "welcome2shack";
+const char* ssid = "Freifunk";
+const char* password = "";
 // const char* host = "192.168.1.12";
 const char* host = "api.dusti.xyz";
 // const int httpPort = 8000;
@@ -28,7 +28,7 @@ int value = 0;
 
 
 unsigned long starttime;
-unsigned long sampletime_ms = 10000;
+unsigned long sampletime_ms = 30000;
 
 
 /**********************************************/
