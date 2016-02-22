@@ -12,6 +12,7 @@
 OneWire ds(ONEWIRE_PIN);
 
 byte dsaddr[8];
+String sensortype;
 
 void DSinit(){
   byte i;
@@ -37,26 +38,28 @@ void DSinit(){
   }
   Serial.println();
  
+  sensortype="DSunknown";
   // the first ROM byte indicates which chip
   switch (dsaddr[0]) {
     case DS18S20_ID:
       Serial.println("  Chip = DS18S20");  // or old DS1820
       type_s = 1;
+      sensortype="DS18S20";
       break;
     case DS18B20_ID:
       Serial.println("  Chip = DS18B20");
       type_s = 0;
+      sensortype="DS18B20";
       break;
     case DS1822_ID:
       Serial.println("  Chip = DS1822");
       type_s = 0;
+      sensortype="DS1822";
       break;
     default:
       Serial.println("Device is not a DS18x20 family device.");
       return;
   ds.reset();
-
-
   }
 }
 
@@ -142,6 +145,12 @@ void DSpush(){
     data += "\"}]}";
     Serial.println("#### Sending to Dusty: ");
     sendData(data, ONEWIRE_PIN);
+#ifdef PUSHTO_MQTT
+    Serial.println("#### Sending to MQTT...");
+    mqtt_publish_subtopic(sensortype.c_str(),data);
+    Serial.println("...done");
+#endif
+    
 }
 
 float DSgetTemperature(){

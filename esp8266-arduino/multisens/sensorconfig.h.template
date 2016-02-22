@@ -29,15 +29,33 @@ int D[13]={16, 5, 4, 0, 2, 14, 12, 13, 15, 3,  1,  9, 10};
 unsigned long sampletime_ms = 30000;
 
 
-/* WIFI credentials */
+/* WIFI definitions */
 #define WIRELESS_ACTIVE
 
 #ifdef WIRELESS_ACTIVE
 const char* ssid = "Freifunk";
 const char* password = "";
+#define PUSHTO_DJANGOAPI
+#ifdef PUSHTO_DJANGOAPI
 const char* host = "api.dusti.xyz";
 //const char* host = "10.42.26.103";
 const int httpPort = 80;
+#endif
+
+/* MQTT settings */
+#define PUSHTO_MQTT
+#ifdef PUSHTO_MQTT
+const char mqttserver[] = "mqtt.opendataset.click";
+const int mqttport = 1883;
+const char mqtttopicbase[]="/dusti/";
+#define MQTT_INTOPIC "MessageToClient"
+//const char MQTT_SERVER[] PROGMEM    = "mqtt.opendataset.click";
+//const char MQTT_USERNAME[] PROGMEM  = "AIO_USERNAME";
+//const char MQTT_PASSWORD[] PROGMEM  = "AIO_KEY";
+// endif PUSHTO_MQTT
+#endif
+
+// endif WIRELESS_ACTIVE
 #endif
 
 #define PIN_LED_STATUS D[8] // the GPIO of the LED pin

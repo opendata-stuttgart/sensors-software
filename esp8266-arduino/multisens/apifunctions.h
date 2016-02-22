@@ -75,6 +75,7 @@ void connectWifi() {
   WiFi.printDiag(Serial);
 #endif
 }
+
 /**********************************************/
 /* send data to rest api
 /**********************************************/
@@ -83,6 +84,7 @@ void sendData(const String& data, int pin=-1) {
   ++value;
 
 #ifdef WIRELESS_ACTIVE
+#ifdef PUSHTO_DJANGOAPI
 Serial.print("#### Sending to ");
 Serial.print(String(host));
 Serial.print(":");
@@ -131,6 +133,8 @@ digitalWrite(PIN_LED_STATUS, LOW);
   
   Serial.println();
   Serial.println("closing connection");
+// endif PUSHTO_DJANGOAPI
+#endif
 #ifdef PIN_LED_STATUS
 digitalWrite(PIN_LED_STATUS, HIGH);
 #endif
@@ -148,7 +152,6 @@ digitalWrite(PIN_LED_STATUS, HIGH);
     delay(100);
     #endif
 #endif
-
 }
 
 String Float2String(float value)

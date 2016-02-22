@@ -1,3 +1,5 @@
+#include <PubSubClient.h>
+
  /*******************************************************/
 /* OK LAB Particulate Matter Sensor                    */
 /*      - nodemcu-LoLin board                          */
@@ -12,9 +14,19 @@
 /**********************************************/
 #include "sensorconfig.h"
 
+#ifdef WIRELESS_ACTIVE
 #include <ESP8266WiFi.h>
 int value = 0;
+#endif
 #include "apifunctions.h"
+
+/**********************************************/
+/* MQTT declarations: see sensorconfig.h      */
+/**********************************************/
+#ifdef PUSHTO_MQTT
+#include <PubSubClient.h>
+#include "mqttfunctions.h"
+#endif
 
 /**********************************************/
 /* DHT declaration 
@@ -39,16 +51,6 @@ int value = 0;
 /**********************************************/
 /* WiFi declarations: see sensorconfig.h      */
 /**********************************************/
-
-/**********************************************/
-/* MQTT declarations: see sensorconfig.h      */
-/**********************************************/
-#ifdef PUSHTO_MQTT
-#include "Adafruit_MQTT.h"
-#include "Adafruit_MQTT_Client.h"
-#include "mqttfunctions.h"
-
-#endif
 
 /**********************************************/
 /* Variable Definitions for PPD24NS           */
@@ -139,7 +141,6 @@ ledsstate=HIGH;
 digitalWrite(PIN_LED_STATUS, ledsstate);
 #endif
 #endif
-  starttime = millis(); // store the start time
   
 #ifdef DHT_ACTIVE
 #ifdef PIN_LED_STATUS
@@ -183,6 +184,12 @@ digitalWrite(PIN_LED_STATUS, ledsstate);
 ledsstate=HIGH;
 digitalWrite(PIN_LED_STATUS, ledsstate);
 #endif
+#ifdef PUSHTO_MQTT
+mqtt_setup();
+#endif
+
+  starttime = millis(); // store the start time
+
 }
 
 /**********************************************/
@@ -279,10 +286,11 @@ void loop() {
     // Resetting for next sampling
     lowpulseoccupancyP1 = 0;
     lowpulseoccupancyP2 = 0;
+
+    #ifdef PUSHTO_MQTT
+        mqtt_publish_subtopic("PPD42NS",data);
+    #endif
 #endif
-    starttime = millis(); // store the start time
-
-
     // FIXME: option to send PIN
 #ifdef DHT_ACTIVE
     sensorDHT();  // getting temperature and humidity (optional)
@@ -291,5 +299,8 @@ void loop() {
 #ifdef DS_ACTIVE
     DSpush();
 #endif
+  // reset start time at the very end
+  starttime = millis(); // store the start time
   }
+
 }

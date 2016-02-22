@@ -22,5 +22,5 @@ Libraries:
 * Sketch -> Include library -> Library manager 
 * Add "DHT sensor library"
 * "OneWire" should be there already
-* Adafruit MQTT Library (to be implemented), see https://github.com/adafruit/Adafruit_MQTT_Library/
+* MQTT PubSubClient https://github.com/knolleary/pubsubclient/
 

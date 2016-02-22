@@ -65,7 +65,11 @@ void sensorDHT(){
     data += Float2String(h);
     data += "\"}]}";
     sendData(data, DHTPIN);
-  }
+    //
+#ifdef PUSHTO_MQTT
+    mqtt_publish_subtopic("DHT22",data);
+#endif
+ }
 }
 
 #endif
