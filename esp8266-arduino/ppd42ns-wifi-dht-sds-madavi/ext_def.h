@@ -8,3 +8,5 @@
 #define DHT_READ 0
 #define PPD_READ 1
 #define SDS_READ 0
+
+#define DEBUG 1
