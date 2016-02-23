@@ -1,4 +1,5 @@
 MQTT: reconnecting does not work, what to re-init, if network changes?
+MQTT: howto timestamps (must be on server side or we need to use a "timestamp ticker" topic to subscribe to)
 
 DONE implement MQTT
 DONE merge software ID from esp8266-arduino/ppd42ns-wifi-dht/ppd42ns-wifi-dht.ino

@@ -84,10 +84,11 @@ if(usearchive){
         
         pdffilename=file.path(plotdir,paste("plots_sensor_",sid,".pdf",sep=""))
         pdf(pdffilename, width=25, height=10)
-        for (coln in c("P1", "durP1", "ratioP1", "P2", "durP2", "ratioP2", "P2diff1", "durP2diff1")){        
-            sdat$plotdat<-stats::filter(sdat[,coln],gfcoeffs(sigma,ntaps))
-            ggplot(sdat, aes(timestampct,plotdat))+geom_line()+
-            geom_smooth()+ labs(x="Time",y=coln)
+        for (coln in c("P1", "durP1", "ratioP1", "P2", "durP2", "ratioP2", "P2diff1", "durP2diff1")){
+            if(dim(sdat)[1]>ntaps){
+                sdat$plotdat<-stats::filter(sdat[,coln],gfcoeffs(sigma,ntaps))
+                ggplot(sdat, aes(timestampct,plotdat))+geom_line()+geom_smooth()+ labs(x="Time",y=coln)
+            }
         }
         dev.off()
     }# sensor_id
