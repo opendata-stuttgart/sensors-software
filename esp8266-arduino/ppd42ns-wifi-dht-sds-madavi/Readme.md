@@ -11,10 +11,19 @@ Konfigurierbar sind:
 - welche Sensoren sollen ausgelesen werden
 - an wen werden die Daten gesendet
 
-Nach 5 Minuten wird der Access-Point wieder 
+Nach 5 Minuten wird der Access-Point wieder deaktiviert.
 
   
   
 Verwendete Bibliotheken:  
-<https://github.com/adafruit/DHT-sensor-library>  
-<https://github.com/tzapu/WiFiManager>  
+  
+DHT <https://github.com/adafruit/DHT-sensor-library>  
+SoftwareSerial <https://github.com/plerup/espsoftwareserial>  
+WifiManager <https://github.com/tzapu/WiFiManager>  
+  
+In ESP8266 für Arduino enthalten:  
+FS  
+ESP8266WiFi  
+ESP8266WebServer  
+DNSServer  
+ArduinoJson  
