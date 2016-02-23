@@ -6,8 +6,7 @@
 //
 // const char mqttserver[] = "mqtt.opendataset.click"; const int mqttport = 1883; const char mqtttopicbase[]="/dusti/";
 // derived from example of PubSubClient lib: mqtt_esp8266.ino
-
-WiFiClient mqttwificlient;
+WiFiClient mqttwificlient; // a wificlient for our mqtt connection
 String mqttclientid="esp8266-"+String(ESP.getChipId());
 String logtopic=String(String(mqtttopicbase) + "/" + mqttclientid + "/" + "log");
 PubSubClient psclient;
@@ -15,19 +14,8 @@ String mqttmsg;
 // do everything without String?
 //char msg [MQTT_MAX_PACKET_SIZE] = "";
 
-void mqttcallback(char* topic, byte* payload, unsigned int length) {
-  Serial.print("mqttcallback: message arrived [");
-  Serial.print(topic);
-  Serial.print("] ");
-  for (int i = 0; i < length; i++) {
-    Serial.print((char)payload[i]);
-  }
-  //TODO: analyse message here (not yet used)
-}
-
-
 boolean pubsubclient_reconnect(){
-  // Loop until we're reconnected
+  // Loop to reconnect
   int ccnt=10;
   while ((!psclient.connected())&&(ccnt>0)) {
     Serial.print("Attempting MQTT connection...");
@@ -53,7 +41,7 @@ boolean pubsubclient_reconnect(){
 }
 
 void mqtt_publish_topic(const char* topic, const char* payload) {
-    Serial.println("Publish to MQTT server...");
+    //Serial.println("Publish to MQTT server...");
     boolean success=false;
     if (!psclient.connected()) {
         success=pubsubclient_reconnect();
@@ -63,17 +51,17 @@ void mqtt_publish_topic(const char* topic, const char* payload) {
         }
     }
    // Once connected, publish payload...
-   Serial.println("publish payload: ");
+   Serial.print("MQTT: publish topic ");
+   Serial.println(topic);
    Serial.println(payload);
    success=psclient.publish(topic, payload);
-   Serial.print("publish topic ");
    if (success){
        Serial.println(" OK");
    }else{
        Serial.println(" failed");
        mqttmsg=String("topic pub fail: ") +topic;
        psclient.publish(logtopic.c_str(), mqttmsg.c_str());
-   }    
+   }
 }
 // publish String
 void mqtt_publish_topic(const char* subtopic, String payload) {
@@ -87,6 +75,19 @@ void mqtt_publish_subtopic(const char* subtopic, const char* payload) {
 void mqtt_publish_subtopic(const char* subtopic, String payload) {
     mqtt_publish_subtopic(subtopic, payload.c_str());
 }
+
+void mqttcallback(char* topic, byte* payload, unsigned int length) {
+  Serial.print("mqttcallback: message arrived [");
+  Serial.print(topic);
+  Serial.print("] ");
+  for (int i = 0; i < length; i++) {
+    Serial.print((char)payload[i]);
+  }
+  // acknowledge reception
+  psclient.publish(logtopic.c_str(), "received incoming msg");
+  //TODO: analyse message here (not yet used)
+}
+
 
 // check the following, unused and unfinished yet
 void mqtt_subscribetosubtopic(const char* subtopic){

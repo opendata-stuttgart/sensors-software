@@ -40,6 +40,10 @@ void PrintMacAddress(void) {
 
 void connectWifi() {
 #ifdef WIRELESS_ACTIVE
+  if (WiFi.status() == WL_CONNECTED){
+    // nothing to do
+    return;
+  }
   PrintMacAddress();
   WiFi.begin(ssid, password); // Start WiFI
   Serial.print("Connecting to ");
@@ -96,8 +100,8 @@ digitalWrite(PIN_LED_STATUS, LOW);
   Serial.println(host);
   
   // Use WiFiClient class to create TCP connections
-  WiFiClient client;
-  if (!client.connect(host, httpPort)) {
+  WiFiClient wificlient;
+  if (!wificlient.connect(host, httpPort)) {
     Serial.println("connection failed");
     return;
   }
@@ -113,21 +117,21 @@ digitalWrite(PIN_LED_STATUS, LOW);
   String pinstr=String('-');
   if (pin > 0 ){pinstr=String(pin);}
   // send request to the server
-  client.print(String("POST ") + url + " HTTP/1.1\r\n" +
+  wificlient.print(String("POST ") + url + " HTTP/1.1\r\n" +
                "Host: " + host + "\r\n" +
                "Pin: " + pinstr + "\r\n" +
                "Content-Type: application/json\r\n" +
                "Sensor: esp8266-");
-  client.println(ESP.getChipId());
-  client.print("Content-Length: ");
-  client.println(data.length(), DEC);
-  client.println("Connection: close\r\n");
-  client.println(data);
+  wificlient.println(ESP.getChipId());
+  wificlient.print("Content-Length: ");
+  wificlient.println(data.length(), DEC);
+  wificlient.println("Connection: close\r\n");
+  wificlient.println(data);
   delay(1);
   
   // Read reply from server and print them
-  while(client.available()){
-    char c = client.read();
+  while(wificlient.available()){
+    char c = wificlient.read();
     Serial.print(c);
   }
   

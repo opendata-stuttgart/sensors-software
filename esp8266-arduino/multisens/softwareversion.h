@@ -7,8 +7,9 @@
 // git tag 0.2.4814a5d // set tag
 // git describe --tags // get tag
 // set version in softwareversion.h
-#define SOFTWARE_VERSION_NUMBER "0.5"
+#define SOFTWARE_VERSION_NUMBER "0.6"
 // changelog 
+// 0.6: MQTT loop (process incoming/ping)
 // 0.5: MQTT implemented, 
 //      counter restarts after sending to APIs
 //      Strings from values (avoid multiple Float2String)

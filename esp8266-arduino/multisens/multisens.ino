@@ -298,7 +298,13 @@ void loop() {
     // -1 -> '-' is default for ppd
     sendData(data,-1);
     
-    #ifdef PUSHTO_MQTT
+    #ifdef PUSHTO_MQTT//process incoming data/ping
+       Serial.print("PubSubClient::loop");
+       if (psclient.loop()){
+           Serial.println("OK");
+        }else{
+           Serial.println("failed");
+        }
         mqtt_publish_subtopic("json/PPD42NS",data);
         mqtt_publish_subtopic("PPD42NS/durP1",lowpulseoccupancyP1s);
         mqtt_publish_subtopic("PPD42NS/durP2",lowpulseoccupancyP2s);

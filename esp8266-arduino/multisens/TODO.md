@@ -1,6 +1,7 @@
+MQTT: reconnecting does not work, what to re-init, if network changes?
 
-merge software ID from esp8266-arduino/ppd42ns-wifi-dht/ppd42ns-wifi-dht.ino
-
+DONE implement MQTT
+DONE merge software ID from esp8266-arduino/ppd42ns-wifi-dht/ppd42ns-wifi-dht.ino
 DONE implement status LEDs
 DONE Move sensor specific code to header files, add conditionals to include/exclude via #define #ifdef 
 DONE dhtpush.h
