@@ -153,9 +153,9 @@ void DSpush(){
     sendData(data, ONEWIRE_PIN);
 #ifdef PUSHTO_MQTT
     dstopic=String("json/")+sensortype;
-    mqtt_publish_subtopic(dstopic,data);
+    mqtt_publish_subtopic(dstopic.c_str(),data);
     dstopic=String(sensortype)+"/temperature";
-    mqtt_publish_subtopic(dstopic,t_celsius_s);    
+    mqtt_publish_subtopic(dstopic.c_str(),t_celsius_s);    
 #endif
     
 }
