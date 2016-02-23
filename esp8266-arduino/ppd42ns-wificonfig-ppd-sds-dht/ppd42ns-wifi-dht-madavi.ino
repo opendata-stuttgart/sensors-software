@@ -380,10 +380,10 @@ String sensorSDS() {
       Serial.println("PM2.5: "+Float2String(float(sds_pm25_sum)/(sds_val_count*10.0)));
       Serial.println("------------------------------");
     }
-    s += "{\"value_type\":\"SDS_P1\",\"value\":\"";
+    s += "{\"value_type\":\"P1\",\"value\":\"";
     s += Float2String(float(sds_pm10_sum)/(sds_val_count*10.0));
     s += "\"},";
-    s += "{\"value_type\":\"SDS_P2\",\"value\":\"";
+    s += "{\"value_type\":\"P2\",\"value\":\"";
     s += Float2String(float(sds_pm25_sum)/(sds_val_count*10.0));
     s += "\"},";
     sds_pm10_sum = 0; sds_pm25_sum = 0; sds_val_count = 0;
@@ -611,16 +611,16 @@ void loop() {
   String result_SDS;
   String result_DHT;
   
-  if (PPD_READ) {
+  if (ppd_read) {
     result_PPD = sensorPPD();
   }
   
-  if (SDS_READ && (((act_milli-starttime_SDS) > sampletime_SDS_ms) || ((act_milli-starttime) > sampletime_ms))) {
+  if (sds_read && (((act_milli-starttime_SDS) > sampletime_SDS_ms) || ((act_milli-starttime) > sampletime_ms))) {
     result_SDS = sensorSDS();
     starttime_SDS = act_milli;
   }
   
-  if (DHT_READ && ((act_milli-starttime) > sampletime_ms)) {
+  if (dht_read && ((act_milli-starttime) > sampletime_ms)) {
     result_DHT = sensorDHT();  // getting temperature and humidity (optional)
   }
 
@@ -630,9 +630,9 @@ void loop() {
     data += SOFTWARE_VERSION;
     data += "\",";
     data += "\"sensordatavalues\":[";
-    if (PPD_READ) {data += result_PPD;}
-    if (SDS_READ) {data += result_SDS;}
-    if (DHT_READ) {data += result_DHT;}
+    if (ppd_read) {data += result_PPD;}
+    if (sds_read) {data += result_SDS;}
+    if (dht_read) {data += result_DHT;}
     if ((result_PPD.length() > 0) || (result_DHT.length() > 0) || (result_SDS.length() > 0)) {
       data.remove(data.length()-1);
     }
