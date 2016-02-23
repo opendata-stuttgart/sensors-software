@@ -1,7 +1,7 @@
 #define WLANSSID "Freifunk"
 #define WLANPWD ""
 
-#define SEND2DUSTI 1
+#define SEND2DUSTI 0
 #define SEND2MADAVI 1
 #define SEND2MQTT 0
 
