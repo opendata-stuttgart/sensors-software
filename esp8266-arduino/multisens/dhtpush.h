@@ -15,6 +15,10 @@
 
 DHT dht(DHTPIN, DHTTYPE);
 
+String dht_s_temperature;
+String dht_s_humidity;
+String dht_s_hic;
+
 /* functions for DHT sensors */
 
 // Connect pin 1 (on the left) of the sensor to +5V
@@ -31,20 +35,26 @@ void sensorDHT(){
   String data;
   float h = dht.readHumidity(); //Read Humidity
   float t = dht.readTemperature(); //Read Temperature
-
   // Check if valid number if non NaN (not a number) will be send.
   if (isnan(t) || isnan(h)) {
     Serial.println("DHT22 could not be read");
+#ifdef PUSHTO_MQTT
+    mqtt_publish_topic(logtopic.c_str(),"DHT22 error: could not be read");
+#endif
+    
   } else {
     float hic = dht.computeHeatIndex(t, h, false);
+    dht_s_temperature=Float2String(t);
+    dht_s_humidity=Float2String(h);
+    dht_s_hic=Float2String(hic);
     Serial.print("Humidity    : ");
-    Serial.print(h);
+    Serial.print(dht_s_humidity);
     Serial.print(" %\n");
     Serial.print("Temperature : ");
-    Serial.print(t);
+    Serial.print(dht_s_temperature);
     Serial.println(" C");
     Serial.print("Heat index : ");
-    Serial.print(hic);
+    Serial.print(dht_s_hic);
     Serial.println(" C");
    
     if ((t>84.99) & (t<85.01)){
@@ -59,15 +69,17 @@ void sensorDHT(){
     data += "\",";
     data += "\"sensordatavalues\":[{";
     data += "\"value_type\":\"temperature\",\"value\":\"";
-    data += Float2String(t);
+    data += dht_s_temperature;
     data += "\"},{";
     data += "\"value_type\":\"humidity\",\"value\":\"";
-    data += Float2String(h);
+    data += dht_s_humidity;
     data += "\"}]}";
     sendData(data, DHTPIN);
     //
 #ifdef PUSHTO_MQTT
-    mqtt_publish_subtopic("DHT22",data);
+    mqtt_publish_subtopic("json/DHT22",data);
+    mqtt_publish_subtopic("DHT22/temperature",dht_s_temperature);
+    mqtt_publish_subtopic("DHT22/humidity",dht_s_humidity);
 #endif
  }
 }

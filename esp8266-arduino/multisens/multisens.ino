@@ -1,5 +1,3 @@
-#include <PubSubClient.h>
-
  /*******************************************************/
 /* OK LAB Particulate Matter Sensor                    */
 /*      - nodemcu-LoLin board                          */
@@ -17,6 +15,7 @@
 #ifdef WIRELESS_ACTIVE
 #include <ESP8266WiFi.h>
 int value = 0;
+String software_version_s=String(SOFTWARE_VERSION_INITIALS)+"_"+String(SOFTWARE_VERSION_NUMBER);
 #endif
 #include "apifunctions.h"
 
@@ -24,6 +23,10 @@ int value = 0;
 /* MQTT declarations: see sensorconfig.h      */
 /**********************************************/
 #ifdef PUSHTO_MQTT
+// in PubSubClient.h, MQTT_MAX_PACKET_SIZE restricts 
+//the maximum length of a message to 128, this is not enough here: redefine
+#define MQTT_MAX_PACKET_SIZE 4096
+#undef MAX_TRANSFER_SIZE
 #include <PubSubClient.h>
 #include "mqttfunctions.h"
 #endif
@@ -79,8 +82,18 @@ unsigned long trigOnP2;
 unsigned long lowpulseoccupancyP1 = 0;
 unsigned long lowpulseoccupancyP2 = 0;
 
-float ratio = 0;
-float concentration = 0;
+float ratio_p1 = 0;
+float concentration_p1 = 0;
+float ratio_p2 = 0;
+float concentration_p2 = 0;
+// String versions (convert only once)
+String ratio_p1s;
+String ratio_p2s;
+String concentration_p1s;
+String concentration_p2s;
+String lowpulseoccupancyP1s;
+String lowpulseoccupancyP2s;
+
 
 #ifdef PIN_LED_STATUS
 int ledsstate=LOW;
@@ -105,9 +118,7 @@ digitalWrite(PIN_LED_STATUS, ledsstate);
   Serial.begin(9600); //Output to Serial at 9600 baud
   delay(10);
   Serial.print("Software version: ");
-  Serial.print(SOFTWARE_VERSION_INITIALS);
-  Serial.print("_");
-  Serial.println(SOFTWARE_VERSION_NUMBER);
+  Serial.print(software_version_s);
 
   Serial.println("ESP startup, chipid:");
   Serial.println(ESP.getChipId());
@@ -228,54 +239,58 @@ void loop() {
   if ((millis()-starttime) > sampletime_ms)
   {
 #ifdef PPD_ACTIVE
-    ratio = lowpulseoccupancyP1/(sampletime_ms*10.0);                 // int percentage 0 to 100
-    concentration = 1.1*pow(ratio,3)-3.8*pow(ratio,2)+520*ratio+0.62; // spec sheet curve
+    ratio_p1 = lowpulseoccupancyP1/(sampletime_ms*10.0);                 // int percentage 0 to 100
+    concentration_p1 = 1.1*pow(ratio_p1,3)-3.8*pow(ratio_p1,2)+520*ratio_p1+0.62; // spec sheet curve
+    ratio_p1s=Float2String(ratio_p1);
+    concentration_p1s=Float2String(concentration_p1);
+    lowpulseoccupancyP1s=String(lowpulseoccupancyP1);
     // Begin printing
     Serial.print("LPO P10     : ");
     Serial.println(lowpulseoccupancyP1);
     Serial.print("Ratio PM10  : ");
-    Serial.print(ratio);
+    Serial.print(ratio_p1s);
     Serial.println(" %");
     Serial.print("PM10 Count  : ");
-    Serial.println(concentration);
+    Serial.println(concentration_p1s);
 
     // json for push to api / P1
     data = "{\"software_version\": \"";
-    data += SOFTWARE_VERSION_INITIALS;
-    data += "_";
-    data += SOFTWARE_VERSION_NUMBER;
+    data += software_version_s;
     data += "\",";
     data += "\"sensordatavalues\":[{";
     data += "\"value_type\":\"durP1\",\"value\":\"";
-    data += long(lowpulseoccupancyP1);
+    data += lowpulseoccupancyP1s;
     data += "\"},{";
     data += "\"value_type\":\"ratioP1\",\"value\":\"";
-    data += Float2String(ratio);
+    data += ratio_p1s;
     data += "\"},{";
     data += "\"value_type\":\"P1\",\"value\":\"";
-    data += Float2String(concentration);
+    data += concentration_p1s;
     data += "\"},{";
 
-    ratio = lowpulseoccupancyP2/(sampletime_ms*10.0);
-    concentration = 1.1*pow(ratio,3)-3.8*pow(ratio,2)+520*ratio+0.62;
+    ratio_p2 = lowpulseoccupancyP2/(sampletime_ms*10.0);
+    concentration_p2 = 1.1*pow(ratio_p2,3)-3.8*pow(ratio_p2,2)+520*ratio_p2+0.62;
+    ratio_p2s=Float2String(ratio_p2);
+    concentration_p2s=Float2String(concentration_p2);
+    lowpulseoccupancyP2s=String(lowpulseoccupancyP2);
     // Begin printing
     Serial.print("LPO PM25    : ");
-    Serial.println(lowpulseoccupancyP2);
+    Serial.println(lowpulseoccupancyP2s);
     Serial.print("Ratio PM25  : ");
-    Serial.print(ratio);
+    Serial.print(ratio_p2s);
     Serial.println(" %");
     Serial.print("PM25 Count  : ");
-    Serial.println(concentration);
+    Serial.println(concentration_p2s);
 
     // json for push to api / P2
     data += "\"value_type\":\"durP2\",\"value\":\"";
-    data += long(lowpulseoccupancyP2);
+    data += lowpulseoccupancyP2s;
     data += "\"},{";
     data += "\"value_type\":\"ratioP2\",\"value\":\"";
-    data += Float2String(ratio);
+    data += ratio_p2s;
     data += "\"},{";
     data += "\"value_type\":\"P2\",\"value\":\"";
-    data += Float2String(concentration);
+    data += concentration_p2s;
     data += "\"}]}";
 
     //sending to dustix api
@@ -283,13 +298,16 @@ void loop() {
     // -1 -> '-' is default for ppd
     sendData(data,-1);
     
-    // Resetting for next sampling
-    lowpulseoccupancyP1 = 0;
-    lowpulseoccupancyP2 = 0;
-
     #ifdef PUSHTO_MQTT
-        mqtt_publish_subtopic("PPD42NS",data);
+        mqtt_publish_subtopic("json/PPD42NS",data);
+        mqtt_publish_subtopic("PPD42NS/durP1",lowpulseoccupancyP1s);
+        mqtt_publish_subtopic("PPD42NS/durP2",lowpulseoccupancyP2s);
+        mqtt_publish_subtopic("PPD42NS/ratioP1",ratio_p1s);
+        mqtt_publish_subtopic("PPD42NS/ratioP2",ratio_p2s);
+        mqtt_publish_subtopic("PPD42NS/P1",concentration_p1s);
+        mqtt_publish_subtopic("PPD42NS/P2",concentration_p2s);
     #endif
+
 #endif
     // FIXME: option to send PIN
 #ifdef DHT_ACTIVE
@@ -299,6 +317,10 @@ void loop() {
 #ifdef DS_ACTIVE
     DSpush();
 #endif
+
+  // Resetting for next sampling
+  lowpulseoccupancyP1 = 0;
+  lowpulseoccupancyP2 = 0;
   // reset start time at the very end
   starttime = millis(); // store the start time
   }

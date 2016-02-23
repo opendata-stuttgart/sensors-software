@@ -13,6 +13,8 @@ OneWire ds(ONEWIRE_PIN);
 
 byte dsaddr[8];
 String sensortype;
+String dstopic;
+String t_celsius_s;
 
 void DSinit(){
   byte i;
@@ -100,6 +102,9 @@ void DSpush(){
   // check CRC, return if invalid
   if (OneWire::crc8(dat, 8) != dat[8]) {
       Serial.println("CRC is not valid, no measurement pushed!");
+#ifdef PUSHTO_MQTT
+    mqtt_publish_topic(logtopic.c_str(),"DS error: CRC invalid");
+#endif
       return;
   }
   
@@ -124,8 +129,9 @@ void DSpush(){
   }
   celsius = (float)raw / 16.0;
   fahrenheit = celsius * 1.8 + 32.0;
+  t_celsius_s=Float2String(celsius);
   Serial.print("  Temperature = ");
-  Serial.print(celsius);
+  Serial.print(t_celsius_s);
   Serial.print(" Celsius, ");
   Serial.print(fahrenheit);
   Serial.println(" Fahrenheit");
@@ -141,14 +147,15 @@ void DSpush(){
     data += "\",";
     data += "\"sensordatavalues\":[{";
     data += "\"value_type\":\"temperature\",\"value\":\"";
-    data += Float2String(celsius);
+    data += t_celsius_s;
     data += "\"}]}";
     Serial.println("#### Sending to Dusty: ");
     sendData(data, ONEWIRE_PIN);
 #ifdef PUSHTO_MQTT
-    Serial.println("#### Sending to MQTT...");
-    mqtt_publish_subtopic(sensortype.c_str(),data);
-    Serial.println("...done");
+    dstopic=String("json/")+sensortype;
+    mqtt_publish_subtopic(dstopic,data);
+    dstopic=String(sensortype)+"/temperature";
+    mqtt_publish_subtopic(dstopic,t_celsius_s);    
 #endif
     
 }
