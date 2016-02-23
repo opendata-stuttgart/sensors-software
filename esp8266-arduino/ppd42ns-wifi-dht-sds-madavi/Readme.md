@@ -4,9 +4,17 @@ Grundsätzliche Konfiguration der Parameter über die Datei ext_dev.h .
 
 WLAN Konfiguration:
 
-Wenn das vorgegebene WLAN nach 10 Sekunden nicht erreichbar ist, wird ein Access-Point eingerichtet, der über "Feinstaubsensor-<Sensor-ID>" erreichbar ist. Nach dem Verbinden zu diesem Accesspoint werden alle Anfragen auf die Konfigurationsseite umgeleitet.
+Wenn das vorgegebene WLAN nach 10 Sekunden nicht erreichbar ist, wird ein Access-Point eingerichtet, der über "Feinstaubsensor-\[Sensor-ID\]" erreichbar ist. Nach dem Verbinden zu diesem Accesspoint werden alle Anfragen auf die Konfigurationsseite umgeleitet.
 
 Konfigurierbar sind:
 - WLAN-Name und Passwort
 - welche Sensoren sollen ausgelesen werden
 - an wen werden die Daten gesendet
+
+Nach 5 Minuten wird der Access-Point wieder 
+
+
+
+Verwendete Bibliotheken:
+<https://github.com/adafruit/DHT-sensor-library>
+<https://github.com/tzapu/WiFiManager>
