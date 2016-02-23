@@ -13,8 +13,8 @@ Konfigurierbar sind:
 
 Nach 5 Minuten wird der Access-Point wieder 
 
-
-
-Verwendete Bibliotheken:
-<https://github.com/adafruit/DHT-sensor-library>
-<https://github.com/tzapu/WiFiManager>
+  
+  
+Verwendete Bibliotheken:  
+<https://github.com/adafruit/DHT-sensor-library>  
+<https://github.com/tzapu/WiFiManager>  
