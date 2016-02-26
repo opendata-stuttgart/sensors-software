@@ -6,15 +6,14 @@
 /**********************************************/
 
 void PrintMacAddress(void) {
+#ifndef WIRELESS_ACTIVE
+    Serial.println("MAC: no WiFi -> no MAC")
+#endif
+#ifdef WIRELESS_ACTIVE
   uint8_t  MAC_STA[6];
   uint8_t  MAC_softAP[]          = {0,0,0,0,0,0};
   char temp[20];      // buffer for formatting the output (xx:xx:xx:xx:xx:xx\r\n) = 20 bytes
   uint8_t macaddr[6];   // array that will receive the MAC address from the chip
-  
-  //
-  // get the mac address from the API. This is described in the  documentation from
-  // SDK 0.9.1. The document is/was missing in SDK 0.9.2. If anyone needs it, let me know
-  //
   Serial.print("MAC[SoftAP]");
   uint8_t* MAC  = WiFi.softAPmacAddress(MAC_softAP);                   //get MAC address of softAP interface
     for (int i = 0; i < sizeof(MAC)+2; ++i){                                                          //this line needs cleaning up.
@@ -36,6 +35,7 @@ void PrintMacAddress(void) {
        MAC_STA[i] = MAC[i];                                            //copy back to global variable
   }
   Serial.println();
+#endif //WIRELESS_ACTIVE
 }
 
 void connectWifi() {
@@ -142,8 +142,7 @@ digitalWrite(PIN_LED_STATUS, LOW);
 #ifdef PIN_LED_STATUS
 digitalWrite(PIN_LED_STATUS, HIGH);
 #endif
-// ifdef WIRELESS_ACTIVE
-#endif
+#endif //WIRELESS_ACTIVE
 #ifndef WIRELESS_ACTIVE
     #ifdef PIN_LED_STATUS
     digitalWrite(PIN_LED_STATUS, LOW);
@@ -155,7 +154,7 @@ digitalWrite(PIN_LED_STATUS, HIGH);
     digitalWrite(PIN_LED_STATUS, HIGH);
     delay(100);
     #endif
-#endif
+#endif // WIRELESS_ACTIVE
 }
 
 String Float2String(float value)
@@ -170,4 +169,4 @@ String Float2String(float value)
   return s;
 }
 
-#endif
+#endif // APIFUNCTIONS_H

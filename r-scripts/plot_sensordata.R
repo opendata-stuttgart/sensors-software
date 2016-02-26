@@ -1,5 +1,10 @@
 require("ggplot2")
 require("dplyr")
+require("timeSeries")
+# require("forecast")
+# require("tsoutliers")
+# require("zoo")
+
 usearchive=TRUE # csv data from archive
 sensorid=40
 usearchive=FALSE # timestamp needs fixing (in csv and conversion below)
@@ -68,6 +73,8 @@ if(usearchive){
         labs(x="year, doy", y="sensor id")+
         theme(axis.text.x  = element_text(angle=90, vjust=0.5, size=6))
     dev.off()
+    
+# iterate sensors
     for (sid in unique(arcdat$sensor_id)){
         print(sid)
         sdat<-dplyr::filter(arcdat, sensor_id==sid)
@@ -76,22 +83,50 @@ if(usearchive){
         sdat$durP2diff1=sdat$durP2-sdat$durP1
         
         print(dim(sdat))
-        # stats::filter the data 
+        # stats::filter the data                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
         # create a gaussian smoothing
         sigma=5
         ntaps=10
         gc<-gfcoeffs(sigma,ntaps)
         
+        # TODO: identify/handle outliers
+        # look at forecast::tsoutliers tsoutliers::tso
+        
+        
+        #    fts wants chr dates (timestamps possible?) in row names?
+        #    rownames(sdat)<-as.character(sdat$timestampct)
+        
+        
         pdffilename=file.path(plotdir,paste("plots_sensor_",sid,".pdf",sep=""))
+        print (pdffilename)
         pdf(pdffilename, width=25, height=10)
-        for (coln in c("P1", "durP1", "ratioP1", "P2", "durP2", "ratioP2", "P2diff1", "durP2diff1")){
+        measvalnames=c("P1", "durP1", "ratioP1", "P2", "durP2", "ratioP2", "P2diff1", "durP2diff1")
+        # have a timeSeries object and plot it
+        tsdat<-timeSeries(sdat[,measvalnames], sdat$timestampct)
+        plot(tsdat)
+        for (coln in measvalnames){
             if(dim(sdat)[1]>ntaps){
-                sdat$plotdat<-stats::filter(sdat[,coln],gfcoeffs(sigma,ntaps))
-                ggplot(sdat, aes(timestampct,plotdat))+geom_line()+geom_smooth()+ labs(x="Time",y=coln)
+                # outlier filter first
+                sdat$plotdat<-tsclean(sdat[,coln])
+                sdat$plotdat<-stats::filter(sdat$plotdat, gfcoeffs(sigma,ntaps))
+                p<-ggplot(sdat, aes(timestampct,plotdat))+geom_line()+geom_smooth()+ labs(x="Time",y=coln)
+                print(p)
+                # TODO: gleitende 24-Stunden-Mittelwerte
+                # maybe possible via zoo forecast::ma its fts tseries timeSeries
+                # fts:moving.mean only Date as time?
+                # look for functions with timestamp based intervals (24h)
+                #     z=zoo(sdat,order.by=sdat$timestampct)
+                #     sdat.fts=as.fts(sdat[,c("timestampct","P1")])
+                #     idat=irts(sdat$timestampct, sdat$P1)
+                #     plot(idat)
+                #     measurement Dates
+                #     mdts<-as.timeSeries(unique(as.Date(sdat$timestampct)))
             }
         }
         dev.off()
     }# sensor_id
+    print(paste("total size of data:", dim(arcdat) ,collapse = " "))
+    stop("manual break: archive plots done")
 }# usearchive
 
 
@@ -106,9 +141,6 @@ if(usearchive){
     #     filelist=urllist
     #     csvsep=";"
 
-if(usearchive){
-    stop("manual break for archive plots")
-}
 
 fpattern<-"sensor[0-9]+.csv"
 # get filelist relative to working directory, pattern = glob2rx(fpattern)

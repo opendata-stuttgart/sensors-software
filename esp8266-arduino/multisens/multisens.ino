@@ -14,9 +14,9 @@
 
 #ifdef WIRELESS_ACTIVE
 #include <ESP8266WiFi.h>
+#endif
 int value = 0;
 String software_version_s=String(SOFTWARE_VERSION_INITIALS)+"_"+String(SOFTWARE_VERSION_NUMBER);
-#endif
 #include "apifunctions.h"
 
 /**********************************************/
