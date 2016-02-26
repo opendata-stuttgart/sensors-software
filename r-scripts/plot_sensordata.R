@@ -1,7 +1,7 @@
 require("ggplot2")
 require("dplyr")
 require("timeSeries")
-# require("forecast")
+require("forecast")
 # require("tsoutliers")
 # require("zoo")
 
@@ -89,12 +89,6 @@ if(usearchive){
         ntaps=10
         gc<-gfcoeffs(sigma,ntaps)
         
-        # TODO: identify/handle outliers
-        # look at forecast::tsoutliers tsoutliers::tso
-        
-        
-        #    fts wants chr dates (timestamps possible?) in row names?
-        #    rownames(sdat)<-as.character(sdat$timestampct)
         
         
         pdffilename=file.path(plotdir,paste("plots_sensor_",sid,".pdf",sep=""))
@@ -102,13 +96,17 @@ if(usearchive){
         pdf(pdffilename, width=25, height=10)
         measvalnames=c("P1", "durP1", "ratioP1", "P2", "durP2", "ratioP2", "P2diff1", "durP2diff1")
         # have a timeSeries object and plot it
+        print(paste("tsdat plot"))
         tsdat<-timeSeries(sdat[,measvalnames], sdat$timestampct)
         plot(tsdat)
         for (coln in measvalnames){
             if(dim(sdat)[1]>ntaps){
-                # outlier filter first
+                # TODO: identify/handle outliers
+                # look at forecast::tsoutliers tsoutliers::tso                
+                # outlier filter first forecast::tsclean
                 sdat$plotdat<-tsclean(sdat[,coln])
                 sdat$plotdat<-stats::filter(sdat$plotdat, gfcoeffs(sigma,ntaps))
+                print(paste(coln,"ggplot"))
                 p<-ggplot(sdat, aes(timestampct,plotdat))+geom_line()+geom_smooth()+ labs(x="Time",y=coln)
                 print(p)
                 # TODO: gleitende 24-Stunden-Mittelwerte
@@ -121,6 +119,8 @@ if(usearchive){
                 #     plot(idat)
                 #     measurement Dates
                 #     mdts<-as.timeSeries(unique(as.Date(sdat$timestampct)))
+                #    fts wants chr dates (timestamps possible?) in row names?
+                #    rownames(sdat)<-as.character(sdat$timestampct)
             }
         }
         dev.off()
