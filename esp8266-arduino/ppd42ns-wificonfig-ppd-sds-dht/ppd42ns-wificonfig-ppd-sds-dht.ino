@@ -1,70 +1,84 @@
-/*****************************************************************/
-/* OK LAB Particulate Matter Sensor                              */
-/*      - nodemcu-LoLin board                                    */
-/*      - Shinyei PPD42NS                                        */
-/*      http://www.sca-shinyei.com/pdf/PPD42NS.pdf               */
-/*                                                               */
-/* Wiring Instruction:                                           */
-/*      Pin 2 of dust sensor PM2.5 -> Digital 6 (PWM)            */
-/*      Pin 3 of dust sensor       -> +5V                        */
-/*      Pin 4 of dust sensor PM1   -> Digital 3 (PMW)            */ 
-/*                                                               */
-/*      - PPD42NS Pin 1 (grey or green)  => GND                  */
-/*      - PPD42NS Pin 2 (green or white)) => Pin D5 /GPIO14      */
-/*        counts particles PM25                                  */
-/*      - PPD42NS Pin 3 (black or yellow) => Vin                 */
-/*      - PPD42NS Pin 4 (white or black) => Pin D6 / GPIO12      */
-/*        counts particles PM10                                  */
-/*      - PPD42NS Pin 5 (red)   => unused                        */
-/*                                                               */
-/*****************************************************************/
-/*                                                               */
-/* Alternative                                                   */
-/*      - nodemcu-LoLin board                                    */
-/*      - Nova SDS0111                                           */
-/*  ﻿http://inovafitness.com/en/Laser-PM2-5-Sensor-SDS011-35.html */
-/*                                                               */
-/* Wiring Instruction:                                           */
-/*      - SDS011 Pin 1  (TX)   -> Pin D1 / GPIO5                 */
-/*      - SDS011 Pin 2  (RX)   -> Pin D2 / GPIO4                 */
-/*      - SDS011 Pin 3  (GND)  -> GND                            */
-/*      - SDS011 Pin 4  (2.5m) -> unused                         */
-/*      - SDS011 Pin 5  (5V)   -> Vin                            */
-/*      - SDS011 Pin 6  (1m)   -> unused                         */
-/*                                                               */
-/*****************************************************************/
-/* Extension: DHT22 (AM2303)                                     */
-/*  ﻿http://www.aosong.com/en/products/details.asp?id=117         */
-/*                                                               */
-/* DHT22 Wiring Instruction                                      */
-/* (left to right, front is perforated side):                    */
-/*      - DHT22 Pin 1 (VDD)     -> Pin 3V3 (3.3V)                */
-/*      - DHT22 Pin 2 (DATA)    -> Pin D4 (GPIO4)                */
-/*      - DHT22 Pin 3 (NULL)    -> unused                        */
-/*      - DHT22 Pin 4 (GND)     -> Pin GND                       */
-/*                                                               */
+/*****************************************************************
+/* OK LAB Particulate Matter Sensor                              *
+/*      - nodemcu-LoLin board                                    *
+/*      - Shinyei PPD42NS                                        *
+/*      http://www.sca-shinyei.com/pdf/PPD42NS.pdf               *
+/*                                                               *
+/* Wiring Instruction:                                           *
+/*      Pin 2 of dust sensor PM2.5 -> Digital 6 (PWM)            *
+/*      Pin 3 of dust sensor       -> +5V                        *
+/*      Pin 4 of dust sensor PM1   -> Digital 3 (PMW)            * 
+/*                                                               *
+/*      - PPD42NS Pin 1 (grey or green)  => GND                  *
+/*      - PPD42NS Pin 2 (green or white)) => Pin D5 /GPIO14      *
+/*        counts particles PM25                                  *
+/*      - PPD42NS Pin 3 (black or yellow) => Vin                 *
+/*      - PPD42NS Pin 4 (white or black) => Pin D6 / GPIO12      *
+/*        counts particles PM10                                  *
+/*      - PPD42NS Pin 5 (red)   => unused                        *
+/*                                                               *
+/*****************************************************************
+/*                                                               *
+/* Alternative                                                   *
+/*      - nodemcu-LoLin board                                    *
+/*      - Nova SDS0111                                           *
+/*  ﻿http://inovafitness.com/en/Laser-PM2-5-Sensor-SDS011-35.html *
+/*                                                               *
+/* Wiring Instruction:                                           *
+/*      - SDS011 Pin 1  (TX)   -> Pin D1 / GPIO5                 *
+/*      - SDS011 Pin 2  (RX)   -> Pin D2 / GPIO4                 *
+/*      - SDS011 Pin 3  (GND)  -> GND                            *
+/*      - SDS011 Pin 4  (2.5m) -> unused                         *
+/*      - SDS011 Pin 5  (5V)   -> Vin                            *
+/*      - SDS011 Pin 6  (1m)   -> unused                         *
+/*                                                               *
+/*****************************************************************
+/* Extension: DHT22 (AM2303)                                     *
+/*  ﻿http://www.aosong.com/en/products/details.asp?id=117         *
+/*                                                               *
+/* DHT22 Wiring Instruction                                      *
+/* (left to right, front is perforated side):                    *
+/*      - DHT22 Pin 1 (VDD)     -> Pin 3V3 (3.3V)                *
+/*      - DHT22 Pin 2 (DATA)    -> Pin D4 (GPIO4)                *
+/*      - DHT22 Pin 3 (NULL)    -> unused                        *
+/*      - DHT22 Pin 4 (GND)     -> Pin GND                       *
+/*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-005"
+#define SOFTWARE_VERSION "NRZ-2016-006"
 
-#include "FS.h"
+/*****************************************************************
+/* Global definitions (moved to ext_def.h)                       *
+/* #define WLANSSID "Freifunk"                                   *
+/* #define WLANPWD ""                                            *
+/*                                                               *
+/* #define DHT_READ 0                                            *
+/* #define PPD_READ 1                                            *
+/* #define SDS_READ 0                                            *
+/*                                                               *
+/* #define SEND2DUSTI 0                                          *
+/* #define SEND2MADAVI 1                                         *
+/* #define SEND2MQTT 0                                           *
+/* #define SEND2CSV 0                                            *
+/*                                                               *
+/* #define DEBUG 1                                               *
+/*****************************************************************/
 
-// #define WLANSSID "Freifunk"
-// #define WLANPWD ""
-
-// #define DHT_READ 0
-// #define PPD_READ 1
-// #define SDS_READ 0
-
-/**********************************************/
-/* WiFi declarations                          */
-/**********************************************/
+/*****************************************************************
+/* Includes                                                      *
+/*****************************************************************/
+#include <FS.h>                     // must be first
 #include <ESP8266WiFi.h>
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
 #include <WiFiManager.h>
 #include <ArduinoJson.h>
 
+#include "ext_def.h"
+
+/*****************************************************************
+/* Variables with defaults                                       *
+/*****************************************************************/
 char wlanssid[65] = "Freifunk";
 char wlanpwd[65] = "";
 
@@ -74,14 +88,16 @@ bool dht_read = 0;
 bool send2dusti = 1;
 bool send2madavi = 0;
 bool send2mqtt = 0;
-
-#include "ext_def.h"
+bool send2csv = 0;
+bool debug = 1;
 
 const char* host_madavi = "www.madavi.de";
 const char* url_madavi = "/sensor/data.php";
+const int httpPort_madavi = 80;
 
 const char* host_dusti = "api.dusti.xyz";
 const char* url_dusti = "/v1/push-sensor-data/";
+const int httpPort_dusti = 80;
 
 const char* host_mqtt = "mqtt.opensensors.io";
 const char* mqtt_user = "";
@@ -89,33 +105,27 @@ const char* mqtt_pw = "";
 const char* mqtt_client_id = "";
 const char* mqtt_topic = "";
 
-
-const int   httpPort = 80;
-
-int value = 0;
-
-/**********************************************/
-/* SDS011 declarations                        */
-/**********************************************/
-
+/*****************************************************************
+/* SDS011 declarations                                           *
+/*****************************************************************/
 #include <SoftwareSerial.h>
 #define SDSPINRX 5
 #define SDSPINTX 4
 
 SoftwareSerial serialSDS(SDSPINRX, SDSPINTX, 128);
 
-/**********************************************/
-/* DHT declaration                            */
-/**********************************************/
+/*****************************************************************
+/* DHT declaration                                               *
+/*****************************************************************/
 #include "DHT.h"
 #define DHTPIN 2
 #define DHTTYPE DHT22
 
 DHT dht(DHTPIN, DHTTYPE);
 
-/**********************************************/
-/* Variable Definitions for PPD24NS           */
-/**********************************************/
+/*****************************************************************
+/* Variable Definitions for PPD24NS                              *
+/*****************************************************************/
 #define PPDPINP1 12
 #define PPDPINP2 14
 
@@ -145,16 +155,20 @@ int sds_pm10_sum = 0;
 int sds_pm25_sum = 0;
 int sds_val_count = 0;
 
-/**********************************************/
-/* WifiConfig                                 */
-/**********************************************/
+bool first_csv_line = 1;
+
+String debug_before_write = "";
+/*****************************************************************
+/* WifiConfig                                                    *
+/*****************************************************************/
 void wifiConfig() {
   String boolvar;
   String apname;
   String custom_wlanssid;
   String custom_wlanpwd;
-  int reset_wifi;
   WiFiManager wifiManager;
+
+  if (! debug) wifiManager.setDebugOutput(false);
   boolvar = (dht_read) ? '1' : '0';
   WiFiManagerParameter custom_dht_read("dht_read", "DHT Sensor (0/1) ?", "", 10);
   wifiManager.addParameter(&custom_dht_read);
@@ -170,10 +184,13 @@ void wifiConfig() {
   boolvar = (send2madavi) ? '1' : '0';
   WiFiManagerParameter custom_send2madavi("send2madavi", "Senden an madavi.de (0/1) ?", "", 10);
   wifiManager.addParameter(&custom_send2madavi);
-  boolvar = '0';
-  WiFiManagerParameter custom_reset_wifi("reset_wifi", "Reset WiFi (0/1) ?", "", 10);
-  wifiManager.addParameter(&custom_reset_wifi);
-  apname  = "Feinstaubsensor ";
+  boolvar = (send2csv) ? '1' : '0';
+  WiFiManagerParameter custom_send2csv("send2csv", "Seriell als CSV (0/1) ?", "", 10);
+  wifiManager.addParameter(&custom_send2csv);
+  boolvar = (debug) ? '1' : '0';
+  WiFiManagerParameter custom_debug("debug", "Debug output (0/1) ?", "", 10);
+  wifiManager.addParameter(&custom_debug);
+  apname  = "Feinstaubsensor-";
   apname += ESP.getChipId();
   wifiManager.setTimeout(300);
   wifiManager.setBreakAfterConfig(true);
@@ -187,8 +204,9 @@ void wifiConfig() {
   if (strcmp(custom_sds_read.getValue(),"") != 0) sds_read = strtol(custom_sds_read.getValue(), NULL, 10);
   if (strcmp(custom_send2dusti.getValue(),"") != 0) send2dusti = strtol(custom_send2dusti.getValue(), NULL, 10);
   if (strcmp(custom_send2madavi.getValue(),"") != 0) send2madavi = strtol(custom_send2madavi.getValue(), NULL, 10);
-  reset_wifi = strtol(custom_reset_wifi.getValue(), NULL, 10);
-  if (DEBUG) {
+  if (strcmp(custom_send2csv.getValue(),"") != 0) send2csv = strtol(custom_send2csv.getValue(), NULL, 10);
+  if (strcmp(custom_debug.getValue(),"") != 0) debug = strtol(custom_debug.getValue(), NULL, 10);
+  if (debug) {
 	Serial.println("------ Result from Webconfig ------");
     Serial.print("WLANSSID: ");Serial.println(wlanssid);
     Serial.print("DHT_read: ");Serial.print(custom_dht_read.getValue());Serial.print(" - ");Serial.println(dht_read);
@@ -196,30 +214,29 @@ void wifiConfig() {
     Serial.print("SDS_read: ");Serial.print(custom_sds_read.getValue());Serial.print(" - ");Serial.println(sds_read);
     Serial.print("Dusti   : ");Serial.print(custom_send2dusti.getValue());Serial.print(" - ");Serial.println(send2dusti);
     Serial.print("Madavi  : ");Serial.print(custom_send2madavi.getValue());Serial.print(" - ");Serial.println(send2madavi);
+    Serial.print("CSV     : ");Serial.print(custom_send2csv.getValue());Serial.print(" - ");Serial.println(send2csv);
+    Serial.print("Debug   : ");Serial.print(custom_debug.getValue());Serial.print(" - ");Serial.println(debug);
 	Serial.println("-----------------------------------");
-  }
-  if (reset_wifi) {
-    ESP.restart();
   }
 }
 
-/**********************************************/
-/* WiFi auto connecting script                */
-/**********************************************/
+/*****************************************************************
+/* WiFi auto connecting script                                   *
+/*****************************************************************/
 void connectWifi() {
   int retry_count = 0;
   Serial.println(WiFi.status());
   WiFi.begin(wlanssid, wlanpwd); // Start WiFI
   WiFi.mode(WIFI_STA);
   
-  if (DEBUG) {
+  if (debug) {
     Serial.print("Connecting to ");
     Serial.print(wlanssid);
   }
   while ((WiFi.status() != WL_CONNECTED) && (retry_count < 20))
   {
     delay(500);
-    if (DEBUG) Serial.print(".");
+    if (debug) Serial.print(".");
     retry_count++;
   }
   if (WiFi.status() != WL_CONNECTED) {
@@ -229,22 +246,22 @@ void connectWifi() {
       while ((WiFi.status() != WL_CONNECTED) && (retry_count < 20))
       {
         delay(500);
-        if (DEBUG) Serial.print(".");
+        if (debug) Serial.print(".");
         retry_count++;
       }
     }
   }
-  if (DEBUG) {
+  if (debug) {
     Serial.println("WiFi connected");
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
   }
 }
 
-/**********************************************/
-/* convert float to string with a             */
-/* precision of two decimal places            */
-/**********************************************/
+/*****************************************************************
+/* convert float to string with a                                *
+/* precision of two decimal places                               *
+/*****************************************************************/
 String Float2String(float value) {
   // Convert a float to String with two decimals.
   char temp[15];
@@ -256,12 +273,12 @@ String Float2String(float value) {
   return s;
 }
 
-/**********************************************/
-/* send data to rest api                      */
-/**********************************************/
+/*****************************************************************
+/* send data to rest api                                         *
+/*****************************************************************/
 void sendData(const String& data, const char* host, const int httpPort, const char* url) {
 
-  if (DEBUG) {
+  if (debug) {
     Serial.print("connecting to ");
     Serial.println(host);
   }
@@ -273,7 +290,7 @@ void sendData(const String& data, const char* host, const int httpPort, const ch
     return;
   }
   
-  if (DEBUG) {
+  if (debug) {
     Serial.print("Requesting URL: ");
     Serial.println(url);
     Serial.println(ESP.getChipId());
@@ -297,15 +314,54 @@ void sendData(const String& data, const char* host, const int httpPort, const ch
   // Read reply from server and print them
   while(client.available()){
     char c = client.read();
-    if (DEBUG) Serial.print(c);
+    if (debug) Serial.print(c);
   }
   
-  if (DEBUG) {
+  if (debug) {
     Serial.println();
     Serial.println("closing connection");
     Serial.println("------------------------------");    
     Serial.println();
     Serial.println();
+  }
+}
+
+/*****************************************************************
+/* send data as csv to serial out                                *
+/*****************************************************************/
+void send_csv(const String& data) {
+  char* s;
+  String tmp_str;
+  String headline;
+  String valueline;
+  int value_count = 0;
+  StaticJsonBuffer<500> jsonBuffer;
+  JsonObject& json2data = jsonBuffer.parseObject(data);
+  if (debug) {
+    Serial.println("CSV Output");
+    Serial.println(data);
+  }
+  if (json2data.success()) {
+    headline = "Timestamp_ms;";
+    valueline = String(act_milli)+";";
+    if (ppd_read) value_count += 6;
+    if (sds_read) value_count += 2;
+    if (dht_read) value_count += 2;
+    for (int i=0;i<value_count;i++) {
+      tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value_type"].asString());
+      headline += tmp_str+";";
+      tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value"].asString());
+      valueline += tmp_str+";";
+    }
+    if (first_csv_line) {
+      if (headline.length() > 0) headline.remove(headline.length()-1);
+      Serial.println(headline);
+      first_csv_line = 0;
+    }
+    if (valueline.length() > 0) valueline.remove(valueline.length()-1);
+    Serial.println(valueline);
+  } else {
+    Serial.println("Data read failed");
   }
 }
 
@@ -319,7 +375,7 @@ String sensorDHT() {
   if (isnan(t) || isnan(h)) {
     Serial.println("DHT22 couldn't be read");
   } else {
-    if (DEBUG) {
+    if (debug) {
       Serial.println("Humidity    : "+String(h)+"%");
       Serial.println("Temperature : "+String(t)+" C");
     }
@@ -330,7 +386,7 @@ String sensorDHT() {
     s += Float2String(h);
     s += "\"},";
   }
-  if (DEBUG) Serial.println("------------------------------");    
+  if (debug) Serial.println("------------------------------");    
   return s;
 }
 
@@ -349,21 +405,22 @@ String sensorSDS() {
   while (serialSDS.available() > 0) {
     buffer = serialSDS.read();
 //  Serial.println(String(len)+" - "+String(buffer,DEC)+" - "+String(buffer,HEX)+" - "+int(buffer)+" .");
+//  "aa" = 170, "ab" = 171, "c0" = 192
     value = int(buffer);
-    value_hex = String(value,HEX);
+//  value_hex = String(value,HEX);
     switch (len) {
-      case (0): if (! value_hex.equals("aa")) { len = -1; }; break;
-      case (1): if (! value_hex.equals("c0")) { len = -1; }; break;
+      case (0): if (value != 170) { len = -1; }; break;
+      case (1): if (value != 192) { len = -1; }; break;
       case (2): pm25_serial = value; checksum_is  = value; break;
-      case (3): pm25_serial += 256 * value; checksum_is += value; break;
+      case (3): pm25_serial += (value << 8); checksum_is += value; break;
       case (4): pm10_serial = value; checksum_is += value; break;
-      case (5): pm10_serial += 256 * value; checksum_is += value; break;
+      case (5): pm10_serial += (value << 8); checksum_is += value; break;
       case (6): checksum_is += value; break;
       case (7): checksum_is += value; break;
       case (8):
 //      Serial.println("Checksum is: "+String(checksum_is % 256)+" - should: "+String(value));
         if (value == (checksum_is % 256)) { checksum_ok = 1; } else { len = -1; }; break;
-      case (9): if (! value_hex.equals("ab")) { len = -1; }; break;
+      case (9): if (value != 171) { len = -1; }; break;
     }
     len++;
     if (len == 10 && checksum_ok == 1) {
@@ -375,7 +432,7 @@ String sensorSDS() {
     yield();
   }
   if ((act_milli-starttime) > sampletime_ms) {
-    if (DEBUG) {
+    if (debug) {
       Serial.println("PM10:  "+Float2String(float(sds_pm10_sum)/(sds_val_count*10.0)));
       Serial.println("PM2.5: "+Float2String(float(sds_pm25_sum)/(sds_val_count*10.0)));
       Serial.println("------------------------------");
@@ -425,10 +482,10 @@ String sensorPPD() {
 
   // Checking if it is time to sample
   if ((act_milli-starttime) > sampletime_ms) {
-    ratio = lowpulseoccupancyP1/(sampletime_ms*10.0);                 // int percentage 0 to 100
+    ratio = lowpulseoccupancyP1/(sampletime_ms*10.0);                   // int percentage 0 to 100
     concentration = (1.1*pow(ratio,3)-3.8*pow(ratio,2)+520*ratio+0.62); // spec sheet curve
     // Begin printing
-    if (DEBUG) {
+    if (debug) {
       Serial.print("LPO P10     : ");
       Serial.println(lowpulseoccupancyP1);
       Serial.print("Ratio PM10  : ");
@@ -452,7 +509,7 @@ String sensorPPD() {
     ratio = lowpulseoccupancyP2/(sampletime_ms*10.0);
     concentration = (1.1*pow(ratio,3)-3.8*pow(ratio,2)+520*ratio+0.62);
     // Begin printing
-    if (DEBUG) {
+    if (debug) {
       Serial.print("LPO PM25    : ");
       Serial.println(lowpulseoccupancyP2);
       Serial.print("Ratio PM25  : ");
@@ -473,14 +530,14 @@ String sensorPPD() {
     s += Float2String(concentration);
     s += "\"},";
 
-    if (DEBUG) Serial.println("------------------------------");    
+    if (debug) Serial.println("------------------------------");    
   }
   return s;
 }
 
-/**********************************************/
-/* copy config from ext_def                   */
-/**********************************************/
+/*****************************************************************
+/* copy config from ext_def                                      *
+/*****************************************************************/
 void copyExtDef() {
   if (WLANSSID != NULL) { strcpy(wlanssid,WLANSSID); }
   if (WLANPWD  != NULL) { strcpy(wlanpwd,WLANPWD); }
@@ -490,13 +547,15 @@ void copyExtDef() {
   if (SEND2DUSTI != send2dusti) { send2dusti = SEND2DUSTI; }
   if (SEND2MADAVI != send2madavi) { send2madavi = SEND2MADAVI; }
   if (SEND2MQTT != send2mqtt) { send2mqtt = SEND2MQTT; }
+  if (SEND2CSV != send2csv) { send2csv = SEND2CSV; }
+  if (DEBUG != debug) { debug = DEBUG; }
 }
 
-/**********************************************/
-/* write config to spiffs                     */
-/**********************************************/
+/*****************************************************************
+/* write config to spiffs                                        *
+/*****************************************************************/
 void writeConfig() {
-    Serial.println("saving config");
+    if (debug) Serial.println("saving config");
     DynamicJsonBuffer jsonBuffer;
     JsonObject& json = jsonBuffer.createObject();
     json["wlanssid"] = wlanssid;
@@ -507,32 +566,33 @@ void writeConfig() {
     json["send2dusti"] = send2dusti;
     json["send2madavi"] = send2madavi;
     json["send2mqtt"] = send2mqtt;
+    json["debug"] = debug;
 
     File configFile = SPIFFS.open("/config.json", "w");
     if (!configFile) {
       Serial.println("failed to open config file for writing");
     }
 
-    if (DEBUG) json.printTo(Serial);
+    if (debug) json.printTo(Serial);
     json.printTo(configFile);
     configFile.close();
     //end save
 }
 
-/**********************************************/
-/* read config from spiffs                    */
-/**********************************************/
+/*****************************************************************
+/* read config from spiffs                                       *
+/*****************************************************************/
 void readConfig() {
-  if (DEBUG) Serial.println("mounting FS...");
+  if (debug) Serial.println("mounting FS...");
 
   if (SPIFFS.begin()) {
-    if (DEBUG) Serial.println("mounted file system");
+    if (debug) Serial.println("mounted file system");
     if (SPIFFS.exists("/config.json")) {
       //file exists, reading and loading
-      if (DEBUG) Serial.println("reading config file");
+      if (debug) Serial.println("reading config file");
       File configFile = SPIFFS.open("/config.json", "r");
       if (configFile) {
-        if (DEBUG) Serial.println("opened config file");
+        if (debug) Serial.println("opened config file");
         size_t size = configFile.size();
         // Allocate a buffer to store contents of the file.
         std::unique_ptr<char[]> buf(new char[size]);
@@ -540,9 +600,9 @@ void readConfig() {
         configFile.readBytes(buf.get(), size);
         DynamicJsonBuffer jsonBuffer;
         JsonObject& json = jsonBuffer.parseObject(buf.get());
-        if (DEBUG) json.printTo(Serial);
+        if (debug) json.printTo(Serial);
         if (json.success()) {
-          Serial.println("\nparsed json");
+          if (debug) Serial.println("\nparsed json");
           if (json.containsKey("wlanssid")) strcpy(wlanssid, json["wlanssid"]);
           if (json.containsKey("wlanssid")) strcpy(wlanpwd, json["wlanpwd"]);
           if (json.containsKey("dht_read")) dht_read = json["dht_read"];
@@ -551,39 +611,40 @@ void readConfig() {
           if (json.containsKey("send2dusti")) send2dusti = json["send2dusti"];
           if (json.containsKey("send2madavi")) send2madavi = json["send2madavi"];
           if (json.containsKey("send2mqtt")) send2mqtt = json["send2mqtt"];
+          if (json.containsKey("debug")) debug = json["debug"];
         } else {
-          if (DEBUG) Serial.println("failed to load json config");
+          if (debug) Serial.println("failed to load json config");
         }
       }
     } else {
-          if (DEBUG) Serial.println("config file not found ...");
+          if (debug) Serial.println("config file not found ...");
     }
   } else {
     Serial.println("failed to mount FS");
   }
 }
 
-/**********************************************/
-/* AutoUpdate                                 */
-/**********************************************/
+/*****************************************************************
+/* AutoUpdate                                                    *
+/*****************************************************************/
 void autoUpdate() {
 }
 
-/**********************************************/
-/* The Setup                                  */
-/**********************************************/
+/*****************************************************************
+/* The Setup                                                     *
+/*****************************************************************/
 void setup() {
   WiFi.persistent(false);
-  Serial.begin(9600); //Output to Serial at 9600 baud
+  Serial.begin(9600);             // Output to Serial at 9600 baud
   copyExtDef();
   readConfig();
-  connectWifi(); // Start ConnecWifi
+  connectWifi();                  // Start ConnectWifi
   writeConfig();
   pinMode(PPDPINP1,INPUT_PULLUP); // Listen at the designated PIN
   pinMode(PPDPINP2,INPUT_PULLUP); // Listen at the designated PIN
-  dht.begin(); // Start DHT
+  dht.begin();                    // Start DHT
   delay(10);
-  if (DEBUG){
+  if (debug){
     Serial.print("\n"); 
     Serial.println("ChipId: ");
     Serial.println(ESP.getChipId());
@@ -594,13 +655,13 @@ void setup() {
     if (send2madavi) Serial.println("Sende an madavi.de...");
 	if (send2mqtt) Serial.println("Sende an MQTT broker...");
   }
-  starttime = millis(); // store the start time
+  starttime = millis();           // store the start time
   starttime_SDS = millis();
 }
 
-/**********************************************/
-/* And action                                 */
-/**********************************************/
+/*****************************************************************
+/* And action                                                    *
+/*****************************************************************/
 void loop() {
   String data = "";
 
@@ -625,7 +686,7 @@ void loop() {
   }
 
   if ((act_milli-starttime) > sampletime_ms) {
-    if (DEBUG) Serial.println("Creating data string:");
+    if (debug) Serial.println("Creating data string:");
     data = "{\"software_version\": \"";
     data += SOFTWARE_VERSION;
     data += "\",";
@@ -641,12 +702,16 @@ void loop() {
     //sending to api
     
     if (send2madavi) {
-      if (DEBUG) Serial.println("#### Sending to madavi.de: ");
-      sendData(data,host_madavi,httpPort,url_madavi);
+      if (debug) Serial.println("#### Sending to madavi.de: ");
+      sendData(data,host_madavi,httpPort_madavi,url_madavi);
     }
     if (send2dusti) {
-      if (DEBUG) Serial.println("#### Sending to dusti.xyz: ");
-      sendData(data,host_dusti,httpPort,url_dusti);
+      if (debug) Serial.println("#### Sending to dusti.xyz: ");
+      sendData(data,host_dusti,httpPort_dusti,url_dusti);
+    }
+    if (send2csv) {
+      if (debug) Serial.println("#### Sending as csv: ");
+      send_csv(data);
     }
     
     // Resetting for next sampling
