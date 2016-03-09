@@ -7,7 +7,7 @@
 
 void PrintMacAddress(void) {
 #ifndef WIRELESS_ACTIVE
-    Serial.println("MAC: no WiFi -> no MAC")
+    Serial.println("MAC: no WiFi -> no MAC");
 #endif
 #ifdef WIRELESS_ACTIVE
   uint8_t  MAC_STA[6];

@@ -2,7 +2,7 @@
 name this file sensorconfig.h
 and change your config here
 */
-#define SOFTWARE_VERSION_INITIALS XX
+#define SOFTWARE_VERSION_INITIALS "MULTISENS"
 // additionally set SOFTWARE_VERSION_NUMBER in softwareversion.h
 #include "softwareversion.h"
 
