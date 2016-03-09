@@ -16,7 +16,7 @@ Pclip<-list(P1=list(min=0,    max=10000),
             P2=list(min=0.62, max=1000))
 dateinterval<-list(min=as.POSIXct(strptime("2015-12-30", format="%Y-%m-%d")), 
                    max=as.POSIXct(Sys.Date()))
-plotdir="plots/"
+plotdir="output_plots/"
 if(!dir.exists(plotdir)){dir.create(plotdir, showWarnings = TRUE, recursive = TRUE, mode = "0755")}
 
 #' function to clip values above/below thresholds
@@ -77,7 +77,7 @@ if(usearchive){
 # iterate sensors
     for (sid in unique(arcdat$sensor_id)){
         print(sid)
-        sdat<-dplyr::filter(arcdat, sensor_id==sid)
+        sdat<-as.data.frame(dplyr::filter(arcdat, sensor_id==sid)) # result type is tbl_df, convert to df
         sdat<-sdat[order(sdat$timestampct),] # sort by timestampct
         sdat$P2diff1=sdat$P2-sdat$P1
         sdat$durP2diff1=sdat$durP2-sdat$durP1
@@ -90,26 +90,31 @@ if(usearchive){
         gc<-gfcoeffs(sigma,ntaps)
         
         
-        
         pdffilename=file.path(plotdir,paste("plots_sensor_",sid,".pdf",sep=""))
         print (pdffilename)
-        pdf(pdffilename, width=25, height=10)
+#         set width according to timediff
+        timespan<-as.double(max(sdat$timestampct)-min(sdat$timestampct))
+        print(paste("plotwidth", min(timespan/2,10)))
+        pdf(pdffilename, width=max(timespan/2,10), height=10)
         measvalnames=c("P1", "durP1", "ratioP1", "P2", "durP2", "ratioP2", "P2diff1", "durP2diff1")
         # have a timeSeries object and plot it
         print(paste("tsdat plot"))
         tsdat<-timeSeries(sdat[,measvalnames], sdat$timestampct)
         plot(tsdat)
+        
         for (coln in measvalnames){
-            if(dim(sdat)[1]>ntaps){
+            print (coln)
+            if(length(sdat[,coln])>ntaps){
                 # TODO: identify/handle outliers
                 # look at forecast::tsoutliers tsoutliers::tso                
                 # outlier filter first forecast::tsclean
-                sdat$plotdat<-tsclean(sdat[,coln])
-                sdat$plotdat<-stats::filter(sdat$plotdat, gfcoeffs(sigma,ntaps))
+                sdat$plotdat<-forecast::tsclean(sdat[,coln]) 
+                sdat$plotdat<-as.vector(stats::filter(sdat$plotdat, gfcoeffs(sigma,ntaps)))
+                
                 print(paste(coln,"ggplot"))
-                p<-ggplot(sdat, aes(timestampct,plotdat))+geom_line()+geom_smooth()+ labs(x="Time",y=coln)
+                p<-ggplot(sdat, aes(timestampct,plotdat))+geom_line()+geom_smooth(span=0.2)+ labs(x="Time",y=coln)
                 print(p)
-                # TODO: gleitende 24-Stunden-Mittelwerte
+                # TODO: gleitende 24-Stunden-Mittelwerte (24h means filtering)
                 # maybe possible via zoo forecast::ma its fts tseries timeSeries
                 # fts:moving.mean only Date as time?
                 # look for functions with timestamp based intervals (24h)
