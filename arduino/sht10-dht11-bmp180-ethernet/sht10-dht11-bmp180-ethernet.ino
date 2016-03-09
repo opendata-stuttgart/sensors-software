@@ -65,7 +65,7 @@ byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0x01 };
 byte gateway[] = { 192, 168, 1, 1};
 byte subnet[] = { 255, 255, 255, 0 };
 
-char server[] = "api.dusti.xyz";
+char server[] = "api.luftdaten.info";
 
 // initialize the library instance:
 IPAddress ip(192,168,1, 42);

@@ -20,7 +20,7 @@
 /************************************************************/
 
 // increment on change
-#define SOFTWARE_VERSION "MFA-2015-001"
+#define SOFTWARE_VERSION "MFA-2015-002"
 
 /**********************************************/
 /* DHT declaration 
@@ -37,8 +37,8 @@ DHT dht(DHTPIN, DHTTYPE);
 
 const char* ssid = "Freifunk";
 const char* password = "";
-// const char* host = "";
-const char* host = "api.dusti.xyz";
+// const char* host = "192.168.1.12";
+const char* host = "api.luftdaten.info";
 // const int httpPort = 8000;
 const int httpPort = 80;
 int value = 0;
@@ -167,7 +167,7 @@ void loop() {
     data += "\"}]}";
 
     //sending to dustix api
-    Serial.println("#### Sending to dusti.xyz: ");
+    Serial.println("#### Sending to luftdaten.info: ");
     sendData(data);
     
     // Resetting for next sampling
@@ -196,7 +196,7 @@ void sensorDHT(){
    Serial.print(t);
    Serial.println(" C");
    
-   //Serial.println("#### Sending to Dusty: ");
+   //Serial.println("#### Sending to luftdaten.info: ");
    //connect2API();
    //Serial.print("\n");
  }

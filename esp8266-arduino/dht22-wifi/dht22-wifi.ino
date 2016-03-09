@@ -3,7 +3,7 @@
 /************************************************************/
 
 // increment on change
-#define SOFTWARE_VERSION "MFA-2015-001-DHT22"
+#define SOFTWARE_VERSION "MFA-2015-002-DHT22"
 
 /**********************************************/
 /* DHT declaration 
@@ -21,7 +21,7 @@ DHT dht(DHTPIN, DHTTYPE);
 const char* ssid = "Freifunk";
 const char* password = "";
 // const char* host = "192.168.1.12";
-const char* host = "api.dusti.xyz";
+const char* host = "api.luftdaten.info";
 // const int httpPort = 8000;
 const int httpPort = 80;
 int value = 0;
