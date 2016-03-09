@@ -136,9 +136,7 @@ void DSpush(){
   Serial.print(fahrenheit);
   Serial.println(" Fahrenheit");
   // TODO: call API
-  
-    Serial.println("#### Sending to Dusty: ");
-    
+      
     // json for push to api: h t
     data = "{\"software_version\": \"";
     data += SOFTWARE_VERSION_INITIALS;
@@ -149,7 +147,6 @@ void DSpush(){
     data += "\"value_type\":\"temperature\",\"value\":\"";
     data += t_celsius_s;
     data += "\"}]}";
-    Serial.println("#### Sending to Dusty: ");
     sendData(data, ONEWIRE_PIN);
 #ifdef PUSHTO_MQTT
     dstopic=String("json/")+sensortype;

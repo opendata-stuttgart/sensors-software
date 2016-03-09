@@ -45,7 +45,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-006"
+#define SOFTWARE_VERSION "NRZ-2016-007"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -95,7 +95,7 @@ const char* host_madavi = "www.madavi.de";
 const char* url_madavi = "/sensor/data.php";
 const int httpPort_madavi = 80;
 
-const char* host_dusti = "api.dusti.xyz";
+const char* host_dusti = "api.luftdaten.info";
 const char* url_dusti = "/v1/push-sensor-data/";
 const int httpPort_dusti = 80;
 
@@ -179,7 +179,7 @@ void wifiConfig() {
   WiFiManagerParameter custom_sds_read("sds_read", "SDS Sensor (0/1) ?", "", 10);
   wifiManager.addParameter(&custom_sds_read);
   boolvar = (send2dusti) ? '1' : '0';
-  WiFiManagerParameter custom_send2dusti("send2dusti", "Senden an dusti.xyz (0/1) ?", "", 10);
+  WiFiManagerParameter custom_send2dusti("send2dusti", "Senden an luftdaten.info (0/1) ?", "", 10);
   wifiManager.addParameter(&custom_send2dusti);
   boolvar = (send2madavi) ? '1' : '0';
   WiFiManagerParameter custom_send2madavi("send2madavi", "Senden an madavi.de (0/1) ?", "", 10);
@@ -651,7 +651,7 @@ void setup() {
     if (ppd_read) Serial.println("Lese PPD...");
     if (sds_read) Serial.println("Lese SDS...");
     if (dht_read) Serial.println("Lese DHT...");
-    if (send2dusti) Serial.println("Sende an dusti.xyz...");
+    if (send2dusti) Serial.println("Sende an luftdaten.info...");
     if (send2madavi) Serial.println("Sende an madavi.de...");
 	if (send2mqtt) Serial.println("Sende an MQTT broker...");
   }
@@ -706,7 +706,7 @@ void loop() {
       sendData(data,host_madavi,httpPort_madavi,url_madavi);
     }
     if (send2dusti) {
-      if (debug) Serial.println("#### Sending to dusti.xyz: ");
+      if (debug) Serial.println("#### Sending to luftdaten.info: ");
       sendData(data,host_dusti,httpPort_dusti,url_dusti);
     }
     if (send2csv) {
