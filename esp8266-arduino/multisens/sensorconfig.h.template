@@ -39,8 +39,7 @@ const char* ssid = "Freifunk";
 const char* password = "";
 #define PUSHTO_DJANGOAPI
 #ifdef PUSHTO_DJANGOAPI
-const char* host = "api.dusti.xyz";
-//const char* host = "10.42.26.103";
+const char host[] = "api.luftdaten.info";
 const int httpPort = 80;
 #endif
 
