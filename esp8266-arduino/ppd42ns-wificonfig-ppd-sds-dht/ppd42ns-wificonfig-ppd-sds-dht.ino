@@ -45,7 +45,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-007"
+#define SOFTWARE_VERSION "NRZ-2016-008"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
