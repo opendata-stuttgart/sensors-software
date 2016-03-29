@@ -39,7 +39,7 @@
 /* DHT22 Wiring Instruction                                      *
 /* (left to right, front is perforated side):                    *
 /*      - DHT22 Pin 1 (VDD)     -> Pin 3V3 (3.3V)                *
-/*      - DHT22 Pin 2 (DATA)    -> Pin D4 (GPIO4)                *
+/*      - DHT22 Pin 2 (DATA)    -> Pin D4 (GPIO2)                *
 /*      - DHT22 Pin 3 (NULL)    -> unused                        *
 /*      - DHT22 Pin 4 (GND)     -> Pin GND                       *
 /*                                                               *
@@ -73,6 +73,9 @@
 #include <ESP8266WebServer.h>
 #include <WiFiManager.h>
 #include <ArduinoJson.h>
+#include <SoftwareSerial.h>
+
+#include "DHT.h"
 
 #include "ext_def.h"
 
@@ -82,9 +85,15 @@
 char wlanssid[65] = "Freifunk";
 char wlanpwd[65] = "";
 
-bool ppd_read = 1;
-bool sds_read = 0;
 bool dht_read = 0;
+bool dht_pin  = 2;
+int  dht_type = DHT22;
+bool ppd_read = 1;
+int  ppd_pin_pm1 = 12;
+int  ppd_pin_pm2 = 14;
+bool sds_read = 0;
+int  sds_pin_rx = 4;
+int  sds_pin_tx = 5;
 bool send2dusti = 1;
 bool send2madavi = 0;
 bool send2mqtt = 0;
@@ -108,26 +117,16 @@ const char* mqtt_topic = "";
 /*****************************************************************
 /* SDS011 declarations                                           *
 /*****************************************************************/
-#include <SoftwareSerial.h>
-#define SDSPINRX 5
-#define SDSPINTX 4
-
-SoftwareSerial serialSDS(SDSPINRX, SDSPINTX, 128);
+SoftwareSerial serialSDS(sds_pin_rx, sds_pin_tx, 128);
 
 /*****************************************************************
 /* DHT declaration                                               *
 /*****************************************************************/
-#include "DHT.h"
-#define DHTPIN 2
-#define DHTTYPE DHT22
-
-DHT dht(DHTPIN, DHTTYPE);
+DHT dht(dht_pin, dht_type);
 
 /*****************************************************************
 /* Variable Definitions for PPD24NS                              *
 /*****************************************************************/
-#define PPDPINP1 12
-#define PPDPINP2 14
 
 // P1 for PM10 & P2 for PM25
 boolean valP1 = HIGH;
@@ -158,6 +157,16 @@ int sds_val_count = 0;
 bool first_csv_line = 1;
 
 String debug_before_write = "";
+
+/*****************************************************************
+/* Debug output                                                  *
+/*****************************************************************/
+void debug_out(const String& text, int level) {
+	if (level <= debug) {
+		Serial.print(text);
+	}
+}
+
 /*****************************************************************
 /* WifiConfig                                                    *
 /*****************************************************************/
@@ -169,15 +178,6 @@ void wifiConfig() {
   WiFiManager wifiManager;
 
   if (! debug) wifiManager.setDebugOutput(false);
-  boolvar = (dht_read) ? '1' : '0';
-  WiFiManagerParameter custom_dht_read("dht_read", "DHT Sensor (0/1) ?", "", 10);
-  wifiManager.addParameter(&custom_dht_read);
-  boolvar = (ppd_read) ? '1' : '0';
-  WiFiManagerParameter custom_ppd_read("ppd_read", "PPD42NS Sensor (0/1) ?", "", 10);
-  wifiManager.addParameter(&custom_ppd_read);
-  boolvar = (sds_read) ? '1' : '0';
-  WiFiManagerParameter custom_sds_read("sds_read", "SDS Sensor (0/1) ?", "", 10);
-  wifiManager.addParameter(&custom_sds_read);
   boolvar = (send2dusti) ? '1' : '0';
   WiFiManagerParameter custom_send2dusti("send2dusti", "Senden an luftdaten.info (0/1) ?", "", 10);
   wifiManager.addParameter(&custom_send2dusti);
@@ -187,6 +187,27 @@ void wifiConfig() {
   boolvar = (send2csv) ? '1' : '0';
   WiFiManagerParameter custom_send2csv("send2csv", "Seriell als CSV (0/1) ?", "", 10);
   wifiManager.addParameter(&custom_send2csv);
+  boolvar = (dht_read) ? '1' : '0';
+  WiFiManagerParameter custom_dht_read("dht_read", "DHT Sensor (0/1) ?", "", 10);
+  wifiManager.addParameter(&custom_dht_read);
+  WiFiManagerParameter custom_dht_pin("dht_pin", "DHT PIN (GPIO) ?", "", 10);
+  wifiManager.addParameter(&custom_dht_pin);
+  WiFiManagerParameter custom_dht_type("dht_type", "DHT Type (11,21,22)?", "", 10);
+  wifiManager.addParameter(&custom_dht_type);
+  boolvar = (ppd_read) ? '1' : '0';
+  WiFiManagerParameter custom_ppd_read("ppd_read", "PPD42NS Sensor (0/1) ?", "", 10);
+  wifiManager.addParameter(&custom_ppd_read);
+  WiFiManagerParameter custom_ppd_pin_pm1("ppd_pin_pm1", "PPD42NS PIN PM1 (GPIO) ?", "", 10);
+  wifiManager.addParameter(&custom_ppd_pin_pm1);
+  WiFiManagerParameter custom_ppd_pin_pm2("ppd_pin_pm2", "PPD42NS PIN PM2 (GPIO) ?", "", 10);
+  wifiManager.addParameter(&custom_ppd_pin_pm2);
+  boolvar = (sds_read) ? '1' : '0';
+  WiFiManagerParameter custom_sds_read("sds_read", "SDS Sensor (0/1) ?", "", 10);
+  wifiManager.addParameter(&custom_sds_read);
+  WiFiManagerParameter custom_sds_pin_rx("sds_pin_rx", "SDS PIN RX (GPIO) ?", "", 10);
+  wifiManager.addParameter(&custom_sds_pin_rx);
+  WiFiManagerParameter custom_sds_pin_tx("sds_pin_tx", "SDS PIN TX (GPIO) ?", "", 10);
+  wifiManager.addParameter(&custom_sds_pin_tx);
   boolvar = (debug) ? '1' : '0';
   WiFiManagerParameter custom_debug("debug", "Debug output (0/1) ?", "", 10);
   wifiManager.addParameter(&custom_debug);
@@ -200,8 +221,14 @@ void wifiConfig() {
   strcpy(wlanssid,custom_wlanssid.c_str());
   strcpy(wlanpwd,custom_wlanpwd.c_str());
   if (strcmp(custom_dht_read.getValue(),"") != 0) dht_read = strtol(custom_dht_read.getValue(), NULL, 10);
+  if (strcmp(custom_dht_pin.getValue(),"")  != 0) dht_pin  = strtol(custom_dht_pin.getValue(), NULL, 10);
+  if (strcmp(custom_dht_type.getValue(),"") != 0) dht_type = strtol(custom_dht_type.getValue(), NULL, 10);
   if (strcmp(custom_ppd_read.getValue(),"") != 0) ppd_read = strtol(custom_ppd_read.getValue(), NULL, 10);
+  if (strcmp(custom_ppd_pin_pm1.getValue(),"") != 0) ppd_pin_pm1 = strtol(custom_ppd_pin_pm1.getValue(), NULL, 10);
+  if (strcmp(custom_ppd_pin_pm2.getValue(),"") != 0) ppd_pin_pm2 = strtol(custom_ppd_pin_pm2.getValue(), NULL, 10);
   if (strcmp(custom_sds_read.getValue(),"") != 0) sds_read = strtol(custom_sds_read.getValue(), NULL, 10);
+  if (strcmp(custom_sds_pin_rx.getValue(),"") != 0) sds_pin_rx = strtol(custom_sds_pin_rx.getValue(), NULL, 10);
+  if (strcmp(custom_sds_pin_tx.getValue(),"") != 0) sds_pin_tx = strtol(custom_sds_pin_tx.getValue(), NULL, 10);
   if (strcmp(custom_send2dusti.getValue(),"") != 0) send2dusti = strtol(custom_send2dusti.getValue(), NULL, 10);
   if (strcmp(custom_send2madavi.getValue(),"") != 0) send2madavi = strtol(custom_send2madavi.getValue(), NULL, 10);
   if (strcmp(custom_send2csv.getValue(),"") != 0) send2csv = strtol(custom_send2csv.getValue(), NULL, 10);
@@ -229,10 +256,14 @@ void connectWifi() {
   WiFi.begin(wlanssid, wlanpwd); // Start WiFI
   WiFi.mode(WIFI_STA);
   
-  if (debug) {
-    Serial.print("Connecting to ");
-    Serial.print(wlanssid);
-  }
+//  if (debug) {
+//    Serial.print("Connecting to ");
+//    Serial.print(wlanssid);
+//  }
+
+  debug_out("Connecting to ",DEBUG_INFO);
+  debug_out(wlanssid,DEBUG_INFO);
+
   while ((WiFi.status() != WL_CONNECTED) && (retry_count < 20))
   {
     delay(500);
@@ -455,8 +486,8 @@ String sensorPPD() {
   String s = "";
   
   // Read pins connected to ppd42ns
-  valP1 = digitalRead(PPDPINP1);
-  valP2 = digitalRead(PPDPINP2);
+  valP1 = digitalRead(PPD_PIN_PM1);
+  valP2 = digitalRead(PPD_PIN_PM2);
 
   if(valP1 == LOW && trigP1 == false){
     trigP1 = true;
@@ -542,12 +573,19 @@ void copyExtDef() {
   if (WLANSSID != NULL) { strcpy(wlanssid,WLANSSID); }
   if (WLANPWD  != NULL) { strcpy(wlanpwd,WLANPWD); }
   if (DHT_READ != dht_read) { dht_read = DHT_READ; }
+  if (DHT_PIN  != dht_pin ) { dht_pin  = DHT_PIN;  }
+  if (DHT_TYPE != dht_type) { dht_type = DHT_TYPE; }
   if (PPD_READ != ppd_read) { ppd_read = PPD_READ; }
+  if (PPD_PIN_PM1 != ppd_pin_pm1) { ppd_pin_pm1 = PPD_PIN_PM1; }
+  if (PPD_PIN_PM2 != ppd_pin_pm2) { ppd_pin_pm2 = PPD_PIN_PM2; }
   if (SDS_READ != sds_read) { sds_read = SDS_READ; }
+  if (SDS_PIN_RX != sds_pin_rx) { sds_pin_rx = SDS_PIN_RX; }
+  if (SDS_PIN_TX != sds_pin_tx) { sds_pin_tx = SDS_PIN_TX; }
   if (SEND2DUSTI != send2dusti) { send2dusti = SEND2DUSTI; }
   if (SEND2MADAVI != send2madavi) { send2madavi = SEND2MADAVI; }
   if (SEND2MQTT != send2mqtt) { send2mqtt = SEND2MQTT; }
   if (SEND2CSV != send2csv) { send2csv = SEND2CSV; }
+  
   if (DEBUG != debug) { debug = DEBUG; }
 }
 
@@ -561,8 +599,14 @@ void writeConfig() {
     json["wlanssid"] = wlanssid;
     json["wlanpwd"] = wlanpwd;
     json["dht_read"] = dht_read;
+    json["dht_pin"] = dht_pin;
+    json["dht_type"] = dht_type;
     json["ppd_read"] = ppd_read;
+    json["ppd_pin_pm1"] = ppd_pin_pm1;
+    json["ppd_pin_pm2"] = ppd_pin_pm2;
     json["sds_read"] = sds_read;
+    json["sds_pin_rx"] = sds_pin_rx;
+    json["sds_pin_tx"] = sds_pin_tx;
     json["send2dusti"] = send2dusti;
     json["send2madavi"] = send2madavi;
     json["send2mqtt"] = send2mqtt;
@@ -606,8 +650,14 @@ void readConfig() {
           if (json.containsKey("wlanssid")) strcpy(wlanssid, json["wlanssid"]);
           if (json.containsKey("wlanssid")) strcpy(wlanpwd, json["wlanpwd"]);
           if (json.containsKey("dht_read")) dht_read = json["dht_read"];
+          if (json.containsKey("dht_pin") ) dht_pin  = json["dht_pin"];
+          if (json.containsKey("dht_type")) dht_type = json["dht_type"];
           if (json.containsKey("ppd_read")) ppd_read = json["ppd_read"];
+          if (json.containsKey("ppd_pin_pm1")) ppd_pin_pm1 = json["ppd_pin_pm1"];
+          if (json.containsKey("ppd_pin_pm2")) ppd_pin_pm2 = json["ppd_pin_pm2"];
           if (json.containsKey("sds_read")) sds_read = json["sds_read"];
+          if (json.containsKey("sds_pin_rx")) sds_pin_rx = json["sds_pin_rx"];
+          if (json.containsKey("sds_pin_tx")) sds_pin_tx = json["sds_pin_tx"];
           if (json.containsKey("send2dusti")) send2dusti = json["send2dusti"];
           if (json.containsKey("send2madavi")) send2madavi = json["send2madavi"];
           if (json.containsKey("send2mqtt")) send2mqtt = json["send2mqtt"];
@@ -640,8 +690,8 @@ void setup() {
   readConfig();
   connectWifi();                  // Start ConnectWifi
   writeConfig();
-  pinMode(PPDPINP1,INPUT_PULLUP); // Listen at the designated PIN
-  pinMode(PPDPINP2,INPUT_PULLUP); // Listen at the designated PIN
+  pinMode(ppd_pin_pm1,INPUT_PULLUP); // Listen at the designated PIN
+  pinMode(ppd_pin_pm2,INPUT_PULLUP); // Listen at the designated PIN
   dht.begin();                    // Start DHT
   delay(10);
   if (debug){
