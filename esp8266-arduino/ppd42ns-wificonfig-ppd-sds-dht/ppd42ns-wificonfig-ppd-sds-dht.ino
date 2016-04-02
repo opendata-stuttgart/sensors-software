@@ -45,7 +45,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-010"
+#define SOFTWARE_VERSION "NRZ-2016-011"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -72,6 +72,7 @@
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
 #include <WiFiManager.h>
+#include <ESP8266httpUpdate.h>
 #include <ArduinoJson.h>
 #include <SoftwareSerial.h>
 #include <PubSubClient.h>
@@ -109,6 +110,10 @@ const char* mqtt_user = "";
 const char* mqtt_pwd = "";
 const char* mqtt_client_id = "";
 const char* mqtt_topic = "";
+
+const char* update_host = "www.madavi.de";
+const char* update_url = "/sensor/update/firmware.php";
+const int update_port = 80;
 
 WiFiClient mqtt_wifi;
 PubSubClient mqtt_client(mqtt_wifi);
@@ -148,6 +153,9 @@ unsigned long act_milli;
 
 unsigned long sampletime_ms = 30000;
 unsigned long sampletime_SDS_ms = 1000;
+
+unsigned long last_update_attempt;
+unsigned long pause_between_update_attempts = 86400000;
 
 int sds_pm10_sum = 0;
 int sds_pm25_sum = 0;
@@ -335,7 +343,7 @@ void send_csv(const String& data) {
 	String headline;
 	String valueline;
 	int value_count = 0;
-	StaticJsonBuffer<500> jsonBuffer;
+	StaticJsonBuffer<2000> jsonBuffer;
 	JsonObject& json2data = jsonBuffer.parseObject(data);
 	debug_out("CSV Output",DEBUG_MIN_INFO,1);
 	debug_out(data,DEBUG_MIN_INFO,1);
@@ -626,6 +634,20 @@ void readConfig() {
 /* AutoUpdate                                                    *
 /*****************************************************************/
 void autoUpdate() {
+	debug_out("Starting OTA update ...",DEBUG_MIN_INFO,1);
+	last_update_attempt = millis();
+	t_httpUpdate_return ret = ESPhttpUpdate.update(update_host, update_port, update_url, SOFTWARE_VERSION);
+	switch(ret) {
+		case HTTP_UPDATE_FAILED:
+				Serial.println("[update] Update failed.");
+				break;
+		case HTTP_UPDATE_NO_UPDATES:
+				Serial.println("[update] Update no Update.");
+				break;
+		case HTTP_UPDATE_OK:
+				Serial.println("[update] Update ok."); // may not called we reboot the ESP
+				break;
+	}
 }
 
 /*****************************************************************
@@ -638,6 +660,7 @@ void setup() {
 	readConfig();
 	connectWifi();                  // Start ConnectWifi
 	writeConfig();
+	autoUpdate();
 	pinMode(PPD_PIN_PM1,INPUT_PULLUP); // Listen at the designated PIN
 	pinMode(PPD_PIN_PM2,INPUT_PULLUP); // Listen at the designated PIN
 	dht.begin();                    // Start DHT
@@ -721,5 +744,10 @@ void loop() {
 		lowpulseoccupancyP2 = 0;
 		starttime = millis(); // store the start time
 	}
+	
+	if ((act_milli-last_update_attempt) > pause_between_update_attempts) {
+		autoUpdate();
+	}
+
 	yield();
 }
