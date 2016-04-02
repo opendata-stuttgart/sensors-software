@@ -78,6 +78,10 @@ if(usearchive){
     for (sid in unique(arcdat$sensor_id)){
         print(sid)
         sdat<-as.data.frame(dplyr::filter(arcdat, sensor_id==sid)) # result type is tbl_df, convert to df
+        # select dateinterval
+        sdat<-sendat[sdat$timestampct>dateinterval$min&
+                sdat$timestampct<dateinterval$max,]
+
         sdat<-sdat[order(sdat$timestampct),] # sort by timestampct
         sdat$P2diff1=sdat$P2-sdat$P1
         sdat$durP2diff1=sdat$durP2-sdat$durP1
