@@ -107,10 +107,6 @@ void setup() {
 
 #ifdef PIN_LED_STATUS
 pinMode(PIN_LED_STATUS, OUTPUT);
-digitalWrite(PIN_LED_STATUS, ledsstate);
-#endif
-
-#ifdef PIN_LED_STATUS
 ledsstate=HIGH;
 digitalWrite(PIN_LED_STATUS, ledsstate);
 #endif
@@ -150,6 +146,7 @@ digitalWrite(PIN_LED_STATUS, ledsstate);
 #ifdef PIN_LED_STATUS
 ledsstate=HIGH;
 digitalWrite(PIN_LED_STATUS, ledsstate);
+delay(50);
 #endif
 #endif
   
@@ -163,7 +160,7 @@ digitalWrite(PIN_LED_STATUS, ledsstate);
   Serial.println(DHTPIN);
   Serial.println("init DHT");
   dht.begin(); // Start DHT
-  delay(10);
+  delay(50);
 #ifdef PIN_LED_STATUS
 ledsstate=HIGH;
 digitalWrite(PIN_LED_STATUS, ledsstate);
@@ -182,7 +179,7 @@ digitalWrite(PIN_LED_STATUS, ledsstate);
   Serial.print("init DS");
   Serial.println();
   DSinit();
-  delay(10);
+  delay(50);
   // try to read a temperature
   float t;
   t=DSgetTemperature();
@@ -198,9 +195,11 @@ digitalWrite(PIN_LED_STATUS, ledsstate);
 #ifdef PUSHTO_MQTT
 mqtt_setup();
 #endif
-
+#ifdef PIN_LED_STATUS
+ledsstate=HIGH;
+digitalWrite(PIN_LED_STATUS, ledsstate);
+#endif
   starttime = millis(); // store the start time
-
 }
 
 /**********************************************/
@@ -208,6 +207,9 @@ mqtt_setup();
 /**********************************************/
 void loop() {
   String data;
+#ifndef PPD_ACTIVE
+    delay(10);
+#endif
   // Read pins connected to ppd42ns
 #ifdef PPD_ACTIVE
   valP1 = digitalRead(PPD42_P1_PIN);
@@ -238,7 +240,7 @@ void loop() {
   // Checking if it is time to sample
   if ((millis()-starttime) > sampletime_ms)
   {
-#ifdef PPD_ACTIVE
+    #ifdef PPD_ACTIVE
     ratio_p1 = lowpulseoccupancyP1/(sampletime_ms*10.0);                 // int percentage 0 to 100
     concentration_p1 = 1.1*pow(ratio_p1,3)-3.8*pow(ratio_p1,2)+520*ratio_p1+0.62; // spec sheet curve
     ratio_p1s=Float2String(ratio_p1);
@@ -298,7 +300,8 @@ void loop() {
     // -1 -> '-' is default for ppd
     sendData(data,-1);
     
-    #ifdef PUSHTO_MQTT//process incoming data/ping
+    #ifdef PUSHTO_MQTT
+       //process incoming data/ping
        Serial.print("PubSubClient::loop");
        if (psclient.loop()){
            Serial.println("OK");
@@ -312,23 +315,27 @@ void loop() {
         mqtt_publish_subtopic("PPD42NS/ratioP2",ratio_p2s);
         mqtt_publish_subtopic("PPD42NS/P1",concentration_p1s);
         mqtt_publish_subtopic("PPD42NS/P2",concentration_p2s);
+    #endif //PUSHTO_MQTT
+
+    #endif //PPD_ACTIVE
+        // FIXME: option to send PIN
+    #ifdef DHT_ACTIVE
+        sensorDHT();  // getting temperature and humidity (optional)
+        Serial.println("------------------------------");
+    #endif //DHT_ACTIVE
+    #ifdef DS_ACTIVE
+        DSpush();
+    #endif //DS_ACTIVE
+
+    // Resetting for next sampling
+    lowpulseoccupancyP1 = 0;
+    lowpulseoccupancyP2 = 0;
+    #ifdef PIN_LED_STATUS
+    ledsstate=HIGH;
+    digitalWrite(PIN_LED_STATUS, ledsstate);
     #endif
+    // reset start time at the very end
+    starttime = millis(); // store the start time
+    }
 
-#endif
-    // FIXME: option to send PIN
-#ifdef DHT_ACTIVE
-    sensorDHT();  // getting temperature and humidity (optional)
-    Serial.println("------------------------------");
-#endif
-#ifdef DS_ACTIVE
-    DSpush();
-#endif
-
-  // Resetting for next sampling
-  lowpulseoccupancyP1 = 0;
-  lowpulseoccupancyP2 = 0;
-  // reset start time at the very end
-  starttime = millis(); // store the start time
-  }
-
-}
+}// loop()

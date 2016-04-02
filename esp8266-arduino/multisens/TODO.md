@@ -13,6 +13,8 @@ DONE WIRELESS_ACTIVE option to log only via serial (HDM copter)
 
 # TODOs
 
+* config might be done via aREST https://arest.io/esp8266-cloud/
+
 # optimised Onewire code: 
 http://www.cupidcontrols.com/2014/10/moteino-arduino-and-1wire-optimize-your-read-for-speed/
 see also Asynchronous vs. Synchronous read/write on

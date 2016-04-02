@@ -58,7 +58,10 @@ void mqtt_publish_topic(const char* topic, const char* payload) {
    if (success){
        Serial.println(" OK");
    }else{
-       Serial.println(" failed");
+       Serial.print(" failed, state is ");
+       Serial.print(psclient.state());
+       Serial.print(" publish return code is ");
+       Serial.println(success);
        mqttmsg=String("topic pub fail: ") +topic;
        psclient.publish(logtopic.c_str(), mqttmsg.c_str());
    }
@@ -89,7 +92,7 @@ void mqttcallback(char* topic, byte* payload, unsigned int length) {
 }
 
 
-// check the following, unused and unfinished yet
+// subscribe to subtopic
 void mqtt_subscribetosubtopic(const char* subtopic){
    String subscribetopic=String(mqtttopicbase) + "/" + mqttclientid + "/" + String(subtopic);
    Serial.print("mqtt_subscribetosubtopic to ");

@@ -55,8 +55,8 @@ void connectWifi() {
     #ifdef PIN_LED_STATUS
     digitalWrite(PIN_LED_STATUS, LOW);
     #endif
-    delay(250);
-    Serial.print(".");
+    delay(250+100*counter);
+    Serial.print(WiFi.status());
     if (counter++==50){
       Serial.println();
       counter =0;
@@ -69,14 +69,19 @@ void connectWifi() {
   Serial.println("WiFi connected");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
+  // print the received signal strength:
   //Serial.print("MAC address: ");
   // for (int i = 0; i < 6; ++i) {
   //   Serial.print(String(mac[i], 16));
   //  if (i < 5)
   //    Serial.print(":");
   //  }
-    Serial.println();
-  WiFi.printDiag(Serial);
+  long rssi = WiFi.RSSI();
+  Serial.print("signal strength (RSSI):");
+  Serial.println(rssi);
+
+  //Serial.println();
+  //WiFi.printDiag(Serial);
 #endif
 }
 
