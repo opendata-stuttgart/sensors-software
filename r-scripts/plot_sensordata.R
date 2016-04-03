@@ -68,20 +68,24 @@ if(usearchive){
     arcdat$timestampct<-as.POSIXct(strptime(arcdat$timestamp,format="%Y-%m-%dT%H:%M:%OS"))
     arctbl<-table(arcdat$sensor_id,as.Date(arcdat$timestamp))#$yday+1000*(as.POSIXlt(arcdat$timestamp)$year+1990))
     save(arcdat, arctbl ,file=arcdat_filename)
-    pdf(file.path(plotdir,"plots_sensordata_overview.pdf"),width=12,height=9)
-    ggplot(as.data.frame(arctbl), aes(Var2,Var1,size=Freq)) + geom_point()+
-        labs(x="year, doy", y="sensor id")+
-        theme(axis.text.x  = element_text(angle=90, vjust=0.5, size=6))
+    pdf(file.path(plotdir,"plots_sensordata_overview.pdf"),width=15,height=9)
+    arctbl.df<-as.data.frame(arctbl)
+    arctbl.df$Var2<-as.Date(arctbl.df$Var2)
+    p<-ggplot(arctbl.df, aes(Var2,Var1,size=Freq, color=as.factor(as.POSIXlt(arctbl.df$Var2)$mon+1))) + geom_point()+
+        labs(x="Date", y="sensor id")+
+        theme(axis.text.x  = element_text(angle=90, vjust=0.5, size=6))+
+        scale_x_date(date_labels = "%b %d %Y", date_minor_breaks = "1 day", date_breaks = "1 week")+
+        scale_colour_hue(name="Month")
+#         scale_colour_brewer(name = "Month")
+#         theme(legend.title=element_blank())+ 
+    # months(arctbl.df$Var2)
+    print(p)
     dev.off()
     
 # iterate sensors
     for (sid in unique(arcdat$sensor_id)){
         print(sid)
         sdat<-as.data.frame(dplyr::filter(arcdat, sensor_id==sid)) # result type is tbl_df, convert to df
-        # select dateinterval
-        sdat<-sendat[sdat$timestampct>dateinterval$min&
-                sdat$timestampct<dateinterval$max,]
-
         sdat<-sdat[order(sdat$timestampct),] # sort by timestampct
         sdat$P2diff1=sdat$P2-sdat$P1
         sdat$durP2diff1=sdat$durP2-sdat$durP1
@@ -135,9 +139,10 @@ if(usearchive){
         dev.off()
     }# sensor_id
     print(paste("total size of data:", dim(arcdat) ,collapse = " "))
-    stop("manual break: archive plots done")
 }# usearchive
 
+stop("manual break: archive plots done")
+## the following is legacy code
 
     #     dates=seq.Date(from=as.Date(dateinterval$min),to=as.Date(dateinterval$max),by=1)
     #         u<-paste('http://archive.madflex.de/',
