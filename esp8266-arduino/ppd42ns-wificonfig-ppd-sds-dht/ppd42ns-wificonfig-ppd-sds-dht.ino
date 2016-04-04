@@ -45,7 +45,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-011"
+#define SOFTWARE_VERSION "NRZ-2016-012"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -76,6 +76,9 @@
 #include <ArduinoJson.h>
 #include <SoftwareSerial.h>
 #include <PubSubClient.h>
+#include <Wire.h>
+#include "SSD1306.h"
+#include "SSD1306Ui.h"
 
 #include "DHT.h"
 
@@ -94,6 +97,7 @@ bool send2dusti = 1;
 bool send2madavi = 0;
 bool send2mqtt = 0;
 bool send2csv = 0;
+bool has_display = 0;
 int  debug = 3;
 
 const char* host_madavi = "www.madavi.de";
@@ -117,6 +121,12 @@ const int update_port = 80;
 
 WiFiClient mqtt_wifi;
 PubSubClient mqtt_client(mqtt_wifi);
+
+/*****************************************************************
+/* Display definitions                                           *
+/*****************************************************************/
+SSD1306   display(0x3c, D3, D4);
+SSD1306Ui ui     ( &display );
 
 /*****************************************************************
 /* SDS011 declarations                                           *
@@ -547,7 +557,8 @@ void copyExtDef() {
 	if (SEND2MADAVI != send2madavi) { send2madavi = SEND2MADAVI; }
 	if (SEND2MQTT != send2mqtt) { send2mqtt = SEND2MQTT; }
 	if (SEND2CSV != send2csv) { send2csv = SEND2CSV; }
-  
+	if (HAS_DISPLAY != has_display) { has_display = HAS_DISPLAY; }
+
 	if (DEBUG != debug) { debug = DEBUG; }
 }
 
@@ -567,6 +578,7 @@ void writeConfig() {
 	json["send2madavi"] = send2madavi;
 	json["send2mqtt"] = send2mqtt;
 	json["send2csv"] = send2csv;
+	json["has_display"] = has_display;
 	json["debug"] = debug;
 
 	File configFile = SPIFFS.open("/config.json", "w");
@@ -617,6 +629,7 @@ void readConfig() {
 					if (json.containsKey("send2madavi")) send2madavi = json["send2madavi"];
 					if (json.containsKey("send2mqtt")) send2mqtt = json["send2mqtt"];
 					if (json.containsKey("send2csv")) send2csv = json["send2csv"];
+					if (json.containsKey("has_display")) send2csv = json["has_display"];
 					if (json.containsKey("debug")) debug = json["debug"];
 				} else {
 					debug_out("failed to load json config",DEBUG_ERROR,1);
@@ -651,6 +664,62 @@ void autoUpdate() {
 }
 
 /*****************************************************************
+/* display values                                                 *
+/*****************************************************************/
+void display_values(const String& data) {
+	char* s;
+	String tmp_type;
+	String tmp_val;
+	String temp;
+	String humidity;
+	String ppd_p1;
+	String ppd_p2;
+	String sds_p1;
+	String sds_p2;
+	int value_count = 0;
+	StaticJsonBuffer<2000> jsonBuffer;
+	JsonObject& json2data = jsonBuffer.parseObject(data);
+	debug_out("Display output",DEBUG_MIN_INFO,1);
+	debug_out(data,DEBUG_MIN_INFO,1);
+	if (json2data.success()) {
+		if (ppd_read) value_count += 6;
+		if (sds_read) value_count += 2;
+		if (dht_read) value_count += 2;
+		for (int i=0;i<value_count;i++) {
+			tmp_type = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value_type"].asString());
+			tmp_val = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value"].asString());
+			if (tmp_type == "temp") temp = tmp_val;
+			if (tmp_type == "humidity") humidity = tmp_val;
+			if (tmp_type == "P1") ppd_p1 = tmp_val;
+			if (tmp_type == "P2") ppd_p2 = tmp_val;
+			if (tmp_type == "SDS_P1") sds_p1 = tmp_val;
+			if (tmp_type == "SDS_P2") sds_p2 = tmp_val;
+		}
+	} else {
+		debug_out("Data read failed",DEBUG_ERROR,1);
+	}
+	display.resetDisplay();
+	display.clear();
+	display.displayOn();
+	display.setFont(ArialMT_Plain_10);
+	display.setTextAlignment(TEXT_ALIGN_LEFT);
+	if (dht_read) display.drawString(0,0,"Temp: "+temp+"   Hum.: "+humidity);
+	if (ppd_read) display.drawString(0,12,"PPD P1: "+ppd_p1);
+	if (ppd_read) display.drawString(0,24,"PPD P2: "+ppd_p2);
+	if (sds_read) display.drawString(0,36,"SDS P1: "+sds_p1);
+	if (sds_read) display.drawString(0,48,"SDS P2: "+sds_p2);
+	display.display();
+}
+
+/*****************************************************************
+/* Init display                                                  *
+/*****************************************************************/
+void init_display() {
+	display.init();
+	display.resetDisplay();
+}
+
+/*****************************************************************
 /* The Setup                                                     *
 /*****************************************************************/
 void setup() {
@@ -661,6 +730,7 @@ void setup() {
 	connectWifi();                  // Start ConnectWifi
 	writeConfig();
 	autoUpdate();
+	if (has_display) init_display();
 	pinMode(PPD_PIN_PM1,INPUT_PULLUP); // Listen at the designated PIN
 	pinMode(PPD_PIN_PM2,INPUT_PULLUP); // Listen at the designated PIN
 	dht.begin();                    // Start DHT
@@ -720,6 +790,10 @@ void loop() {
 
 		//sending to api
 
+		if (has_display) {
+			display_values(data);
+		}
+
 		if (send2madavi) {
 			debug_out("#### Sending to madavi.de: ",DEBUG_MIN_INFO,1);
 			sendData(data,host_madavi,httpPort_madavi,url_madavi);
@@ -738,7 +812,6 @@ void loop() {
 			debug_out("#### Sending as csv: ",DEBUG_MIN_INFO,1);
 			send_csv(data);
 		}
-    
 		// Resetting for next sampling
 		lowpulseoccupancyP1 = 0;
 		lowpulseoccupancyP2 = 0;
