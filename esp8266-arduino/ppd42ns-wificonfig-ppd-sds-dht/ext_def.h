@@ -15,7 +15,7 @@
 #define MQTT_TOPIC ""
 
 #define DHT_READ 0
-#define DHT_PIN 2
+#define DHT_PIN 13
 #define DHT_TYPE DHT22
 
 #define PPD_READ 1
@@ -25,6 +25,8 @@
 #define SDS_READ 0
 #define SDS_PIN_RX 5
 #define SDS_PIN_TX 4
+
+#define HAS_DISPLAY 1
 
 #define DEBUG 3
 
