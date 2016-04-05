@@ -39,9 +39,19 @@
 /* DHT22 Wiring Instruction                                      *
 /* (left to right, front is perforated side):                    *
 /*      - DHT22 Pin 1 (VDD)     -> Pin 3V3 (3.3V)                *
-/*      - DHT22 Pin 2 (DATA)    -> Pin D4 (GPIO2)                *
+/*      - DHT22 Pin 2 (DATA)    -> Pin D7 (GPIO13)               *
 /*      - DHT22 Pin 3 (NULL)    -> unused                        *
 /*      - DHT22 Pin 4 (GND)     -> Pin GND                       *
+/*                                                               *
+/*****************************************************************
+/* Extension: OLED Display with SSD1309                          *
+/*                                                               *
+/* Wiring Instruction                                            *
+/* (see labels on display)                                       *
+/*      VCC       ->     Pin 3V3                                 *
+/*      GND       ->     Pin GND                                 *
+/*      SCL       ->     Pin D4 (GPIO2)                          *
+/*      SDA       ->     Pin D3 (GPIO0)                          *
 /*                                                               *
 /*****************************************************************/
 // increment on change
@@ -77,8 +87,7 @@
 #include <SoftwareSerial.h>
 #include <PubSubClient.h>
 #include <Wire.h>
-#include "SSD1306.h"
-#include "SSD1306Ui.h"
+#include <SSD1306.h>
 
 #include "DHT.h"
 
@@ -126,7 +135,6 @@ PubSubClient mqtt_client(mqtt_wifi);
 /* Display definitions                                           *
 /*****************************************************************/
 SSD1306   display(0x3c, D3, D4);
-SSD1306Ui ui     ( &display );
 
 /*****************************************************************
 /* SDS011 declarations                                           *
@@ -218,6 +226,8 @@ void wifiConfig() {
 	wifiManager.addParameter(&custom_ppd_read);
 	WiFiManagerParameter custom_sds_read("sds_read", "SDS Sensor (0/1) ?", "", 10);
 	wifiManager.addParameter(&custom_sds_read);
+	WiFiManagerParameter custom_has_display("has_display", "Display (0/1) ?", "", 10);
+	wifiManager.addParameter(&custom_has_display);
 	WiFiManagerParameter custom_debug("debug", "Debug output (0-3) ?", "", 10);
 	wifiManager.addParameter(&custom_debug);
 	apname  = "Feinstaubsensor-" + String(ESP.getChipId());
@@ -234,15 +244,17 @@ void wifiConfig() {
 	if (strcmp(custom_send2dusti.getValue(),"") != 0) send2dusti = strtol(custom_send2dusti.getValue(), NULL, 10);
 	if (strcmp(custom_send2madavi.getValue(),"") != 0) send2madavi = strtol(custom_send2madavi.getValue(), NULL, 10);
 	if (strcmp(custom_send2csv.getValue(),"") != 0) send2csv = strtol(custom_send2csv.getValue(), NULL, 10);
+	if (strcmp(custom_has_display.getValue(),"") != 0) has_display = strtol(custom_has_display.getValue(), NULL, 10);
 	if (strcmp(custom_debug.getValue(),"") != 0) debug = strtol(custom_debug.getValue(), NULL, 10);
 	debug_out("------ Result from Webconfig ------",DEBUG_MIN_INFO,1);
 	debug_out("WLANSSID: ",DEBUG_MIN_INFO,0);debug_out(wlanssid,DEBUG_MIN_INFO,1);
-	debug_out("DHT_read: "+String(custom_dht_read.getValue()),DEBUG_MIN_INFO,0);debug_out(custom_dht_read.getValue(),DEBUG_MIN_INFO,0);debug_out(" - "+String(dht_read),DEBUG_MIN_INFO,1);
+	debug_out("DHT_read: "+String(custom_dht_read.getValue()),DEBUG_MIN_INFO,0+" - ");debug_out(custom_dht_read.getValue(),DEBUG_MIN_INFO,0);debug_out(" - "+String(dht_read),DEBUG_MIN_INFO,1);
 	debug_out("PPD_read: ",DEBUG_MIN_INFO,0);debug_out(custom_ppd_read.getValue(),DEBUG_MIN_INFO,0);debug_out(" - "+String(ppd_read),DEBUG_MIN_INFO,1);
 	debug_out("SDS_read: ",DEBUG_MIN_INFO,0);debug_out(custom_sds_read.getValue(),DEBUG_MIN_INFO,0);debug_out(" - "+String(sds_read),DEBUG_MIN_INFO,1);
 	debug_out("Dusti   : ",DEBUG_MIN_INFO,0);debug_out(custom_send2dusti.getValue(),DEBUG_MIN_INFO,0);debug_out(" - "+String(send2dusti),DEBUG_MIN_INFO,1);
 	debug_out("Madavi  : ",DEBUG_MIN_INFO,0);debug_out(custom_send2madavi.getValue(),DEBUG_MIN_INFO,0);debug_out(" - "+String(send2madavi),DEBUG_MIN_INFO,1);
 	debug_out("CSV     : ",DEBUG_MIN_INFO,0);debug_out(custom_send2csv.getValue(),DEBUG_MIN_INFO,0);debug_out(" - "+String(send2csv),DEBUG_MIN_INFO,1);
+	debug_out("Display : ",DEBUG_MIN_INFO,0);debug_out(custom_has_display.getValue(),DEBUG_MIN_INFO,0);debug_out(" - "+String(has_display),DEBUG_MIN_INFO,1);
 	debug_out("Debug   : ",DEBUG_MIN_INFO,0);debug_out(custom_debug.getValue(),DEBUG_MIN_INFO,0);debug_out(" - "+String(debug),DEBUG_MIN_INFO,1);
 	debug_out("-----------------------------------",DEBUG_MIN_INFO,1);
 }
@@ -498,13 +510,9 @@ String sensorPPD() {
 		ratio = lowpulseoccupancyP1/(sampletime_ms*10.0);                   // int percentage 0 to 100
 		concentration = (1.1*pow(ratio,3)-3.8*pow(ratio,2)+520*ratio+0.62); // spec sheet curve
 		// Begin printing
-		debug_out("LPO P10     : ",DEBUG_MIN_INFO,0);
-		debug_out(String(lowpulseoccupancyP1),DEBUG_MIN_INFO,1);
-		debug_out("Ratio PM10  : ",DEBUG_MIN_INFO,0);
-		debug_out(Float2String(ratio),DEBUG_MIN_INFO,0);
-		debug_out(" %",DEBUG_MIN_INFO,1);
-		debug_out("PM10 Count  : ",DEBUG_MIN_INFO,0);
-		debug_out(Float2String(concentration),DEBUG_MIN_INFO,1);
+		debug_out("LPO P10     : "+String(lowpulseoccupancyP1),DEBUG_MIN_INFO,1);
+		debug_out("Ratio PM10  : "+Float2String(ratio)+" %",DEBUG_MIN_INFO,1);
+		debug_out("PM10 Count  : "+Float2String(concentration),DEBUG_MIN_INFO,1);
 
 		// json for push to api / P1
 		s += "{\"value_type\":\"durP1\",\"value\":\"";
@@ -520,13 +528,9 @@ String sensorPPD() {
 		ratio = lowpulseoccupancyP2/(sampletime_ms*10.0);
 		concentration = (1.1*pow(ratio,3)-3.8*pow(ratio,2)+520*ratio+0.62);
 		// Begin printing
-		debug_out("LPO PM25    : ",DEBUG_MIN_INFO,0);
-		debug_out(String(lowpulseoccupancyP2),DEBUG_MIN_INFO,1);
-		debug_out("Ratio PM25  : ",DEBUG_MIN_INFO,0);
-		debug_out(Float2String(ratio),DEBUG_MIN_INFO,0);
-		debug_out(" %",DEBUG_MIN_INFO,1);
-		debug_out("PM25 Count  : ",DEBUG_MIN_INFO,0);
-		debug_out(Float2String(concentration),DEBUG_MIN_INFO,1);
+		debug_out("LPO PM25    : "+String(lowpulseoccupancyP2),DEBUG_MIN_INFO,1);
+		debug_out("Ratio PM25  : "+Float2String(ratio)+" %",DEBUG_MIN_INFO,1);
+		debug_out("PM25 Count  : "+Float2String(concentration),DEBUG_MIN_INFO,0);
 
 		// json for push to api / P2
 		s += "{\"value_type\":\"durP2\",\"value\":\"";
@@ -566,7 +570,7 @@ void copyExtDef() {
 /* write config to spiffs                                        *
 /*****************************************************************/
 void writeConfig() {
-	debug_out("saving config",DEBUG_MIN_INFO,1);
+	debug_out("saving config...",DEBUG_MIN_INFO,1);
 	DynamicJsonBuffer jsonBuffer;
 	JsonObject& json = jsonBuffer.createObject();
 	json["wlanssid"] = wlanssid;
@@ -601,13 +605,13 @@ void readConfig() {
 	debug_out("mounting FS...",DEBUG_MIN_INFO,1);
 
 	if (SPIFFS.begin()) {
-		debug_out("mounted file system",DEBUG_MIN_INFO,1);
+		debug_out("mounted file system...",DEBUG_MIN_INFO,1);
 		if (SPIFFS.exists("/config.json")) {
 			//file exists, reading and loading
-			debug_out("reading config file",DEBUG_MIN_INFO,1);
+			debug_out("reading config file...",DEBUG_MIN_INFO,1);
 			File configFile = SPIFFS.open("/config.json", "r");
 			if (configFile) {
-				debug_out("opened config file",DEBUG_MIN_INFO,1);
+				debug_out("opened config file...",DEBUG_MIN_INFO,1);
 				size_t size = configFile.size();
 				// Allocate a buffer to store contents of the file.
 				std::unique_ptr<char[]> buf(new char[size]);
@@ -617,9 +621,9 @@ void readConfig() {
 				JsonObject& json = jsonBuffer.parseObject(buf.get());
 				char buffer[512];
 				json.printTo(buffer, sizeof(buffer));
-				debug_out(buffer,DEBUG_MIN_INFO,1);
+				debug_out(buffer,DEBUG_MAX_INFO,1);
 				if (json.success()) {
-					debug_out("\nparsed json",DEBUG_MIN_INFO,1);
+					debug_out("parsed json...",DEBUG_MIN_INFO,1);
 					if (json.containsKey("wlanssid")) strcpy(wlanssid, json["wlanssid"]);
 					if (json.containsKey("wlanssid")) strcpy(wlanpwd, json["wlanpwd"]);
 					if (json.containsKey("dht_read")) dht_read = json["dht_read"];
@@ -629,7 +633,7 @@ void readConfig() {
 					if (json.containsKey("send2madavi")) send2madavi = json["send2madavi"];
 					if (json.containsKey("send2mqtt")) send2mqtt = json["send2mqtt"];
 					if (json.containsKey("send2csv")) send2csv = json["send2csv"];
-					if (json.containsKey("has_display")) send2csv = json["has_display"];
+					if (json.containsKey("has_display")) has_display = json["has_display"];
 					if (json.containsKey("debug")) debug = json["debug"];
 				} else {
 					debug_out("failed to load json config",DEBUG_ERROR,1);
@@ -652,13 +656,13 @@ void autoUpdate() {
 	t_httpUpdate_return ret = ESPhttpUpdate.update(update_host, update_port, update_url, SOFTWARE_VERSION);
 	switch(ret) {
 		case HTTP_UPDATE_FAILED:
-				Serial.println("[update] Update failed.");
+				debug_out("[update] Update failed.",DEBUG_ERROR,1);
 				break;
 		case HTTP_UPDATE_NO_UPDATES:
-				Serial.println("[update] Update no Update.");
+				debug_out("[update] Update no Update.",DEBUG_MIN_INFO,1);
 				break;
 		case HTTP_UPDATE_OK:
-				Serial.println("[update] Update ok."); // may not called we reboot the ESP
+				debug_out("[update] Update ok.",DEBUG_MIN_INFO,1); // may not called we reboot the ESP
 				break;
 	}
 }
@@ -679,8 +683,8 @@ void display_values(const String& data) {
 	int value_count = 0;
 	StaticJsonBuffer<2000> jsonBuffer;
 	JsonObject& json2data = jsonBuffer.parseObject(data);
-	debug_out("Display output",DEBUG_MIN_INFO,1);
-	debug_out(data,DEBUG_MIN_INFO,1);
+	debug_out("output values to display...",DEBUG_MIN_INFO,1);
+	debug_out(data,DEBUG_MAX_INFO,1);
 	if (json2data.success()) {
 		if (ppd_read) value_count += 6;
 		if (sds_read) value_count += 2;
@@ -744,6 +748,7 @@ void setup() {
 	if (send2madavi) debug_out("Sende an madavi.de...",DEBUG_MIN_INFO,1);
 	if (send2mqtt) debug_out("Sende an MQTT broker...",DEBUG_MIN_INFO,1);
 	if (send2csv) debug_out("Sende als CSV an Serial...",DEBUG_MIN_INFO,1);
+	if (has_display) debug_out("Zeige auf Display...",DEBUG_MIN_INFO,1);
 	starttime = millis();           // store the start time
 	starttime_SDS = millis();
 }
@@ -788,7 +793,7 @@ void loop() {
 		}
 		data += "]}";
 
-		//sending to api
+		//sending to api(s)
 
 		if (has_display) {
 			display_values(data);
