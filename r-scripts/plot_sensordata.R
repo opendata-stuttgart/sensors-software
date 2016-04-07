@@ -65,6 +65,8 @@ if(usearchive){
             rdat<-read.csv(csvfilename, sep=";", dec=".", header=TRUE)
             arcdat<-dplyr::bind_rows(arcdat,rdat)
     }
+    # Detectable range of concentration 0~28,000 pcs/liter (0~8,000pcs/0.01 CF=283ml)
+    
     arcdat$timestampct<-as.POSIXct(strptime(arcdat$timestamp,format="%Y-%m-%dT%H:%M:%OS"))
     arctbl<-table(arcdat$sensor_id,as.Date(arcdat$timestamp))#$yday+1000*(as.POSIXlt(arcdat$timestamp)$year+1990))
     save(arcdat, arctbl ,file=arcdat_filename)
@@ -81,6 +83,8 @@ if(usearchive){
     # months(arctbl.df$Var2)
     print(p)
     dev.off()
+    
+    # Detectable range of concentration 0~28,000 pcs/liter (0~8,000pcs/0.01 CF=283ml)
     
 # iterate sensors
     for (sid in unique(arcdat$sensor_id)){
@@ -109,7 +113,21 @@ if(usearchive){
         print(paste("tsdat plot"))
         tsdat<-timeSeries(sdat[,measvalnames], sdat$timestampct)
         plot(tsdat)
+        tdn<-as.numeric(sdat$timestampct[2:length(sdat$timestampct)]-sdat$timestampct[1:(length(sdat$timestampct)-1)])
+        tdn.c<-tdn[tdn<320]
         
+        # plot histogram of timediffs
+        hist(tdn.c,n=100, main = paste("Histogram of timediffs"))
+        
+        # aggregate by year, day, hour
+        tstamplt<-as.POSIXlt(sdat$timestampct)# [,c("year","yday")]
+        sdat.agg<-aggregate(sdat, by=list(year=tstamplt$year+1900,yday=tstamplt$yday,hour=tstamplt$hour),FUN=mean)
+        # order by ymd
+        sdat.agg<-sdat.agg[order(sdat.agg$year,sdat.agg$yday,sdat.agg$hour),]  
+
+        sdat.dagg<-aggregate(sdat, by=list(year=tstamplt$year+1900,yday=tstamplt$yday),FUN=mean)
+        sdat.dagg<-sdat.dagg[order(sdat.dagg$year,sdat.dagg$yday),]        
+#         ggplot(sdat.dagg,aes_string("timestampct",coln))
         for (coln in measvalnames){
             print (coln)
             if(length(sdat[,coln])>ntaps){
@@ -118,6 +136,10 @@ if(usearchive){
                 # outlier filter first forecast::tsclean
                 sdat$plotdat<-forecast::tsclean(sdat[,coln]) 
                 sdat$plotdat<-as.vector(stats::filter(sdat$plotdat, gfcoeffs(sigma,ntaps)))
+                p<-ggplot(sdat.agg,aes_string("timestampct",coln))+geom_bar(stat = "identity")+labs(main="Hourly means")
+                print(p)
+                p<-ggplot(sdat.dagg,aes_string("timestampct",coln))+ geom_bar(stat = "identity")+labs(main="Daily means")
+                print(p)
                 
                 print(paste(coln,"ggplot"))
                 p<-ggplot(sdat, aes(timestampct,plotdat))+geom_line()+geom_smooth(span=0.2)+ labs(x="Time",y=coln)
@@ -182,6 +204,8 @@ for (csvfilename in filelist){
     seldat<-sendat[sendat$timestampct>dateinterval$min&
                 sendat$timestampct<dateinterval$max,]
     #     seldat<-sendat
+    
+    # seldat$td<-as.POSIXlt(seldat$timestampct)$doy
 
     pdf(pdffilename)
 
