@@ -94,6 +94,10 @@ String concentration_p2s;
 String lowpulseoccupancyP1s;
 String lowpulseoccupancyP2s;
 
+#ifdef DEBUG_CYCLES
+unsigned long cycount = 0;
+#endif // DEBUG_CYCLES
+
 
 #ifdef PIN_LED_STATUS
 int ledsstate=LOW;
@@ -149,7 +153,7 @@ digitalWrite(PIN_LED_STATUS, ledsstate);
 delay(50);
 #endif
 #endif
-  
+
 #ifdef DHT_ACTIVE
 #ifdef PIN_LED_STATUS
 ledsstate=LOW;
@@ -237,9 +241,18 @@ void loop() {
     trigP2 = false;
   }
 #endif
+#ifdef DEBUG_CYCLES
+cycount++;
+#endif //DEBUG_CYCLES
   // Checking if it is time to sample
   if ((millis()-starttime) > sampletime_ms)
   {
+#ifdef DEBUG_CYCLES
+Serial.print("measurement cycles: ");
+Serial.println(cycount);
+cycount=0;
+#endif //DEBUG_CYCLES
+    
     #ifdef PPD_ACTIVE
     ratio_p1 = lowpulseoccupancyP1/(sampletime_ms*10.0);                 // int percentage 0 to 100
     concentration_p1 = 1.1*pow(ratio_p1,3)-3.8*pow(ratio_p1,2)+520*ratio_p1+0.62; // spec sheet curve

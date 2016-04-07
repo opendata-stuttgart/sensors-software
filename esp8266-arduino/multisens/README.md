@@ -24,3 +24,4 @@ Libraries:
 * "OneWire" should be there already
 * MQTT PubSubClient https://github.com/knolleary/pubsubclient/
 
+* MQTT home assistant stack HASS https://home-assistant.io/
