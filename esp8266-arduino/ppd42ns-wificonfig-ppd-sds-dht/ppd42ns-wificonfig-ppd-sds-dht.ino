@@ -55,7 +55,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-012"
+#define SOFTWARE_VERSION "NRZ-2016-014"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -108,6 +108,8 @@ bool send2mqtt = 0;
 bool send2csv = 0;
 bool has_display = 0;
 int  debug = 3;
+
+long int sample_count = 0;
 
 const char* host_madavi = "www.madavi.de";
 const char* url_madavi = "/sensor/data.php";
@@ -168,6 +170,10 @@ unsigned long starttime;
 unsigned long starttime_SDS;
 unsigned long act_micro;
 unsigned long act_milli;
+unsigned long last_micro = 0;
+unsigned long min_micro = 1000000000;
+unsigned long max_micro = 0;
+unsigned long diff_micro = 0;
 
 unsigned long sampletime_ms = 30000;
 unsigned long sampletime_SDS_ms = 1000;
@@ -191,6 +197,23 @@ void debug_out(const String& text, int level, bool linebreak) {
 		} else {
 			Serial.print(text);
 		}
+	}
+}
+
+/*****************************************************************
+/* display values                                                 *
+/*****************************************************************/
+void display_debug(const String& text) {
+	if (has_display) {
+		debug_out("output debug text to display...",DEBUG_MIN_INFO,1);
+		debug_out(text,DEBUG_MAX_INFO,1);
+		display.resetDisplay();
+		display.clear();
+		display.displayOn();
+		display.setFont(ArialMT_Plain_10);
+		display.setTextAlignment(TEXT_ALIGN_LEFT);
+		display.drawStringMaxWidth(0,12,128,text);
+		display.display();
 	}
 }
 
@@ -278,6 +301,7 @@ void connectWifi() {
 	}
 	debug_out("",DEBUG_MIN_INFO,1);
 	if (WiFi.status() != WL_CONNECTED) {
+		display_debug("AP ID: Feinstaub-"+String(ESP.getChipId())+" - IP: 192.168.4.1");
 		wifiConfig();
 		if (WiFi.status() != WL_CONNECTED) {
 			retry_count = 0;
@@ -321,7 +345,7 @@ void sendData(const String& data, const char* host, const int httpPort, const ch
 		debug_out("connection failed",DEBUG_ERROR,1);
 		return;
 	}
-  
+
 	debug_out("Requesting URL: ",DEBUG_MIN_INFO,0);
 	debug_out(url,DEBUG_MIN_INFO,1);
 	debug_out(String(ESP.getChipId()),DEBUG_MIN_INFO,1);
@@ -468,6 +492,9 @@ String sensorSDS() {
 		s += "{\"value_type\":\"SDS_P2\",\"value\":\"";
 		s += Float2String(float(sds_pm25_sum)/(sds_val_count*10.0));
 		s += "\"},";
+		if (! ppd_read) {
+			s.replace("SDS_","");
+		}
 		sds_pm10_sum = 0; sds_pm25_sum = 0; sds_val_count = 0;
 	}
 	return s;
@@ -657,9 +684,11 @@ void autoUpdate() {
 	switch(ret) {
 		case HTTP_UPDATE_FAILED:
 				debug_out("[update] Update failed.",DEBUG_ERROR,1);
+				display_debug("Update failed.");
 				break;
 		case HTTP_UPDATE_NO_UPDATES:
 				debug_out("[update] Update no Update.",DEBUG_MIN_INFO,1);
+				display_debug("No update found.");
 				break;
 		case HTTP_UPDATE_OK:
 				debug_out("[update] Update ok.",DEBUG_MIN_INFO,1); // may not called we reboot the ESP
@@ -707,11 +736,21 @@ void display_values(const String& data) {
 	display.displayOn();
 	display.setFont(ArialMT_Plain_10);
 	display.setTextAlignment(TEXT_ALIGN_LEFT);
-	if (dht_read) display.drawString(0,0,"Temp: "+temp+"   Hum.: "+humidity);
-	if (ppd_read) display.drawString(0,12,"PPD P1: "+ppd_p1);
-	if (ppd_read) display.drawString(0,24,"PPD P2: "+ppd_p2);
-	if (sds_read) display.drawString(0,36,"SDS P1: "+sds_p1);
-	if (sds_read) display.drawString(0,48,"SDS P2: "+sds_p2);
+	value_count = 0;
+	if (dht_read) display.drawString(0,12*(value_count++),"Temp: "+temp+"   Hum.: "+humidity);
+	if (ppd_read) {
+		display.drawString(0,12*(value_count++),"PPD P1: "+ppd_p1);
+		display.drawString(0,12*(value_count++),"PPD P2: "+ppd_p2);
+	}
+	if (sds_read) {
+		if (ppd_read) {
+			display.drawString(0,12*(value_count++),"SDS P1: "+sds_p1);
+			display.drawString(0,12*(value_count++),"SDS P2: "+sds_p2);
+		} else {
+			display.drawString(0,12*(value_count++),"SDS P1: "+ppd_p1);
+			display.drawString(0,12*(value_count++),"SDS P2: "+ppd_p2);
+		}
+	}
 	display.display();
 }
 
@@ -729,12 +768,16 @@ void init_display() {
 void setup() {
 	WiFi.persistent(false);
 	Serial.begin(9600);             // Output to Serial at 9600 baud
+	init_display();
 	copyExtDef();
+	display_debug("Reading config from SPIFFS");
 	readConfig();
+	display_debug("Connecting to "+String(wlanssid));
 	connectWifi();                  // Start ConnectWifi
+	display_debug("Writing config to SPIFFS");
 	writeConfig();
+	display_debug("Looking for OTA update");
 	autoUpdate();
-	if (has_display) init_display();
 	pinMode(PPD_PIN_PM1,INPUT_PULLUP); // Listen at the designated PIN
 	pinMode(PPD_PIN_PM2,INPUT_PULLUP); // Listen at the designated PIN
 	dht.begin();                    // Start DHT
@@ -762,6 +805,17 @@ void loop() {
 	act_micro = micros();
 	act_milli = millis();
 
+	sample_count++;
+	
+	if (last_micro != 0) {
+		diff_micro = act_micro-last_micro;
+		if (max_micro < diff_micro) { max_micro = diff_micro;}
+		if (min_micro > diff_micro) { min_micro = diff_micro;}
+		last_micro = act_micro;
+	} else {
+		last_micro = act_micro;
+	}
+
 	String result_PPD;
 	String result_SDS;
 	String result_DHT;
@@ -788,6 +842,16 @@ void loop() {
 		if (ppd_read) {data += result_PPD;}
 		if (sds_read) {data += result_SDS;}
 		if (dht_read) {data += result_DHT;}
+		data += "{\"value_type\":\"samples\",\"value\":\"";
+		data += long(sample_count);
+		data += "\"},";
+		data += "{\"value_type\":\"min_micro\",\"value\":\"";
+		data += long(min_micro);
+		data += "\"},";
+		data += "{\"value_type\":\"max_micro\",\"value\":\"";
+		data += long(max_micro);
+		data += "\"},";
+		
 		if ((result_PPD.length() > 0) || (result_DHT.length() > 0) || (result_SDS.length() > 0)) {
 			data.remove(data.length()-1);
 		}
@@ -817,15 +881,20 @@ void loop() {
 			debug_out("#### Sending as csv: ",DEBUG_MIN_INFO,1);
 			send_csv(data);
 		}
+
+		if ((act_milli-last_update_attempt) > pause_between_update_attempts) {
+			autoUpdate();
+		}
+
 		// Resetting for next sampling
 		lowpulseoccupancyP1 = 0;
 		lowpulseoccupancyP2 = 0;
+		sample_count = 0;
+		last_micro = 0;
+		min_micro = 1000000000;
+		max_micro = 0;
 		starttime = millis(); // store the start time
 	}
 	
-	if ((act_milli-last_update_attempt) > pause_between_update_attempts) {
-		autoUpdate();
-	}
-
 	yield();
 }
