@@ -66,8 +66,8 @@
 /* #define PPD_READ 1                                            *
 /* #define SDS_READ 0                                            *
 /*                                                               *
-/* #define SEND2DUSTI 0                                          *
-/* #define SEND2MADAVI 1                                         *
+/* #define SEND2DUSTI 1                                          *
+/* #define SEND2MADAVI 0                                         *
 /* #define SEND2MQTT 0                                           *
 /* #define SEND2CSV 0                                            *
 /*                                                               *
@@ -104,6 +104,7 @@ bool ppd_read = 1;
 bool sds_read = 0;
 bool send2dusti = 1;
 bool send2madavi = 0;
+bool send2custom = 0;
 bool send2mqtt = 0;
 bool send2csv = 0;
 bool has_display = 0;
@@ -118,6 +119,10 @@ const int httpPort_madavi = 80;
 const char* host_dusti = "api.luftdaten.info";
 const char* url_dusti = "/v1/push-sensor-data/";
 const int httpPort_dusti = 80;
+
+const char* host_custom = "";
+const char* url_custom = "";
+const int httpPort_custom = 80;
 
 const char* host_mqtt = "mqtt.opensensors.io";
 const int mqtt_port = 1883;
@@ -863,15 +868,21 @@ void loop() {
 			display_values(data);
 		}
 
-		if (send2madavi) {
-			debug_out("#### Sending to madavi.de: ",DEBUG_MIN_INFO,1);
-			sendData(data,host_madavi,httpPort_madavi,url_madavi);
-		}
 		if (send2dusti) {
 			debug_out("#### Sending to luftdaten.info: ",DEBUG_MIN_INFO,1);
 			sendData(data,host_dusti,httpPort_dusti,url_dusti);
 		}
 		
+		if (send2madavi) {
+			debug_out("#### Sending to madavi.de: ",DEBUG_MIN_INFO,1);
+			sendData(data,host_madavi,httpPort_madavi,url_madavi);
+		}
+
+		if (send2custom) {
+			debug_out("#### Sending to custom api: ",DEBUG_MIN_INFO,1);
+			sendData(data,host_custom,httpPort_custom,url_custom);
+		}
+
 		if (send2mqtt) {
 			debug_out("#### Sending to mqtt: ",DEBUG_MIN_INFO,1);
 			sendmqtt(data,host_mqtt,mqtt_port);
