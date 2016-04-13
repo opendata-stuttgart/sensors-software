@@ -4,4 +4,4 @@ Dependencies:
 
 platform.io: compile and upload firmware
 
-perl module Curses::UI
+perl modules: Curses, Curses::UI
