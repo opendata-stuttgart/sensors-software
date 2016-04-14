@@ -566,7 +566,7 @@ String sensorPPD() {
 
 		// json for push to api / P2
 		s += "{\"value_type\":\"durP2\",\"value\":\"";
-		s += long(lowpulseoccupancyP1);
+		s += long(lowpulseoccupancyP2);
 		s += "\"},";
 		s += "{\"value_type\":\"ratioP2\",\"value\":\"";
 		s += Float2String(ratio);
