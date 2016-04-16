@@ -55,7 +55,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-014"
+#define SOFTWARE_VERSION "NRZ-2016-015"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -120,9 +120,9 @@ const char* host_dusti = "api.luftdaten.info";
 const char* url_dusti = "/v1/push-sensor-data/";
 const int httpPort_dusti = 80;
 
-const char* host_custom = "";
-const char* url_custom = "";
-const int httpPort_custom = 80;
+char host_custom[100] = "192.168.234.1";
+char url_custom[100] = "/data.php";
+int httpPort_custom = 80;
 
 const char* host_mqtt = "mqtt.opensensors.io";
 const int mqtt_port = 1883;
@@ -256,8 +256,16 @@ void wifiConfig() {
 	wifiManager.addParameter(&custom_sds_read);
 	WiFiManagerParameter custom_has_display("has_display", "Display (0/1) ?", "", 10);
 	wifiManager.addParameter(&custom_has_display);
-	WiFiManagerParameter custom_debug("debug", "Debug output (0-3) ?", "", 10);
+	WiFiManagerParameter custom_debug("debug", "Debug output (0-5) ?", "", 10);
 	wifiManager.addParameter(&custom_debug);
+	WiFiManagerParameter custom_send2custom("send2custom", "Senden an eigene API (0/1)?", "", 10);
+	wifiManager.addParameter(&custom_send2custom);
+//	WiFiManagerParameter custom_host_custom("host_custom", "Host ?", "", 40);
+//	wifiManager.addParameter(&custom_host_custom);
+//	WiFiManagerParameter custom_url_custom("url_custom", "Pfad ?", "", 40);
+//	wifiManager.addParameter(&custom_url_custom);
+//	WiFiManagerParameter custom_httpPort_custom("httpPort_custom", "HTTP Port (80) ?", "", 10);
+//	wifiManager.addParameter(&custom_httpPort_custom);
 	apname  = "Feinstaubsensor-" + String(ESP.getChipId());
 	wifiManager.setTimeout(300);
 	wifiManager.setBreakAfterConfig(true);
@@ -274,6 +282,10 @@ void wifiConfig() {
 	if (strcmp(custom_send2csv.getValue(),"") != 0) send2csv = strtol(custom_send2csv.getValue(), NULL, 10);
 	if (strcmp(custom_has_display.getValue(),"") != 0) has_display = strtol(custom_has_display.getValue(), NULL, 10);
 	if (strcmp(custom_debug.getValue(),"") != 0) debug = strtol(custom_debug.getValue(), NULL, 10);
+	if (strcmp(custom_send2custom.getValue(),"") != 0) send2custom = strtol(custom_send2custom.getValue(), NULL, 10);
+//	if (strcmp(custom_host_custom.getValue(),"") != 0) strcpy(host_custom,custom_host_custom.getValue());
+//	if (strcmp(custom_url_custom.getValue(),"") != 0) strcpy(url_custom,custom_url_custom.getValue());
+//	if (strcmp(custom_httpPort_custom.getValue(),"") != 0) httpPort_custom = strtol(custom_httpPort_custom.getValue(), NULL, 10);
 	debug_out("------ Result from Webconfig ------",DEBUG_MIN_INFO,1);
 	debug_out("WLANSSID: ",DEBUG_MIN_INFO,0);debug_out(wlanssid,DEBUG_MIN_INFO,1);
 	debug_out("DHT_read: "+String(custom_dht_read.getValue()),DEBUG_MIN_INFO,0+" - ");debug_out(custom_dht_read.getValue(),DEBUG_MIN_INFO,0);debug_out(" - "+String(dht_read),DEBUG_MIN_INFO,1);
@@ -284,6 +296,10 @@ void wifiConfig() {
 	debug_out("CSV     : ",DEBUG_MIN_INFO,0);debug_out(custom_send2csv.getValue(),DEBUG_MIN_INFO,0);debug_out(" - "+String(send2csv),DEBUG_MIN_INFO,1);
 	debug_out("Display : ",DEBUG_MIN_INFO,0);debug_out(custom_has_display.getValue(),DEBUG_MIN_INFO,0);debug_out(" - "+String(has_display),DEBUG_MIN_INFO,1);
 	debug_out("Debug   : ",DEBUG_MIN_INFO,0);debug_out(custom_debug.getValue(),DEBUG_MIN_INFO,0);debug_out(" - "+String(debug),DEBUG_MIN_INFO,1);
+	debug_out("Custom API  : ",DEBUG_MIN_INFO,0);debug_out(custom_send2custom.getValue(),DEBUG_MIN_INFO,0);debug_out(" - "+String(send2custom),DEBUG_MIN_INFO,1);
+//	debug_out("Custom Host : ",DEBUG_MIN_INFO,0);debug_out(custom_host_custom.getValue(),DEBUG_MIN_INFO,0);debug_out(" - "+String(host_custom),DEBUG_MIN_INFO,1);
+//	debug_out("Custom URL  : ",DEBUG_MIN_INFO,0);debug_out(custom_url_custom.getValue(),DEBUG_MIN_INFO,0);debug_out(" - "+String(url_custom),DEBUG_MIN_INFO,1);
+//	debug_out("Custom Port : ",DEBUG_MIN_INFO,0);debug_out(custom_httpPort_custom.getValue(),DEBUG_MIN_INFO,0);debug_out(" - "+String(httpPort_custom),DEBUG_MIN_INFO,1);
 	debug_out("-----------------------------------",DEBUG_MIN_INFO,1);
 }
 
@@ -596,6 +612,12 @@ void copyExtDef() {
 	if (HAS_DISPLAY != has_display) { has_display = HAS_DISPLAY; }
 
 	if (DEBUG != debug) { debug = DEBUG; }
+
+	if (SEND2CUSTOM != send2custom) { send2custom = SEND2CUSTOM; }
+	if (HOST_CUSTOM != NULL) { strcpy(host_custom,HOST_CUSTOM); }
+	if (URL_CUSTOM != NULL) { strcpy(url_custom,URL_CUSTOM); }
+	if (HTTPPORT_CUSTOM != httpPort_custom) { httpPort_custom = HTTPPORT_CUSTOM; }
+
 }
 
 /*****************************************************************
@@ -616,6 +638,10 @@ void writeConfig() {
 	json["send2csv"] = send2csv;
 	json["has_display"] = has_display;
 	json["debug"] = debug;
+	json["send2custom"] = send2custom;
+	json["host_custom"] = host_custom;
+	json["url_custom"] = url_custom;
+	json["httpPort_custom"] = httpPort_custom;
 
 	File configFile = SPIFFS.open("/config.json", "w");
 	if (!configFile) {
@@ -667,6 +693,10 @@ void readConfig() {
 					if (json.containsKey("send2csv")) send2csv = json["send2csv"];
 					if (json.containsKey("has_display")) has_display = json["has_display"];
 					if (json.containsKey("debug")) debug = json["debug"];
+					if (json.containsKey("send2custom")) send2custom = json["send2custom"];
+					if (json.containsKey("host_custom")) strcpy(host_custom, json["host_custom"]);
+					if (json.containsKey("url_custom")) strcpy(url_custom, json["url_custom"]);
+					if (json.containsKey("httpPort_custom")) httpPort_custom = json["httpPort_custom"];
 				} else {
 					debug_out("failed to load json config",DEBUG_ERROR,1);
 				}
@@ -796,6 +826,7 @@ void setup() {
 	if (send2madavi) debug_out("Sende an madavi.de...",DEBUG_MIN_INFO,1);
 	if (send2mqtt) debug_out("Sende an MQTT broker...",DEBUG_MIN_INFO,1);
 	if (send2csv) debug_out("Sende als CSV an Serial...",DEBUG_MIN_INFO,1);
+	if (send2custom) debug_out("Sende an custom API...",DEBUG_MIN_INFO,1);
 	if (has_display) debug_out("Zeige auf Display...",DEBUG_MIN_INFO,1);
 	starttime = millis();           // store the start time
 	starttime_SDS = millis();

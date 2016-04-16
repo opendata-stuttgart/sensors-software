@@ -5,7 +5,11 @@
 #define SEND2MADAVI 0
 #define SEND2MQTT 0
 #define SEND2CSV 0
+#define SEND2CUSTOM 0
 
+#define HOST_CUSTOM "192.168.234.1"
+#define URL_CUSTOM "/data.php"
+#define HTTPPORT_CUSTOM 80
 
 #define HOST_MQTT "mqtt.opensensors.io"
 #define MQTT_PORT 1883
