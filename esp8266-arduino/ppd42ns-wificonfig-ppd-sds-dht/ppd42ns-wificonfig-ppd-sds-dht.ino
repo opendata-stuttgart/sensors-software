@@ -55,7 +55,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-012"
+#define SOFTWARE_VERSION "NRZ-2016-015"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -66,8 +66,8 @@
 /* #define PPD_READ 1                                            *
 /* #define SDS_READ 0                                            *
 /*                                                               *
-/* #define SEND2DUSTI 0                                          *
-/* #define SEND2MADAVI 1                                         *
+/* #define SEND2DUSTI 1                                          *
+/* #define SEND2MADAVI 0                                         *
 /* #define SEND2MQTT 0                                           *
 /* #define SEND2CSV 0                                            *
 /*                                                               *
@@ -99,15 +99,21 @@
 char wlanssid[65] = "Freifunk";
 char wlanpwd[65] = "";
 
+char version_from_local_config[30] = "";
+
 bool dht_read = 0;
 bool ppd_read = 1;
 bool sds_read = 0;
 bool send2dusti = 1;
 bool send2madavi = 0;
+bool send2custom = 0;
 bool send2mqtt = 0;
 bool send2csv = 0;
+bool auto_update = 1;
 bool has_display = 0;
 int  debug = 3;
+
+long int sample_count = 0;
 
 const char* host_madavi = "www.madavi.de";
 const char* url_madavi = "/sensor/data.php";
@@ -116,6 +122,10 @@ const int httpPort_madavi = 80;
 const char* host_dusti = "api.luftdaten.info";
 const char* url_dusti = "/v1/push-sensor-data/";
 const int httpPort_dusti = 80;
+
+char host_custom[100] = "192.168.234.1";
+char url_custom[100] = "/data.php";
+int httpPort_custom = 80;
 
 const char* host_mqtt = "mqtt.opensensors.io";
 const int mqtt_port = 1883;
@@ -148,9 +158,9 @@ DHT dht(DHT_PIN, DHT_TYPE);
 
 /*****************************************************************
 /* Variable Definitions for PPD24NS                              *
+/* P1 for PM10 & P2 for PM25                                     *
 /*****************************************************************/
 
-// P1 for PM10 & P2 for PM25
 boolean valP1 = HIGH;
 boolean valP2 = HIGH;
 unsigned long durationP1;
@@ -168,6 +178,10 @@ unsigned long starttime;
 unsigned long starttime_SDS;
 unsigned long act_micro;
 unsigned long act_milli;
+unsigned long last_micro = 0;
+unsigned long min_micro = 1000000000;
+unsigned long max_micro = 0;
+unsigned long diff_micro = 0;
 
 unsigned long sampletime_ms = 30000;
 unsigned long sampletime_SDS_ms = 1000;
@@ -191,6 +205,23 @@ void debug_out(const String& text, int level, bool linebreak) {
 		} else {
 			Serial.print(text);
 		}
+	}
+}
+
+/*****************************************************************
+/* display values                                                 *
+/*****************************************************************/
+void display_debug(const String& text) {
+	if (has_display) {
+		debug_out("output debug text to display...",DEBUG_MIN_INFO,1);
+		debug_out(text,DEBUG_MAX_INFO,1);
+		display.resetDisplay();
+		display.clear();
+		display.displayOn();
+		display.setFont(ArialMT_Plain_10);
+		display.setTextAlignment(TEXT_ALIGN_LEFT);
+		display.drawStringMaxWidth(0,12,128,text);
+		display.display();
 	}
 }
 
@@ -226,10 +257,20 @@ void wifiConfig() {
 	wifiManager.addParameter(&custom_ppd_read);
 	WiFiManagerParameter custom_sds_read("sds_read", "SDS Sensor (0/1) ?", "", 10);
 	wifiManager.addParameter(&custom_sds_read);
+	WiFiManagerParameter custom_auto_update("auto_update", "Auto-Update (0/1) ?", "", 10);
+	wifiManager.addParameter(&custom_auto_update);
 	WiFiManagerParameter custom_has_display("has_display", "Display (0/1) ?", "", 10);
 	wifiManager.addParameter(&custom_has_display);
-	WiFiManagerParameter custom_debug("debug", "Debug output (0-3) ?", "", 10);
+	WiFiManagerParameter custom_debug("debug", "Debug output (0-5) ?", "", 10);
 	wifiManager.addParameter(&custom_debug);
+	WiFiManagerParameter custom_send2custom("send2custom", "Senden an eigene API (0/1)?", "", 10);
+	wifiManager.addParameter(&custom_send2custom);
+//	WiFiManagerParameter custom_host_custom("host_custom", "Host ?", "", 40);
+//	wifiManager.addParameter(&custom_host_custom);
+//	WiFiManagerParameter custom_url_custom("url_custom", "Pfad ?", "", 40);
+//	wifiManager.addParameter(&custom_url_custom);
+//	WiFiManagerParameter custom_httpPort_custom("httpPort_custom", "HTTP Port (80) ?", "", 10);
+//	wifiManager.addParameter(&custom_httpPort_custom);
 	apname  = "Feinstaubsensor-" + String(ESP.getChipId());
 	wifiManager.setTimeout(300);
 	wifiManager.setBreakAfterConfig(true);
@@ -244,18 +285,28 @@ void wifiConfig() {
 	if (strcmp(custom_send2dusti.getValue(),"") != 0) send2dusti = strtol(custom_send2dusti.getValue(), NULL, 10);
 	if (strcmp(custom_send2madavi.getValue(),"") != 0) send2madavi = strtol(custom_send2madavi.getValue(), NULL, 10);
 	if (strcmp(custom_send2csv.getValue(),"") != 0) send2csv = strtol(custom_send2csv.getValue(), NULL, 10);
+	if (strcmp(custom_auto_update.getValue(),"") != 0) auto_update = strtol(custom_auto_update.getValue(), NULL, 10);
 	if (strcmp(custom_has_display.getValue(),"") != 0) has_display = strtol(custom_has_display.getValue(), NULL, 10);
 	if (strcmp(custom_debug.getValue(),"") != 0) debug = strtol(custom_debug.getValue(), NULL, 10);
+	if (strcmp(custom_send2custom.getValue(),"") != 0) send2custom = strtol(custom_send2custom.getValue(), NULL, 10);
+//	if (strcmp(custom_host_custom.getValue(),"") != 0) strcpy(host_custom,custom_host_custom.getValue());
+//	if (strcmp(custom_url_custom.getValue(),"") != 0) strcpy(url_custom,custom_url_custom.getValue());
+//	if (strcmp(custom_httpPort_custom.getValue(),"") != 0) httpPort_custom = strtol(custom_httpPort_custom.getValue(), NULL, 10);
 	debug_out("------ Result from Webconfig ------",DEBUG_MIN_INFO,1);
 	debug_out("WLANSSID: ",DEBUG_MIN_INFO,0);debug_out(wlanssid,DEBUG_MIN_INFO,1);
-	debug_out("DHT_read: "+String(custom_dht_read.getValue()),DEBUG_MIN_INFO,0+" - ");debug_out(custom_dht_read.getValue(),DEBUG_MIN_INFO,0);debug_out(" - "+String(dht_read),DEBUG_MIN_INFO,1);
-	debug_out("PPD_read: ",DEBUG_MIN_INFO,0);debug_out(custom_ppd_read.getValue(),DEBUG_MIN_INFO,0);debug_out(" - "+String(ppd_read),DEBUG_MIN_INFO,1);
-	debug_out("SDS_read: ",DEBUG_MIN_INFO,0);debug_out(custom_sds_read.getValue(),DEBUG_MIN_INFO,0);debug_out(" - "+String(sds_read),DEBUG_MIN_INFO,1);
-	debug_out("Dusti   : ",DEBUG_MIN_INFO,0);debug_out(custom_send2dusti.getValue(),DEBUG_MIN_INFO,0);debug_out(" - "+String(send2dusti),DEBUG_MIN_INFO,1);
-	debug_out("Madavi  : ",DEBUG_MIN_INFO,0);debug_out(custom_send2madavi.getValue(),DEBUG_MIN_INFO,0);debug_out(" - "+String(send2madavi),DEBUG_MIN_INFO,1);
-	debug_out("CSV     : ",DEBUG_MIN_INFO,0);debug_out(custom_send2csv.getValue(),DEBUG_MIN_INFO,0);debug_out(" - "+String(send2csv),DEBUG_MIN_INFO,1);
-	debug_out("Display : ",DEBUG_MIN_INFO,0);debug_out(custom_has_display.getValue(),DEBUG_MIN_INFO,0);debug_out(" - "+String(has_display),DEBUG_MIN_INFO,1);
-	debug_out("Debug   : ",DEBUG_MIN_INFO,0);debug_out(custom_debug.getValue(),DEBUG_MIN_INFO,0);debug_out(" - "+String(debug),DEBUG_MIN_INFO,1);
+	debug_out("DHT_read: "+String(custom_dht_read.getValue())+" - "+String(dht_read),DEBUG_MIN_INFO,1);
+	debug_out("PPD_read: "+String(custom_ppd_read.getValue())+" - "+String(ppd_read),DEBUG_MIN_INFO,1);
+	debug_out("SDS_read: "+String(custom_sds_read.getValue())+" - "+String(sds_read),DEBUG_MIN_INFO,1);
+	debug_out("Dusti: "+String(custom_send2dusti.getValue())+" - "+String(send2dusti),DEBUG_MIN_INFO,1);
+	debug_out("Madavi: "+String(custom_send2madavi.getValue())+" - "+String(send2madavi),DEBUG_MIN_INFO,1);
+	debug_out("CSV: "+String(custom_send2csv.getValue())+" - "+String(send2csv),DEBUG_MIN_INFO,1);
+	debug_out("Autoupdate: "+String(custom_auto_update.getValue())+" - "+String(auto_update),DEBUG_MIN_INFO,1);
+	debug_out("Display: "+String(custom_has_display.getValue())+" - "+String(has_display),DEBUG_MIN_INFO,1);
+	debug_out("Debug: "+String(custom_debug.getValue())+" - "+String(debug),DEBUG_MIN_INFO,1);
+	debug_out("Custom API: "+String(custom_send2custom.getValue())+" - "+String(send2custom),DEBUG_MIN_INFO,1);
+//	debug_out("Custom Host: "+String(custom_host_custom.getValue())+" - "+String(host_custom),DEBUG_MIN_INFO,1);
+//	debug_out("Custom URL: "+String(custom_url_custom.getValue())+" - "+String(url_custom),DEBUG_MIN_INFO,1);
+//	debug_out("Custom Port: "+String(custom_httpPort_custom.getValue())+" - "+String(httpPort_custom),DEBUG_MIN_INFO,1);
 	debug_out("-----------------------------------",DEBUG_MIN_INFO,1);
 }
 
@@ -278,6 +329,7 @@ void connectWifi() {
 	}
 	debug_out("",DEBUG_MIN_INFO,1);
 	if (WiFi.status() != WL_CONNECTED) {
+		display_debug("AP ID: Feinstaubsensor-"+String(ESP.getChipId())+" - IP: 192.168.4.1");
 		wifiConfig();
 		if (WiFi.status() != WL_CONNECTED) {
 			retry_count = 0;
@@ -321,7 +373,7 @@ void sendData(const String& data, const char* host, const int httpPort, const ch
 		debug_out("connection failed",DEBUG_ERROR,1);
 		return;
 	}
-  
+
 	debug_out("Requesting URL: ",DEBUG_MIN_INFO,0);
 	debug_out(url,DEBUG_MIN_INFO,1);
 	debug_out(String(ESP.getChipId()),DEBUG_MIN_INFO,1);
@@ -393,7 +445,9 @@ void send_csv(const String& data) {
 	}
 }
 
-// DHT22 Sensor
+/*****************************************************************
+/* read DHT22 sensor values                                      *
+/*****************************************************************/
 String sensorDHT() {
 	String s = "";
 	float h = dht.readHumidity(); //Read Humidity
@@ -416,7 +470,9 @@ String sensorDHT() {
 	return s;
 }
 
-// SDS011 Sensor
+/*****************************************************************
+/* read SDS011 sensor values                                     *
+/*****************************************************************/
 String sensorSDS() {
 	String s = "";
 	String value_hex;
@@ -468,12 +524,17 @@ String sensorSDS() {
 		s += "{\"value_type\":\"SDS_P2\",\"value\":\"";
 		s += Float2String(float(sds_pm25_sum)/(sds_val_count*10.0));
 		s += "\"},";
+		if (! ppd_read) {
+			s.replace("SDS_","");
+		}
 		sds_pm10_sum = 0; sds_pm25_sum = 0; sds_val_count = 0;
 	}
 	return s;
 }
 
-// PPD42NS Sensor 
+/*****************************************************************
+/* read PPD42NS sensor values                                    *
+/*****************************************************************/
 String sensorPPD() {
 	float ratio = 0;
 	float concentration = 0;
@@ -530,11 +591,11 @@ String sensorPPD() {
 		// Begin printing
 		debug_out("LPO PM25    : "+String(lowpulseoccupancyP2),DEBUG_MIN_INFO,1);
 		debug_out("Ratio PM25  : "+Float2String(ratio)+" %",DEBUG_MIN_INFO,1);
-		debug_out("PM25 Count  : "+Float2String(concentration),DEBUG_MIN_INFO,0);
+		debug_out("PM25 Count  : "+Float2String(concentration),DEBUG_MIN_INFO,1);
 
 		// json for push to api / P2
 		s += "{\"value_type\":\"durP2\",\"value\":\"";
-		s += long(lowpulseoccupancyP1);
+		s += long(lowpulseoccupancyP2);
 		s += "\"},";
 		s += "{\"value_type\":\"ratioP2\",\"value\":\"";
 		s += Float2String(ratio);
@@ -561,9 +622,16 @@ void copyExtDef() {
 	if (SEND2MADAVI != send2madavi) { send2madavi = SEND2MADAVI; }
 	if (SEND2MQTT != send2mqtt) { send2mqtt = SEND2MQTT; }
 	if (SEND2CSV != send2csv) { send2csv = SEND2CSV; }
+	if (AUTO_UPDATE != auto_update) { auto_update = AUTO_UPDATE; }
 	if (HAS_DISPLAY != has_display) { has_display = HAS_DISPLAY; }
 
 	if (DEBUG != debug) { debug = DEBUG; }
+
+	if (SEND2CUSTOM != send2custom) { send2custom = SEND2CUSTOM; }
+	if (HOST_CUSTOM != NULL) { strcpy(host_custom,HOST_CUSTOM); }
+	if (URL_CUSTOM != NULL) { strcpy(url_custom,URL_CUSTOM); }
+	if (HTTPPORT_CUSTOM != httpPort_custom) { httpPort_custom = HTTPPORT_CUSTOM; }
+
 }
 
 /*****************************************************************
@@ -573,6 +641,7 @@ void writeConfig() {
 	debug_out("saving config...",DEBUG_MIN_INFO,1);
 	DynamicJsonBuffer jsonBuffer;
 	JsonObject& json = jsonBuffer.createObject();
+	json["SOFTWARE_VERSION"] = SOFTWARE_VERSION;
 	json["wlanssid"] = wlanssid;
 	json["wlanpwd"] = wlanpwd;
 	json["dht_read"] = dht_read;
@@ -582,8 +651,13 @@ void writeConfig() {
 	json["send2madavi"] = send2madavi;
 	json["send2mqtt"] = send2mqtt;
 	json["send2csv"] = send2csv;
+	json["auto_update"] = auto_update;
 	json["has_display"] = has_display;
 	json["debug"] = debug;
+	json["send2custom"] = send2custom;
+	json["host_custom"] = host_custom;
+	json["url_custom"] = url_custom;
+	json["httpPort_custom"] = httpPort_custom;
 
 	File configFile = SPIFFS.open("/config.json", "w");
 	if (!configFile) {
@@ -624,6 +698,7 @@ void readConfig() {
 				debug_out(buffer,DEBUG_MAX_INFO,1);
 				if (json.success()) {
 					debug_out("parsed json...",DEBUG_MIN_INFO,1);
+					if (json.containsKey("SOFTWARE_VERSION")) strcpy(version_from_local_config, json["SOFTWARE_VERSION"]);
 					if (json.containsKey("wlanssid")) strcpy(wlanssid, json["wlanssid"]);
 					if (json.containsKey("wlanssid")) strcpy(wlanpwd, json["wlanpwd"]);
 					if (json.containsKey("dht_read")) dht_read = json["dht_read"];
@@ -633,8 +708,13 @@ void readConfig() {
 					if (json.containsKey("send2madavi")) send2madavi = json["send2madavi"];
 					if (json.containsKey("send2mqtt")) send2mqtt = json["send2mqtt"];
 					if (json.containsKey("send2csv")) send2csv = json["send2csv"];
+					if (json.containsKey("auto_update")) has_display = json["auto_update"];
 					if (json.containsKey("has_display")) has_display = json["has_display"];
 					if (json.containsKey("debug")) debug = json["debug"];
+					if (json.containsKey("send2custom")) send2custom = json["send2custom"];
+					if (json.containsKey("host_custom")) strcpy(host_custom, json["host_custom"]);
+					if (json.containsKey("url_custom")) strcpy(url_custom, json["url_custom"]);
+					if (json.containsKey("httpPort_custom")) httpPort_custom = json["httpPort_custom"];
 				} else {
 					debug_out("failed to load json config",DEBUG_ERROR,1);
 				}
@@ -651,19 +731,23 @@ void readConfig() {
 /* AutoUpdate                                                    *
 /*****************************************************************/
 void autoUpdate() {
-	debug_out("Starting OTA update ...",DEBUG_MIN_INFO,1);
-	last_update_attempt = millis();
-	t_httpUpdate_return ret = ESPhttpUpdate.update(update_host, update_port, update_url, SOFTWARE_VERSION);
-	switch(ret) {
-		case HTTP_UPDATE_FAILED:
-				debug_out("[update] Update failed.",DEBUG_ERROR,1);
-				break;
-		case HTTP_UPDATE_NO_UPDATES:
-				debug_out("[update] Update no Update.",DEBUG_MIN_INFO,1);
-				break;
-		case HTTP_UPDATE_OK:
-				debug_out("[update] Update ok.",DEBUG_MIN_INFO,1); // may not called we reboot the ESP
-				break;
+	if (auto_update) {
+		debug_out("Starting OTA update ...",DEBUG_MIN_INFO,1);
+		last_update_attempt = millis();
+		t_httpUpdate_return ret = ESPhttpUpdate.update(update_host, update_port, update_url, SOFTWARE_VERSION);
+		switch(ret) {
+			case HTTP_UPDATE_FAILED:
+					debug_out("[update] Update failed.",DEBUG_ERROR,1);
+					display_debug("Update failed.");
+					break;
+			case HTTP_UPDATE_NO_UPDATES:
+					debug_out("[update] Update no Update.",DEBUG_MIN_INFO,1);
+					display_debug("No update found.");
+					break;
+			case HTTP_UPDATE_OK:
+					debug_out("[update] Update ok.",DEBUG_MIN_INFO,1); // may not called we reboot the ESP
+					break;
+		}
 	}
 }
 
@@ -707,11 +791,21 @@ void display_values(const String& data) {
 	display.displayOn();
 	display.setFont(ArialMT_Plain_10);
 	display.setTextAlignment(TEXT_ALIGN_LEFT);
-	if (dht_read) display.drawString(0,0,"Temp: "+temp+"   Hum.: "+humidity);
-	if (ppd_read) display.drawString(0,12,"PPD P1: "+ppd_p1);
-	if (ppd_read) display.drawString(0,24,"PPD P2: "+ppd_p2);
-	if (sds_read) display.drawString(0,36,"SDS P1: "+sds_p1);
-	if (sds_read) display.drawString(0,48,"SDS P2: "+sds_p2);
+	value_count = 0;
+	if (dht_read) display.drawString(0,12*(value_count++),"Temp: "+temp+"   Hum.: "+humidity);
+	if (ppd_read) {
+		display.drawString(0,12*(value_count++),"PPD P1: "+ppd_p1);
+		display.drawString(0,12*(value_count++),"PPD P2: "+ppd_p2);
+	}
+	if (sds_read) {
+		if (ppd_read) {
+			display.drawString(0,12*(value_count++),"SDS P1: "+sds_p1);
+			display.drawString(0,12*(value_count++),"SDS P2: "+sds_p2);
+		} else {
+			display.drawString(0,12*(value_count++),"SDS P1: "+ppd_p1);
+			display.drawString(0,12*(value_count++),"SDS P2: "+ppd_p2);
+		}
+	}
 	display.display();
 }
 
@@ -729,15 +823,19 @@ void init_display() {
 void setup() {
 	WiFi.persistent(false);
 	Serial.begin(9600);             // Output to Serial at 9600 baud
+	init_display();
 	copyExtDef();
+	display_debug("Reading config from SPIFFS");
 	readConfig();
+	display_debug("Connecting to "+String(wlanssid));
 	connectWifi();                  // Start ConnectWifi
+	display_debug("Writing config to SPIFFS");
 	writeConfig();
+	display_debug("Looking for OTA update");
 	autoUpdate();
-	if (has_display) init_display();
 	pinMode(PPD_PIN_PM1,INPUT_PULLUP); // Listen at the designated PIN
 	pinMode(PPD_PIN_PM2,INPUT_PULLUP); // Listen at the designated PIN
-	dht.begin();                    // Start DHT
+	dht.begin();                       // Start DHT
 	delay(10);
 	debug_out("\nChipId: ",DEBUG_MIN_INFO,1);
 	debug_out(String(ESP.getChipId()),DEBUG_MIN_INFO,1);
@@ -748,6 +846,8 @@ void setup() {
 	if (send2madavi) debug_out("Sende an madavi.de...",DEBUG_MIN_INFO,1);
 	if (send2mqtt) debug_out("Sende an MQTT broker...",DEBUG_MIN_INFO,1);
 	if (send2csv) debug_out("Sende als CSV an Serial...",DEBUG_MIN_INFO,1);
+	if (send2custom) debug_out("Sende an custom API...",DEBUG_MIN_INFO,1);
+	if (auto_update) debug_out("Auto-Update wird ausgeführt...",DEBUG_MIN_INFO,1);
 	if (has_display) debug_out("Zeige auf Display...",DEBUG_MIN_INFO,1);
 	starttime = millis();           // store the start time
 	starttime_SDS = millis();
@@ -761,6 +861,17 @@ void loop() {
 
 	act_micro = micros();
 	act_milli = millis();
+
+	sample_count++;
+	
+	if (last_micro != 0) {
+		diff_micro = act_micro-last_micro;
+		if (max_micro < diff_micro) { max_micro = diff_micro;}
+		if (min_micro > diff_micro) { min_micro = diff_micro;}
+		last_micro = act_micro;
+	} else {
+		last_micro = act_micro;
+	}
 
 	String result_PPD;
 	String result_SDS;
@@ -788,6 +899,16 @@ void loop() {
 		if (ppd_read) {data += result_PPD;}
 		if (sds_read) {data += result_SDS;}
 		if (dht_read) {data += result_DHT;}
+		data += "{\"value_type\":\"samples\",\"value\":\"";
+		data += long(sample_count);
+		data += "\"},";
+		data += "{\"value_type\":\"min_micro\",\"value\":\"";
+		data += long(min_micro);
+		data += "\"},";
+		data += "{\"value_type\":\"max_micro\",\"value\":\"";
+		data += long(max_micro);
+		data += "\"},";
+		
 		if ((result_PPD.length() > 0) || (result_DHT.length() > 0) || (result_SDS.length() > 0)) {
 			data.remove(data.length()-1);
 		}
@@ -799,15 +920,21 @@ void loop() {
 			display_values(data);
 		}
 
-		if (send2madavi) {
-			debug_out("#### Sending to madavi.de: ",DEBUG_MIN_INFO,1);
-			sendData(data,host_madavi,httpPort_madavi,url_madavi);
-		}
 		if (send2dusti) {
 			debug_out("#### Sending to luftdaten.info: ",DEBUG_MIN_INFO,1);
 			sendData(data,host_dusti,httpPort_dusti,url_dusti);
 		}
 		
+		if (send2madavi) {
+			debug_out("#### Sending to madavi.de: ",DEBUG_MIN_INFO,1);
+			sendData(data,host_madavi,httpPort_madavi,url_madavi);
+		}
+
+		if (send2custom) {
+			debug_out("#### Sending to custom api: ",DEBUG_MIN_INFO,1);
+			sendData(data,host_custom,httpPort_custom,url_custom);
+		}
+
 		if (send2mqtt) {
 			debug_out("#### Sending to mqtt: ",DEBUG_MIN_INFO,1);
 			sendmqtt(data,host_mqtt,mqtt_port);
@@ -817,15 +944,20 @@ void loop() {
 			debug_out("#### Sending as csv: ",DEBUG_MIN_INFO,1);
 			send_csv(data);
 		}
+
+		if ((act_milli-last_update_attempt) > pause_between_update_attempts) {
+			autoUpdate();
+		}
+
 		// Resetting for next sampling
 		lowpulseoccupancyP1 = 0;
 		lowpulseoccupancyP2 = 0;
+		sample_count = 0;
+		last_micro = 0;
+		min_micro = 1000000000;
+		max_micro = 0;
 		starttime = millis(); // store the start time
 	}
 	
-	if ((act_milli-last_update_attempt) > pause_between_update_attempts) {
-		autoUpdate();
-	}
-
 	yield();
 }
