@@ -11,6 +11,7 @@
 #define SOFTWARE_VERSION_INITIALS "MULTISENS"
 #endif
 #define SOFTWARE_VERSION_NUMBER "0.6"
+
 // changelog 
 // 0.6: MQTT loop (process incoming/ping)
 // 0.5: MQTT implemented, 

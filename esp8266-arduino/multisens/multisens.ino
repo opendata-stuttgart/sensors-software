@@ -11,6 +11,7 @@
 /* PINs and WIFI in sensorconfig.h            */
 /**********************************************/
 #include "sensorconfig.h"
+String software_version = String(SOFTWARE_VERSION_INITIALS)+String("_")+String(SOFTWARE_VERSION_NUMBER);
 
 #ifdef WIRELESS_ACTIVE
 #include <ESP8266WiFi.h>
@@ -18,6 +19,8 @@
 int value = 0;
 String software_version_s=String(SOFTWARE_VERSION_INITIALS)+"_"+String(SOFTWARE_VERSION_NUMBER);
 #include "apifunctions.h"
+#include "serialfunctions.h"
+#include "ledfunctions.h"
 
 /**********************************************/
 /* MQTT declarations: see sensorconfig.h      */
@@ -54,6 +57,14 @@ String software_version_s=String(SOFTWARE_VERSION_INITIALS)+"_"+String(SOFTWARE_
 /**********************************************/
 /* WiFi declarations: see sensorconfig.h      */
 /**********************************************/
+
+/* GPS  */
+#ifdef GPS_ACTIVE
+#include <TinyGPS++.h>
+#include <SoftwareSerial.h>
+#include "gpsfunctions.h"
+#endif //GPS_ACTIVE
+
 
 /**********************************************/
 /* Variable Definitions for PPD24NS           */
@@ -97,11 +108,6 @@ String lowpulseoccupancyP2s;
 #ifdef DEBUG_CYCLES
 unsigned long cycount = 0;
 #endif // DEBUG_CYCLES
-
-
-#ifdef PIN_LED_STATUS
-int ledsstate=LOW;
-#endif
 
 /**********************************************/
 /* The Setup
@@ -199,6 +205,9 @@ digitalWrite(PIN_LED_STATUS, ledsstate);
 #ifdef PUSHTO_MQTT
 mqtt_setup();
 #endif
+#ifdef GPS_ACTIVE
+gps_setup();
+#endif //GPS_ACTIVE
 #ifdef PIN_LED_STATUS
 ledsstate=HIGH;
 digitalWrite(PIN_LED_STATUS, ledsstate);
@@ -339,6 +348,9 @@ cycount=0;
     #ifdef DS_ACTIVE
         DSpush();
     #endif //DS_ACTIVE
+    #ifdef GPS_ACTIVE
+    gps_read();
+    #endif //GPS_ACTIVE
 
     // Resetting for next sampling
     lowpulseoccupancyP1 = 0;

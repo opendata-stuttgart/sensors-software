@@ -14,7 +14,12 @@ int D[13]={16, 5, 4, 0, 2, 14, 12, 13, 15, 3,  1,  9, 10};
 /* defines to activate sensors */
 #define PPD_ACTIVE
 //#define DHT_ACTIVE
-//#define DS_ACTIVE
+// #define DS_ACTIVE
+#define GPS_ACTIVE
+
+//#define DEBUG_CYCLES
+
+unsigned int verbosity = 4; //TODO: implement; output levels over serial, increase to get more messages, like 0 no_messages, 1 warn, 2 info, 5 debug
 
 /* DHT PIN */
 // #define DHTPIN 4 // = GPIO PIN
@@ -53,10 +58,19 @@ const char mqttintopic[]="intopicforclient";
 // endif PUSHTO_MQTT
 #endif
 
-// endif WIRELESS_ACTIVE
+#endif // WIRELESS_ACTIVE
+
+/* GPS settings */
+#ifdef GPS_ACTIVE
+unsigned int pin_gps_rx=D[7];
+unsigned int pin_gps_tx=D[8];
+unsigned int gps_baudrate=9600;
+unsigned long gpsmaxtime_ms=2100; // max time to wait for GPS messages on serial
 #endif
 
-#define PIN_LED_STATUS BUILTIN_LED; //D[8] // the GPIO of the LED pin
+#define PIN_LED_STATUS BUILTIN_LED
+//#define PIN_LED_STATUS D[8] // the GPIO of the LED pin
+unsigned int pin_led_status = PIN_LED_STATUS ; // the GPIO of the LED pin
 
 // nodemcu pins Dx - GPIOx
 // in this config use GPIO number
