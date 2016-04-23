@@ -42,6 +42,11 @@ Serial.print(gps.location.lng(),6);
 Serial.print("\t");
 Serial.println(gps.altitude.meters());
 #endif
+        #ifdef PUSHTO_MQTT
+        mqtt_publish_subtopic("GPS/lat",gps.location.lat());
+        mqtt_publish_subtopic("GPS/lon",gps.location.lng());
+        mqtt_publish_subtopic("GPS/height",gps.altitude.meters());
+        #endif
 }
 
 bool push_gps_datetime(){
@@ -51,24 +56,40 @@ bool push_gps_datetime(){
     if (!d.isValid()){
         return false;
     }else{
-        sprintf(sz, "DateTimeAge\t%02d-%02d-%02d", d.year(), d.month(), d.day());
+        sprintf(sz, "%02d-%02d-%02d", d.year(), d.month(), d.day());
         #ifdef PUSHTO_SERIAL
+        Serial.print("DateTimeAge\t");
         Serial.print(sz);
+        #endif
+        #ifdef PUSHTO_MQTT
+        mqtt_publish_subtopic("GPS/date",gps.hdop.value());
         #endif
     }
     if (!t.isValid()){
         Serial.println("");
         return false;
     }else{
-        sprintf(sz, " %02d:%02d:%02d\t%02d", t.hour(), t.minute(), t.second(),gps.location.age());
+        sprintf(sz, "%02d:%02d:%02d", t.hour(), t.minute(), t.second(),gps.location.age());
         #ifdef PUSHTO_SERIAL
+        Serial.print(" ");
         Serial.println(sz);
+        #endif
+        #ifdef PUSHTO_MQTT
+        mqtt_publish_subtopic("GPS/time",sz);
+        #endif
+        sprintf(sz, "%02d", gps.location.age());
+        #ifdef PUSHTO_SERIAL
+        Serial.print("\t");
+        Serial.println(sz);
+        #endif
+        #ifdef PUSHTO_MQTT
+        mqtt_publish_subtopic("GPS/locationage",sz);
         #endif
     }
     return true;
 }
 bool push_gps_info(){
-      bool retval = ( gps.hdop.isValid() & gps.satellites.isValid() );
+      bool retval = (gps.hdop.isValid() & gps.satellites.isValid());
       #ifdef PUSHTO_SERIAL
       Serial.print("HdopSat\t");
       if(gps.hdop.isValid()){
@@ -80,6 +101,14 @@ bool push_gps_info(){
       }
       Serial.println("");
       #endif
+#ifdef PUSHTO_MQTT    
+      if(gps.hdop.isValid()){
+        mqtt_publish_subtopic("GPS/HDOP",gps.hdop.value());
+      }
+      if(gps.satellites.isValid()){
+        mqtt_publish_subtopic("GPS/satellites",gps.satellites.value());
+      }
+#endif
       return retval;
 }
 bool gps_read(){
