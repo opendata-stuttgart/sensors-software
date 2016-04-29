@@ -24,18 +24,18 @@
 
 // DHT22, Sensor Temperatur und Luftfeuchte
 #define DHT_READ 0
-#define DHT_PIN 13
+#define DHT_PIN D7
 #define DHT_TYPE DHT22
 
 // PPD42NS, der günstigere der beiden Feinstaubsensoren
 #define PPD_READ 1
-#define PPD_PIN_PM1 12
-#define PPD_PIN_PM2 14
+#define PPD_PIN_PM1 D6
+#define PPD_PIN_PM2 D5
 
 // SDS011, der etwas teuerere Feinstaubsensor
 #define SDS_READ 0
-#define SDS_PIN_RX 5
-#define SDS_PIN_TX 4
+#define SDS_PIN_RX D1
+#define SDS_PIN_TX D2
 
 // Automatische Firmware-Updates über WLAN
 #define AUTO_UPDATE 1
