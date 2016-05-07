@@ -41,10 +41,10 @@ ESP8266WebServer
 DNSServer  
 Wire  
   
-Installierbar über Arduino IDE (Menü Sketch -> Bibliothek einbinden -> Bibliotheken verwalten):  
-ArduinoJson <https://github.com/bblanchon/ArduinoJson>  
-ESP8266 Oled driver for SSD1306 display <https://github.com/squix78/esp8266-oled-ssd1306>  
-ESP8266httpUpdate  
-PubSubClient <http://pubsubclient.knolleary.net/>  
-SoftwareSerial <https://github.com/plerup/espsoftwareserial>  
-WifiManager <https://github.com/tzapu/WiFiManager>  
+Installierbar über Arduino IDE (Menü Sketch -> Bibliothek einbinden -> Bibliotheken verwalten, in Klammern die getestete Version):  
+ArduinoJson <https://github.com/bblanchon/ArduinoJson> (5.1.1)  
+ESP8266 Oled driver for SSD1306 display <https://github.com/squix78/esp8266-oled-ssd1306> (2.0.0)  
+ESP8266httpUpdate (1.1.0)  
+PubSubClient <http://pubsubclient.knolleary.net/> (2.6.0)  
+SoftwareSerial <https://github.com/plerup/espsoftwareserial> (1.0.0)  
+WifiManager <https://github.com/tzapu/WiFiManager>  (unbedingt 0.10.0, da sonst Fehler wegen undefinierter isnan())

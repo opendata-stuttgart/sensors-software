@@ -220,7 +220,7 @@ void display_debug(const String& text) {
 		display.displayOn();
 		display.setFont(ArialMT_Plain_10);
 		display.setTextAlignment(TEXT_ALIGN_LEFT);
-		display.drawStringMaxWidth(0,12,128,text);
+		display.drawStringMaxWidth(0,12,120,text);
 		display.display();
 	}
 }
