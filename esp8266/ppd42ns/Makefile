@@ -14,3 +14,8 @@ noop:
 	# upload empty init.lua and reboot
 	luatool.py -r -f noop_init/init.lua
 
+upload_dev:
+	luatool.py -f init.lua
+	luatool.py -f maindev.lua
+	luatool.py -f http.lua
+	luatool.py -l
