@@ -459,7 +459,7 @@ String sensorDHT() {
 	} else {
 		debug_out("Humidity    : "+String(h)+"%",DEBUG_MIN_INFO,1);
 		debug_out("Temperature : "+String(t)+" C",DEBUG_MIN_INFO,1);
-		s += "{\"value_type\":\"temp\",\"value\":\"";
+		s += "{\"value_type\":\"temperature\",\"value\":\"";
 		s += Float2String(t);
 		s += "\"},";
 		s += "{\"value_type\":\"humidity\",\"value\":\"";
