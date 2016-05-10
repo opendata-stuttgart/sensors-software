@@ -36,12 +36,12 @@ bool push_gps_location(){
         return false;   
     }
 #ifdef PUSHTO_SERIAL
-Serial.print("LatLonAlt\t");
-Serial.print(gps.location.lat(),6);
-Serial.print("\t");
-Serial.print(gps.location.lng(),6);
-Serial.print("\t");
-Serial.println(gps.altitude.meters());
+serial_out("LatLonAlt\t");
+serial_out(gps.location.lat(),6);
+serial_out("\t");
+serial_out(gps.location.lng(),6);
+serial_out("\t");
+serial_outln(gps.altitude.meters());
 #endif
 }
 
@@ -54,16 +54,16 @@ bool push_gps_datetime(){
     }else{
         sprintf(sz, "DateTimeAge\t%02d-%02d-%02d", d.year(), d.month(), d.day());
         #ifdef PUSHTO_SERIAL
-        Serial.print(sz);
+        serial_out(sz);
         #endif
     }
     if (!t.isValid()){
-        Serial.println("");
+        serial_outln("");
         return false;
     }else{
         sprintf(sz, " %02d:%02d:%02d\t%02d", t.hour(), t.minute(), t.second(),gps.location.age());
         #ifdef PUSHTO_SERIAL
-        Serial.println(sz);
+        serial_outln(sz);
         #endif
     }
     return true;
@@ -72,26 +72,29 @@ bool push_gps_datetime(){
 bool push_gps_info(){
       bool retval = ( gps.hdop.isValid() & gps.satellites.isValid() );
       #ifdef PUSHTO_SERIAL
-      Serial.print("HdopSat\t");
+      serial_out("HdopSat\t");
       if(gps.hdop.isValid()){
-          Serial.print(gps.hdop.value());
+          serial_out(gps.hdop.value());
       }
-      Serial.print("\t");
+      serial_out("\t");
       if(gps.satellites.isValid()){
-          Serial.print(gps.satellites.value());
+          serial_out(gps.satellites.value());
       }
-      Serial.println("");
+      serial_outln("");
       #endif
       return retval;
 }
 
 bool gps_read(){
     bool success=false;
+    #ifdef PUSHTO_SERIAL
+    serial_outln("gps_read", 5);
+    #endif
     // ss.flush(); //only outgoing data
     if(!feedDelayGPS(gpsmaxtime_ms)){
         // no news from GPS
         #ifdef PUSHTO_SERIAL
-        Serial.println("no news from GPS");
+        serial_out("no news from GPS");
         #endif
         return false;
     }
@@ -110,11 +113,11 @@ bool gps_read(){
 //      }
 //     }
 
-//     Serial.print("debug: starttime=");
-//     Serial.println (starttime);
+//     serial_out("debug: starttime=");
+//     serial_outln (starttime);
 //     if(!success){
 //         #ifdef PUSHTO_SERIAL
-//         Serial.println("error reading GPS");
+//         serial_outln("error reading GPS");
 //         #endif
 //         return false;
 //     }

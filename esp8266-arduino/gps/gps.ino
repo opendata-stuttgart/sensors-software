@@ -16,11 +16,26 @@ static const int GPSRXPin = D[7];
 static const int GPSTXPin = D[8];
 static const uint32_t GPSBaud = 9600;
 unsigned long gpsmaxtime_ms=2100;
+unsigned int pin_led = D[0];
+
+//#define DEBUG_GPS_NMEA
 
 #include <TinyGPS++.h>
 #include <SoftwareSerial.h>
 #include "gpsfunctions.h"
 #endif //GPS_ACTIVE
+
+void blink_led(unsigned int pin,unsigned int n=2, unsigned int interval=100){
+unsigned int i=0;
+    digitalWrite(pin, LOW);
+    delay(interval);
+    for (i=0; i<n;i++){
+        digitalWrite(pin, HIGH);
+        delay(interval);
+        digitalWrite(pin, LOW);
+        delay(interval);
+    }
+}
 
 void setup(){
 #ifdef PUSHTO_SERIAL
@@ -29,18 +44,33 @@ void setup(){
     Serial.print("chipid\t");
     Serial.println(ESP.getChipId());
 #endif //PUSHTO_SERIAL
+
+    pinMode(pin_led, OUTPUT);
+    blink_led(pin_led,3,500);
+    
 #ifdef GPS_ACTIVE
     gps_setup();
 #endif //GPS_ACTIVE
+
+    pinMode(pin_led, OUTPUT);
+    blink_led(pin_led,2,500);
+
 }
 
 void loop(){
+blink_led(pin_led,2,200);
 bool success=gps_read();
 if (!success){
+blink_led(pin_led,5,100);
 #ifdef PUSHTO_SERIAL
     Serial.print(millis());
     Serial.println("\tGPS failed");
 #endif //PUSHTO_SERIAL
-}
-delay(30000);
+}else{
+    push_gps_location();
+    blink_led(pin_led,1,1000);
+    Serial.println("\tGPS read success");
+
+}    
+delay(10000);
 }

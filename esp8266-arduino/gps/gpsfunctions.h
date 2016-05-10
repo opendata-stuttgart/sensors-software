@@ -18,15 +18,34 @@ void gps_setup(){
 // is being "fed".
 bool feedDelayGPS(unsigned long ms)
 {
+  #ifdef DEBUG_GPS_NMEA
+  char recchar;
+  #endif
   unsigned long start = millis();
   do
   {
-    while (ss.available())
+    while (ss.available()){
+      #ifdef DEBUG_GPS_NMEA
+      recchar=ss.read();
+      Serial.print(recchar);
+      gps.encode(recchar);
+      #endif
+      #ifndef DEBUG_GPS_NMEA
       gps.encode(ss.read());
+      #endif
+    
       if (gps.location.isUpdated()){
           return true;
       }
+    }
   } while (millis() - start < ms);
+#ifdef DEBUG_GPS_NMEA
+    Serial.println("charsProcessed() sentencesWithFix() failedChecksum() passedChecksum()");
+    Serial.println(gps.charsProcessed());
+    Serial.println(gps.sentencesWithFix());
+    Serial.println(gps.failedChecksum());
+    Serial.println(gps.passedChecksum());
+#endif
   return false;
 }
 
