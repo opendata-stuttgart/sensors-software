@@ -51,10 +51,10 @@ DHT sensor library <https://github.com/adafruit/DHT-sensor-library> (1.2.3)
 ESP8266 Oled driver for SSD1306 display <https://github.com/squix78/esp8266-oled-ssd1306> (2.0.0)  
 ESP8266httpUpdate (1.1.0)  
 PubSubClient <http://pubsubclient.knolleary.net/> (2.6.0)  
-ESP8266 Oled Driver for SSD1306 display <https://github.com/squix78/esp8266-oled-ssd1306> (2.0.2)
+ESP8266 Oled Driver for SSD1306 display <https://github.com/squix78/esp8266-oled-ssd1306> (2.0.2)  
 SoftwareSerial <https://github.com/plerup/espsoftwareserial> (1.0.0)  
-WifiManager <https://github.com/tzapu/WiFiManager>  (unbedingt 0.10.0, da sonst Fehler wegen undefinierter isnan())
-    
+WifiManager <https://github.com/tzapu/WiFiManager>  (unbedingt 0.10.0, da sonst Fehler wegen undefinierter isnan())  
+  
 Bis Version NRZ-2016-15:  
 DHT <https://github.com/adafruit/DHT-sensor-library>  
 (DHT.cpp und DHT.h downloaden und in das Softwareverzeichnis kopieren)  
