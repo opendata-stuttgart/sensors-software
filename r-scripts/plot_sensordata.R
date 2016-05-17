@@ -163,6 +163,43 @@ if(usearchive){
     print(paste("total size of data:", dim(arcdat) ,collapse = " "))
 }# usearchive
 
+## calibration function
+ppdcalib<-function(x){1.1*x^3 - 3.8*x^2 + 520*x + 0.62} # calibration function: ratioPx [%] / Concentration [pcs/283ml] = [pcs/0.01cf]
+cf3tom3=0.02831685 # cubic foot to cubic meter ft³=0.02831685m³, m³=ft³/35.315
+# to pcs/m3:  /100 /cf3tom3
+# to µg*m^-3
+# https://github.com/intel-iot-devkit/upm/pull/409/files
+#  +    // All particles are spherical, with a density of 1.65E12 µg/m3
+#  +    double density = 1.65 * pow (10, 12);
+#  +    // The radius of a particle in the PM2.5 channel is .44 µm
+# I doubt it, should be 2.5/2 µm
+#  +    double r25 = 0.44 * pow (10, -6);
+#  +    double vol25 = (4/3) * pi * pow (r25, 3);
+#  +    double mass25 = density * vol25; // ug
+#  +    double K = 3531.5; // per m^3
+# interesting, since with weather correction:
+# http://www.cleanair.org/sites/default/files/Drexel%20Air%20Monitoring_-_Final_Report_-_Team_19_0.pdf
+
+
+pdffilename=file.path(plotdir,paste("ppd_calib.pdf",sep=""))
+pdf(pdffilename)
+p<- ggplot(sdat,aes(ratioP1,P1))+geom_point()+
+    stat_function(fun=ppdcalib)+
+    labs(title="PPD calibration function")+
+    coord_flip()
+    #coord_flip to have the same orientation as in the spec sheet curve
+print(p)
+p<- ggplot(sdat[sdat$ratioP1<5,],aes(ratioP1,P1))+geom_point()+
+    stat_function(fun=ppdcalib)+
+    labs(title="PPD calibration function < 5")
+print(p)
+
+p<- ggplot(arcdat,aes(P2, ..count..))+
+    geom_density()+xlim(0.621,3000)+
+    facet_wrap(~sensor_id,scales='free_y')
+print(p)
+dev.off()
+
 stop("manual break: archive plots done")
 ## the following is legacy code
 
