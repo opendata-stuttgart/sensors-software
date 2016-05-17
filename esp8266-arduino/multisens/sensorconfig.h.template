@@ -1,6 +1,7 @@
 /*
-name this file sensorconfig.h
+copy this file to sensorconfig.h
 and change your config here
+or link one from configs/ dir
 */
 #define SOFTWARE_VERSION_INITIALS "MULTISENS"
 // additionally set SOFTWARE_VERSION_NUMBER in softwareversion.h
