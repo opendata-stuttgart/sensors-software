@@ -23,7 +23,10 @@ Nach 5 Minuten sollte der Access-Point wieder deaktiviert werden (Funktioniert z
 Speichern als CSV:  
 Die Daten können als CSV via USB ausgegeben werden. Dafür sollte sowohl in ext_def.h als auch in der WLAN-Konfiguration Debug auf 0 gesetzt werden, damit ide ausgegebenen Daten nur noch die Sensordaten sind. Beim Neustart des ESP8266 erscheinen dann nur noch ein paar wenige Zeichen, die den Startzustand darstellen.  
   
-  
+Wiring:
+
+* SDS and DHT wiring: [pdf/sds_dht_wiring.pdf](pdf/sds_dht_wiring.pdf)
+
 Benötigte Software:  
 Arduino IDE <https://www.arduino.cc/en/Main/Software>  
 ESP8266 für Arduino <http://arduino.esp8266.com/stable/package_esp8266com_index.json>  
