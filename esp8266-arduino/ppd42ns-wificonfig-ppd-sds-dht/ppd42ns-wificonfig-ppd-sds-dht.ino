@@ -55,7 +55,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-017"
+#define SOFTWARE_VERSION "NRZ-2016-018"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -89,6 +89,7 @@
 #include <Wire.h>
 #include <SSD1306.h>
 #include <DHT.h>
+#include <Adafruit_BMP085.h>
 
 #include "ext_def.h"
 
@@ -159,7 +160,7 @@ DHT dht(DHT_PIN, DHT_TYPE);
 /*****************************************************************
 /* BMP declaration                                               *
 /*****************************************************************/
-//BMP dht(BMP_PIN_SCL, BMP_PIN_SDA);
+Adafruit_BMP085 bmp;
 
 /*****************************************************************
 /* Variable Definitions for PPD24NS                              *
@@ -289,6 +290,7 @@ void wifiConfig() {
 	if (strcmp(custom_dht_read.getValue(),"") != 0) dht_read = strtol(custom_dht_read.getValue(), NULL, 10);
 	if (strcmp(custom_ppd_read.getValue(),"") != 0) ppd_read = strtol(custom_ppd_read.getValue(), NULL, 10);
 	if (strcmp(custom_sds_read.getValue(),"") != 0) sds_read = strtol(custom_sds_read.getValue(), NULL, 10);
+	if (strcmp(custom_bmp_read.getValue(),"") != 0) bmp_read = strtol(custom_bmp_read.getValue(), NULL, 10);
 	if (strcmp(custom_send2dusti.getValue(),"") != 0) send2dusti = strtol(custom_send2dusti.getValue(), NULL, 10);
 	if (strcmp(custom_send2madavi.getValue(),"") != 0) send2madavi = strtol(custom_send2madavi.getValue(), NULL, 10);
 	if (strcmp(custom_send2csv.getValue(),"") != 0) send2csv = strtol(custom_send2csv.getValue(), NULL, 10);
@@ -304,6 +306,7 @@ void wifiConfig() {
 	debug_out("DHT_read: "+String(custom_dht_read.getValue())+" - "+String(dht_read),DEBUG_MIN_INFO,1);
 	debug_out("PPD_read: "+String(custom_ppd_read.getValue())+" - "+String(ppd_read),DEBUG_MIN_INFO,1);
 	debug_out("SDS_read: "+String(custom_sds_read.getValue())+" - "+String(sds_read),DEBUG_MIN_INFO,1);
+	debug_out("BMP_read: "+String(custom_bmp_read.getValue())+" - "+String(bmp_read),DEBUG_MIN_INFO,1);
 	debug_out("Dusti: "+String(custom_send2dusti.getValue())+" - "+String(send2dusti),DEBUG_MIN_INFO,1);
 	debug_out("Madavi: "+String(custom_send2madavi.getValue())+" - "+String(send2madavi),DEBUG_MIN_INFO,1);
 	debug_out("CSV: "+String(custom_send2csv.getValue())+" - "+String(send2csv),DEBUG_MIN_INFO,1);
@@ -472,6 +475,31 @@ String sensorDHT() {
 		s += "\"},";
 		s += "{\"value_type\":\"humidity\",\"value\":\"";
 		s += Float2String(h);
+		s += "\"},";
+	}
+	debug_out("------------------------------",DEBUG_MIN_INFO,1);    
+	return s;
+}
+/*****************************************************************
+/* read BMP180 sensor values                                      *
+/*****************************************************************/
+String sensorBMP() {
+	String s = "";
+	int p;
+	float t;
+
+	p = bmp.readPressure();
+	t = bmp.readTemperature();
+	if (isnan(p) || isnan(t)) {
+		debug_out("BMP180 couldn't be read",DEBUG_ERROR,1);
+	} else {
+		debug_out("Pressure    : "+Float2String(float(p)/100)+" hPa",DEBUG_MIN_INFO,1);
+		debug_out("Temperature : "+String(t)+" C",DEBUG_MIN_INFO,1);
+		s += "{\"value_type\":\"BMP_pressure\",\"value\":\"";
+		s += String(p);
+		s += "\"},";
+		s += "{\"value_type\":\"BMP_temperature\",\"value\":\"";
+		s += Float2String(t);
 		s += "\"},";
 	}
 	debug_out("------------------------------",DEBUG_MIN_INFO,1);    
@@ -744,6 +772,7 @@ void readConfig() {
 void autoUpdate() {
 	if (auto_update) {
 		debug_out("Starting OTA update ...",DEBUG_MIN_INFO,1);
+		display_debug("Looking for OTA update");
 		last_update_attempt = millis();
 		t_httpUpdate_return ret = ESPhttpUpdate.update(update_host, update_port, update_url, SOFTWARE_VERSION);
 		switch(ret) {
@@ -834,6 +863,8 @@ void init_display() {
 void setup() {
 	WiFi.persistent(false);
 	Serial.begin(9600);             // Output to Serial at 9600 baud
+	Wire.pins(D3,D4);				// must be set before all other I2C cmds 
+	Wire.begin(D3,D4);
 	init_display();
 	copyExtDef();
 	display_debug("Reading config from SPIFFS");
@@ -842,7 +873,6 @@ void setup() {
 	connectWifi();                  // Start ConnectWifi
 	display_debug("Writing config to SPIFFS");
 	writeConfig();
-	display_debug("Looking for OTA update");
 	autoUpdate();
 	pinMode(PPD_PIN_PM1,INPUT_PULLUP); // Listen at the designated PIN
 	pinMode(PPD_PIN_PM2,INPUT_PULLUP); // Listen at the designated PIN
@@ -861,6 +891,12 @@ void setup() {
 	if (send2custom) debug_out("Sende an custom API...",DEBUG_MIN_INFO,1);
 	if (auto_update) debug_out("Auto-Update wird ausgeführt...",DEBUG_MIN_INFO,1);
 	if (has_display) debug_out("Zeige auf Display...",DEBUG_MIN_INFO,1);
+	if (bmp_read) {
+		if (!bmp.begin()) {
+			Serial.println("Could not find a valid BMP085 sensor, check wiring!");
+			bmp_read = 0;
+		}
+	}
 	starttime = millis();           // store the start time
 	starttime_SDS = millis();
 }
@@ -894,7 +930,8 @@ void loop() {
 	String result_PPD;
 	String result_SDS;
 	String result_DHT;
-  
+	String result_BMP;
+	
 	if (ppd_read) {
 		result_PPD = sensorPPD();
 	}
@@ -906,6 +943,10 @@ void loop() {
   
 	if (dht_read && ((act_milli-starttime) > sampletime_ms)) {
 		result_DHT = sensorDHT();  // getting temperature and humidity (optional)
+	}
+
+	if (bmp_read && ((act_milli-starttime) > sampletime_ms)) {
+		result_BMP = sensorBMP();  // getting temperature and humidity (optional)
 	}
 
 	if ((act_milli-starttime) > sampletime_ms) {
@@ -953,6 +994,18 @@ void loop() {
 			if (send2dusti) {
 				debug_out("#### Sending DHT data to luftdaten.info: ",DEBUG_MIN_INFO,1);
 				sendData(data_dht,DHT_API_PIN,host_dusti,httpPort_dusti,url_dusti);
+			}
+		}
+		if (bmp_read) {
+			data += result_BMP;
+			data_bmp  = data_first_part + result_BMP;
+			data_bmp += data_sample_times;
+			data_bmp.remove(data_bmp.length()-1);
+			data_bmp.replace("BMP_","");
+			data_bmp += "]}";
+			if (send2dusti) {
+				debug_out("#### Sending BMP data to luftdaten.info: ",DEBUG_MIN_INFO,1);
+				sendData(data_bmp,BMP_API_PIN,host_dusti,httpPort_dusti,url_dusti);
 			}
 		}
 

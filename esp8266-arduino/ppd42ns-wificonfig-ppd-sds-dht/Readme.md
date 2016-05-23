@@ -46,6 +46,7 @@ DNSServer
 Wire  
   
 Installierbar über Arduino IDE (Menü Sketch -> Bibliothek einbinden -> Bibliotheken verwalten, in Klammern die getestete Version):  
+Adafruit BMP085 library <https://github.com/adafruit/Adafruit-BMP085-Library> (1.0.0)  
 ArduinoJson <https://github.com/bblanchon/ArduinoJson> (5.1.1)  
 DHT sensor library <https://github.com/adafruit/DHT-sensor-library> (1.2.3)  
 ESP8266 Oled driver for SSD1306 display <https://github.com/squix78/esp8266-oled-ssd1306> (2.0.0)  
@@ -87,7 +88,7 @@ Pin 6 (1m)   -> unused
   
 Luftdaten.info API "Pins"  
 Bei Aktivierung von mehreren Sensoren, z.B. "gleichzeitig" DHT22 und PPD42NS, benötigt die API zur Zuordnung der Sensorwerte die Angabe eines Pins, an dem der Sensor (virtuell) angeschlossen ist.
-Diese Firmware definiert die Pins für die verschiedenenen Sensoren wie folgt:
+Diese Firmware definiert die Pins für die verschiedenenen Sensoren wie folgt:  
 PPD42NS => Pin 5  
 DHT22 => Pin 7  
 SDS011 => Pin 1  
