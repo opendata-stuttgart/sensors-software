@@ -90,6 +90,8 @@ if(usearchive){
     for (sid in unique(arcdat$sensor_id)){
         print(sid)
         sdat<-as.data.frame(dplyr::filter(arcdat, sensor_id==sid)) # result type is tbl_df, convert to df
+        if(0==sum(!is.na(sdat$P1))){print(paste0("no P1 data, skiping sensor ",sid));next;}
+        # check for Px sensor data
         sdat<-sdat[order(sdat$timestampct),] # sort by timestampct
         sdat$P2diff1=sdat$P2-sdat$P1
         sdat$durP2diff1=sdat$durP2-sdat$durP1
@@ -112,12 +114,12 @@ if(usearchive){
         # have a timeSeries object and plot it
         print(paste("tsdat plot"))
         tsdat<-timeSeries(sdat[,measvalnames], sdat$timestampct)
-        plot(tsdat)
+        tryCatch({plot(tsdat)}, error = function(e) e)
         tdn<-as.numeric(sdat$timestampct[2:length(sdat$timestampct)]-sdat$timestampct[1:(length(sdat$timestampct)-1)])
         tdn.c<-tdn[tdn<320]
         
         # plot histogram of timediffs
-        hist(tdn.c,n=100, main = paste("Histogram of timediffs"))
+        tryCatch({hist(tdn.c,n=100, main = paste("Histogram of timediffs"))},  error = function(e) e)
         
         # aggregate by year, day, hour
         tstamplt<-as.POSIXlt(sdat$timestampct)# [,c("year","yday")]
