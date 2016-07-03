@@ -36,7 +36,7 @@ Wiring:
 
 Benötigte Software:  
 Arduino IDE <https://www.arduino.cc/en/Main/Software>  
-ESP8266 für Arduino <http://arduino.esp8266.com/stable/package_esp8266com_index.json>  
+ESP8266 für Arduino<http://arduino.esp8266.com/stable/package_esp8266com_index.json> (Version 2.3.0)  
   
   
 Verwendete Bibliotheken:  
@@ -50,14 +50,13 @@ Wire
   
 Installierbar über Arduino IDE (Menü Sketch -> Bibliothek einbinden -> Bibliotheken verwalten, in Klammern die getestete Version):  
 Adafruit BMP085 library <https://github.com/adafruit/Adafruit-BMP085-Library> (1.0.0)  
-ArduinoJson <https://github.com/bblanchon/ArduinoJson> (5.1.1)  
+ArduinoJson <https://github.com/bblanchon/ArduinoJson> (5.6.1)  
 DHT sensor library <https://github.com/adafruit/DHT-sensor-library> (1.2.3)  
-ESP8266 Oled driver for SSD1306 display <https://github.com/squix78/esp8266-oled-ssd1306> (2.0.0)  
+ESP8266 Oled driver for SSD1306 display <https://github.com/squix78/esp8266-oled-ssd1306> (3.1.0)  
 ESP8266httpUpdate (1.1.0)  
 PubSubClient <http://pubsubclient.knolleary.net/> (2.6.0)  
-ESP8266 Oled Driver for SSD1306 display <https://github.com/squix78/esp8266-oled-ssd1306> (2.0.2)  
 SoftwareSerial <https://github.com/plerup/espsoftwareserial> (1.0.0)  
-WifiManager <https://github.com/tzapu/WiFiManager>  (unbedingt 0.10.0, da sonst Fehler wegen undefinierter isnan())  
+WifiManager <https://github.com/tzapu/WiFiManager> (0.12.0)  
   
 Bis Version NRZ-2016-15:  
 DHT <https://github.com/adafruit/DHT-sensor-library>  
