@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 /*****************************************************************
 /* OK LAB Particulate Matter Sensor                              *
 /*      - nodemcu-LoLin board                                    *
@@ -55,7 +57,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-018"
+#define SOFTWARE_VERSION "NRZ-2016-020"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -79,6 +81,7 @@
 /*****************************************************************/
 #include <FS.h>                     // must be first
 #include <ESP8266WiFi.h>
+#include <WiFiClientSecure.h>
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
 #include <WiFiManager.h>
@@ -118,11 +121,11 @@ long int sample_count = 0;
 
 const char* host_madavi = "www.madavi.de";
 const char* url_madavi = "/sensor/data.php";
-const int httpPort_madavi = 80;
+const int httpPort_madavi = 443;
 
 const char* host_dusti = "api.luftdaten.info";
 const char* url_dusti = "/v1/push-sensor-data/";
-const int httpPort_dusti = 80;
+const int httpPort_dusti = 443;
 
 char host_custom[100] = "192.168.234.1";
 char url_custom[100] = "/data.php";
@@ -377,40 +380,79 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 	debug_out("connecting to ",DEBUG_MIN_INFO,0);
 	debug_out(host,DEBUG_MIN_INFO,1);
   
-	// Use WiFiClient class to create TCP connections
 	WiFiClient client;
-	if (!client.connect(host, httpPort)) {
-		debug_out("connection failed",DEBUG_ERROR,1);
-		return;
+	WiFiClientSecure client_s;
+	// Use WiFiClient class to create TCP connections
+	
+	if (httpPort == 80) {
+		if (!client.connect(host, httpPort)) {
+			debug_out("connection failed",DEBUG_ERROR,1);
+			return;
+		}
+
+		debug_out("Requesting URL: ",DEBUG_MIN_INFO,0);
+		debug_out(url,DEBUG_MIN_INFO,1);
+		debug_out(String(ESP.getChipId()),DEBUG_MIN_INFO,1);
+		debug_out(data,DEBUG_MIN_INFO,1);
+  
+		// send request to the server
+		client.print(String("POST ") + url + " HTTP/1.1\r\n" +
+					"Host: " + host + "\r\n" +
+					"Content-Type: application/json\r\n" +
+					"PIN: " + String(pin) + "\r\n" +
+					"Sensor: esp8266-");
+		client.println(ESP.getChipId());
+		client.print("Content-Length: ");
+		client.println(data.length(), DEC);
+		client.println("Connection: close\r\n");
+
+		client.println(data);
+
+		delay(1);
+  
+		// Read reply from server and print them
+		while(client.available()){
+			char c = client.read();
+			debug_out(String(c),DEBUG_MIN_INFO,0);
+		}
+  
+		debug_out("\nclosing connection\n------------------------------\n\n",DEBUG_MIN_INFO,1);
+
+	} else {
+
+		if (!client_s.connect(host, httpPort)) {
+			debug_out("connection failed",DEBUG_ERROR,1);
+			return;
+		}
+
+		debug_out("Requesting URL: ",DEBUG_MIN_INFO,0);
+		debug_out(url,DEBUG_MIN_INFO,1);
+		debug_out(String(ESP.getChipId()),DEBUG_MIN_INFO,1);
+		debug_out(data,DEBUG_MIN_INFO,1);
+  
+		// send request to the server
+		client_s.print(String("POST ") + url + " HTTP/1.1\r\n" +
+					"Host: " + host + "\r\n" +
+					"Content-Type: application/json\r\n" +
+					"PIN: " + String(pin) + "\r\n" +
+					"Sensor: esp8266-");
+		client_s.println(ESP.getChipId());
+		client_s.print("Content-Length: ");
+		client_s.println(data.length(), DEC);
+		client_s.println("Connection: close\r\n");
+
+		client_s.println(data);
+
+		delay(1);
+  
+		// Read reply from server and print them
+		while(client_s.available()){
+			char c = client_s.read();
+			debug_out(String(c),DEBUG_MIN_INFO,0);
+		}
+  
+		debug_out("\nclosing connection\n------------------------------\n\n",DEBUG_MIN_INFO,1);
 	}
-
-	debug_out("Requesting URL: ",DEBUG_MIN_INFO,0);
-	debug_out(url,DEBUG_MIN_INFO,1);
-	debug_out(String(ESP.getChipId()),DEBUG_MIN_INFO,1);
-	debug_out(data,DEBUG_MIN_INFO,1);
-  
-	// send request to the server
-	client.print(String("POST ") + url + " HTTP/1.1\r\n" +
-				"Host: " + host + "\r\n" +
-				"Content-Type: application/json\r\n" +
-				"PIN: " + String(pin) + "\r\n" +
-				"Sensor: esp8266-");
-	client.println(ESP.getChipId());
-	client.print("Content-Length: ");
-	client.println(data.length(), DEC);
-	client.println("Connection: close\r\n");
-
-	client.println(data);
-
-	delay(1);
-  
-	// Read reply from server and print them
-	while(client.available()){
-		char c = client.read();
-		debug_out(String(c),DEBUG_MIN_INFO,0);
-	}
-  
-	debug_out("\nclosing connection\n------------------------------\n\n",DEBUG_MIN_INFO,1);
 }
 
 /*****************************************************************
@@ -480,6 +522,7 @@ String sensorDHT() {
 	debug_out("------------------------------",DEBUG_MIN_INFO,1);    
 	return s;
 }
+
 /*****************************************************************
 /* read BMP180 sensor values                                      *
 /*****************************************************************/

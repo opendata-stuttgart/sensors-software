@@ -32,6 +32,6 @@ working code for gravity sensor
 
 ## ppd42ns-wificonfig-ppd-sds-dht
 
-includes config over wifi, code for sensors ppd42ns, sds011, dht11/22 and oled display
+maintained version, includes config over wifi, code for sensors ppd42ns, sds011, dht11/22, bmp160 and oled display
 
 ## restapi-test
