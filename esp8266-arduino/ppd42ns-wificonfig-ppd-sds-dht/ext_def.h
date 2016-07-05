@@ -4,7 +4,7 @@
 
 // Wohin gehen die Daten?
 #define SEND2DUSTI 1
-#define SEND2MADAVI 0
+#define SEND2MADAVI 1
 #define SEND2MQTT 0
 #define SEND2CSV 0
 #define SEND2CUSTOM 0
@@ -23,10 +23,10 @@
 #define MQTT_TOPIC ""
 
 // DHT22, Sensor Temperatur und Luftfeuchte
-#define DHT_READ 0
-#define DHT_PIN D7
+#define DHT_READ 1
+#define DHT_PIN D4
 #define DHT_TYPE DHT22
-#define DHT_API_PIN 7
+#define DHT_API_PIN 2
 
 // PPD42NS, der günstigere der beiden Feinstaubsensoren
 #define PPD_READ 1
