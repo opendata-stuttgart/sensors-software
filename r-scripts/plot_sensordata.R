@@ -2,6 +2,7 @@ require("ggplot2")
 require("dplyr")
 require("timeSeries")
 require("forecast")
+require("plotly")
 # require("tsoutliers")
 # require("zoo")
 
@@ -11,12 +12,17 @@ usearchive=FALSE # timestamp needs fixing (in csv and conversion below)
 usearchive=TRUE # timestamp needs fixing (in csv and conversion below)
 #if(usearchive){require("RCurl");}
 
+# set to dir containing this script 
+if(("scriptdir" %in% ls())){
+   setwd(scriptdir)
+}
+
 #max values for clipping
 Pclip<-list(P1=list(min=0,    max=10000),
             P2=list(min=0.62, max=1000))
 dateinterval<-list(min=as.POSIXct(strptime("2015-12-30", format="%Y-%m-%d")), 
                    max=as.POSIXct(Sys.Date()))
-plotdir="output_plots/"
+plotdir="./output_plots"
 if(!dir.exists(plotdir)){dir.create(plotdir, showWarnings = TRUE, recursive = TRUE, mode = "0755")}
 
 #' function to clip values above/below thresholds
@@ -46,6 +52,16 @@ gfcoeffs <- function(s, n) {
     # sum(gfiltc)=1
 }
 
+plotlyggout<-function(p,dir,filename,libdir="plotlyb"){
+    print(paste("plotlyggout:",dir,filename))
+    ggp<-ggplotly(p)
+    # this function (more precise: the function called save_html) fails for (relative?) paths, so go to the dir
+    oldwd<-getwd()
+    setwd(dir)
+    try(htmlwidgets::saveWidget(widget=as.widget(ggp),file=filename, libdir=libdir))
+    setwd(oldwd)
+    }
+
 csvsep=","
 if(usearchive){
     arcdat_filename<-"arcdat.RData"
@@ -60,17 +76,24 @@ if(usearchive){
     # get filelist relative to working directory, pattern = glob2rx(fpattern)
     filelist<- dir(path = "archive.luftdaten.info",pattern=glob2rx(fpattern),recursive=TRUE,full.names=TRUE, ignore.case = TRUE) ## files in current directory
     # only read files newer than arcdat_filename
+    adddat<-NULL
+    if(!is.null(arcdat)){addata<-arcdat[0,]}
+    newdat=FALSE
     for (csvfilename in filelist[file.mtime(filelist)>arcdat_filename_mtime]){
             print(paste("reading ", csvfilename))
             rdat<-read.csv(csvfilename, sep=";", dec=".", header=TRUE)
-            arcdat<-dplyr::bind_rows(arcdat,rdat)
+            adddat<-dplyr::bind_rows(adddat,rdat)
+            newdat=TRUE
     }
+    if(newdat){arcdat<-dplyr::bind_rows(arcdat,adddat)}
     # Detectable range of concentration 0~28,000 pcs/liter (0~8,000pcs/0.01 CF=283ml)
     
     arcdat$timestampct<-as.POSIXct(strptime(arcdat$timestamp,format="%Y-%m-%dT%H:%M:%OS"))
     arctbl<-table(arcdat$sensor_id,as.Date(arcdat$timestamp))#$yday+1000*(as.POSIXlt(arcdat$timestamp)$year+1990))
     save(arcdat, arctbl ,file=arcdat_filename)
-    pdf(file.path(plotdir,"plots_sensordata_overview.pdf"),width=15,height=9)
+    outfilebase="plots_sensordata_overview"
+    outfilepath=file.path(plotdir,"plots_sensordata_overview")
+    pdf(paste(outfilepath,".pdf",sep=""),width=15,height=9)
     arctbl.df<-as.data.frame(arctbl)
     arctbl.df$Var2<-as.Date(arctbl.df$Var2)
     p<-ggplot(arctbl.df, aes(Var2,Var1,size=Freq, color=as.factor(as.POSIXlt(arctbl.df$Var2)$mon+1))) + geom_point()+
@@ -82,6 +105,7 @@ if(usearchive){
 #         theme(legend.title=element_blank())+ 
     # months(arctbl.df$Var2)
     print(p)
+    plotlyggout(p=p,dir=plotdir,filename=paste(outfilebase,".html",sep=""))
     dev.off()
     
     # Detectable range of concentration 0~28,000 pcs/liter (0~8,000pcs/0.01 CF=283ml)
@@ -103,9 +127,8 @@ if(usearchive){
         ntaps=10
         gc<-gfcoeffs(sigma,ntaps)
         
-        
-        pdffilename=file.path(plotdir,paste("plots_sensor_",sid,".pdf",sep=""))
-        print (pdffilename)
+        outfilebase=paste("plots_sensor_",sid,sep="")
+        pdffilename=paste(plotdir,"/",outfilebase,".pdf",sep="")
 #         set width according to timediff
         timespan<-as.double(max(sdat$timestampct)-min(sdat$timestampct))
         print(paste("plotwidth", min(timespan/2,10)))
@@ -140,12 +163,13 @@ if(usearchive){
                 sdat$plotdat<-as.vector(stats::filter(sdat$plotdat, gfcoeffs(sigma,ntaps)))
                 p<-ggplot(sdat.agg,aes_string("timestampct",coln))+geom_bar(stat = "identity")+labs(main="Hourly means")
                 print(p)
+                plotlyggout(p=p,dir=plotdir,filename=paste(outfilebase,"_hourly.html",sep=""))
                 p<-ggplot(sdat.dagg,aes_string("timestampct",coln))+ geom_bar(stat = "identity")+labs(main="Daily means")
                 print(p)
-                
-                print(paste(coln,"ggplot"))
+                plotlyggout(p=p,dir=plotdir,filename=paste(outfilebase,"_daily.html",sep=""))
                 p<-ggplot(sdat, aes(timestampct,plotdat))+geom_line()+geom_smooth(span=0.2)+ labs(x="Time",y=coln)
                 print(p)
+                plotlyggout(p=p,dir=plotdir,filename=paste(outfilebase,"_.html",sep=""))
                 # TODO: gleitende 24-Stunden-Mittelwerte (24h means filtering)
                 # maybe possible via zoo forecast::ma its fts tseries timeSeries
                 # fts:moving.mean only Date as time?

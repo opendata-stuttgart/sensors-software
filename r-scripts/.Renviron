@@ -1,0 +1,3 @@
+#oldpkg <- getOption("defaultPackages"); 
+#options(defaultPackages = c(oldpkg, "ggplot2","dplyr","timeSeries","forecast","plotly"))
+R_DEFAULT_PACKAGES='ggplot2,dplyr,timeSeries,forecast,plotly'
