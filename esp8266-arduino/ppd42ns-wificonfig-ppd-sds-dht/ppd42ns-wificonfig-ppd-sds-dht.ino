@@ -57,7 +57,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-020"
+#define SOFTWARE_VERSION "NRZ-2016-022"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -79,18 +79,25 @@
 /*****************************************************************
 /* Includes                                                      *
 /*****************************************************************/
+#if defined(ESP8266)
 #include <FS.h>                     // must be first
 #include <ESP8266WiFi.h>
-#include <WiFiClientSecure.h>
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
 #include <WiFiManager.h>
 #include <ESP8266httpUpdate.h>
-#include <ArduinoJson.h>
+#include <WiFiClientSecure.h>
 #include <SoftwareSerial.h>
+#include <SSD1306.h>
+#endif
+#if defined(ARDUINO_SAMD_ZERO)
+#include <RHReliableDatagram.h>
+#include <RH_RF69.h>
+#include <SPI.h>
+#endif
+#include <ArduinoJson.h>
 #include <PubSubClient.h>
 #include <Wire.h>
-#include <SSD1306.h>
 #include <DHT.h>
 #include <Adafruit_BMP085.h>
 
@@ -112,6 +119,7 @@ bool send2dusti = 1;
 bool send2madavi = 0;
 bool send2custom = 0;
 bool send2mqtt = 0;
+bool send2lora = 0;
 bool send2csv = 0;
 bool auto_update = 1;
 bool has_display = 0;
@@ -142,18 +150,29 @@ const char* update_host = "www.madavi.de";
 const char* update_url = "/sensor/update/firmware.php";
 const int update_port = 80;
 
+#if defined(ESP8266)
 WiFiClient mqtt_wifi;
 PubSubClient mqtt_client(mqtt_wifi);
+#endif
+
+#if defined(ARDUINO_SAMD_ZERO)
+RH_RF69 rf69(RFM69_CS, RFM69_INT);
+RHReliableDatagram manager(rf69, CLIENT_ADDRESS);
+#endif
 
 /*****************************************************************
 /* Display definitions                                           *
 /*****************************************************************/
+#if defined(ESP8266)
 SSD1306   display(0x3c, D3, D4);
+#endif
 
 /*****************************************************************
 /* SDS011 declarations                                           *
 /*****************************************************************/
+#if defined(ESP8266)
 SoftwareSerial serialSDS(SDS_PIN_RX, SDS_PIN_TX, false, 128);
+#endif
 
 /*****************************************************************
 /* DHT declaration                                               *
@@ -221,6 +240,7 @@ void debug_out(const String& text, int level, bool linebreak) {
 /* display values                                                 *
 /*****************************************************************/
 void display_debug(const String& text) {
+#if defined(ESP8266)
 	if (has_display) {
 		debug_out("output debug text to display...",DEBUG_MIN_INFO,1);
 		debug_out(text,DEBUG_MAX_INFO,1);
@@ -232,6 +252,7 @@ void display_debug(const String& text) {
 		display.drawStringMaxWidth(0,12,120,text);
 		display.display();
 	}
+#endif
 }
 
 /*****************************************************************
@@ -247,6 +268,7 @@ String IPAddress2String(IPAddress ipaddress) {
 /* WifiConfig                                                    *
 /*****************************************************************/
 void wifiConfig() {
+#if defined(ESP8266)
 	String boolvar;
 	String apname;
 	String custom_wlanssid;
@@ -321,12 +343,14 @@ void wifiConfig() {
 //	debug_out("Custom URL: "+String(custom_url_custom.getValue())+" - "+String(url_custom),DEBUG_MIN_INFO,1);
 //	debug_out("Custom Port: "+String(custom_httpPort_custom.getValue())+" - "+String(httpPort_custom),DEBUG_MIN_INFO,1);
 	debug_out("-----------------------------------",DEBUG_MIN_INFO,1);
+#endif
 }
 
 /*****************************************************************
 /* WiFi auto connecting script                                   *
 /*****************************************************************/
 void connectWifi() {
+#if defined(ESP8266)
 	int retry_count = 0;
 	debug_out(String(WiFi.status()),DEBUG_MIN_INFO,1);
 	WiFi.begin(wlanssid, wlanpwd); // Start WiFI
@@ -355,7 +379,65 @@ void connectWifi() {
 		}
 	}
     debug_out("WiFi connected\nIP address: "+IPAddress2String(WiFi.localIP()),DEBUG_MIN_INFO,1);
+#endif
 }
+
+#if defined(ARDUINO_SAMD_ZERO) && defined(SERIAL_PORT_USBVIRTUAL)
+#if 0
+char *dtostrf (double val, signed char width, unsigned char prec, char *sout) {
+	char fmt[20];
+	sprintf(fmt, "%%%d.%df", width, prec);
+	sprintf(sout, fmt, val);
+	return sout;
+}
+#else
+#include <string.h>
+#include <stdlib.h>
+char *dtostrf(double val, int width, unsigned int prec, char *sout) {
+	int decpt, sign, reqd, pad;
+	const char *s, *e;
+	char *p;
+	s = fcvt(val, prec, &decpt, &sign);
+	if (prec == 0 && decpt == 0) {
+		s = (*s < '5') ? "0" : "1";
+		reqd = 1;
+	} else {
+		reqd = strlen(s);
+		if (reqd > decpt) reqd++;
+		if (decpt == 0) reqd++;
+	}
+	if (sign) reqd++;
+	p = sout;
+	e = p + reqd;
+	pad = width - reqd;
+	if (pad > 0) {
+		e += pad;
+		while (pad-- > 0) *p++ = ' ';
+	}
+	if (sign) *p++ = '-';
+	if (decpt <= 0 && prec > 0) {
+		*p++ = '0';
+		*p++ = '.';
+		e++;
+		while ( decpt < 0 ) {
+			decpt++;
+			*p++ = '0';
+		}
+	}   
+	while (p < e) {
+		*p++ = *s++;
+		if (p == e) break;
+		if (--decpt == 0) *p++ = '.';
+	}
+	if (width < 0) {
+		pad = (reqd + width) * -1;
+		while (pad-- > 0) *p++ = ' ';
+	}
+	*p = 0;
+	return sout;
+}
+#endif
+#endif
 
 /*****************************************************************
 /* convert float to string with a                                *
@@ -372,10 +454,31 @@ String Float2String(float value) {
 	return s;
 }
 
+String FeatherChipId() {
+#if defined(ARDUINO_SAMD_ZERO)
+  String s;
+  volatile uint32_t val1, val2, val3, val4;
+  volatile uint32_t *ptr1 = (volatile uint32_t *)0x0080A00C;
+  val1 = *ptr1;
+  volatile uint32_t *ptr = (volatile uint32_t *)0x0080A040;
+  val2 = *ptr;
+  ptr++;
+  val3 = *ptr;
+  ptr++;
+  val4 = *ptr;
+
+  s = String(val1,HEX)+String(val2,HEX)+String(val3,HEX)+String(val4,HEX);
+
+  return s;
+#endif
+}
+
+
 /*****************************************************************
 /* send data to rest api                                         *
 /*****************************************************************/
 void sendData(const String& data, const int pin, const char* host, const int httpPort, const char* url) {
+#if defined(ESP8266)
 
 	debug_out("connecting to ",DEBUG_MIN_INFO,0);
 	debug_out(host,DEBUG_MIN_INFO,1);
@@ -453,6 +556,34 @@ void sendData(const String& data, const int pin, const char* host, const int htt
   
 		debug_out("\nclosing connection\n------------------------------\n\n",DEBUG_MIN_INFO,1);
 	}
+#endif
+}
+
+void send_lora(const String& data) {
+#if defined(ARDUINO_SAMD_ZERO)
+	uint8_t buf[RH_RF69_MAX_MESSAGE_LEN];
+
+	debug_out("connecting to LoRa gateway ",DEBUG_MIN_INFO,1);
+	
+	if (manager.sendtoWait((uint8_t*)(data.c_str()), sizeof(data), SERVER_ADDRESS))
+	{
+		// Now wait for a reply from the server
+		uint8_t len = sizeof(buf);
+		uint8_t from;   
+		if (manager.recvfromAckTimeout(buf, &len, 2000, &from))
+		{
+			debug_out("got reply from : 0x",DEBUG_MIN_INFO,0);
+			debug_out(String(from, HEX),DEBUG_MIN_INFO,0);
+//			debug_out(": ",DEBUG_MIN_INFO,0);
+//			debug_out(s,DEBUG_MIN_INFO,1);
+		} else {
+			debug_out("No reply, is rf69_reliable_datagram_server running?",DEBUG_MIN_INFO,1);
+		}
+	}  else
+		Serial.println("sendtoWait failed");
+
+		debug_out("\nclosing connection\n------------------------------\n\n",DEBUG_MIN_INFO,1);
+#endif
 }
 
 /*****************************************************************
@@ -553,6 +684,7 @@ String sensorBMP() {
 /* read SDS011 sensor values                                     *
 /*****************************************************************/
 String sensorSDS() {
+#if defined(ESP8266)
 	String s = "";
 	String value_hex;
 	char buffer;
@@ -609,6 +741,7 @@ String sensorSDS() {
 		sds_pm10_sum = 0; sds_pm25_sum = 0; sds_val_count = 0;
 	}
 	return s;
+#endif
 }
 
 /*****************************************************************
@@ -692,6 +825,7 @@ String sensorPPD() {
 /* copy config from ext_def                                      *
 /*****************************************************************/
 void copyExtDef() {
+#if defined(ESP8266)
 	if (WLANSSID != NULL) { strcpy(wlanssid,WLANSSID); }
 	if (WLANPWD  != NULL) { strcpy(wlanpwd,WLANPWD); }
 	if (DHT_READ != dht_read) { dht_read = DHT_READ; }
@@ -711,13 +845,14 @@ void copyExtDef() {
 	if (HOST_CUSTOM != NULL) { strcpy(host_custom,HOST_CUSTOM); }
 	if (URL_CUSTOM != NULL) { strcpy(url_custom,URL_CUSTOM); }
 	if (HTTPPORT_CUSTOM != httpPort_custom) { httpPort_custom = HTTPPORT_CUSTOM; }
-
+#endif
 }
 
 /*****************************************************************
 /* write config to spiffs                                        *
 /*****************************************************************/
 void writeConfig() {
+#if defined(ESP8266)
 	debug_out("saving config...",DEBUG_MIN_INFO,1);
 	DynamicJsonBuffer jsonBuffer;
 	JsonObject& json = jsonBuffer.createObject();
@@ -751,12 +886,14 @@ void writeConfig() {
 	json.printTo(configFile);
 	configFile.close();
 	//end save
+#endif
 }
 
 /*****************************************************************
 /* read config from spiffs                                       *
 /*****************************************************************/
 void readConfig() {
+#if defined(ESP8266)
 	debug_out("mounting FS...",DEBUG_MIN_INFO,1);
 
 	if (SPIFFS.begin()) {
@@ -807,12 +944,14 @@ void readConfig() {
 	} else {
 		debug_out("failed to mount FS",DEBUG_ERROR,1);
 	}
+#endif
 }
 
 /*****************************************************************
 /* AutoUpdate                                                    *
 /*****************************************************************/
 void autoUpdate() {
+#if defined(ESP8266)
 	if (auto_update) {
 		debug_out("Starting OTA update ...",DEBUG_MIN_INFO,1);
 		display_debug("Looking for OTA update");
@@ -832,12 +971,14 @@ void autoUpdate() {
 					break;
 		}
 	}
+#endif
 }
 
 /*****************************************************************
 /* display values                                                 *
 /*****************************************************************/
 void display_values(const String& data) {
+#if defined(ESP8266)
 	char* s;
 	String tmp_type;
 	String tmp_val;
@@ -890,24 +1031,32 @@ void display_values(const String& data) {
 		}
 	}
 	display.display();
+#endif
 }
 
 /*****************************************************************
 /* Init display                                                  *
 /*****************************************************************/
 void init_display() {
+#if defined(ESP8266)
 	display.init();
 	display.resetDisplay();
+#endif
 }
 
 /*****************************************************************
 /* The Setup                                                     *
 /*****************************************************************/
 void setup() {
-	WiFi.persistent(false);
 	Serial.begin(9600);             // Output to Serial at 9600 baud
+#if defined(ESP8266)
+	WiFi.persistent(false);
 	Wire.pins(D3,D4);				// must be set before all other I2C cmds 
 	Wire.begin(D3,D4);
+#endif
+#if defined(ARDUINO_SAMD_ZERO)
+    Wire.begin();
+#endif
 	init_display();
 	copyExtDef();
 	display_debug("Reading config from SPIFFS");
@@ -921,8 +1070,23 @@ void setup() {
 	pinMode(PPD_PIN_PM2,INPUT_PULLUP); // Listen at the designated PIN
 	dht.begin();                       // Start DHT
 	delay(10);
+#if defined(ESP8266)
 	debug_out("\nChipId: ",DEBUG_MIN_INFO,1);
 	debug_out(String(ESP.getChipId()),DEBUG_MIN_INFO,1);
+#endif
+#if defined(ARDUINO_SAMD_ZERO)
+	if (!manager.init())
+		debug_out("Manager init failed",DEBUG_MIN_INFO,1);
+	if (!rf69.setFrequency(RF69_FREQ)) {
+		debug_out("setFrequency failed",DEBUG_MIN_INFO,1);
+		while (1);
+	}
+	debug_out("Set Freq to: ",DEBUG_MIN_INFO,0);
+	debug_out(String(RF69_FREQ),DEBUG_MIN_INFO,1);
+	rf69.setTxPower(15);
+	debug_out("\nChipId: ",DEBUG_MIN_INFO,0);
+	debug_out(FeatherChipId(),DEBUG_MIN_INFO,1);
+#endif
 	if (ppd_read) debug_out("Lese PPD...",DEBUG_MIN_INFO,1);
 	if (sds_read) debug_out("Lese SDS...",DEBUG_MIN_INFO,1);
 	if (dht_read) debug_out("Lese DHT...",DEBUG_MIN_INFO,1);
@@ -1080,6 +1244,11 @@ void loop() {
 			sendmqtt(data,host_mqtt,mqtt_port);
 		}
 		
+		if (send2lora) {
+			debug_out("#### Sending to LoRa gateway: ",DEBUG_MIN_INFO,1);
+			send_lora(data);
+		}
+
 		if (send2csv) {
 			debug_out("#### Sending as csv: ",DEBUG_MIN_INFO,1);
 			send_csv(data);

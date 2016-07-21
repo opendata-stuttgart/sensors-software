@@ -1,11 +1,11 @@
-Version für Sensoren PPD42NS, SDS011, DHT22 und BMP180 (BMP is work in progress).  
+Version für Sensoren PPD42NS, SDS011, DHT22 und BMP180.  
 
 Features:  
 - gleichzeitiger Betrieb mehrerer Sensoren  
 - Konfiguration über WLAN (Sensor als Access Point) möglich  
 - Unterstützung von OLED-Displays mit SSD1306  
 - Auswahl der API(s), an welche die Daten gesendet werden, inklusive der Möglichkeit, die Daten als CSV über USB auszugeben   
-
+- nutzbar für ESP8266 und Arduino Feather M0 (LoRa)
 
 ToDo's:
 - TimeOut für WifiKonfig zum Laufen bekommen
@@ -39,7 +39,7 @@ Arduino IDE <https://www.arduino.cc/en/Main/Software>
 ESP8266 für Arduino<http://arduino.esp8266.com/stable/package_esp8266com_index.json> (Version 2.3.0)  
   
   
-Verwendete Bibliotheken:  
+Verwendete Bibliotheken (für ESP8266):  
   
 In ESP8266 für Arduino IDE enthalten:  
 FS  
