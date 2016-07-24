@@ -6,6 +6,7 @@
 #define SEND2DUSTI 1
 #define SEND2MADAVI 0
 #define SEND2MQTT 0
+#define SEND2LORA 0
 #define SEND2CSV 0
 #define SEND2CUSTOM 0
 
@@ -55,6 +56,14 @@
 #if defined(ESP8266)
 #define BMP_PIN_SCL D4
 #define BMP_PIN_SDA D3
+#endif
+
+// GPS, bevorzugt Neo-6M
+#define GPS_READ 0
+#define GPS_API_PIN 9
+#if defined(ESP8266)
+#define GPS_PIN_RX D1
+#define GPS_PIN_TX D2
 #endif
 
 // Automatische Firmware-Updates über WLAN
