@@ -33,7 +33,7 @@ bool feedDelayGPS(unsigned long ms=200)
       #ifndef DEBUG_GPS_NMEA
       gps.encode(ss.read());
       #endif
-    
+      yield();
       if (gps.location.isUpdated()){
           return true;
       }

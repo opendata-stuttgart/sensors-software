@@ -49,6 +49,7 @@ void setup(){
     blink_led(pin_led,3,500);
     
 #ifdef GPS_ACTIVE
+    ESP.wdtEnable(15000); // make the watch dog timeout longer
     gps_setup();
 #endif //GPS_ACTIVE
 
@@ -58,10 +59,18 @@ void setup(){
 }
 
 void loop(){
-blink_led(pin_led,2,200);
+blink_led(pin_led,1,50);
 bool success=gps_read();
 if (!success){
-blink_led(pin_led,5,100);
+// morse nop:    -. --- .--.
+unsigned int msht=30;
+unsigned int mlng=msht*2;
+//n
+blink_led(pin_led,1,mlng);blink_led(pin_led,1,msht);delay(mlng);
+//o
+blink_led(pin_led,3,mlng);delay(mlng);
+//p
+blink_led(pin_led,1,msht);blink_led(pin_led,2,mlng);blink_led(pin_led,1,msht);delay(mlng);
 #ifdef PUSHTO_SERIAL
     Serial.print(millis());
     Serial.println("\tGPS failed");
