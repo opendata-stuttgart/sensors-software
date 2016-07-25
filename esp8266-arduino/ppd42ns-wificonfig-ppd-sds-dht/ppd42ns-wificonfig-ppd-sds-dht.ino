@@ -57,7 +57,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-020"
+#define SOFTWARE_VERSION "NRZ-2016-022"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -71,28 +71,37 @@
 /* #define SEND2DUSTI 1                                          *
 /* #define SEND2MADAVI 0                                         *
 /* #define SEND2MQTT 0                                           *
+/* #define SEND2LORA 0                                           *
 /* #define SEND2CSV 0                                            *
 /*                                                               *
-/* #define DEBUG 1                                               *
+/* #define DEBUG 3                                               *
 /*****************************************************************/
 
 /*****************************************************************
 /* Includes                                                      *
 /*****************************************************************/
+#if defined(ESP8266)
 #include <FS.h>                     // must be first
 #include <ESP8266WiFi.h>
-#include <WiFiClientSecure.h>
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
 #include <WiFiManager.h>
 #include <ESP8266httpUpdate.h>
-#include <ArduinoJson.h>
+#include <WiFiClientSecure.h>
 #include <SoftwareSerial.h>
+#include <SSD1306.h>
+#endif
+#if defined(ARDUINO_SAMD_ZERO)
+#include <RHReliableDatagram.h>
+#include <RH_RF69.h>
+#include <SPI.h>
+#endif
+#include <ArduinoJson.h>
 #include <PubSubClient.h>
 #include <Wire.h>
-#include <SSD1306.h>
 #include <DHT.h>
 #include <Adafruit_BMP085.h>
+#include <TinyGPS++.h>
 
 #include "ext_def.h"
 
@@ -108,10 +117,12 @@ bool dht_read = 0;
 bool ppd_read = 1;
 bool sds_read = 0;
 bool bmp_read = 0;
+bool gps_read = 0;
 bool send2dusti = 1;
 bool send2madavi = 0;
 bool send2custom = 0;
 bool send2mqtt = 0;
+bool send2lora = 0;
 bool send2csv = 0;
 bool auto_update = 1;
 bool has_display = 0;
@@ -142,19 +153,32 @@ const char* update_host = "www.madavi.de";
 const char* update_url = "/sensor/update/firmware.php";
 const int update_port = 80;
 
+#if defined(ESP8266)
 WiFiClient mqtt_wifi;
 PubSubClient mqtt_client(mqtt_wifi);
+#endif
+
+#if defined(ARDUINO_SAMD_ZERO)
+RH_RF69 rf69(RFM69_CS, RFM69_INT);
+RHReliableDatagram manager(rf69, CLIENT_ADDRESS);
+#endif
 
 /*****************************************************************
 /* Display definitions                                           *
 /*****************************************************************/
+#if defined(ESP8266)
 SSD1306   display(0x3c, D3, D4);
+#endif
 
 /*****************************************************************
 /* SDS011 declarations                                           *
 /*****************************************************************/
+#if defined(ESP8266)
 SoftwareSerial serialSDS(SDS_PIN_RX, SDS_PIN_TX, false, 128);
-
+#endif
+#if defined(ARDUINO_SAMD_ZERO)
+#define serialSDS SERIAL_PORT_HARDWARE
+#endif
 /*****************************************************************
 /* DHT declaration                                               *
 /*****************************************************************/
@@ -164,6 +188,13 @@ DHT dht(DHT_PIN, DHT_TYPE);
 /* BMP declaration                                               *
 /*****************************************************************/
 Adafruit_BMP085 bmp;
+
+/*****************************************************************
+/* GPS declaration                                               *
+/*****************************************************************/
+#if defined(ARDUINO_SAMD_ZERO) || defined(ESP8266)
+TinyGPSPlus gps;
+#endif
 
 /*****************************************************************
 /* Variable Definitions for PPD24NS                              *
@@ -185,6 +216,7 @@ unsigned long lowpulseoccupancyP2 = 0;
 
 unsigned long starttime;
 unsigned long starttime_SDS;
+unsigned long starttime_GPS;
 unsigned long act_micro;
 unsigned long act_milli;
 unsigned long last_micro = 0;
@@ -194,6 +226,7 @@ unsigned long diff_micro = 0;
 
 unsigned long sampletime_ms = 30000;
 unsigned long sampletime_SDS_ms = 1000;
+unsigned long sampletime_GPS_ms = 50;
 
 unsigned long last_update_attempt;
 unsigned long pause_between_update_attempts = 86400000;
@@ -201,6 +234,26 @@ unsigned long pause_between_update_attempts = 86400000;
 int sds_pm10_sum = 0;
 int sds_pm25_sum = 0;
 int sds_val_count = 0;
+
+String data_first_part;
+String data_ppd;
+String data_dht;
+String data_sds;
+String data_bmp;
+String data_gps;
+String data_sample_times;
+
+String result_PPD;
+String result_SDS;
+String result_DHT;
+String result_BMP;
+String result_GPS;
+	
+String last_gps_lat;
+String last_gps_lng;
+String last_gps_alt;
+String last_gps_date;
+String last_gps_time;
 
 bool first_csv_line = 1;
 
@@ -218,9 +271,10 @@ void debug_out(const String& text, int level, bool linebreak) {
 }
 
 /*****************************************************************
-/* display values                                                 *
+/* display values                                                *
 /*****************************************************************/
 void display_debug(const String& text) {
+#if defined(ESP8266)
 	if (has_display) {
 		debug_out("output debug text to display...",DEBUG_MIN_INFO,1);
 		debug_out(text,DEBUG_MAX_INFO,1);
@@ -232,6 +286,7 @@ void display_debug(const String& text) {
 		display.drawStringMaxWidth(0,12,120,text);
 		display.display();
 	}
+#endif
 }
 
 /*****************************************************************
@@ -247,11 +302,14 @@ String IPAddress2String(IPAddress ipaddress) {
 /* WifiConfig                                                    *
 /*****************************************************************/
 void wifiConfig() {
+#if defined(ESP8266)
 	String boolvar;
 	String apname;
 	String custom_wlanssid;
 	String custom_wlanpwd;
 	WiFiManager wifiManager;
+
+	debug_out("Starting WiFiManager",DEBUG_MED_INFO,1);
 
 	if (debug < 5) wifiManager.setDebugOutput(false);
 	WiFiManagerParameter custom_send2dusti("send2dusti", "Senden an luftdaten.info (0/1) ?", "", 10);
@@ -321,17 +379,19 @@ void wifiConfig() {
 //	debug_out("Custom URL: "+String(custom_url_custom.getValue())+" - "+String(url_custom),DEBUG_MIN_INFO,1);
 //	debug_out("Custom Port: "+String(custom_httpPort_custom.getValue())+" - "+String(httpPort_custom),DEBUG_MIN_INFO,1);
 	debug_out("-----------------------------------",DEBUG_MIN_INFO,1);
+#endif
 }
 
 /*****************************************************************
 /* WiFi auto connecting script                                   *
 /*****************************************************************/
 void connectWifi() {
+#if defined(ESP8266)
 	int retry_count = 0;
 	debug_out(String(WiFi.status()),DEBUG_MIN_INFO,1);
 	WiFi.begin(wlanssid, wlanpwd); // Start WiFI
 	WiFi.mode(WIFI_STA);
-  
+
 	debug_out("Connecting to ",DEBUG_MIN_INFO,0);
 	debug_out(wlanssid,DEBUG_MIN_INFO,1);
 
@@ -354,8 +414,69 @@ void connectWifi() {
 			debug_out("",DEBUG_MIN_INFO,1);
 		}
 	}
-    debug_out("WiFi connected\nIP address: "+IPAddress2String(WiFi.localIP()),DEBUG_MIN_INFO,1);
+	debug_out("WiFi connected\nIP address: "+IPAddress2String(WiFi.localIP()),DEBUG_MIN_INFO,1);
+#endif
 }
+
+/*****************************************************************
+/* dtostrf for Arduino feather                                   *
+/*****************************************************************/
+#if defined(ARDUINO_SAMD_ZERO) && defined(SERIAL_PORT_USBVIRTUAL)
+#if 0
+char *dtostrf (double val, signed char width, unsigned char prec, char *sout) {
+	char fmt[20];
+	sprintf(fmt, "%%%d.%df", width, prec);
+	sprintf(sout, fmt, val);
+	return sout;
+}
+#else
+#include <string.h>
+#include <stdlib.h>
+char *dtostrf(double val, int width, unsigned int prec, char *sout) {
+	int decpt, sign, reqd, pad;
+	const char *s, *e;
+	char *p;
+	s = fcvt(val, prec, &decpt, &sign);
+	if (prec == 0 && decpt == 0) {
+		s = (*s < '5') ? "0" : "1";
+		reqd = 1;
+	} else {
+		reqd = strlen(s);
+		if (reqd > decpt) reqd++;
+		if (decpt == 0) reqd++;
+	}
+	if (sign) reqd++;
+	p = sout;
+	e = p + reqd;
+	pad = width - reqd;
+	if (pad > 0) {
+		e += pad;
+		while (pad-- > 0) *p++ = ' ';
+	}
+	if (sign) *p++ = '-';
+	if (decpt <= 0 && prec > 0) {
+		*p++ = '0';
+		*p++ = '.';
+		e++;
+		while ( decpt < 0 ) {
+			decpt++;
+			*p++ = '0';
+		}
+	}
+	while (p < e) {
+		*p++ = *s++;
+		if (p == e) break;
+		if (--decpt == 0) *p++ = '.';
+	}
+	if (width < 0) {
+		pad = (reqd + width) * -1;
+		while (pad-- > 0) *p++ = ' ';
+	}
+	*p = 0;
+	return sout;
+}
+#endif
+#endif
 
 /*****************************************************************
 /* convert float to string with a                                *
@@ -373,13 +494,38 @@ String Float2String(float value) {
 }
 
 /*****************************************************************
+/* ChipId Arduino Feather                                        *
+/*****************************************************************/
+String FeatherChipId() {
+	String s;
+#if defined(ARDUINO_SAMD_ZERO)
+	debug_out("Reading Arduino Feather ChipID",DEBUG_MED_INFO,1);
+
+	volatile uint32_t val1, val2, val3, val4;
+	volatile uint32_t *ptr1 = (volatile uint32_t *)0x0080A00C;
+	val1 = *ptr1;
+	volatile uint32_t *ptr = (volatile uint32_t *)0x0080A040;
+	val2 = *ptr;
+	ptr++;
+	val3 = *ptr;
+	ptr++;
+	val4 = *ptr;
+
+	s = String(val1,HEX)+String(val2,HEX)+String(val3,HEX)+String(val4,HEX);
+
+#endif
+	return s;
+}
+
+/*****************************************************************
 /* send data to rest api                                         *
 /*****************************************************************/
 void sendData(const String& data, const int pin, const char* host, const int httpPort, const char* url) {
+#if defined(ESP8266)
 
-	debug_out("connecting to ",DEBUG_MIN_INFO,0);
+	debug_out("Start connecting to ",DEBUG_MIN_INFO,0);
 	debug_out(host,DEBUG_MIN_INFO,1);
-  
+
 	WiFiClient client;
 	WiFiClientSecure client_s;
 	// Use WiFiClient class to create TCP connections
@@ -394,7 +540,7 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 		debug_out(url,DEBUG_MIN_INFO,1);
 		debug_out(String(ESP.getChipId()),DEBUG_MIN_INFO,1);
 		debug_out(data,DEBUG_MIN_INFO,1);
-  
+
 		// send request to the server
 		client.print(String("POST ") + url + " HTTP/1.1\r\n" +
 					"Host: " + host + "\r\n" +
@@ -409,13 +555,13 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 		client.println(data);
 
 		delay(1);
-  
+
 		// Read reply from server and print them
 		while(client.available()){
 			char c = client.read();
 			debug_out(String(c),DEBUG_MIN_INFO,0);
 		}
-  
+
 		debug_out("\nclosing connection\n------------------------------\n\n",DEBUG_MIN_INFO,1);
 
 	} else {
@@ -429,7 +575,7 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 		debug_out(url,DEBUG_MIN_INFO,1);
 		debug_out(String(ESP.getChipId()),DEBUG_MIN_INFO,1);
 		debug_out(data,DEBUG_MIN_INFO,1);
-  
+
 		// send request to the server
 		client_s.print(String("POST ") + url + " HTTP/1.1\r\n" +
 					"Host: " + host + "\r\n" +
@@ -444,15 +590,96 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 		client_s.println(data);
 
 		delay(1);
-  
+
 		// Read reply from server and print them
 		while(client_s.available()){
 			char c = client_s.read();
 			debug_out(String(c),DEBUG_MIN_INFO,0);
 		}
-  
+
 		debug_out("\nclosing connection\n------------------------------\n\n",DEBUG_MIN_INFO,1);
 	}
+
+	debug_out("End connecting to ",DEBUG_MIN_INFO,0);
+	debug_out(host,DEBUG_MIN_INFO,1);
+
+#endif
+}
+
+/*****************************************************************
+/* send data to LoRa gateway                                     *
+/*****************************************************************/
+void send_lora(const String& data) {
+#if defined(ARDUINO_SAMD_ZERO)
+	uint8_t buf[RH_RF69_MAX_MESSAGE_LEN];
+	uint8_t message_end[] = "LORA_MESSAGE_END";
+	uint8_t message_start[] = "LORA_MESSAGE_START";
+	int counter;
+	String part2send;
+
+	debug_out("Start connecting to LoRa gateway ",DEBUG_MIN_INFO,1);
+
+	debug_out("Length of data (data.length()): ",DEBUG_MAX_INFO,0);
+	debug_out(String(data.length()),DEBUG_MAX_INFO,1);
+	
+	if (manager.sendtoWait(message_start, sizeof(message_start), SERVER_ADDRESS)) {
+		// Now wait for a reply from the server
+		uint8_t len = sizeof(buf);
+		uint8_t from;
+		if (manager.recvfromAckTimeout(buf, &len, 2000, &from)) {
+			debug_out("got reply from : 0x",DEBUG_MAX_INFO,0);
+			debug_out(String(from, HEX),DEBUG_MAX_INFO,1);
+		} else {
+			debug_out("No reply, is server running?",DEBUG_MIN_INFO,1);
+		}
+	}  else
+		debug_out("sendtoWait failed",DEBUG_MIN_INFO,1);
+	
+	while ((counter * (RH_RF69_MAX_MESSAGE_LEN-1)) < data.length()+1) {
+
+		part2send = data.substring(counter * (RH_RF69_MAX_MESSAGE_LEN-1), (counter * (RH_RF69_MAX_MESSAGE_LEN - 1) + (RH_RF69_MAX_MESSAGE_LEN - 1) <= (data.length()+1) ? counter * (RH_RF69_MAX_MESSAGE_LEN - 1) + (RH_RF69_MAX_MESSAGE_LEN - 1) : (data.length()+1) ) ) + "\0";
+
+		debug_out("Data part: ",DEBUG_MAX_INFO,0);
+		debug_out(part2send,DEBUG_MAX_INFO,1);
+		debug_out("part2send.length(): ",DEBUG_MAX_INFO,0);
+		debug_out(String(part2send.length()),DEBUG_MAX_INFO,1);
+	
+		if (manager.sendtoWait((uint8_t*)(part2send.c_str()), part2send.length(), SERVER_ADDRESS))
+		{
+			// Now wait for a reply from the server
+			uint8_t len = sizeof(buf);
+			uint8_t from;
+			if (manager.recvfromAckTimeout(buf, &len, 2000, &from))
+			{
+				debug_out("got reply from : 0x",DEBUG_MAX_INFO,0);
+				debug_out(String(from, HEX),DEBUG_MAX_INFO,1);
+			} else {
+				debug_out("No reply, is server running?",DEBUG_MIN_INFO,1);
+			}
+		}  else
+			debug_out("sendtoWait failed",DEBUG_MIN_INFO,1);
+
+		counter++;
+	}
+
+	if (manager.sendtoWait(message_end, sizeof(message_end), SERVER_ADDRESS)) {
+		// Now wait for a reply from the server
+		uint8_t len = sizeof(buf);
+		uint8_t from;
+		if (manager.recvfromAckTimeout(buf, &len, 2000, &from)) {
+			debug_out("got reply from : 0x",DEBUG_MAX_INFO,0);
+			debug_out(String(from, HEX),DEBUG_MAX_INFO,1);
+		} else {
+			debug_out("No reply, is server running?",DEBUG_MIN_INFO,1);
+		}
+	}  else
+		debug_out("sendtoWait failed",DEBUG_MIN_INFO,1);
+
+	debug_out("\nclosing connection\n------------------------------\n\n",DEBUG_MIN_INFO,1);
+
+	debug_out("End connecting to LoRa gateway ",DEBUG_MIN_INFO,1);
+
+#endif
 }
 
 /*****************************************************************
@@ -506,6 +733,8 @@ String sensorDHT() {
 	float h = dht.readHumidity(); //Read Humidity
 	float t = dht.readTemperature(); //Read Temperature
 
+	debug_out("Start reading DHT11/22",DEBUG_MED_INFO,1);
+
 	// Check if valid number if non NaN (not a number) will be send.
 	if (isnan(t) || isnan(h)) {
 		debug_out("DHT22 couldn't be read",DEBUG_ERROR,1);
@@ -519,7 +748,10 @@ String sensorDHT() {
 		s += Float2String(h);
 		s += "\"},";
 	}
-	debug_out("------------------------------",DEBUG_MIN_INFO,1);    
+	debug_out("------------------------------",DEBUG_MIN_INFO,1);
+
+	debug_out("End reading DHT11/22",DEBUG_MED_INFO,1);
+
 	return s;
 }
 
@@ -530,6 +762,8 @@ String sensorBMP() {
 	String s = "";
 	int p;
 	float t;
+
+	debug_out("Start reading BMP180",DEBUG_MED_INFO,1);
 
 	p = bmp.readPressure();
 	t = bmp.readTemperature();
@@ -545,7 +779,10 @@ String sensorBMP() {
 		s += Float2String(t);
 		s += "\"},";
 	}
-	debug_out("------------------------------",DEBUG_MIN_INFO,1);    
+	debug_out("------------------------------",DEBUG_MIN_INFO,1);
+
+	debug_out("End reading BMP180",DEBUG_MED_INFO,1);
+
 	return s;
 }
 
@@ -563,6 +800,9 @@ String sensorSDS() {
 	int checksum_is;
 	int checksum_ok = 0;
 	int position = 0;
+
+	debug_out("Start reading SDS011",DEBUG_MED_INFO,1);
+
 	while (serialSDS.available() > 0) {
 		buffer = serialSDS.read();
 		debug_out(String(len)+" - "+String(buffer,DEC)+" - "+String(buffer,HEX)+" - "+int(buffer)+" .",DEBUG_MAX_INFO,1);
@@ -608,6 +848,8 @@ String sensorSDS() {
 		}
 		sds_pm10_sum = 0; sds_pm25_sum = 0; sds_val_count = 0;
 	}
+	debug_out("End reading SDS011",DEBUG_MED_INFO,1);
+
 	return s;
 }
 
@@ -618,7 +860,9 @@ String sensorPPD() {
 	float ratio = 0;
 	float concentration = 0;
 	String s = "";
-  
+
+	debug_out("Start reading PPD42NS",DEBUG_MED_INFO,1);
+
 	// Read pins connected to ppd42ns
 	valP1 = digitalRead(PPD_PIN_PM1);
 	valP2 = digitalRead(PPD_PIN_PM2);
@@ -627,18 +871,18 @@ String sensorPPD() {
 		trigP1 = true;
 		trigOnP1 = act_micro;
 	}
-  
+
 	if (valP1 == HIGH && trigP1 == true){
 		durationP1 = act_micro - trigOnP1;
 		lowpulseoccupancyP1 = lowpulseoccupancyP1 + durationP1;
 		trigP1 = false;
 	}
-  
+
 	if(valP2 == LOW && trigP2 == false){
 		trigP2 = true;
 		trigOnP2 = act_micro;
 	}
-  
+
 	if (valP2 == HIGH && trigP2 == true){
 		durationP2 = act_micro - trigOnP2;
 		lowpulseoccupancyP2 = lowpulseoccupancyP2 + durationP2;
@@ -683,8 +927,102 @@ String sensorPPD() {
 		s += Float2String(concentration);
 		s += "\"},";
 
-		debug_out("------------------------------",DEBUG_MIN_INFO,1);    
+		debug_out("------------------------------",DEBUG_MIN_INFO,1);
 	}
+
+	debug_out("End reading PPD42NS",DEBUG_MED_INFO,1);
+
+	return s;
+}
+
+/*****************************************************************
+/* read GPS sensor values                                        *
+/*****************************************************************/
+String sensorGPS() {
+	String s = "";
+#if defined(ARDUINO_SAMD_ZERO) || defined(ESP8266)
+	String gps_lat = "";
+	String gps_lng = "";
+	String gps_alt = "";
+	String gps_date = "";
+	String gps_time = "";
+
+	debug_out("Reading GPS",DEBUG_MED_INFO,1);
+
+	while (serialSDS.available() > 0) {
+		if (gps.encode(serialSDS.read())) {
+			if (gps.location.isValid()) {
+				last_gps_lat = String(gps.location.lat(),6);
+				last_gps_lng = String(gps.location.lng(),6);
+			} else {
+				debug_out("Lat/Lng INVALID",DEBUG_MAX_INFO,1);
+			}
+			if (gps.altitude.isValid()) {
+				last_gps_alt = String(gps.altitude.meters(),2);
+			} else {
+				debug_out("Altitude INVALID",DEBUG_MAX_INFO,1);
+			}
+			if (gps.date.isValid()) {
+				gps_date = "";
+				if (gps.date.month() < 10) gps_date += "0";
+				gps_date += String(gps.date.month());
+				gps_date += "/";
+				if (gps.date.day() < 10) gps_date += "0";
+				gps_date += String(gps.date.day());
+				gps_date += "/";
+				gps_date += String(gps.date.year());
+				last_gps_date = gps_date;
+			} else {
+				debug_out("Date INVALID",DEBUG_MAX_INFO,1);
+			}
+			if (gps.time.isValid()) {
+				gps_time = "";
+				if (gps.time.hour() < 10) gps_time += "0";
+				gps_time += String(gps.time.hour());
+				gps_time += ":";
+				if (gps.time.minute() < 10) gps_time += "0";
+				gps_time += String(gps.time.minute());
+				gps_time += ":";
+				if (gps.time.second() < 10) gps_time += "0";
+				gps_time += String(gps.time.second());
+				gps_time += ".";
+				if (gps.time.centisecond() < 10) gps_time += "0";
+				gps_time += String(gps.time.centisecond());
+				last_gps_time = gps_time;
+			} else {
+				debug_out("Time: INVALID",DEBUG_MAX_INFO,1);
+			}
+		}
+	}
+
+	if ((act_milli-starttime) > sampletime_ms) {
+		debug_out("Lat/Lng: "+last_gps_lat+","+last_gps_lng,DEBUG_MIN_INFO,1);
+		debug_out("Altitude: "+last_gps_alt,DEBUG_MIN_INFO,1);
+		debug_out("Date: "+last_gps_date,DEBUG_MIN_INFO,1);
+		debug_out("Time "+last_gps_time,DEBUG_MIN_INFO,1);
+		debug_out("------------------------------",DEBUG_MIN_INFO,1);
+		s += "{\"value_type\":\"GPS_Lat\",\"value\":\"";
+		s += last_gps_lat;
+		s += "\"},";
+		s += "{\"value_type\":\"GPS_Lng\",\"value\":\"";
+		s += last_gps_lng;
+		s += "\"},";
+		s += "{\"value_type\":\"GPS_Alt\",\"value\":\"";
+		s += last_gps_alt;
+		s += "\"},";
+		s += "{\"value_type\":\"GPS_Date\",\"value\":\"";
+		s += last_gps_date;
+		s += "\"},";
+		s += "{\"value_type\":\"GPS_Time\",\"value\":\"";
+		s += last_gps_time;
+		s += "\"},";
+		last_gps_lat = "";
+		last_gps_lng = "";
+		last_gps_alt = "";
+		last_gps_date = "";
+		last_gps_time = "";
+	}
+#endif
 	return s;
 }
 
@@ -701,6 +1039,7 @@ void copyExtDef() {
 	if (SEND2DUSTI != send2dusti) { send2dusti = SEND2DUSTI; }
 	if (SEND2MADAVI != send2madavi) { send2madavi = SEND2MADAVI; }
 	if (SEND2MQTT != send2mqtt) { send2mqtt = SEND2MQTT; }
+	if (SEND2LORA != send2lora) { send2lora = SEND2LORA; }
 	if (SEND2CSV != send2csv) { send2csv = SEND2CSV; }
 	if (AUTO_UPDATE != auto_update) { auto_update = AUTO_UPDATE; }
 	if (HAS_DISPLAY != has_display) { has_display = HAS_DISPLAY; }
@@ -711,13 +1050,13 @@ void copyExtDef() {
 	if (HOST_CUSTOM != NULL) { strcpy(host_custom,HOST_CUSTOM); }
 	if (URL_CUSTOM != NULL) { strcpy(url_custom,URL_CUSTOM); }
 	if (HTTPPORT_CUSTOM != httpPort_custom) { httpPort_custom = HTTPPORT_CUSTOM; }
-
 }
 
 /*****************************************************************
 /* write config to spiffs                                        *
 /*****************************************************************/
 void writeConfig() {
+#if defined(ESP8266)
 	debug_out("saving config...",DEBUG_MIN_INFO,1);
 	DynamicJsonBuffer jsonBuffer;
 	JsonObject& json = jsonBuffer.createObject();
@@ -751,12 +1090,14 @@ void writeConfig() {
 	json.printTo(configFile);
 	configFile.close();
 	//end save
+#endif
 }
 
 /*****************************************************************
 /* read config from spiffs                                       *
 /*****************************************************************/
 void readConfig() {
+#if defined(ESP8266)
 	debug_out("mounting FS...",DEBUG_MIN_INFO,1);
 
 	if (SPIFFS.begin()) {
@@ -807,12 +1148,14 @@ void readConfig() {
 	} else {
 		debug_out("failed to mount FS",DEBUG_ERROR,1);
 	}
+#endif
 }
 
 /*****************************************************************
 /* AutoUpdate                                                    *
 /*****************************************************************/
 void autoUpdate() {
+#if defined(ESP8266)
 	if (auto_update) {
 		debug_out("Starting OTA update ...",DEBUG_MIN_INFO,1);
 		display_debug("Looking for OTA update");
@@ -832,12 +1175,14 @@ void autoUpdate() {
 					break;
 		}
 	}
+#endif
 }
 
 /*****************************************************************
 /* display values                                                 *
 /*****************************************************************/
 void display_values(const String& data) {
+#if defined(ESP8266)
 	char* s;
 	String tmp_type;
 	String tmp_val;
@@ -890,24 +1235,33 @@ void display_values(const String& data) {
 		}
 	}
 	display.display();
+#endif
 }
 
 /*****************************************************************
 /* Init display                                                  *
 /*****************************************************************/
 void init_display() {
+#if defined(ESP8266)
 	display.init();
 	display.resetDisplay();
+#endif
 }
 
 /*****************************************************************
 /* The Setup                                                     *
 /*****************************************************************/
 void setup() {
-	WiFi.persistent(false);
 	Serial.begin(9600);             // Output to Serial at 9600 baud
+#if defined(ESP8266)
+	WiFi.persistent(false);
 	Wire.pins(D3,D4);				// must be set before all other I2C cmds 
 	Wire.begin(D3,D4);
+#endif
+#if defined(ARDUINO_SAMD_ZERO)
+	Wire.begin();
+	serialSDS.begin(9600);
+#endif
 	init_display();
 	copyExtDef();
 	display_debug("Reading config from SPIFFS");
@@ -921,8 +1275,23 @@ void setup() {
 	pinMode(PPD_PIN_PM2,INPUT_PULLUP); // Listen at the designated PIN
 	dht.begin();                       // Start DHT
 	delay(10);
+#if defined(ESP8266)
 	debug_out("\nChipId: ",DEBUG_MIN_INFO,1);
 	debug_out(String(ESP.getChipId()),DEBUG_MIN_INFO,1);
+#endif
+#if defined(ARDUINO_SAMD_ZERO)
+	if (!manager.init())
+		debug_out("Manager init failed",DEBUG_MIN_INFO,1);
+	if (!rf69.setFrequency(RF69_FREQ)) {
+		debug_out("setFrequency failed",DEBUG_MIN_INFO,1);
+		while (1);
+	}
+	debug_out("Set Freq to: ",DEBUG_MIN_INFO,0);
+	debug_out(String(RF69_FREQ),DEBUG_MIN_INFO,1);
+	rf69.setTxPower(18);
+	debug_out("\nChipId: ",DEBUG_MIN_INFO,0);
+	debug_out(FeatherChipId(),DEBUG_MIN_INFO,1);
+#endif
 	if (ppd_read) debug_out("Lese PPD...",DEBUG_MIN_INFO,1);
 	if (sds_read) debug_out("Lese SDS...",DEBUG_MIN_INFO,1);
 	if (dht_read) debug_out("Lese DHT...",DEBUG_MIN_INFO,1);
@@ -936,7 +1305,7 @@ void setup() {
 	if (has_display) debug_out("Zeige auf Display...",DEBUG_MIN_INFO,1);
 	if (bmp_read) {
 		if (!bmp.begin()) {
-			Serial.println("Could not find a valid BMP085 sensor, check wiring!");
+			debug_out("Could not find a valid BMP085 sensor, check wiring!",DEBUG_MIN_INFO,1);
 			bmp_read = 0;
 		}
 	}
@@ -949,13 +1318,20 @@ void setup() {
 /*****************************************************************/
 void loop() {
 	String data = "";
-	String data_first_part = "{\"software_version\": \"" + String(SOFTWARE_VERSION) + "\", \"sensordatavalues\":[";
-	String data_ppd = "";
-	String data_dht = "";
-	String data_sds = "";
-	String data_bmp = "";
-	String data_sample_times = "";
+	data_first_part = "{\"software_version\": \"" + String(SOFTWARE_VERSION) + "\", \"chipid\": \"" + FeatherChipId() + "\", \"sensordatavalues\":[";
+	data_ppd = "";
+	data_dht = "";
+	data_sds = "";
+	data_bmp = "";
+	data_gps = "";
+	data_sample_times = "";
 
+/*	result_PPD = "";
+	result_SDS = "";
+	result_DHT = "";
+	result_BMP = "";
+	result_GPS = ""; */
+	
 	act_micro = micros();
 	act_milli = millis();
 
@@ -970,26 +1346,31 @@ void loop() {
 		last_micro = act_micro;
 	}
 
-	String result_PPD;
-	String result_SDS;
-	String result_DHT;
-	String result_BMP;
-	
 	if (ppd_read) {
+		debug_out("Call sensorPPD",DEBUG_MAX_INFO,1);
 		result_PPD = sensorPPD();
 	}
-  
+
 	if (sds_read && (((act_milli-starttime_SDS) > sampletime_SDS_ms) || ((act_milli-starttime) > sampletime_ms))) {
+		debug_out("Call sensorSDS",DEBUG_MAX_INFO,1);
 		result_SDS = sensorSDS();
 		starttime_SDS = act_milli;
 	}
-  
+
 	if (dht_read && ((act_milli-starttime) > sampletime_ms)) {
+		debug_out("Call sensorDHT",DEBUG_MAX_INFO,1);
 		result_DHT = sensorDHT();  // getting temperature and humidity (optional)
 	}
 
 	if (bmp_read && ((act_milli-starttime) > sampletime_ms)) {
+		debug_out("Call sensorBMP",DEBUG_MAX_INFO,1);
 		result_BMP = sensorBMP();  // getting temperature and humidity (optional)
+	}
+
+	if (gps_read && (((act_milli-starttime_GPS) > sampletime_GPS_ms) || ((act_milli-starttime) > sampletime_ms))) {
+		debug_out("Call sensorGPS",DEBUG_MAX_INFO,1);
+		result_GPS = sensorGPS();  // getting GPS coordinates
+		starttime_GPS = act_milli;
 	}
 
 	if ((act_milli-starttime) > sampletime_ms) {
@@ -1051,6 +1432,18 @@ void loop() {
 				sendData(data_bmp,BMP_API_PIN,host_dusti,httpPort_dusti,url_dusti);
 			}
 		}
+		if (gps_read) {
+			data += result_GPS;
+			data_gps  = data_first_part + result_GPS;
+			data_gps += data_sample_times;
+			data_gps.remove(data_gps.length()-1);
+			data_gps.replace("GPS_","");
+			data_gps += "]}";
+			if (send2dusti) {
+				debug_out("#### Sending GPS data to luftdaten.info: ",DEBUG_MIN_INFO,1);
+				sendData(data_gps,GPS_API_PIN,host_dusti,httpPort_dusti,url_dusti);
+			}
+		}
 
 		data += data_sample_times;
 
@@ -1080,6 +1473,11 @@ void loop() {
 			sendmqtt(data,host_mqtt,mqtt_port);
 		}
 		
+		if (send2lora) {
+			debug_out("#### Sending to LoRa gateway: ",DEBUG_MIN_INFO,1);
+			send_lora(data);
+		}
+
 		if (send2csv) {
 			debug_out("#### Sending as csv: ",DEBUG_MIN_INFO,1);
 			send_csv(data);

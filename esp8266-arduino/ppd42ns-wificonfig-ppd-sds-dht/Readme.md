@@ -1,11 +1,11 @@
-Version für Sensoren PPD42NS, SDS011, DHT22 und BMP180 (BMP is work in progress).  
+Version für Sensoren PPD42NS, SDS011, DHT22, BMP180 und NEO-6M.  
 
 Features:  
 - gleichzeitiger Betrieb mehrerer Sensoren  
 - Konfiguration über WLAN (Sensor als Access Point) möglich  
 - Unterstützung von OLED-Displays mit SSD1306  
 - Auswahl der API(s), an welche die Daten gesendet werden, inklusive der Möglichkeit, die Daten als CSV über USB auszugeben   
-
+- nutzbar für ESP8266 und Arduino Feather M0 (LoRa)
 
 ToDo's:
 - TimeOut für WifiKonfig zum Laufen bekommen
@@ -35,28 +35,34 @@ Wiring:
 * SDS and DHT wiring: [pdf/sds_dht_wiring.pdf](pdf/sds_dht_wiring.pdf)
 
 Benötigte Software:  
-Arduino IDE <https://www.arduino.cc/en/Main/Software>  
+Arduino IDE <https://www.arduino.cc/en/Main/Software>  (Version 1.6.9)
 ESP8266 für Arduino<http://arduino.esp8266.com/stable/package_esp8266com_index.json> (Version 2.3.0)  
   
   
-Verwendete Bibliotheken:  
+Verwendete Bibliotheken (für ESP8266):  
   
+In Arduino enthalten:
+Wire
+
 In ESP8266 für Arduino IDE enthalten:  
 FS  
 ESP8266WiFi  
 ESP8266WebServer  
 DNSServer  
-Wire  
   
 Installierbar über Arduino IDE (Menü Sketch -> Bibliothek einbinden -> Bibliotheken verwalten, in Klammern die getestete Version):  
 Adafruit BMP085 library <https://github.com/adafruit/Adafruit-BMP085-Library> (1.0.0)  
-ArduinoJson <https://github.com/bblanchon/ArduinoJson> (5.6.1)  
+ArduinoJson <https://github.com/bblanchon/ArduinoJson> (5.6.4)  
 DHT sensor library <https://github.com/adafruit/DHT-sensor-library> (1.2.3)  
-ESP8266 Oled driver for SSD1306 display <https://github.com/squix78/esp8266-oled-ssd1306> (3.1.0)  
+ESP8266 Oled driver for SSD1306 display <https://github.com/squix78/esp8266-oled-ssd1306> (3.2.3)  
 ESP8266httpUpdate (1.1.0)  
 PubSubClient <http://pubsubclient.knolleary.net/> (2.6.0)  
 SoftwareSerial <https://github.com/plerup/espsoftwareserial> (1.0.0)  
 WifiManager <https://github.com/tzapu/WiFiManager> (0.12.0)  
+  
+Manuell zu installieren:  
+TinyGPS++ <http://arduiniana.org/libraries/tinygpsplus/> (0.94b)  
+  
   
 Bis Version NRZ-2016-15:  
 DHT <https://github.com/adafruit/DHT-sensor-library>  
@@ -95,3 +101,30 @@ PPD42NS => Pin 5
 DHT22 => Pin 7  
 SDS011 => Pin 1  
 BMP180 => Pin 3  
+GPS(Neo-6M) => Pin 9  
+  
+  
+Verwendete Bibliotheken für Adafruit Feather M0 LoRa:  
+
+Für die Verwendung der Adafruit Feather Boards muss im Arduino IDE noch der Adafruit Board Index eingetragen werden. Dazu in den Einstellungen die URL 
+https://adafruit.github.io/arduino-board-index/package_adafruit_index.json als zusätzliche Boardverwalter-URL eintragen. Nach einem Neustart der IDE im Boardverwalter "Adafruit SAMD boards" installieren.
+  
+In Arduino enthalten:
+Wire  
+SPI  
+  
+In "Adafruit SAMD Boards" enthalten:  
+  
+  
+Installierbar über Arduino IDE (für Versionen siehe auch ESP8266):  
+Adafruit BMP085 library <https://github.com/adafruit/Adafruit-BMP085-Library> (1.0.0)  
+ArduinoJson <https://github.com/bblanchon/ArduinoJson> (5.6.4)  
+DHT sensor library <https://github.com/adafruit/DHT-sensor-library> (1.2.3)  
+PubSubClient <http://pubsubclient.knolleary.net/> (2.6.0)  
+SoftwareSerial <https://github.com/plerup/espsoftwareserial> (1.0.0)  
+  
+Manuell zu installieren:  
+RadioHead Packet Radio library <http://www.airspayce.com/mikem/arduino/RadioHead/> (1.6.1), Link zum Download des Ziparchivs im 2. Abschnitt  
+TinyGPS++ <http://arduiniana.org/libraries/tinygpsplus/> (0.94b)  
+  
+Ich hoffe, alle Bibliotheken erwischt zu haben. Falls beim Kompilieren eine Bibliothek fehlt, bitte als Issue melden. Ich trage dann die Infos nach.  
