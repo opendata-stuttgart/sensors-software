@@ -1,9 +1,12 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import argparse
 from influxdb import InfluxDBClient
 import paho.mqtt.client as mqtt
 import sys
 
+# globals
 verbosity_level=3;
 
 # main 
@@ -45,7 +48,7 @@ def main():
         print(e)
     # mclient.subscribe.callback(on_message, args.topicroot+"#", hostname=args.mqtthost)
     #mclient.loop_forever(timeout=1.0, max_packets=1, retry_first_connection=False)
-    mclient.loop_start()
+    mclient.loop_forever()
 
 def debug_out(msg,verbosity=5):
     if verbosity>verbosity_level:
@@ -65,12 +68,12 @@ def on_disconnect(client, userdata, rc):
 def on_message(client, userdata, msg):
     debug_out(msg.topic+" "+str(msg.payload),5)
     # if topicroot is found at beginning: strip it
-    ss=msg.topic.lstrip(topicroot).split("/")
+    ss=msg.topic.lstrip(userdata["topicroot"]).split("/")
     slen=len(ss)
-    json_body=[]
+    json_body={}
     if (slen)>=3:
         # split contains all parts
-        json_body = [{
+        json_body = {
                 "measurement": ss[slen-1],
                 "fields": {
                     "value": msg.payload
@@ -78,7 +81,7 @@ def on_message(client, userdata, msg):
                 "tags":{
                     "sensortype": ss[slen-2],
                     "nodeid": ss[slen-3]
-                }}]
+                }}
         userdata["iclient"].write(json_body)
     #  state_topic: "dusti/esp8266-16058770/PPD42NS/#"
     #  name: "PPD Sensor"
@@ -96,7 +99,7 @@ def parse_args():
                         help='port of InfluxDB http API')
     parser.add_argument('-m', '--mqtthost',  dest='mqtthost', type=str, required=False, default='localhost',
                         help='hostname of MQTT server')
-    parser.add_argument('-M','--mqttport',  dest='mqttport', type=int, required=False, default=8086,
+    parser.add_argument('-M','--mqttport',  dest='mqttport', type=int, required=False, default=1883,
                         help='port of MQTT server')
     parser.add_argument('-t', '--topicroot',  dest='topicroot', type=str, required=False, default='',
                         help='only consider topics starting with topicroot')
