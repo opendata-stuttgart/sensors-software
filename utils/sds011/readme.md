@@ -2,9 +2,13 @@
 
 This is a small logger script for the SDS011 particle sensor.
 Connect the device via serial to your computer (e.g. via USB2serial) and run the python program. 
-To change the device, have the path/name as argument, like:
+To change the device, have the path/name as first argument, like:
 
 	./sds011logger.py /dev/ttyUSB0
+
+To log on console and into a file just use redirection or tee:
+
+	./sds011logger.py /dev/ttyUSB0 | tee -a ~/sdslog_0.csv
 
 Three values per reading are the output, they are TAB separated. 
 With a header the output would be like:
