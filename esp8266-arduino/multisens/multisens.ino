@@ -31,6 +31,7 @@ String software_version_s=String(SOFTWARE_VERSION_INITIALS)+"_"+String(SOFTWARE_
 #define MQTT_MAX_PACKET_SIZE 4096
 #undef MAX_TRANSFER_SIZE
 #include <PubSubClient.h>
+#include <ArduinoJson.h>
 #include "mqttfunctions.h"
 #endif
 

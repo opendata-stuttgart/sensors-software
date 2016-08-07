@@ -1,4 +1,4 @@
-#ifdef PUSHTO_MQTT
+#if defined(PUSHTO_MQTT) || defined (SEND2MQTT)
 #ifdef WIRELESS_ACTIVE
 // connect/push to an MQTT server
 // #include <PubSubClient.h> // include in .ino
@@ -91,7 +91,6 @@ void mqttcallback(char* topic, byte* payload, unsigned int length) {
   //TODO: analyse message here (not yet used)
 }
 
-
 // subscribe to subtopic
 void mqtt_subscribetosubtopic(const char* subtopic){
    String subscribetopic=String(mqtttopicbase) + "/" + mqttclientid + "/" + String(subtopic);
@@ -136,6 +135,21 @@ void mqtt_setup() {
   mqtt_subscribetosubtopic(mqttintopic);
 }
 
+void json2mqttpub(String jsondata){
+    String svalue_type, svalue;
+    StaticJsonBuffer<2000> jsonBuffer;
+    JsonObject& json2data = jsonBuffer.parseObject(jsondata);
+    if (!json2data.success()) {return;}
+    // sensordatavalues
+    // "value_type\":\"durP1\",\"value
+    /* TODO: iterate here
+    for (JsonObject::iterator it=jsondata["sensordatavalues"].begin(); it!=jsondata["sensordatavalues"].end(); ++it){
+        svalue_type=it["value_type"].asString();
+        svalue=it["value"].asString();
+    //     Serial.println(it->value.asString());
+    }
+    */
+}
 
 // endif WIRELESS_ACTIVE
 #endif
