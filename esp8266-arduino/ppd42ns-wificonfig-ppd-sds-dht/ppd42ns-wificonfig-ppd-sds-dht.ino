@@ -57,7 +57,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-024"
+#define SOFTWARE_VERSION "NRZ-2016-025"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -1227,13 +1227,8 @@ void display_values(const String& data) {
 		display.drawString(0,12*(value_count++),"PPD P2: "+ppd_p2);
 	}
 	if (sds_read) {
-		if (ppd_read) {
-			display.drawString(0,12*(value_count++),"SDS P1: "+sds_p1);
-			display.drawString(0,12*(value_count++),"SDS P2: "+sds_p2);
-		} else {
-			display.drawString(0,12*(value_count++),"SDS P1: "+ppd_p1);
-			display.drawString(0,12*(value_count++),"SDS P2: "+ppd_p2);
-		}
+		display.drawString(0,12*(value_count++),"SDS P1: "+ppd_p1);
+		display.drawString(0,12*(value_count++),"SDS P2: "+ppd_p2);
 	}
 	display.display();
 #endif
