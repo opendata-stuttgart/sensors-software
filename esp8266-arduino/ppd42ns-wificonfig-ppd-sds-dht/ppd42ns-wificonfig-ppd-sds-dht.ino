@@ -57,7 +57,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-022"
+#define SOFTWARE_VERSION "NRZ-2016-024"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -113,18 +113,18 @@ char wlanpwd[65] = "";
 
 char version_from_local_config[30] = "";
 
-bool dht_read = 0;
-bool ppd_read = 1;
-bool sds_read = 0;
+bool dht_read = 1;
+bool ppd_read = 0;
+bool sds_read = 1;
 bool bmp_read = 0;
 bool gps_read = 0;
 bool send2dusti = 1;
-bool send2madavi = 0;
+bool send2madavi = 1;
 bool send2custom = 0;
 bool send2mqtt = 0;
-bool send2lora = 0;
+bool send2lora = 1;
 bool send2csv = 0;
-bool auto_update = 1;
+bool auto_update = 0;
 bool has_display = 0;
 int  debug = 3;
 
@@ -154,6 +154,8 @@ const char* update_url = "/sensor/update/firmware.php";
 const int update_port = 80;
 
 #if defined(ESP8266)
+WiFiClient client;
+WiFiClientSecure client_s;
 WiFiClient mqtt_wifi;
 PubSubClient mqtt_client(mqtt_wifi);
 #endif
@@ -201,8 +203,6 @@ TinyGPSPlus gps;
 /* P1 for PM10 & P2 for PM25                                     *
 /*****************************************************************/
 
-boolean valP1 = HIGH;
-boolean valP2 = HIGH;
 unsigned long durationP1;
 unsigned long durationP2;
 
@@ -224,31 +224,26 @@ unsigned long min_micro = 1000000000;
 unsigned long max_micro = 0;
 unsigned long diff_micro = 0;
 
-unsigned long sampletime_ms = 30000;
-unsigned long sampletime_SDS_ms = 1000;
-unsigned long sampletime_GPS_ms = 50;
+const unsigned long sampletime_ms = 30000;
+
+const unsigned long sampletime_SDS_ms = 1000;
+const unsigned long warmup_time_SDS_ms = 10000;
+const unsigned long reading_time_SDS_ms = 5000;
+bool is_SDS_running = true;
+
+const unsigned long sampletime_GPS_ms = 50;
+
+const unsigned long sending_intervall_ms = 55000;
+unsigned long sending_time = 0;
+bool send_failed = false;
 
 unsigned long last_update_attempt;
-unsigned long pause_between_update_attempts = 86400000;
+const unsigned long pause_between_update_attempts = 86400000;
 
 int sds_pm10_sum = 0;
 int sds_pm25_sum = 0;
 int sds_val_count = 0;
 
-String data_first_part;
-String data_ppd;
-String data_dht;
-String data_sds;
-String data_bmp;
-String data_gps;
-String data_sample_times;
-
-String result_PPD;
-String result_SDS;
-String result_DHT;
-String result_BMP;
-String result_GPS;
-	
 String last_gps_lat;
 String last_gps_lng;
 String last_gps_alt;
@@ -257,10 +252,23 @@ String last_gps_time;
 
 bool first_csv_line = 1;
 
+const byte stop_SDS_cmd[] = {0xAA, 0xB4, 0x06, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x05, 0xAB};
+const byte start_SDS_cmd[] = {0xAA, 0xB4, 0x06, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x06, 0xAB};
+
+String data_first_part = "{\"software_version\": \"" + String(SOFTWARE_VERSION) + "\"FEATHERCHIPID, \"sensordatavalues\":[";
+
+const String txt_connection_failed = "connection failed";
+const String txt_start_connecting_to = "Start connecting to ";
+const String txt_end_connecting_to = "End connecting to ";
+const String txt_start_reading = "Start reading ";
+const String txt_end_reading = "End reading ";
+const String txt_sending_to = "## Sending to ";
+const String txt_sending_to_luftdaten = "## Sending to luftdaten.info ";
+
 /*****************************************************************
 /* Debug output                                                  *
 /*****************************************************************/
-void debug_out(const String& text, int level, bool linebreak) {
+void debug_out(const String& text, const int level, const bool linebreak) {
 	if (level <= debug) {
 		if (linebreak) {
 			Serial.println(text);
@@ -292,130 +300,10 @@ void display_debug(const String& text) {
 /*****************************************************************
 /* IPAddress to String                                           *
 /*****************************************************************/
-String IPAddress2String(IPAddress ipaddress) {
-	char myIpString[24];	
+String IPAddress2String(const IPAddress& ipaddress) {
+	char myIpString[24];
 	sprintf(myIpString, "%d.%d.%d.%d", ipaddress[0], ipaddress[1], ipaddress[2], ipaddress[3]);
 	return String(myIpString);
-}
-
-/*****************************************************************
-/* WifiConfig                                                    *
-/*****************************************************************/
-void wifiConfig() {
-#if defined(ESP8266)
-	String boolvar;
-	String apname;
-	String custom_wlanssid;
-	String custom_wlanpwd;
-	WiFiManager wifiManager;
-
-	debug_out("Starting WiFiManager",DEBUG_MED_INFO,1);
-
-	if (debug < 5) wifiManager.setDebugOutput(false);
-	WiFiManagerParameter custom_send2dusti("send2dusti", "Senden an luftdaten.info (0/1) ?", "", 10);
-	wifiManager.addParameter(&custom_send2dusti);
-	WiFiManagerParameter custom_send2madavi("send2madavi", "Senden an madavi.de (0/1) ?", "", 10);
-	wifiManager.addParameter(&custom_send2madavi);
-	WiFiManagerParameter custom_send2csv("send2csv", "Seriell als CSV (0/1) ?", "", 10);
-	wifiManager.addParameter(&custom_send2csv);
-	WiFiManagerParameter custom_dht_read("dht_read", "DHT Sensor (0/1) ?", "", 10);
-	wifiManager.addParameter(&custom_dht_read);
-	WiFiManagerParameter custom_ppd_read("ppd_read", "PPD42NS Sensor (0/1) ?", "", 10);
-	wifiManager.addParameter(&custom_ppd_read);
-	WiFiManagerParameter custom_sds_read("sds_read", "SDS Sensor (0/1) ?", "", 10);
-	wifiManager.addParameter(&custom_sds_read);
-	WiFiManagerParameter custom_bmp_read("bmp_read", "BMP Sensor (0/1) ?", "", 10);
-	wifiManager.addParameter(&custom_bmp_read);
-	WiFiManagerParameter custom_auto_update("auto_update", "Auto-Update (0/1) ?", "", 10);
-	wifiManager.addParameter(&custom_auto_update);
-	WiFiManagerParameter custom_has_display("has_display", "Display (0/1) ?", "", 10);
-	wifiManager.addParameter(&custom_has_display);
-	WiFiManagerParameter custom_debug("debug", "Debug output (0-5) ?", "", 10);
-	wifiManager.addParameter(&custom_debug);
-	WiFiManagerParameter custom_send2custom("send2custom", "Senden an eigene API (0/1)?", "", 10);
-	wifiManager.addParameter(&custom_send2custom);
-//	WiFiManagerParameter custom_host_custom("host_custom", "Host ?", "", 40);
-//	wifiManager.addParameter(&custom_host_custom);
-//	WiFiManagerParameter custom_url_custom("url_custom", "Pfad ?", "", 40);
-//	wifiManager.addParameter(&custom_url_custom);
-//	WiFiManagerParameter custom_httpPort_custom("httpPort_custom", "HTTP Port (80) ?", "", 10);
-//	wifiManager.addParameter(&custom_httpPort_custom);
-	apname  = "Feinstaubsensor-" + String(ESP.getChipId());
-	wifiManager.setTimeout(300);
-	wifiManager.setBreakAfterConfig(true);
-	wifiManager.startConfigPortal(apname.c_str());
-	custom_wlanssid = WiFi.SSID();
-	custom_wlanpwd = WiFi.psk();
-	strcpy(wlanssid,custom_wlanssid.c_str());
-	strcpy(wlanpwd,custom_wlanpwd.c_str());
-	if (strcmp(custom_dht_read.getValue(),"") != 0) dht_read = strtol(custom_dht_read.getValue(), NULL, 10);
-	if (strcmp(custom_ppd_read.getValue(),"") != 0) ppd_read = strtol(custom_ppd_read.getValue(), NULL, 10);
-	if (strcmp(custom_sds_read.getValue(),"") != 0) sds_read = strtol(custom_sds_read.getValue(), NULL, 10);
-	if (strcmp(custom_bmp_read.getValue(),"") != 0) bmp_read = strtol(custom_bmp_read.getValue(), NULL, 10);
-	if (strcmp(custom_send2dusti.getValue(),"") != 0) send2dusti = strtol(custom_send2dusti.getValue(), NULL, 10);
-	if (strcmp(custom_send2madavi.getValue(),"") != 0) send2madavi = strtol(custom_send2madavi.getValue(), NULL, 10);
-	if (strcmp(custom_send2csv.getValue(),"") != 0) send2csv = strtol(custom_send2csv.getValue(), NULL, 10);
-	if (strcmp(custom_auto_update.getValue(),"") != 0) auto_update = strtol(custom_auto_update.getValue(), NULL, 10);
-	if (strcmp(custom_has_display.getValue(),"") != 0) has_display = strtol(custom_has_display.getValue(), NULL, 10);
-	if (strcmp(custom_debug.getValue(),"") != 0) debug = strtol(custom_debug.getValue(), NULL, 10);
-	if (strcmp(custom_send2custom.getValue(),"") != 0) send2custom = strtol(custom_send2custom.getValue(), NULL, 10);
-//	if (strcmp(custom_host_custom.getValue(),"") != 0) strcpy(host_custom,custom_host_custom.getValue());
-//	if (strcmp(custom_url_custom.getValue(),"") != 0) strcpy(url_custom,custom_url_custom.getValue());
-//	if (strcmp(custom_httpPort_custom.getValue(),"") != 0) httpPort_custom = strtol(custom_httpPort_custom.getValue(), NULL, 10);
-	debug_out("------ Result from Webconfig ------",DEBUG_MIN_INFO,1);
-	debug_out("WLANSSID: ",DEBUG_MIN_INFO,0);debug_out(wlanssid,DEBUG_MIN_INFO,1);
-	debug_out("DHT_read: "+String(custom_dht_read.getValue())+" - "+String(dht_read),DEBUG_MIN_INFO,1);
-	debug_out("PPD_read: "+String(custom_ppd_read.getValue())+" - "+String(ppd_read),DEBUG_MIN_INFO,1);
-	debug_out("SDS_read: "+String(custom_sds_read.getValue())+" - "+String(sds_read),DEBUG_MIN_INFO,1);
-	debug_out("BMP_read: "+String(custom_bmp_read.getValue())+" - "+String(bmp_read),DEBUG_MIN_INFO,1);
-	debug_out("Dusti: "+String(custom_send2dusti.getValue())+" - "+String(send2dusti),DEBUG_MIN_INFO,1);
-	debug_out("Madavi: "+String(custom_send2madavi.getValue())+" - "+String(send2madavi),DEBUG_MIN_INFO,1);
-	debug_out("CSV: "+String(custom_send2csv.getValue())+" - "+String(send2csv),DEBUG_MIN_INFO,1);
-	debug_out("Autoupdate: "+String(custom_auto_update.getValue())+" - "+String(auto_update),DEBUG_MIN_INFO,1);
-	debug_out("Display: "+String(custom_has_display.getValue())+" - "+String(has_display),DEBUG_MIN_INFO,1);
-	debug_out("Debug: "+String(custom_debug.getValue())+" - "+String(debug),DEBUG_MIN_INFO,1);
-	debug_out("Custom API: "+String(custom_send2custom.getValue())+" - "+String(send2custom),DEBUG_MIN_INFO,1);
-//	debug_out("Custom Host: "+String(custom_host_custom.getValue())+" - "+String(host_custom),DEBUG_MIN_INFO,1);
-//	debug_out("Custom URL: "+String(custom_url_custom.getValue())+" - "+String(url_custom),DEBUG_MIN_INFO,1);
-//	debug_out("Custom Port: "+String(custom_httpPort_custom.getValue())+" - "+String(httpPort_custom),DEBUG_MIN_INFO,1);
-	debug_out("-----------------------------------",DEBUG_MIN_INFO,1);
-#endif
-}
-
-/*****************************************************************
-/* WiFi auto connecting script                                   *
-/*****************************************************************/
-void connectWifi() {
-#if defined(ESP8266)
-	int retry_count = 0;
-	debug_out(String(WiFi.status()),DEBUG_MIN_INFO,1);
-	WiFi.begin(wlanssid, wlanpwd); // Start WiFI
-	WiFi.mode(WIFI_STA);
-
-	debug_out("Connecting to ",DEBUG_MIN_INFO,0);
-	debug_out(wlanssid,DEBUG_MIN_INFO,1);
-
-	while ((WiFi.status() != WL_CONNECTED) && (retry_count < 20)) {
-		delay(500);
-		debug_out(".",DEBUG_MIN_INFO,0);
-		retry_count++;
-	}
-	debug_out("",DEBUG_MIN_INFO,1);
-	if (WiFi.status() != WL_CONNECTED) {
-		display_debug("AP ID: Feinstaubsensor-"+String(ESP.getChipId())+" - IP: 192.168.4.1");
-		wifiConfig();
-		if (WiFi.status() != WL_CONNECTED) {
-			retry_count = 0;
-			while ((WiFi.status() != WL_CONNECTED) && (retry_count < 20)) {
-				delay(500);
-				debug_out(".",DEBUG_MIN_INFO,0);
-				retry_count++;
-			}
-			debug_out("",DEBUG_MIN_INFO,1);
-		}
-	}
-	debug_out("WiFi connected\nIP address: "+IPAddress2String(WiFi.localIP()),DEBUG_MIN_INFO,1);
-#endif
 }
 
 /*****************************************************************
@@ -482,7 +370,7 @@ char *dtostrf(double val, int width, unsigned int prec, char *sout) {
 /* convert float to string with a                                *
 /* precision of two decimal places                               *
 /*****************************************************************/
-String Float2String(float value) {
+String Float2String(const float value) {
 	// Convert a float to String with two decimals.
 	char temp[15];
 	String s;
@@ -490,6 +378,14 @@ String Float2String(float value) {
 	dtostrf(value,13, 2, temp);
 	s = String(temp);
 	s.trim();
+	return s;
+}
+
+/*****************************************************************
+/* convert value to json string                                  *
+/*****************************************************************/
+String Value2Json(const String type, const String value) {
+	String s = "{\"value_type\":\""+type+"\",\"value\":\""+value+"\"},";
 	return s;
 }
 
@@ -518,21 +414,148 @@ String FeatherChipId() {
 }
 
 /*****************************************************************
+/* WifiConfig                                                    *
+/*****************************************************************/
+void wifiConfig() {
+#if defined(ESP8266)
+	String boolvar;
+	String apname;
+	String custom_wlanssid;
+	String custom_wlanpwd;
+	WiFiManager wifiManager;
+
+	debug_out("Starting WiFiManager",DEBUG_MED_INFO,1);
+
+	if (debug < 5) wifiManager.setDebugOutput(false);
+	WiFiManagerParameter custom_send2dusti("send2dusti", "Senden an luftdaten.info (0/1) ?", "", 10);
+	wifiManager.addParameter(&custom_send2dusti);
+	WiFiManagerParameter custom_send2madavi("send2madavi", "Senden an madavi.de (0/1) ?", "", 10);
+	wifiManager.addParameter(&custom_send2madavi);
+	WiFiManagerParameter custom_send2csv("send2csv", "Seriell als CSV (0/1) ?", "", 10);
+	wifiManager.addParameter(&custom_send2csv);
+	WiFiManagerParameter custom_dht_read("dht_read", "DHT Sensor (0/1) ?", "", 10);
+	wifiManager.addParameter(&custom_dht_read);
+	WiFiManagerParameter custom_ppd_read("ppd_read", "PPD42NS Sensor (0/1) ?", "", 10);
+	wifiManager.addParameter(&custom_ppd_read);
+	WiFiManagerParameter custom_sds_read("sds_read", "SDS Sensor (0/1) ?", "", 10);
+	wifiManager.addParameter(&custom_sds_read);
+	WiFiManagerParameter custom_bmp_read("bmp_read", "BMP Sensor (0/1) ?", "", 10);
+	wifiManager.addParameter(&custom_bmp_read);
+	WiFiManagerParameter custom_auto_update("auto_update", "Auto-Update (0/1) ?", "", 10);
+	wifiManager.addParameter(&custom_auto_update);
+	WiFiManagerParameter custom_has_display("has_display", "Display (0/1) ?", "", 10);
+	wifiManager.addParameter(&custom_has_display);
+	WiFiManagerParameter custom_debug("debug", "Debug output (0-5) ?", "", 10);
+	wifiManager.addParameter(&custom_debug);
+	WiFiManagerParameter custom_send2custom("send2custom", "Senden an eigene API (0/1)?", "", 10);
+	wifiManager.addParameter(&custom_send2custom);
+//	WiFiManagerParameter custom_host_custom("host_custom", "Host ?", "", 40);
+//	wifiManager.addParameter(&custom_host_custom);
+//	WiFiManagerParameter custom_url_custom("url_custom", "Pfad ?", "", 40);
+//	wifiManager.addParameter(&custom_url_custom);
+//	WiFiManagerParameter custom_httpPort_custom("httpPort_custom", "HTTP Port (80) ?", "", 10);
+//	wifiManager.addParameter(&custom_httpPort_custom);
+	wifiManager.resetSettings();
+	apname = "Feinstaubsensor-" + String(ESP.getChipId());
+	wifiManager.setTimeout(300);
+	wifiManager.setBreakAfterConfig(true);
+	wifiManager.startConfigPortal(apname.c_str());
+	custom_wlanssid = WiFi.SSID();
+	custom_wlanpwd = WiFi.psk();
+	strcpy(wlanssid,custom_wlanssid.c_str());
+	strcpy(wlanpwd,custom_wlanpwd.c_str());
+	if (strcmp(custom_dht_read.getValue(),"") != 0) dht_read = strtol(custom_dht_read.getValue(), NULL, 10);
+	if (strcmp(custom_ppd_read.getValue(),"") != 0) ppd_read = strtol(custom_ppd_read.getValue(), NULL, 10);
+	if (strcmp(custom_sds_read.getValue(),"") != 0) sds_read = strtol(custom_sds_read.getValue(), NULL, 10);
+	if (strcmp(custom_bmp_read.getValue(),"") != 0) bmp_read = strtol(custom_bmp_read.getValue(), NULL, 10);
+	if (strcmp(custom_send2dusti.getValue(),"") != 0) send2dusti = strtol(custom_send2dusti.getValue(), NULL, 10);
+	if (strcmp(custom_send2madavi.getValue(),"") != 0) send2madavi = strtol(custom_send2madavi.getValue(), NULL, 10);
+	if (strcmp(custom_send2csv.getValue(),"") != 0) send2csv = strtol(custom_send2csv.getValue(), NULL, 10);
+	if (strcmp(custom_auto_update.getValue(),"") != 0) auto_update = strtol(custom_auto_update.getValue(), NULL, 10);
+	if (strcmp(custom_has_display.getValue(),"") != 0) has_display = strtol(custom_has_display.getValue(), NULL, 10);
+	if (strcmp(custom_debug.getValue(),"") != 0) debug = strtol(custom_debug.getValue(), NULL, 10);
+	if (strcmp(custom_send2custom.getValue(),"") != 0) send2custom = strtol(custom_send2custom.getValue(), NULL, 10);
+//	if (strcmp(custom_host_custom.getValue(),"") != 0) strcpy(host_custom,custom_host_custom.getValue());
+//	if (strcmp(custom_url_custom.getValue(),"") != 0) strcpy(url_custom,custom_url_custom.getValue());
+//	if (strcmp(custom_httpPort_custom.getValue(),"") != 0) httpPort_custom = strtol(custom_httpPort_custom.getValue(), NULL, 10);
+	debug_out("------ Result from Webconfig ------",DEBUG_MIN_INFO,1);
+	debug_out("WLANSSID: ",DEBUG_MIN_INFO,0);debug_out(wlanssid,DEBUG_MIN_INFO,1);
+	debug_out("DHT_read: "+String(custom_dht_read.getValue())+" - "+String(dht_read),DEBUG_MIN_INFO,1);
+	debug_out("PPD_read: "+String(custom_ppd_read.getValue())+" - "+String(ppd_read),DEBUG_MIN_INFO,1);
+	debug_out("SDS_read: "+String(custom_sds_read.getValue())+" - "+String(sds_read),DEBUG_MIN_INFO,1);
+	debug_out("BMP_read: "+String(custom_bmp_read.getValue())+" - "+String(bmp_read),DEBUG_MIN_INFO,1);
+	debug_out("Dusti: "+String(custom_send2dusti.getValue())+" - "+String(send2dusti),DEBUG_MIN_INFO,1);
+	debug_out("Madavi: "+String(custom_send2madavi.getValue())+" - "+String(send2madavi),DEBUG_MIN_INFO,1);
+	debug_out("CSV: "+String(custom_send2csv.getValue())+" - "+String(send2csv),DEBUG_MIN_INFO,1);
+	debug_out("Autoupdate: "+String(custom_auto_update.getValue())+" - "+String(auto_update),DEBUG_MIN_INFO,1);
+	debug_out("Display: "+String(custom_has_display.getValue())+" - "+String(has_display),DEBUG_MIN_INFO,1);
+	debug_out("Debug: "+String(custom_debug.getValue())+" - "+String(debug),DEBUG_MIN_INFO,1);
+	debug_out("Custom API: "+String(custom_send2custom.getValue())+" - "+String(send2custom),DEBUG_MIN_INFO,1);
+//	debug_out("Custom Host: "+String(custom_host_custom.getValue())+" - "+String(host_custom),DEBUG_MIN_INFO,1);
+//	debug_out("Custom URL: "+String(custom_url_custom.getValue())+" - "+String(url_custom),DEBUG_MIN_INFO,1);
+//	debug_out("Custom Port: "+String(custom_httpPort_custom.getValue())+" - "+String(httpPort_custom),DEBUG_MIN_INFO,1);
+	debug_out("------",DEBUG_MIN_INFO,1);
+#endif
+}
+
+/*****************************************************************
+/* WiFi auto connecting script                                   *
+/*****************************************************************/
+void connectWifi() {
+#if defined(ESP8266)
+	int retry_count = 0;
+	debug_out(String(WiFi.status()),DEBUG_MIN_INFO,1);
+	WiFi.begin(wlanssid, wlanpwd); // Start WiFI
+	WiFi.mode(WIFI_STA);
+
+	debug_out("Connecting to ",DEBUG_MIN_INFO,0);
+	debug_out(wlanssid,DEBUG_MIN_INFO,1);
+
+	while ((WiFi.status() != WL_CONNECTED) && (retry_count < 20)) {
+		delay(500);
+		debug_out(".",DEBUG_MIN_INFO,0);
+		retry_count++;
+	}
+	debug_out("",DEBUG_MIN_INFO,1);
+	if (WiFi.status() != WL_CONNECTED) {
+		display_debug("AP ID: Feinstaubsensor-"+String(ESP.getChipId())+" - IP: 192.168.4.1");
+		wifiConfig();
+		if (WiFi.status() != WL_CONNECTED) {
+			retry_count = 0;
+			while ((WiFi.status() != WL_CONNECTED) && (retry_count < 20)) {
+				delay(500);
+				debug_out(".",DEBUG_MIN_INFO,0);
+				retry_count++;
+			}
+			debug_out("",DEBUG_MIN_INFO,1);
+		}
+	}
+	debug_out("WiFi connected\nIP address: "+IPAddress2String(WiFi.localIP()),DEBUG_MIN_INFO,1);
+#endif
+}
+
+/*****************************************************************
 /* send data to rest api                                         *
 /*****************************************************************/
 void sendData(const String& data, const int pin, const char* host, const int httpPort, const char* url) {
 #if defined(ESP8266)
 
-	debug_out("Start connecting to ",DEBUG_MIN_INFO,0);
+	debug_out(txt_start_connecting_to,DEBUG_MIN_INFO,0);
 	debug_out(host,DEBUG_MIN_INFO,1);
 
-	WiFiClient client;
-	WiFiClientSecure client_s;
+	String request_head = "POST " + String(url) + " HTTP/1.1\r\n" +
+					"Host: " + String(host) + "\r\n" +
+					"Content-Type: application/json\r\n" +
+					"PIN: " + String(pin) + "\r\n" +
+					"Sensor: esp8266-" + String(ESP.getChipId()) + "\r\n" +
+					"Content-Length: " + String(data.length(),DEC) + "\r\n" +
+					"Connection: close\r\n\r\n";
+
 	// Use WiFiClient class to create TCP connections
-	
+
 	if (httpPort == 80) {
 		if (!client.connect(host, httpPort)) {
-			debug_out("connection failed",DEBUG_ERROR,1);
+			debug_out(txt_connection_failed,DEBUG_ERROR,1);
 			return;
 		}
 
@@ -541,33 +564,24 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 		debug_out(String(ESP.getChipId()),DEBUG_MIN_INFO,1);
 		debug_out(data,DEBUG_MIN_INFO,1);
 
-		// send request to the server
-		client.print(String("POST ") + url + " HTTP/1.1\r\n" +
-					"Host: " + host + "\r\n" +
-					"Content-Type: application/json\r\n" +
-					"PIN: " + String(pin) + "\r\n" +
-					"Sensor: esp8266-");
-		client.println(ESP.getChipId());
-		client.print("Content-Length: ");
-		client.println(data.length(), DEC);
-		client.println("Connection: close\r\n");
+		client.print(request_head);
 
 		client.println(data);
 
-		delay(1);
+		delay(10);
 
 		// Read reply from server and print them
 		while(client.available()){
-			char c = client.read();
+			char c = client_s.read();
 			debug_out(String(c),DEBUG_MIN_INFO,0);
 		}
 
-		debug_out("\nclosing connection\n------------------------------\n\n",DEBUG_MIN_INFO,1);
+		debug_out("\nclosing connection\n------\n\n",DEBUG_MIN_INFO,1);
 
 	} else {
 
 		if (!client_s.connect(host, httpPort)) {
-			debug_out("connection failed",DEBUG_ERROR,1);
+			debug_out(txt_connection_failed,DEBUG_ERROR,1);
 			return;
 		}
 
@@ -577,19 +591,12 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 		debug_out(data,DEBUG_MIN_INFO,1);
 
 		// send request to the server
-		client_s.print(String("POST ") + url + " HTTP/1.1\r\n" +
-					"Host: " + host + "\r\n" +
-					"Content-Type: application/json\r\n" +
-					"PIN: " + String(pin) + "\r\n" +
-					"Sensor: esp8266-");
-		client_s.println(ESP.getChipId());
-		client_s.print("Content-Length: ");
-		client_s.println(data.length(), DEC);
-		client_s.println("Connection: close\r\n");
+
+		client_s.print(request_head);
 
 		client_s.println(data);
 
-		delay(1);
+		delay(10);
 
 		// Read reply from server and print them
 		while(client_s.available()){
@@ -597,10 +604,11 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 			debug_out(String(c),DEBUG_MIN_INFO,0);
 		}
 
-		debug_out("\nclosing connection\n------------------------------\n\n",DEBUG_MIN_INFO,1);
+		debug_out("\nclosing connection\n------\n\n",DEBUG_MIN_INFO,1);
+
 	}
 
-	debug_out("End connecting to ",DEBUG_MIN_INFO,0);
+	debug_out(txt_end_connecting_to,DEBUG_MIN_INFO,0);
 	debug_out(host,DEBUG_MIN_INFO,1);
 
 #endif
@@ -616,25 +624,28 @@ void send_lora(const String& data) {
 	uint8_t message_start[] = "LORA_MESSAGE_START";
 	int counter;
 	String part2send;
+	const String txt_no_reply = "No reply, server running?";
+	const String txt_got_reply_from = "got reply from : 0x";
+	const String txt_sentToWait_failed = "sendtoWait failed";
 
-	debug_out("Start connecting to LoRa gateway ",DEBUG_MIN_INFO,1);
+	debug_out(txt_start_connecting_to+"LoRa gateway",DEBUG_MIN_INFO,1);
 
-	debug_out("Length of data (data.length()): ",DEBUG_MAX_INFO,0);
+	debug_out("data.length(): ",DEBUG_MAX_INFO,0);
 	debug_out(String(data.length()),DEBUG_MAX_INFO,1);
-	
+
 	if (manager.sendtoWait(message_start, sizeof(message_start), SERVER_ADDRESS)) {
 		// Now wait for a reply from the server
 		uint8_t len = sizeof(buf);
 		uint8_t from;
 		if (manager.recvfromAckTimeout(buf, &len, 2000, &from)) {
-			debug_out("got reply from : 0x",DEBUG_MAX_INFO,0);
+			debug_out(txt_got_reply_from,DEBUG_MAX_INFO,0);
 			debug_out(String(from, HEX),DEBUG_MAX_INFO,1);
 		} else {
-			debug_out("No reply, is server running?",DEBUG_MIN_INFO,1);
+			debug_out(txt_no_reply,DEBUG_MIN_INFO,1);
 		}
-	}  else
-		debug_out("sendtoWait failed",DEBUG_MIN_INFO,1);
-	
+	} else
+		debug_out(txt_sentToWait_failed,DEBUG_MIN_INFO,1);
+
 	while ((counter * (RH_RF69_MAX_MESSAGE_LEN-1)) < data.length()+1) {
 
 		part2send = data.substring(counter * (RH_RF69_MAX_MESSAGE_LEN-1), (counter * (RH_RF69_MAX_MESSAGE_LEN - 1) + (RH_RF69_MAX_MESSAGE_LEN - 1) <= (data.length()+1) ? counter * (RH_RF69_MAX_MESSAGE_LEN - 1) + (RH_RF69_MAX_MESSAGE_LEN - 1) : (data.length()+1) ) ) + "\0";
@@ -643,7 +654,7 @@ void send_lora(const String& data) {
 		debug_out(part2send,DEBUG_MAX_INFO,1);
 		debug_out("part2send.length(): ",DEBUG_MAX_INFO,0);
 		debug_out(String(part2send.length()),DEBUG_MAX_INFO,1);
-	
+
 		if (manager.sendtoWait((uint8_t*)(part2send.c_str()), part2send.length(), SERVER_ADDRESS))
 		{
 			// Now wait for a reply from the server
@@ -651,13 +662,13 @@ void send_lora(const String& data) {
 			uint8_t from;
 			if (manager.recvfromAckTimeout(buf, &len, 2000, &from))
 			{
-				debug_out("got reply from : 0x",DEBUG_MAX_INFO,0);
+				debug_out(txt_got_reply_from,DEBUG_MAX_INFO,0);
 				debug_out(String(from, HEX),DEBUG_MAX_INFO,1);
 			} else {
-				debug_out("No reply, is server running?",DEBUG_MIN_INFO,1);
+				debug_out(txt_no_reply,DEBUG_MIN_INFO,1);
 			}
-		}  else
-			debug_out("sendtoWait failed",DEBUG_MIN_INFO,1);
+		} else
+			debug_out(txt_sentToWait_failed,DEBUG_MIN_INFO,1);
 
 		counter++;
 	}
@@ -667,17 +678,17 @@ void send_lora(const String& data) {
 		uint8_t len = sizeof(buf);
 		uint8_t from;
 		if (manager.recvfromAckTimeout(buf, &len, 2000, &from)) {
-			debug_out("got reply from : 0x",DEBUG_MAX_INFO,0);
+			debug_out(txt_got_reply_from,DEBUG_MAX_INFO,0);
 			debug_out(String(from, HEX),DEBUG_MAX_INFO,1);
 		} else {
-			debug_out("No reply, is server running?",DEBUG_MIN_INFO,1);
+			debug_out(txt_no_reply,DEBUG_MIN_INFO,1);
 		}
-	}  else
-		debug_out("sendtoWait failed",DEBUG_MIN_INFO,1);
+	} else
+		debug_out(txt_sentToWait_failed,DEBUG_MIN_INFO,1);
 
-	debug_out("\nclosing connection\n------------------------------\n\n",DEBUG_MIN_INFO,1);
+	debug_out("\nclosing connection\n------\n\n",DEBUG_MIN_INFO,1);
 
-	debug_out("End connecting to LoRa gateway ",DEBUG_MIN_INFO,1);
+	debug_out(txt_end_connecting_to+"LoRa gateway",DEBUG_MIN_INFO,1);
 
 #endif
 }
@@ -733,7 +744,7 @@ String sensorDHT() {
 	float h = dht.readHumidity(); //Read Humidity
 	float t = dht.readTemperature(); //Read Temperature
 
-	debug_out("Start reading DHT11/22",DEBUG_MED_INFO,1);
+	debug_out(txt_start_reading+"DHT11/22",DEBUG_MED_INFO,1);
 
 	// Check if valid number if non NaN (not a number) will be send.
 	if (isnan(t) || isnan(h)) {
@@ -741,29 +752,25 @@ String sensorDHT() {
 	} else {
 		debug_out("Humidity    : "+String(h)+"%",DEBUG_MIN_INFO,1);
 		debug_out("Temperature : "+String(t)+" C",DEBUG_MIN_INFO,1);
-		s += "{\"value_type\":\"temperature\",\"value\":\"";
-		s += Float2String(t);
-		s += "\"},";
-		s += "{\"value_type\":\"humidity\",\"value\":\"";
-		s += Float2String(h);
-		s += "\"},";
+		s += Value2Json("temperature",Float2String(t));
+		s += Value2Json("humidity",Float2String(h));
 	}
-	debug_out("------------------------------",DEBUG_MIN_INFO,1);
+	debug_out("------",DEBUG_MIN_INFO,1);
 
-	debug_out("End reading DHT11/22",DEBUG_MED_INFO,1);
+	debug_out(txt_end_reading+"DHT11/22",DEBUG_MED_INFO,1);
 
 	return s;
 }
 
 /*****************************************************************
-/* read BMP180 sensor values                                      *
+/* read BMP180 sensor values                                     *
 /*****************************************************************/
 String sensorBMP() {
 	String s = "";
 	int p;
 	float t;
 
-	debug_out("Start reading BMP180",DEBUG_MED_INFO,1);
+	debug_out(txt_start_reading+"BMP180",DEBUG_MED_INFO,1);
 
 	p = bmp.readPressure();
 	t = bmp.readTemperature();
@@ -772,16 +779,12 @@ String sensorBMP() {
 	} else {
 		debug_out("Pressure    : "+Float2String(float(p)/100)+" hPa",DEBUG_MIN_INFO,1);
 		debug_out("Temperature : "+String(t)+" C",DEBUG_MIN_INFO,1);
-		s += "{\"value_type\":\"BMP_pressure\",\"value\":\"";
-		s += String(p);
-		s += "\"},";
-		s += "{\"value_type\":\"BMP_temperature\",\"value\":\"";
-		s += Float2String(t);
-		s += "\"},";
+		s += Value2Json("BMP_pressure",String(p));
+		s += Value2Json("BMP_temperature",Float2String(t));
 	}
-	debug_out("------------------------------",DEBUG_MIN_INFO,1);
+	debug_out("------",DEBUG_MIN_INFO,1);
 
-	debug_out("End reading BMP180",DEBUG_MED_INFO,1);
+	debug_out(txt_end_reading+"BMP180",DEBUG_MED_INFO,1);
 
 	return s;
 }
@@ -801,54 +804,62 @@ String sensorSDS() {
 	int checksum_ok = 0;
 	int position = 0;
 
-	debug_out("Start reading SDS011",DEBUG_MED_INFO,1);
+	debug_out(txt_start_reading+"SDS011",DEBUG_MED_INFO,1);
 
-	while (serialSDS.available() > 0) {
-		buffer = serialSDS.read();
-		debug_out(String(len)+" - "+String(buffer,DEC)+" - "+String(buffer,HEX)+" - "+int(buffer)+" .",DEBUG_MAX_INFO,1);
-//		"aa" = 170, "ab" = 171, "c0" = 192
-		value = int(buffer);
-		switch (len) {
-			case (0): if (value != 170) { len = -1; }; break;
-			case (1): if (value != 192) { len = -1; }; break;
-			case (2): pm25_serial = value; checksum_is  = value; break;
-			case (3): pm25_serial += (value << 8); checksum_is += value; break;
-			case (4): pm10_serial = value; checksum_is += value; break;
-			case (5): pm10_serial += (value << 8); checksum_is += value; break;
-			case (6): checksum_is += value; break;
-			case (7): checksum_is += value; break;
-			case (8):
-					debug_out("Checksum is: "+String(checksum_is % 256)+" - should: "+String(value),DEBUG_MED_INFO,1);
-					if (value == (checksum_is % 256)) { checksum_ok = 1; } else { len = -1; }; break;
-			case (9): if (value != 171) { len = -1; }; break;
+	if ((act_milli-starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
+		if (is_SDS_running) {
+			serialSDS.write(stop_SDS_cmd,sizeof(stop_SDS_cmd));	is_SDS_running = false;
 		}
-		len++;
-		if (len == 10 && checksum_ok == 1) {
-			sds_pm10_sum += pm10_serial;
-			sds_pm25_sum += pm25_serial;
-			debug_out("PM10 (sec.) : "+Float2String(float(pm10_serial)),DEBUG_MED_INFO,1);
-			debug_out("PM2.5 (sec.): "+Float2String(float(pm25_serial)),DEBUG_MED_INFO,1);
-			sds_val_count++;
-			len = 0; checksum_ok = 0; pm10_serial = 0.0; pm25_serial = 0.0; checksum_is = 0;
+	} else {
+		if (! is_SDS_running) {
+			serialSDS.write(start_SDS_cmd,sizeof(start_SDS_cmd)); is_SDS_running = true;
 		}
-		yield();
+
+		while (serialSDS.available() > 0) {
+			buffer = serialSDS.read();
+			debug_out(String(len)+" - "+String(buffer,DEC)+" - "+String(buffer,HEX)+" - "+int(buffer)+" .",DEBUG_MAX_INFO,1);
+//			"aa" = 170, "ab" = 171, "c0" = 192
+			value = int(buffer);
+			switch (len) {
+				case (0): if (value != 170) { len = -1; }; break;
+				case (1): if (value != 192) { len = -1; }; break;
+				case (2): pm25_serial = value; checksum_is = value; break;
+				case (3): pm25_serial += (value << 8); checksum_is += value; break;
+				case (4): pm10_serial = value; checksum_is += value; break;
+				case (5): pm10_serial += (value << 8); checksum_is += value; break;
+				case (6): checksum_is += value; break;
+				case (7): checksum_is += value; break;
+				case (8):
+						debug_out("Checksum is: "+String(checksum_is % 256)+" - should: "+String(value),DEBUG_MED_INFO,1);
+						if (value == (checksum_is % 256)) { checksum_ok = 1; } else { len = -1; }; break;
+				case (9): if (value != 171) { len = -1; }; break;
+			}
+			len++;
+			if (len == 10 && checksum_ok == 1 && ((act_milli-starttime) > (sending_intervall_ms - reading_time_SDS_ms))) {
+				sds_pm10_sum += pm10_serial;
+				sds_pm25_sum += pm25_serial;
+				debug_out("PM10 (sec.) : "+Float2String(float(pm10_serial)),DEBUG_MED_INFO,1);
+				debug_out("PM2.5 (sec.): "+Float2String(float(pm25_serial)),DEBUG_MED_INFO,1);
+				sds_val_count++;
+				len = 0; checksum_ok = 0; pm10_serial = 0.0; pm25_serial = 0.0; checksum_is = 0;
+			}
+			yield();
+		}
+
 	}
-	if ((act_milli-starttime) > sampletime_ms) {
+	if ((act_milli-starttime) > sending_intervall_ms) {
 		debug_out("PM10:  "+Float2String(float(sds_pm10_sum)/(sds_val_count*10.0)),DEBUG_MIN_INFO,1);
 		debug_out("PM2.5: "+Float2String(float(sds_pm25_sum)/(sds_val_count*10.0)),DEBUG_MIN_INFO,1);
-		debug_out("------------------------------",DEBUG_MIN_INFO,1);
-		s += "{\"value_type\":\"SDS_P1\",\"value\":\"";
-		s += Float2String(float(sds_pm10_sum)/(sds_val_count*10.0));
-		s += "\"},";
-		s += "{\"value_type\":\"SDS_P2\",\"value\":\"";
-		s += Float2String(float(sds_pm25_sum)/(sds_val_count*10.0));
-		s += "\"},";
-		if (! ppd_read) {
-			s.replace("SDS_","");
-		}
+		debug_out("------",DEBUG_MIN_INFO,1);
+		s += Value2Json("SDS_P1",Float2String(float(sds_pm10_sum)/(sds_val_count*10.0)));
+		s += Value2Json("SDS_P2",Float2String(float(sds_pm25_sum)/(sds_val_count*10.0)));
 		sds_pm10_sum = 0; sds_pm25_sum = 0; sds_val_count = 0;
+		if (sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms)) {
+			serialSDS.write(stop_SDS_cmd,sizeof(stop_SDS_cmd));	is_SDS_running = false;
+		}
 	}
-	debug_out("End reading SDS011",DEBUG_MED_INFO,1);
+
+	debug_out(txt_end_reading+"SDS011",DEBUG_MED_INFO,1);
 
 	return s;
 }
@@ -857,80 +868,73 @@ String sensorSDS() {
 /* read PPD42NS sensor values                                    *
 /*****************************************************************/
 String sensorPPD() {
+	boolean valP1 = HIGH;
+	boolean valP2 = HIGH;
 	float ratio = 0;
 	float concentration = 0;
 	String s = "";
 
-	debug_out("Start reading PPD42NS",DEBUG_MED_INFO,1);
+	debug_out(txt_start_reading+"PPD42NS",DEBUG_MED_INFO,1);
 
-	// Read pins connected to ppd42ns
-	valP1 = digitalRead(PPD_PIN_PM1);
-	valP2 = digitalRead(PPD_PIN_PM2);
+	if ((act_milli-starttime) <= sampletime_ms) {
 
-	if(valP1 == LOW && trigP1 == false){
-		trigP1 = true;
-		trigOnP1 = act_micro;
+		// Read pins connected to ppd42ns
+		valP1 = digitalRead(PPD_PIN_PM1);
+		valP2 = digitalRead(PPD_PIN_PM2);
+
+		if(valP1 == LOW && trigP1 == false){
+			trigP1 = true;
+			trigOnP1 = act_micro;
+		}
+
+		if (valP1 == HIGH && trigP1 == true){
+			durationP1 = act_micro - trigOnP1;
+			lowpulseoccupancyP1 = lowpulseoccupancyP1 + durationP1;
+			trigP1 = false;
+		}
+
+		if(valP2 == LOW && trigP2 == false){
+			trigP2 = true;
+			trigOnP2 = act_micro;
+		}
+
+		if (valP2 == HIGH && trigP2 == true){
+			durationP2 = act_micro - trigOnP2;
+			lowpulseoccupancyP2 = lowpulseoccupancyP2 + durationP2;
+			trigP2 = false;
+		}
+
 	}
-
-	if (valP1 == HIGH && trigP1 == true){
-		durationP1 = act_micro - trigOnP1;
-		lowpulseoccupancyP1 = lowpulseoccupancyP1 + durationP1;
-		trigP1 = false;
-	}
-
-	if(valP2 == LOW && trigP2 == false){
-		trigP2 = true;
-		trigOnP2 = act_micro;
-	}
-
-	if (valP2 == HIGH && trigP2 == true){
-		durationP2 = act_micro - trigOnP2;
-		lowpulseoccupancyP2 = lowpulseoccupancyP2 + durationP2;
-		trigP2 = false;
-	}
-
 	// Checking if it is time to sample
-	if ((act_milli-starttime) > sampletime_ms) {
-		ratio = lowpulseoccupancyP1/(sampletime_ms*10.0);                   // int percentage 0 to 100
-		concentration = (1.1*pow(ratio,3)-3.8*pow(ratio,2)+520*ratio+0.62); // spec sheet curve
+	if ((act_milli-starttime) > sending_intervall_ms) {
+		ratio = lowpulseoccupancyP1/(sampletime_ms*10.0);					// int percentage 0 to 100
+		concentration = (1.1*pow(ratio,3)-3.8*pow(ratio,2)+520*ratio+0.62);	// spec sheet curve
 		// Begin printing
-		debug_out("LPO P10     : "+String(lowpulseoccupancyP1),DEBUG_MIN_INFO,1);
-		debug_out("Ratio PM10  : "+Float2String(ratio)+" %",DEBUG_MIN_INFO,1);
-		debug_out("PM10 Count  : "+Float2String(concentration),DEBUG_MIN_INFO,1);
+		debug_out("LPO P10    : "+String(lowpulseoccupancyP1),DEBUG_MIN_INFO,1);
+		debug_out("Ratio PM10 : "+Float2String(ratio)+" %",DEBUG_MIN_INFO,1);
+		debug_out("PM10 Count : "+Float2String(concentration),DEBUG_MIN_INFO,1);
 
 		// json for push to api / P1
-		s += "{\"value_type\":\"durP1\",\"value\":\"";
-		s += long(lowpulseoccupancyP1);
-		s += "\"},";
-		s += "{\"value_type\":\"ratioP1\",\"value\":\"";
-		s += Float2String(ratio);
-		s += "\"},";
-		s += "{\"value_type\":\"P1\",\"value\":\"";
-		s += Float2String(concentration);
-		s += "\"},";
+		s += Value2Json("durP1",String(long(lowpulseoccupancyP1)));
+		s += Value2Json("ratioP1",Float2String(ratio));
+		s += Value2Json("P1",Float2String(concentration));
 
 		ratio = lowpulseoccupancyP2/(sampletime_ms*10.0);
 		concentration = (1.1*pow(ratio,3)-3.8*pow(ratio,2)+520*ratio+0.62);
 		// Begin printing
-		debug_out("LPO PM25    : "+String(lowpulseoccupancyP2),DEBUG_MIN_INFO,1);
-		debug_out("Ratio PM25  : "+Float2String(ratio)+" %",DEBUG_MIN_INFO,1);
-		debug_out("PM25 Count  : "+Float2String(concentration),DEBUG_MIN_INFO,1);
+		debug_out("LPO PM25   : "+String(lowpulseoccupancyP2),DEBUG_MIN_INFO,1);
+		debug_out("Ratio PM25 : "+Float2String(ratio)+" %",DEBUG_MIN_INFO,1);
+		debug_out("PM25 Count : "+Float2String(concentration),DEBUG_MIN_INFO,1);
 
 		// json for push to api / P2
-		s += "{\"value_type\":\"durP2\",\"value\":\"";
-		s += long(lowpulseoccupancyP2);
-		s += "\"},";
-		s += "{\"value_type\":\"ratioP2\",\"value\":\"";
-		s += Float2String(ratio);
-		s += "\"},";
-		s += "{\"value_type\":\"P2\",\"value\":\"";
-		s += Float2String(concentration);
-		s += "\"},";
+		s += Value2Json("durP2",String(long(lowpulseoccupancyP2)));
+		s += Value2Json("ratioP2",Float2String(ratio));
+		s += Value2Json("P2",Float2String(concentration));
 
-		debug_out("------------------------------",DEBUG_MIN_INFO,1);
+		debug_out("------",DEBUG_MIN_INFO,1);
 	}
 
-	debug_out("End reading PPD42NS",DEBUG_MED_INFO,1);
+	debug_out(txt_end_reading+"PPD42NS",DEBUG_MED_INFO,1);
 
 	return s;
 }
@@ -947,7 +951,7 @@ String sensorGPS() {
 	String gps_date = "";
 	String gps_time = "";
 
-	debug_out("Reading GPS",DEBUG_MED_INFO,1);
+	debug_out(txt_start_reading+"GPS",DEBUG_MED_INFO,1);
 
 	while (serialSDS.available() > 0) {
 		if (gps.encode(serialSDS.read())) {
@@ -995,33 +999,25 @@ String sensorGPS() {
 		}
 	}
 
-	if ((act_milli-starttime) > sampletime_ms) {
+	if ((act_milli-starttime) > sending_intervall_ms) {
 		debug_out("Lat/Lng: "+last_gps_lat+","+last_gps_lng,DEBUG_MIN_INFO,1);
 		debug_out("Altitude: "+last_gps_alt,DEBUG_MIN_INFO,1);
 		debug_out("Date: "+last_gps_date,DEBUG_MIN_INFO,1);
 		debug_out("Time "+last_gps_time,DEBUG_MIN_INFO,1);
-		debug_out("------------------------------",DEBUG_MIN_INFO,1);
-		s += "{\"value_type\":\"GPS_Lat\",\"value\":\"";
-		s += last_gps_lat;
-		s += "\"},";
-		s += "{\"value_type\":\"GPS_Lng\",\"value\":\"";
-		s += last_gps_lng;
-		s += "\"},";
-		s += "{\"value_type\":\"GPS_Alt\",\"value\":\"";
-		s += last_gps_alt;
-		s += "\"},";
-		s += "{\"value_type\":\"GPS_Date\",\"value\":\"";
-		s += last_gps_date;
-		s += "\"},";
-		s += "{\"value_type\":\"GPS_Time\",\"value\":\"";
-		s += last_gps_time;
-		s += "\"},";
+		debug_out("------",DEBUG_MIN_INFO,1);
+		s += Value2Json("GPS_lat",last_gps_lat);
+		s += Value2Json("GPS_lon",last_gps_lng);
+		s += Value2Json("GPS_height",last_gps_alt);
+		s += Value2Json("GPS_date",last_gps_date);
+		s += Value2Json("GPS_time",last_gps_time);
 		last_gps_lat = "";
 		last_gps_lng = "";
 		last_gps_alt = "";
 		last_gps_date = "";
 		last_gps_time = "";
 	}
+	debug_out(txt_end_reading+"GPS",DEBUG_MED_INFO,1);
+
 #endif
 	return s;
 }
@@ -1036,6 +1032,7 @@ void copyExtDef() {
 	if (PPD_READ != ppd_read) { ppd_read = PPD_READ; }
 	if (SDS_READ != sds_read) { sds_read = SDS_READ; }
 	if (BMP_READ != bmp_read) { bmp_read = BMP_READ; }
+	if (GPS_READ != gps_read) { gps_read = GPS_READ; }
 	if (SEND2DUSTI != send2dusti) { send2dusti = SEND2DUSTI; }
 	if (SEND2MADAVI != send2madavi) { send2madavi = SEND2MADAVI; }
 	if (SEND2MQTT != send2mqtt) { send2mqtt = SEND2MQTT; }
@@ -1067,9 +1064,11 @@ void writeConfig() {
 	json["ppd_read"] = ppd_read;
 	json["sds_read"] = sds_read;
 	json["bmp_read"] = bmp_read;
+	json["gps_read"] = gps_read;
 	json["send2dusti"] = send2dusti;
 	json["send2madavi"] = send2madavi;
 	json["send2mqtt"] = send2mqtt;
+	json["send2lora"] = send2lora;
 	json["send2csv"] = send2csv;
 	json["auto_update"] = auto_update;
 	json["has_display"] = has_display;
@@ -1127,11 +1126,13 @@ void readConfig() {
 					if (json.containsKey("ppd_read")) ppd_read = json["ppd_read"];
 					if (json.containsKey("sds_read")) sds_read = json["sds_read"];
 					if (json.containsKey("bmp_read")) bmp_read = json["bmp_read"];
+					if (json.containsKey("gps_read")) gps_read = json["gps_read"];
 					if (json.containsKey("send2dusti")) send2dusti = json["send2dusti"];
 					if (json.containsKey("send2madavi")) send2madavi = json["send2madavi"];
 					if (json.containsKey("send2mqtt")) send2mqtt = json["send2mqtt"];
+					if (json.containsKey("send2lora")) send2lora = json["send2lora"];
 					if (json.containsKey("send2csv")) send2csv = json["send2csv"];
-					if (json.containsKey("auto_update")) has_display = json["auto_update"];
+					if (json.containsKey("auto_update")) auto_update = json["auto_update"];
 					if (json.containsKey("has_display")) has_display = json["has_display"];
 					if (json.containsKey("debug")) debug = json["debug"];
 					if (json.containsKey("send2custom")) send2custom = json["send2custom"];
@@ -1167,7 +1168,7 @@ void autoUpdate() {
 					display_debug("Update failed.");
 					break;
 			case HTTP_UPDATE_NO_UPDATES:
-					debug_out("[update] Update no Update.",DEBUG_MIN_INFO,1);
+					debug_out("[update] No Update.",DEBUG_MIN_INFO,1);
 					display_debug("No update found.");
 					break;
 			case HTTP_UPDATE_OK:
@@ -1179,7 +1180,7 @@ void autoUpdate() {
 }
 
 /*****************************************************************
-/* display values                                                 *
+/* display values                                                *
 /*****************************************************************/
 void display_values(const String& data) {
 #if defined(ESP8266)
@@ -1252,10 +1253,10 @@ void init_display() {
 /* The Setup                                                     *
 /*****************************************************************/
 void setup() {
-	Serial.begin(9600);             // Output to Serial at 9600 baud
+	Serial.begin(9600);					// Output to Serial at 9600 baud
 #if defined(ESP8266)
 	WiFi.persistent(false);
-	Wire.pins(D3,D4);				// must be set before all other I2C cmds 
+	Wire.pins(D3,D4);					// must be set before all other I2C cmds 
 	Wire.begin(D3,D4);
 #endif
 #if defined(ARDUINO_SAMD_ZERO)
@@ -1267,13 +1268,13 @@ void setup() {
 	display_debug("Reading config from SPIFFS");
 	readConfig();
 	display_debug("Connecting to "+String(wlanssid));
-	connectWifi();                  // Start ConnectWifi
+	connectWifi();						// Start ConnectWifi
 	display_debug("Writing config to SPIFFS");
 	writeConfig();
 	autoUpdate();
-	pinMode(PPD_PIN_PM1,INPUT_PULLUP); // Listen at the designated PIN
-	pinMode(PPD_PIN_PM2,INPUT_PULLUP); // Listen at the designated PIN
-	dht.begin();                       // Start DHT
+	pinMode(PPD_PIN_PM1,INPUT_PULLUP);	// Listen at the designated PIN
+	pinMode(PPD_PIN_PM2,INPUT_PULLUP);	// Listen at the designated PIN
+	dht.begin();						// Start DHT
 	delay(10);
 #if defined(ESP8266)
 	debug_out("\nChipId: ",DEBUG_MIN_INFO,1);
@@ -1288,7 +1289,7 @@ void setup() {
 	}
 	debug_out("Set Freq to: ",DEBUG_MIN_INFO,0);
 	debug_out(String(RF69_FREQ),DEBUG_MIN_INFO,1);
-	rf69.setTxPower(18);
+	rf69.setTxPower(20);
 	debug_out("\nChipId: ",DEBUG_MIN_INFO,0);
 	debug_out(FeatherChipId(),DEBUG_MIN_INFO,1);
 #endif
@@ -1296,20 +1297,29 @@ void setup() {
 	if (sds_read) debug_out("Lese SDS...",DEBUG_MIN_INFO,1);
 	if (dht_read) debug_out("Lese DHT...",DEBUG_MIN_INFO,1);
 	if (bmp_read) debug_out("Lese BMP...",DEBUG_MIN_INFO,1);
+	if (gps_read) debug_out("Lese GPS...",DEBUG_MIN_INFO,1);
 	if (send2dusti) debug_out("Sende an luftdaten.info...",DEBUG_MIN_INFO,1);
 	if (send2madavi) debug_out("Sende an madavi.de...",DEBUG_MIN_INFO,1);
 	if (send2mqtt) debug_out("Sende an MQTT broker...",DEBUG_MIN_INFO,1);
+	if (send2lora) debug_out("Sende an LoRa gateway...",DEBUG_MIN_INFO,1);
 	if (send2csv) debug_out("Sende als CSV an Serial...",DEBUG_MIN_INFO,1);
 	if (send2custom) debug_out("Sende an custom API...",DEBUG_MIN_INFO,1);
 	if (auto_update) debug_out("Auto-Update wird ausgeführt...",DEBUG_MIN_INFO,1);
 	if (has_display) debug_out("Zeige auf Display...",DEBUG_MIN_INFO,1);
 	if (bmp_read) {
 		if (!bmp.begin()) {
-			debug_out("Could not find a valid BMP085 sensor, check wiring!",DEBUG_MIN_INFO,1);
+			debug_out("No valid BMP085 sensor, check wiring!",DEBUG_MIN_INFO,1);
 			bmp_read = 0;
 		}
 	}
-	starttime = millis();           // store the start time
+	
+#if defined(ARDUINO_SAMD_ZERO)
+	data_first_part.replace("FEATHERCHIPID", ", \"chipid\": \"" + FeatherChipId() + "\"");
+#else
+	data_first_part.replace("FEATHERCHIPID", "");
+#endif
+
+	starttime = millis();					// store the start time
 	starttime_SDS = millis();
 }
 
@@ -1318,25 +1328,26 @@ void setup() {
 /*****************************************************************/
 void loop() {
 	String data = "";
-	data_first_part = "{\"software_version\": \"" + String(SOFTWARE_VERSION) + "\", \"chipid\": \"" + FeatherChipId() + "\", \"sensordatavalues\":[";
-	data_ppd = "";
-	data_dht = "";
-	data_sds = "";
-	data_bmp = "";
-	data_gps = "";
-	data_sample_times = "";
 
-/*	result_PPD = "";
-	result_SDS = "";
-	result_DHT = "";
-	result_BMP = "";
-	result_GPS = ""; */
+	String data_4_dusti = "";
+	String data_sample_times = "";
+
+	String result_PPD = "";
+	String result_SDS = "";
+	String result_DHT = "";
+	String result_BMP = "";
+	String result_GPS = "";
 	
+	unsigned long sum_send_time = 0;
+	unsigned long start_send;
+	
+	send_failed = false;
+
 	act_micro = micros();
 	act_milli = millis();
 
 	sample_count++;
-	
+
 	if (last_micro != 0) {
 		diff_micro = act_micro-last_micro;
 		if (max_micro < diff_micro) { max_micro = diff_micro;}
@@ -1351,97 +1362,100 @@ void loop() {
 		result_PPD = sensorPPD();
 	}
 
-	if (sds_read && (((act_milli-starttime_SDS) > sampletime_SDS_ms) || ((act_milli-starttime) > sampletime_ms))) {
+	if (sds_read && (((act_milli-starttime_SDS) > sampletime_SDS_ms) || ((act_milli-starttime) > sending_intervall_ms))) {
 		debug_out("Call sensorSDS",DEBUG_MAX_INFO,1);
 		result_SDS = sensorSDS();
 		starttime_SDS = act_milli;
 	}
 
-	if (dht_read && ((act_milli-starttime) > sampletime_ms)) {
+	if (dht_read && ((act_milli-starttime) > sending_intervall_ms)) {
 		debug_out("Call sensorDHT",DEBUG_MAX_INFO,1);
-		result_DHT = sensorDHT();  // getting temperature and humidity (optional)
+		result_DHT = sensorDHT();			// getting temperature and humidity (optional)
 	}
 
-	if (bmp_read && ((act_milli-starttime) > sampletime_ms)) {
+	if (bmp_read && ((act_milli-starttime) > sending_intervall_ms)) {
 		debug_out("Call sensorBMP",DEBUG_MAX_INFO,1);
-		result_BMP = sensorBMP();  // getting temperature and humidity (optional)
+		result_BMP = sensorBMP();			// getting temperature and humidity (optional)
 	}
 
-	if (gps_read && (((act_milli-starttime_GPS) > sampletime_GPS_ms) || ((act_milli-starttime) > sampletime_ms))) {
+	if (gps_read && (((act_milli-starttime_GPS) > sampletime_GPS_ms) || ((act_milli-starttime) > sending_intervall_ms))) {
 		debug_out("Call sensorGPS",DEBUG_MAX_INFO,1);
-		result_GPS = sensorGPS();  // getting GPS coordinates
+		result_GPS = sensorGPS();			// getting GPS coordinates
 		starttime_GPS = act_milli;
 	}
 
-	if ((act_milli-starttime) > sampletime_ms) {
+	if ((act_milli-starttime) > sending_intervall_ms) {
 		debug_out("Creating data string:",DEBUG_MIN_INFO,1);
 		data = data_first_part;
-		data_sample_times  = "{\"value_type\":\"samples\",\"value\":\"";
-		data_sample_times += long(sample_count);
-		data_sample_times += "\"},";
-		data_sample_times += "{\"value_type\":\"min_micro\",\"value\":\"";
-		data_sample_times += long(min_micro);
-		data_sample_times += "\"},";
-		data_sample_times += "{\"value_type\":\"max_micro\",\"value\":\"";
-		data_sample_times += long(max_micro);
-		data_sample_times += "\"},";
-
+		data_sample_times  = Value2Json("samples",String(long(sample_count)));
+		data_sample_times += Value2Json("min_micro",String(long(min_micro)));
+		data_sample_times += Value2Json("max_micro",String(long(max_micro)));
 		if (ppd_read) {
 			data += result_PPD;
-			data_ppd  = data_first_part + result_PPD;
-			data_ppd += data_sample_times;
-			data_ppd.remove(data_ppd.length()-1);
-			data_ppd += "]}";
+			data_4_dusti  = data_first_part + result_PPD;
+			data_4_dusti += data_sample_times;
+			data_4_dusti.remove(data_4_dusti.length()-1);
+			data_4_dusti += "]}";
 			if (send2dusti) {
-				debug_out("#### Sending PPD data to luftdaten.info: ",DEBUG_MIN_INFO,1);
-				sendData(data_ppd,PPD_API_PIN,host_dusti,httpPort_dusti,url_dusti);
+				debug_out(txt_sending_to_luftdaten+"(PPD): ",DEBUG_MIN_INFO,1);
+				start_send = micros();
+				sendData(data_4_dusti,PPD_API_PIN,host_dusti,httpPort_dusti,url_dusti);
+				sum_send_time += micros() - start_send;
 			}
 		}
 		if (sds_read) {
 			data += result_SDS;
-			data_sds  = data_first_part + result_SDS;
-			data_sds += data_sample_times;
-			data_sds.remove(data_sds.length()-1);
-			data_sds.replace("SDS_","");
-			data_sds += "]}";
+			data_4_dusti  = data_first_part + result_SDS;
+			data_4_dusti += data_sample_times;
+			data_4_dusti.remove(data_4_dusti.length()-1);
+			data_4_dusti.replace("SDS_","");
+			data_4_dusti += "]}";
 			if (send2dusti) {
-				debug_out("#### Sending SDS data to luftdaten.info: ",DEBUG_MIN_INFO,1);
-				sendData(data_sds,SDS_API_PIN,host_dusti,httpPort_dusti,url_dusti);
+				debug_out(txt_sending_to_luftdaten+"(SDS): ",DEBUG_MIN_INFO,1);
+				start_send = micros();
+				sendData(data_4_dusti,SDS_API_PIN,host_dusti,httpPort_dusti,url_dusti);
+				sum_send_time += micros() - start_send;
 			}
 		}
 		if (dht_read) {
 			data += result_DHT;
-			data_dht  = data_first_part + result_DHT;
-			data_dht += data_sample_times;
-			data_dht.remove(data_dht.length()-1);
-			data_dht += "]}";
+			data_4_dusti  = data_first_part + result_DHT;
+			data_4_dusti += data_sample_times;
+			data_4_dusti.remove(data_4_dusti.length()-1);
+			data_4_dusti += "]}";
 			if (send2dusti) {
-				debug_out("#### Sending DHT data to luftdaten.info: ",DEBUG_MIN_INFO,1);
-				sendData(data_dht,DHT_API_PIN,host_dusti,httpPort_dusti,url_dusti);
+				debug_out(txt_sending_to_luftdaten+"(DHT): ",DEBUG_MIN_INFO,1);
+				start_send = micros();
+				sendData(data_4_dusti,DHT_API_PIN,host_dusti,httpPort_dusti,url_dusti);
+				sum_send_time += micros() - start_send;
 			}
 		}
 		if (bmp_read) {
 			data += result_BMP;
-			data_bmp  = data_first_part + result_BMP;
-			data_bmp += data_sample_times;
-			data_bmp.remove(data_bmp.length()-1);
-			data_bmp.replace("BMP_","");
-			data_bmp += "]}";
+			data_4_dusti  = data_first_part + result_BMP;
+			data_4_dusti += data_sample_times;
+			data_4_dusti.remove(data_4_dusti.length()-1);
+			data_4_dusti.replace("BMP_","");
+			data_4_dusti += "]}";
 			if (send2dusti) {
-				debug_out("#### Sending BMP data to luftdaten.info: ",DEBUG_MIN_INFO,1);
-				sendData(data_bmp,BMP_API_PIN,host_dusti,httpPort_dusti,url_dusti);
+				debug_out(txt_sending_to_luftdaten+"(BMP): ",DEBUG_MIN_INFO,1);
+				start_send = micros();
+				sendData(data_4_dusti,BMP_API_PIN,host_dusti,httpPort_dusti,url_dusti);
+				sum_send_time += micros() - start_send;
 			}
 		}
 		if (gps_read) {
 			data += result_GPS;
-			data_gps  = data_first_part + result_GPS;
-			data_gps += data_sample_times;
-			data_gps.remove(data_gps.length()-1);
-			data_gps.replace("GPS_","");
-			data_gps += "]}";
+			data_4_dusti  = data_first_part + result_GPS;
+			data_4_dusti += data_sample_times;
+			data_4_dusti.remove(data_4_dusti.length()-1);
+			data_4_dusti.replace("GPS_","");
+			data_4_dusti += "]}";
 			if (send2dusti) {
-				debug_out("#### Sending GPS data to luftdaten.info: ",DEBUG_MIN_INFO,1);
-				sendData(data_gps,GPS_API_PIN,host_dusti,httpPort_dusti,url_dusti);
+				debug_out(txt_sending_to_luftdaten+"(GPS): ",DEBUG_MIN_INFO,1);
+				start_send = micros();
+				sendData(data_4_dusti,GPS_API_PIN,host_dusti,httpPort_dusti,url_dusti);
+				sum_send_time += micros() - start_send;
 			}
 		}
 
@@ -1459,27 +1473,33 @@ void loop() {
 		}
 
 		if (send2madavi) {
-			debug_out("#### Sending to madavi.de: ",DEBUG_MIN_INFO,1);
+			debug_out(txt_sending_to+"madavi.de: ",DEBUG_MIN_INFO,1);
+			start_send = micros();
 			sendData(data,0,host_madavi,httpPort_madavi,url_madavi);
+			sum_send_time += micros() - start_send;
 		}
 
 		if (send2custom) {
-			debug_out("#### Sending to custom api: ",DEBUG_MIN_INFO,1);
+			debug_out(txt_sending_to+"custom api: ",DEBUG_MIN_INFO,1);
+			start_send = micros();
 			sendData(data,0,host_custom,httpPort_custom,url_custom);
+			sum_send_time += micros() - start_send;
 		}
 
 		if (send2mqtt) {
-			debug_out("#### Sending to mqtt: ",DEBUG_MIN_INFO,1);
+			debug_out(txt_sending_to+"mqtt: ",DEBUG_MIN_INFO,1);
+			start_send = micros();
 			sendmqtt(data,host_mqtt,mqtt_port);
+			sum_send_time += micros() - start_send;
 		}
-		
+
 		if (send2lora) {
-			debug_out("#### Sending to LoRa gateway: ",DEBUG_MIN_INFO,1);
+			debug_out(txt_sending_to+"LoRa gateway: ",DEBUG_MIN_INFO,1);
 			send_lora(data);
 		}
 
 		if (send2csv) {
-			debug_out("#### Sending as csv: ",DEBUG_MIN_INFO,1);
+			debug_out("## Sending as csv: ",DEBUG_MIN_INFO,1);
 			send_csv(data);
 		}
 
@@ -1487,6 +1507,8 @@ void loop() {
 			autoUpdate();
 		}
 
+		if (! send_failed) sending_time = (4 * sending_time + sum_send_time) / 5;
+		debug_out("Time for sending data: "+String(sending_time),DEBUG_MIN_INFO,1);
 		// Resetting for next sampling
 		lowpulseoccupancyP1 = 0;
 		lowpulseoccupancyP2 = 0;
@@ -1496,6 +1518,6 @@ void loop() {
 		max_micro = 0;
 		starttime = millis(); // store the start time
 	}
-	
+
 	yield();
 }

@@ -4,9 +4,9 @@
 
 // Wohin gehen die Daten?
 #define SEND2DUSTI 1
-#define SEND2MADAVI 0
+#define SEND2MADAVI 1
 #define SEND2MQTT 0
-#define SEND2LORA 0
+#define SEND2LORA 1
 #define SEND2CSV 0
 #define SEND2CUSTOM 0
 
@@ -24,7 +24,7 @@
 #define MQTT_TOPIC ""
 
 // DHT22, Sensor Temperatur und Luftfeuchte
-#define DHT_READ 0
+#define DHT_READ 1
 #define DHT_TYPE DHT22
 #define DHT_API_PIN 7
 #if defined(ESP8266)
@@ -35,7 +35,7 @@
 #endif
 
 // PPD42NS, der günstigere der beiden Feinstaubsensoren
-#define PPD_READ 1
+#define PPD_READ 0
 #define PPD_API_PIN 5
 #if defined(ARDUINO_SAMD_ZERO) || defined(ESP8266)
 #define PPD_PIN_PM1 D6
@@ -43,7 +43,7 @@
 #endif
 
 // SDS011, der etwas teuerere Feinstaubsensor
-#define SDS_READ 0
+#define SDS_READ 1
 #define SDS_API_PIN 1
 #if defined(ESP8266)
 #define SDS_PIN_RX D1
