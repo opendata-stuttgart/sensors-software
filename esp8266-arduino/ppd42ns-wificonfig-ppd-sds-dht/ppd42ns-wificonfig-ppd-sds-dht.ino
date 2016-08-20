@@ -57,7 +57,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-025"
+#define SOFTWARE_VERSION "NRZ-2016-026"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -715,10 +715,7 @@ void send_csv(const String& data) {
 	if (json2data.success()) {
 		headline = "Timestamp_ms;";
 		valueline = String(act_milli)+";";
-		if (ppd_read) value_count += 6;
-		if (sds_read) value_count += 2;
-		if (dht_read) value_count += 2;
-		for (int i=0;i<value_count;i++) {
+		for (int i=0;i<json2data["sensordatavalues"].size();i++) {
 			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value_type"].asString());
 			headline += tmp_str+";";
 			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value"].asString());
@@ -1227,8 +1224,8 @@ void display_values(const String& data) {
 		display.drawString(0,12*(value_count++),"PPD P2: "+ppd_p2);
 	}
 	if (sds_read) {
-		display.drawString(0,12*(value_count++),"SDS P1: "+ppd_p1);
-		display.drawString(0,12*(value_count++),"SDS P2: "+ppd_p2);
+		display.drawString(0,12*(value_count++),"SDS P1: "+sds_p1);
+		display.drawString(0,12*(value_count++),"SDS P2: "+sds_p2);
 	}
 	display.display();
 #endif
