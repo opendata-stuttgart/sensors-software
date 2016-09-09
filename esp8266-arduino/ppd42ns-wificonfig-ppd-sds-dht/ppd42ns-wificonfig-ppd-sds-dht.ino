@@ -57,7 +57,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-026"
+#define SOFTWARE_VERSION "NRZ-2016-027"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -572,7 +572,7 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 
 		// Read reply from server and print them
 		while(client.available()){
-			char c = client_s.read();
+			char c = client.read();
 			debug_out(String(c),DEBUG_MIN_INFO,0);
 		}
 
