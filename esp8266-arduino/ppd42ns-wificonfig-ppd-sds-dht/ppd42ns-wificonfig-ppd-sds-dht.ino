@@ -31,7 +31,7 @@
 /*      - SDS011 Pin 2  (RX)   -> Pin D2 / GPIO4                 *
 /*      - SDS011 Pin 3  (GND)  -> GND                            *
 /*      - SDS011 Pin 4  (2.5m) -> unused                         *
-/*      - SDS011 Pin 5  (5V)   -> Vin                            *
+/*      - SDS011 Pin 5  (5V)   -> VU                             *
 /*      - SDS011 Pin 6  (1m)   -> unused                         *
 /*                                                               *
 /*****************************************************************
@@ -57,7 +57,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-027"
+#define SOFTWARE_VERSION "NRZ-2016-028"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -263,6 +263,7 @@ const String txt_end_connecting_to = "End connecting to ";
 const String txt_start_reading = "Start reading ";
 const String txt_end_reading = "End reading ";
 const String txt_sending_to = "## Sending to ";
+const String txt_no_data_sent = "No data sent ...";
 const String txt_sending_to_luftdaten = "## Sending to luftdaten.info ";
 
 /*****************************************************************
@@ -833,18 +834,20 @@ String sensorSDS() {
 			}
 			len++;
 			if (len == 10 && checksum_ok == 1 && ((act_milli-starttime) > (sending_intervall_ms - reading_time_SDS_ms))) {
-				sds_pm10_sum += pm10_serial;
-				sds_pm25_sum += pm25_serial;
-				debug_out("PM10 (sec.) : "+Float2String(float(pm10_serial)),DEBUG_MED_INFO,1);
-				debug_out("PM2.5 (sec.): "+Float2String(float(pm25_serial)),DEBUG_MED_INFO,1);
-				sds_val_count++;
+				if ((! isnan(pm10_serial)) && (! isnan(pm25_serial))) {
+					sds_pm10_sum += pm10_serial;
+					sds_pm25_sum += pm25_serial;
+					debug_out("PM10 (sec.) : "+Float2String(float(pm10_serial)),DEBUG_MED_INFO,1);
+					debug_out("PM2.5 (sec.): "+Float2String(float(pm25_serial)),DEBUG_MED_INFO,1);
+					sds_val_count++;
+				}
 				len = 0; checksum_ok = 0; pm10_serial = 0.0; pm25_serial = 0.0; checksum_is = 0;
 			}
 			yield();
 		}
 
 	}
-	if ((act_milli-starttime) > sending_intervall_ms) {
+	if (((act_milli-starttime) > sending_intervall_ms) && (sds_val_count > 0)) {
 		debug_out("PM10:  "+Float2String(float(sds_pm10_sum)/(sds_val_count*10.0)),DEBUG_MIN_INFO,1);
 		debug_out("PM2.5: "+Float2String(float(sds_pm25_sum)/(sds_val_count*10.0)),DEBUG_MIN_INFO,1);
 		debug_out("------",DEBUG_MIN_INFO,1);
@@ -1190,6 +1193,8 @@ void display_values(const String& data) {
 	String ppd_p2;
 	String sds_p1;
 	String sds_p2;
+	String bmp_pressure;
+	String bmp_temp;
 	int value_count = 0;
 	StaticJsonBuffer<2000> jsonBuffer;
 	JsonObject& json2data = jsonBuffer.parseObject(data);
@@ -1199,6 +1204,7 @@ void display_values(const String& data) {
 		if (ppd_read) value_count += 6;
 		if (sds_read) value_count += 2;
 		if (dht_read) value_count += 2;
+		if (bmp_read) value_count += 2;
 		for (int i=0;i<value_count;i++) {
 			tmp_type = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value_type"].asString());
 			tmp_val = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value"].asString());
@@ -1208,6 +1214,8 @@ void display_values(const String& data) {
 			if (tmp_type == "P2") ppd_p2 = tmp_val;
 			if (tmp_type == "SDS_P1") sds_p1 = tmp_val;
 			if (tmp_type == "SDS_P2") sds_p2 = tmp_val;
+			if (tmp_type == "BMP_pressure") bmp_pressure = tmp_val;
+			if (tmp_type == "BMP_temperature") bmp_temp = tmp_val;
 		}
 	} else {
 		debug_out("Data read failed",DEBUG_ERROR,1);
@@ -1218,14 +1226,19 @@ void display_values(const String& data) {
 	display.setFont(ArialMT_Plain_10);
 	display.setTextAlignment(TEXT_ALIGN_LEFT);
 	value_count = 0;
-	if (dht_read) display.drawString(0,12*(value_count++),"Temp: "+temp+"   Hum.: "+humidity);
+	if (dht_read) {
+		display.drawString(0,10*(value_count++),"Temp: "+temp+"   Hum.: "+humidity);
+	}
+	if (bmp_read) {
+		display.drawString(0,10*(value_count++),"Temp: "+bmp_temp+"  Druck: "+bmp_pressure);
+	}
 	if (ppd_read) {
-		display.drawString(0,12*(value_count++),"PPD P1: "+ppd_p1);
-		display.drawString(0,12*(value_count++),"PPD P2: "+ppd_p2);
+		display.drawString(0,10*(value_count++),"PPD P1: "+ppd_p1);
+		display.drawString(0,10*(value_count++),"PPD P2: "+ppd_p2);
 	}
 	if (sds_read) {
-		display.drawString(0,12*(value_count++),"SDS P1: "+sds_p1);
-		display.drawString(0,12*(value_count++),"SDS P2: "+sds_p2);
+		display.drawString(0,10*(value_count++),"SDS P1: "+sds_p1);
+		display.drawString(0,10*(value_count++),"SDS P2: "+sds_p2);
 	}
 	display.display();
 #endif
@@ -1391,7 +1404,11 @@ void loop() {
 			if (send2dusti) {
 				debug_out(txt_sending_to_luftdaten+"(PPD): ",DEBUG_MIN_INFO,1);
 				start_send = micros();
-				sendData(data_4_dusti,PPD_API_PIN,host_dusti,httpPort_dusti,url_dusti);
+				if (result_PPD != "") {
+					sendData(data_4_dusti,PPD_API_PIN,host_dusti,httpPort_dusti,url_dusti);
+				} else {
+					debug_out(txt_no_data_sent,DEBUG_MIN_INFO,1);
+				}
 				sum_send_time += micros() - start_send;
 			}
 		}
@@ -1405,7 +1422,11 @@ void loop() {
 			if (send2dusti) {
 				debug_out(txt_sending_to_luftdaten+"(SDS): ",DEBUG_MIN_INFO,1);
 				start_send = micros();
-				sendData(data_4_dusti,SDS_API_PIN,host_dusti,httpPort_dusti,url_dusti);
+				if (result_SDS != "") {
+					sendData(data_4_dusti,SDS_API_PIN,host_dusti,httpPort_dusti,url_dusti);
+				} else {
+					debug_out(txt_no_data_sent,DEBUG_MIN_INFO,1);
+				}
 				sum_send_time += micros() - start_send;
 			}
 		}
@@ -1418,7 +1439,11 @@ void loop() {
 			if (send2dusti) {
 				debug_out(txt_sending_to_luftdaten+"(DHT): ",DEBUG_MIN_INFO,1);
 				start_send = micros();
-				sendData(data_4_dusti,DHT_API_PIN,host_dusti,httpPort_dusti,url_dusti);
+				if (result_DHT != "") {
+					sendData(data_4_dusti,DHT_API_PIN,host_dusti,httpPort_dusti,url_dusti);
+				} else {
+					debug_out(txt_no_data_sent,DEBUG_MIN_INFO,1);
+				}
 				sum_send_time += micros() - start_send;
 			}
 		}
@@ -1432,7 +1457,11 @@ void loop() {
 			if (send2dusti) {
 				debug_out(txt_sending_to_luftdaten+"(BMP): ",DEBUG_MIN_INFO,1);
 				start_send = micros();
-				sendData(data_4_dusti,BMP_API_PIN,host_dusti,httpPort_dusti,url_dusti);
+				if (result_BMP != "") {
+					sendData(data_4_dusti,BMP_API_PIN,host_dusti,httpPort_dusti,url_dusti);
+				} else {
+					debug_out(txt_no_data_sent,DEBUG_MIN_INFO,1);
+				}
 				sum_send_time += micros() - start_send;
 			}
 		}
@@ -1446,7 +1475,11 @@ void loop() {
 			if (send2dusti) {
 				debug_out(txt_sending_to_luftdaten+"(GPS): ",DEBUG_MIN_INFO,1);
 				start_send = micros();
-				sendData(data_4_dusti,GPS_API_PIN,host_dusti,httpPort_dusti,url_dusti);
+				if (result_GPS != "") {
+					sendData(data_4_dusti,GPS_API_PIN,host_dusti,httpPort_dusti,url_dusti);
+				} else {
+					debug_out(txt_no_data_sent,DEBUG_MIN_INFO,1);
+				}
 				sum_send_time += micros() - start_send;
 			}
 		}
