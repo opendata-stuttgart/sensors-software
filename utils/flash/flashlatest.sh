@@ -1,6 +1,8 @@
 #!/bin/bash
 
+outappendfile=listofflashed.csv
 echo "usage: [esptool=esptool.py] $0 [<esptooloptions>]"
+echo "writes output to $outappendfile"
 
 if [ -z "$esptool" ] 
 then
@@ -12,12 +14,32 @@ if [ -z "$esptool" ]
 	fi
 fi
 
-binfile="latest.bin"
-wget -c "https://www.madavi.de/sensor/update/data/$binfile"
+if [ ! -f "$outappendfile" ] ; then
+	echo "sensorID	sensorname	hexchipID	MAC	shortname	email	lat	lon	locationaddress	sensorID1	sensorname1	sensorID2	sensorname2" >> "$outappendfile"
+fi
+
+# get info
+chipid="$(esptool.py chip_id)"
+chid=$(esptool.py chip_id| grep -io '0x[0-9a-fA-F]*\b')
+chiddec=$(python -c "print (\"%d\"%($chid))")
+shortname="$chiddec"
+mac="$(esptool.py read_mac| grep -io '[0-9a-f:]\{17\}')"
+echo ""
+read -p "You have a shortname? [default: $shortname]" ans
+if [ -n "$ans" ] ; then
+	shortname="$ans"
+fi
+info="DBID\tesp8266-$chiddec\t$chid\t$mac\t$shortname\tEMAIL\tLAT\tLON\tLOCADDRESS\tSID1\tSNAME1\tSID2\tSNAME2"
+echo -e "$info" | tee -a "$outappendfile"
+
+
 
 #esptool.py write_flash -vv -cb 57600 -ca 0x00000 -cp /dev/ttyUSB0 -cf latest.bin 
 
 read -p "patch Freifunk to XXXXXXXX? [y/N]" ans
+
+binfile="latest.bin"
+wget -c "https://www.madavi.de/sensor/update/data/$binfile"
 
 if [ "$ans" == "y" ] 
 then
@@ -28,13 +50,4 @@ fi
 
 # flash 
 esptool.py write_flash 0x00000 "$binfile" "$@"
-
-# get info
-chipid="$(esptool.py chip_id)"
-chid=$(esptool.py chip_id| grep -io '0x[0-9a-fA-F]*\b')
-chiddec=$(python -c "print (\"%d\"%($chid))")
-mac="$(esptool.py read_mac| grep -io '[0-9a-f:]\{17\}')"
-info="$chiddec\t$chid\t$mac"
-echo -e "$info" | tee -a flashlist.txt
-
 
