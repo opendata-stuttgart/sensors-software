@@ -39,7 +39,7 @@ PubSubClient mqttClient(espClient);
 long lastMsg = 0;
 char msg[50];
 
-unsigned long sampletime_ms = 1000; // 1 second
+unsigned long sampletime_ms = 10000; // 10 seconds
 
 /**********************************************/
 /* The Setup
@@ -105,6 +105,7 @@ void sensorDHT(){
 /* WiFi connecting script
 /**********************************************/
 void connectWifi() {
+  WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password); // Start WiFI
   
   Serial.print("Connecting ");

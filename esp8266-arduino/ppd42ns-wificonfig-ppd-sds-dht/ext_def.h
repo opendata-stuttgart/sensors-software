@@ -6,7 +6,7 @@
 #define SEND2DUSTI 1
 #define SEND2MADAVI 1
 #define SEND2MQTT 0
-#define SEND2LORA 1
+#define SEND2LORA 0
 #define SEND2CSV 0
 #define SEND2CUSTOM 0
 
