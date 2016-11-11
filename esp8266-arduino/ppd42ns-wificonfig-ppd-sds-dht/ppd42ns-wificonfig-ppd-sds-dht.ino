@@ -57,7 +57,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-032"
+#define SOFTWARE_VERSION "NRZ-2016-034"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -580,7 +580,7 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 		// Read reply from server and print them
 		while(client.available()){
 			char c = client.read();
-			debug_out(String(c),DEBUG_MIN_INFO,0);
+			debug_out(String(c),DEBUG_MAX_INFO,0);
 		}
 
 		debug_out("\nclosing connection\n------\n\n",DEBUG_MIN_INFO,1);
@@ -608,7 +608,7 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 		// Read reply from server and print them
 		while(client_s.available()){
 			char c = client_s.read();
-			debug_out(String(c),DEBUG_MIN_INFO,0);
+			debug_out(String(c),DEBUG_MAX_INFO,0);
 		}
 
 		debug_out("\nclosing connection\n------\n\n",DEBUG_MIN_INFO,1);
@@ -1127,7 +1127,7 @@ void readConfig() {
 					debug_out("parsed json...",DEBUG_MIN_INFO,1);
 					if (json.containsKey("SOFTWARE_VERSION")) strcpy(version_from_local_config, json["SOFTWARE_VERSION"]);
 					if (json.containsKey("wlanssid")) strcpy(wlanssid, json["wlanssid"]);
-					if (json.containsKey("wlanssid")) strcpy(wlanpwd, json["wlanpwd"]);
+					if (json.containsKey("wlanpwd")) strcpy(wlanpwd, json["wlanpwd"]);
 					if (json.containsKey("dht_read")) dht_read = json["dht_read"];
 					if (json.containsKey("ppd_read")) ppd_read = json["ppd_read"];
 					if (json.containsKey("sds_read")) sds_read = json["sds_read"];
@@ -1347,6 +1347,7 @@ void loop() {
 	String result_DHT = "";
 	String result_BMP = "";
 	String result_GPS = "";
+	String signal_strength = "";
 	
 	unsigned long sum_send_time = 0;
 	unsigned long start_send;
@@ -1400,6 +1401,11 @@ void loop() {
 		data_sample_times  = Value2Json("samples",String(long(sample_count)));
 		data_sample_times += Value2Json("min_micro",String(long(min_micro)));
 		data_sample_times += Value2Json("max_micro",String(long(max_micro)));
+
+		signal_strength = String(WiFi.RSSI())+" dBm";
+		debug_out("WLAN signal strength: "+signal_strength,DEBUG_MIN_INFO,1);
+		debug_out("------",DEBUG_MIN_INFO,1);
+
 		if (ppd_read) {
 			data += result_PPD;
 			data_4_dusti  = data_first_part + result_PPD;
@@ -1494,7 +1500,7 @@ void loop() {
 			}
 		}
 
-		data_sample_times += Value2Json("signal",String(WiFi.RSSI())+" dBm");
+		data_sample_times += Value2Json("signal",signal_strength);
 		data += data_sample_times;
 
 		if ((result_PPD.length() > 0) || (result_DHT.length() > 0) || (result_SDS.length() > 0)) {
