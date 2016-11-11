@@ -57,7 +57,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-028"
+#define SOFTWARE_VERSION "NRZ-2016-030"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -130,13 +130,17 @@ int  debug = 3;
 
 long int sample_count = 0;
 
-const char* host_madavi = "www.madavi.de";
-const char* url_madavi = "/sensor/data.php";
+const char* host_madavi = "api-rrd.madavi.de";
+const char* url_madavi = "/data.php";
 const int httpPort_madavi = 443;
 
 const char* host_dusti = "api.luftdaten.info";
 const char* url_dusti = "/v1/push-sensor-data/";
 const int httpPort_dusti = 443;
+
+const char* host_api_madavi = "api.madavi.de";
+const char* url_api_madavi = "/v1/push-sensor-data/";
+const int httpPort_api_madavi = 443;
 
 char host_custom[100] = "192.168.234.1";
 char url_custom[100] = "/data.php";
@@ -425,7 +429,8 @@ void wifiConfig() {
 	String custom_wlanpwd;
 	WiFiManager wifiManager;
 
-	debug_out("Starting WiFiManager",DEBUG_MED_INFO,1);
+	debug_out("Starting WiFiManager",DEBUG_MIN_INFO,1);
+	debug_out("AP ID: Feinstaubsensor-"+String(ESP.getChipId()),DEBUG_MIN_INFO,1);
 
 	if (debug < 5) wifiManager.setDebugOutput(false);
 	WiFiManagerParameter custom_send2dusti("send2dusti", "Senden an luftdaten.info (0/1) ?", "", 10);
@@ -456,15 +461,16 @@ void wifiConfig() {
 //	wifiManager.addParameter(&custom_url_custom);
 //	WiFiManagerParameter custom_httpPort_custom("httpPort_custom", "HTTP Port (80) ?", "", 10);
 //	wifiManager.addParameter(&custom_httpPort_custom);
-	wifiManager.resetSettings();
 	apname = "Feinstaubsensor-" + String(ESP.getChipId());
 	wifiManager.setTimeout(300);
 	wifiManager.setBreakAfterConfig(true);
 	wifiManager.startConfigPortal(apname.c_str());
-	custom_wlanssid = WiFi.SSID();
-	custom_wlanpwd = WiFi.psk();
-	strcpy(wlanssid,custom_wlanssid.c_str());
-	strcpy(wlanpwd,custom_wlanpwd.c_str());
+	if (WiFi.SSID().length() != 0) {
+		custom_wlanssid = WiFi.SSID();
+		custom_wlanpwd = WiFi.psk();
+		strcpy(wlanssid,custom_wlanssid.c_str());
+		strcpy(wlanpwd,custom_wlanpwd.c_str());
+	}
 	if (strcmp(custom_dht_read.getValue(),"") != 0) dht_read = strtol(custom_dht_read.getValue(), NULL, 10);
 	if (strcmp(custom_ppd_read.getValue(),"") != 0) ppd_read = strtol(custom_ppd_read.getValue(), NULL, 10);
 	if (strcmp(custom_sds_read.getValue(),"") != 0) sds_read = strtol(custom_sds_read.getValue(), NULL, 10);
@@ -837,8 +843,8 @@ String sensorSDS() {
 				if ((! isnan(pm10_serial)) && (! isnan(pm25_serial))) {
 					sds_pm10_sum += pm10_serial;
 					sds_pm25_sum += pm25_serial;
-					debug_out("PM10 (sec.) : "+Float2String(float(pm10_serial)),DEBUG_MED_INFO,1);
-					debug_out("PM2.5 (sec.): "+Float2String(float(pm25_serial)),DEBUG_MED_INFO,1);
+					debug_out("PM10 (sec.) : "+Float2String(float(pm10_serial)/10),DEBUG_MED_INFO,1);
+					debug_out("PM2.5 (sec.): "+Float2String(float(pm25_serial)/10),DEBUG_MED_INFO,1);
 					sds_val_count++;
 				}
 				len = 0; checksum_ok = 0; pm10_serial = 0.0; pm25_serial = 0.0; checksum_is = 0;
@@ -1260,7 +1266,6 @@ void init_display() {
 void setup() {
 	Serial.begin(9600);					// Output to Serial at 9600 baud
 #if defined(ESP8266)
-	WiFi.persistent(false);
 	Wire.pins(D3,D4);					// must be set before all other I2C cmds 
 	Wire.begin(D3,D4);
 #endif
@@ -1345,7 +1350,7 @@ void loop() {
 	
 	unsigned long sum_send_time = 0;
 	unsigned long start_send;
-	
+
 	send_failed = false;
 
 	act_micro = micros();
@@ -1406,6 +1411,7 @@ void loop() {
 				start_send = micros();
 				if (result_PPD != "") {
 					sendData(data_4_dusti,PPD_API_PIN,host_dusti,httpPort_dusti,url_dusti);
+//					sendData(data_4_dusti,PPD_API_PIN,host_api_madavi,httpPort_api_madavi,url_api_madavi);
 				} else {
 					debug_out(txt_no_data_sent,DEBUG_MIN_INFO,1);
 				}
@@ -1424,6 +1430,7 @@ void loop() {
 				start_send = micros();
 				if (result_SDS != "") {
 					sendData(data_4_dusti,SDS_API_PIN,host_dusti,httpPort_dusti,url_dusti);
+//					sendData(data_4_dusti,SDS_API_PIN,host_api_madavi,httpPort_api_madavi,url_api_madavi);
 				} else {
 					debug_out(txt_no_data_sent,DEBUG_MIN_INFO,1);
 				}
@@ -1441,6 +1448,7 @@ void loop() {
 				start_send = micros();
 				if (result_DHT != "") {
 					sendData(data_4_dusti,DHT_API_PIN,host_dusti,httpPort_dusti,url_dusti);
+//					sendData(data_4_dusti,DHT_API_PIN,host_api_madavi,httpPort_api_madavi,url_api_madavi);
 				} else {
 					debug_out(txt_no_data_sent,DEBUG_MIN_INFO,1);
 				}
@@ -1459,6 +1467,7 @@ void loop() {
 				start_send = micros();
 				if (result_BMP != "") {
 					sendData(data_4_dusti,BMP_API_PIN,host_dusti,httpPort_dusti,url_dusti);
+//					sendData(data_4_dusti,BMP_API_PIN,host_api_madavi,httpPort_api_madavi,url_api_madavi);
 				} else {
 					debug_out(txt_no_data_sent,DEBUG_MIN_INFO,1);
 				}
@@ -1477,6 +1486,7 @@ void loop() {
 				start_send = micros();
 				if (result_GPS != "") {
 					sendData(data_4_dusti,GPS_API_PIN,host_dusti,httpPort_dusti,url_dusti);
+//					sendData(data_4_dusti,GPS_API_PIN,host_api_madavi,httpPort_api_madavi,url_api_madavi);
 				} else {
 					debug_out(txt_no_data_sent,DEBUG_MIN_INFO,1);
 				}
@@ -1484,6 +1494,7 @@ void loop() {
 			}
 		}
 
+		data_sample_times += Value2Json("signal",String(WiFi.RSSI())+" dBm");
 		data += data_sample_times;
 
 		if ((result_PPD.length() > 0) || (result_DHT.length() > 0) || (result_SDS.length() > 0)) {
