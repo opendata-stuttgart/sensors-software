@@ -57,7 +57,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-030"
+#define SOFTWARE_VERSION "NRZ-2016-032"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -1167,7 +1167,7 @@ void autoUpdate() {
 		debug_out("Starting OTA update ...",DEBUG_MIN_INFO,1);
 		display_debug("Looking for OTA update");
 		last_update_attempt = millis();
-		t_httpUpdate_return ret = ESPhttpUpdate.update(update_host, update_port, update_url, SOFTWARE_VERSION);
+		t_httpUpdate_return ret = ESPhttpUpdate.update(update_host, update_port, update_url, String(SOFTWARE_VERSION)+String(" ")+String(ESP.getChipId()));
 		switch(ret) {
 			case HTTP_UPDATE_FAILED:
 					debug_out("[update] Update failed.",DEBUG_ERROR,1);
