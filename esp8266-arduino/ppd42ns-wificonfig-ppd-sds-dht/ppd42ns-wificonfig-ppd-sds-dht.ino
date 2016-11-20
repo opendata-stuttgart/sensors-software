@@ -57,7 +57,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-038"
+#define SOFTWARE_VERSION "NRZ-2016-039"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -243,6 +243,7 @@ bool send_failed = false;
 
 unsigned long last_update_attempt;
 const unsigned long pause_between_update_attempts = 86400000;
+bool will_check_for_update = false;
 
 int sds_pm10_sum = 0;
 int sds_pm25_sum = 0;
@@ -436,6 +437,10 @@ String SDS_version_date() {
 
 	debug_out(txt_start_reading+"SDS011 version date",DEBUG_MED_INFO,1);
 
+	serialSDS.write(start_SDS_cmd,sizeof(start_SDS_cmd)); is_SDS_running = true;
+
+	delay(100);
+
 	serialSDS.write(version_SDS_cmd,sizeof(version_SDS_cmd));
 	
 	delay(100);
@@ -473,6 +478,7 @@ String SDS_version_date() {
 
 	return s;
 }
+
 /*****************************************************************
 /* WifiConfig                                                    *
 /*****************************************************************/
@@ -915,7 +921,7 @@ String sensorSDS() {
 		s += Value2Json("SDS_P1",Float2String(float(sds_pm10_sum)/(sds_val_count*10.0)));
 		s += Value2Json("SDS_P2",Float2String(float(sds_pm25_sum)/(sds_val_count*10.0)));
 		sds_pm10_sum = 0; sds_pm25_sum = 0; sds_val_count = 0;
-		if (sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms)) {
+		if ((sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms)) && (! will_check_for_update)) {
 			serialSDS.write(stop_SDS_cmd,sizeof(stop_SDS_cmd));	is_SDS_running = false;
 		}
 	}
@@ -1240,6 +1246,7 @@ void autoUpdate() {
 					break;
 		}
 	}
+	will_check_for_update = false;
 #endif
 }
 
@@ -1567,6 +1574,10 @@ void loop() {
 		data += "]}";
 
 		//sending to api(s)
+
+		if ((act_milli-last_update_attempt) > pause_between_update_attempts) {
+			will_check_for_update = true;
+		}
 
 		if (has_display) {
 			display_values(data);
