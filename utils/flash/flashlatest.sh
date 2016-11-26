@@ -1,7 +1,7 @@
 #!/bin/bash
 
 outappendfile=listofflashed.csv
-echo "usage: [esptool=/path/to/esptool] [esptoolpy=/path/to/esptool.py] $0"
+echo "usage: [esptool=/path/to/esptool] [esptoolpy=/path/to/esptool.py] [devserial=/dev/ttyUSB0] $0"
 echo "writes output to $outappendfile"
 
 if [ -z "$esptool" ] ; then
@@ -15,15 +15,28 @@ fi
 if [ -z "$esptoolpy" ] ; then
 	esptoolpy="$(which esptool.py)"
 	if [ -z "$esptoolpy" ] ; then
-		echo esptool.py not found, please define esptoolpy="/path/to/esptool.py"
+		echo esptool.py not found in PATH, please define esptoolpy="/path/to/esptool.py"
 		echo "https://github.com/themadinventor/esptool"
 		exit 1
 	fi
 fi
 
+if [ -z "$devserial" ] ; then
+	devserial=/dev/ttyUSB0
+	echo devserial="$devserial" \# define to change
+fi
+if [ ! -w "$devserial" ] ; then
+	echo "no write access to $devserial"
+	read -p "list all serial devices? [Y/n]" ans
+	if [ "$ans" != "n" ] ; then
+		ls -l /dev/serial/by-id/
+	fi
+	exit 1
+fi
+
 
 if [ ! -f "$outappendfile" ] ; then
-	echo "sensorID	sensorname	hexchipID	MAC	shortname	email	lat	lon	locationaddress	sensorID1	sensorname1	sensorID2	sensorname2" >> "$outappendfile"
+	echo "sensorID	sensorname	hexchipID	MAC	revision:serial	email	lat	lon	locationaddress	sensorID1	sensorname1	sensorID2	sensorname2" >> "$outappendfile"
 fi
 
 # get info
@@ -31,7 +44,6 @@ chipid="$($esptoolpy chip_id)"
 chid=$($esptoolpy chip_id| grep -io '0x[0-9a-fA-F]*\b')
 chiddec=$(python -c "print (\"%d\"%($chid))")
 mac="$($esptoolpy read_mac| grep -io '[0-9a-f:]\{17\}')"
-shortname="$chiddec"
 locadr="LOCADRESS"
 email="@"
 lat="LAT"
@@ -41,11 +53,17 @@ echo ""
 read -p "ask more infos? [Y/n]" ans
 
 if [ "$ans" != "n" ] ; then
-
-	read -p "Station shortname? [default: $shortname]" ans
+	examplestr="V0-000"
+	read -p "PM sensor revision (on back/flat side top left corner)? [default: $examplestring]" ans
 	if [ -n "$ans" ] ; then
-		shortname="$ans"
+		srevision="$ans"
 	fi
+	examplestr="0000-0000"
+	read -p "PM sensor serial number (SN on sticker, besides fan, below barcode)? [default: $examplestring]" ans
+	if [ -n "$ans" ] ; then
+		sserial="$ans"
+	fi
+
 	examplestr="70000 Stuttgart, Staubweg 00"
 	read -p "Adress?  [like: $examplestr]" ans
 	if [ -n "$ans" ] ; then
@@ -68,9 +86,8 @@ if [ "$ans" != "n" ] ; then
 	fi
 fi
 
-info="DBID\tesp8266-$chiddec\t$chid\t$mac\t$shortname\t$email\t$lat\t$lon\t$locadr\tSID1\tSNAME1\tSID2\tSNAME2"
+info="DBID\tesp8266-$chiddec\t$chid\t$mac\t$srevision:$sserial\t$email\t$lat\t$lon\t$locadr\tSID1\tSNAME1\tSID2\tSNAME2"
 echo -e "$info" | tee -a "$outappendfile"
-
 
 
 #esptool.py write_flash -vv -cb 57600 -ca 0x00000 -cp /dev/ttyUSB0 -cf latest.bin 
@@ -94,7 +111,7 @@ fi
 read -p "flash now? [y/N] " ans
 if [ "$ans" == "y" ] 
 then
-	$esptool -vv -cd nodemcu -cb 57600 -ca 0x00000 -cp /dev/ttyUSB0 -cf "$binfile"
+	$esptool -vv -cd nodemcu -cb 57600 -ca 0x00000 -cp "$devserial" -cf "$binfile"
 fi
 
 
@@ -119,5 +136,6 @@ if [ "$ans" == "y" ] ; then
 		bunzip2 -k "${spiffbin}.bz2"
 	fi
 
-	$esptool -vv -cd nodemcu -cb 115200 -ca 0x100000 -cp /dev/ttyUSB0 -cf "$spiffbin"
+	$esptool -vv -cd nodemcu -cb 115200 -ca 0x100000 -cp "$devserial" -cf "$spiffbin"
 fi
+
