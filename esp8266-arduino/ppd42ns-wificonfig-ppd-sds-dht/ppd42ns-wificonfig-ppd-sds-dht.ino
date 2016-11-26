@@ -57,7 +57,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-034"
+#define SOFTWARE_VERSION "NRZ-2016-039"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -243,6 +243,7 @@ bool send_failed = false;
 
 unsigned long last_update_attempt;
 const unsigned long pause_between_update_attempts = 86400000;
+bool will_check_for_update = false;
 
 int sds_pm10_sum = 0;
 int sds_pm25_sum = 0;
@@ -258,6 +259,7 @@ bool first_csv_line = 1;
 
 const byte stop_SDS_cmd[] = {0xAA, 0xB4, 0x06, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x05, 0xAB};
 const byte start_SDS_cmd[] = {0xAA, 0xB4, 0x06, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x06, 0xAB};
+const byte version_SDS_cmd[] = {0xAA, 0xB4, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x05, 0xAB};
 
 String data_first_part = "{\"software_version\": \"" + String(SOFTWARE_VERSION) + "\"FEATHERCHIPID, \"sensordatavalues\":[";
 
@@ -415,6 +417,65 @@ String FeatherChipId() {
 	s = String(val1,HEX)+String(val2,HEX)+String(val3,HEX)+String(val4,HEX);
 
 #endif
+	return s;
+}
+
+/*****************************************************************
+/* read SDS011 sensor values                                     *
+/*****************************************************************/
+String SDS_version_date() {
+	String s = "";
+	String value_hex;
+	char buffer;
+	int value;
+	int len = 0;
+	String version_date = "";
+	String device_id = "";
+	int checksum_is;
+	int checksum_ok = 0;
+	int position = 0;
+
+	debug_out(txt_start_reading+"SDS011 version date",DEBUG_MED_INFO,1);
+
+	serialSDS.write(start_SDS_cmd,sizeof(start_SDS_cmd)); is_SDS_running = true;
+
+	delay(100);
+
+	serialSDS.write(version_SDS_cmd,sizeof(version_SDS_cmd));
+	
+	delay(100);
+
+	while (serialSDS.available() > 0) {
+		buffer = serialSDS.read();
+		debug_out(String(len)+" - "+String(buffer,DEC)+" - "+String(buffer,HEX)+" - "+int(buffer)+" .",DEBUG_MED_INFO,1);
+//		"aa" = 170, "ab" = 171, "c0" = 192
+		value = int(buffer);
+		switch (len) {
+			case (0): if (value != 170) { len = -1; }; break;
+			case (1): if (value != 197) { len = -1; }; break;
+			case (2): if (value != 7) { len = -1; }; break;
+			case (3): version_date  = String(value); checksum_is = 7 + value; break;
+			case (4): version_date += "-"+String(value); checksum_is += value; break;
+			case (5): version_date += "-"+String(value); checksum_is += value; break;
+			case (6): if (value < 0x10) {device_id  = "0"+String(value,HEX);} else {device_id  = String(value,HEX);}; checksum_is += value; break;
+			case (7): if (value < 0x10) {device_id += "0";}; device_id += String(value,HEX); checksum_is += value; break;
+			case (8):
+					debug_out("Checksum is: "+String(checksum_is % 256)+" - should: "+String(value),DEBUG_MED_INFO,1);
+					if (value == (checksum_is % 256)) { checksum_ok = 1; } else { len = -1; }; break;
+			case (9): if (value != 171) { len = -1; }; break;
+		}
+		len++;
+		if (len == 10 && checksum_ok == 1) {
+			s = version_date+"("+device_id+")";
+			debug_out("SDS version date : "+version_date,DEBUG_MIN_INFO,1);
+			debug_out("SDS device ID:     "+device_id,DEBUG_MIN_INFO,1);
+			len = 0; checksum_ok = 0; version_date = ""; device_id = ""; checksum_is = 0;
+		}
+		yield();
+	}
+
+	debug_out(txt_end_reading+"SDS011 version date",DEBUG_MED_INFO,1);
+
 	return s;
 }
 
@@ -860,7 +921,7 @@ String sensorSDS() {
 		s += Value2Json("SDS_P1",Float2String(float(sds_pm10_sum)/(sds_val_count*10.0)));
 		s += Value2Json("SDS_P2",Float2String(float(sds_pm25_sum)/(sds_val_count*10.0)));
 		sds_pm10_sum = 0; sds_pm25_sum = 0; sds_val_count = 0;
-		if (sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms)) {
+		if ((sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms)) && (! will_check_for_update)) {
 			serialSDS.write(stop_SDS_cmd,sizeof(stop_SDS_cmd));	is_SDS_running = false;
 		}
 	}
@@ -1163,11 +1224,14 @@ void readConfig() {
 /*****************************************************************/
 void autoUpdate() {
 #if defined(ESP8266)
+	String SDS_version = "";
 	if (auto_update) {
 		debug_out("Starting OTA update ...",DEBUG_MIN_INFO,1);
+		debug_out("NodeMCU firmware : "+String(SOFTWARE_VERSION),DEBUG_MIN_INFO,1);
+		if (sds_read) { SDS_version = SDS_version_date();}
 		display_debug("Looking for OTA update");
 		last_update_attempt = millis();
-		t_httpUpdate_return ret = ESPhttpUpdate.update(update_host, update_port, update_url, String(SOFTWARE_VERSION)+String(" ")+String(ESP.getChipId()));
+		t_httpUpdate_return ret = ESPhttpUpdate.update(update_host, update_port, update_url, String(SOFTWARE_VERSION)+String(" ")+String(ESP.getChipId())+String(" ")+SDS_version);
 		switch(ret) {
 			case HTTP_UPDATE_FAILED:
 					debug_out("[update] Update failed.",DEBUG_ERROR,1);
@@ -1182,6 +1246,7 @@ void autoUpdate() {
 					break;
 		}
 	}
+	will_check_for_update = false;
 #endif
 }
 
@@ -1509,6 +1574,10 @@ void loop() {
 		data += "]}";
 
 		//sending to api(s)
+
+		if ((act_milli-last_update_attempt) > pause_between_update_attempts) {
+			will_check_for_update = true;
+		}
 
 		if (has_display) {
 			display_values(data);
