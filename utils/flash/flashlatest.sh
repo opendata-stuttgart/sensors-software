@@ -27,6 +27,10 @@ if [ -z "$devserial" ] ; then
 fi
 if [ ! -w "$devserial" ] ; then
 	echo "no write access to $devserial"
+	if [ ! -d "/dev/serial/" ] ; then 
+		echo "no serial devices found in /dev/serial/, exiting"
+		exit 1
+	fi
 	read -p "list all serial devices? [Y/n]" ans
 	if [ "$ans" != "n" ] ; then
 		ls -l /dev/serial/by-id/
@@ -54,12 +58,12 @@ read -p "ask more infos? [Y/n]" ans
 
 if [ "$ans" != "n" ] ; then
 	examplestr="V0-000"
-	read -p "PM sensor revision (on back/flat side top left corner)? [default: $examplestring]" ans
+	read -p "PM sensor revision (on back/flat side top left corner)? [default: $examplestr]" ans
 	if [ -n "$ans" ] ; then
 		srevision="$ans"
 	fi
 	examplestr="0000-0000"
-	read -p "PM sensor serial number (SN on sticker, besides fan, below barcode)? [default: $examplestring]" ans
+	read -p "PM sensor serial number (SN on sticker, besides fan, below barcode)? [default: $examplestr]" ans
 	if [ -n "$ans" ] ; then
 		sserial="$ans"
 	fi
