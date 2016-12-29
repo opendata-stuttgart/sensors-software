@@ -123,6 +123,7 @@ bool send2madavi = 1;
 bool send2custom = 0;
 bool send2mqtt = 0;
 bool send2lora = 1;
+bool send2influxdb = 0;
 bool send2csv = 0;
 bool auto_update = 0;
 bool has_display = 0;
@@ -141,6 +142,10 @@ const int httpPort_dusti = 443;
 const char* host_api_madavi = "api.madavi.de";
 const char* url_api_madavi = "/v1/push-sensor-data/";
 const int httpPort_api_madavi = 443;
+
+char host_influxdb[100] = "192.168.234.1";
+char url_influxdb[100] = "/write?db=mydb";
+int httpPort_influxdb = 8086;
 
 char host_custom[100] = "192.168.234.1";
 char url_custom[100] = "/data.php";
@@ -522,6 +527,14 @@ void wifiConfig() {
 //	wifiManager.addParameter(&custom_url_custom);
 //	WiFiManagerParameter custom_httpPort_custom("httpPort_custom", "HTTP Port (80) ?", "", 10);
 //	wifiManager.addParameter(&custom_httpPort_custom);
+	WiFiManagerParameter custom_send2influxdb("send2influxdb", "Senden an eigene InfluxDB (0/1)?", "", 10);
+	wifiManager.addParameter(&custom_send2influxdb);
+//	WiFiManagerParameter custom_host_influxdb("host_influxdb, "Host ?", "", 40);
+//	wifiManager.addParameter(&custom_host_influxdb);
+//	WiFiManagerParameter custom_url_influxdb("url_influxdb", "Pfad ?", "", 40);
+//	wifiManager.addParameter(&custom_url_influxdb);
+//	WiFiManagerParameter custom_httpPort_influxdb("httpPort_influxdb, "HTTP Port (8086) ?", "", 10);
+//	wifiManager.addParameter(&custom_httpPort_influxdb);
 	apname = "Feinstaubsensor-" + String(ESP.getChipId());
 	wifiManager.setTimeout(300);
 	wifiManager.setBreakAfterConfig(true);
@@ -546,6 +559,10 @@ void wifiConfig() {
 //	if (strcmp(custom_host_custom.getValue(),"") != 0) strcpy(host_custom,custom_host_custom.getValue());
 //	if (strcmp(custom_url_custom.getValue(),"") != 0) strcpy(url_custom,custom_url_custom.getValue());
 //	if (strcmp(custom_httpPort_custom.getValue(),"") != 0) httpPort_custom = strtol(custom_httpPort_custom.getValue(), NULL, 10);
+	if (strcmp(custom_send2influxdb.getValue(),"") != 0) send2influxdb = strtol(custom_send2influxdb.getValue(), NULL, 10);
+//	if (strcmp(custom_host_influxdb.getValue(),"") != 0) strcpy(host_influxdb,custom_host_influxdb.getValue());
+//	if (strcmp(custom_url_influxdb.getValue(),"") != 0) strcpy(url_influxdb,custom_url_influxdb.getValue());
+//	if (strcmp(custom_httpPort_influxdb.getValue(),"") != 0) httpPort_influxdb = strtol(custom_httpPort_influxdb.getValue(), NULL, 10);
 	debug_out("------ Result from Webconfig ------",DEBUG_MIN_INFO,1);
 	debug_out("WLANSSID: ",DEBUG_MIN_INFO,0);debug_out(wlanssid,DEBUG_MIN_INFO,1);
 	debug_out("DHT_read: "+String(custom_dht_read.getValue())+" - "+String(dht_read),DEBUG_MIN_INFO,1);
@@ -562,6 +579,10 @@ void wifiConfig() {
 //	debug_out("Custom Host: "+String(custom_host_custom.getValue())+" - "+String(host_custom),DEBUG_MIN_INFO,1);
 //	debug_out("Custom URL: "+String(custom_url_custom.getValue())+" - "+String(url_custom),DEBUG_MIN_INFO,1);
 //	debug_out("Custom Port: "+String(custom_httpPort_custom.getValue())+" - "+String(httpPort_custom),DEBUG_MIN_INFO,1);
+	debug_out("InfluxDB: "+String(custom_send2influxdb.getValue())+" - "+String(send2influxdb),DEBUG_MIN_INFO,1);
+//	debug_out("InfluxDB Host: "+String(custom_host_influxdb.getValue())+" - "+String(host_influxdb),DEBUG_MIN_INFO,1);
+//	debug_out("InfluxDB URL: "+String(custom_url_influxdb.getValue())+" - "+String(url_influxdb),DEBUG_MIN_INFO,1);
+//	debug_out("InfluxDB Port: "+String(custom_httpPort_influxdb.getValue())+" - "+String(httpPort_influxdb),DEBUG_MIN_INFO,1);
 	debug_out("------",DEBUG_MIN_INFO,1);
 #endif
 }
@@ -765,6 +786,75 @@ void send_lora(const String& data) {
 /* send data to mqtt api                                         *
 /*****************************************************************/
 void sendmqtt(const String& data, const char* host, const int mqtt_port) {
+}
+
+/*****************************************************************
+  /* send data to influxdb                                         *
+  /*****************************************************************/
+void send_influxDB(const String& data, const int pin, const char* host, const int httpPort, const char* url) {
+#if defined(ESP8266)
+
+  debug_out(txt_start_connecting_to, DEBUG_MIN_INFO, 0);
+  debug_out(host, DEBUG_MIN_INFO, 1);
+
+  // Use WiFiClient class to create TCP connections
+  if (!client.connect(host, httpPort)) {
+    debug_out(txt_connection_failed, DEBUG_ERROR, 1);
+    return;
+  }
+
+  String tmp_str;
+  String valueline;
+  int value_count = 0;
+  StaticJsonBuffer<2000> jsonBuffer;
+  JsonObject& json2data = jsonBuffer.parseObject(data);
+  debug_out("Parse JSON for influx DB", DEBUG_MIN_INFO, 1);
+  debug_out(data, DEBUG_MIN_INFO, 1);
+  if (json2data.success()) {
+    valueline = "";
+    for (int i = 0; i < json2data["sensordatavalues"].size()-1; i++) {
+      valueline += "feinstaub,node=esp8266-"+String(ESP.getChipId())+" ";
+      tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value_type"].asString());
+      valueline += tmp_str + "=";
+      tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value"].asString());
+      valueline += tmp_str + "\n";
+    }
+  } else {
+    debug_out("Data read failed", DEBUG_ERROR, 1);
+  }
+
+  debug_out("Requesting URL: ", DEBUG_MIN_INFO, 0);
+  debug_out(url, DEBUG_MIN_INFO, 1);
+  debug_out(String(ESP.getChipId()), DEBUG_MIN_INFO, 1);
+  debug_out(valueline, DEBUG_MIN_INFO, 1);
+
+  String request_head = "POST " + String(url) + " HTTP/1.1\r\n" +
+                        "Host: " + String(host) + "\r\n" +
+                        "Accept: */*\r\n" +
+                        "Content-Length: " + String(valueline.length(), DEC) + "\r\n" +
+                        "Content-Type: application/x-www-form-urlencoded\r\n" +
+                        "PIN: " + String(pin) + "\r\n" +
+                        "Sensor: esp8266-" + String(ESP.getChipId()) + "\r\n\r\n";
+
+  // send request to the server
+
+  client.print(request_head);
+
+  client.println(valueline);
+
+  delay(10);
+
+  // Read reply from server and print them
+  while (client.available()) {
+    char c = client.read();
+    debug_out(String(c), DEBUG_MIN_INFO, 0);
+  }
+
+  debug_out("\nclosing connection\n------\n\n", DEBUG_MIN_INFO, 1);
+  debug_out(txt_end_connecting_to, DEBUG_MIN_INFO, 0);
+  debug_out(host, DEBUG_MIN_INFO, 1);
+
+#endif
 }
 
 /*****************************************************************
@@ -1114,6 +1204,11 @@ void copyExtDef() {
 	if (HOST_CUSTOM != NULL) { strcpy(host_custom,HOST_CUSTOM); }
 	if (URL_CUSTOM != NULL) { strcpy(url_custom,URL_CUSTOM); }
 	if (HTTPPORT_CUSTOM != httpPort_custom) { httpPort_custom = HTTPPORT_CUSTOM; }
+
+	if (SEND2INFLUXDB != send2influxdb) { send2influxdb = SEND2INFLUXDB; }
+	if (HOST_INFLUXDB != NULL) { strcpy(host_influxdb,HOST_INFLUXDB); }
+	if (URL_INFLUXDB != NULL) { strcpy(url_influxdb,URL_INFLUXDB); }
+	if (HTTPPORT_INFLUXDB != httpPort_influxdb) { httpPort_influxdb = HTTPPORT_INFLUXDB; }
 }
 
 /*****************************************************************
@@ -1144,6 +1239,10 @@ void writeConfig() {
 	json["host_custom"] = host_custom;
 	json["url_custom"] = url_custom;
 	json["httpPort_custom"] = httpPort_custom;
+	json["send2influxdb"] = send2influxdb;
+	json["host_influxdb"] = host_influxdb;
+	json["url_influxdb"] = url_influxdb;
+	json["httpPort_influxdb"] = httpPort_influxdb;
 
 	File configFile = SPIFFS.open("/config.json", "w");
 	if (!configFile) {
@@ -1206,6 +1305,10 @@ void readConfig() {
 					if (json.containsKey("host_custom")) strcpy(host_custom, json["host_custom"]);
 					if (json.containsKey("url_custom")) strcpy(url_custom, json["url_custom"]);
 					if (json.containsKey("httpPort_custom")) httpPort_custom = json["httpPort_custom"];
+					if (json.containsKey("send2influxdb")) send2influxdb = json["send2influxdb"];
+					if (json.containsKey("host_influxdb")) strcpy(host_influxdb, json["host_influxdb"]);
+					if (json.containsKey("url_influxdb")) strcpy(url_influxdb, json["url_influxdb"]);
+					if (json.containsKey("httpPort_influxdb")) httpPort_influxdb = json["httpPort_influxdb"];
 				} else {
 					debug_out("failed to load json config",DEBUG_ERROR,1);
 				}
@@ -1379,6 +1482,7 @@ void setup() {
 	if (send2lora) debug_out("Sende an LoRa gateway...",DEBUG_MIN_INFO,1);
 	if (send2csv) debug_out("Sende als CSV an Serial...",DEBUG_MIN_INFO,1);
 	if (send2custom) debug_out("Sende an custom API...",DEBUG_MIN_INFO,1);
+	if (send2influxdb) debug_out("Sende an custom influx DB...",DEBUG_MIN_INFO,1);
 	if (auto_update) debug_out("Auto-Update wird ausgeführt...",DEBUG_MIN_INFO,1);
 	if (has_display) debug_out("Zeige auf Display...",DEBUG_MIN_INFO,1);
 	if (bmp_read) {
@@ -1597,6 +1701,13 @@ void loop() {
 			sum_send_time += micros() - start_send;
 		}
 
+		if (send2influxdb) {
+			debug_out(txt_sending_to+"custom influx db: ",DEBUG_MIN_INFO,1);
+			start_send = micros();
+			send_influxDB(data,0,host_influxdb,httpPort_influxdb,url_influxdb);
+			sum_send_time += micros() - start_send;
+		}
+
 		if (send2mqtt) {
 			debug_out(txt_sending_to+"mqtt: ",DEBUG_MIN_INFO,1);
 			start_send = micros();
@@ -1632,3 +1743,4 @@ void loop() {
 
 	yield();
 }
+
