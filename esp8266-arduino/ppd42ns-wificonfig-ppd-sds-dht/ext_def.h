@@ -6,6 +6,7 @@
 #define SEND2DUSTI 1
 #define SEND2MADAVI 1
 #define SEND2MQTT 0
+#define SEND2INFLUXDB 0
 #define SEND2LORA 0
 #define SEND2CSV 0
 #define SEND2CUSTOM 0
@@ -14,6 +15,11 @@
 #define HOST_CUSTOM "192.168.234.1"
 #define URL_CUSTOM "/data.php"
 #define HTTPPORT_CUSTOM 80
+
+// Definition eigene InfluxDB
+#define HOST_INFLUXDB "192.168.234.1"
+#define URL_INFLUXDB "/write?db=mydb"
+#define HTTPPORT_INFLUXDB 8086
 
 // MQTT Definitionen (noch nicht genutzt)
 #define HOST_MQTT "mqtt.opensensors.io"
