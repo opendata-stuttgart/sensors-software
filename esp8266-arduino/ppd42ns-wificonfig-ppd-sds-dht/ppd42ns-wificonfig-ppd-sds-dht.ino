@@ -1714,6 +1714,4 @@ void loop() {
 			debug_out("",DEBUG_MIN_INFO,1);
 		}
 	}
-
-	yield();
 }
