@@ -1484,18 +1484,20 @@ void showInfoPage(){
   
   String sResponse,sHeader;
   sResponse = "<html><head><title>Feinstaubsensor " + String(ESP.getChipId()) + "</title></head><body>";
-  sResponse += "<a href=\"https://www.madavi.de/sensor/signal.php?sensor=esp8266-" +  String(ESP.getChipId()) + ">WiFi</a>";
+  sResponse += "<a href=\"https://www.madavi.de/sensor/signal.php?sensor=esp8266-" +  String(ESP.getChipId()) + "\">WiFi</a>";
   if (ppd_read) {
-    sResponse += "<a href=\"https://www.madavi.de/sensor/signal.php?sensor=esp8266-" +  String(ESP.getChipId()) + "-ppd42ns>PPD42ns</a>";
+    sResponse += "<a href=\"https://www.madavi.de/sensor/signal.php?sensor=esp8266-" +  String(ESP.getChipId()) + "-ppd42ns\">PPD42ns</a>";
+    sResponse += "<a href=\"https://www.madavi.de/sensor/feinstaub-map-ppd42ns\">PPD42ns MAP</a>";
   }
   if(dht_read){
-    sResponse += "<a href=\"https://www.madavi.de/sensor/signal.php?sensor=esp8266-" +  String(ESP.getChipId()) + "-dht>dht</a>";
+    sResponse += "<a href=\"https://www.madavi.de/sensor/signal.php?sensor=esp8266-" +  String(ESP.getChipId()) + "-dht\">dht</a>";
   }
   if(sds_read){
-    sResponse += "<a href=\"https://www.madavi.de/sensor/signal.php?sensor=esp8266-" +  String(ESP.getChipId()) + "-sds01>sds01</a>";
+    sResponse += "<a href=\"https://www.madavi.de/sensor/signal.php?sensor=esp8266-" +  String(ESP.getChipId()) + "-sds01\">sds01</a>";
+    sResponse += "<a href=\"http://opendata-stuttgart.github.io/feinstaub-map\">sds01 MAP</a>";
   }
   if(bmp_read){
-    sResponse += "<a href=\"https://www.madavi.de/sensor/signal.php?sensor=esp8266-" +  String(ESP.getChipId()) + "-bmp>bmp</a>";
+    sResponse += "<a href=\"https://www.madavi.de/sensor/signal.php?sensor=esp8266-" +  String(ESP.getChipId()) + "-bmp\">bmp</a>";
   }
   sResponse += "</body></html>";
     
