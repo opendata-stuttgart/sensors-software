@@ -74,7 +74,7 @@
 /* #define SEND2LORA 0                                           *
 /* #define SEND2CSV 0                                            *
 /*                                                               *
-/* #define DEBUG 3                                               *
+/* #define DEBUG 3                                               *shi
 /*****************************************************************/
 
 /*****************************************************************
@@ -163,6 +163,7 @@ const char* update_url = "/sensor/update/firmware.php";
 const int update_port = 80;
 
 #if defined(ESP8266)
+WiFiServer server(80); // The port to gain information from the ESP
 WiFiClient client;
 WiFiClientSecure client_s;
 WiFiClient mqtt_wifi;
@@ -1381,6 +1382,7 @@ void setup() {
 	dht.begin();						// Start DHT
 	delay(10);
 #if defined(ESP8266)
+  server.begin(); // start the server
 	debug_out("\nChipId: ",DEBUG_MIN_INFO,1);
 	debug_out(String(ESP.getChipId()),DEBUG_MIN_INFO,1);
 #endif
@@ -1429,6 +1431,91 @@ void setup() {
 
 	starttime = millis();					// store the start time
 	starttime_SDS = millis();
+}
+
+/*****************************************************************
+/* Show Infopage                                                     *
+/*****************************************************************/
+void showInfoPage(){
+  WiFiClient infopage = server.available();
+  unsigned long ultimeout = millis()+250;
+  while(!infopage.available() && (millis()<ultimeout) )
+  {  }
+  if(millis()>ultimeout) 
+  { 
+    return; 
+  }
+  
+  String sRequest = infopage.readStringUntil('\r');
+  infopage.flush();
+  
+  // stop client, if request is empty
+  if(sRequest=="")
+  {
+    infopage.stop();
+    return;
+  }
+  String sPath="",sParam="", sCmd="";
+  String sGetstart="GET ";
+  int iStart,iEndSpace,iEndQuest;
+  iStart = sRequest.indexOf(sGetstart);
+  if (iStart>=0)
+  {
+    iStart+=+sGetstart.length();
+    iEndSpace = sRequest.indexOf(" ",iStart);
+    iEndQuest = sRequest.indexOf("?",iStart);
+    
+    // are there parameters?
+    if(iEndSpace>0)
+    {
+      if(iEndQuest>0)
+      {
+        // there are parameters
+        sPath  = sRequest.substring(iStart,iEndQuest);
+        sParam = sRequest.substring(iEndQuest,iEndSpace);
+      }
+      else
+      {
+        // NO parameters
+        sPath  = sRequest.substring(iStart,iEndSpace);
+      }
+    }
+  }
+  
+  String sResponse,sHeader;
+  sResponse = "<html><head><title>Feinstaubsensor " + String(ESP.getChipId()) + "</title></head><body>";
+  sResponse += "<a href=\"https://www.madavi.de/sensor/signal.php?sensor=esp8266-" +  String(ESP.getChipId()) + "\">WiFi</a>";
+  if (ppd_read) {
+    sResponse += "<a href=\"https://www.madavi.de/sensor/signal.php?sensor=esp8266-" +  String(ESP.getChipId()) + "-ppd42ns\">PPD42ns</a>";
+    sResponse += "<a href=\"https://www.madavi.de/sensor/feinstaub-map-ppd42ns\">PPD42ns MAP</a>";
+  }
+  if(dht_read){
+    sResponse += "<a href=\"https://www.madavi.de/sensor/signal.php?sensor=esp8266-" +  String(ESP.getChipId()) + "-dht\">dht</a>";
+  }
+  if(sds_read){
+    sResponse += "<a href=\"https://www.madavi.de/sensor/signal.php?sensor=esp8266-" +  String(ESP.getChipId()) + "-sds01\">sds01</a>";
+    sResponse += "<a href=\"http://opendata-stuttgart.github.io/feinstaub-map\">sds01 MAP</a>";
+  }
+  if(bmp_read){
+    sResponse += "<a href=\"https://www.madavi.de/sensor/signal.php?sensor=esp8266-" +  String(ESP.getChipId()) + "-bmp\">bmp</a>";
+  }
+  sResponse += "</body></html>";
+    
+  sHeader  = "HTTP/1.1 200 OK\r\n";
+  sHeader += "Content-Length: ";
+  sHeader += sResponse.length();
+  sHeader += "\r\n";
+  sHeader += "Content-Type: text/html\r\n";
+  sHeader += "Connection: close\r\n";
+  sHeader += "\r\n";
+   
+  // Send the response to the client
+  infopage.print(sHeader);
+  infopage.print(sResponse);
+  
+  
+  // and stop the client
+  infopage.stop();
 }
 
 /*****************************************************************
@@ -1714,6 +1801,9 @@ void loop() {
 			debug_out("",DEBUG_MIN_INFO,1);
 		}
 	}
+#if defined(ESP8266)
+  showInfoPage();
+#endif
 
 	yield();
 }
