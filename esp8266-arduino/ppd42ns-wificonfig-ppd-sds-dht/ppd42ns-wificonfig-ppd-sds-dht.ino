@@ -1801,7 +1801,9 @@ void loop() {
 			debug_out("",DEBUG_MIN_INFO,1);
 		}
 	}
- showInfoPage();
+#if defined(ESP8266)
+  showInfoPage();
+#endif
 
 	yield();
 }
