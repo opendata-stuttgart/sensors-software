@@ -167,6 +167,7 @@ WiFiClient client;
 WiFiClientSecure client_s;
 WiFiClient mqtt_wifi;
 PubSubClient mqtt_client(mqtt_wifi);
+ESP8266WebServer server(80);
 #endif
 
 #if defined(ARDUINO_SAMD_ZERO)
