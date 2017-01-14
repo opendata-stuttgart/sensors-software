@@ -273,6 +273,8 @@ String last_gps_alt;
 String last_gps_date;
 String last_gps_time;
 
+String last_data = "";
+
 bool first_csv_line = 1;
 
 const byte stop_SDS_cmd[] = {0xAA, 0xB4, 0x06, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x05, 0xAB};
@@ -1380,6 +1382,13 @@ void setup() {
 	pinMode(PPD_PIN_PM2,INPUT_PULLUP);	// Listen at the designated PIN
 	dht.begin();						// Start DHT
 	delay(10);
+	server.on("/", []() {
+		String webString = "<head><title>Feinstaubsensor</title></head>"
+			"<h1>Feinstaubsensor</h1>"
+			"<p>" + last_data + "</p>";
+		server.send(200, "text/html", webString);
+	});
+	server.begin();
 #if defined(ESP8266)
 	debug_out("\nChipId: ",DEBUG_MIN_INFO,1);
 	debug_out(String(ESP.getChipId()),DEBUG_MIN_INFO,1);
@@ -1623,6 +1632,8 @@ void loop() {
 			data.remove(data.length()-1);
 		}
 		data += "]}";
+		
+		last_data = data;
 
 		//sending to api(s)
 
@@ -1714,6 +1725,6 @@ void loop() {
 			debug_out("",DEBUG_MIN_INFO,1);
 		}
 	}
-
+	server.handleClient();
 	yield();
 }
