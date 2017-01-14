@@ -97,7 +97,8 @@
 #include <SPI.h>
 #endif
 #include <ArduinoJson.h>
-#include <PubSubClient.h>
+#include "Adafruit_MQTT.h"
+#include "Adafruit_MQTT_Client.h"
 #include <Wire.h>
 #include <DHT.h>
 #include <Adafruit_BMP085.h>
@@ -151,12 +152,11 @@ char host_custom[100] = "192.168.234.1";
 char url_custom[100] = "/data.php";
 int httpPort_custom = 80;
 
-const char* host_mqtt = "mqtt.opensensors.io";
-const int mqtt_port = 1883;
-const char* mqtt_user = "";
-const char* mqtt_pwd = "";
-const char* mqtt_client_id = "";
-const char* mqtt_topic = "";
+const char* host_mqtt = "io.adafruit.com";
+const int mqtt_port = 8883;
+const char* mqtt_user = "username";
+const char* mqtt_pwd = "apikey";
+const char* mqtt_client_id = "feinstaubsensor";
 
 const char* update_host = "www.madavi.de";
 const char* update_url = "/sensor/update/firmware.php";
@@ -165,8 +165,8 @@ const int update_port = 80;
 #if defined(ESP8266)
 WiFiClient client;
 WiFiClientSecure client_s;
-WiFiClient mqtt_wifi;
-PubSubClient mqtt_client(mqtt_wifi);
+WiFiClientSecure client_mqtt;
+Adafruit_MQTT_Client mqtt_client(&client_mqtt, host_mqtt, mqtt_port, mqtt_user, mqtt_pwd);
 #endif
 
 #if defined(ARDUINO_SAMD_ZERO)
@@ -777,7 +777,51 @@ void send_lora(const String& data) {
 /*****************************************************************
 /* send data to mqtt api                                         *
 /*****************************************************************/
-void sendmqtt(const String& data, const char* host, const int mqtt_port) {
+void sendmqtt(const String& data) {
+	int8_t ret;
+	if (!mqtt_client.connected()) {
+		uint8_t retries = 3;
+		while ((ret = mqtt_client.connect()) != 0 && retries > 0) { // connect will return 0 for connected
+			Serial.println(mqtt_client.connectErrorString(ret));
+			mqtt_client.disconnect();
+			retries--;
+			delay(100);
+		}
+	}
+	if (mqtt_client.connected()) {
+		Serial.println("mqtt connected");
+	} else {
+		Serial.println("mqtt failed.");
+		return;
+	}
+
+	DynamicJsonBuffer jsonBuffer;
+	JsonObject& json2data = jsonBuffer.parseObject(data);
+	//String valueP1 = jsonBuffer.strdup(json2data["sensordatavalues"][0]["value"].asString()));
+	double valueP1 = json2data["sensordatavalues"][0]["value"];
+	double valueP2 = json2data["sensordatavalues"][1]["value"];
+	double valueTemperature = json2data["sensordatavalues"][2]["value"];
+	double valueHumidity = json2data["sensordatavalues"][3]["value"];
+
+	//Serial.println("username/feeds/sensor-p1: " + valueP1);
+
+	Adafruit_MQTT_Publish mqtt_feed_p1 = Adafruit_MQTT_Publish(&mqtt_client, "username/feeds/sensor-p1");
+	Adafruit_MQTT_Publish mqtt_feed_p2 = Adafruit_MQTT_Publish(&mqtt_client, "username/feeds/sensor-p2");
+	Adafruit_MQTT_Publish mqtt_feed_temperature = Adafruit_MQTT_Publish(&mqtt_client, "username/feeds/sensor-temperature");
+	Adafruit_MQTT_Publish mqtt_feed_humidity = Adafruit_MQTT_Publish(&mqtt_client, "username/feeds/sensor-humidity");
+
+	if (!mqtt_feed_p1.publish(valueP1, 2)) {
+		Serial.println(F("Failed"));
+	} else {
+		Serial.println(F("OK!"));
+	}
+	mqtt_feed_p2.publish(valueP2, 2);
+	if(valueTemperature < 50) {
+		mqtt_feed_temperature.publish(valueTemperature, 2);
+	}
+	if(valueHumidity < 100) {
+		mqtt_feed_humidity.publish(valueHumidity, 2);
+	}
 }
 
 /*****************************************************************
@@ -1651,7 +1695,7 @@ void loop() {
 		if (send2mqtt) {
 			debug_out(txt_sending_to+"mqtt: ",DEBUG_MIN_INFO,1);
 			start_send = micros();
-			sendmqtt(data,host_mqtt,mqtt_port);
+			sendmqtt(data);
 			sum_send_time += micros() - start_send;
 		}
 		
