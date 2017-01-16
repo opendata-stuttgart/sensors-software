@@ -123,6 +123,7 @@ ArduinoJson <https://github.com/bblanchon/ArduinoJson> (5.6.4)
 DHT sensor library <https://github.com/adafruit/DHT-sensor-library> (1.2.3)  
 PubSubClient <http://pubsubclient.knolleary.net/> (2.6.0)  
 SoftwareSerial <https://github.com/plerup/espsoftwareserial> (1.0.0)  
+NTPClient <https://github.com/arduino-libraries/NTPClient> (3.1.0)  
   
 Manuell zu installieren:  
 RadioHead Packet Radio library <http://www.airspayce.com/mikem/arduino/RadioHead/> (1.6.1), Link zum Download des Ziparchivs im 2. Abschnitt  
