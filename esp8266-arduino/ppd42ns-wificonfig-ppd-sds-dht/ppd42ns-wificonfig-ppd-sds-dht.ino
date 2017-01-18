@@ -57,7 +57,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-040"
+#define SOFTWARE_VERSION "NRZ-2016-041"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -86,7 +86,6 @@
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
-#include <NTPClient.h>
 #include <WiFiUdp.h>
 #include <ESP8266httpUpdate.h>
 #include <WiFiClientSecure.h>
@@ -160,12 +159,7 @@ const char* update_host = "www.madavi.de";
 const char* update_url = "/sensor/update/firmware.php";
 const int update_port = 80;
 
-char NTPServer[100] = "0.europe.pool.org";
-
 #if defined(ESP8266)
-WiFiUDP udp;
-Ticker tickerOSWatch;
-NTPClient *timeClient=NULL;
 ESP8266WebServer server(80);
 int TimeZone=1;
 #endif
@@ -299,7 +293,6 @@ String data_first_part = "{\"software_version\": \"" + String(SOFTWARE_VERSION) 
 #define LEAP_YEAR(Y)     ( ((1970+Y)>0) && !((1970+Y)%4) && ( ((1970+Y)%100) || !((1970+Y)%400) ) )
 static uint8_t monthDays[]={31,28,31,30,31,30,31,31,30,31,30,31}; // API starts months from 1, this array starts from 0
 
-#define OSWATCH_RESET_TIME 120 // two minutes watchdog TODO make sure last running jobs such as OTA do not trigger the watchdog
 static unsigned long last_loop;
 
 /*****************************************************************
@@ -550,8 +543,6 @@ void copyExtDef() {
 
 	if (DEBUG != debug) { debug = DEBUG; }
 
-	if (NTP_SERVER != NULL) { strcpy(NTPServer,NTP_SERVER); }
-
 	if (SEND2CUSTOM != send2custom) { send2custom = SEND2CUSTOM; }
 	if (HOST_CUSTOM != NULL) { strcpy(host_custom,HOST_CUSTOM); }
 	if (URL_CUSTOM != NULL) { strcpy(url_custom,URL_CUSTOM); }
@@ -612,7 +603,6 @@ void readConfig() {
 					if (json.containsKey("auto_update")) auto_update = json["auto_update"];
 					if (json.containsKey("has_display")) has_display = json["has_display"];
 					if (json.containsKey("debug")) debug = json["debug"];
-					if (json.containsKey("NTPServer")) strcpy(NTPServer, json["NTPServer"]);
 					if (json.containsKey("send2custom")) send2custom = json["send2custom"];
 					if (json.containsKey("host_custom")) strcpy(host_custom, json["host_custom"]);
 					if (json.containsKey("url_custom")) strcpy(url_custom, json["url_custom"]);
@@ -662,7 +652,6 @@ void writeConfig() {
 	json["auto_update"] = auto_update;
 	json["has_display"] = has_display;
 	json["debug"] = debug;
-	json["NTPServer"] = NTPServer;
 	json["send2custom"] = send2custom;
 	json["host_custom"] = host_custom;
 	json["url_custom"] = url_custom;
@@ -694,108 +683,12 @@ void writeConfig() {
 #endif
 }
 
-
+/*****************************************************************
+/* Base64 encode user:password                                   *
+/*****************************************************************/
 void create_basic_auth_strings() {
 	basic_auth_custom = base64::encode(String(user_custom)+":"+String(pwd_custom));
 	basic_auth_influxdb = base64::encode(String(user_influxdb)+":"+String(pwd_influxdb));
-}
-
-/*****************************************************************
-/* print helper functions                                        *
-/*****************************************************************/
-static void printFloat(float val, bool valid, int len, int prec) {
-	if (!valid) {
-		while (len-- > 1) Serial.print('*');
-		Serial.print(' ');
-	} else {
-		Serial.print(val, prec);
-		int vi = abs((int)val);
-		int flen = prec + (val < 0.0 ? 2 : 1); // . and -
-		flen += vi >= 1000 ? 4 : vi >= 100 ? 3 : vi >= 10 ? 2 : 1;
-		for (int i=flen; i<len; ++i) Serial.print(' ');
-	}
-}
-
-static void printInt(unsigned long val, bool valid, int len) {
-	char sz[32] = "*****************";
-	if (valid) sprintf(sz, "%ld", val);
-	sz[len] = 0;
-	for (int i=strlen(sz); i<len; ++i) sz[i] = ' ';
-	if (len > 0) sz[len-1] = ' ';
-	Serial.print(sz);
-}
-
-static void printDateTime(TinyGPSDate &d, TinyGPSTime &t) {
-	if (!d.isValid()) {
-		Serial.print(F("********** "));
-	} else {
-		char sz[32];
-		sprintf(sz, "%02d/%02d/%02d ", d.month(), d.day(), d.year());
-		Serial.print(sz);
-	}
-	if (!t.isValid()) {
-		Serial.print(F("******** "));
-	} else {
-		char sz[32];
-		sprintf(sz, "%02d:%02d:%02d ", t.hour(), t.minute(), t.second());
-		Serial.print(sz);
-	}
-	printInt(d.age(), d.isValid(), 5);
-}
-
-static void printStr(const char *str, int len) {
-	int slen = strlen(str);
-	for (int i=0; i<len; ++i) Serial.print(i<slen ? str[i] : ' ');
-}
-
-void getCurrentTime(unsigned long epoch, int *year, int *month, int *day, int *hour, int *minute, int *second) {
-	int tempDay = 0;
-
-	*hour = (epoch  % 86400L) / 3600;
-	*minute = (epoch  % 3600) / 60;
-	*second = epoch % 60;
-
-	*year = 1970;
-	*month = 0;
-	*day = epoch / 86400;
-
-	for (*year = 1970; ; (*year)++) {
-		if (tempDay + (LEAP_YEAR(*year) ? 366 : 365) > *day) {
-			break;
-		} else {
-			tempDay += (LEAP_YEAR(*year) ? 366 : 365);
-		}
-	}
-	if(LEAP_YEAR(*year))
-		monthDays[1]=29;
-	else
-		monthDays[1]=28;
-		tempDay = *day - tempDay; // the days left in a year
-
-	while(tempDay > monthDays[*month]) tempDay -= monthDays[(*month)++];
-
-/*	if(tempDay+2 >monthDays[(*month)]){
-		*day = (tempDay+2) -monthDays[(*month)];
-		(*month)+=2;
-		if((*month)>12){ 
-			*year+=1;
-			(*month)=(*month)-12;
-		}
-	} else {
-		(*month)++;
-		*day = tempDay+2; // one for base 1, one for current day
-	} */
-	(*month)++;
-	*day = tempDay+1;
-}
-
-void ICACHE_RAM_ATTR osWatch(void) {
-	unsigned long t = millis();
-	unsigned long last_run = abs(t - act_milli);
-	if(last_run >= (OSWATCH_RESET_TIME * 1000)) {
-		ESP.restart();  // normal reboot 
-		//ESP.reset();  // hard reset
-	}
 }
 
 /*****************************************************************
@@ -832,6 +725,7 @@ String table_row_from_value(const String& name, const String& value) {
 void webserver_root() {
 	String page_content = "";
 	last_page_load = millis();
+	debug_out(F("output root page..."),DEBUG_MIN_INFO,1);
 	page_content = FPSTR(WEB_PAGE_HEADER);
 	page_content.replace("{t}",F("Übersicht"));
 	page_content.replace("CHIPID",esp_chipid);
@@ -847,6 +741,7 @@ void webserver_config() {
 	String page_content = "";
 	last_page_load = millis();
 
+	debug_out(F("output config page ..."),DEBUG_MIN_INFO,1);
 	page_content += FPSTR(WEB_PAGE_HEADER);
 	if ((!server.hasArg("submit")) || (server.arg("submit") != "Speichern")) {
 		page_content.replace("{t}",F("Konfiguration"));
@@ -971,24 +866,24 @@ void webserver_values() {
 	page_content.replace("CHIPID",esp_chipid);
 	page_content += F("<table>");
 	if (ppd_read) {
-		page_content += table_row_from_value(F("PPD42NS PM1:"),last_value_PPD_P1+F(" Partikel/Liter"));
-		page_content += table_row_from_value(F("PPD42NS PM2.5:"),last_value_PPD_P2+F(" Partikel/Liter"));
+		page_content += table_row_from_value(F("PPD42NS&nbsp;PM1:"),last_value_PPD_P1+F("&nbsp;Partikel/Liter"));
+		page_content += table_row_from_value(F("PPD42NS&nbsp;PM2.5:"),last_value_PPD_P2+F("&nbsp;Partikel/Liter"));
 	}
 	if (sds_read) {
-		page_content += table_row_from_value(F("SDS011 PM2.5:"),last_value_SDS_P2+F(" µg/m³"));
-		page_content += table_row_from_value(F("SDS011 PM10:"),last_value_SDS_P1+F(" µg/m³"));
+		page_content += table_row_from_value(F("SDS011&nbsp;PM2.5:"),last_value_SDS_P2+F("&nbsp;µg/m³"));
+		page_content += table_row_from_value(F("SDS011&nbsp;PM10:"),last_value_SDS_P1+F("&nbsp;µg/m³"));
 	}
 	if (dht_read) {
-		page_content += table_row_from_value(F("DHT22 Temperatur:"),last_value_DHT_T+" °C");
-		page_content += table_row_from_value(F("DHT22 rel. Luftfeuchte:"),last_value_DHT_H+" %");
+		page_content += table_row_from_value(F("DHT22&nbsp;Temperatur:"),last_value_DHT_T+"&nbsp;°C");
+		page_content += table_row_from_value(F("DHT22&nbsp;rel.&nbsp;Luftfeuchte:"),last_value_DHT_H+"&nbsp;%");
 	}
 	if (bmp_read) {
-		page_content += table_row_from_value(F("BMP180 Temperatur:"),last_value_BMP_T+" °C");
-		page_content += table_row_from_value(F("BMP180 Luftdruck:"),last_value_BMP_P+" Pascal");
+		page_content += table_row_from_value(F("BMP180&nbsp;Temperatur:"),last_value_BMP_T+"&nbsp;°C");
+		page_content += table_row_from_value(F("BMP180&nbsp;Luftdruck:"),last_value_BMP_P+"&nbsp;Pascal");
 	}
 	page_content += table_row_from_value(" "," ");
-	page_content += table_row_from_value(F("WiFi Signal"),String(signal_strength)+" dBm");
-	page_content += table_row_from_value(F("Signal Qualität"),String(signal_quality)+"%");
+	page_content += table_row_from_value(F("WiFi&nbsp;Signal"),String(signal_strength)+"&nbsp;dBm");
+	page_content += table_row_from_value(F("Signal&nbsp;Qualität"),String(signal_quality)+"%");
 	page_content += F("</table>");
 	page_content += FPSTR(WEB_PAGE_FOOTER);
 	server.send(200,FPSTR(TXT_CONTENT_TYPE_TEXT_HTML),page_content);
@@ -1001,6 +896,7 @@ void webserver_values() {
 void webserver_debug_level() {
 	String page_content = "";
 	last_page_load = millis();
+	debug_out(F("output change debug level page..."),DEBUG_MIN_INFO,1);
 	page_content += FPSTR(WEB_PAGE_HEADER);
 	page_content.replace("{t}","Debug level");
 	page_content.replace("CHIPID",esp_chipid);
@@ -1024,6 +920,7 @@ void webserver_debug_level() {
 void webserver_removeConfig() {
 	String page_content = "";
 	last_page_load = millis();
+	debug_out(F("output remove config page..."),DEBUG_MIN_INFO,1);
 	page_content += FPSTR(WEB_PAGE_HEADER);
 	page_content.replace("{t}","config.json löschen");
 	page_content.replace("CHIPID",esp_chipid);
@@ -1053,6 +950,7 @@ void webserver_removeConfig() {
 void webserver_reset() {
 	String page_content = "";
 	last_page_load = millis();
+	debug_out(F("output reset NodeMCU page..."),DEBUG_MIN_INFO,1);
 	page_content += FPSTR(WEB_PAGE_HEADER);
 	page_content.replace("{t}","Reset NodeMCU");
 	page_content.replace("CHIPID",esp_chipid);
@@ -1071,6 +969,7 @@ void webserver_reset() {
 /* Webserver Logo Luftdaten.info                                 *
 /*****************************************************************/
 void webserver_luftdaten_logo() {
+	debug_out(F("output luftdaten.info logo..."),DEBUG_MIN_INFO,1);
 	server.send(200, FPSTR(TXT_CONTENT_TYPE_IMAGE_SVG),FPSTR(LUFTDATEN_INFO_LOGO_SVG));
 }
 
@@ -1078,6 +977,7 @@ void webserver_luftdaten_logo() {
 /* Webserver Logo Code For Germany                               *
 /*****************************************************************/
 void webserver_cfg_logo() {
+	debug_out(F("output codefor.de logo..."),DEBUG_MIN_INFO,1);
 	server.send(200, FPSTR(TXT_CONTENT_TYPE_IMAGE_SVG),FPSTR(CFG_LOGO_SVG));
 }
 
@@ -1086,6 +986,7 @@ void webserver_cfg_logo() {
 /*****************************************************************/
 void webserver_not_found() {
 	last_page_load = millis();
+	debug_out(F("output not found page..."),DEBUG_MIN_INFO,1);
 	 server.send(404, FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN), F("Not found."));
 }
 
@@ -1317,6 +1218,7 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 	debug_out(F("End connecting to "),DEBUG_MIN_INFO,0);
 	debug_out(host,DEBUG_MIN_INFO,1);
 
+	yield();
 #endif
 }
 
@@ -1847,6 +1749,7 @@ void display_values(const String& value_DHT_T, const String& value_DHT_H, const 
 		display.drawString(0,10*(value_count++),"satelites: "+String(gps.satellites.value()));
 	}
 	display.display();
+	yield();
 #endif
 }
 
@@ -1888,9 +1791,6 @@ void setup() {
 
 	serialSDS.begin(9600);
 	serialGPS.begin(9600);
-
-	timeClient = new NTPClient(udp, NTPServer, TimeZone * 3600, 60000); // (logical name, address of server, time-zone offset in seconds, refresh-rate in mSec)
-	timeClient->begin(); // Start the NTP service for time 
 
 	pinMode(PPD_PIN_PM1,INPUT_PULLUP);	// Listen at the designated PIN
 	pinMode(PPD_PIN_PM2,INPUT_PULLUP);	// Listen at the designated PIN
@@ -1944,8 +1844,6 @@ void setup() {
 
 	starttime = millis();					// store the start time
 	starttime_SDS = millis();
-	
-	tickerOSWatch.attach_ms(((OSWATCH_RESET_TIME / 3) * 1000), osWatch); // setup watchdog
 }
 
 /*****************************************************************
@@ -2107,6 +2005,7 @@ void loop() {
 				sum_send_time += micros() - start_send;
 			}
 		}
+
 		if (gps_read) {
 			data += result_GPS;
 			data_4_dusti  = data_first_part + result_GPS;
@@ -2135,13 +2034,6 @@ void loop() {
 		data += "]}";
 
 		//sending to api(s)
-
-		if (config_needs_write) {
-			writeConfig();
-			create_basic_auth_strings();
-		}
-		server.handleClient();
-		yield();
 
 		if ((act_milli-last_update_attempt) > pause_between_update_attempts) {
 			will_check_for_update = true;
@@ -2187,8 +2079,6 @@ void loop() {
 			autoUpdate();
 		}
 
-		timeClient->update();						// NTP updates are allowed no-more than every 60-seconds and the 'display_time' function independently updates the seconds
-
 		if (! send_failed) sending_time = (4 * sending_time + sum_send_time) / 5;
 		debug_out(F("Time for sending data: "),DEBUG_MIN_INFO,0);
 		debug_out(String(sending_time),DEBUG_MIN_INFO,1);
@@ -2213,10 +2103,7 @@ void loop() {
 			debug_out("",DEBUG_MIN_INFO,1);
 		}
 	}
-	if (config_needs_write) {
-		writeConfig();
-		create_basic_auth_strings();
-	}
+	if (config_needs_write) { writeConfig(); create_basic_auth_strings(); }
 	server.handleClient();
 	yield();
 }

@@ -20,11 +20,11 @@ input[type='password']{width:100%;}\
 <h3 style='min-height:100px;'><a href='/' style='background:none;width:0;'><img src='/luftdaten_logo.svg' style='float:left;margin-right:20px'/></a>{t} Feinstaubsensor CHIPID</h3>\
 ";
 
-const char WEB_PAGE_FOOTER[] PROGMEM = "<br/><br/><img src='/cfg_logo.svg' style='width:200px;max-width:50%;'/>\
+const char WEB_PAGE_FOOTER[] PROGMEM = "<br/><br/><a href='http://codefor.de/' target='_blank' style='display:inline;background:none;width:0px;'><img src='/cfg_logo.svg' style='width:200px;max-width:50%;'/></a>\
 </body></html>\r\n";
 
 const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a href='/values'>aktuelle Werte</a><br/>\
-<a href='http://opendata-stuttgart.github.io/feinstaub-map/'>Karte der aktiven Sensoren</a><br/>\
+<a href='http://opendata-stuttgart.github.io/feinstaub-map/' target='_blank'>Karte der aktiven Sensoren</a><br/>\
 <a href='/config'>Konfiguration</a><br/>\
 <a href='/removeConfig'>Konfiguration löschen</a><br/>\
 <table style='width:100%;'>\
