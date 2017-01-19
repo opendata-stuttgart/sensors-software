@@ -39,6 +39,8 @@ const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a href='/values'>aktuelle Werte</
 </table>\
 ";
 
+const char WEB_CONFIG_SCRIPT[] PROGMEM = "<script>function setSSID(ssid){document.getElementById('wlanssid').value=ssid.innerText||ssid.textContent;document.getElementById('wlanpwd').focus();}</script>";
+
 const char WEB_REMOVE_CONFIG_CONTENT[] PROGMEM = "<h3>Konfiguration wirklich löschen?</h3>\
 <table><tr><td><a href='/removeConfig?confirm=yes'>Löschen</a></td><td><a href='/'>Abbrechen</a></td></tr></table>\
 ";

@@ -57,7 +57,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-041"
+#define SOFTWARE_VERSION "NRZ-2016-042"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -478,7 +478,6 @@ String SDS_version_date() {
 
 	debug_out(F("Start reading SDS011 version date"),DEBUG_MED_INFO,1);
 
-//	serialSDS.write(start_SDS_cmd,sizeof(start_SDS_cmd)); is_SDS_running = true;
 	start_SDS();
 
 	delay(100);
@@ -695,13 +694,13 @@ void create_basic_auth_strings() {
 /* html helper functions                                         *
 /*****************************************************************/
 String form_input(const String& name, const String& info, const String& value, const int length) {
-	String s = F("<tr><td>{i} </td><td style='width:90%;'><input type='text' name='{n}' placeholder='{i}' value='{v}' maxlength='{l}'/></td></tr>");
+	String s = F("<tr><td>{i} </td><td style='width:90%;'><input type='text' name='{n}' id='{n}' placeholder='{i}' value='{v}' maxlength='{l}'/></td></tr>");
 	s.replace("{i}",info);s.replace("{n}",name);s.replace("{v}",value);s.replace("{l}",String(length));
 	return s;
 }
 
 String form_password(const String& name, const String& info, const String& value, const int length) {
-	String s = F("<tr><td>{i} </td><td style='width:90%;'><input type='password' name='{n}' placeholder='{i}' value='{v}' maxlength='{l}'/></td></tr>");
+	String s = F("<tr><td>{i} </td><td style='width:90%;'><input type='password' name='{n}' id='{n}' placeholder='{i}' value='{v}' maxlength='{l}'/></td></tr>");
 	s.replace("{i}",info);s.replace("{n}",name);s.replace("{v}",value);s.replace("{l}",String(length));
 	return s;
 }
@@ -716,6 +715,16 @@ String form_checkbox(const String& name, const String& info, const bool checked)
 String table_row_from_value(const String& name, const String& value) {
 	String s = F("<tr><td>{n}</td><td style='width:80%;'>{v}</td></tr>");
 	s.replace("{n}",name);s.replace("{v}",value);
+	return s;
+}
+
+String wlan_ssid_to_table_row(const String& ssid, const String& encryption, const long rssi) {
+	long rssi_temp = rssi;
+	if (rssi_temp > -50) {rssi_temp = -50; }
+	if (rssi_temp < -100) {rssi_temp = -100; }
+	int quality = (rssi_temp+100)*2;
+	String s = F("<tr><td><a href='#wlanpwd' onclick='setSSID(this)' style='background:none;color:blue;padding:5px;display:inline;'>{n}</a>&nbsp;{e}</a></td><td style='width:80%;vertical-align:middle;'>{v}%</td></tr>");
+	s.replace("{n}",ssid);s.replace("{e}",encryption);s.replace("{v}",String(quality));
 	return s;
 }
 
@@ -743,11 +752,53 @@ void webserver_config() {
 
 	debug_out(F("output config page ..."),DEBUG_MIN_INFO,1);
 	page_content += FPSTR(WEB_PAGE_HEADER);
+	page_content += FPSTR(WEB_CONFIG_SCRIPT);
 	if ((!server.hasArg("submit")) || (server.arg("submit") != "Speichern")) {
 		page_content.replace("{t}",F("Konfiguration"));
 		page_content.replace("CHIPID",esp_chipid);
 		page_content += F("<form method='POST' action='/config' style='width: 100%;'>");
-		page_content += F("<b>WLAN Daten</b><br/><table>");
+		page_content += F("<b>WLAN Daten</b><br/>");
+		if (WiFi.status() != WL_CONNECTED) {  // scan for wlan ssids
+			WiFi.disconnect();
+			debug_out(F("scan for wifi networks..."),DEBUG_MIN_INFO,1);
+			int n = WiFi.scanNetworks();
+			debug_out(F("wifi networks found: "),DEBUG_MIN_INFO,0);
+			debug_out(String(n),DEBUG_MIN_INFO,1);
+			if (n == 0) {
+				page_content += F("<br/>Kein WLAN gefunden<br/>");
+			} else {
+				page_content += F("<br/>Netzwerke gefunden: ");
+				page_content += String(n);
+				page_content += F("<br/>");
+				int indices[n];
+				for (int i = 0; i < n; i++) { indices[i] = i; }
+				for (int i = 0; i < n; i++) {
+					for (int j = i + 1; j < n; j++) {
+						if (WiFi.RSSI(indices[j]) > WiFi.RSSI(indices[i])) {
+							std::swap(indices[i], indices[j]);
+						}
+					}
+				}
+				String cssid;
+				for (int i = 0; i < n; i++) {
+					if (indices[i] == -1) continue;
+						cssid = WiFi.SSID(indices[i]);
+						for (int j = i + 1; j < n; j++) {
+							if (cssid == WiFi.SSID(indices[j])) {
+							indices[j] = -1; // set dup aps to index -1
+						}
+					}
+				}
+				page_content += F("<br/><table>");
+				for (int i = 0; i < n; ++i) {
+					if (indices[i] == -1) continue;
+					// Print SSID and RSSI for each network found
+					page_content += wlan_ssid_to_table_row(WiFi.SSID(indices[i]),((WiFi.encryptionType(indices[i]) == ENC_TYPE_NONE)?" ":"*"),WiFi.RSSI(indices[i]));
+				}
+				page_content += F("</table><br/><br/>");
+			}
+		}
+		page_content += F("<table>");
 		page_content += form_input(F("wlanssid"),F("WLAN"),wlanssid,32);
 		page_content += form_password(F("wlanpwd"),F("Passwort"),wlanpwd,32);
 		page_content += F("</table><br/><input type='submit' name='submit' value='Speichern'/><br/><br/><b>APIs</b><br/>");
@@ -1012,10 +1063,6 @@ void setup_webserver() {
 	debug_out(F("Starte Webserver... "),DEBUG_MIN_INFO,0);
 	debug_out(IPAddress2String(WiFi.localIP()),DEBUG_MIN_INFO,1);
 	server.begin();
-
-	if (MDNS.begin(server_name.c_str())) {
-		MDNS.addService("http", "tcp", 80);
-	}
 }
 
 /*****************************************************************
@@ -1841,6 +1888,10 @@ void setup() {
 #else
 	data_first_part.replace("FEATHERCHIPID", "");
 #endif
+
+	if (MDNS.begin(server_name.c_str())) {
+		MDNS.addService("http", "tcp", 80);
+	}
 
 	starttime = millis();					// store the start time
 	starttime_SDS = millis();
