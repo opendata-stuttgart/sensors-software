@@ -27,6 +27,7 @@ const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a href='/values'>aktuelle Werte</
 <a href='http://opendata-stuttgart.github.io/feinstaub-map/' target='_blank'>Karte der aktiven Sensoren</a><br/>\
 <a href='/config'>Konfiguration</a><br/>\
 <a href='/removeConfig'>Konfiguration löschen</a><br/>\
+<a href='/reset'>Sensor neu starten (Reset)</a><br/>\
 <table style='width:100%;'>\
 <tr><td style='width:33%;'><a href='/debug?level=0'>Debug null</a></td>\
 <td style='width:33%;'><a href='/debug?level=1'>Debug Error</a></td>\
@@ -46,7 +47,7 @@ const char WEB_REMOVE_CONFIG_CONTENT[] PROGMEM = "<h3>Konfiguration wirklich lö
 ";
 
 const char WEB_RESET_CONTENT[] PROGMEM = "<h3>Wirklich neu starten?</h3>\
-<table><tr><td><a href='/removeConfig?confirm=yes'>Löschen</a></td><td><a href='/'>Abbrechen</a></td></tr></table>\
+<table><tr><td><a href='/reset?confirm=yes'>Neu starten</a></td><td><a href='/'>Abbrechen</a></td></tr></table>\
 ";
 
 const char LUFTDATEN_INFO_LOGO_SVG[] PROGMEM = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\

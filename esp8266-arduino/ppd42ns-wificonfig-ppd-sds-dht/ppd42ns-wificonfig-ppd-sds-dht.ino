@@ -57,7 +57,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-042"
+#define SOFTWARE_VERSION "NRZ-2016-046"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -799,8 +799,8 @@ void webserver_config() {
 			}
 		}
 		page_content += F("<table>");
-		page_content += form_input(F("wlanssid"),F("WLAN"),wlanssid,32);
-		page_content += form_password(F("wlanpwd"),F("Passwort"),wlanpwd,32);
+		page_content += form_input(F("wlanssid"),F("WLAN"),wlanssid,64);
+		page_content += form_password(F("wlanpwd"),F("Passwort"),wlanpwd,64);
 		page_content += F("</table><br/><input type='submit' name='submit' value='Speichern'/><br/><br/><b>APIs</b><br/>");
 		page_content += form_checkbox(F("send2dusti"),F("API Luftdaten.info"),send2dusti);
 		page_content += form_checkbox(F("send2madavi"),F("API Madavi.de"),send2madavi);
@@ -1089,9 +1089,9 @@ void wifiConfig() {
 	dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
 	dnsServer.start(DNS_PORT, "*", apIP);
 
-	// 5 minutes timeout for wifi config
+	// 10 minutes timeout for wifi config
 	last_page_load = millis();
-	while (((millis() - last_page_load) < 300000) && (! config_needs_write)) {
+	while (((millis() - last_page_load) < 600000) && (! config_needs_write)) {
 		dnsServer.processNextRequest();
 		server.handleClient();
 		yield();
@@ -1420,23 +1420,31 @@ void send_csv(const String& data) {
 /*****************************************************************/
 String sensorDHT() {
 	String s = "";
-	float h = dht.readHumidity(); //Read Humidity
-	float t = dht.readTemperature(); //Read Temperature
+	int i = 0;
+	float h;
+	float t;
 
 	debug_out(F("Start reading DHT11/22"),DEBUG_MED_INFO,1);
 
 	// Check if valid number if non NaN (not a number) will be send.
-	if (isnan(t) || isnan(h)) {
-		debug_out(F("DHT22 couldn't be read"),DEBUG_ERROR,1);
-	} else {
-		debug_out(F("Humidity    : "),DEBUG_MIN_INFO,0);
-		debug_out(String(h)+"%",DEBUG_MIN_INFO,1);
-		debug_out(F("Temperature : "),DEBUG_MIN_INFO,0);
-		debug_out(String(t)+" C",DEBUG_MIN_INFO,1);
-		last_value_DHT_T = Float2String(t);
-		last_value_DHT_H = Float2String(h);
-		s += Value2Json(F("temperature"),last_value_DHT_T);
-		s += Value2Json(F("humidity"),last_value_DHT_H);
+
+	while ((i++ < 10) && (s == "")) {
+		dht.begin();
+		h = dht.readHumidity(true); //Read Humidity
+		t = dht.readTemperature(false,true); //Read Temperature
+		if (isnan(t) || isnan(h)) {
+			debug_out(F("DHT22 couldn't be read"),DEBUG_ERROR,1);
+			delay(50);
+		} else {
+			debug_out(F("Humidity    : "),DEBUG_MIN_INFO,0);
+			debug_out(String(h)+"%",DEBUG_MIN_INFO,1);
+			debug_out(F("Temperature : "),DEBUG_MIN_INFO,0);
+			debug_out(String(t)+" C",DEBUG_MIN_INFO,1);
+			last_value_DHT_T = Float2String(t);
+			last_value_DHT_H = Float2String(h);
+			s += Value2Json(F("temperature"),last_value_DHT_T);
+			s += Value2Json(F("humidity"),last_value_DHT_H);
+		}
 	}
 	debug_out(F("------"),DEBUG_MIN_INFO,1);
 
@@ -2124,6 +2132,10 @@ void loop() {
 		if (send2csv) {
 			debug_out(F("## Sending as csv: "),DEBUG_MIN_INFO,1);
 			send_csv(data);
+		}
+
+		if ((act_milli-last_update_attempt) > (28 * pause_between_update_attempts)) {
+			ESP.restart();
 		}
 
 		if ((act_milli-last_update_attempt) > pause_between_update_attempts) {
