@@ -4,16 +4,6 @@ temperature sensors for shackspace, powered over selfmade PoE
 
 ## dht22-wifi
 
-## gps
-
-## i2scan
-
-i2c scanner for esp8266
-
-## minimal
-
-minimal arduino sketch
-
 ## mma7455
 
 working code for gravity sensor
@@ -24,14 +14,20 @@ working code for gravity sensor
 
 ## pintester
 
-## ppd42ns
-
-## ppd42ns-wifi-dht
-
-## ppd42ns-wifi-dht-mqtt
-
 ## ppd42ns-wificonfig-ppd-sds-dht
 
 maintained version, includes config over wifi, code for sensors ppd42ns, sds011, dht11/22, bmp160 and oled display
 
 ## restapi-test
+
+## sensordev  
+
+## setrgbledbyphoto  
+  
+## archive  
+- i2scan (i2c scanner for esp8266)
+- minimal (minimal arduino sketch)
+- ppd42ns
+- ppd42ns-wifi-dht
+- ppd42ns-wifi-dht-mqtt
+

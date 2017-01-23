@@ -6,22 +6,27 @@
 #define SEND2DUSTI 1
 #define SEND2MADAVI 1
 #define SEND2MQTT 0
+#define SEND2INFLUXDB 0
 #define SEND2LORA 0
 #define SEND2CSV 0
 #define SEND2CUSTOM 0
+
+// NTP Server
+#define NTP_SERVER "0.europe.pool.ntp.org"
 
 // Definition eigene API
 #define HOST_CUSTOM "192.168.234.1"
 #define URL_CUSTOM "/data.php"
 #define HTTPPORT_CUSTOM 80
+#define USER_CUSTOM ""
+#define PWD_CUSTOM ""
 
-// MQTT Definitionen (noch nicht genutzt)
-#define HOST_MQTT "mqtt.opensensors.io"
-#define MQTT_PORT 1883
-#define MQTT_USER ""
-#define MQTT_PWD ""
-#define MQTT_CLIENT_ID ""
-#define MQTT_TOPIC ""
+// Definition eigene InfluxDB
+#define HOST_INFLUXDB "api.luftdaten.info"
+#define URL_INFLUXDB "/write?db=luftdaten"
+#define HTTPPORT_INFLUXDB 8086
+#define USER_INFLUXDB "luftdaten"
+#define PWD_INFLUXDB "info"
 
 // DHT22, Sensor Temperatur und Luftfeuchte
 #define DHT_READ 1
@@ -46,6 +51,10 @@
 #define SDS_READ 1
 #define SDS_API_PIN 1
 #if defined(ESP8266)
+// Serial confusion: These definitions are based on SoftSerial
+// TX (transmitting) pin on one side goes to RX (receiving) pin on other side
+// SoftSerial RX PIN is D1 and goes to SDS TX
+// SoftSerial TX PIN is D2 and goes to SDS RX
 #define SDS_PIN_RX D1
 #define SDS_PIN_TX D2
 #endif
@@ -62,8 +71,8 @@
 #define GPS_READ 0
 #define GPS_API_PIN 9
 #if defined(ESP8266)
-#define GPS_PIN_RX D1
-#define GPS_PIN_TX D2
+#define GPS_PIN_RX D5
+#define GPS_PIN_TX D6
 #endif
 
 // Automatische Firmware-Updates über WLAN

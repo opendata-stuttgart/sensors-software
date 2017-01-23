@@ -51,9 +51,10 @@ ESP8266WebServer
 DNSServer  
   
 Installierbar über Arduino IDE (Menü Sketch -> Bibliothek einbinden -> Bibliotheken verwalten, in Klammern die getestete Version):  
+ArduinoJson <https://github.com/bblanchon/ArduinoJson> (5.7.3)  
+Adafruit Unified Sensor <https://github.com/adafruit/Adafruit_Sensor> (1.0.2)  
 Adafruit BMP085 library <https://github.com/adafruit/Adafruit-BMP085-Library> (1.0.0)  
-ArduinoJson <https://github.com/bblanchon/ArduinoJson> (5.6.4)  
-DHT sensor library <https://github.com/adafruit/DHT-sensor-library> (1.2.3)  
+DHT sensor library <https://github.com/adafruit/DHT-sensor-library> (1.3.0)  
 ESP8266 Oled driver for SSD1306 display <https://github.com/squix78/esp8266-oled-ssd1306> (3.2.3)  
 ESP8266httpUpdate (1.1.0)  
 PubSubClient <http://pubsubclient.knolleary.net/> (2.6.0)  
@@ -122,6 +123,7 @@ ArduinoJson <https://github.com/bblanchon/ArduinoJson> (5.6.4)
 DHT sensor library <https://github.com/adafruit/DHT-sensor-library> (1.2.3)  
 PubSubClient <http://pubsubclient.knolleary.net/> (2.6.0)  
 SoftwareSerial <https://github.com/plerup/espsoftwareserial> (1.0.0)  
+NTPClient <https://github.com/arduino-libraries/NTPClient> (3.1.0)  
   
 Manuell zu installieren:  
 RadioHead Packet Radio library <http://www.airspayce.com/mikem/arduino/RadioHead/> (1.6.1), Link zum Download des Ziparchivs im 2. Abschnitt  
