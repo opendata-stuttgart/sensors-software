@@ -1,15 +1,19 @@
 ## readdata inputs data sets + preprocesses, saves objects as RData
+## appends data from csv to datafilename (.RData), if filename is given
 
+readairdata<-function(csvfilename,datafilename=NULL){
 # data filename
 # filename should match this scripts filename, to be able to use makefile (update only if)
-d.f="readdata.RData"
-
-if(file.exists(d.f)){
+if (!is.null(datafilename)){
+  if(file.exists(datafilename)){
     # read that file
-    print(paste("loading",d.f))
-    load(d.f)
-}else{ # read from source and preprocess, then save
-    print(paste("creating",d.f))
+    print(paste("loading",datafilename))
+    load(datafilename)
+  }else{ # fail to find file
+	  warn(paste("readairdata - file not found:",datafilename))
+	  return
+	  }
+}
 
     # get data from
     # https://paste.madflex.de/d9rcQxUT#particlesdata.csv
@@ -17,13 +21,13 @@ if(file.exists(d.f)){
     # sed -i -e '/\r.\+/d;/ovf/d;' data/particlesdata.csv
 
     # try particlesdata, then sampledata
-    data.csv.filename="data/particlesdata.csv"
+    data.csv.filename=csvfilename
     if (file.exists(data.csv.filename)){
-        dat <- read.csv(data.csv.filename,dec=".", sep=",", na.strings=c("","NA"))
+        airdat <- read.csv(data.csv.filename,dec=".", sep=",", na.strings=c("","NA"))
     }else{
         warning(paste("datafile ",data.csv.filename," not found, using sampledata"))
         data.csv.filename="data/sampledata.csv"
-        dat <- read.csv(data.csv.filename,dec=".", sep=",", na.strings=c("","NA"))
+        airdat <- read.csv(data.csv.filename,dec=".", sep=",", na.strings=c("","NA"))
     }
     #ppd <- filter(dat, type=="PPD42NS")
     #
@@ -33,7 +37,7 @@ if(file.exists(d.f)){
     #     mutate(timestamp2 = regexpr(pattern, timestamp)) %>%
     #     mutate(timestamp2 = regmatches(timestamp, timestamp2)) %>%
     #     mutate(timestamp2=ymd_hms(timestamp2))
-    dat$timestamp2<-as.POSIXct(strptime(dat$timestamp,format="%Y-%m-%d %H:%M:%S"))
+    airdat$timestamp2<-as.POSIXct(strptime(airdat$timestamp,format="%Y-%m-%d %H:%M:%S"))
     # dat$timestamp2<-strptime(dat$timestamp,format="%d.%m.%y %H:%M:%S+%Z")
 
     # str(dat)
@@ -75,7 +79,9 @@ if(file.exists(d.f)){
 #     ## dust_density should be numeric
 #     dat$dust_density_num=as.numeric(as.character(dat$dust_density))
 
-
+if(!is.null(datafilename)){
     # save all stuff currently in workspace
-    save(list=ls(all.names = TRUE),file=d.f)
-} # end else
+    save(airdat,file=datafilename)
+}
+return(airdat)
+}

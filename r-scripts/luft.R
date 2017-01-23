@@ -18,6 +18,8 @@ installrequire(c("lubridate","dplyr","ggplot2"))
 # script to read+preprocess (Makefile friendly)
 # loads dataframe dat
 source("readdata.R")
+stop("readddata.R dysfct/not existent/moved to readairdat, stopping here...")
+
 
 ## Plots, to pdf
 # pdf("plots.pdf")

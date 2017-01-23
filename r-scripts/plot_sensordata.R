@@ -6,6 +6,8 @@ require("plotly")
 # require("tsoutliers")
 # require("zoo")
 
+# TODO: use https://stat.ethz.ch/R-manual/R-devel/library/stats/html/decompose.html
+
 usearchive=TRUE # csv data from archive
 sensorid=40
 usearchive=FALSE # timestamp needs fixing (in csv and conversion below)
@@ -78,6 +80,7 @@ if(usearchive){
     # only read files newer than arcdat_filename
     adddat<-NULL
     if(!is.null(arcdat)){addata<-arcdat[0,]}
+    # read files newer than saved .RData file
     newdat=FALSE
     for (csvfilename in filelist[file.mtime(filelist)>arcdat_filename_mtime]){
             print(paste("reading ", csvfilename))
