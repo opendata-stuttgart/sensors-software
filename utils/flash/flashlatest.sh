@@ -40,7 +40,7 @@ fi
 
 
 if [ ! -f "$outappendfile" ] ; then
-	echo "sensorID	sensorname	hexchipID	MAC	revision:serial	email	lat	lon	locationaddress	sensorID1	sensorname1	sensorID2	sensorname2" >> "$outappendfile"
+	echo "nodemcuID	sensorname	hexchipID	MAC	revision:serial	email	lat	lon	locationaddress	sensorID1	sensorname1	sensorID2	sensorname2" >> "$outappendfile"
 fi
 
 # get info
@@ -57,16 +57,16 @@ echo ""
 read -p "ask more infos? [Y/n]" ans
 
 if [ "$ans" != "n" ] ; then
-	examplestr="V0-000"
-	read -p "PM sensor revision (on back/flat side top left corner)? [default: $examplestr]" ans
-	if [ -n "$ans" ] ; then
-		srevision="$ans"
-	fi
-	examplestr="0000-0000"
-	read -p "PM sensor serial number (SN on sticker, besides fan, below barcode)? [default: $examplestr]" ans
-	if [ -n "$ans" ] ; then
-		sserial="$ans"
-	fi
+	#examplestr="V0-000"
+	#read -p "PM sensor revision (on back/flat side top left corner)? [default: $examplestr]" ans
+	#if [ -n "$ans" ] ; then
+#		srevision="$ans"
+	#fi
+	#examplestr="0000-0000"
+	#read -p "PM sensor serial number (SN on sticker, besides fan, below barcode)? [default: $examplestr]" ans
+	#if [ -n "$ans" ] ; then
+#		sserial="$ans"
+	#fi
 
 	examplestr="70000 Stuttgart, Staubweg 00"
 	read -p "Adress?  [like: $examplestr]" ans

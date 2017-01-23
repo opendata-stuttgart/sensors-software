@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# name this file mailconfig.sh to set your parameters for infomail.sh
+
+export sender=""
+export smtpserver="mail.example.com:587"
+#export lfile="testlist.csv"
+
+
