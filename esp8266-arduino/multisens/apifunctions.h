@@ -1,8 +1,9 @@
 #ifndef APIFUNCTIONS_H
 #define APIFUNCTIONS_H
 // #include <ESP8266WiFi.h>
+
 /**********************************************/
-/* WiFi connecting script
+/* MAC adresses
 /**********************************************/
 
 void PrintMacAddress(void) {
@@ -38,6 +39,9 @@ void PrintMacAddress(void) {
 #endif //WIRELESS_ACTIVE
 }
 
+/*****************************************************************
+/* WiFi auto connecting script                                   *
+/*****************************************************************/
 void connectWifi() {
 #ifdef WIRELESS_ACTIVE
   if (WiFi.status() == WL_CONNECTED){
@@ -84,6 +88,7 @@ void connectWifi() {
   //WiFi.printDiag(Serial);
 #endif
 }
+
 
 /**********************************************/
 /* send data to rest api
@@ -173,5 +178,7 @@ String Float2String(float value)
   s.trim();
   return s;
 }
+
+
 
 #endif // APIFUNCTIONS_H

@@ -5,44 +5,65 @@ void setup_serial(const unsigned int baudrate = 9600){
   delay(10);
 }
 
-// 
-void serial_out(String msg, unsigned int level=1){
+void serial_out(String msg, unsigned int level=1,boolean newline=false){
   if (level<=verbosity){return;}
   Serial.print(String("")+msg);
+  if(newline){Serial.println("");}
 }
+/*
 void serial_outln(String msg, unsigned int level=1){
   if (level<=verbosity){return;}
   Serial.println(String("")+msg);
 }
-
-void serial_out(long msg, unsigned int level=1){
+*/
+void serial_out(long msg, unsigned int level=1,boolean newline=false){
   if (level<=verbosity){return;}
   Serial.print(msg);
+  if(newline){Serial.println("");}
 }
+/*
+void serial_out(int32_t msg, unsigned int level=1,boolean newline=false){
+  if (level<=verbosity){return;}
+  Serial.print(msg);
+  if(newline){Serial.println("");}
+ 
+}
+*/
+/*
 void serial_outln(long msg, unsigned int level=1){
   if (level<=verbosity){return;}
   Serial.println(msg);
 }
-
-void serial_out(unsigned long msg, unsigned int level=1){
+*/
+void serial_out(unsigned long msg, unsigned int level=1,boolean newline=false){
   if (level<=verbosity){return;}
   Serial.print(msg);
+  if(newline){Serial.println("");}
 }
+void serial_out(double msg, unsigned int level=1,boolean newline=false){
+  if (level<=verbosity){return;}
+  Serial.print(msg);
+  if(newline){Serial.println("");}
+}
+/*
 void serial_outln(unsigned long msg, unsigned int level=1){
   if (level<=verbosity){return;}
   Serial.println(msg);
 }
+*/
 
-// print uint8_t as int 
-void serial_out(uint8_t msg, unsigned int level=1){
+// print uint8_t as int
+void serial_out(uint8_t msg, unsigned int level=1,boolean newline=false){
   if (level<=verbosity){return;}
   Serial.print(int(msg));
+  if(newline){Serial.println("");}
 }
+/*
 void serial_outln(uint8_t msg, unsigned int level=1){
   if (level<=verbosity){return;}
   Serial.println(int(msg));
 }
-
+*
 
 void serial_out(float msg, unsigned int level=1){
   if (level<=verbosity){return;}
@@ -112,3 +133,18 @@ String config_info(){
   return(info);
 }
 */
+
+
+/*****************************************************************
+/* Debug output                                                  *
+/*****************************************************************/
+void debug_out(const String& text, int level, bool linebreak) {
+    if (level <= debug) {
+        if (linebreak) {
+            Serial.println(text);
+        } else {
+            Serial.print(text);
+        }
+    }
+}
+

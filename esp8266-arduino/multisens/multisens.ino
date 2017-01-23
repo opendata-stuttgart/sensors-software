@@ -11,6 +11,7 @@
 /* PINs and WIFI in sensorconfig.h            */
 /**********************************************/
 #include "sensorconfig.h"
+unsigned int  debug = verbosity;
 String software_version = String(SOFTWARE_VERSION_INITIALS)+String("_")+String(SOFTWARE_VERSION_NUMBER);
 
 #ifdef WIRELESS_ACTIVE
@@ -109,6 +110,7 @@ String lowpulseoccupancyP2s;
 #ifdef DEBUG_CYCLES
 unsigned long cycount = 0;
 #endif // DEBUG_CYCLES
+
 
 /**********************************************/
 /* The Setup
