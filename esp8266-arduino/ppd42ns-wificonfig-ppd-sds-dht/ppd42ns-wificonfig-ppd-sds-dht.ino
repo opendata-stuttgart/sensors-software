@@ -1209,6 +1209,10 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 			return;
 		}
 
+    if (LED_SENDDATA) {
+      digitalWrite(LED_PIN, LED_ON);
+    }
+
 		debug_out(F("Requesting URL: "),DEBUG_MIN_INFO,0);
 		debug_out(url,DEBUG_MIN_INFO,1);
 		debug_out(esp_chipid,DEBUG_MIN_INFO,1);
@@ -1227,6 +1231,10 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 			char c = client_s.read();
 			debug_out(String(c),DEBUG_MAX_INFO,0);
 		}
+
+    if (LED_SENDDATA) {
+      digitalWrite(LED_PIN, LED_OFF);
+    }
 
 		debug_out(F("\nclosing connection\n------\n\n"),DEBUG_MIN_INFO,1);
 
@@ -1903,6 +1911,12 @@ void setup() {
 
 	starttime = millis();					// store the start time
 	starttime_SDS = millis();
+
+  if (LED_SENDDATA) {
+    pinMode(LED_PIN, OUTPUT);
+    digitalWrite(LED_PIN, LED_OFF); 
+
+  }
 }
 
 /*****************************************************************
