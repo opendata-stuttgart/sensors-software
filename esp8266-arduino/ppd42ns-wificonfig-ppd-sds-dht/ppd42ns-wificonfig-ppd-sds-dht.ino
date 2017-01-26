@@ -739,6 +739,7 @@ void webserver_root() {
 	page_content.replace("{t}",F("Übersicht"));
 	page_content.replace("CHIPID",esp_chipid);
 	page_content += FPSTR(WEB_ROOT_PAGE_CONTENT);
+  page_content.replace("SOFTWARE_VERSION",SOFTWARE_VERSION);
 	page_content += FPSTR(WEB_PAGE_FOOTER);
 	server.send(200,FPSTR(TXT_CONTENT_TYPE_TEXT_HTML),page_content);
 }
