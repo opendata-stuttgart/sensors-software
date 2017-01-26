@@ -739,6 +739,7 @@ void webserver_root() {
 	page_content.replace("{t}",F("Übersicht"));
 	page_content.replace("CHIPID",esp_chipid);
 	page_content += FPSTR(WEB_ROOT_PAGE_CONTENT);
+  page_content.replace("SOFTWARE_VERSION",SOFTWARE_VERSION);
 	page_content += FPSTR(WEB_PAGE_FOOTER);
 	server.send(200,FPSTR(TXT_CONTENT_TYPE_TEXT_HTML),page_content);
 }
@@ -1209,6 +1210,10 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 			return;
 		}
 
+    if (LED_SENDDATA) {
+      digitalWrite(LED_PIN, LED_ON);
+    }
+
 		debug_out(F("Requesting URL: "),DEBUG_MIN_INFO,0);
 		debug_out(url,DEBUG_MIN_INFO,1);
 		debug_out(esp_chipid,DEBUG_MIN_INFO,1);
@@ -1227,6 +1232,10 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 			char c = client_s.read();
 			debug_out(String(c),DEBUG_MAX_INFO,0);
 		}
+
+    if (LED_SENDDATA) {
+      digitalWrite(LED_PIN, LED_OFF);
+    }
 
 		debug_out(F("\nclosing connection\n------\n\n"),DEBUG_MIN_INFO,1);
 
@@ -1907,6 +1916,12 @@ void setup() {
 
 	starttime = millis();					// store the start time
 	starttime_SDS = millis();
+
+  if (LED_SENDDATA) {
+    pinMode(LED_PIN, OUTPUT);
+    digitalWrite(LED_PIN, LED_OFF); 
+
+  }
 }
 
 /*****************************************************************

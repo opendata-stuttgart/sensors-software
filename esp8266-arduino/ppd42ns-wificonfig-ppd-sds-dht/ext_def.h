@@ -116,3 +116,13 @@
 #define CLIENT_ADDRESS 2
 #define SERVER_ADDRESS 100
 #endif
+
+// Definition for LED
+#define LED_SENDDATA 1 //toggle LED during DATA
+#define LED_PIN LED_BUILTIN // default: use LED_BUILTIN
+#define LED_ON HIGH// default
+#define LED_OFF LOW // default
+#if defined(ESP8266)
+	#define LED_ON LOW // usual for NodeMCU
+	#define LED_OFF HIGH // usual für NodeMCU
+#endif
