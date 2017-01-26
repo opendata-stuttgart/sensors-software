@@ -57,7 +57,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-046"
+#define SOFTWARE_VERSION "NRZ-2016-047"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -1428,13 +1428,17 @@ String sensorDHT() {
 
 	// Check if valid number if non NaN (not a number) will be send.
 
-	while ((i++ < 10) && (s == "")) {
-		dht.begin();
-		h = dht.readHumidity(true); //Read Humidity
-		t = dht.readTemperature(false,true); //Read Temperature
+	while ((i++ < 5) && (s == "")) {
+//		dht.begin();
+		h = dht.readHumidity(); //Read Humidity
+		t = dht.readTemperature(); //Read Temperature
+		if (isnan(t) || isnan(h)) {
+			delay(100);
+			h = dht.readHumidity(true); //Read Humidity
+			t = dht.readTemperature(false,true); //Read Temperature
+		}
 		if (isnan(t) || isnan(h)) {
 			debug_out(F("DHT22 couldn't be read"),DEBUG_ERROR,1);
-			delay(50);
 		} else {
 			debug_out(F("Humidity    : "),DEBUG_MIN_INFO,0);
 			debug_out(String(h)+"%",DEBUG_MIN_INFO,1);
