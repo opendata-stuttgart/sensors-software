@@ -17,7 +17,7 @@ input[type='text']{width:100%;}\
 input[type='password']{width:100%;}\
 </style>\
 </head><body>\
-<h3 style='min-height:100px;'><a href='/' style='background:none;width:0;'><img src='/luftdaten_logo.svg' style='float:left;margin-right:20px'/></a>{t} Feinstaubsensor CHIPID</h3>\
+<h3 style='min-height:100px;'><a href='/' style='background:none;width:0;'><img src='/luftdaten_logo.svg' style='float:left;margin-right:20px'/></a>{t} Feinstaubsensor {id}<br/><small>Firmware {fw}</small></h3>\
 ";
 
 const char WEB_PAGE_FOOTER[] PROGMEM = "<br/><br/><a href='http://codefor.de/' target='_blank' style='display:inline;background:none;width:0px;'><img src='/cfg_logo.svg' style='width:200px;max-width:50%;'/></a>\

@@ -67,6 +67,14 @@
 #define BMP_PIN_SDA D3
 #endif
 
+// BME280, Luftdruck-Sensor
+#define BME280_READ 0
+#define BME280_API_PIN 11
+#if defined(ESP8266)
+#define BME280_PIN_SCL D4
+#define BME280_PIN_SDA D3
+#endif
+
 // GPS, bevorzugt Neo-6M
 #define GPS_READ 0
 #define GPS_API_PIN 9

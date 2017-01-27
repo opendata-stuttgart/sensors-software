@@ -3,6 +3,21 @@
 /*****************************************************************
 /* OK LAB Particulate Matter Sensor                              *
 /*      - nodemcu-LoLin board                                    *
+/*      - Nova SDS0111                                           *
+/*  ﻿http://inovafitness.com/en/Laser-PM2-5-Sensor-SDS011-35.html *
+/*                                                               *
+/* Wiring Instruction:                                           *
+/*      - SDS011 Pin 1  (TX)   -> Pin D1 / GPIO5                 *
+/*      - SDS011 Pin 2  (RX)   -> Pin D2 / GPIO4                 *
+/*      - SDS011 Pin 3  (GND)  -> GND                            *
+/*      - SDS011 Pin 4  (2.5m) -> unused                         *
+/*      - SDS011 Pin 5  (5V)   -> VU                             *
+/*      - SDS011 Pin 6  (1m)   -> unused                         *
+/*                                                               *
+/*****************************************************************
+/*                                                               *
+/* Alternative                                                   *
+/*      - nodemcu-LoLin board                                    *
 /*      - Shinyei PPD42NS                                        *
 /*      http://www.sca-shinyei.com/pdf/PPD42NS.pdf               *
 /*                                                               *
@@ -20,21 +35,6 @@
 /*      - PPD42NS Pin 5 (red)   => unused                        *
 /*                                                               *
 /*****************************************************************
-/*                                                               *
-/* Alternative                                                   *
-/*      - nodemcu-LoLin board                                    *
-/*      - Nova SDS0111                                           *
-/*  ﻿http://inovafitness.com/en/Laser-PM2-5-Sensor-SDS011-35.html *
-/*                                                               *
-/* Wiring Instruction:                                           *
-/*      - SDS011 Pin 1  (TX)   -> Pin D1 / GPIO5                 *
-/*      - SDS011 Pin 2  (RX)   -> Pin D2 / GPIO4                 *
-/*      - SDS011 Pin 3  (GND)  -> GND                            *
-/*      - SDS011 Pin 4  (2.5m) -> unused                         *
-/*      - SDS011 Pin 5  (5V)   -> VU                             *
-/*      - SDS011 Pin 6  (1m)   -> unused                         *
-/*                                                               *
-/*****************************************************************
 /* Extension: DHT22 (AM2303)                                     *
 /*  ﻿http://www.aosong.com/en/products/details.asp?id=117         *
 /*                                                               *
@@ -46,10 +46,11 @@
 /*      - DHT22 Pin 4 (GND)     -> Pin GND                       *
 /*                                                               *
 /*****************************************************************
-/* Extension: OLED Display with SSD1309                          *
+/* Extensions connected via I2C:                                 *
+/* BMP180, BME280, OLED Display with SSD1309                     *
 /*                                                               *
 /* Wiring Instruction                                            *
-/* (see labels on display)                                       *
+/* (see labels on display or sensor board)                       *
 /*      VCC       ->     Pin 3V3                                 *
 /*      GND       ->     Pin GND                                 *
 /*      SCL       ->     Pin D4 (GPIO2)                          *
@@ -57,7 +58,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-047"
+#define SOFTWARE_VERSION "NRZ-2016-048"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -102,6 +103,7 @@
 #include <Wire.h>
 #include <DHT.h>
 #include <Adafruit_BMP085.h>
+#include <Adafruit_BME280.h>
 #include <TinyGPS++.h>
 #include <Ticker.h>
 
@@ -120,6 +122,7 @@ bool dht_read = 1;
 bool ppd_read = 0;
 bool sds_read = 1;
 bool bmp_read = 0;
+bool bme280_read = 0;
 bool gps_read = 0;
 bool send2dusti = 1;
 bool send2madavi = 1;
@@ -197,6 +200,11 @@ DHT dht(DHT_PIN, DHT_TYPE);
 Adafruit_BMP085 bmp;
 
 /*****************************************************************
+/* BME280 declaration                                            *
+/*****************************************************************/
+Adafruit_BME280 bme280;
+
+/*****************************************************************
 /* GPS declaration                                               *
 /*****************************************************************/
 #if defined(ARDUINO_SAMD_ZERO) || defined(ESP8266)
@@ -261,6 +269,7 @@ String last_result_PPD = "";
 String last_result_SDS = "";
 String last_result_DHT = "";
 String last_result_BMP = "";
+String last_result_BME280 = "";
 String last_result_GPS = "";
 String last_value_PPD_P1 = "";
 String last_value_PPD_P2 = "";
@@ -270,6 +279,9 @@ String last_value_DHT_T = "";
 String last_value_DHT_H = "";
 String last_value_BMP_T = "";
 String last_value_BMP_P = ""; 
+String last_value_BME280_T = "";
+String last_value_BME280_H = ""; 
+String last_value_BME280_P = "";
 String last_data_string = "";
 
 String last_gps_lat;
@@ -532,6 +544,7 @@ void copyExtDef() {
 	if (PPD_READ != ppd_read) { ppd_read = PPD_READ; }
 	if (SDS_READ != sds_read) { sds_read = SDS_READ; }
 	if (BMP_READ != bmp_read) { bmp_read = BMP_READ; }
+	if (BME280_READ != bme280_read) { bme280_read = BME280_READ; }
 	if (GPS_READ != gps_read) { gps_read = GPS_READ; }
 	if (SEND2DUSTI != send2dusti) { send2dusti = SEND2DUSTI; }
 	if (SEND2MADAVI != send2madavi) { send2madavi = SEND2MADAVI; }
@@ -594,6 +607,7 @@ void readConfig() {
 					if (json.containsKey("ppd_read")) ppd_read = json["ppd_read"];
 					if (json.containsKey("sds_read")) sds_read = json["sds_read"];
 					if (json.containsKey("bmp_read")) bmp_read = json["bmp_read"];
+					if (json.containsKey("bme280_read")) bme280_read = json["bme280_read"];
 					if (json.containsKey("gps_read")) gps_read = json["gps_read"];
 					if (json.containsKey("send2dusti")) send2dusti = json["send2dusti"];
 					if (json.containsKey("send2madavi")) send2madavi = json["send2madavi"];
@@ -643,6 +657,7 @@ void writeConfig() {
 	json["ppd_read"] = ppd_read;
 	json["sds_read"] = sds_read;
 	json["bmp_read"] = bmp_read;
+	json["bme280_read"] = bme280_read;
 	json["gps_read"] = gps_read;
 	json["send2dusti"] = send2dusti;
 	json["send2madavi"] = send2madavi;
@@ -737,7 +752,8 @@ void webserver_root() {
 	debug_out(F("output root page..."),DEBUG_MIN_INFO,1);
 	page_content = FPSTR(WEB_PAGE_HEADER);
 	page_content.replace("{t}",F("Übersicht"));
-	page_content.replace("CHIPID",esp_chipid);
+	page_content.replace("{id}",esp_chipid);
+	page_content.replace("{fw}",SOFTWARE_VERSION);
 	page_content += FPSTR(WEB_ROOT_PAGE_CONTENT);
 	page_content += FPSTR(WEB_PAGE_FOOTER);
 	server.send(200,FPSTR(TXT_CONTENT_TYPE_TEXT_HTML),page_content);
@@ -752,10 +768,14 @@ void webserver_config() {
 
 	debug_out(F("output config page ..."),DEBUG_MIN_INFO,1);
 	page_content += FPSTR(WEB_PAGE_HEADER);
+	page_content.replace("{t}",F("Konfiguration"));
+	page_content.replace("{id}",esp_chipid);
+	page_content.replace("{fw}",SOFTWARE_VERSION);
 	page_content += FPSTR(WEB_CONFIG_SCRIPT);
 	if ((!server.hasArg("submit")) || (server.arg("submit") != "Speichern")) {
 		page_content.replace("{t}",F("Konfiguration"));
-		page_content.replace("CHIPID",esp_chipid);
+		page_content.replace("{id}",esp_chipid);
+		page_content.replace("{fw}",SOFTWARE_VERSION);
 		page_content += F("<form method='POST' action='/config' style='width: 100%;'>");
 		page_content += F("<b>WLAN Daten</b><br/>");
 		if (WiFi.status() != WL_CONNECTED) {  // scan for wlan ssids
@@ -809,6 +829,7 @@ void webserver_config() {
 		page_content += form_checkbox(F("dht_read"),F("DHT22 (Temp.,Luftfeuchte)"),dht_read);
 		page_content += form_checkbox(F("ppd_read"),F("PPD42NS"),ppd_read);
 		page_content += form_checkbox(F("bmp_read"),F("BMP180"),bmp_read);
+		page_content += form_checkbox(F("bme280_read"),F("BME280"),bme280_read);
 		page_content += form_checkbox(F("gps_read"),F("GPS (NEO 6M)"),gps_read);
 		page_content += F("<br/><b>Weitere Einstellungen</b><br/>");
 		page_content += form_checkbox(F("auto_update"),F("Auto Update"),auto_update);
@@ -834,8 +855,6 @@ void webserver_config() {
 		page_content += F("</table><br/>");
 		page_content += F("<br/><input type='submit' name='submit' value='Speichern'/></form>");
 	} else {
-		page_content.replace("{t}",F("Konfiguration"));
-		page_content.replace("CHIPID",esp_chipid);
 		if (server.hasArg("wlanssid") && server.arg("wlanssid") != "") {
 			server.arg("wlanssid").toCharArray(wlanssid,65);
 			if (server.hasArg("wlanpwd") && server.arg("wlanpwd") != "") {
@@ -848,6 +867,7 @@ void webserver_config() {
 		if (server.hasArg("sds_read") && server.arg("sds_read") == "1") { sds_read = 1; } else { sds_read = 0; }
 		if (server.hasArg("ppd_read") && server.arg("ppd_read") == "1") { ppd_read = 1; } else { ppd_read = 0; }
 		if (server.hasArg("bmp_read") && server.arg("bmp_read") == "1") { bmp_read = 1; } else { bmp_read = 0; }
+		if (server.hasArg("bme280_read") && server.arg("bme280_read") == "1") { bme280_read = 1; } else { bme280_read = 0; }
 		if (server.hasArg("gps_read") && server.arg("gps_read") == "1") { gps_read = 1; } else { gps_read = 0; }
 		if (server.hasArg("auto_update") && server.arg("auto_update") == "1") { auto_update = 1; } else { auto_update = 0; }
 		if (server.hasArg("has_display") && server.arg("has_display") == "1") { has_display = 1; } else { has_display = 0; }
@@ -874,7 +894,8 @@ void webserver_config() {
 		page_content += F("<br/>Lese DHT "); page_content += String(dht_read);
 		page_content += F("<br/>Lese SDS "); page_content += String(sds_read);
 		page_content += F("<br/>Lese PPD "); page_content += String(ppd_read);
-		page_content += F("<br/>Lese BMP "); page_content += String(bmp_read);
+		page_content += F("<br/>Lese BMP180 "); page_content += String(bmp_read);
+		page_content += F("<br/>Lese BME280 "); page_content += String(bme280_read);
 		page_content += F("<br/>Lese GPS "); page_content += String(gps_read);
 		page_content += F("<br/>Auto Update "); page_content += String(auto_update);
 		page_content += F("<br/>Display "); page_content += String(has_display);
@@ -914,7 +935,8 @@ void webserver_values() {
 	debug_out(F("output values to web page..."),DEBUG_MIN_INFO,1);
 	page_content += FPSTR(WEB_PAGE_HEADER);
 	page_content.replace("{t}",F("Aktuelle Werte"));
-	page_content.replace("CHIPID",esp_chipid);
+	page_content.replace("{id}",esp_chipid);
+	page_content.replace("{fw}",SOFTWARE_VERSION);
 	page_content += F("<table>");
 	if (ppd_read) {
 		page_content += table_row_from_value(F("PPD42NS&nbsp;PM1:"),last_value_PPD_P1+F("&nbsp;Partikel/Liter"));
@@ -931,6 +953,11 @@ void webserver_values() {
 	if (bmp_read) {
 		page_content += table_row_from_value(F("BMP180&nbsp;Temperatur:"),last_value_BMP_T+"&nbsp;°C");
 		page_content += table_row_from_value(F("BMP180&nbsp;Luftdruck:"),last_value_BMP_P+"&nbsp;Pascal");
+	}
+	if (bme280_read) {
+		page_content += table_row_from_value(F("BME280&nbsp;Temperatur:"),last_value_BME280_T+"&nbsp;°C");
+		page_content += table_row_from_value(F("BME280&nbsp;rel.&nbsp;Luftfeuchte:"),last_value_BME280_H+"&nbsp;%");
+		page_content += table_row_from_value(F("BME280&nbsp;Luftdruck:"),last_value_BME280_P+"&nbsp;Pascal");
 	}
 	page_content += table_row_from_value(" "," ");
 	page_content += table_row_from_value(F("WiFi&nbsp;Signal"),String(signal_strength)+"&nbsp;dBm");
@@ -950,7 +977,8 @@ void webserver_debug_level() {
 	debug_out(F("output change debug level page..."),DEBUG_MIN_INFO,1);
 	page_content += FPSTR(WEB_PAGE_HEADER);
 	page_content.replace("{t}","Debug level");
-	page_content.replace("CHIPID",esp_chipid);
+	page_content.replace("{id}",esp_chipid);
+	page_content.replace("{fw}",SOFTWARE_VERSION);
 	if (server.hasArg("level")) {
 		switch (server.arg("level").toInt()) {
 			case (0): debug=0; page_content += F("<h3>Set debug to none.</h3>");break;
@@ -974,7 +1002,8 @@ void webserver_removeConfig() {
 	debug_out(F("output remove config page..."),DEBUG_MIN_INFO,1);
 	page_content += FPSTR(WEB_PAGE_HEADER);
 	page_content.replace("{t}","config.json löschen");
-	page_content.replace("CHIPID",esp_chipid);
+	page_content.replace("{id}",esp_chipid);
+	page_content.replace("{fw}",SOFTWARE_VERSION);
 	if (server.hasArg("confirm") && server.arg("confirm") == "yes") {
 #if defined(ESP8266)
 		if (SPIFFS.exists("/config.json")) {	//file exists
@@ -1004,7 +1033,8 @@ void webserver_reset() {
 	debug_out(F("output reset NodeMCU page..."),DEBUG_MIN_INFO,1);
 	page_content += FPSTR(WEB_PAGE_HEADER);
 	page_content.replace("{t}","Reset NodeMCU");
-	page_content.replace("CHIPID",esp_chipid);
+	page_content.replace("{id}",esp_chipid);
+	page_content.replace("{fw}",SOFTWARE_VERSION);
 	if (server.hasArg("confirm") && server.arg("confirm") == "yes") {
 #if defined(ESP8266)
 		ESP.restart();
@@ -1489,6 +1519,43 @@ String sensorBMP() {
 }
 
 /*****************************************************************
+/* read BME280 sensor values                                     *
+/*****************************************************************/
+String sensorBME280() {
+	String s = "";
+	float t;
+	float h;
+	float p;
+
+	debug_out(F("Start reading BME280"),DEBUG_MED_INFO,1);
+
+	t = bme280.readTemperature();
+	h = bme280.readHumidity();
+	p = bme280.readPressure();
+	if (isnan(t) || isnan(h) || isnan(p)) {
+		debug_out(F("BME280 couldn't be read"),DEBUG_ERROR,1);
+	} else {
+		debug_out(F("Temperature : "),DEBUG_MIN_INFO,0);
+		debug_out(Float2String(t)+" C",DEBUG_MIN_INFO,1);
+		debug_out(F("humidity : "),DEBUG_MIN_INFO,0);
+		debug_out(Float2String(h)+" %",DEBUG_MIN_INFO,1);
+		debug_out(F("Pressure    : "),DEBUG_MIN_INFO,0);
+		debug_out(Float2String(float(p)/100)+" hPa",DEBUG_MIN_INFO,1);
+		last_value_BME280_T = Float2String(t);
+		last_value_BME280_H = Float2String(h);
+		last_value_BME280_P = Float2String(p);
+		s += Value2Json(F("BME280_temperature"),last_value_BME280_T);
+		s += Value2Json(F("BME280_humidity"),last_value_BME280_H);
+		s += Value2Json(F("BME280_pressure"),last_value_BME280_P);
+	}
+	debug_out(F("------"),DEBUG_MIN_INFO,1);
+
+	debug_out(F("End reading BME280"),DEBUG_MED_INFO,1);
+
+	return s;
+}
+
+/*****************************************************************
 /* read SDS011 sensor values                                     *
 /*****************************************************************/
 String sensorSDS() {
@@ -1876,6 +1943,7 @@ void setup() {
 	if (sds_read) debug_out(F("Lese SDS..."),DEBUG_MIN_INFO,1);
 	if (dht_read) debug_out(F("Lese DHT..."),DEBUG_MIN_INFO,1);
 	if (bmp_read) debug_out(F("Lese BMP..."),DEBUG_MIN_INFO,1);
+	if (bme280_read) debug_out(F("Lese BME280..."),DEBUG_MIN_INFO,1);
 	if (gps_read) debug_out(F("Lese GPS..."),DEBUG_MIN_INFO,1);
 	if (send2dusti) debug_out(F("Sende an luftdaten.info..."),DEBUG_MIN_INFO,1);
 	if (send2madavi) debug_out(F("Sende an madavi.de..."),DEBUG_MIN_INFO,1);
@@ -1889,6 +1957,15 @@ void setup() {
 		if (!bmp.begin()) {
 			debug_out(F("No valid BMP085 sensor, check wiring!"),DEBUG_MIN_INFO,1);
 			bmp_read = 0;
+		}
+	}
+	if (bme280_read) {
+		if (!bme280.begin(0x76)) {
+			debug_out(F("No valid BME280 sensor on 0x76 "),DEBUG_MIN_INFO,0);
+			if (!bme280.begin(0x77)) {
+				debug_out(F("or on 0x77, check wiring"),DEBUG_MIN_INFO,0);
+				bme280_read = 0;
+			}
 		}
 	}
 	if (sds_read) {
@@ -1923,6 +2000,7 @@ void loop() {
 	String result_SDS = "";
 	String result_DHT = "";
 	String result_BMP = "";
+	String result_BME280 = "";
 	String result_GPS = "";
 	String signal_strength = "";
 	
@@ -1964,6 +2042,11 @@ void loop() {
 	if (bmp_read && ((act_milli-starttime) > sending_intervall_ms)) {
 		debug_out(F("Call sensorBMP"),DEBUG_MAX_INFO,1);
 		result_BMP = sensorBMP();			// getting temperature and humidity (optional)
+	}
+
+	if (bme280_read && ((act_milli-starttime) > sending_intervall_ms)) {
+		debug_out(F("Call sensorBME280"),DEBUG_MAX_INFO,1);
+		result_BME280 = sensorBME280();			// getting temperature and humidity (optional)
 	}
 
 	if (gps_read && (((act_milli-starttime_GPS) > sampletime_GPS_ms) || ((act_milli-starttime) > sending_intervall_ms))) {
@@ -2035,7 +2118,6 @@ void loop() {
 			last_result_DHT = result_DHT;
 			data += result_DHT;
 			data_4_dusti  = data_first_part + result_DHT;
-			data_4_dusti += data_sample_times;
 			data_4_dusti.remove(data_4_dusti.length()-1);
 			data_4_dusti += "]}";
 			if (send2dusti) {
@@ -2053,7 +2135,6 @@ void loop() {
 			last_result_BMP = result_BMP;
 			data += result_BMP;
 			data_4_dusti  = data_first_part + result_BMP;
-			data_4_dusti += data_sample_times;
 			data_4_dusti.remove(data_4_dusti.length()-1);
 			data_4_dusti.replace("BMP_","");
 			data_4_dusti += "]}";
@@ -2068,11 +2149,28 @@ void loop() {
 				sum_send_time += micros() - start_send;
 			}
 		}
+		if (bme280_read) {
+			last_result_BME280 = result_BME280;
+			data += result_BME280;
+			data_4_dusti  = data_first_part + result_BME280;
+			data_4_dusti.remove(data_4_dusti.length()-1);
+			data_4_dusti.replace("BME280_","");
+			data_4_dusti += "]}";
+			if (send2dusti) {
+				debug_out(F("## Sending to luftdaten.info (BME280): "),DEBUG_MIN_INFO,1);
+				start_send = micros();
+				if (result_BME280 != "") {
+					sendData(data_4_dusti,BME280_API_PIN,host_dusti,httpPort_dusti,url_dusti,"",FPSTR(TXT_CONTENT_TYPE_JSON));
+				} else {
+					debug_out(F("No data sent..."),DEBUG_MIN_INFO,1);
+				}
+				sum_send_time += micros() - start_send;
+			}
+		}
 
 		if (gps_read) {
 			data += result_GPS;
 			data_4_dusti  = data_first_part + result_GPS;
-			data_4_dusti += data_sample_times;
 			data_4_dusti.remove(data_4_dusti.length()-1);
 			data_4_dusti.replace("GPS_","");
 			data_4_dusti += "]}";
