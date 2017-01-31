@@ -2,6 +2,11 @@
 #define WLANSSID "Freifunk"
 #define WLANPWD ""
 
+// BasicAuth Konfig
+#define WWW_USERNAME "admin"
+#define WWW_PASSWORD "feinstaub"
+#define WWW_BASICAUTH_ENABLED 0
+
 // Wohin gehen die Daten?
 #define SEND2DUSTI 1
 #define SEND2MADAVI 1
