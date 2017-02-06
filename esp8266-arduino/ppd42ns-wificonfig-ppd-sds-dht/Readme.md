@@ -1,15 +1,15 @@
 # Version für Sensoren PPD42NS, SDS011, DHT22, BMP180 und NEO-6M.
 
 Features:
-- gleichzeitiger Betrieb mehrerer Sensoren
-- Konfiguration über WLAN (Sensor als Access Point) möglich
-- Unterstützung von OLED-Displays mit SSD1306
-- Auswahl der API(s), an welche die Daten gesendet werden, inklusive der Möglichkeit, die Daten als CSV über USB auszugeben
-- nutzbar für ESP8266 und Arduino Feather M0 (LoRa)
+* gleichzeitiger Betrieb mehrerer Sensoren
+* Konfiguration über WLAN (Sensor als Access Point) möglich
+* Unterstützung von OLED-Displays mit SSD1306
+* Auswahl der API(s), an welche die Daten gesendet werden, inklusive der Möglichkeit, die Daten als CSV über USB auszugeben
+* nutzbar für ESP8266 und Arduino Feather M0 (LoRa)
 
 ToDo's:
-- TimeOut für WifiKonfig zum Laufen bekommen
-- MQTT-Konfig ergänzen
+* TimeOut für WifiKonfig zum Laufen bekommen
+* MQTT-Konfig ergänzen
 
 Die grundsätzliche Konfiguration der Parameter erfolgt über die Datei `ext_dev.h`.
 
@@ -20,9 +20,9 @@ Die grundsätzliche Konfiguration der Parameter erfolgt über die Datei `ext_dev
 Wenn das vorgegebene WLAN nach 10 Sekunden nicht erreichbar ist, wird ein Access-Point eingerichtet, der über "Feinstaubsensor-\[Sensor-ID\]" erreichbar ist. Nach dem Verbinden zu diesem Accesspoint sollten alle Anfragen auf die Konfigurationsseite umgeleitet werden. Direkte Adresse der Seite ist http://192.168.4.1/ .
 
 Konfigurierbar sind:
-- WLAN-Name und Passwort
-- Auszulesende Sensoren
-- Ziele für den Versand der Daten
+* WLAN-Name und Passwort
+* Auszulesende Sensoren
+* Ziele für den Versand der Daten
 
 Nach 5 Minuten sollte der Access-Point wieder deaktiviert werden (funktioniert zur Zeit noch nicht stabil).
 
@@ -37,7 +37,7 @@ Die Daten können als CSV via USB ausgegeben werden. Dafür sollte sowohl in ext
 
 ## Benötigte Software:
 
-* [Arduino IDE](https://www.arduino.cc/en/Main/Software)  (Version 1.6.9)
+* [Arduino IDE](https://www.arduino.cc/en/Main/Software)  (Version 1.8.1)
 * [ESP8266 für Arduino](http://arduino.esp8266.com/stable/package_esp8266com_index.json) (Version 2.3.0)
 
 ### Verwendete Bibliotheken (für ESP8266):
@@ -52,16 +52,15 @@ In ESP8266 für Arduino IDE enthalten:
 * DNSServer
 
 Installierbar über Arduino IDE (Menü Sketch -> Bibliothek einbinden -> Bibliotheken verwalten, in Klammern die getestete Version):
-* [ArduinoJson](https://github.com/bblanchon/ArduinoJson) (5.7.3)
+* [ArduinoJson](https://github.com/bblanchon/ArduinoJson) (5.8.2)
 * [Adafruit Unified Sensor](https://github.com/adafruit/Adafruit_Sensor) (1.0.2)
 * [Adafruit BMP085 library](https://github.com/adafruit/Adafruit-BMP085-Library) (1.0.0)
 * [Adafruit BME280 library](https://github.com/adafruit/Adafruit_BME280_Library) (1.0.4)
 * [DHT sensor library](https://github.com/adafruit/DHT-sensor-library) (1.3.0)
-* [ESP8266 Oled driver for SSD1306 display](https://github.com/squix78/esp8266-oled-ssd1306) (3.2.3)
-* [ESP8266httpUpdate (1.1.0)
+* [ESP8266 Oled driver for SSD1306 display](https://github.com/squix78/esp8266-oled-ssd1306) (3.2.5)
+* ESP8266httpUpdate (1.1.0)
 * [PubSubClient](http://pubsubclient.knolleary.net/) (2.6.0)
 * [SoftwareSerial](https://github.com/plerup/espsoftwareserial) (1.0.0)
-* [WifiManager](https://github.com/tzapu/WiFiManager) (0.12.0)
 
 Manuell zu installieren:
 * [TinyGPS++](http://arduiniana.org/libraries/tinygpsplus/) (0.94b)
@@ -105,6 +104,7 @@ Diese Firmware definiert die Pins für die verschiedenenen Sensoren wie folgt:
 * DHT22 => Pin 7
 * SDS011 => Pin 1
 * BMP180 => Pin 3
+* BME280 => Pin 11
 * GPS(Neo-6M) => Pin 9
 
 
@@ -114,22 +114,22 @@ Für die Verwendung der Adafruit Feather Boards muss im Arduino IDE noch der Ada
 https://adafruit.github.io/arduino-board-index/package_adafruit_index.json als zusätzliche Boardverwalter-URL eintragen. Nach einem Neustart der IDE im Boardverwalter "Adafruit SAMD boards" installieren.
 
 In Arduino enthalten:
-Wire
-SPI
+* Wire
+* SPI
 
 In "Adafruit SAMD Boards" enthalten:
 
 
 Installierbar über Arduino IDE (für Versionen siehe auch ESP8266):
-* Adafruit BMP085 library <https://github.com/adafruit/Adafruit-BMP085-Library> (1.0.0)
-* ArduinoJson <https://github.com/bblanchon/ArduinoJson> (5.6.4)
-* DHT sensor library <https://github.com/adafruit/DHT-sensor-library> (1.2.3)
-* PubSubClient <http://pubsubclient.knolleary.net/> (2.6.0)
-* SoftwareSerial <https://github.com/plerup/espsoftwareserial> (1.0.0)
-* NTPClient <https://github.com/arduino-libraries/NTPClient> (3.1.0)
+* [Adafruit BMP085 library](https://github.com/adafruit/Adafruit-BMP085-Library) (1.0.0)
+* [ArduinoJson](https://github.com/bblanchon/ArduinoJson) (5.6.4)
+* [DHT sensor library](https://github.com/adafruit/DHT-sensor-library) (1.2.3)
+* [PubSubClient](http://pubsubclient.knolleary.net/) (2.6.0)
+* [SoftwareSerial](https://github.com/plerup/espsoftwareserial) (1.0.0)
+* [NTPClient](https://github.com/arduino-libraries/NTPClient) (3.1.0)
 
 Manuell zu installieren:
-* RadioHead Packet Radio library <http://www.airspayce.com/mikem/arduino/RadioHead/> (1.6.1), Link zum Download des Ziparchivs im 2. Abschnitt
-* TinyGPS++ <http://arduiniana.org/libraries/tinygpsplus/> (0.94b)
+* [RadioHead Packet Radio library](http://www.airspayce.com/mikem/arduino/RadioHead/) (1.6.1), Link zum Download des Ziparchivs im 2. Abschnitt
+* [TinyGPS++](http://arduiniana.org/libraries/tinygpsplus/) (0.94b)
 
-Ich hoffe, alle Bibliotheken erwischt zu haben. Falls beim Kompilieren eine Bibliothek fehlt, bitte als Issue melden. Ich trage dann die Infos nach.
+Ich hoffe, alle Bibliotheken erwischt zu haben. Falls beim Kompilieren eine Bibliothek fehlt, bitte als [Issue](https://github.com/opendata-stuttgart/sensors-software/issues/) melden. Ich trage dann die Infos nach.
