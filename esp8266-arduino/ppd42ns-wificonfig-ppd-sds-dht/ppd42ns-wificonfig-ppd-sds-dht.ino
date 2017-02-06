@@ -544,9 +544,9 @@ String SDS_version_date() {
 void copyExtDef() {
 	if (WLANSSID != NULL) { strcpy(wlanssid,WLANSSID); }
 	if (WLANPWD  != NULL) { strcpy(wlanpwd,WLANPWD); }
-  if (WWW_USERNAME != NULL) { strcpy(www_username,WWW_USERNAME); }
-  if (WWW_PASSWORD  != NULL) { strcpy(www_password,WWW_PASSWORD); }
-  if (WWW_BASICAUTH_ENABLED != www_basicauth_enabled) { www_basicauth_enabled = WWW_BASICAUTH_ENABLED; }
+	if (WWW_USERNAME != NULL) { strcpy(www_username,WWW_USERNAME); }
+	if (WWW_PASSWORD  != NULL) { strcpy(www_password,WWW_PASSWORD); }
+	if (WWW_BASICAUTH_ENABLED != www_basicauth_enabled) { www_basicauth_enabled = WWW_BASICAUTH_ENABLED; }
 	if (DHT_READ != dht_read) { dht_read = DHT_READ; }
 	if (PPD_READ != ppd_read) { ppd_read = PPD_READ; }
 	if (SDS_READ != sds_read) { sds_read = SDS_READ; }
@@ -610,8 +610,8 @@ void readConfig() {
 					if (json.containsKey("SOFTWARE_VERSION")) strcpy(version_from_local_config, json["SOFTWARE_VERSION"]);
 					if (json.containsKey("wlanssid")) strcpy(wlanssid, json["wlanssid"]);
 					if (json.containsKey("wlanpwd")) strcpy(wlanpwd, json["wlanpwd"]);
-          if (json.containsKey("www_username")) strcpy(www_username, json["www_username"]);
-          if (json.containsKey("www_password")) strcpy(www_password, json["www_password"]);
+					if (json.containsKey("www_username")) strcpy(www_username, json["www_username"]);
+					if (json.containsKey("www_password")) strcpy(www_password, json["www_password"]);
 					if (json.containsKey("www_basicauth_enabled")) www_basicauth_enabled = json["www_basicauth_enabled"];
 					if (json.containsKey("dht_read")) dht_read = json["dht_read"];
 					if (json.containsKey("ppd_read")) ppd_read = json["ppd_read"];
@@ -663,8 +663,8 @@ void writeConfig() {
 	json["SOFTWARE_VERSION"] = SOFTWARE_VERSION;
 	json["wlanssid"] = wlanssid;
 	json["wlanpwd"] = wlanpwd;
-  json["www_username"] = www_username;
-  json["www_password"] = www_password;
+	json["www_username"] = www_username;
+	json["www_password"] = www_password;
 	json["www_basicauth_enabled"] = www_basicauth_enabled;
 	json["dht_read"] = dht_read;
 	json["ppd_read"] = ppd_read;
@@ -762,11 +762,11 @@ String wlan_ssid_to_table_row(const String& ssid, const String& encryption, cons
  * -Provide BasicAuth for all page contexts except /values and images
 /*****************************************************************/
 void webserver_request_auth() {
-  debug_out(F("validate request auth..."),DEBUG_MIN_INFO,1);
-  if(www_basicauth_enabled) {
-    if(!server.authenticate(www_username, www_password))
-      return server.requestAuthentication();  
-  }
+	debug_out(F("validate request auth..."),DEBUG_MIN_INFO,1);
+	if (www_basicauth_enabled) {
+		if (!server.authenticate(www_username, www_password))
+			return server.requestAuthentication();  
+	}
 }
 
 /*****************************************************************
@@ -850,10 +850,10 @@ void webserver_config() {
 		page_content += form_password(F("wlanpwd"),F("Passwort"),wlanpwd,64);
 		page_content += F("</table><br/><input type='submit' name='submit' value='Speichern'/><br/><br/><b>BasicAuth</b><br/>");
 		page_content += F("<table>");
-    page_content += form_input(F("www_username"),F("User"),www_username,64);
-    page_content += form_password(F("www_password"),F("Passwort"),www_password,64);
-    page_content += form_checkbox(F("www_basicauth_enabled"),F("BasicAuth aktivieren"),www_basicauth_enabled);
-    page_content += F("</table><br/><input type='submit' name='submit' value='Speichern'/><br/><br/><b>APIs</b><br/>");
+		page_content += form_input(F("www_username"),F("User"),www_username,64);
+		page_content += form_password(F("www_password"),F("Passwort"),www_password,64);
+		page_content += form_checkbox(F("www_basicauth_enabled"),F("BasicAuth aktivieren"),www_basicauth_enabled);
+		page_content += F("</table><br/><input type='submit' name='submit' value='Speichern'/><br/><br/><b>APIs</b><br/>");
 		page_content += form_checkbox(F("send2dusti"),F("API Luftdaten.info"),send2dusti);
 		page_content += form_checkbox(F("send2madavi"),F("API Madavi.de"),send2madavi);
 		page_content += F("<br/><b>Sensoren</b><br/>");
@@ -893,9 +893,9 @@ void webserver_config() {
 				server.arg("wlanpwd").toCharArray(wlanpwd,65);
 			}
 		}
-    if (server.hasArg("www_username") && server.arg("www_username") != "") { server.arg("www_username").toCharArray(www_username,65); }
-    if (server.hasArg("www_password") && server.arg("www_password") != "") { server.arg("www_password").toCharArray(www_password,65); }
-    if (server.hasArg("www_basicauth_enabled") && server.arg("www_basicauth_enabled") == "1") { www_basicauth_enabled = 1; } else { www_basicauth_enabled = 0; }
+		if (server.hasArg("www_username") && server.arg("www_username") != "") { server.arg("www_username").toCharArray(www_username,65); }
+		if (server.hasArg("www_password") && server.arg("www_password") != "") { server.arg("www_password").toCharArray(www_password,65); }
+		if (server.hasArg("www_basicauth_enabled") && server.arg("www_basicauth_enabled") == "1") { www_basicauth_enabled = 1; } else { www_basicauth_enabled = 0; }
 		if (server.hasArg("send2dusti") && server.arg("send2dusti") == "1") { send2dusti = 1; } else { send2dusti = 0; }
 		if (server.hasArg("send2madavi") && server.arg("send2madavi") == "1") { send2madavi = 1; } else { send2madavi = 0; }
 		if (server.hasArg("dht_read") && server.arg("dht_read") == "1") { dht_read = 1; } else { dht_read = 0; }
@@ -1007,7 +1007,7 @@ void webserver_values() {
 /* Webserver set debug level                                     *
 /*****************************************************************/
 void webserver_debug_level() {
-  webserver_request_auth();
+	webserver_request_auth();
   
 	String page_content = "";
 	last_page_load = millis();
