@@ -21,11 +21,17 @@ input[type='password']{width:100%;}\
 <h3 style='min-height:100px;'><a href='/' style='background:none;width:0;'><img src='/luftdaten_logo.svg' style='float:left;margin-right:20px'/></a>{t} Feinstaubsensor {id}<br/><small>Firmware {fw}</small></h3>\
 ";
 
-const char WEB_PAGE_FOOTER[] PROGMEM = "<br/><br/><a href='http://codefor.de/' target='_blank' style='display:inline;background:none;width:0px;'><img src='/cfg_logo.svg' style='width:200px;max-width:50%;'/></a>\
+const char WEB_PAGE_FOOTER[] PROGMEM = "<br/><br/><a href='/' style='display:inline;'>Zurück zur Startseite</a><br/><br/><br/>\
+<a href='http://codefor.de/' target='_blank' style='display:inline;background:none;width:0px;'><img src='/cfg_logo.svg' style='width:200px;max-width:50%;'/></a>\
 </body></html>\r\n";
 
+<<<<<<< HEAD
 const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a href='/values'>aktuelle Werte</a><br/>\
 <a href='http://opendata-stuttgart.github.io/feinstaub-map/' class='external' target='_blank'>Karte der aktiven Sensoren (Internetlink)</a><br/>\
+=======
+const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a href='/values'>Aktuelle Werte</a><br/>\
+<a href='http://opendata-stuttgart.github.io/feinstaub-map/' target='_blank'>Karte der aktiven Sensoren (externer Link)</a><br/>\
+>>>>>>> e0ae915b244d082944218c529f55fbcfbea92baa
 <a href='/config'>Konfiguration</a><br/>\
 <a href='/removeConfig'>Konfiguration löschen</a><br/>\
 <a href='/reset'>Sensor neu starten (Reset)</a><br/>\
@@ -48,7 +54,7 @@ const char WEB_REMOVE_CONFIG_CONTENT[] PROGMEM = "<h3>Konfiguration wirklich lö
 <table><tr><td><a href='/removeConfig?confirm=yes'>Löschen</a></td><td><a href='/'>Abbrechen</a></td></tr></table>\
 ";
 
-const char WEB_RESET_CONTENT[] PROGMEM = "<h3>Wirklich neu starten?</h3>\
+const char WEB_RESET_CONTENT[] PROGMEM = "<h3>Sensor wirklich neu starten?</h3>\
 <table><tr><td><a href='/reset?confirm=yes'>Neu starten</a></td><td><a href='/'>Abbrechen</a></td></tr></table>\
 ";
 
