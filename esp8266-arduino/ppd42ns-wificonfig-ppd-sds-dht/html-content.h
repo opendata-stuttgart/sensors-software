@@ -13,6 +13,7 @@ body{font-family:Arial;}\
 table{width:100%}\
 td{vertical-align:top;}\
 a{text-decoration:none;padding:10px;background:blue;color:white;display:block;width:auto;border-radius:5px;}\
+.external{background:blueViolet;color:white;}\
 input[type='text']{width:100%;}\
 input[type='password']{width:100%;}\
 </style>\
