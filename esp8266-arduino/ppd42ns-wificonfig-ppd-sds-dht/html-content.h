@@ -25,13 +25,8 @@ const char WEB_PAGE_FOOTER[] PROGMEM = "<br/><br/><a href='/' style='display:inl
 <a href='http://codefor.de/' target='_blank' style='display:inline;background:none;width:0px;'><img src='/cfg_logo.svg' style='width:200px;max-width:50%;'/></a>\
 </body></html>\r\n";
 
-<<<<<<< HEAD
-const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a href='/values'>aktuelle Werte</a><br/>\
-<a href='http://opendata-stuttgart.github.io/feinstaub-map/' class='external' target='_blank'>Karte der aktiven Sensoren (Internetlink)</a><br/>\
-=======
 const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a href='/values'>Aktuelle Werte</a><br/>\
-<a href='http://opendata-stuttgart.github.io/feinstaub-map/' target='_blank'>Karte der aktiven Sensoren (externer Link)</a><br/>\
->>>>>>> e0ae915b244d082944218c529f55fbcfbea92baa
+<a href='http://opendata-stuttgart.github.io/feinstaub-map/' class='external' target='_blank'>Karte der aktiven Sensoren (externer Link)</a><br/>\
 <a href='/config'>Konfiguration</a><br/>\
 <a href='/removeConfig'>Konfiguration löschen</a><br/>\
 <a href='/reset'>Sensor neu starten (Reset)</a><br/>\
