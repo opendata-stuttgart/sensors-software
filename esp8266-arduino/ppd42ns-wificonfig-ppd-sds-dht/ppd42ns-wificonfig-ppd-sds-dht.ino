@@ -988,7 +988,7 @@ void webserver_debug_level() {
 			case (5): debug=5; page_content += F("<h3>Setze Debug auf max. info.</h3>");break;
 		}
 	}
-  page_content += F("<a href='/'>zurück</a>");
+	page_content += F("<a href='/'>zurück</a>");
 	page_content += FPSTR(WEB_PAGE_FOOTER);
 	server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
 }
