@@ -58,7 +58,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-048"
+#define SOFTWARE_VERSION "NRZ-2016-049"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -802,10 +802,7 @@ void webserver_config() {
 	page_content.replace("{id}",esp_chipid);
 	page_content.replace("{fw}",SOFTWARE_VERSION);
 	page_content += FPSTR(WEB_CONFIG_SCRIPT);
-	if ((!server.hasArg("submit")) || (server.arg("submit") != "Speichern")) {
-		page_content.replace("{t}",F("Konfiguration"));
-		page_content.replace("{id}",esp_chipid);
-		page_content.replace("{fw}",SOFTWARE_VERSION);
+	if ((!server.hasArg("submit")) || (server.arg("submit") != "Save")) {
 		page_content += F("<form method='POST' action='/config' style='width: 100%;'>");
 		page_content += F("<b>WLAN Daten</b><br/>");
 		if (WiFi.status() != WL_CONNECTED) {  // scan for wlan ssids
@@ -815,7 +812,7 @@ void webserver_config() {
 			debug_out(F("wifi networks found: "),DEBUG_MIN_INFO,0);
 			debug_out(String(n),DEBUG_MIN_INFO,1);
 			if (n == 0) {
-				page_content += F("<br/>Kein WLAN gefunden<br/>");
+				page_content += F("<br/>Keine Netzwerke gefunden<br/>");
 			} else {
 				page_content += F("<br/>Netzwerke gefunden: ");
 				page_content += String(n);
@@ -872,7 +869,7 @@ void webserver_config() {
 		page_content += F("<table>");
 		page_content += form_input(F("debug"),F("Debug&nbsp;Level"),String(debug),5);
 		page_content += F("</table><br/><b>Weitere APIs</b><br/><br/>");
-		page_content += form_checkbox(F("send2custom"),F("Senden an eigene API"),send2custom);
+		page_content += form_checkbox(F("send2custom"),F("An eigene API senden"),send2custom);
 		page_content += F("<table>");
 		page_content += form_input(F("host_custom"),F("Server: "),host_custom,50);
 		page_content += form_input(F("url_custom"),F("Pfad: "),url_custom,50);
@@ -1021,12 +1018,12 @@ void webserver_debug_level() {
 	page_content.replace("{fw}",SOFTWARE_VERSION);
 	if (server.hasArg("level")) {
 		switch (server.arg("level").toInt()) {
-			case (0): debug=0; page_content += F("<h3>Set debug to none.</h3>");break;
-			case (1): debug=1; page_content += F("<h3>Set debug to error.</h3>");break;
-			case (2): debug=2; page_content += F("<h3>Set debug to warning.</h3>");break;
-			case (3): debug=3; page_content += F("<h3>Set debug to min. info.</h3>");break;
-			case (4): debug=4; page_content += F("<h3>Set debug to med. info.</h3>");break;
-			case (5): debug=5; page_content += F("<h3>Set debug to max. info.</h3>");break;
+			case (0): debug=0; page_content += F("<h3>Setze Debug auf none.</h3>");break;
+			case (1): debug=1; page_content += F("<h3>Setze Debug auf error.</h3>");break;
+			case (2): debug=2; page_content += F("<h3>Setze Debug auf warning.</h3>");break;
+			case (3): debug=3; page_content += F("<h3>Setze Debug auf min. info.</h3>");break;
+			case (4): debug=4; page_content += F("<h3>Setze Debug auf med. info.</h3>");break;
+			case (5): debug=5; page_content += F("<h3>Setze Debug auf max. info.</h3>");break;
 		}
 	}
 	page_content += FPSTR(WEB_PAGE_FOOTER);
@@ -1043,7 +1040,7 @@ void webserver_removeConfig() {
 	last_page_load = millis();
 	debug_out(F("output remove config page..."),DEBUG_MIN_INFO,1);
 	page_content += FPSTR(WEB_PAGE_HEADER);
-	page_content.replace("{t}","config.json löschen");
+	page_content.replace("{t}","Config.json löschen");
 	page_content.replace("{id}",esp_chipid);
 	page_content.replace("{fw}",SOFTWARE_VERSION);
 	if (server.hasArg("confirm") && server.arg("confirm") == "yes") {
@@ -1076,7 +1073,7 @@ void webserver_reset() {
 	last_page_load = millis();
 	debug_out(F("output reset NodeMCU page..."),DEBUG_MIN_INFO,1);
 	page_content += FPSTR(WEB_PAGE_HEADER);
-	page_content.replace("{t}","Reset NodeMCU");
+	page_content.replace("{t}","Sensor neu starten");
 	page_content.replace("{id}",esp_chipid);
 	page_content.replace("{fw}",SOFTWARE_VERSION);
 	if (server.hasArg("confirm") && server.arg("confirm") == "yes") {
@@ -1939,7 +1936,6 @@ void init_display() {
 void setup() {
 	Serial.begin(9600);					// Output to Serial at 9600 baud
 #if defined(ESP8266)
-	Wire.pins(D3,D4);					// must be set before all other I2C cmds 
 	Wire.begin(D3,D4);
 	esp_chipid = String(ESP.getChipId());
 #endif
