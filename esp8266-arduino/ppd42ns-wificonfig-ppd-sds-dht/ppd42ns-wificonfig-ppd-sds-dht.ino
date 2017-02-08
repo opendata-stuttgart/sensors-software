@@ -58,7 +58,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-049"
+#define SOFTWARE_VERSION "NRZ-2016-050"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -1439,9 +1439,9 @@ String create_influxdb_string(const String& data) {
 		data_4_influxdb += F("feinstaub,node=esp8266-");
 		data_4_influxdb += esp_chipid+" ";
 		for (int i = 0; i < json2data["sensordatavalues"].size()-1; i++) {
-			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value_type"].asString());
+			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value_type"].as<char*>());
 			data_4_influxdb += tmp_str + "=";
-			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value"].asString());
+			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value"].as<char*>());
 			data_4_influxdb += tmp_str;
 			if (i < (json2data["sensordatavalues"].size()-2)) data_4_influxdb += ",";
 		}
@@ -1469,9 +1469,9 @@ void send_csv(const String& data) {
 		headline = F("Timestamp_ms;");
 		valueline = String(act_milli)+";";
 		for (int i=0;i<json2data["sensordatavalues"].size();i++) {
-			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value_type"].asString());
+			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value_type"].as<char*>());
 			headline += tmp_str+";";
-			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value"].asString());
+			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value"].as<char*>());
 			valueline += tmp_str+";";
 		}
 		if (first_csv_line) {
