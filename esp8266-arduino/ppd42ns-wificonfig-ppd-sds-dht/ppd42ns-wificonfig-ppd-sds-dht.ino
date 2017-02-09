@@ -58,7 +58,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-051"
+#define SOFTWARE_VERSION "NRZ-2016-052"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -1933,16 +1933,15 @@ void init_display() {
 /*****************************************************************
 /* Init BME280                                                   *
 /*****************************************************************/
-bool init_bme280(char addr) {
-	char msg[35];
-	sprintf(msg, "Trying BME280 sensor on 0x%02X ... ", addr);
+bool initBME280(char addr) {
+	debug_out("Trying BME280 sensor on ",DEBUG_MIN_INFO,0);
+	debug_out(String(addr,HEX),DEBUG_MIN_INFO,0);
 
-	debug_out(String(msg), DEBUG_MIN_INFO, 0);
 	if (bme280.begin(addr)) {
-		debug_out(F("found"), DEBUG_MIN_INFO, 1);
+		debug_out(F(" ... found"), DEBUG_MIN_INFO, 1);
 		return true;
 	} else {
-		debug_out(F("not found"), DEBUG_MIN_INFO, 1);
+		debug_out(F(" ... not found"), DEBUG_MIN_INFO, 1);
 		return false;
 	}
 }
