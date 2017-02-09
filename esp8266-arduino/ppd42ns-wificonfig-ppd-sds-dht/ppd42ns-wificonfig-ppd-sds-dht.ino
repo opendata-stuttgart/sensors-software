@@ -1931,6 +1931,24 @@ void init_display() {
 }
 
 /*****************************************************************
+/* Init BME280                                                   *
+/*****************************************************************/
+bool init_bme280(char addr) {
+	char msg[35];
+	sprintf(msg, "Trying BME280 sensor on 0x%02X ... ", addr);
+
+	debug_out(String(msg), DEBUG_MIN_INFO, 0);
+	if (bme280.begin(addr)) {
+		debug_out(F("found"), DEBUG_MIN_INFO, 1);
+		return true;
+	} else {
+		debug_out(F("not found"), DEBUG_MIN_INFO, 1);
+		return false;
+	}
+}
+
+
+/*****************************************************************
 /* The Setup                                                     *
 /*****************************************************************/
 void setup() {
@@ -1999,14 +2017,9 @@ void setup() {
 			bmp_read = 0;
 		}
 	}
-	if (bme280_read) {
-		if (!bme280.begin(0x76)) {
-			debug_out(F("No valid BME280 sensor on 0x76 "),DEBUG_MIN_INFO,0);
-			if (!bme280.begin(0x77)) {
-				debug_out(F("or on 0x77, check wiring"),DEBUG_MIN_INFO,0);
-				bme280_read = 0;
-			}
-		}
+	if (bme280_read && !initBME280(0x76) && !initBME280(0x77)) {
+		debug_out(F("Check BME280 wiring"),DEBUG_MIN_INFO,1);
+		bme280_read = 0;
 	}
 	if (sds_read) {
 		debug_out(F("Stoppe SDS011..."),DEBUG_MIN_INFO,1);
