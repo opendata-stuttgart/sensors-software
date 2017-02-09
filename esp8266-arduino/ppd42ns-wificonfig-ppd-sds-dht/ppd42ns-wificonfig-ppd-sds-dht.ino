@@ -58,7 +58,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-050"
+#define SOFTWARE_VERSION "NRZ-2016-051"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -2122,7 +2122,6 @@ void loop() {
 			last_result_PPD = result_PPD;
 			data += result_PPD;
 			data_4_dusti  = data_first_part + result_PPD;
-			data_4_dusti += data_sample_times;
 			data_4_dusti.remove(data_4_dusti.length()-1);
 			data_4_dusti += "]}";
 			if (send2dusti) {
@@ -2139,7 +2138,6 @@ void loop() {
 		if (sds_read) {
 			data += result_SDS;
 			data_4_dusti  = data_first_part + result_SDS;
-			data_4_dusti += data_sample_times;
 			data_4_dusti.remove(data_4_dusti.length()-1);
 			data_4_dusti.replace("SDS_","");
 			data_4_dusti += "]}";
