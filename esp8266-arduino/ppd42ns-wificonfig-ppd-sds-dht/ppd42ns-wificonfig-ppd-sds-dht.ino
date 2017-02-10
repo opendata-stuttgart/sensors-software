@@ -231,6 +231,7 @@ unsigned long trigOnP2;
 unsigned long lowpulseoccupancyP1 = 0;
 unsigned long lowpulseoccupancyP2 = 0;
 
+bool send_now = false;
 unsigned long starttime;
 unsigned long starttime_SDS;
 unsigned long starttime_GPS;
@@ -1659,7 +1660,7 @@ String sensorSDS() {
 		}
 
 	}
-	if (((act_milli-starttime) > sending_intervall_ms) && (sds_val_count > 0)) {
+	if (send_now && (sds_val_count > 0)) {
 		debug_out("PM10:  "+Float2String(float(sds_pm10_sum)/(sds_val_count*10.0)),DEBUG_MIN_INFO,1);
 		debug_out("PM2.5: "+Float2String(float(sds_pm25_sum)/(sds_val_count*10.0)),DEBUG_MIN_INFO,1);
 		debug_out("------",DEBUG_MIN_INFO,1);
@@ -1720,7 +1721,7 @@ String sensorPPD() {
 
 	}
 	// Checking if it is time to sample
-	if ((act_milli-starttime) > sending_intervall_ms) {
+	if (send_now) {
 		ratio = lowpulseoccupancyP1/(sampletime_ms*10.0);					// int percentage 0 to 100
 		concentration = (1.1*pow(ratio,3)-3.8*pow(ratio,2)+520*ratio+0.62);	// spec sheet curve
 		// Begin printing
@@ -1821,7 +1822,7 @@ String sensorGPS() {
 		}
 	}
 
-	if ((act_milli-starttime) > sending_intervall_ms) {
+	if (send_now) {
 		debug_out("Lat/Lng: "+last_gps_lat+","+last_gps_lng,DEBUG_MIN_INFO,1);
 		debug_out("Altitude: "+last_gps_alt,DEBUG_MIN_INFO,1);
 		debug_out("Date: "+last_gps_date,DEBUG_MIN_INFO,1);
@@ -2063,6 +2064,7 @@ void loop() {
 
 	act_micro = micros();
 	act_milli = millis();
+	send_now = (act_milli-starttime) > sending_intervall_ms;
 
 	sample_count++;
 
@@ -2080,28 +2082,28 @@ void loop() {
 		result_PPD = sensorPPD();
 	}
 
-	if (sds_read && (((act_milli-starttime_SDS) > sampletime_SDS_ms) || ((act_milli-starttime) > sending_intervall_ms))) {
+	if (sds_read && (send_now || (act_milli-starttime_SDS) > sampletime_SDS_ms)) {
 		debug_out(F("Call sensorSDS"),DEBUG_MAX_INFO,1);
 		result_SDS = sensorSDS();
 		starttime_SDS = act_milli;
 	}
 
-	if (dht_read && ((act_milli-starttime) > sending_intervall_ms)) {
+	if (dht_read && send_now) {
 		debug_out(F("Call sensorDHT"),DEBUG_MAX_INFO,1);
 		result_DHT = sensorDHT();			// getting temperature and humidity (optional)
 	}
 
-	if (bmp_read && ((act_milli-starttime) > sending_intervall_ms)) {
+	if (bmp_read && send_now) {
 		debug_out(F("Call sensorBMP"),DEBUG_MAX_INFO,1);
 		result_BMP = sensorBMP();			// getting temperature and humidity (optional)
 	}
 
-	if (bme280_read && ((act_milli-starttime) > sending_intervall_ms)) {
+	if (bme280_read && send_now) {
 		debug_out(F("Call sensorBME280"),DEBUG_MAX_INFO,1);
 		result_BME280 = sensorBME280();			// getting temperature and humidity (optional)
 	}
 
-	if (gps_read && (((act_milli-starttime_GPS) > sampletime_GPS_ms) || ((act_milli-starttime) > sending_intervall_ms))) {
+	if (gps_read && (send_now || (act_milli-starttime_GPS > sampletime_GPS_ms))) {
 		debug_out(F("Call sensorGPS"),DEBUG_MAX_INFO,1);
 		result_GPS = sensorGPS();			// getting GPS coordinates
 		starttime_GPS = act_milli;
@@ -2118,7 +2120,7 @@ void loop() {
 		}
 	}
 
-	if ((act_milli-starttime) > sending_intervall_ms) {
+	if (send_now) {
 		debug_out(F("Creating data string:"),DEBUG_MIN_INFO,1);
 		data = data_first_part;
 		data_sample_times  = Value2Json("samples",String(long(sample_count)));
