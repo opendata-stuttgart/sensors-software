@@ -2086,19 +2086,21 @@ void loop() {
 		starttime_SDS = act_milli;
 	}
 
-	if (dht_read && ((act_milli-starttime) > sending_intervall_ms)) {
-		debug_out(F("Call sensorDHT"),DEBUG_MAX_INFO,1);
-		result_DHT = sensorDHT();			// getting temperature and humidity (optional)
-	}
+	if ((act_milli-starttime) > sending_intervall_ms) {
+		if (dht_read) {
+			debug_out(F("Call sensorDHT"),DEBUG_MAX_INFO,1);
+			result_DHT = sensorDHT();			// getting temperature and humidity (optional)
+		}
 
-	if (bmp_read && ((act_milli-starttime) > sending_intervall_ms)) {
-		debug_out(F("Call sensorBMP"),DEBUG_MAX_INFO,1);
-		result_BMP = sensorBMP();			// getting temperature and humidity (optional)
-	}
+		if (bmp_read) {
+			debug_out(F("Call sensorBMP"),DEBUG_MAX_INFO,1);
+			result_BMP = sensorBMP();			// getting temperature and humidity (optional)
+		}
 
-	if (bme280_read && ((act_milli-starttime) > sending_intervall_ms)) {
-		debug_out(F("Call sensorBME280"),DEBUG_MAX_INFO,1);
-		result_BME280 = sensorBME280();			// getting temperature and humidity (optional)
+		if (bme280_read) {
+			debug_out(F("Call sensorBME280"),DEBUG_MAX_INFO,1);
+			result_BME280 = sensorBME280();			// getting temperature and humidity (optional)
+		}
 	}
 
 	if (gps_read && (((act_milli-starttime_GPS) > sampletime_GPS_ms) || ((act_milli-starttime) > sending_intervall_ms))) {
