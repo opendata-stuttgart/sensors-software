@@ -13,6 +13,7 @@ body{font-family:Arial;}\
 table{width:100%}\
 td{vertical-align:top;}\
 a{text-decoration:none;padding:10px;background:blue;color:white;display:block;width:auto;border-radius:5px;}\
+.external{background:blueViolet;color:white;}\
 input[type='text']{width:100%;}\
 input[type='password']{width:100%;}\
 </style>\
@@ -25,7 +26,7 @@ const char WEB_PAGE_FOOTER[] PROGMEM = "<br/><br/><a href='/' style='display:inl
 </body></html>\r\n";
 
 const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a href='/values'>Aktuelle Werte</a><br/>\
-<a href='http://opendata-stuttgart.github.io/feinstaub-map/' target='_blank'>Karte der aktiven Sensoren (externer Link)</a><br/>\
+<a href='http://opendata-stuttgart.github.io/feinstaub-map/' class='external' target='_blank'>Karte der aktiven Sensoren (externer Link)</a><br/>\
 <a href='/config'>Konfiguration</a><br/>\
 <a href='/removeConfig'>Konfiguration löschen</a><br/>\
 <a href='/reset'>Sensor neu starten (Reset)</a><br/>\

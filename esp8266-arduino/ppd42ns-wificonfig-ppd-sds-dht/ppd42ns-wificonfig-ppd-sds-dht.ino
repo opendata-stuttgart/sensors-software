@@ -887,6 +887,7 @@ void webserver_config() {
 		page_content += form_input(F("pwd_influxdb"),F("Passwort: "),pwd_influxdb,50);
 		page_content += F("</table><br/>");
 		page_content += F("<br/><input type='submit' name='submit' value='Speichern'/></form>");
+		page_content += F("<a href='/'>zurück</a>");
 	} else {
 		if (server.hasArg("wlanssid") && server.arg("wlanssid") != "") {
 			server.arg("wlanssid").toCharArray(wlanssid,65);
@@ -999,6 +1000,7 @@ void webserver_values() {
 	page_content += table_row_from_value(F("WiFi&nbsp;Signal"),String(signal_strength)+"&nbsp;dBm");
 	page_content += table_row_from_value(F("Signal&nbsp;Qualität"),String(signal_quality)+"%");
 	page_content += F("</table>");
+	page_content += F("<a href='/'>zurück</a>");
 	page_content += FPSTR(WEB_PAGE_FOOTER);
 	server.send(200,FPSTR(TXT_CONTENT_TYPE_TEXT_HTML),page_content);
 #endif
@@ -1027,6 +1029,7 @@ void webserver_debug_level() {
 			case (5): debug=5; page_content += F("<h3>Setze Debug auf max. info.</h3>");break;
 		}
 	}
+	page_content += F("<a href='/'>zurück</a>");
 	page_content += FPSTR(WEB_PAGE_FOOTER);
 	server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
 }
