@@ -782,6 +782,7 @@ void webserver_root() {
 	page_content = FPSTR(WEB_PAGE_HEADER);
 	page_content.replace("{t}",F("Übersicht"));
 	page_content.replace("{id}",esp_chipid);
+	page_content.replace("{mac}",WiFi.macAddress());
 	page_content.replace("{fw}",SOFTWARE_VERSION);
 	page_content += FPSTR(WEB_ROOT_PAGE_CONTENT);
 	page_content += FPSTR(WEB_PAGE_FOOTER);
@@ -801,6 +802,7 @@ void webserver_config() {
 	page_content += FPSTR(WEB_PAGE_HEADER);
 	page_content.replace("{t}",F("Konfiguration"));
 	page_content.replace("{id}",esp_chipid);
+	page_content.replace("{mac}",WiFi.macAddress());
 	page_content.replace("{fw}",SOFTWARE_VERSION);
 	page_content += FPSTR(WEB_CONFIG_SCRIPT);
 	if ((!server.hasArg("submit")) || (server.arg("submit") != "Save")) {
@@ -972,6 +974,7 @@ void webserver_values() {
 	page_content += FPSTR(WEB_PAGE_HEADER);
 	page_content.replace("{t}",F("Aktuelle Werte"));
 	page_content.replace("{id}",esp_chipid);
+	page_content.replace("{mac}",WiFi.macAddress());
 	page_content.replace("{fw}",SOFTWARE_VERSION);
 	page_content += F("<table>");
 	if (ppd_read) {
@@ -1016,6 +1019,7 @@ void webserver_debug_level() {
 	page_content += FPSTR(WEB_PAGE_HEADER);
 	page_content.replace("{t}","Debug level");
 	page_content.replace("{id}",esp_chipid);
+	page_content.replace("{mac}",WiFi.macAddress());
 	page_content.replace("{fw}",SOFTWARE_VERSION);
 	if (server.hasArg("level")) {
 		switch (server.arg("level").toInt()) {
@@ -1043,6 +1047,7 @@ void webserver_removeConfig() {
 	page_content += FPSTR(WEB_PAGE_HEADER);
 	page_content.replace("{t}","Config.json löschen");
 	page_content.replace("{id}",esp_chipid);
+	page_content.replace("{mac}",WiFi.macAddress());
 	page_content.replace("{fw}",SOFTWARE_VERSION);
 	if (server.hasArg("confirm") && server.arg("confirm") == "yes") {
 #if defined(ESP8266)
@@ -1076,6 +1081,7 @@ void webserver_reset() {
 	page_content += FPSTR(WEB_PAGE_HEADER);
 	page_content.replace("{t}","Sensor neu starten");
 	page_content.replace("{id}",esp_chipid);
+	page_content.replace("{mac}",WiFi.macAddress());
 	page_content.replace("{fw}",SOFTWARE_VERSION);
 	if (server.hasArg("confirm") && server.arg("confirm") == "yes") {
 #if defined(ESP8266)
