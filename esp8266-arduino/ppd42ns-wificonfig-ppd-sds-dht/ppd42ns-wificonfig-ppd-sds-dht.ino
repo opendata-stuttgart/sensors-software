@@ -58,7 +58,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-054"
+#define SOFTWARE_VERSION "NRZ-2016-055"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -820,7 +820,7 @@ void webserver_config() {
 	page_content.replace("{mac}",WiFi.macAddress());
 	page_content.replace("{fw}",SOFTWARE_VERSION);
 	page_content += FPSTR(WEB_CONFIG_SCRIPT);
-	if ((!server.hasArg("submit")) || (server.arg("submit") != "Save")) {
+	if ((!server.hasArg("submit")) || (server.arg("submit") != "Speichern")) {
 		page_content += F("<form method='POST' action='/config' style='width: 100%;'>");
 		page_content += F("<b>WLAN Daten</b><br/>");
 		if (WiFi.status() != WL_CONNECTED) {  // scan for wlan ssids
@@ -910,9 +910,10 @@ void webserver_config() {
 #define readBoolParam(param) if (server.hasArg(#param)){ param = server.arg(#param) == "1"; }
 #define readIntParam(param)  if (server.hasArg(#param)){ int val = server.arg(#param).toInt(); if (val != 0){ param = val; }}
 
-		readCharParam(wlanssid);
-		readCharParam(wlanpwd);
-
+		if (server.hasArg("wlanssid") && server.arg("wlanssid") != "") {
+      readCharParam(wlanssid);
+		  readCharParam(wlanpwd);
+    }
 		readCharParam(www_username);
 		readCharParam(www_password);
 		readBoolParam(www_basicauth_enabled);
