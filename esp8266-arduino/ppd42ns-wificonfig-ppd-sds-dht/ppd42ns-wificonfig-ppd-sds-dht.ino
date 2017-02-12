@@ -58,7 +58,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-054"
+#define SOFTWARE_VERSION "NRZ-2016-055"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -805,7 +805,7 @@ void webserver_config() {
 	page_content.replace("{mac}",WiFi.macAddress());
 	page_content.replace("{fw}",SOFTWARE_VERSION);
 	page_content += FPSTR(WEB_CONFIG_SCRIPT);
-	if ((!server.hasArg("submit")) || (server.arg("submit") != "Save")) {
+	if ((!server.hasArg("submit")) || (server.arg("submit") != "Speichern")) {
 		page_content += F("<form method='POST' action='/config' style='width: 100%;'>");
 		page_content += F("<b>WLAN Daten</b><br/>");
 		if (WiFi.status() != WL_CONNECTED) {  // scan for wlan ssids
@@ -892,9 +892,7 @@ void webserver_config() {
 	} else {
 		if (server.hasArg("wlanssid") && server.arg("wlanssid") != "") {
 			server.arg("wlanssid").toCharArray(wlanssid,65);
-			if (server.hasArg("wlanpwd") && server.arg("wlanpwd") != "") {
-				server.arg("wlanpwd").toCharArray(wlanpwd,65);
-			}
+			server.arg("wlanpwd").toCharArray(wlanpwd,65);
 		}
 		if (server.hasArg("www_username") && server.arg("www_username") != "") { server.arg("www_username").toCharArray(www_username,65); }
 		if (server.hasArg("www_password") && server.arg("www_password") != "") { server.arg("www_password").toCharArray(www_password,65); }
