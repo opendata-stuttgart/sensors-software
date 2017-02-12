@@ -543,39 +543,46 @@ String SDS_version_date() {
 /* copy config from ext_def                                      *
 /*****************************************************************/
 void copyExtDef() {
-	if (WLANSSID != NULL) { strcpy(wlanssid,WLANSSID); }
-	if (WLANPWD  != NULL) { strcpy(wlanpwd,WLANPWD); }
-	if (WWW_USERNAME != NULL) { strcpy(www_username,WWW_USERNAME); }
-	if (WWW_PASSWORD  != NULL) { strcpy(www_password,WWW_PASSWORD); }
-	if (WWW_BASICAUTH_ENABLED != www_basicauth_enabled) { www_basicauth_enabled = WWW_BASICAUTH_ENABLED; }
-	if (DHT_READ != dht_read) { dht_read = DHT_READ; }
-	if (PPD_READ != ppd_read) { ppd_read = PPD_READ; }
-	if (SDS_READ != sds_read) { sds_read = SDS_READ; }
-	if (BMP_READ != bmp_read) { bmp_read = BMP_READ; }
-	if (BME280_READ != bme280_read) { bme280_read = BME280_READ; }
-	if (GPS_READ != gps_read) { gps_read = GPS_READ; }
-	if (SEND2DUSTI != send2dusti) { send2dusti = SEND2DUSTI; }
-	if (SEND2MADAVI != send2madavi) { send2madavi = SEND2MADAVI; }
-	if (SEND2LORA != send2lora) { send2lora = SEND2LORA; }
-	if (SEND2CSV != send2csv) { send2csv = SEND2CSV; }
-	if (AUTO_UPDATE != auto_update) { auto_update = AUTO_UPDATE; }
-	if (HAS_DISPLAY != has_display) { has_display = HAS_DISPLAY; }
 
-	if (DEBUG != debug) { debug = DEBUG; }
+#define strcpyDef(var, def) if (def != NULL) { strcpy(var, def); }
+#define setDef(var, def)    if (def != var) { var = def; }
 
-	if (SEND2CUSTOM != send2custom) { send2custom = SEND2CUSTOM; }
-	if (HOST_CUSTOM != NULL) { strcpy(host_custom,HOST_CUSTOM); }
-	if (URL_CUSTOM != NULL) { strcpy(url_custom,URL_CUSTOM); }
-	if (HTTPPORT_CUSTOM != httpPort_custom) { httpPort_custom = HTTPPORT_CUSTOM; }
-	if (USER_CUSTOM != NULL) { strcpy(user_custom,USER_CUSTOM); }
-	if (PWD_CUSTOM != NULL) { strcpy(pwd_custom,PWD_CUSTOM); }
+	strcpyDef(wlanssid, WLANSSID);
+	strcpyDef(wlanpwd, WLANPWD);
+	strcpyDef(www_username, WWW_USERNAME);
+	strcpyDef(www_password, WWW_PASSWORD);
+	setDef(www_basicauth_enabled, WWW_BASICAUTH_ENABLED);
+	setDef(dht_read, DHT_READ);
+	setDef(ppd_read, PPD_READ);
+	setDef(sds_read, SDS_READ);
+	setDef(bmp_read, BMP_READ);
+	setDef(bme280_read, BME280_READ);
+	setDef(gps_read, GPS_READ);
+	setDef(send2dusti, SEND2DUSTI);
+	setDef(send2madavi, SEND2MADAVI);
+	setDef(send2lora, SEND2LORA);
+	setDef(send2csv, SEND2CSV);
+	setDef(auto_update, AUTO_UPDATE);
+	setDef(has_display, HAS_DISPLAY);
 
-	if (SEND2INFLUXDB != send2influxdb) { send2influxdb = SEND2INFLUXDB; }
-	if (HOST_INFLUXDB != NULL) { strcpy(host_influxdb,HOST_INFLUXDB); }
-	if (URL_INFLUXDB != NULL) { strcpy(url_influxdb,URL_INFLUXDB); }
-	if (HTTPPORT_INFLUXDB != httpPort_influxdb) { httpPort_influxdb = HTTPPORT_INFLUXDB; }
-	if (USER_INFLUXDB != NULL) {strcpy(user_influxdb,USER_INFLUXDB); }
-	if (PWD_INFLUXDB != NULL) {strcpy(pwd_influxdb,PWD_INFLUXDB); }
+	setDef(debug, DEBUG);
+
+	setDef(send2custom, SEND2CUSTOM);
+	strcpyDef(host_custom, HOST_CUSTOM);
+	strcpyDef(url_custom, URL_CUSTOM);
+	setDef(httpPort_custom, HTTPPORT_CUSTOM);
+	strcpyDef(user_custom, USER_CUSTOM);
+	strcpyDef(pwd_custom, PWD_CUSTOM);
+
+	setDef(send2influxdb, SEND2INFLUXDB);
+	strcpyDef(host_influxdb, HOST_INFLUXDB);
+	strcpyDef(url_influxdb, URL_INFLUXDB);
+	setDef(httpPort_influxdb, HTTPPORT_INFLUXDB);
+	strcpyDef(user_influxdb, USER_INFLUXDB);
+	strcpyDef(pwd_influxdb, PWD_INFLUXDB);
+
+#undef strcpyDef
+#undef setDef
 }
 
 /*****************************************************************
@@ -609,36 +616,41 @@ void readConfig() {
 				if (json.success()) {
 					debug_out(F("parsed json..."),DEBUG_MIN_INFO,1);
 					if (json.containsKey("SOFTWARE_VERSION")) strcpy(version_from_local_config, json["SOFTWARE_VERSION"]);
-					if (json.containsKey("wlanssid")) strcpy(wlanssid, json["wlanssid"]);
-					if (json.containsKey("wlanpwd")) strcpy(wlanpwd, json["wlanpwd"]);
-					if (json.containsKey("www_username")) strcpy(www_username, json["www_username"]);
-					if (json.containsKey("www_password")) strcpy(www_password, json["www_password"]);
-					if (json.containsKey("www_basicauth_enabled")) www_basicauth_enabled = json["www_basicauth_enabled"];
-					if (json.containsKey("dht_read")) dht_read = json["dht_read"];
-					if (json.containsKey("ppd_read")) ppd_read = json["ppd_read"];
-					if (json.containsKey("sds_read")) sds_read = json["sds_read"];
-					if (json.containsKey("bmp_read")) bmp_read = json["bmp_read"];
-					if (json.containsKey("bme280_read")) bme280_read = json["bme280_read"];
-					if (json.containsKey("gps_read")) gps_read = json["gps_read"];
-					if (json.containsKey("send2dusti")) send2dusti = json["send2dusti"];
-					if (json.containsKey("send2madavi")) send2madavi = json["send2madavi"];
-					if (json.containsKey("send2lora")) send2lora = json["send2lora"];
-					if (json.containsKey("send2csv")) send2csv = json["send2csv"];
-					if (json.containsKey("auto_update")) auto_update = json["auto_update"];
-					if (json.containsKey("has_display")) has_display = json["has_display"];
-					if (json.containsKey("debug")) debug = json["debug"];
-					if (json.containsKey("send2custom")) send2custom = json["send2custom"];
-					if (json.containsKey("host_custom")) strcpy(host_custom, json["host_custom"]);
-					if (json.containsKey("url_custom")) strcpy(url_custom, json["url_custom"]);
-					if (json.containsKey("httpPort_custom")) httpPort_custom = json["httpPort_custom"];
-					if (json.containsKey("user_custom")) strcpy(user_custom, json["user_custom"]);
-					if (json.containsKey("pwd_custom")) strcpy(pwd_custom, json["pwd_custom"]);
-					if (json.containsKey("send2influxdb")) send2influxdb = json["send2influxdb"];
-					if (json.containsKey("host_influxdb")) strcpy(host_influxdb, json["host_influxdb"]);
-					if (json.containsKey("url_influxdb")) strcpy(url_influxdb, json["url_influxdb"]);
-					if (json.containsKey("httpPort_influxdb")) httpPort_influxdb = json["httpPort_influxdb"];
-					if (json.containsKey("user_influxdb")) strcpy(user_influxdb, json["user_influxdb"]);
-					if (json.containsKey("pwd_influxdb")) strcpy(pwd_influxdb, json["pwd_influxdb"]);
+
+#define setFromJSON(key)    if (json.containsKey(#key)) key = json[#key];
+#define strcpyFromJSON(key) if (json.containsKey(#key)) strcpy(key, json[#key]);
+					strcpyFromJSON(wlanssid);
+					strcpyFromJSON(wlanpwd);
+					strcpyFromJSON(www_username);
+					strcpyFromJSON(www_password);
+					setFromJSON(www_basicauth_enabled);
+					setFromJSON(dht_read);
+					setFromJSON(ppd_read);
+					setFromJSON(sds_read);
+					setFromJSON(bmp_read);
+					setFromJSON(bme280_read);
+					setFromJSON(gps_read);
+					setFromJSON(send2dusti);
+					setFromJSON(send2madavi);
+					setFromJSON(send2lora);
+					setFromJSON(send2csv);
+					setFromJSON(auto_update);
+					setFromJSON(has_display);
+					setFromJSON(debug);
+					setFromJSON(send2custom);
+					strcpyFromJSON(host_custom);
+					strcpyFromJSON(url_custom);
+					setFromJSON(httpPort_custom);
+					strcpyFromJSON(user_custom);
+					strcpyFromJSON(pwd_custom);
+					setFromJSON(send2influxdb);
+					strcpyFromJSON(host_influxdb);
+					strcpyFromJSON(url_influxdb);
+					setFromJSON(httpPort_influxdb);
+					strcpyFromJSON(user_influxdb);
+					strcpyFromJSON(pwd_influxdb);
+#undef setFromJSON
+#undef strcpyFromJSON
 				} else {
 					debug_out(F("failed to load json config"),DEBUG_ERROR,1);
 				}
@@ -661,38 +673,41 @@ void writeConfig() {
 	debug_out(F("saving config..."),DEBUG_MIN_INFO,1);
 	StaticJsonBuffer<2000> jsonBuffer;
 	JsonObject& json = jsonBuffer.createObject();
-	json["SOFTWARE_VERSION"] = SOFTWARE_VERSION;
-	json["wlanssid"] = wlanssid;
-	json["wlanpwd"] = wlanpwd;
-	json["www_username"] = www_username;
-	json["www_password"] = www_password;
-	json["www_basicauth_enabled"] = www_basicauth_enabled;
-	json["dht_read"] = dht_read;
-	json["ppd_read"] = ppd_read;
-	json["sds_read"] = sds_read;
-	json["bmp_read"] = bmp_read;
-	json["bme280_read"] = bme280_read;
-	json["gps_read"] = gps_read;
-	json["send2dusti"] = send2dusti;
-	json["send2madavi"] = send2madavi;
-	json["send2lora"] = send2lora;
-	json["send2csv"] = send2csv;
-	json["auto_update"] = auto_update;
-	json["has_display"] = has_display;
-	json["debug"] = debug;
-	json["send2custom"] = send2custom;
-	json["host_custom"] = host_custom;
-	json["url_custom"] = url_custom;
-	json["httpPort_custom"] = httpPort_custom;
-	json["user_custom"] = user_custom;
-	json["pwd_custom"] = pwd_custom;
 
-	json["send2influxdb"] = send2influxdb;
-	json["host_influxdb"] = host_influxdb;
-	json["url_influxdb"] = url_influxdb;
-	json["httpPort_influxdb"] = httpPort_influxdb;
-	json["user_influxdb"] = user_influxdb;
-	json["pwd_influxdb"] = pwd_influxdb;
+#define copyToJSON(varname) json[#varname] = varname;
+	copyToJSON(SOFTWARE_VERSION);
+	copyToJSON(wlanssid);
+	copyToJSON(wlanpwd);
+	copyToJSON(www_username);
+	copyToJSON(www_password);
+	copyToJSON(www_basicauth_enabled);
+	copyToJSON(dht_read);
+	copyToJSON(ppd_read);
+	copyToJSON(sds_read);
+	copyToJSON(bmp_read);
+	copyToJSON(bme280_read);
+	copyToJSON(gps_read);
+	copyToJSON(send2dusti);
+	copyToJSON(send2madavi);
+	copyToJSON(send2lora);
+	copyToJSON(send2csv);
+	copyToJSON(auto_update);
+	copyToJSON(has_display);
+	copyToJSON(debug);
+	copyToJSON(send2custom);
+	copyToJSON(host_custom);
+	copyToJSON(url_custom);
+	copyToJSON(httpPort_custom);
+	copyToJSON(user_custom);
+	copyToJSON(pwd_custom);
+
+	copyToJSON(send2influxdb);
+	copyToJSON(host_influxdb);
+	copyToJSON(url_influxdb);
+	copyToJSON(httpPort_influxdb);
+	copyToJSON(user_influxdb);
+	copyToJSON(pwd_influxdb);
+#undef copyToJSON
 
 	File configFile = SPIFFS.open("/config.json", "w");
 	if (!configFile) {
@@ -735,7 +750,7 @@ String form_password(const String& name, const String& info, const String& value
 }
 
 String form_checkbox(const String& name, const String& info, const bool checked) {
-	String s = F("<label for='{n}'><input type='checkbox' name='{n}' value='1' id='{n}' {c}/> {i}</label><br/>");
+	String s = F("<label for='{n}'><input type='checkbox' name='{n}' value='1' id='{n}' {c}/><input type='hidden' name='{n}' value='0' /> {i}</label><br/>");
 	if (checked) {s.replace("{c}",F(" checked='checked'"));} else {s.replace("{c}","");};
 	s.replace("{i}",info);s.replace("{n}",name);
 	return s;
@@ -890,40 +905,46 @@ void webserver_config() {
 		page_content += F("</table><br/>");
 		page_content += F("<br/><input type='submit' name='submit' value='Speichern'/></form>");
 	} else {
-		if (server.hasArg("wlanssid") && server.arg("wlanssid") != "") {
-			server.arg("wlanssid").toCharArray(wlanssid,65);
-			if (server.hasArg("wlanpwd") && server.arg("wlanpwd") != "") {
-				server.arg("wlanpwd").toCharArray(wlanpwd,65);
-			}
-		}
-		if (server.hasArg("www_username") && server.arg("www_username") != "") { server.arg("www_username").toCharArray(www_username,65); }
-		if (server.hasArg("www_password") && server.arg("www_password") != "") { server.arg("www_password").toCharArray(www_password,65); }
-		if (server.hasArg("www_basicauth_enabled") && server.arg("www_basicauth_enabled") == "1") { www_basicauth_enabled = 1; } else { www_basicauth_enabled = 0; }
-		if (server.hasArg("send2dusti") && server.arg("send2dusti") == "1") { send2dusti = 1; } else { send2dusti = 0; }
-		if (server.hasArg("send2madavi") && server.arg("send2madavi") == "1") { send2madavi = 1; } else { send2madavi = 0; }
-		if (server.hasArg("dht_read") && server.arg("dht_read") == "1") { dht_read = 1; } else { dht_read = 0; }
-		if (server.hasArg("sds_read") && server.arg("sds_read") == "1") { sds_read = 1; } else { sds_read = 0; }
-		if (server.hasArg("ppd_read") && server.arg("ppd_read") == "1") { ppd_read = 1; } else { ppd_read = 0; }
-		if (server.hasArg("bmp_read") && server.arg("bmp_read") == "1") { bmp_read = 1; } else { bmp_read = 0; }
-		if (server.hasArg("bme280_read") && server.arg("bme280_read") == "1") { bme280_read = 1; } else { bme280_read = 0; }
-		if (server.hasArg("gps_read") && server.arg("gps_read") == "1") { gps_read = 1; } else { gps_read = 0; }
-		if (server.hasArg("auto_update") && server.arg("auto_update") == "1") { auto_update = 1; } else { auto_update = 0; }
-		if (server.hasArg("has_display") && server.arg("has_display") == "1") { has_display = 1; } else { has_display = 0; }
+
+#define readCharParam(param) if (server.hasArg(#param)){ server.arg(#param).toCharArray(param, sizeof(param)); }
+#define readBoolParam(param) if (server.hasArg(#param)){ param = server.arg(#param) == "1"; }
+#define readIntParam(param)  if (server.hasArg(#param)){ int val = server.arg(#param).toInt(); if (val != 0){ param = val; }}
+
+		readCharParam(wlanssid);
+		readCharParam(wlanpwd);
+
+		readCharParam(www_username);
+		readCharParam(www_password);
+		readBoolParam(www_basicauth_enabled);
+		readBoolParam(send2dusti);
+		readBoolParam(send2madavi);
+		readBoolParam(dht_read);
+		readBoolParam(sds_read);
+		readBoolParam(ppd_read);
+		readBoolParam(bmp_read);
+		readBoolParam(bme280_read);
+		readBoolParam(gps_read);
+		readBoolParam(auto_update);
+		readBoolParam(has_display);
 		if (server.hasArg("debug")) { debug = server.arg("debug").toInt(); } else { debug = 0; }
 
-		if (server.hasArg("send2custom") && server.arg("send2custom") == "1") { send2custom = 1; } else { send2custom = 0; }
-		if (server.hasArg("host_custom") && server.arg("host_custom") != "") { server.arg("host_custom").toCharArray(host_custom,100); }
-		if (server.hasArg("url_custom") && server.arg("url_custom") != "") { server.arg("url_custom").toCharArray(url_custom,100); }
-		if (server.hasArg("httpPort_custom") && server.arg("httpPort_custom").toInt() != 0) { httpPort_custom = server.arg("httpPort_custom").toInt();}
-		if (server.hasArg("user_custom") && server.arg("user_custom") != "") { server.arg("user_custom").toCharArray(user_custom,100); }
-		if (server.hasArg("pwd_custom") && server.arg("pwd_custom") != "") { server.arg("pwd_custom").toCharArray(pwd_custom,100); }
+		readBoolParam(send2custom);
+		readCharParam(host_custom);
+		readCharParam(url_custom);
+		readIntParam(httpPort_custom);
+		readCharParam(user_custom);
+		readCharParam(pwd_custom);
 
-		if (server.hasArg("send2influxdb") && server.arg("send2influxdb") == "1") { send2influxdb = 1; } else { send2influxdb = 0; }
-		if (server.hasArg("host_influxdb") && server.arg("host_influxdb") != "") { server.arg("host_influxdb").toCharArray(host_influxdb,100); }
-		if (server.hasArg("url_influxdb") && server.arg("url_influxdb") != "") { server.arg("url_influxdb").toCharArray(url_influxdb,100); }
-		if (server.hasArg("httpPort_influxdb") && server.arg("httpPort_influxdb").toInt() != 0) { httpPort_influxdb = server.arg("httpPort_influxdb").toInt();}
-		if (server.hasArg("user_influxdb") && server.arg("user_influxdb") != "") { server.arg("user_influxdb").toCharArray(user_influxdb,100); }
-		if (server.hasArg("pwd_influxdb") && server.arg("pwd_influxdb") != "") { server.arg("pwd_influxdb").toCharArray(pwd_influxdb,100); }
+		readBoolParam(send2influxdb);
+		readCharParam(host_influxdb);
+		readCharParam(url_influxdb);
+		readIntParam(httpPort_influxdb);
+		readCharParam(user_influxdb);
+		readCharParam(pwd_influxdb);
+
+#undef readCharParam
+#undef readBoolParam
+#undef readIntParam
 
 		config_needs_write = true;
 
