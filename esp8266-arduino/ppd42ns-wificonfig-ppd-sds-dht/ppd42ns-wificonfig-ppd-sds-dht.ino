@@ -805,7 +805,7 @@ void webserver_config() {
 	page_content.replace("{mac}",WiFi.macAddress());
 	page_content.replace("{fw}",SOFTWARE_VERSION);
 	page_content += FPSTR(WEB_CONFIG_SCRIPT);
-	if ((!server.hasArg("submit")) || (server.arg("submit") != "Save")) {
+	if (server.method() == HTTP_GET) {
 		page_content += F("<form method='POST' action='/config' style='width: 100%;'>");
 		page_content += F("<b>WLAN Daten</b><br/>");
 		if (WiFi.status() != WL_CONNECTED) {  // scan for wlan ssids
@@ -851,7 +851,7 @@ void webserver_config() {
 		page_content += F("<table>");
 		page_content += form_input(F("wlanssid"),F("WLAN"),wlanssid,64);
 		page_content += form_password(F("wlanpwd"),F("Passwort"),wlanpwd,64);
-		page_content += F("</table><br/><input type='submit' name='submit' value='Speichern'/><br/><br/><b>BasicAuth</b><br/>");
+		page_content += F("</table><br/><input type='submit' value='Speichern'/><br/><br/><b>BasicAuth</b><br/>");
 		page_content += F("<table>");
 		page_content += form_input(F("www_username"),F("User"),www_username,64);
 		page_content += form_password(F("www_password"),F("Passwort"),www_password,64);
@@ -888,8 +888,8 @@ void webserver_config() {
 		page_content += form_input(F("user_influxdb"),F("Benutzer: "),user_influxdb,50);
 		page_content += form_input(F("pwd_influxdb"),F("Passwort: "),pwd_influxdb,50);
 		page_content += F("</table><br/>");
-		page_content += F("<br/><input type='submit' name='submit' value='Speichern'/></form>");
-	} else {
+		page_content += F("<br/><input type='submit' value='Speichern'/></form>");
+	} else if (server.method() == HTTP_POST) {
 		if (server.hasArg("wlanssid") && server.arg("wlanssid") != "") {
 			server.arg("wlanssid").toCharArray(wlanssid,65);
 			if (server.hasArg("wlanpwd") && server.arg("wlanpwd") != "") {
@@ -952,6 +952,8 @@ void webserver_config() {
 		page_content += F("<br/>Passwort "); page_content += pwd_influxdb;
 		page_content += F("<br/><br/><a href='/reset?confirm=yes'>Gerät neu starten?</a>");
 
+	} else {
+		server.send(405, FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN), "Method not allowed");
 	}
 	page_content += FPSTR(WEB_PAGE_FOOTER);
 	server.send(200,FPSTR(TXT_CONTENT_TYPE_TEXT_HTML),page_content);
