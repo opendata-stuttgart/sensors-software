@@ -58,7 +58,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-056"
+#define SOFTWARE_VERSION "NRZ-2016-058"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -1291,8 +1291,8 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 	request_head += F("Host: "); request_head += String(host) + "\r\n";
 	request_head += F("Content-Type: "); request_head += contentType + "\r\n";
 	if (basic_auth_string != "") { request_head += F("Authorization: Basic "); request_head += String(basic_auth_string) + "\r\n";}
-	request_head += F("PIN: "); request_head += String(pin) + "\r\n";
-	request_head += F("Sensor: esp8266-"); request_head += esp_chipid + "\r\n";
+	request_head += F("X-PIN: "); request_head += String(pin) + "\r\n";
+	request_head += F("X-Sensor: esp8266-"); request_head += esp_chipid + "\r\n";
 	request_head += F("Content-Length: "); request_head += String(data.length(),DEC) + "\r\n";
 	request_head += F("Connection: close\r\n\r\n");
 
