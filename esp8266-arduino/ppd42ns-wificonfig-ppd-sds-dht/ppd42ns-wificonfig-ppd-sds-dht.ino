@@ -58,7 +58,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-055"
+#define SOFTWARE_VERSION "NRZ-2016-056"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -820,7 +820,7 @@ void webserver_config() {
 	page_content.replace("{mac}",WiFi.macAddress());
 	page_content.replace("{fw}",SOFTWARE_VERSION);
 	page_content += FPSTR(WEB_CONFIG_SCRIPT);
-	if ((!server.hasArg("submit")) || (server.arg("submit") != "Speichern")) {
+	if (server.method() == HTTP_GET) {
 		page_content += F("<form method='POST' action='/config' style='width: 100%;'>");
 		page_content += F("<b>WLAN Daten</b><br/>");
 		if (WiFi.status() != WL_CONNECTED) {  // scan for wlan ssids
@@ -1071,7 +1071,9 @@ void webserver_removeConfig() {
 	page_content.replace("{id}",esp_chipid);
 	page_content.replace("{mac}",WiFi.macAddress());
 	page_content.replace("{fw}",SOFTWARE_VERSION);
-	if (server.hasArg("confirm") && server.arg("confirm") == "yes") {
+	if (server.method() == HTTP_GET) {
+		page_content += FPSTR(WEB_REMOVE_CONFIG_CONTENT);
+	} else {
 #if defined(ESP8266)
 		if (SPIFFS.exists("/config.json")) {	//file exists
 			debug_out(F("removing config.json..."),DEBUG_MIN_INFO,1);
@@ -1084,8 +1086,6 @@ void webserver_removeConfig() {
 			page_content += F("<h3>Config.json nicht gefunden.</h3>");
 		}
 #endif
-	} else {
-		page_content += FPSTR(WEB_REMOVE_CONFIG_CONTENT);
 	}
 	page_content += FPSTR(WEB_PAGE_FOOTER);
 	server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
@@ -1105,12 +1105,12 @@ void webserver_reset() {
 	page_content.replace("{id}",esp_chipid);
 	page_content.replace("{mac}",WiFi.macAddress());
 	page_content.replace("{fw}",SOFTWARE_VERSION);
-	if (server.hasArg("confirm") && server.arg("confirm") == "yes") {
+	if (server.method() == HTTP_GET) {
+		page_content += FPSTR(WEB_RESET_CONTENT);
+	} else {
 #if defined(ESP8266)
 		ESP.restart();
 #endif
-	} else {
-		page_content += FPSTR(WEB_RESET_CONTENT);
 	}
 	page_content += FPSTR(WEB_PAGE_FOOTER);
 	server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);

@@ -15,6 +15,8 @@ td{vertical-align:top;}\
 a{text-decoration:none;padding:10px;background:blue;color:white;display:block;width:auto;border-radius:5px;}\
 input[type='text']{width:100%;}\
 input[type='password']{width:100%;}\
+input[type='submit']{border-radius:5px;font-size:medium;padding:5px;}\
+.submit_blue{padding:9px !important;width:100%;border-style:none;background:blue;color:white;text-align:left;}\
 </style>\
 </head><body>\
 <h3 style='min-height:100px;'><a href='/' style='background:none;width:0;'><img src='/luftdaten_logo.svg' style='float:left;margin-right:20px'/></a>{t} Feinstaubsensor {id}<br/><small>MAC: {mac}<br/>Firmware {fw}</small></h3>\
@@ -44,11 +46,11 @@ const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a href='/values'>Aktuelle Werte</
 const char WEB_CONFIG_SCRIPT[] PROGMEM = "<script>function setSSID(ssid){document.getElementById('wlanssid').value=ssid.innerText||ssid.textContent;document.getElementById('wlanpwd').focus();}</script>";
 
 const char WEB_REMOVE_CONFIG_CONTENT[] PROGMEM = "<h3>Konfiguration wirklich löschen?</h3>\
-<table><tr><td><a href='/removeConfig?confirm=yes'>Löschen</a></td><td><a href='/'>Abbrechen</a></td></tr></table>\
+<table><tr><td><form method='POST' action='/removeConfig'><input type='submit' class='submit_blue' name='submit' value='Löschen'/></form></td><td><a href='/'>Abbrechen</a></td></tr></table>\
 ";
 
 const char WEB_RESET_CONTENT[] PROGMEM = "<h3>Sensor wirklich neu starten?</h3>\
-<table><tr><td><a href='/reset?confirm=yes'>Neu starten</a></td><td><a href='/'>Abbrechen</a></td></tr></table>\
+<table><tr><td><form method='POST' action'/reset'><input type='submit' class='submit_blue' name='submit' value='Neu starten'/></form></td><td><a href='/'>Abbrechen</a></td></tr></table>\
 ";
 
 const char LUFTDATEN_INFO_LOGO_SVG[] PROGMEM = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\
