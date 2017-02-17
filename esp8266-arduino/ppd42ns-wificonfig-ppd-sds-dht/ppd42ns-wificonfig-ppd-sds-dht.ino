@@ -58,7 +58,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-058"
+#define SOFTWARE_VERSION "NRZ-2016-059"
 
 /*****************************************************************
 /* Global definitions (moved to ext_def.h)                       *
@@ -1117,6 +1117,14 @@ void webserver_reset() {
 }
 
 /*****************************************************************
+/* Webserver data.json                                           *
+/*****************************************************************/
+void webserver_data_json() {
+	debug_out(F("output data json..."),DEBUG_MIN_INFO,1);
+	server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML),last_data_string);
+}
+
+/*****************************************************************
 /* Webserver Logo Luftdaten.info                                 *
 /*****************************************************************/
 void webserver_luftdaten_logo() {
@@ -1156,6 +1164,7 @@ void setup_webserver() {
 	server.on("/debug", webserver_debug_level);
 	server.on("/removeConfig", webserver_removeConfig);
 	server.on("/reset", webserver_reset);
+	server.on("/data.json",webserver_data_json);
 	server.on("/luftdaten_logo.svg", webserver_luftdaten_logo);
 	server.on("/cfg_logo.svg", webserver_cfg_logo);
 	server.onNotFound(webserver_not_found);
@@ -1974,7 +1983,6 @@ bool initBME280(char addr) {
 		return false;
 	}
 }
-
 
 /*****************************************************************
 /* The Setup                                                     *
