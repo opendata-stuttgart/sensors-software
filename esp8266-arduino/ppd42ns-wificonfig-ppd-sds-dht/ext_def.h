@@ -1,5 +1,5 @@
 // WLAN Konfig
-#define WLANSSID "Freifunk"
+#define WLANSSID "Freifunk-disabled"
 #define WLANPWD ""
 
 // BasicAuth Konfig

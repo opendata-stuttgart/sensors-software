@@ -58,25 +58,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-059"
-
-/*****************************************************************
-/* Global definitions (moved to ext_def.h)                       *
-/* #define WLANSSID "Freifunk"                                   *
-/* #define WLANPWD ""                                            *
-/*                                                               *
-/* #define DHT_READ 0                                            *
-/* #define PPD_READ 1                                            *
-/* #define SDS_READ 0                                            *
-/*                                                               *
-/* #define SEND2DUSTI 1                                          *
-/* #define SEND2MADAVI 0                                         *
-/* #define SEND2MQTT 0                                           *
-/* #define SEND2LORA 0                                           *
-/* #define SEND2CSV 0                                            *
-/*                                                               *
-/* #define DEBUG 3                                               *
-/*****************************************************************/
+#define SOFTWARE_VERSION "NRZ-2016-062"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -113,7 +95,7 @@
 /*****************************************************************
 /* Variables with defaults                                       *
 /*****************************************************************/
-char wlanssid[65] = "Freifunk";
+char wlanssid[65] = "Freifunk-disabled";
 char wlanpwd[65] = "";
 
 char www_username[65] = "admin";
@@ -306,9 +288,6 @@ bool config_needs_write = false;
 bool first_csv_line = 1;
 
 String data_first_part = "{\"software_version\": \"" + String(SOFTWARE_VERSION) + "\"FEATHERCHIPID, \"sensordatavalues\":[";
-
-#define LEAP_YEAR(Y)     ( ((1970+Y)>0) && !((1970+Y)%4) && ( ((1970+Y)%100) || !((1970+Y)%400) ) )
-static uint8_t monthDays[]={31,28,31,30,31,30,31,31,30,31,30,31}; // API starts months from 1, this array starts from 0
 
 static unsigned long last_loop;
 
@@ -1121,7 +1100,7 @@ void webserver_reset() {
 /*****************************************************************/
 void webserver_data_json() {
 	debug_out(F("output data json..."),DEBUG_MIN_INFO,1);
-	server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML),last_data_string);
+	server.send(200, FPSTR(TXT_CONTENT_TYPE_JSON),last_data_string);
 }
 
 /*****************************************************************
@@ -1176,8 +1155,6 @@ void setup_webserver() {
 
 /*****************************************************************
 /* WifiConfig                                                    *
-/* Custom API, MQTT, InfuxDB have to be configured in ext_def.h  *
-/* no more fields possible for new options                       *
 /*****************************************************************/
 void wifiConfig() {
 #if defined(ESP8266)
@@ -1203,6 +1180,7 @@ void wifiConfig() {
 	while (((millis() - last_page_load) < 600000) && (! config_needs_write)) {
 		dnsServer.processNextRequest();
 		server.handleClient();
+		wdt_reset(); // nodemcu is alive
 		yield();
 	}
 
@@ -1374,6 +1352,7 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 	debug_out(F("End connecting to "),DEBUG_MIN_INFO,0);
 	debug_out(host,DEBUG_MIN_INFO,1);
 
+	wdt_reset(); // nodemcu is alive
 	yield();
 #endif
 }
@@ -2071,6 +2050,10 @@ void setup() {
 		MDNS.addService("http", "tcp", 80);
 	}
 
+	// sometimes parallel sending data and web page will stop nodemcu, watchdogtimer set to 8 seconds
+	wdt_disable();
+	wdt_enable(30000);// 30 sec
+
 	starttime = millis();					// store the start time
 	starttime_SDS = millis();
 }
@@ -2103,6 +2086,8 @@ void loop() {
 	send_now = (act_milli-starttime) > sending_intervall_ms;
 
 	sample_count++;
+
+	wdt_reset(); // nodemcu is alive
 
 	if (last_micro != 0) {
 		diff_micro = act_micro-last_micro;
