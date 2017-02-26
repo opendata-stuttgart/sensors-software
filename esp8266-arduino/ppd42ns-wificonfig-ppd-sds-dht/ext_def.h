@@ -1,6 +1,11 @@
 // WLAN Konfig
-#define WLANSSID "Freifunk"
+#define WLANSSID "Freifunk-disabled"
 #define WLANPWD ""
+
+// BasicAuth Konfig
+#define WWW_USERNAME "admin"
+#define WWW_PASSWORD "feinstaub"
+#define WWW_BASICAUTH_ENABLED 0
 
 // Wohin gehen die Daten?
 #define SEND2DUSTI 1
@@ -65,6 +70,14 @@
 #if defined(ESP8266)
 #define BMP_PIN_SCL D4
 #define BMP_PIN_SDA D3
+#endif
+
+// BME280, Luftdruck-Sensor
+#define BME280_READ 0
+#define BME280_API_PIN 11
+#if defined(ESP8266)
+#define BME280_PIN_SCL D4
+#define BME280_PIN_SDA D3
 #endif
 
 // GPS, bevorzugt Neo-6M

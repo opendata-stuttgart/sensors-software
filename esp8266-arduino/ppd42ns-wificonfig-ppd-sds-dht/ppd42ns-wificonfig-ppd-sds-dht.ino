@@ -3,6 +3,21 @@
 /*****************************************************************
 /* OK LAB Particulate Matter Sensor                              *
 /*      - nodemcu-LoLin board                                    *
+/*      - Nova SDS0111                                           *
+/*  ﻿http://inovafitness.com/en/Laser-PM2-5-Sensor-SDS011-35.html *
+/*                                                               *
+/* Wiring Instruction:                                           *
+/*      - SDS011 Pin 1  (TX)   -> Pin D1 / GPIO5                 *
+/*      - SDS011 Pin 2  (RX)   -> Pin D2 / GPIO4                 *
+/*      - SDS011 Pin 3  (GND)  -> GND                            *
+/*      - SDS011 Pin 4  (2.5m) -> unused                         *
+/*      - SDS011 Pin 5  (5V)   -> VU                             *
+/*      - SDS011 Pin 6  (1m)   -> unused                         *
+/*                                                               *
+/*****************************************************************
+/*                                                               *
+/* Alternative                                                   *
+/*      - nodemcu-LoLin board                                    *
 /*      - Shinyei PPD42NS                                        *
 /*      http://www.sca-shinyei.com/pdf/PPD42NS.pdf               *
 /*                                                               *
@@ -20,21 +35,6 @@
 /*      - PPD42NS Pin 5 (red)   => unused                        *
 /*                                                               *
 /*****************************************************************
-/*                                                               *
-/* Alternative                                                   *
-/*      - nodemcu-LoLin board                                    *
-/*      - Nova SDS0111                                           *
-/*  ﻿http://inovafitness.com/en/Laser-PM2-5-Sensor-SDS011-35.html *
-/*                                                               *
-/* Wiring Instruction:                                           *
-/*      - SDS011 Pin 1  (TX)   -> Pin D1 / GPIO5                 *
-/*      - SDS011 Pin 2  (RX)   -> Pin D2 / GPIO4                 *
-/*      - SDS011 Pin 3  (GND)  -> GND                            *
-/*      - SDS011 Pin 4  (2.5m) -> unused                         *
-/*      - SDS011 Pin 5  (5V)   -> VU                             *
-/*      - SDS011 Pin 6  (1m)   -> unused                         *
-/*                                                               *
-/*****************************************************************
 /* Extension: DHT22 (AM2303)                                     *
 /*  ﻿http://www.aosong.com/en/products/details.asp?id=117         *
 /*                                                               *
@@ -46,10 +46,11 @@
 /*      - DHT22 Pin 4 (GND)     -> Pin GND                       *
 /*                                                               *
 /*****************************************************************
-/* Extension: OLED Display with SSD1309                          *
+/* Extensions connected via I2C:                                 *
+/* BMP180, BME280, OLED Display with SSD1309                     *
 /*                                                               *
 /* Wiring Instruction                                            *
-/* (see labels on display)                                       *
+/* (see labels on display or sensor board)                       *
 /*      VCC       ->     Pin 3V3                                 *
 /*      GND       ->     Pin GND                                 *
 /*      SCL       ->     Pin D4 (GPIO2)                          *
@@ -57,25 +58,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-046"
-
-/*****************************************************************
-/* Global definitions (moved to ext_def.h)                       *
-/* #define WLANSSID "Freifunk"                                   *
-/* #define WLANPWD ""                                            *
-/*                                                               *
-/* #define DHT_READ 0                                            *
-/* #define PPD_READ 1                                            *
-/* #define SDS_READ 0                                            *
-/*                                                               *
-/* #define SEND2DUSTI 1                                          *
-/* #define SEND2MADAVI 0                                         *
-/* #define SEND2MQTT 0                                           *
-/* #define SEND2LORA 0                                           *
-/* #define SEND2CSV 0                                            *
-/*                                                               *
-/* #define DEBUG 3                                               *
-/*****************************************************************/
+#define SOFTWARE_VERSION "NRZ-2016-062"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -102,6 +85,7 @@
 #include <Wire.h>
 #include <DHT.h>
 #include <Adafruit_BMP085.h>
+#include <Adafruit_BME280.h>
 #include <TinyGPS++.h>
 #include <Ticker.h>
 
@@ -111,8 +95,12 @@
 /*****************************************************************
 /* Variables with defaults                                       *
 /*****************************************************************/
-char wlanssid[65] = "Freifunk";
+char wlanssid[65] = "Freifunk-disabled";
 char wlanpwd[65] = "";
+
+char www_username[65] = "admin";
+char www_password[65] = "feinstaub";
+bool www_basicauth_enabled = 0;
 
 char version_from_local_config[30] = "";
 
@@ -120,6 +108,7 @@ bool dht_read = 1;
 bool ppd_read = 0;
 bool sds_read = 1;
 bool bmp_read = 0;
+bool bme280_read = 0;
 bool gps_read = 0;
 bool send2dusti = 1;
 bool send2madavi = 1;
@@ -197,6 +186,11 @@ DHT dht(DHT_PIN, DHT_TYPE);
 Adafruit_BMP085 bmp;
 
 /*****************************************************************
+/* BME280 declaration                                            *
+/*****************************************************************/
+Adafruit_BME280 bme280;
+
+/*****************************************************************
 /* GPS declaration                                               *
 /*****************************************************************/
 #if defined(ARDUINO_SAMD_ZERO) || defined(ESP8266)
@@ -219,6 +213,7 @@ unsigned long trigOnP2;
 unsigned long lowpulseoccupancyP1 = 0;
 unsigned long lowpulseoccupancyP2 = 0;
 
+bool send_now = false;
 unsigned long starttime;
 unsigned long starttime_SDS;
 unsigned long starttime_GPS;
@@ -261,6 +256,7 @@ String last_result_PPD = "";
 String last_result_SDS = "";
 String last_result_DHT = "";
 String last_result_BMP = "";
+String last_result_BME280 = "";
 String last_result_GPS = "";
 String last_value_PPD_P1 = "";
 String last_value_PPD_P2 = "";
@@ -270,6 +266,9 @@ String last_value_DHT_T = "";
 String last_value_DHT_H = "";
 String last_value_BMP_T = "";
 String last_value_BMP_P = ""; 
+String last_value_BME280_T = "";
+String last_value_BME280_H = ""; 
+String last_value_BME280_P = "";
 String last_data_string = "";
 
 String last_gps_lat;
@@ -289,9 +288,6 @@ bool config_needs_write = false;
 bool first_csv_line = 1;
 
 String data_first_part = "{\"software_version\": \"" + String(SOFTWARE_VERSION) + "\"FEATHERCHIPID, \"sensordatavalues\":[";
-
-#define LEAP_YEAR(Y)     ( ((1970+Y)>0) && !((1970+Y)%4) && ( ((1970+Y)%100) || !((1970+Y)%400) ) )
-static uint8_t monthDays[]={31,28,31,30,31,30,31,31,30,31,30,31}; // API starts months from 1, this array starts from 0
 
 static unsigned long last_loop;
 
@@ -526,35 +522,46 @@ String SDS_version_date() {
 /* copy config from ext_def                                      *
 /*****************************************************************/
 void copyExtDef() {
-	if (WLANSSID != NULL) { strcpy(wlanssid,WLANSSID); }
-	if (WLANPWD  != NULL) { strcpy(wlanpwd,WLANPWD); }
-	if (DHT_READ != dht_read) { dht_read = DHT_READ; }
-	if (PPD_READ != ppd_read) { ppd_read = PPD_READ; }
-	if (SDS_READ != sds_read) { sds_read = SDS_READ; }
-	if (BMP_READ != bmp_read) { bmp_read = BMP_READ; }
-	if (GPS_READ != gps_read) { gps_read = GPS_READ; }
-	if (SEND2DUSTI != send2dusti) { send2dusti = SEND2DUSTI; }
-	if (SEND2MADAVI != send2madavi) { send2madavi = SEND2MADAVI; }
-	if (SEND2LORA != send2lora) { send2lora = SEND2LORA; }
-	if (SEND2CSV != send2csv) { send2csv = SEND2CSV; }
-	if (AUTO_UPDATE != auto_update) { auto_update = AUTO_UPDATE; }
-	if (HAS_DISPLAY != has_display) { has_display = HAS_DISPLAY; }
 
-	if (DEBUG != debug) { debug = DEBUG; }
+#define strcpyDef(var, def) if (def != NULL) { strcpy(var, def); }
+#define setDef(var, def)    if (def != var) { var = def; }
 
-	if (SEND2CUSTOM != send2custom) { send2custom = SEND2CUSTOM; }
-	if (HOST_CUSTOM != NULL) { strcpy(host_custom,HOST_CUSTOM); }
-	if (URL_CUSTOM != NULL) { strcpy(url_custom,URL_CUSTOM); }
-	if (HTTPPORT_CUSTOM != httpPort_custom) { httpPort_custom = HTTPPORT_CUSTOM; }
-	if (USER_CUSTOM != NULL) { strcpy(user_custom,USER_CUSTOM); }
-	if (PWD_CUSTOM != NULL) { strcpy(pwd_custom,PWD_CUSTOM); }
+	strcpyDef(wlanssid, WLANSSID);
+	strcpyDef(wlanpwd, WLANPWD);
+	strcpyDef(www_username, WWW_USERNAME);
+	strcpyDef(www_password, WWW_PASSWORD);
+	setDef(www_basicauth_enabled, WWW_BASICAUTH_ENABLED);
+	setDef(dht_read, DHT_READ);
+	setDef(ppd_read, PPD_READ);
+	setDef(sds_read, SDS_READ);
+	setDef(bmp_read, BMP_READ);
+	setDef(bme280_read, BME280_READ);
+	setDef(gps_read, GPS_READ);
+	setDef(send2dusti, SEND2DUSTI);
+	setDef(send2madavi, SEND2MADAVI);
+	setDef(send2lora, SEND2LORA);
+	setDef(send2csv, SEND2CSV);
+	setDef(auto_update, AUTO_UPDATE);
+	setDef(has_display, HAS_DISPLAY);
 
-	if (SEND2INFLUXDB != send2influxdb) { send2influxdb = SEND2INFLUXDB; }
-	if (HOST_INFLUXDB != NULL) { strcpy(host_influxdb,HOST_INFLUXDB); }
-	if (URL_INFLUXDB != NULL) { strcpy(url_influxdb,URL_INFLUXDB); }
-	if (HTTPPORT_INFLUXDB != httpPort_influxdb) { httpPort_influxdb = HTTPPORT_INFLUXDB; }
-	if (USER_INFLUXDB != NULL) {strcpy(user_influxdb,USER_INFLUXDB); }
-	if (PWD_INFLUXDB != NULL) {strcpy(pwd_influxdb,PWD_INFLUXDB); }
+	setDef(debug, DEBUG);
+
+	setDef(send2custom, SEND2CUSTOM);
+	strcpyDef(host_custom, HOST_CUSTOM);
+	strcpyDef(url_custom, URL_CUSTOM);
+	setDef(httpPort_custom, HTTPPORT_CUSTOM);
+	strcpyDef(user_custom, USER_CUSTOM);
+	strcpyDef(pwd_custom, PWD_CUSTOM);
+
+	setDef(send2influxdb, SEND2INFLUXDB);
+	strcpyDef(host_influxdb, HOST_INFLUXDB);
+	strcpyDef(url_influxdb, URL_INFLUXDB);
+	setDef(httpPort_influxdb, HTTPPORT_INFLUXDB);
+	strcpyDef(user_influxdb, USER_INFLUXDB);
+	strcpyDef(pwd_influxdb, PWD_INFLUXDB);
+
+#undef strcpyDef
+#undef setDef
 }
 
 /*****************************************************************
@@ -588,32 +595,41 @@ void readConfig() {
 				if (json.success()) {
 					debug_out(F("parsed json..."),DEBUG_MIN_INFO,1);
 					if (json.containsKey("SOFTWARE_VERSION")) strcpy(version_from_local_config, json["SOFTWARE_VERSION"]);
-					if (json.containsKey("wlanssid")) strcpy(wlanssid, json["wlanssid"]);
-					if (json.containsKey("wlanpwd")) strcpy(wlanpwd, json["wlanpwd"]);
-					if (json.containsKey("dht_read")) dht_read = json["dht_read"];
-					if (json.containsKey("ppd_read")) ppd_read = json["ppd_read"];
-					if (json.containsKey("sds_read")) sds_read = json["sds_read"];
-					if (json.containsKey("bmp_read")) bmp_read = json["bmp_read"];
-					if (json.containsKey("gps_read")) gps_read = json["gps_read"];
-					if (json.containsKey("send2dusti")) send2dusti = json["send2dusti"];
-					if (json.containsKey("send2madavi")) send2madavi = json["send2madavi"];
-					if (json.containsKey("send2lora")) send2lora = json["send2lora"];
-					if (json.containsKey("send2csv")) send2csv = json["send2csv"];
-					if (json.containsKey("auto_update")) auto_update = json["auto_update"];
-					if (json.containsKey("has_display")) has_display = json["has_display"];
-					if (json.containsKey("debug")) debug = json["debug"];
-					if (json.containsKey("send2custom")) send2custom = json["send2custom"];
-					if (json.containsKey("host_custom")) strcpy(host_custom, json["host_custom"]);
-					if (json.containsKey("url_custom")) strcpy(url_custom, json["url_custom"]);
-					if (json.containsKey("httpPort_custom")) httpPort_custom = json["httpPort_custom"];
-					if (json.containsKey("user_custom")) strcpy(user_custom, json["user_custom"]);
-					if (json.containsKey("pwd_custom")) strcpy(pwd_custom, json["pwd_custom"]);
-					if (json.containsKey("send2influxdb")) send2influxdb = json["send2influxdb"];
-					if (json.containsKey("host_influxdb")) strcpy(host_influxdb, json["host_influxdb"]);
-					if (json.containsKey("url_influxdb")) strcpy(url_influxdb, json["url_influxdb"]);
-					if (json.containsKey("httpPort_influxdb")) httpPort_influxdb = json["httpPort_influxdb"];
-					if (json.containsKey("user_influxdb")) strcpy(user_influxdb, json["user_influxdb"]);
-					if (json.containsKey("pwd_influxdb")) strcpy(pwd_influxdb, json["pwd_influxdb"]);
+
+#define setFromJSON(key)    if (json.containsKey(#key)) key = json[#key];
+#define strcpyFromJSON(key) if (json.containsKey(#key)) strcpy(key, json[#key]);
+					strcpyFromJSON(wlanssid);
+					strcpyFromJSON(wlanpwd);
+					strcpyFromJSON(www_username);
+					strcpyFromJSON(www_password);
+					setFromJSON(www_basicauth_enabled);
+					setFromJSON(dht_read);
+					setFromJSON(ppd_read);
+					setFromJSON(sds_read);
+					setFromJSON(bmp_read);
+					setFromJSON(bme280_read);
+					setFromJSON(gps_read);
+					setFromJSON(send2dusti);
+					setFromJSON(send2madavi);
+					setFromJSON(send2lora);
+					setFromJSON(send2csv);
+					setFromJSON(auto_update);
+					setFromJSON(has_display);
+					setFromJSON(debug);
+					setFromJSON(send2custom);
+					strcpyFromJSON(host_custom);
+					strcpyFromJSON(url_custom);
+					setFromJSON(httpPort_custom);
+					strcpyFromJSON(user_custom);
+					strcpyFromJSON(pwd_custom);
+					setFromJSON(send2influxdb);
+					strcpyFromJSON(host_influxdb);
+					strcpyFromJSON(url_influxdb);
+					setFromJSON(httpPort_influxdb);
+					strcpyFromJSON(user_influxdb);
+					strcpyFromJSON(pwd_influxdb);
+#undef setFromJSON
+#undef strcpyFromJSON
 				} else {
 					debug_out(F("failed to load json config"),DEBUG_ERROR,1);
 				}
@@ -636,34 +652,41 @@ void writeConfig() {
 	debug_out(F("saving config..."),DEBUG_MIN_INFO,1);
 	StaticJsonBuffer<2000> jsonBuffer;
 	JsonObject& json = jsonBuffer.createObject();
-	json["SOFTWARE_VERSION"] = SOFTWARE_VERSION;
-	json["wlanssid"] = wlanssid;
-	json["wlanpwd"] = wlanpwd;
-	json["dht_read"] = dht_read;
-	json["ppd_read"] = ppd_read;
-	json["sds_read"] = sds_read;
-	json["bmp_read"] = bmp_read;
-	json["gps_read"] = gps_read;
-	json["send2dusti"] = send2dusti;
-	json["send2madavi"] = send2madavi;
-	json["send2lora"] = send2lora;
-	json["send2csv"] = send2csv;
-	json["auto_update"] = auto_update;
-	json["has_display"] = has_display;
-	json["debug"] = debug;
-	json["send2custom"] = send2custom;
-	json["host_custom"] = host_custom;
-	json["url_custom"] = url_custom;
-	json["httpPort_custom"] = httpPort_custom;
-	json["user_custom"] = user_custom;
-	json["pwd_custom"] = pwd_custom;
 
-	json["send2influxdb"] = send2influxdb;
-	json["host_influxdb"] = host_influxdb;
-	json["url_influxdb"] = url_influxdb;
-	json["httpPort_influxdb"] = httpPort_influxdb;
-	json["user_influxdb"] = user_influxdb;
-	json["pwd_influxdb"] = pwd_influxdb;
+#define copyToJSON(varname) json[#varname] = varname;
+	copyToJSON(SOFTWARE_VERSION);
+	copyToJSON(wlanssid);
+	copyToJSON(wlanpwd);
+	copyToJSON(www_username);
+	copyToJSON(www_password);
+	copyToJSON(www_basicauth_enabled);
+	copyToJSON(dht_read);
+	copyToJSON(ppd_read);
+	copyToJSON(sds_read);
+	copyToJSON(bmp_read);
+	copyToJSON(bme280_read);
+	copyToJSON(gps_read);
+	copyToJSON(send2dusti);
+	copyToJSON(send2madavi);
+	copyToJSON(send2lora);
+	copyToJSON(send2csv);
+	copyToJSON(auto_update);
+	copyToJSON(has_display);
+	copyToJSON(debug);
+	copyToJSON(send2custom);
+	copyToJSON(host_custom);
+	copyToJSON(url_custom);
+	copyToJSON(httpPort_custom);
+	copyToJSON(user_custom);
+	copyToJSON(pwd_custom);
+
+	copyToJSON(send2influxdb);
+	copyToJSON(host_influxdb);
+	copyToJSON(url_influxdb);
+	copyToJSON(httpPort_influxdb);
+	copyToJSON(user_influxdb);
+	copyToJSON(pwd_influxdb);
+#undef copyToJSON
 
 	File configFile = SPIFFS.open("/config.json", "w");
 	if (!configFile) {
@@ -706,7 +729,7 @@ String form_password(const String& name, const String& info, const String& value
 }
 
 String form_checkbox(const String& name, const String& info, const bool checked) {
-	String s = F("<label for='{n}'><input type='checkbox' name='{n}' value='1' id='{n}' {c}/> {i}</label><br/>");
+	String s = F("<label for='{n}'><input type='checkbox' name='{n}' value='1' id='{n}' {c}/><input type='hidden' name='{n}' value='0' /> {i}</label><br/>");
 	if (checked) {s.replace("{c}",F(" checked='checked'"));} else {s.replace("{c}","");};
 	s.replace("{i}",info);s.replace("{n}",name);
 	return s;
@@ -729,15 +752,32 @@ String wlan_ssid_to_table_row(const String& ssid, const String& encryption, cons
 }
 
 /*****************************************************************
+/* Webserver request auth: prompt for BasicAuth                              
+ *  
+ * -Provide BasicAuth for all page contexts except /values and images
+/*****************************************************************/
+void webserver_request_auth() {
+	debug_out(F("validate request auth..."),DEBUG_MIN_INFO,1);
+	if (www_basicauth_enabled) {
+		if (!server.authenticate(www_username, www_password))
+			return server.requestAuthentication();  
+	}
+}
+
+/*****************************************************************
 /* Webserver root: show all options                              *
 /*****************************************************************/
 void webserver_root() {
+	webserver_request_auth();
+ 
 	String page_content = "";
 	last_page_load = millis();
 	debug_out(F("output root page..."),DEBUG_MIN_INFO,1);
 	page_content = FPSTR(WEB_PAGE_HEADER);
 	page_content.replace("{t}",F("Übersicht"));
-	page_content.replace("CHIPID",esp_chipid);
+	page_content.replace("{id}",esp_chipid);
+	page_content.replace("{mac}",WiFi.macAddress());
+	page_content.replace("{fw}",SOFTWARE_VERSION);
 	page_content += FPSTR(WEB_ROOT_PAGE_CONTENT);
 	page_content += FPSTR(WEB_PAGE_FOOTER);
 	server.send(200,FPSTR(TXT_CONTENT_TYPE_TEXT_HTML),page_content);
@@ -747,15 +787,19 @@ void webserver_root() {
 /* Webserver root: show all options                              *
 /*****************************************************************/
 void webserver_config() {
+	webserver_request_auth();
+	
 	String page_content = "";
 	last_page_load = millis();
 
 	debug_out(F("output config page ..."),DEBUG_MIN_INFO,1);
 	page_content += FPSTR(WEB_PAGE_HEADER);
+	page_content.replace("{t}",F("Konfiguration"));
+	page_content.replace("{id}",esp_chipid);
+	page_content.replace("{mac}",WiFi.macAddress());
+	page_content.replace("{fw}",SOFTWARE_VERSION);
 	page_content += FPSTR(WEB_CONFIG_SCRIPT);
-	if ((!server.hasArg("submit")) || (server.arg("submit") != "Speichern")) {
-		page_content.replace("{t}",F("Konfiguration"));
-		page_content.replace("CHIPID",esp_chipid);
+	if (server.method() == HTTP_GET) {
 		page_content += F("<form method='POST' action='/config' style='width: 100%;'>");
 		page_content += F("<b>WLAN Daten</b><br/>");
 		if (WiFi.status() != WL_CONNECTED) {  // scan for wlan ssids
@@ -765,7 +809,7 @@ void webserver_config() {
 			debug_out(F("wifi networks found: "),DEBUG_MIN_INFO,0);
 			debug_out(String(n),DEBUG_MIN_INFO,1);
 			if (n == 0) {
-				page_content += F("<br/>Kein WLAN gefunden<br/>");
+				page_content += F("<br/>Keine Netzwerke gefunden<br/>");
 			} else {
 				page_content += F("<br/>Netzwerke gefunden: ");
 				page_content += String(n);
@@ -801,6 +845,11 @@ void webserver_config() {
 		page_content += F("<table>");
 		page_content += form_input(F("wlanssid"),F("WLAN"),wlanssid,64);
 		page_content += form_password(F("wlanpwd"),F("Passwort"),wlanpwd,64);
+		page_content += F("</table><br/><input type='submit' name='submit' value='Speichern'/><br/><br/><b>BasicAuth</b><br/>");
+		page_content += F("<table>");
+		page_content += form_input(F("www_username"),F("User"),www_username,64);
+		page_content += form_password(F("www_password"),F("Passwort"),www_password,64);
+		page_content += form_checkbox(F("www_basicauth_enabled"),F("BasicAuth aktivieren"),www_basicauth_enabled);
 		page_content += F("</table><br/><input type='submit' name='submit' value='Speichern'/><br/><br/><b>APIs</b><br/>");
 		page_content += form_checkbox(F("send2dusti"),F("API Luftdaten.info"),send2dusti);
 		page_content += form_checkbox(F("send2madavi"),F("API Madavi.de"),send2madavi);
@@ -809,6 +858,7 @@ void webserver_config() {
 		page_content += form_checkbox(F("dht_read"),F("DHT22 (Temp.,Luftfeuchte)"),dht_read);
 		page_content += form_checkbox(F("ppd_read"),F("PPD42NS"),ppd_read);
 		page_content += form_checkbox(F("bmp_read"),F("BMP180"),bmp_read);
+		page_content += form_checkbox(F("bme280_read"),F("BME280"),bme280_read);
 		page_content += form_checkbox(F("gps_read"),F("GPS (NEO 6M)"),gps_read);
 		page_content += F("<br/><b>Weitere Einstellungen</b><br/>");
 		page_content += form_checkbox(F("auto_update"),F("Auto Update"),auto_update);
@@ -816,7 +866,7 @@ void webserver_config() {
 		page_content += F("<table>");
 		page_content += form_input(F("debug"),F("Debug&nbsp;Level"),String(debug),5);
 		page_content += F("</table><br/><b>Weitere APIs</b><br/><br/>");
-		page_content += form_checkbox(F("send2custom"),F("Senden an eigene API"),send2custom);
+		page_content += form_checkbox(F("send2custom"),F("An eigene API senden"),send2custom);
 		page_content += F("<table>");
 		page_content += form_input(F("host_custom"),F("Server: "),host_custom,50);
 		page_content += form_input(F("url_custom"),F("Pfad: "),url_custom,50);
@@ -834,38 +884,47 @@ void webserver_config() {
 		page_content += F("</table><br/>");
 		page_content += F("<br/><input type='submit' name='submit' value='Speichern'/></form>");
 	} else {
-		page_content.replace("{t}",F("Konfiguration"));
-		page_content.replace("CHIPID",esp_chipid);
+
+#define readCharParam(param) if (server.hasArg(#param)){ server.arg(#param).toCharArray(param, sizeof(param)); }
+#define readBoolParam(param) if (server.hasArg(#param)){ param = server.arg(#param) == "1"; }
+#define readIntParam(param)  if (server.hasArg(#param)){ int val = server.arg(#param).toInt(); if (val != 0){ param = val; }}
+
 		if (server.hasArg("wlanssid") && server.arg("wlanssid") != "") {
-			server.arg("wlanssid").toCharArray(wlanssid,65);
-			if (server.hasArg("wlanpwd") && server.arg("wlanpwd") != "") {
-				server.arg("wlanpwd").toCharArray(wlanpwd,65);
-			}
-		}
-		if (server.hasArg("send2dusti") && server.arg("send2dusti") == "1") { send2dusti = 1; } else { send2dusti = 0; }
-		if (server.hasArg("send2madavi") && server.arg("send2madavi") == "1") { send2madavi = 1; } else { send2madavi = 0; }
-		if (server.hasArg("dht_read") && server.arg("dht_read") == "1") { dht_read = 1; } else { dht_read = 0; }
-		if (server.hasArg("sds_read") && server.arg("sds_read") == "1") { sds_read = 1; } else { sds_read = 0; }
-		if (server.hasArg("ppd_read") && server.arg("ppd_read") == "1") { ppd_read = 1; } else { ppd_read = 0; }
-		if (server.hasArg("bmp_read") && server.arg("bmp_read") == "1") { bmp_read = 1; } else { bmp_read = 0; }
-		if (server.hasArg("gps_read") && server.arg("gps_read") == "1") { gps_read = 1; } else { gps_read = 0; }
-		if (server.hasArg("auto_update") && server.arg("auto_update") == "1") { auto_update = 1; } else { auto_update = 0; }
-		if (server.hasArg("has_display") && server.arg("has_display") == "1") { has_display = 1; } else { has_display = 0; }
+      readCharParam(wlanssid);
+		  readCharParam(wlanpwd);
+    }
+		readCharParam(www_username);
+		readCharParam(www_password);
+		readBoolParam(www_basicauth_enabled);
+		readBoolParam(send2dusti);
+		readBoolParam(send2madavi);
+		readBoolParam(dht_read);
+		readBoolParam(sds_read);
+		readBoolParam(ppd_read);
+		readBoolParam(bmp_read);
+		readBoolParam(bme280_read);
+		readBoolParam(gps_read);
+		readBoolParam(auto_update);
+		readBoolParam(has_display);
 		if (server.hasArg("debug")) { debug = server.arg("debug").toInt(); } else { debug = 0; }
 
-		if (server.hasArg("send2custom") && server.arg("send2custom") == "1") { send2custom = 1; } else { send2custom = 0; }
-		if (server.hasArg("host_custom") && server.arg("host_custom") != "") { server.arg("host_custom").toCharArray(host_custom,100); }
-		if (server.hasArg("url_custom") && server.arg("url_custom") != "") { server.arg("url_custom").toCharArray(url_custom,100); }
-		if (server.hasArg("httpPort_custom") && server.arg("httpPort_custom").toInt() != 0) { httpPort_custom = server.arg("httpPort_custom").toInt();}
-		if (server.hasArg("user_custom") && server.arg("user_custom") != "") { server.arg("user_custom").toCharArray(user_custom,100); }
-		if (server.hasArg("pwd_custom") && server.arg("pwd_custom") != "") { server.arg("pwd_custom").toCharArray(pwd_custom,100); }
+		readBoolParam(send2custom);
+		readCharParam(host_custom);
+		readCharParam(url_custom);
+		readIntParam(httpPort_custom);
+		readCharParam(user_custom);
+		readCharParam(pwd_custom);
 
-		if (server.hasArg("send2influxdb") && server.arg("send2influxdb") == "1") { send2influxdb = 1; } else { send2influxdb = 0; }
-		if (server.hasArg("host_influxdb") && server.arg("host_influxdb") != "") { server.arg("host_influxdb").toCharArray(host_influxdb,100); }
-		if (server.hasArg("url_influxdb") && server.arg("url_influxdb") != "") { server.arg("url_influxdb").toCharArray(url_influxdb,100); }
-		if (server.hasArg("httpPort_influxdb") && server.arg("httpPort_influxdb").toInt() != 0) { httpPort_influxdb = server.arg("httpPort_influxdb").toInt();}
-		if (server.hasArg("user_influxdb") && server.arg("user_influxdb") != "") { server.arg("user_influxdb").toCharArray(user_influxdb,100); }
-		if (server.hasArg("pwd_influxdb") && server.arg("pwd_influxdb") != "") { server.arg("pwd_influxdb").toCharArray(pwd_influxdb,100); }
+		readBoolParam(send2influxdb);
+		readCharParam(host_influxdb);
+		readCharParam(url_influxdb);
+		readIntParam(httpPort_influxdb);
+		readCharParam(user_influxdb);
+		readCharParam(pwd_influxdb);
+
+#undef readCharParam
+#undef readBoolParam
+#undef readIntParam
 
 		config_needs_write = true;
 
@@ -874,7 +933,8 @@ void webserver_config() {
 		page_content += F("<br/>Lese DHT "); page_content += String(dht_read);
 		page_content += F("<br/>Lese SDS "); page_content += String(sds_read);
 		page_content += F("<br/>Lese PPD "); page_content += String(ppd_read);
-		page_content += F("<br/>Lese BMP "); page_content += String(bmp_read);
+		page_content += F("<br/>Lese BMP180 "); page_content += String(bmp_read);
+		page_content += F("<br/>Lese BME280 "); page_content += String(bme280_read);
 		page_content += F("<br/>Lese GPS "); page_content += String(gps_read);
 		page_content += F("<br/>Auto Update "); page_content += String(auto_update);
 		page_content += F("<br/>Display "); page_content += String(has_display);
@@ -914,7 +974,9 @@ void webserver_values() {
 	debug_out(F("output values to web page..."),DEBUG_MIN_INFO,1);
 	page_content += FPSTR(WEB_PAGE_HEADER);
 	page_content.replace("{t}",F("Aktuelle Werte"));
-	page_content.replace("CHIPID",esp_chipid);
+	page_content.replace("{id}",esp_chipid);
+	page_content.replace("{mac}",WiFi.macAddress());
+	page_content.replace("{fw}",SOFTWARE_VERSION);
 	page_content += F("<table>");
 	if (ppd_read) {
 		page_content += table_row_from_value(F("PPD42NS&nbsp;PM1:"),last_value_PPD_P1+F("&nbsp;Partikel/Liter"));
@@ -932,6 +994,11 @@ void webserver_values() {
 		page_content += table_row_from_value(F("BMP180&nbsp;Temperatur:"),last_value_BMP_T+"&nbsp;°C");
 		page_content += table_row_from_value(F("BMP180&nbsp;Luftdruck:"),last_value_BMP_P+"&nbsp;Pascal");
 	}
+	if (bme280_read) {
+		page_content += table_row_from_value(F("BME280&nbsp;Temperatur:"),last_value_BME280_T+"&nbsp;°C");
+		page_content += table_row_from_value(F("BME280&nbsp;rel.&nbsp;Luftfeuchte:"),last_value_BME280_H+"&nbsp;%");
+		page_content += table_row_from_value(F("BME280&nbsp;Luftdruck:"),last_value_BME280_P+"&nbsp;Pascal");
+	}
 	page_content += table_row_from_value(" "," ");
 	page_content += table_row_from_value(F("WiFi&nbsp;Signal"),String(signal_strength)+"&nbsp;dBm");
 	page_content += table_row_from_value(F("Signal&nbsp;Qualität"),String(signal_quality)+"%");
@@ -945,20 +1012,24 @@ void webserver_values() {
 /* Webserver set debug level                                     *
 /*****************************************************************/
 void webserver_debug_level() {
+	webserver_request_auth();
+  
 	String page_content = "";
 	last_page_load = millis();
 	debug_out(F("output change debug level page..."),DEBUG_MIN_INFO,1);
 	page_content += FPSTR(WEB_PAGE_HEADER);
 	page_content.replace("{t}","Debug level");
-	page_content.replace("CHIPID",esp_chipid);
+	page_content.replace("{id}",esp_chipid);
+	page_content.replace("{mac}",WiFi.macAddress());
+	page_content.replace("{fw}",SOFTWARE_VERSION);
 	if (server.hasArg("level")) {
 		switch (server.arg("level").toInt()) {
-			case (0): debug=0; page_content += F("<h3>Set debug to none.</h3>");break;
-			case (1): debug=1; page_content += F("<h3>Set debug to error.</h3>");break;
-			case (2): debug=2; page_content += F("<h3>Set debug to warning.</h3>");break;
-			case (3): debug=3; page_content += F("<h3>Set debug to min. info.</h3>");break;
-			case (4): debug=4; page_content += F("<h3>Set debug to med. info.</h3>");break;
-			case (5): debug=5; page_content += F("<h3>Set debug to max. info.</h3>");break;
+			case (0): debug=0; page_content += F("<h3>Setze Debug auf none.</h3>");break;
+			case (1): debug=1; page_content += F("<h3>Setze Debug auf error.</h3>");break;
+			case (2): debug=2; page_content += F("<h3>Setze Debug auf warning.</h3>");break;
+			case (3): debug=3; page_content += F("<h3>Setze Debug auf min. info.</h3>");break;
+			case (4): debug=4; page_content += F("<h3>Setze Debug auf med. info.</h3>");break;
+			case (5): debug=5; page_content += F("<h3>Setze Debug auf max. info.</h3>");break;
 		}
 	}
 	page_content += FPSTR(WEB_PAGE_FOOTER);
@@ -969,13 +1040,19 @@ void webserver_debug_level() {
 /* Webserver remove config                                       *
 /*****************************************************************/
 void webserver_removeConfig() {
+	webserver_request_auth();
+ 
 	String page_content = "";
 	last_page_load = millis();
 	debug_out(F("output remove config page..."),DEBUG_MIN_INFO,1);
 	page_content += FPSTR(WEB_PAGE_HEADER);
-	page_content.replace("{t}","config.json löschen");
-	page_content.replace("CHIPID",esp_chipid);
-	if (server.hasArg("confirm") && server.arg("confirm") == "yes") {
+	page_content.replace("{t}","Config.json löschen");
+	page_content.replace("{id}",esp_chipid);
+	page_content.replace("{mac}",WiFi.macAddress());
+	page_content.replace("{fw}",SOFTWARE_VERSION);
+	if (server.method() == HTTP_GET) {
+		page_content += FPSTR(WEB_REMOVE_CONFIG_CONTENT);
+	} else {
 #if defined(ESP8266)
 		if (SPIFFS.exists("/config.json")) {	//file exists
 			debug_out(F("removing config.json..."),DEBUG_MIN_INFO,1);
@@ -988,8 +1065,6 @@ void webserver_removeConfig() {
 			page_content += F("<h3>Config.json nicht gefunden.</h3>");
 		}
 #endif
-	} else {
-		page_content += FPSTR(WEB_REMOVE_CONFIG_CONTENT);
 	}
 	page_content += FPSTR(WEB_PAGE_FOOTER);
 	server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
@@ -999,21 +1074,33 @@ void webserver_removeConfig() {
 /* Webserver reset NodeMCU                                       *
 /*****************************************************************/
 void webserver_reset() {
+	webserver_request_auth();
+ 
 	String page_content = "";
 	last_page_load = millis();
 	debug_out(F("output reset NodeMCU page..."),DEBUG_MIN_INFO,1);
 	page_content += FPSTR(WEB_PAGE_HEADER);
-	page_content.replace("{t}","Reset NodeMCU");
-	page_content.replace("CHIPID",esp_chipid);
-	if (server.hasArg("confirm") && server.arg("confirm") == "yes") {
+	page_content.replace("{t}","Sensor neu starten");
+	page_content.replace("{id}",esp_chipid);
+	page_content.replace("{mac}",WiFi.macAddress());
+	page_content.replace("{fw}",SOFTWARE_VERSION);
+	if (server.method() == HTTP_GET) {
+		page_content += FPSTR(WEB_RESET_CONTENT);
+	} else {
 #if defined(ESP8266)
 		ESP.restart();
 #endif
-	} else {
-		page_content += FPSTR(WEB_RESET_CONTENT);
 	}
 	page_content += FPSTR(WEB_PAGE_FOOTER);
 	server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
+}
+
+/*****************************************************************
+/* Webserver data.json                                           *
+/*****************************************************************/
+void webserver_data_json() {
+	debug_out(F("output data json..."),DEBUG_MIN_INFO,1);
+	server.send(200, FPSTR(TXT_CONTENT_TYPE_JSON),last_data_string);
 }
 
 /*****************************************************************
@@ -1056,6 +1143,7 @@ void setup_webserver() {
 	server.on("/debug", webserver_debug_level);
 	server.on("/removeConfig", webserver_removeConfig);
 	server.on("/reset", webserver_reset);
+	server.on("/data.json",webserver_data_json);
 	server.on("/luftdaten_logo.svg", webserver_luftdaten_logo);
 	server.on("/cfg_logo.svg", webserver_cfg_logo);
 	server.onNotFound(webserver_not_found);
@@ -1067,8 +1155,6 @@ void setup_webserver() {
 
 /*****************************************************************
 /* WifiConfig                                                    *
-/* Custom API, MQTT, InfuxDB have to be configured in ext_def.h  *
-/* no more fields possible for new options                       *
 /*****************************************************************/
 void wifiConfig() {
 #if defined(ESP8266)
@@ -1094,6 +1180,7 @@ void wifiConfig() {
 	while (((millis() - last_page_load) < 600000) && (! config_needs_write)) {
 		dnsServer.processNextRequest();
 		server.handleClient();
+		wdt_reset(); // nodemcu is alive
 		yield();
 	}
 
@@ -1191,8 +1278,8 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 	request_head += F("Host: "); request_head += String(host) + "\r\n";
 	request_head += F("Content-Type: "); request_head += contentType + "\r\n";
 	if (basic_auth_string != "") { request_head += F("Authorization: Basic "); request_head += String(basic_auth_string) + "\r\n";}
-	request_head += F("PIN: "); request_head += String(pin) + "\r\n";
-	request_head += F("Sensor: esp8266-"); request_head += esp_chipid + "\r\n";
+	request_head += F("X-PIN: "); request_head += String(pin) + "\r\n";
+	request_head += F("X-Sensor: esp8266-"); request_head += esp_chipid + "\r\n";
 	request_head += F("Content-Length: "); request_head += String(data.length(),DEC) + "\r\n";
 	request_head += F("Connection: close\r\n\r\n");
 
@@ -1265,6 +1352,7 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 	debug_out(F("End connecting to "),DEBUG_MIN_INFO,0);
 	debug_out(host,DEBUG_MIN_INFO,1);
 
+	wdt_reset(); // nodemcu is alive
 	yield();
 #endif
 }
@@ -1368,9 +1456,9 @@ String create_influxdb_string(const String& data) {
 		data_4_influxdb += F("feinstaub,node=esp8266-");
 		data_4_influxdb += esp_chipid+" ";
 		for (int i = 0; i < json2data["sensordatavalues"].size()-1; i++) {
-			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value_type"].asString());
+			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value_type"].as<char*>());
 			data_4_influxdb += tmp_str + "=";
-			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value"].asString());
+			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value"].as<char*>());
 			data_4_influxdb += tmp_str;
 			if (i < (json2data["sensordatavalues"].size()-2)) data_4_influxdb += ",";
 		}
@@ -1398,9 +1486,9 @@ void send_csv(const String& data) {
 		headline = F("Timestamp_ms;");
 		valueline = String(act_milli)+";";
 		for (int i=0;i<json2data["sensordatavalues"].size();i++) {
-			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value_type"].asString());
+			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value_type"].as<char*>());
 			headline += tmp_str+";";
-			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value"].asString());
+			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value"].as<char*>());
 			valueline += tmp_str+";";
 		}
 		if (first_csv_line) {
@@ -1428,13 +1516,17 @@ String sensorDHT() {
 
 	// Check if valid number if non NaN (not a number) will be send.
 
-	while ((i++ < 10) && (s == "")) {
-		dht.begin();
-		h = dht.readHumidity(true); //Read Humidity
-		t = dht.readTemperature(false,true); //Read Temperature
+	while ((i++ < 5) && (s == "")) {
+//		dht.begin();
+		h = dht.readHumidity(); //Read Humidity
+		t = dht.readTemperature(); //Read Temperature
+		if (isnan(t) || isnan(h)) {
+			delay(100);
+			h = dht.readHumidity(true); //Read Humidity
+			t = dht.readTemperature(false,true); //Read Temperature
+		}
 		if (isnan(t) || isnan(h)) {
 			debug_out(F("DHT22 couldn't be read"),DEBUG_ERROR,1);
-			delay(50);
 		} else {
 			debug_out(F("Humidity    : "),DEBUG_MIN_INFO,0);
 			debug_out(String(h)+"%",DEBUG_MIN_INFO,1);
@@ -1480,6 +1572,43 @@ String sensorBMP() {
 	debug_out(F("------"),DEBUG_MIN_INFO,1);
 
 	debug_out(F("End reading BMP180"),DEBUG_MED_INFO,1);
+
+	return s;
+}
+
+/*****************************************************************
+/* read BME280 sensor values                                     *
+/*****************************************************************/
+String sensorBME280() {
+	String s = "";
+	float t;
+	float h;
+	float p;
+
+	debug_out(F("Start reading BME280"),DEBUG_MED_INFO,1);
+
+	t = bme280.readTemperature();
+	h = bme280.readHumidity();
+	p = bme280.readPressure();
+	if (isnan(t) || isnan(h) || isnan(p)) {
+		debug_out(F("BME280 couldn't be read"),DEBUG_ERROR,1);
+	} else {
+		debug_out(F("Temperature : "),DEBUG_MIN_INFO,0);
+		debug_out(Float2String(t)+" C",DEBUG_MIN_INFO,1);
+		debug_out(F("humidity : "),DEBUG_MIN_INFO,0);
+		debug_out(Float2String(h)+" %",DEBUG_MIN_INFO,1);
+		debug_out(F("Pressure    : "),DEBUG_MIN_INFO,0);
+		debug_out(Float2String(float(p)/100)+" hPa",DEBUG_MIN_INFO,1);
+		last_value_BME280_T = Float2String(t);
+		last_value_BME280_H = Float2String(h);
+		last_value_BME280_P = Float2String(p);
+		s += Value2Json(F("BME280_temperature"),last_value_BME280_T);
+		s += Value2Json(F("BME280_humidity"),last_value_BME280_H);
+		s += Value2Json(F("BME280_pressure"),last_value_BME280_P);
+	}
+	debug_out(F("------"),DEBUG_MIN_INFO,1);
+
+	debug_out(F("End reading BME280"),DEBUG_MED_INFO,1);
 
 	return s;
 }
@@ -1547,7 +1676,7 @@ String sensorSDS() {
 		}
 
 	}
-	if (((act_milli-starttime) > sending_intervall_ms) && (sds_val_count > 0)) {
+	if (send_now && (sds_val_count > 0)) {
 		debug_out("PM10:  "+Float2String(float(sds_pm10_sum)/(sds_val_count*10.0)),DEBUG_MIN_INFO,1);
 		debug_out("PM2.5: "+Float2String(float(sds_pm25_sum)/(sds_val_count*10.0)),DEBUG_MIN_INFO,1);
 		debug_out("------",DEBUG_MIN_INFO,1);
@@ -1608,7 +1737,7 @@ String sensorPPD() {
 
 	}
 	// Checking if it is time to sample
-	if ((act_milli-starttime) > sending_intervall_ms) {
+	if (send_now) {
 		ratio = lowpulseoccupancyP1/(sampletime_ms*10.0);					// int percentage 0 to 100
 		concentration = (1.1*pow(ratio,3)-3.8*pow(ratio,2)+520*ratio+0.62);	// spec sheet curve
 		// Begin printing
@@ -1709,7 +1838,7 @@ String sensorGPS() {
 		}
 	}
 
-	if ((act_milli-starttime) > sending_intervall_ms) {
+	if (send_now) {
 		debug_out("Lat/Lng: "+last_gps_lat+","+last_gps_lng,DEBUG_MIN_INFO,1);
 		debug_out("Altitude: "+last_gps_alt,DEBUG_MIN_INFO,1);
 		debug_out("Date: "+last_gps_date,DEBUG_MIN_INFO,1);
@@ -1819,12 +1948,27 @@ void init_display() {
 }
 
 /*****************************************************************
+/* Init BME280                                                   *
+/*****************************************************************/
+bool initBME280(char addr) {
+	debug_out("Trying BME280 sensor on ",DEBUG_MIN_INFO,0);
+	debug_out(String(addr,HEX),DEBUG_MIN_INFO,0);
+
+	if (bme280.begin(addr)) {
+		debug_out(F(" ... found"), DEBUG_MIN_INFO, 1);
+		return true;
+	} else {
+		debug_out(F(" ... not found"), DEBUG_MIN_INFO, 1);
+		return false;
+	}
+}
+
+/*****************************************************************
 /* The Setup                                                     *
 /*****************************************************************/
 void setup() {
 	Serial.begin(9600);					// Output to Serial at 9600 baud
 #if defined(ESP8266)
-	Wire.pins(D3,D4);					// must be set before all other I2C cmds 
 	Wire.begin(D3,D4);
 	esp_chipid = String(ESP.getChipId());
 #endif
@@ -1872,6 +2016,7 @@ void setup() {
 	if (sds_read) debug_out(F("Lese SDS..."),DEBUG_MIN_INFO,1);
 	if (dht_read) debug_out(F("Lese DHT..."),DEBUG_MIN_INFO,1);
 	if (bmp_read) debug_out(F("Lese BMP..."),DEBUG_MIN_INFO,1);
+	if (bme280_read) debug_out(F("Lese BME280..."),DEBUG_MIN_INFO,1);
 	if (gps_read) debug_out(F("Lese GPS..."),DEBUG_MIN_INFO,1);
 	if (send2dusti) debug_out(F("Sende an luftdaten.info..."),DEBUG_MIN_INFO,1);
 	if (send2madavi) debug_out(F("Sende an madavi.de..."),DEBUG_MIN_INFO,1);
@@ -1887,6 +2032,10 @@ void setup() {
 			bmp_read = 0;
 		}
 	}
+	if (bme280_read && !initBME280(0x76) && !initBME280(0x77)) {
+		debug_out(F("Check BME280 wiring"),DEBUG_MIN_INFO,1);
+		bme280_read = 0;
+	}
 	if (sds_read) {
 		debug_out(F("Stoppe SDS011..."),DEBUG_MIN_INFO,1);
 		stop_SDS();
@@ -1900,6 +2049,10 @@ void setup() {
 	if (MDNS.begin(server_name.c_str())) {
 		MDNS.addService("http", "tcp", 80);
 	}
+
+	// sometimes parallel sending data and web page will stop nodemcu, watchdogtimer set to 8 seconds
+	wdt_disable();
+	wdt_enable(30000);// 30 sec
 
 	starttime = millis();					// store the start time
 	starttime_SDS = millis();
@@ -1919,6 +2072,7 @@ void loop() {
 	String result_SDS = "";
 	String result_DHT = "";
 	String result_BMP = "";
+	String result_BME280 = "";
 	String result_GPS = "";
 	String signal_strength = "";
 	
@@ -1929,8 +2083,11 @@ void loop() {
 
 	act_micro = micros();
 	act_milli = millis();
+	send_now = (act_milli-starttime) > sending_intervall_ms;
 
 	sample_count++;
+
+	wdt_reset(); // nodemcu is alive
 
 	if (last_micro != 0) {
 		diff_micro = act_micro-last_micro;
@@ -1952,14 +2109,21 @@ void loop() {
 		starttime_SDS = act_milli;
 	}
 
-	if (dht_read && ((act_milli-starttime) > sending_intervall_ms)) {
-		debug_out(F("Call sensorDHT"),DEBUG_MAX_INFO,1);
-		result_DHT = sensorDHT();			// getting temperature and humidity (optional)
-	}
+	if (send_now) {
+		if (dht_read) {
+			debug_out(F("Call sensorDHT"),DEBUG_MAX_INFO,1);
+			result_DHT = sensorDHT();			// getting temperature and humidity (optional)
+		}
 
-	if (bmp_read && ((act_milli-starttime) > sending_intervall_ms)) {
-		debug_out(F("Call sensorBMP"),DEBUG_MAX_INFO,1);
-		result_BMP = sensorBMP();			// getting temperature and humidity (optional)
+		if (bmp_read) {
+			debug_out(F("Call sensorBMP"),DEBUG_MAX_INFO,1);
+			result_BMP = sensorBMP();			// getting temperature and humidity (optional)
+		}
+
+		if (bme280_read) {
+			debug_out(F("Call sensorBME280"),DEBUG_MAX_INFO,1);
+			result_BME280 = sensorBME280();			// getting temperature and humidity (optional)
+		}
 	}
 
 	if (gps_read && (((act_milli-starttime_GPS) > sampletime_GPS_ms) || ((act_milli-starttime) > sending_intervall_ms))) {
@@ -1979,7 +2143,7 @@ void loop() {
 		}
 	}
 
-	if ((act_milli-starttime) > sending_intervall_ms) {
+	if (send_now) {
 		debug_out(F("Creating data string:"),DEBUG_MIN_INFO,1);
 		data = data_first_part;
 		data_sample_times  = Value2Json("samples",String(long(sample_count)));
@@ -1995,7 +2159,6 @@ void loop() {
 			last_result_PPD = result_PPD;
 			data += result_PPD;
 			data_4_dusti  = data_first_part + result_PPD;
-			data_4_dusti += data_sample_times;
 			data_4_dusti.remove(data_4_dusti.length()-1);
 			data_4_dusti += "]}";
 			if (send2dusti) {
@@ -2012,7 +2175,6 @@ void loop() {
 		if (sds_read) {
 			data += result_SDS;
 			data_4_dusti  = data_first_part + result_SDS;
-			data_4_dusti += data_sample_times;
 			data_4_dusti.remove(data_4_dusti.length()-1);
 			data_4_dusti.replace("SDS_","");
 			data_4_dusti += "]}";
@@ -2031,7 +2193,6 @@ void loop() {
 			last_result_DHT = result_DHT;
 			data += result_DHT;
 			data_4_dusti  = data_first_part + result_DHT;
-			data_4_dusti += data_sample_times;
 			data_4_dusti.remove(data_4_dusti.length()-1);
 			data_4_dusti += "]}";
 			if (send2dusti) {
@@ -2049,7 +2210,6 @@ void loop() {
 			last_result_BMP = result_BMP;
 			data += result_BMP;
 			data_4_dusti  = data_first_part + result_BMP;
-			data_4_dusti += data_sample_times;
 			data_4_dusti.remove(data_4_dusti.length()-1);
 			data_4_dusti.replace("BMP_","");
 			data_4_dusti += "]}";
@@ -2064,11 +2224,28 @@ void loop() {
 				sum_send_time += micros() - start_send;
 			}
 		}
+		if (bme280_read) {
+			last_result_BME280 = result_BME280;
+			data += result_BME280;
+			data_4_dusti  = data_first_part + result_BME280;
+			data_4_dusti.remove(data_4_dusti.length()-1);
+			data_4_dusti.replace("BME280_","");
+			data_4_dusti += "]}";
+			if (send2dusti) {
+				debug_out(F("## Sending to luftdaten.info (BME280): "),DEBUG_MIN_INFO,1);
+				start_send = micros();
+				if (result_BME280 != "") {
+					sendData(data_4_dusti,BME280_API_PIN,host_dusti,httpPort_dusti,url_dusti,"",FPSTR(TXT_CONTENT_TYPE_JSON));
+				} else {
+					debug_out(F("No data sent..."),DEBUG_MIN_INFO,1);
+				}
+				sum_send_time += micros() - start_send;
+			}
+		}
 
 		if (gps_read) {
 			data += result_GPS;
 			data_4_dusti  = data_first_part + result_GPS;
-			data_4_dusti += data_sample_times;
 			data_4_dusti.remove(data_4_dusti.length()-1);
 			data_4_dusti.replace("GPS_","");
 			data_4_dusti += "]}";
