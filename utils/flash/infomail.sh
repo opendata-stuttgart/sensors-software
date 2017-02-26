@@ -83,8 +83,8 @@ Subject:${subject}"
 	#nodeid=$(awk -F "\t" "/$rec/{print $2}" $lfile)
 	#sensorid1=$(awk -F "\t" "/$rec/{print $10}" $lfile)
 	#sensorid2=$(awk -F "\t" "/$rec/{print $12}" $lfile)
-	lats=${lat:0:6}
-	lons=${lon:0:6}
+	lats=$(echo "$lat"| grep -o '[0-9-]*\.[0-9][0-9][0-9]'}
+	lons=$(echo "$lon"| grep -o '[0-9-]*\.[0-9][0-9][0-9]'}
 		
 	customlinks="
 	
@@ -124,7 +124,7 @@ do
     
     read -p "send? [y/N]" ans
     if [ "$ans" == "y" ] ; then
-        cat "$mailtextfile" | mailx -v \
+        cat "$mailtextfile" | s-nail -v \
         -r "$sender" \
         -S smtp="$smtpserver" \
         -S smtp-use-starttls \
