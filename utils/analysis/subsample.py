@@ -32,19 +32,26 @@ for csvfilename in args.csvfilenames:
         cnt-=1;
         sys.stderr.write(str(cnt)+'.')
         sys.stderr.flush()
-        dat=pd.read_csv(csvfilename, sep=";")
-        if dat.size < 1:
-            sys.stderr.write("no data in "+csvfilename)
+        try:
+            dat=pd.read_csv(csvfilename, sep=";")
+            if dat.size < 1:
+                sys.stderr.write("no data in "+csvfilename)
+                continue
+            dat.index=pd.DatetimeIndex(dat["timestamp"])
+            # hourly
+            h=dat.resample('H').mean()
+            sid=np.int(h["sensor_id"][0])
+            rdh[sid]=pd.concat([rdh.get(sid),h])
+            # daily
+            d=dat.resample('D').mean()
+            rdd[sid]=pd.concat([rdd.get(sid),d])
+        except Exception as e:
+            sys.stderr.write("error processing "+csvfilename+"\n")
+            # do this properly one day
+            sys.stderr.write(str(e.args))
+            sys.stderr.flush()
             continue
-        dat.index=pd.DatetimeIndex(dat["timestamp"])
-        # hourly
-        h=dat.resample('H')
-        sid=np.int(h["sensor_id"][0])
-        rdh[sid]=pd.concat([rdh.get(sid),h])
-        # daily
-        d=dat.resample('D')
-        rdd[sid]=pd.concat([rdd.get(sid),d])
-        
+
 if not os.path.exists(args.outdir):
     os.makedirs(args.outdir)
 
@@ -59,10 +66,15 @@ for k in rdd.keys():
         rdd[k].sort_index().to_csv(o)
 
 # dict of all sensors
-das={}
+dasd={} # daily
+dash={} # hourly
 for k in rdd.keys():
     for m in ['P1','P2','temperature','humidity']:
         if m in rdd[k]:
             s=rdd[k][m]
             s.name=k         
-            das[m]=pd.concat([das.get(m),s],axis=1)
+            dasd[m]=pd.concat([dasd.get(m),s],axis=1)
+        if m in rdh[k]:
+            s=rdh[k][m]
+            s.name=k         
+            dash[m]=pd.concat([dash.get(m),s],axis=1)
