@@ -1,6 +1,7 @@
 # plot the files created via subsample.py
 require(ggplot2)
 require(reshape2)
+require(plotly)
 
 ymax=200
 
@@ -11,11 +12,13 @@ if (!dir.exists(datadir)){
 }
 
 measnames=c("P1","P2","temperature","humidity")
+legdata=data.frame("P1"=c("PM 10","[µm/m³]"),"P2"=c("PM 2.5","[µm/m³]"),"temperature"=c("Temperatur","[°C]"),"humidity"=c("Luftfeuchtigkeit","[%]"))
 
 for (meas in measnames){
   for (dh in c("daily","hourly")){
     
-    infilename<-file.path(datadir, paste("all_",dh,"_",meas,".csv", sep=""))
+    csvfn<-paste("all_",dh,"_",meas,".csv", sep="")
+    infilename<-file.path(datadir, csvfn)
     dat<-read.csv(infilename)
 
     # have the time parsed 
@@ -30,16 +33,22 @@ for (meas in measnames){
     # melt data into long form
     m<-melt(d, id.vars="ts")
     # plot max value
-    mx<-max(m[,"value"])
+    mx<-max(m[,"value"], na.rm=TRUE)
     if (mx>ymax){
         plotmax=ymax
     }else{
         plotmax=mx
     }
     pdffilen=paste(infilename,".pdf",sep="")
-    pdf(pdffilen)
-    p<-ggplot(m,aes(ts,value,color=variable))+geom_line()+ylim(0,200)+ theme(legend.position="none")
-    print(p)
+    pdf(pdffilen, width=40, height=10)
+        p<-ggplot(m,aes(ts,value,color=variable))+geom_line()+ylim(0,plotmax)+ theme(legend.position="none")+labs(title=paste("Alle Sensoren:",legdata[1,meas]),x="Zeit",y=paste(legdata[1,meas],legdata[2,meas]))
+        print(p)
     dev.off()
+    
+    htmlfilen=paste(csvfn,".html",sep="")
+    oldwd=getwd()
+    setwd(datadir)
+    try(htmlwidgets::saveWidget(widget=ggplotly(p),file=htmlfilen, selfcontained = FALSE, libdir="html_libs"))
+    setwd(oldwd)
  }
 }

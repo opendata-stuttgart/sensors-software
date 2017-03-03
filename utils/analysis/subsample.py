@@ -68,8 +68,9 @@ for k in rdd.keys():
 # dict of all sensors
 dasd={} # daily
 dash={} # hourly
+measurements=['P1','P2','temperature','humidity']
 for k in rdd.keys():
-    for m in ['P1','P2','temperature','humidity']:
+    for m in measurements:
         if m in rdd[k]:
             s=rdd[k][m]
             s.name=k         
@@ -78,3 +79,13 @@ for k in rdd.keys():
             s=rdh[k][m]
             s.name=k         
             dash[m]=pd.concat([dash.get(m),s],axis=1)
+
+for m in measurements:
+    ofilen=os.path.join(args.outdir, "all_hourly_"+str(m)+".csv")
+    with open(ofilen, 'w') as o:
+        dash[m].sort_index().to_csv(o)
+    ofilen=os.path.join(args.outdir, "all_daily_"+str(m)+".csv")
+    with open(ofilen, 'w') as o:
+        dasd[m].sort_index().to_csv(o)
+
+
