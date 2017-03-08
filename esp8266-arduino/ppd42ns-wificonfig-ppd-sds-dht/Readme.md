@@ -35,7 +35,7 @@ Die Daten können als CSV via USB ausgegeben werden. Dafür sollte sowohl in ext
 
 * SDS and DHT wiring: [pdf/sds_dht_wiring.pdf](pdf/sds_dht_wiring.pdf)
 
-## Benötigte Software:
+## Benötigte Software (in Klammern getestete Version):
 
 * [Arduino IDE](https://www.arduino.cc/en/Main/Software)  (Version 1.8.1)
 * [ESP8266 für Arduino](http://arduino.esp8266.com/stable/package_esp8266com_index.json) (Version 2.3.0)

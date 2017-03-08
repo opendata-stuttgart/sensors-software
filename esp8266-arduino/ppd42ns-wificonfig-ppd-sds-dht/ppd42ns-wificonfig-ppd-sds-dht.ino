@@ -2050,7 +2050,7 @@ void setup() {
 		MDNS.addService("http", "tcp", 80);
 	}
 
-	// sometimes parallel sending data and web page will stop nodemcu, watchdogtimer set to 8 seconds
+	// sometimes parallel sending data and web page will stop nodemcu, watchdogtimer set to 30 seconds
 	wdt_disable();
 	wdt_enable(30000);// 30 sec
 
