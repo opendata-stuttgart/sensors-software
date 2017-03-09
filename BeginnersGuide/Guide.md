@@ -20,8 +20,8 @@ Nach der Installation der Treiber Rechner neustarten.
 Bemerkung für MacOS 10.9 oder neuer: Wenn ein nicht-signierter Treiber installiert wird, muss dies in MacOS explizit erlaubt werden. Eine gute Beschreibung gibt es bei [tzapu.com](https://tzapu.com/making-ch340-ch341-serial-adapters-work-under-el-capitan-os-x/)
 
 ## Board Manager installieren
-Die Arduino IDE 1.6.5 runterladen & installieren: 
-https://www.arduino.cc/en/Main/OldSoftwareReleases#previous
+Die Arduino IDE herunterladen & installieren: 
+https://www.arduino.cc/en/Main/Software
 
 In den Einstellungen in das **Additional Board Manager URLs** Feld diese URL einfügen: http://arduino.esp8266.com/stable/package_esp8266com_index.json 
 
@@ -46,7 +46,7 @@ Beim CP2102 wäre das auf dem Mac der **/dev/cu.SLAB_USBTOUART**, für den CH340
 ## Code auf den NodeMCU überspielen
 Den aktuellsten Code von GitHub in die Arduino IDE einfügen.
 *Tipp: um den Code besser zu kopieren einfach auf den **RAW** Button klicken*
-https://github.com/HackNorris/OpenDataStuttgart/blob/master/Dusty/Dusty.ino
+https://github.com/opendata-stuttgart/sensors-software/blob/master/esp8266-arduino/ppd42ns-wificonfig-ppd-sds-dht/ppd42ns-wificonfig-ppd-sds-dht.ino
 
 #### Wifi einstellen
 ![Wifi Einstellungen](img/Wifi.jpg)
