@@ -10,6 +10,7 @@
 // Wohin gehen die Daten?
 #define SEND2DUSTI 1
 #define SEND2MADAVI 1
+#define SEND2SENSEMAP 0
 #define SEND2MQTT 0
 #define SEND2INFLUXDB 0
 #define SEND2LORA 0
@@ -18,6 +19,9 @@
 
 // NTP Server
 #define NTP_SERVER "0.europe.pool.ntp.org"
+
+// OpenSenseMap
+#define SENSEBOXID "00112233445566778899aabb"
 
 // Definition eigene API
 #define HOST_CUSTOM "192.168.234.1"

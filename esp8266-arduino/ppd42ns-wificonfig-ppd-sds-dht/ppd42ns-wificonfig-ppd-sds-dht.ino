@@ -58,7 +58,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-062"
+#define SOFTWARE_VERSION "NRZ-2016-064"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -112,6 +112,7 @@ bool bme280_read = 0;
 bool gps_read = 0;
 bool send2dusti = 1;
 bool send2madavi = 1;
+bool send2sensemap = 0;
 bool send2custom = 0;
 bool send2lora = 1;
 bool send2influxdb = 0;
@@ -129,6 +130,11 @@ const int httpPort_madavi = 443;
 const char* host_dusti = "api.luftdaten.info";
 const char* url_dusti = "/v1/push-sensor-data/";
 const int httpPort_dusti = 443;
+
+const char* host_sensemap = "api.opensensemap.org";
+String url_sensemap = "/boxes/BOXID/data?luftdaten=1";
+const int httpPort_sensemap = 443;
+char senseboxid[30] = "00112233445566778899aabb";
 
 char host_influxdb[100] = "api.luftdaten.info";
 char url_influxdb[100] = "/write?db=luftdaten";
@@ -539,12 +545,15 @@ void copyExtDef() {
 	setDef(gps_read, GPS_READ);
 	setDef(send2dusti, SEND2DUSTI);
 	setDef(send2madavi, SEND2MADAVI);
+	setDef(send2sensemap, SEND2SENSEMAP)
 	setDef(send2lora, SEND2LORA);
 	setDef(send2csv, SEND2CSV);
 	setDef(auto_update, AUTO_UPDATE);
 	setDef(has_display, HAS_DISPLAY);
 
 	setDef(debug, DEBUG);
+	
+	strcpyDef(senseboxid, SENSEBOXID);
 
 	setDef(send2custom, SEND2CUSTOM);
 	strcpyDef(host_custom, HOST_CUSTOM);
@@ -611,11 +620,13 @@ void readConfig() {
 					setFromJSON(gps_read);
 					setFromJSON(send2dusti);
 					setFromJSON(send2madavi);
+					setFromJSON(send2sensemap);
 					setFromJSON(send2lora);
 					setFromJSON(send2csv);
 					setFromJSON(auto_update);
 					setFromJSON(has_display);
 					setFromJSON(debug);
+					strcpyFromJSON(senseboxid);
 					setFromJSON(send2custom);
 					strcpyFromJSON(host_custom);
 					strcpyFromJSON(url_custom);
@@ -668,11 +679,13 @@ void writeConfig() {
 	copyToJSON(gps_read);
 	copyToJSON(send2dusti);
 	copyToJSON(send2madavi);
+	copyToJSON(send2sensemap);
 	copyToJSON(send2lora);
 	copyToJSON(send2csv);
 	copyToJSON(auto_update);
 	copyToJSON(has_display);
 	copyToJSON(debug);
+	copyToJSON(senseboxid);
 	copyToJSON(send2custom);
 	copyToJSON(host_custom);
 	copyToJSON(url_custom);
@@ -866,6 +879,10 @@ void webserver_config() {
 		page_content += F("<table>");
 		page_content += form_input(F("debug"),F("Debug&nbsp;Level"),String(debug),5);
 		page_content += F("</table><br/><b>Weitere APIs</b><br/><br/>");
+		page_content += form_checkbox(F("send2sensemap"),F("An OpenSenseMap senden"),send2sensemap);
+		page_content += F("<table>");
+		page_content += form_input(F("senseboxid"),F("senseBox-ID: "),senseboxid,50);
+		page_content += F("</table><br/>");
 		page_content += form_checkbox(F("send2custom"),F("An eigene API senden"),send2custom);
 		page_content += F("<table>");
 		page_content += form_input(F("host_custom"),F("Server: "),host_custom,50);
@@ -890,14 +907,15 @@ void webserver_config() {
 #define readIntParam(param)  if (server.hasArg(#param)){ int val = server.arg(#param).toInt(); if (val != 0){ param = val; }}
 
 		if (server.hasArg("wlanssid") && server.arg("wlanssid") != "") {
-      readCharParam(wlanssid);
-		  readCharParam(wlanpwd);
-    }
+			readCharParam(wlanssid);
+			readCharParam(wlanpwd);
+		}
 		readCharParam(www_username);
 		readCharParam(www_password);
 		readBoolParam(www_basicauth_enabled);
 		readBoolParam(send2dusti);
 		readBoolParam(send2madavi);
+		readBoolParam(send2sensemap);
 		readBoolParam(dht_read);
 		readBoolParam(sds_read);
 		readBoolParam(ppd_read);
@@ -907,6 +925,8 @@ void webserver_config() {
 		readBoolParam(auto_update);
 		readBoolParam(has_display);
 		if (server.hasArg("debug")) { debug = server.arg("debug").toInt(); } else { debug = 0; }
+
+		readCharParam(senseboxid);
 
 		readBoolParam(send2custom);
 		readCharParam(host_custom);
@@ -938,6 +958,9 @@ void webserver_config() {
 		page_content += F("<br/>Lese GPS "); page_content += String(gps_read);
 		page_content += F("<br/>Auto Update "); page_content += String(auto_update);
 		page_content += F("<br/>Display "); page_content += String(has_display);
+		page_content += F("<br/>Debug Level "); page_content += String(debug);
+		page_content += F("<br/>Senden an opensensemap "); page_content += String(send2sensemap);
+		page_content += F("<br/>senseBox-ID "); page_content += senseboxid;
 		page_content += F("<br/>Debug Level "); page_content += String(debug);
 		page_content += F("<br/><br/>Eigene API "); page_content += String(send2custom);
 		page_content += F("<br/>Server "); page_content += host_custom;
@@ -2068,6 +2091,8 @@ void loop() {
 	String data_4_influxdb = "";
 	String data_sample_times = "";
 
+	String sensemap_path = "";
+
 	String result_PPD = "";
 	String result_SDS = "";
 	String result_DHT = "";
@@ -2283,6 +2308,15 @@ void loop() {
 			debug_out(F("## Sending to madavi.de: "),DEBUG_MIN_INFO,1);
 			start_send = micros();
 			sendData(data,0,host_madavi,httpPort_madavi,url_madavi,"",FPSTR(TXT_CONTENT_TYPE_JSON));
+			sum_send_time += micros() - start_send;
+		}
+
+		if (send2sensemap) {
+			debug_out(F("## Sending to opensensemap: "),DEBUG_MIN_INFO,1);
+			start_send = micros();
+			sensemap_path = url_sensemap;
+			sensemap_path.replace("BOXID",senseboxid);
+			sendData(data,0,host_sensemap,httpPort_sensemap,sensemap_path.c_str(),"",FPSTR(TXT_CONTENT_TYPE_JSON));
 			sum_send_time += micros() - start_send;
 		}
 
