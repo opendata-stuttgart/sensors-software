@@ -23,7 +23,7 @@ Bemerkung für MacOS 10.9 oder neuer: Wenn ein nicht-signierter Treiber installi
 Die Arduino IDE herunterladen & installieren: 
 https://www.arduino.cc/en/Main/Software
 
-In den Einstellungen in das **Additional Board Manager URLs** Feld diese URL einfügen: http://arduino.esp8266.com/stable/package_esp8266com_index.json 
+In den Einstellungen (**Datei** → **Voreinstellungen** in das **Additional Board Manager URLs** Feld diese URL einfügen: http://arduino.esp8266.com/stable/package_esp8266com_index.json 
 
 ![Einstellungen](img/Einstellungen.png)
 
@@ -33,7 +33,7 @@ In **Werkzeuge** → **Platine** → **Boardmanager** nach dem ESP8266 Paket suc
 
 ## ESP8266 / NodeMCU Einstellungen
 Nach dem Neustart der Arduino IDE in **Werkzeuge** → **Platine** das entsprechende Board auswählen
-b
+
 - NodeMCU 0.9 (ESP-12 Module) **für NodeMCU v1**
 - NodeMCU 1.0 (ESP-12E Module) **für NodeMCU v2 und v3**
 
