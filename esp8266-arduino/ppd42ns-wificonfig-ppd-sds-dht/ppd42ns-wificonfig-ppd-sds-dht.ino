@@ -58,7 +58,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2016-064"
+#define SOFTWARE_VERSION "NRZ-2017-070"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -781,19 +781,24 @@ void webserver_request_auth() {
 /* Webserver root: show all options                              *
 /*****************************************************************/
 void webserver_root() {
-	webserver_request_auth();
- 
-	String page_content = "";
-	last_page_load = millis();
-	debug_out(F("output root page..."),DEBUG_MIN_INFO,1);
-	page_content = FPSTR(WEB_PAGE_HEADER);
-	page_content.replace("{t}",F("Übersicht"));
-	page_content.replace("{id}",esp_chipid);
-	page_content.replace("{mac}",WiFi.macAddress());
-	page_content.replace("{fw}",SOFTWARE_VERSION);
-	page_content += FPSTR(WEB_ROOT_PAGE_CONTENT);
-	page_content += FPSTR(WEB_PAGE_FOOTER);
-	server.send(200,FPSTR(TXT_CONTENT_TYPE_TEXT_HTML),page_content);
+	if (WiFi.status() != WL_CONNECTED) {
+		server.sendHeader(F("Location"),F("http://192.168.4.1/config"));
+		server.send(302,FPSTR(TXT_CONTENT_TYPE_TEXT_HTML),"");
+	} else {
+		webserver_request_auth();
+
+		String page_content = "";
+		last_page_load = millis();
+		debug_out(F("output root page..."),DEBUG_MIN_INFO,1);
+		page_content = FPSTR(WEB_PAGE_HEADER);
+		page_content.replace("{t}",F("Übersicht"));
+		page_content.replace("{id}",esp_chipid);
+		page_content.replace("{mac}",WiFi.macAddress());
+		page_content.replace("{fw}",SOFTWARE_VERSION);
+		page_content += FPSTR(WEB_ROOT_PAGE_CONTENT);
+		page_content += FPSTR(WEB_PAGE_FOOTER);
+		server.send(200,FPSTR(TXT_CONTENT_TYPE_TEXT_HTML),page_content);
+	}
 }
 
 /*****************************************************************
@@ -858,7 +863,7 @@ void webserver_config() {
 		page_content += F("<table>");
 		page_content += form_input(F("wlanssid"),F("WLAN"),wlanssid,64);
 		page_content += form_password(F("wlanpwd"),F("Passwort"),wlanpwd,64);
-		page_content += F("</table><br/><input type='submit' name='submit' value='Speichern'/><br/><br/><b>BasicAuth</b><br/>");
+		page_content += F("</table><br/><input type='submit' name='submit' value='Speichern'/><br/><br/><b>Ab hier nur ändern, wenn Sie wirklich wissen, was Sie tun!!!</b><br/><br/><b>BasicAuth</b><br/>");
 		page_content += F("<table>");
 		page_content += form_input(F("www_username"),F("User"),www_username,64);
 		page_content += form_password(F("www_password"),F("Passwort"),www_password,64);
@@ -986,48 +991,53 @@ void webserver_config() {
 /*****************************************************************/
 void webserver_values() {
 #if defined(ESP8266)
-	String page_content = "";
-	last_page_load = millis();
-	long signal_strength = WiFi.RSSI();
-	long signal_temp = signal_strength;
-	if (signal_temp > -50) {signal_temp = -50; }
-	if (signal_temp < -100) {signal_temp = -100; }
-	int signal_quality = (signal_temp+100)*2;
-	int value_count = 0;
-	debug_out(F("output values to web page..."),DEBUG_MIN_INFO,1);
-	page_content += FPSTR(WEB_PAGE_HEADER);
-	page_content.replace("{t}",F("Aktuelle Werte"));
-	page_content.replace("{id}",esp_chipid);
-	page_content.replace("{mac}",WiFi.macAddress());
-	page_content.replace("{fw}",SOFTWARE_VERSION);
-	page_content += F("<table>");
-	if (ppd_read) {
-		page_content += table_row_from_value(F("PPD42NS&nbsp;PM1:"),last_value_PPD_P1+F("&nbsp;Partikel/Liter"));
-		page_content += table_row_from_value(F("PPD42NS&nbsp;PM2.5:"),last_value_PPD_P2+F("&nbsp;Partikel/Liter"));
+	if (WiFi.status() != WL_CONNECTED) {
+		server.sendHeader(F("Location"),F("http://192.168.4.1/config"));
+		server.send(302,FPSTR(TXT_CONTENT_TYPE_TEXT_HTML),"");
+	} else {
+		String page_content = "";
+		last_page_load = millis();
+		long signal_strength = WiFi.RSSI();
+		long signal_temp = signal_strength;
+		if (signal_temp > -50) {signal_temp = -50; }
+		if (signal_temp < -100) {signal_temp = -100; }
+		int signal_quality = (signal_temp+100)*2;
+		int value_count = 0;
+		debug_out(F("output values to web page..."),DEBUG_MIN_INFO,1);
+		page_content += FPSTR(WEB_PAGE_HEADER);
+		page_content.replace("{t}",F("Aktuelle Werte"));
+		page_content.replace("{id}",esp_chipid);
+		page_content.replace("{mac}",WiFi.macAddress());
+		page_content.replace("{fw}",SOFTWARE_VERSION);
+		page_content += F("<table>");
+		if (ppd_read) {
+			page_content += table_row_from_value(F("PPD42NS&nbsp;PM1:"),last_value_PPD_P1+F("&nbsp;Partikel/Liter"));
+			page_content += table_row_from_value(F("PPD42NS&nbsp;PM2.5:"),last_value_PPD_P2+F("&nbsp;Partikel/Liter"));
+		}
+		if (sds_read) {
+			page_content += table_row_from_value(F("SDS011&nbsp;PM2.5:"),last_value_SDS_P2+F("&nbsp;µg/m³"));
+			page_content += table_row_from_value(F("SDS011&nbsp;PM10:"),last_value_SDS_P1+F("&nbsp;µg/m³"));
+		}
+		if (dht_read) {
+			page_content += table_row_from_value(F("DHT22&nbsp;Temperatur:"),last_value_DHT_T+"&nbsp;°C");
+			page_content += table_row_from_value(F("DHT22&nbsp;rel.&nbsp;Luftfeuchte:"),last_value_DHT_H+"&nbsp;%");
+		}
+		if (bmp_read) {
+			page_content += table_row_from_value(F("BMP180&nbsp;Temperatur:"),last_value_BMP_T+"&nbsp;°C");
+			page_content += table_row_from_value(F("BMP180&nbsp;Luftdruck:"),last_value_BMP_P+"&nbsp;Pascal");
+		}
+		if (bme280_read) {
+			page_content += table_row_from_value(F("BME280&nbsp;Temperatur:"),last_value_BME280_T+"&nbsp;°C");
+			page_content += table_row_from_value(F("BME280&nbsp;rel.&nbsp;Luftfeuchte:"),last_value_BME280_H+"&nbsp;%");
+			page_content += table_row_from_value(F("BME280&nbsp;Luftdruck:"),last_value_BME280_P+"&nbsp;Pascal");
+		}
+		page_content += table_row_from_value(" "," ");
+		page_content += table_row_from_value(F("WiFi&nbsp;Signal"),String(signal_strength)+"&nbsp;dBm");
+		page_content += table_row_from_value(F("Signal&nbsp;Qualität"),String(signal_quality)+"%");
+		page_content += F("</table>");
+		page_content += FPSTR(WEB_PAGE_FOOTER);
+		server.send(200,FPSTR(TXT_CONTENT_TYPE_TEXT_HTML),page_content);
 	}
-	if (sds_read) {
-		page_content += table_row_from_value(F("SDS011&nbsp;PM2.5:"),last_value_SDS_P2+F("&nbsp;µg/m³"));
-		page_content += table_row_from_value(F("SDS011&nbsp;PM10:"),last_value_SDS_P1+F("&nbsp;µg/m³"));
-	}
-	if (dht_read) {
-		page_content += table_row_from_value(F("DHT22&nbsp;Temperatur:"),last_value_DHT_T+"&nbsp;°C");
-		page_content += table_row_from_value(F("DHT22&nbsp;rel.&nbsp;Luftfeuchte:"),last_value_DHT_H+"&nbsp;%");
-	}
-	if (bmp_read) {
-		page_content += table_row_from_value(F("BMP180&nbsp;Temperatur:"),last_value_BMP_T+"&nbsp;°C");
-		page_content += table_row_from_value(F("BMP180&nbsp;Luftdruck:"),last_value_BMP_P+"&nbsp;Pascal");
-	}
-	if (bme280_read) {
-		page_content += table_row_from_value(F("BME280&nbsp;Temperatur:"),last_value_BME280_T+"&nbsp;°C");
-		page_content += table_row_from_value(F("BME280&nbsp;rel.&nbsp;Luftfeuchte:"),last_value_BME280_H+"&nbsp;%");
-		page_content += table_row_from_value(F("BME280&nbsp;Luftdruck:"),last_value_BME280_P+"&nbsp;Pascal");
-	}
-	page_content += table_row_from_value(" "," ");
-	page_content += table_row_from_value(F("WiFi&nbsp;Signal"),String(signal_strength)+"&nbsp;dBm");
-	page_content += table_row_from_value(F("Signal&nbsp;Qualität"),String(signal_quality)+"%");
-	page_content += F("</table>");
-	page_content += FPSTR(WEB_PAGE_FOOTER);
-	server.send(200,FPSTR(TXT_CONTENT_TYPE_TEXT_HTML),page_content);
 #endif
 }
 
@@ -1159,14 +1169,14 @@ void setup_webserver() {
 	server_name += esp_chipid;
 
 	server.on("/", webserver_root);
-	server.on("/config",webserver_config);
-	server.on("/values",webserver_values);
-	server.on("/generate_204",webserver_root);
-	server.on("/fwlink",webserver_root);
+	server.on("/config", webserver_config);
+	server.on("/values", webserver_values);
+	server.on("/generate_204", webserver_config);
+	server.on("/fwlink", webserver_config);
 	server.on("/debug", webserver_debug_level);
 	server.on("/removeConfig", webserver_removeConfig);
 	server.on("/reset", webserver_reset);
-	server.on("/data.json",webserver_data_json);
+	server.on("/data.json", webserver_data_json);
 	server.on("/luftdaten_logo.svg", webserver_luftdaten_logo);
 	server.on("/cfg_logo.svg", webserver_cfg_logo);
 	server.onNotFound(webserver_not_found);
@@ -1652,7 +1662,6 @@ String sensorSDS() {
 	int position = 0;
 
 	debug_out(F("Start reading SDS011"),DEBUG_MED_INFO,1);
-
 	if (long(act_milli-starttime) < (long(sending_intervall_ms) - long(warmup_time_SDS_ms + reading_time_SDS_ms))) {
 		if (is_SDS_running) {
 			stop_SDS();
@@ -2311,7 +2320,7 @@ void loop() {
 			sum_send_time += micros() - start_send;
 		}
 
-		if (send2sensemap) {
+		if (send2sensemap && (senseboxid != SENSEBOXID)) {
 			debug_out(F("## Sending to opensensemap: "),DEBUG_MIN_INFO,1);
 			start_send = micros();
 			sensemap_path = url_sensemap;
