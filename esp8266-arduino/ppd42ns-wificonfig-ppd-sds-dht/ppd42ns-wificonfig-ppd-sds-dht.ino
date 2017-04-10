@@ -58,7 +58,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2017-070"
+#define SOFTWARE_VERSION "NRZ-2017-074"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -503,7 +503,10 @@ String SDS_version_date() {
 			case (6): if (value < 0x10) {device_id  = "0"+String(value,HEX);} else {device_id  = String(value,HEX);}; checksum_is += value; break;
 			case (7): if (value < 0x10) {device_id += "0";}; device_id += String(value,HEX); checksum_is += value; break;
 			case (8):
-					debug_out("Checksum is: "+String(checksum_is % 256)+" - should: "+String(value),DEBUG_MED_INFO,1);
+          debug_out(F("Checksum is: "),DEBUG_MED_INFO,0);
+          debug_out(String(checksum_is % 256),DEBUG_MED_INFO,0);
+          debug_out(F(" - should: "),DEBUG_MED_INFO,0);
+          debug_out(String(value),DEBUG_MED_INFO,1);
 					if (value == (checksum_is % 256)) { checksum_ok = 1; } else { len = -1; }; break;
 			case (9): if (value != 171) { len = -1; }; break;
 		}
@@ -1323,6 +1326,7 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 		WiFiClientSecure client_s;
 		
 		client_s.setNoDelay(true);
+		client_s.setTimeout(20000);
 
 		if (!client_s.connect(host, httpPort)) {
 			debug_out(F("connection failed"),DEBUG_ERROR,1);
@@ -1355,6 +1359,7 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 		WiFiClient client;
 		
 		client.setNoDelay(true);
+		client.setTimeout(20000);
 
 		if (!client.connect(host, httpPort)) {
 			debug_out(F("connection failed"),DEBUG_ERROR,1);
@@ -2028,7 +2033,8 @@ void setup() {
 	dht.begin();						// Start DHT
 	delay(10);
 #if defined(ESP8266)
-	debug_out("\nChipId: " + esp_chipid,DEBUG_MIN_INFO,1);
+  debug_out("\nChipId: ",DEBUG_MIN_INFO,0);
+  debug_out(esp_chipid,DEBUG_MIN_INFO,1);
 #endif
 #if defined(ARDUINO_SAMD_ZERO)
 	if (!manager.init())
@@ -2298,7 +2304,7 @@ void loop() {
 		data_sample_times += Value2Json("signal",signal_strength);
 		data += data_sample_times;
 
-		if ((result_PPD.length() > 0) || (result_DHT.length() > 0) || (result_SDS.length() > 0)) {
+		if (data.lastIndexOf(',') == (data.length()-1)) {
 			data.remove(data.length()-1);
 		}
 		data += "]}";
