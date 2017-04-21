@@ -1,3 +1,7 @@
 [submodule "arduino/libs/SHT1x"]
 	path = arduino/libs/SHT1x
 	url = https://github.com/practicalarduino/SHT1x
+
+[submodule "esp8266-arduino/ppd42ns-wificonfig-ppd-sds-dht/lib/TinyGPSPlus"]
+	path = esp8266-arduino/ppd42ns-wificonfig-ppd-sds-dht/lib/TinyGPSPlus
+	url = https://github.com/mikalhart/TinyGPSPlus.git
