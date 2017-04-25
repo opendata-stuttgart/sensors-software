@@ -2008,6 +2008,7 @@ void setup() {
 #if defined(ESP8266)
 	Wire.begin(D3,D4);
 	esp_chipid = String(ESP.getChipId());
+	WiFi.hostname("Luftdaten-" + esp_chipid);
 #endif
 #if defined(ARDUINO_SAMD_ZERO)
 	Wire.begin();
