@@ -58,7 +58,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2017-074"
+#define SOFTWARE_VERSION "NRZ-2017-078"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -125,11 +125,11 @@ long int sample_count = 0;
 
 const char* host_madavi = "api-rrd.madavi.de";
 const char* url_madavi = "/data.php";
-const int httpPort_madavi = 443;
+int httpPort_madavi = 443;
 
 const char* host_dusti = "api.luftdaten.info";
 const char* url_dusti = "/v1/push-sensor-data/";
-const int httpPort_dusti = 443;
+int httpPort_dusti = 443;
 
 const char* host_sensemap = "api.opensensemap.org";
 String url_sensemap = "/boxes/BOXID/data?luftdaten=1";
@@ -233,7 +233,7 @@ unsigned long diff_micro = 0;
 const unsigned long sampletime_ms = 30000;
 
 const unsigned long sampletime_SDS_ms = 1000;
-const unsigned long warmup_time_SDS_ms = 10000;
+const unsigned long warmup_time_SDS_ms = 15000;
 const unsigned long reading_time_SDS_ms = 5000;
 // const unsigned long reading_time_SDS_ms = 60000;
 bool is_SDS_running = true;
@@ -246,7 +246,7 @@ unsigned int sds_display_value_pos = 0;
 
 const unsigned long sampletime_GPS_ms = 50;
 
-const unsigned long sending_intervall_ms = 55000;
+const unsigned long sending_intervall_ms = 145000;
 unsigned long sending_time = 0;
 bool send_failed = false;
 
@@ -1232,6 +1232,8 @@ void wifiConfig() {
 	WiFi.mode(WIFI_STA);
 	WiFi.disconnect();
 
+	dnsServer.stop();
+
 	delay(100);
 
 	debug_out(F("Connecting to "),DEBUG_MIN_INFO,0);
@@ -2184,6 +2186,10 @@ void loop() {
 	}
 
 	if (send_now) {
+		if (WiFi.psk() != "") {
+			httpPort_madavi = 80;
+			httpPort_dusti = 80;
+		} 
 		debug_out(F("Creating data string:"),DEBUG_MIN_INFO,1);
 		data = data_first_part;
 		data_sample_times  = Value2Json("samples",String(long(sample_count)));
@@ -2195,6 +2201,8 @@ void loop() {
 		debug_out(signal_strength,DEBUG_MIN_INFO,1);
 		debug_out(F("------"),DEBUG_MIN_INFO,1);
 
+		server.handleClient();
+		server.stop();
 		if (ppd_read) {
 			last_result_PPD = result_PPD;
 			data += result_PPD;
@@ -2359,6 +2367,7 @@ void loop() {
 			debug_out(F("## Sending as csv: "),DEBUG_MIN_INFO,1);
 			send_csv(data);
 		}
+		server.begin();
 
 		if ((act_milli-last_update_attempt) > (28 * pause_between_update_attempts)) {
 			ESP.restart();
