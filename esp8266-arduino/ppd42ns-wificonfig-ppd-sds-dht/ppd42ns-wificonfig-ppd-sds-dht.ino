@@ -735,15 +735,12 @@ void writeConfig() {
 /* Base64 encode user:password                                   *
 /*****************************************************************/
 void create_basic_auth_strings() {
-	if (strcmp(user_custom, "") == 0 && strcmp(pwd_custom, "") == 0) {
-		basic_auth_custom = "";
-	} else {
+	basic_auth_custom = "";
+	if (strcmp(user_custom, "") != 0 || strcmp(pwd_custom, "") != 0) {
 		basic_auth_custom = base64::encode(String(user_custom)+":"+String(pwd_custom));
 	}
-	
-	if (strcmp(user_influxb, "") == 0 && strcmp(pwd_influxdb, "") == 0) {
-		basic_auth_influxdb = "";
-	} else {
+	basic_auth_influxdb = "";
+	if (strcmp(user_influxdb, "") != 0 || strcmp(pwd_influxdb, "") != 0) {
 		basic_auth_influxdb = base64::encode(String(user_influxdb)+":"+String(pwd_influxdb));
 	}
 }
