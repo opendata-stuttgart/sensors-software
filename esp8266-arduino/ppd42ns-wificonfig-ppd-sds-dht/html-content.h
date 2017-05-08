@@ -9,8 +9,9 @@ const char WEB_PAGE_HEADER[] PROGMEM = "<html>\
 <title>{t}</title>\
 <meta name='viewport' content='width=device-width'>\
 <style type='text/css'>\
-body{font-family:Arial;}\
-table{width:100%}\
+body{font-family:Arial;margin:0}\
+.content{margin:10px}\
+.r{text-align:right}\
 td{vertical-align:top;}\
 a{text-decoration:none;padding:10px;background:blue;color:white;display:block;width:auto;border-radius:5px;}\
 input[type='text']{width:100%;}\
@@ -19,18 +20,20 @@ input[type='submit']{border-radius:5px;font-size:medium;padding:5px;}\
 .submit_blue{padding:9px !important;width:100%;border-style:none;background:blue;color:white;text-align:left;}\
 </style>\
 </head><body>\
-<h3 style='min-height:100px;'><a href='/' style='background:none;width:0;'><img src='/luftdaten_logo.svg' style='float:left;margin-right:20px'/></a>{t} Feinstaubsensor {id}<br/><small>MAC: {mac}<br/>Firmware {fw}</small></h3>\
-";
+<div style='min-height:120px;background-color:#38b5ad;margin-bottom:20px'>\
+	<a href='/' style='background:none;width:0;display:inline'><img src='/luftdaten_logo.svg' style='float:left;margin-right:20px'/></a>\
+	<h3 style='margin:0'>{tt}</h3>\
+	<small>ID: {id}<br/>MAC: {mac}<br/>{fwt}: {fw}</small></div><div class='content'><h4>{h} {n} {t}</h4>";
 
-const char WEB_PAGE_FOOTER[] PROGMEM = "<br/><br/><a href='/' style='display:inline;'>Zurück zur Startseite</a><br/><br/><br/>\
+const char WEB_PAGE_FOOTER[] PROGMEM = "<br/><br/><a href='/' style='display:inline;'>{t}</a><br/><br/><br/>\
 <a href='http://codefor.de/' target='_blank' style='display:inline;background:none;width:0px;'><img src='/cfg_logo.svg' style='width:200px;max-width:50%;'/></a>\
-</body></html>\r\n";
+</div></body></html>\r\n";
 
-const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a href='/values'>Aktuelle Werte</a><br/>\
-<a href='http://deutschland.maps.luftdaten.info/' target='_blank'>Karte der aktiven Sensoren (externer Link)</a><br/>\
-<a href='/config'>Konfiguration</a><br/>\
-<a href='/removeConfig'>Konfiguration löschen</a><br/>\
-<a href='/reset'>Sensor neu starten (Reset)</a><br/>\
+const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a href='/values'>{t}</a><br/>\
+<a href='http://deutschland.maps.luftdaten.info/' target='_blank'>{karte}</a><br/>\
+<a href='/config'>{conf}</a><br/>\
+<a href='/removeConfig'>{conf_delete}</a><br/>\
+<a href='/reset'>{restart}</a><br/>\
 <table style='width:100%;'>\
 <tr><td style='width:33%;'><a href='/debug?level=0'>Debug null</a></td>\
 <td style='width:33%;'><a href='/debug?level=1'>Debug Error</a></td>\
@@ -45,21 +48,15 @@ const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a href='/values'>Aktuelle Werte</
 
 const char WEB_CONFIG_SCRIPT[] PROGMEM = "<script>function setSSID(ssid){document.getElementById('wlanssid').value=ssid.innerText||ssid.textContent;document.getElementById('wlanpwd').focus();}</script>";
 
-const char WEB_REMOVE_CONFIG_CONTENT[] PROGMEM = "<h3>Konfiguration wirklich löschen?</h3>\
-<table><tr><td><form method='POST' action='/removeConfig'><input type='submit' class='submit_blue' name='submit' value='Löschen'/></form></td><td><a href='/'>Abbrechen</a></td></tr></table>\
+const char WEB_REMOVE_CONFIG_CONTENT[] PROGMEM = "<h3>{t}</h3>\
+<table><tr><td><form method='POST' action='/removeConfig'><input type='submit' class='submit_blue' name='submit' value='{b}'/></form></td><td><a href='/'>{c}</a></td></tr></table>\
 ";
 
-const char WEB_RESET_CONTENT[] PROGMEM = "<h3>Sensor wirklich neu starten?</h3>\
-<table><tr><td><form method='POST' action'/reset'><input type='submit' class='submit_blue' name='submit' value='Neu starten'/></form></td><td><a href='/'>Abbrechen</a></td></tr></table>\
+const char WEB_RESET_CONTENT[] PROGMEM = "<h3>{t}</h3>\
+<table><tr><td><form method='POST' action'/reset'><input type='submit' class='submit_blue' name='submit' value='{b}'/></form></td><td><a href='/'>{c}</a></td></tr></table>\
 ";
 
-const char LUFTDATEN_INFO_LOGO_SVG[] PROGMEM = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\
-<!-- Generator: Adobe Illustrator 15.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\
-<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\
-<svg version=\"1.1\" id=\"Layer_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" width=\"100px\" height=\"88.891px\" viewBox=\"0 0 100 88.891\" enable-background=\"new 0 0 100 88.891\" xml:space=\"preserve\">\
-<path fill=\"#1ABC9C\" d=\"M90.277,66.571v0.094h-1.388h-5.556c-2.046,0-3.705-1.656-3.705-3.704c0-2.044,1.659-3.7,3.705-3.7h5.556  c2.046,0,3.702-1.661,3.702-3.704c0-2.046-1.656-3.704-3.702-3.704s-3.704-1.659-3.704-3.705c0-2.045,1.658-3.704,3.704-3.704 c0.255,0,0.505,0.025,0.743,0.076C95.417,44.91,100,49.675,100,55.557C100,61.219,95.757,65.884,90.277,66.571z\"/>\
-<path fill=\"#1ABC9C\" d=\"M70.371,44.444c-2.044,0-3.704-1.659-3.704-3.704c0-2.044,1.66-3.705,3.704-3.705  c0.257,0,0.503,0.025,0.745,0.076c5.78,0.391,10.365,5.155,10.365,11.036c0,5.667-4.243,10.33-9.722,11.016v0.098h-1.389H55.583  c-7.432,0-21.038,0-25.953,0c-2.045,0-3.704,1.658-3.704,3.7c0,2.048,1.659,3.704,3.704,3.704h40.741h1.389v0.098  c5.479,0.684,9.722,5.352,9.722,11.015c0,5.882-4.585,10.645-10.365,11.037c-0.242,0.047-0.492,0.076-0.745,0.076  c-2.044,0-3.704-1.661-3.704-3.705c0-2.045,1.66-3.704,3.704-3.704c2.043,0,3.704-1.658,3.704-3.704  c0-2.045-1.661-3.704-3.704-3.704H29.63h-1.389v-0.096c-5.48-0.686-9.724-5.352-9.724-11.017c0-1.953,0.544-3.762,1.432-5.352  C8.345,53.594,0,42.599,0,29.63C0,13.267,13.265,0,29.63,0c11.12,0,20.798,6.134,25.864,15.195c1.23-0.212,2.475-0.38,3.766-0.38  c10.919,0,19.98,7.882,21.851,18.265c-2.582-1.843-5.648-3.048-8.979-3.361c-2.553-4.475-7.356-7.495-12.871-7.495  c-2.964,0-5.712,0.889-8.026,2.389C48.952,14.767,40.17,7.407,29.63,7.407c-12.274,0-22.223,9.949-22.223,22.223  c0,12.271,9.949,22.223,22.223,22.223c4.812,0,15.097,0,22.594,0h18.146c2.043,0,3.704-1.659,3.704-3.705  C74.075,46.101,72.417,44.444,70.371,44.444z\"/>\
-</svg>";
+
 
 const char CFG_LOGO_SVG[] PROGMEM = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\
 <!-- Generator: Adobe Illustrator 16.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\

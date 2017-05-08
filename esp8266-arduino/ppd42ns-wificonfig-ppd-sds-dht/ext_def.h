@@ -1,6 +1,10 @@
+
 // WLAN Konfig
 #define WLANSSID "Freifunk-disabled"
 #define WLANPWD ""
+
+//Lang Konfig
+#define CURRENT_LANG INTL_LANG
 
 // BasicAuth Konfig
 #define WWW_USERNAME "admin"
