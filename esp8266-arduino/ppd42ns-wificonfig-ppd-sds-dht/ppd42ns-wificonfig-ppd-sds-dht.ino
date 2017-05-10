@@ -958,7 +958,7 @@ void webserver_config() {
 		page_content += form_input(F("wlanssid"),F("WLAN"),wlanssid,64);
 		page_content += form_password(F("wlanpwd"),F("Passwort"),wlanpwd,64);	
 		page_content += form_submit(FPSTR(INTL_SPEICHERN));
-		page_content += FPSTR("</table><br/><hr/><b>");
+		page_content += F("</table><br/><hr/><b>");
 		
 		page_content += FPSTR(INTL_AB_HIER_NUR_ANDERN);
 		page_content += F("</b><br/><br/><b>");

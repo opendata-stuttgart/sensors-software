@@ -1,4 +1,4 @@
-const char INTL_LANG[]="EN";
+const char INTL_LANG[] = "EN";
 const char INTL_FEINSTAUBSENSOR[] PROGMEM = "Particulate matter sensor";
 const char INTL_KONFIGURATION[] PROGMEM = "Configuration";
 const char INTL_WLAN_DATEN[] PROGMEM = "WiFi Settings";

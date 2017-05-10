@@ -5,3 +5,4 @@ keywords.txt
 library.json
 TinyGPS++.cpp
 TinyGPS++.h
+builds/*.bin
