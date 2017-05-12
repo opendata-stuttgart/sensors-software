@@ -1,5 +1,5 @@
 #include <Arduino.h>
-
+#define INTL_DE
 /*****************************************************************
 /* OK LAB Particulate Matter Sensor                              *
 /*      - nodemcu-LoLin board                                    *
@@ -58,7 +58,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2017-078"
+#define SOFTWARE_VERSION "NRZ-2017-079"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -104,7 +104,7 @@
 /*****************************************************************/
 char wlanssid[65] = "Freifunk-disabled";
 char wlanpwd[65] = "";
-char current_lang[3] = "DE";
+char current_lang[3] = "de";
 char www_username[65] = "admin";
 char www_password[65] = "feinstaub";
 bool www_basicauth_enabled = 0;
@@ -542,9 +542,9 @@ void copyExtDef() {
 #define strcpyDef(var, def) if (def != NULL) { strcpy(var, def); }
 #define setDef(var, def)    if (def != var) { var = def; }
 
+	strcpyDef(current_lang, CURRENT_LANG);
 	strcpyDef(wlanssid, WLANSSID);
 	strcpyDef(wlanpwd, WLANPWD);
-	strcpyDef(current_lang, CURRENT_LANG);
 	strcpyDef(www_username, WWW_USERNAME);
 	strcpyDef(www_password, WWW_PASSWORD);
 	setDef(www_basicauth_enabled, WWW_BASICAUTH_ENABLED);
@@ -618,9 +618,9 @@ void readConfig() {
 
 #define setFromJSON(key)    if (json.containsKey(#key)) key = json[#key];
 #define strcpyFromJSON(key) if (json.containsKey(#key)) strcpy(key, json[#key]);
+					strcpyFromJSON(current_lang);
 					strcpyFromJSON(wlanssid);
 					strcpyFromJSON(wlanpwd);
-					strcpyFromJSON(current_lang);
 					strcpyFromJSON(www_username);
 					strcpyFromJSON(www_password);
 					setFromJSON(www_basicauth_enabled);
@@ -677,10 +677,10 @@ void writeConfig() {
 	JsonObject& json = jsonBuffer.createObject();
 
 #define copyToJSON(varname) json[#varname] = varname;
+	copyToJSON(current_lang);
 	copyToJSON(SOFTWARE_VERSION);
 	copyToJSON(wlanssid);
 	copyToJSON(wlanpwd);
-	copyToJSON(current_lang);
 	copyToJSON(www_username);
 	copyToJSON(www_password);
 	copyToJSON(www_basicauth_enabled);
@@ -800,19 +800,20 @@ String form_submit(const String& value) {
 }
 
 String form_select_lang() {
-	String s = F("{t} <select name='current_lang'><option value='DE' {s_DE}>German</option><option value='EN' {s_EN}>English</option><option value='BG' {s_BG}>Bulgarian</option></select><br/>");
+	String s_select = F("selected='selected'");
+	String s = F("{t} <select name='current_lang'><option value='DE' {s_DE}>Deutsch (DE)</option><option value='EN' {s_EN}>English (EN)</option><option value='BG' {s_BG}>Bulgarian (BG)</option></select><br/>");
 	
 	s.replace("{t}",FPSTR(INTL_SPRACHE));
 	if(String(current_lang) == "DE"){
-		s.replace("{s_DE}","selected");
+		s.replace(F("{s_DE}"),s_select);
 	}else if(String(current_lang) == "EN"){
-		s.replace("{s_EN}","selected");
+		s.replace(F("{s_EN}"),s_select);
 	}else if(String(current_lang) == "BG"){
-		s.replace("{s_BG}","selected");
+		s.replace(F("{s_BG}"),s_select);
 	}
-	s.replace("{s_DE}","");
-	s.replace("{s_EN}","");
-	s.replace("{s_BG}","");
+	s.replace(F("{s_DE}"),"");
+	s.replace(F("{s_EN}"),"");
+	s.replace(F("{s_BG}"),"");
 	return s;
 }
 
@@ -908,8 +909,7 @@ void webserver_config() {
 	page_content += make_header(FPSTR(INTL_KONFIGURATION));
 	page_content += FPSTR(WEB_CONFIG_SCRIPT);
 	if (server.method() == HTTP_GET) {
-		page_content += F("<form method='POST' action='/config' style='width: 100%;'>");
-		page_content += F("<b>");
+		page_content += F("<form method='POST' action='/config' style='width: 100%;'><b>");
 		page_content += FPSTR(INTL_WLAN_DATEN);
 		page_content += F("</b><br/>");
 		if (WiFi.status() != WL_CONNECTED) {  // scan for wlan ssids

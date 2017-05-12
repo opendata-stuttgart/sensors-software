@@ -57,7 +57,6 @@ const char INTL_PARAMETER[] PROGMEM = "Parameter";
 const char INTL_WERT[] PROGMEM = "Wert";
 
 const char LUFTDATEN_INFO_LOGO_SVG[] PROGMEM = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\
-<!-- Generator: Adobe Illustrator 15.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\
 <!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\
 <svg version=\"1.1\" id=\"Layer_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" width=\"100px\" height=\"88.891px\" viewBox=\"0 0 100 88.891\" enable-background=\"new 0 0 100 88.891\" xml:space=\"preserve\">\
 <path fill=\"#ffffff\" d=\"M90.277,66.571v0.094h-1.388h-5.556c-2.046,0-3.705-1.656-3.705-3.704c0-2.044,1.659-3.7,3.705-3.7h5.556  c2.046,0,3.702-1.661,3.702-3.704c0-2.046-1.656-3.704-3.702-3.704s-3.704-1.659-3.704-3.705c0-2.045,1.658-3.704,3.704-3.704 c0.255,0,0.505,0.025,0.743,0.076C95.417,44.91,100,49.675,100,55.557C100,61.219,95.757,65.884,90.277,66.571z\"/>\
