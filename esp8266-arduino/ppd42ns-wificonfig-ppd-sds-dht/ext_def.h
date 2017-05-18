@@ -25,7 +25,7 @@
 #define NTP_SERVER "0.europe.pool.ntp.org"
 
 // OpenSenseMap
-#define SENSEBOXID "00112233445566778899aabb"
+#define SENSEBOXID ""
 
 // Definition eigene API
 #define HOST_CUSTOM "192.168.234.1"
