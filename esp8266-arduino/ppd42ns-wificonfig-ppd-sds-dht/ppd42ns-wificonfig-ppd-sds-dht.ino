@@ -2183,7 +2183,7 @@ bool initBME280(char addr) {
 /* The Setup                                                     *
 /*****************************************************************/
 void setup() {
-	Serial.begin(9600);					// Output to Serial at 9600 baud
+	Serial.begin(115200); // Output to Serial at 115200 baud
 #if defined(ESP8266)
 	Wire.begin(D3,D4);
 	esp_chipid = String(ESP.getChipId());
