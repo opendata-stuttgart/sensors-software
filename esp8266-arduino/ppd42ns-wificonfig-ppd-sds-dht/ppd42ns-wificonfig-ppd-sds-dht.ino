@@ -138,10 +138,10 @@ const char* host_dusti = "api.luftdaten.info";
 const char* url_dusti = "/v1/push-sensor-data/";
 int httpPort_dusti = 443;
 
-const char* host_sensemap = "api.opensensemap.org";
+const char* host_sensemap = "ingress.opensensemap.org";
 String url_sensemap = "/boxes/BOXID/data?luftdaten=1";
 const int httpPort_sensemap = 443;
-char senseboxid[30] = "00112233445566778899aabb";
+char senseboxid[30] = "";
 
 char host_influxdb[100] = "api.luftdaten.info";
 char url_influxdb[100] = "/write?db=luftdaten";
