@@ -16,7 +16,7 @@
 #define SEND2MADAVI 1
 #define SEND2SENSEMAP 0
 #define SEND2MQTT 0
-#define SEND2INFLUXDB 0
+#define SEND2INFLUX 0
 #define SEND2LORA 0
 #define SEND2CSV 0
 #define SEND2CUSTOM 0
@@ -30,16 +30,16 @@
 // Definition eigene API
 #define HOST_CUSTOM "192.168.234.1"
 #define URL_CUSTOM "/data.php"
-#define HTTPPORT_CUSTOM 80
+#define PORT_CUSTOM 80
 #define USER_CUSTOM ""
 #define PWD_CUSTOM ""
 
 // Definition eigene InfluxDB
-#define HOST_INFLUXDB "api.luftdaten.info"
-#define URL_INFLUXDB "/write?db=luftdaten"
-#define HTTPPORT_INFLUXDB 8086
-#define USER_INFLUXDB "luftdaten"
-#define PWD_INFLUXDB "info"
+#define HOST_INFLUX "api.luftdaten.info"
+#define URL_INFLUX "/write?db=luftdaten"
+#define PORT_INFLUX 8086
+#define USER_INFLUX "luftdaten"
+#define PWD_INFLUX "info"
 
 // DHT22, Sensor Temperatur und Luftfeuchte
 #define DHT_READ 1
@@ -101,6 +101,9 @@
 
 // OLED Display SSD1306 angeschlossen?
 #define HAS_DISPLAY 0
+
+// LCD Display LCD1602 angeschlossen?
+#define HAS_LCD1602 0
 
 // Wieviele Informationen sollen über die serielle Schnittstelle ausgegeben werden?
 #define DEBUG 3
