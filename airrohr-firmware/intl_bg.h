@@ -28,6 +28,7 @@ const char INTL_BENUTZER[] PROGMEM = "Потребител";
 const char INTL_PASSWORT[] PROGMEM = "Парола"; 
 const char INTL_SENDEN_AN[] PROGMEM = "Изпрати до {v}"; 
 const char INTL_LESE[] PROGMEM = "Получено от";
+const char INTL_GERAT_WIRD_NEU_GESTARTET[] PROGMEM = "";
 const char INTL_GERAT_NEU_STARTEN[] PROGMEM = "Рестартирайте устройството";
 const char INTL_CONFIG_LOSCHEN[] PROGMEM = "Изтриване на Конфигурацията";
 const char INTL_SENSOR_NEU_STARTEN[] PROGMEM = "Рестартиране на сензора";

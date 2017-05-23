@@ -27,6 +27,9 @@
 // OpenSenseMap
 #define SENSEBOXID ""
 
+
+// IMPORTANT: NO MORE CHANGES TO VARIABLE NAMES NEEDED FOR EXTERNAL APIS
+
 // Definition eigene API
 #define HOST_CUSTOM "192.168.234.1"
 #define URL_CUSTOM "/data.php"

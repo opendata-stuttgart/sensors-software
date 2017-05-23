@@ -28,6 +28,7 @@ const char INTL_BENUTZER[] PROGMEM = "Usuario";
 const char INTL_PASSWORT[] PROGMEM = "Contraseña";
 const char INTL_SENDEN_AN[] PROGMEM = "Enviar a {v}";
 const char INTL_LESE[] PROGMEM = "Leer";
+const char INTL_GERAT_WIRD_NEU_GESTARTET[] PROGMEM = "";
 const char INTL_GERAT_NEU_STARTEN[] PROGMEM = "Reiniciar dispositivo";
 const char INTL_CONFIG_LOSCHEN[] PROGMEM = "Borrar configruación actual";
 const char INTL_SENSOR_NEU_STARTEN[] PROGMEM = "Reiniciar sensor";

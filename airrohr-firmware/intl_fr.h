@@ -28,6 +28,7 @@ const char INTL_BENUTZER[] PROGMEM = "Utilisateur";
 const char INTL_PASSWORT[] PROGMEM = "Mot de passe"; 
 const char INTL_SENDEN_AN[] PROGMEM = "Envoyer à {v}"; 
 const char INTL_LESE[] PROGMEM = "Lire depuis";
+const char INTL_GERAT_WIRD_NEU_GESTARTET[] PROGMEM = "";
 const char INTL_GERAT_NEU_STARTEN[] PROGMEM = "Redémarrer l'appareil";
 const char INTL_CONFIG_LOSCHEN[] PROGMEM = "Effacer le fichier config.json";
 const char INTL_SENSOR_NEU_STARTEN[] PROGMEM = "Redémarrer le capteur";

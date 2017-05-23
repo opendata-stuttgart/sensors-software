@@ -144,6 +144,8 @@ const char* host_dusti = "api.luftdaten.info";
 const char* url_dusti = "/v1/push-sensor-data/";
 int httpPort_dusti = 443;
 
+// IMPORTANT: NO MORE CHANGES TO VARIABLE NAMES NEEDED FOR EXTERNAL APIS
+
 const char* host_sensemap = "ingress.opensensemap.org";
 String url_sensemap = "/boxes/BOXID/data?luftdaten=1";
 const int httpPort_sensemap = 443;
@@ -302,6 +304,9 @@ String esp_chipid;
 String server_name;
 
 long last_page_load = millis();
+
+bool wificonfig_loop = false;
+bool restart_needed = false;
 
 bool config_needs_write = false;
 
@@ -1108,8 +1113,11 @@ void webserver_config() {
 		page_content += line_from_value(FPSTR(INTL_PORT),String(port_influx));
 		page_content += line_from_value(FPSTR(INTL_BENUTZER),user_influx);
 		page_content += line_from_value(FPSTR(INTL_PASSWORT),pwd_influx);
-		page_content += F("<br/><br/><a href='/reset?confirm=yes'>"); page_content += FPSTR(INTL_GERAT_NEU_STARTEN); page_content += F("?</a>");
-
+		if (wificonfig_loop) {
+			page_content += F("<br/><br/>"); page_content += FPSTR(INTL_GERAT_WIRD_NEU_GESTARTET);
+		} else {
+			page_content += F("<br/><br/><a href='/reset?confirm=yes'>"); page_content += FPSTR(INTL_GERAT_NEU_STARTEN); page_content += F("?</a>");
+		}
 	}
 	page_content += make_footer();
 	server.send(200,FPSTR(TXT_CONTENT_TYPE_TEXT_HTML),page_content);
@@ -1334,6 +1342,8 @@ void wifiConfig() {
 	debug_out(F("AP ID: Feinstaubsensor-"),DEBUG_MIN_INFO,0);
 	debug_out(String(ESP.getChipId()),DEBUG_MIN_INFO,1);
 
+	wificonfig_loop = true;
+
 	WiFi.softAPConfig(apIP, apIP, netMsk);
 	WiFi.softAP(server_name.c_str(), "");
 
@@ -1389,8 +1399,12 @@ void wifiConfig() {
 	debug_out(F("CSV: "),DEBUG_MIN_INFO,0);debug_out(String(send2csv),DEBUG_MIN_INFO,1);
 	debug_out(F("Autoupdate: "),DEBUG_MIN_INFO,0);debug_out(String(auto_update),DEBUG_MIN_INFO,1);
 	debug_out(F("Display: "),DEBUG_MIN_INFO,0);debug_out(String(has_display),DEBUG_MIN_INFO,1);
+	debug_out(F("LCD 1602: "),DEBUG_MIN_INFO,0);debug_out(String(has_lcd1602),DEBUG_MIN_INFO,1);
 	debug_out(F("Debug: "),DEBUG_MIN_INFO,0);debug_out(String(debug),DEBUG_MIN_INFO,1);
 	debug_out(F("------"),DEBUG_MIN_INFO,1);
+	debug_out(F("Restart needed ..."),DEBUG_MIN_INFO,1);
+	wificonfig_loop = false;
+	restart_needed = true;
 #endif
 }
 
@@ -2162,7 +2176,6 @@ void init_lcd1602() {
 #endif
 }
 
-
 /*****************************************************************
 /* Init BME280                                                   *
 /*****************************************************************/
@@ -2200,8 +2213,12 @@ void setup() {
 	setup_webserver();
 	display_debug("Connecting to "+String(wlanssid));
 	connectWifi();						// Start ConnectWifi
-	display_debug(F("Writing config to SPIFFS"));
-	writeConfig();
+	if (restart_needed) {
+		display_debug(F("Writing config to SPIFFS and restarting sensor"));
+		writeConfig();
+		delay(500);
+		ESP.restart();
+	}
 	autoUpdate();
 	create_basic_auth_strings();
 	serialSDS.begin(9600);
@@ -2242,6 +2259,7 @@ void setup() {
 	if (send2influx) debug_out(F("Sende an custom influx DB..."),DEBUG_MIN_INFO,1);
 	if (auto_update) debug_out(F("Auto-Update wird ausgeführt..."),DEBUG_MIN_INFO,1);
 	if (has_display) debug_out(F("Zeige auf Display..."),DEBUG_MIN_INFO,1);
+	if (has_lcd1602) debug_out(F("Zeige auf LCD 1602..."),DEBUG_MIN_INFO,1);
 	if (bmp_read) {
 		if (!bmp.begin()) {
 			debug_out(F("No valid BMP085 sensor, check wiring!"),DEBUG_MIN_INFO,1);
@@ -2350,7 +2368,7 @@ void loop() {
 		starttime_GPS = act_milli;
 	}
 
-	if (has_display) {
+	if (has_display || has_lcd1602) {
 		if ((act_milli-display_last_update) > display_update_interval) {
 			if (sds_read) {
 				last_value_SDS_P1 = Float2String(float(sds_display_values_10[0]+sds_display_values_10[1]+sds_display_values_10[2]+sds_display_values_10[3]+sds_display_values_10[4])/50.0);
@@ -2374,9 +2392,10 @@ void loop() {
 		data_sample_times += Value2Json("min_micro",String(long(min_micro)));
 		data_sample_times += Value2Json("max_micro",String(long(max_micro)));
 
-		signal_strength = String(WiFi.RSSI())+" dBm";
+		signal_strength = String(WiFi.RSSI());
 		debug_out(F("WLAN signal strength: "),DEBUG_MIN_INFO,0);
-		debug_out(signal_strength,DEBUG_MIN_INFO,1);
+		debug_out(signal_strength,DEBUG_MIN_INFO,0);
+		debug_out(F(" dBm"),DEBUG_MIN_INFO,1);
 		debug_out(F("------"),DEBUG_MIN_INFO,1);
 
 		server.handleClient();
@@ -2501,7 +2520,7 @@ void loop() {
 			will_check_for_update = true;
 		}
 
-		if (has_display) {
+		if (has_display || has_lcd1602) {
 			display_values(last_value_DHT_T,last_value_DHT_H,last_value_BMP_T,last_value_BMP_P,last_value_BME280_T,last_value_BME280_H,last_value_BME280_P,last_value_PPD_P1,last_value_PPD_P2,last_value_SDS_P1,last_value_SDS_P2);
 		}
 
@@ -2583,4 +2602,3 @@ void loop() {
 	server.handleClient();
 	yield();
 }
-
