@@ -58,7 +58,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2017-080"
+#define SOFTWARE_VERSION "NRZ-2017-081"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -822,7 +822,7 @@ String form_submit(const String& value) {
 
 String form_select_lang() {
 	String s_select = F("selected='selected'");
-	String s = F("{t} <select name='current_lang'><option value='DE' {s_DE}>Deutsch (DE)</option><option value='BG' {s_BG}>Bulgarian (BG)</option><option value='EN' {s_EN}>English (EN)</option><option value='ES' {s_ES}>Español (ES)</option><option value='FR' {s_FR}>Français (FR)</option></select><br/>");
+	String s = F("{t} <select name='current_lang'><option value='DE' {s_DE}>Deutsch (DE)</option><option value='BG' {s_BG}>Bulgarian (BG)</option><option value='EN' {s_EN}>English (EN)</option><option value='ES' {s_ES}>Español (ES)</option><option value='FR' {s_FR}>Français (FR)</option><option value='NL' {s_NL}>Nederlands (NL)</option></select><br/>");
 
 	s.replace("{t}",FPSTR(INTL_SPRACHE));
 	if(String(current_lang) == "DE"){
@@ -835,12 +835,15 @@ String form_select_lang() {
 		s.replace(F("{s_ES}"),s_select);
 	}else if(String(current_lang) == "FR"){
 		s.replace(F("{s_FR}"),s_select);
+	}else if(String(current_lang) == "NL"){
+		s.replace(F("{s_NL}"),s_select);
 	}
 	s.replace(F("{s_DE}"),"");
 	s.replace(F("{s_BG}"),"");
 	s.replace(F("{s_EN}"),"");
 	s.replace(F("{s_ES}"),"");
 	s.replace(F("{s_FR}"),"");
+	s.replace(F("{s_NL}"),"");
 	return s;
 }
 
