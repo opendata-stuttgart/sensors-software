@@ -24,7 +24,7 @@
 /* Wiring Instruction:                                           *
 /*      Pin 2 of dust sensor PM2.5 -> Digital 6 (PWM)            *
 /*      Pin 3 of dust sensor       -> +5V                        *
-/*      Pin 4 of dust sensor PM1   -> Digital 3 (PMW)            * 
+/*      Pin 4 of dust sensor PM1   -> Digital 3 (PMW)            *
 /*                                                               *
 /*      - PPD42NS Pin 1 (grey or green)  => GND                  *
 /*      - PPD42NS Pin 2 (green or white)) => Pin D5 /GPIO14      *
@@ -98,6 +98,8 @@
 #include "intl_es.h"
 #elif defined(INTL_FR)
 #include "intl_fr.h"
+#elif defined(INTL_NL)
+#include "intl_nl.h"
 #else
 #include "intl_de.h"
 #endif
@@ -289,7 +291,7 @@ String last_value_DHT_H = "";
 String last_value_BMP_T = "";
 String last_value_BMP_P = ""; 
 String last_value_BME280_T = "";
-String last_value_BME280_H = ""; 
+String last_value_BME280_H = "";
 String last_value_BME280_P = "";
 String last_data_string = "";
 
@@ -504,7 +506,7 @@ String SDS_version_date() {
 	delay(100);
 
 	serialSDS.write(version_SDS_cmd,sizeof(version_SDS_cmd));
-	
+
 	delay(100);
 
 	while (serialSDS.available() > 0) {
@@ -576,7 +578,7 @@ void copyExtDef() {
 	setDef(has_lcd1602, HAS_LCD1602);
 
 	setDef(debug, DEBUG);
-	
+
 	strcpyDef(senseboxid, SENSEBOXID);
 
 	setDef(send2custom, SEND2CUSTOM);
@@ -821,7 +823,7 @@ String form_submit(const String& value) {
 String form_select_lang() {
 	String s_select = F("selected='selected'");
 	String s = F("{t} <select name='current_lang'><option value='DE' {s_DE}>Deutsch (DE)</option><option value='BG' {s_BG}>Bulgarian (BG)</option><option value='EN' {s_EN}>English (EN)</option><option value='ES' {s_ES}>Español (ES)</option><option value='FR' {s_FR}>Français (FR)</option></select><br/>");
-	
+
 	s.replace("{t}",FPSTR(INTL_SPRACHE));
 	if(String(current_lang) == "DE"){
 		s.replace(F("{s_DE}"),s_select);
@@ -884,15 +886,15 @@ String wlan_ssid_to_table_row(const String& ssid, const String& encryption, cons
 }
 
 /*****************************************************************
-/* Webserver request auth: prompt for BasicAuth                              
- *  
+/* Webserver request auth: prompt for BasicAuth
+ *
  * -Provide BasicAuth for all page contexts except /values and images
 /*****************************************************************/
 void webserver_request_auth() {
 	debug_out(F("validate request auth..."),DEBUG_MIN_INFO,1);
 	if (www_basicauth_enabled) {
 		if (!server.authenticate(www_username, www_password))
-			return server.requestAuthentication();  
+			return server.requestAuthentication();
 	}
 }
 
@@ -926,7 +928,7 @@ void webserver_root() {
 /*****************************************************************/
 void webserver_config() {
 	webserver_request_auth();
-	
+
 	String page_content = "";
 	last_page_load = millis();
 
@@ -981,13 +983,13 @@ void webserver_config() {
 		}
 		page_content += F("<table>");
 		page_content += form_input(F("wlanssid"),F("WLAN"),wlanssid,64);
-		page_content += form_password(F("wlanpwd"),FPSTR(INTL_PASSWORT),wlanpwd,64);	
+		page_content += form_password(F("wlanpwd"),FPSTR(INTL_PASSWORT),wlanpwd,64);
 		page_content += form_submit(FPSTR(INTL_SPEICHERN));
 		page_content += F("</table><br/><hr/><b>");
-		
+
 		page_content += FPSTR(INTL_AB_HIER_NUR_ANDERN);
 		page_content += F("</b><br/><br/><b>");
-		page_content += FPSTR(INTL_BASICAUTH);		
+		page_content += FPSTR(INTL_BASICAUTH);
 		page_content += F("</b><br/>");
 		page_content += F("<table>");
 		page_content += form_input(F("www_username"),FPSTR(INTL_BENUTZER),www_username,64);
@@ -998,7 +1000,7 @@ void webserver_config() {
 		page_content += F("</table><br/><b>APIs</b><br/>");
 		page_content += form_checkbox(F("send2dusti"),F("API Luftdaten.info"),send2dusti);
 		page_content += form_checkbox(F("send2madavi"),F("API Madavi.de"),send2madavi);
-		page_content += F("<br/><b>");		
+		page_content += F("<br/><b>");
 		page_content += FPSTR(INTL_SENSOREN);
 		page_content += F("</b><br/>");
 		page_content += form_checkbox(F("sds_read"),FPSTR(INTL_SDS011),sds_read);
@@ -1006,27 +1008,27 @@ void webserver_config() {
 		page_content += form_checkbox(F("ppd_read"),FPSTR(INTL_PPD42NS),ppd_read);
 		page_content += form_checkbox(F("bmp_read"),FPSTR(INTL_BMP180),bmp_read);
 		page_content += form_checkbox(F("bme280_read"),FPSTR(INTL_BME280),bme280_read);
-		page_content += form_checkbox(F("gps_read"),F("GPS (NEO 6M)"),gps_read);		
-		page_content += F("<br/><b>"); page_content += FPSTR(INTL_WEITERE_EINSTELLUNGEN); page_content+=("</b><br/>");	
+		page_content += form_checkbox(F("gps_read"),F("GPS (NEO 6M)"),gps_read);
+		page_content += F("<br/><b>"); page_content += FPSTR(INTL_WEITERE_EINSTELLUNGEN); page_content+=("</b><br/>");
 		page_content += form_checkbox(F("auto_update"),FPSTR(INTL_AUTO_UPDATE),auto_update);
 		page_content += form_checkbox(F("has_display"),FPSTR(INTL_DISPLAY),has_display);
 		page_content += form_checkbox(F("has_lcd1602"),FPSTR(INTL_LCD1602),has_lcd1602);
 		page_content += form_select_lang();
 		page_content += F("<table>");
-		page_content += form_input(F("debug"),FPSTR(INTL_DEBUG_LEVEL),String(debug),5);	
+		page_content += form_input(F("debug"),FPSTR(INTL_DEBUG_LEVEL),String(debug),5);
 		page_content += F("</table><br/><b>");page_content += FPSTR(INTL_WEITERE_APIS); page_content += F("</b><br/><br/>");
 		page_content += form_checkbox(F("send2sensemap"),tmpl(FPSTR(INTL_SENDEN_AN),"OpenSenseMap"),send2sensemap);
 		page_content += F("<table>");
 		page_content += form_input(F("senseboxid"),F("senseBox-ID: "),senseboxid,50);
-		page_content += F("</table><br/>");	
+		page_content += F("</table><br/>");
 		page_content += form_checkbox(F("send2custom"),FPSTR(INTL_AN_EIGENE_API_SENDEN),send2custom);
 		page_content += F("<table>");
 		page_content += form_input(F("host_custom"),FPSTR(INTL_SERVER),host_custom,50);
-		page_content += form_input(F("url_custom"),FPSTR(INTL_PFAD),url_custom,50);	
+		page_content += form_input(F("url_custom"),FPSTR(INTL_PFAD),url_custom,50);
 		page_content += form_input(F("port_custom"),FPSTR(INTL_PORT),String(port_custom),30);
-		page_content += form_input(F("user_custom"),FPSTR(INTL_BENUTZER),user_custom,50);		
+		page_content += form_input(F("user_custom"),FPSTR(INTL_BENUTZER),user_custom,50);
 		page_content += form_input(F("pwd_custom"),FPSTR(INTL_PASSWORT),pwd_custom,50);
-		page_content += F("</table><br/>");	
+		page_content += F("</table><br/>");
 		page_content += form_checkbox(F("send2influx"),tmpl(FPSTR(INTL_SENDEN_AN),"InfluxDB"),send2influx);
 		page_content += F("<table>");
 		page_content += form_input(F("host_influx"),FPSTR(INTL_SERVER),host_influx,50);
@@ -1172,7 +1174,7 @@ void webserver_values() {
 			page_content += table_row_from_value(F("BME280"),FPSTR(INTL_LUFTFEUCHTE),last_value_BME280_H,"%");
 			page_content += table_row_from_value(F("BME280"),FPSTR(INTL_LUFTDRUCK),  last_value_BME280_P,"Pascal");
 		}
-		
+
 		page_content += "<tr><td colspan='3'>&nbsp;</td></tr>";
 		page_content += table_row_from_value(F("WiFi"),FPSTR(INTL_SIGNAL),  String(signal_strength),"dBm");
 		page_content += table_row_from_value(F("WiFi"),FPSTR(INTL_QUALITAT),String(signal_quality),"%");
@@ -1188,12 +1190,12 @@ void webserver_values() {
 /*****************************************************************/
 void webserver_debug_level() {
 	webserver_request_auth();
-  
+
 	String page_content = "";
 	last_page_load = millis();
 	debug_out(F("output change debug level page..."),DEBUG_MIN_INFO,1);
 	page_content += make_header(FPSTR(INTL_DEBUG_LEVEL));
-	
+
 	if (server.hasArg("level")) {
 		switch (server.arg("level").toInt()) {
 			case (0): debug=0; page_content += tmpl("<h3>{v1} {v2}.</h3>",FPSTR(INTL_SETZE_DEBUG_AUF),FPSTR(INTL_NONE));break;
@@ -1213,18 +1215,18 @@ void webserver_debug_level() {
 /*****************************************************************/
 void webserver_removeConfig() {
 	webserver_request_auth();
- 
+
 	String page_content = "";
 	last_page_load = millis();
 	debug_out(F("output remove config page..."),DEBUG_MIN_INFO,1);
 	page_content += make_header(FPSTR(INTL_CONFIG_LOSCHEN));
-	
+
 	if (server.method() == HTTP_GET) {
 		page_content += FPSTR(WEB_REMOVE_CONFIG_CONTENT);
 		page_content.replace("{t}",FPSTR(INTL_KONFIGURATION_WIRKLICH_LOSCHEN));
 		page_content.replace("{b}",FPSTR(INTL_LOSCHEN));
 		page_content.replace("{c}",FPSTR(INTL_ABBRECHEN));
-		
+
 	} else {
 #if defined(ESP8266)
 		if (SPIFFS.exists("/config.json")) {	//file exists
@@ -1248,12 +1250,12 @@ void webserver_removeConfig() {
 /*****************************************************************/
 void webserver_reset() {
 	webserver_request_auth();
- 
+
 	String page_content = "";
 	last_page_load = millis();
 	debug_out(F("output reset NodeMCU page..."),DEBUG_MIN_INFO,1);
 	page_content += make_header(FPSTR(INTL_SENSOR_NEU_STARTEN));
-	
+
 	if (server.method() == HTTP_GET) {
 		page_content += FPSTR(WEB_RESET_CONTENT);
 		page_content.replace("{t}",FPSTR(INTL_SENSOR_WIRKLICH_NEU_STARTEN));
@@ -1379,7 +1381,7 @@ void wifiConfig() {
 	debug_out(wlanssid,DEBUG_MIN_INFO,1);
 
 	WiFi.begin(wlanssid, wlanpwd);
-	
+
 	while ((WiFi.status() != WL_CONNECTED) && (retry_count < 20)) {
 		delay(500);
 		debug_out(".",DEBUG_MIN_INFO,0);
@@ -1454,7 +1456,7 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 
 	debug_out(F("Start connecting to "),DEBUG_MIN_INFO,0);
 	debug_out(host,DEBUG_MIN_INFO,1);
-	
+
 	String request_head = F("POST "); request_head += String(url); request_head += F(" HTTP/1.1\r\n");
 	request_head += F("Host: "); request_head += String(host) + "\r\n";
 	request_head += F("Content-Type: "); request_head += contentType + "\r\n";
@@ -1469,7 +1471,7 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 	if (httpPort == 443) {
 
 		WiFiClientSecure client_s;
-		
+
 		client_s.setNoDelay(true);
 		client_s.setTimeout(20000);
 
@@ -1502,7 +1504,7 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 	} else {
 
 		WiFiClient client;
-		
+
 		client.setNoDelay(true);
 		client.setTimeout(20000);
 
@@ -2069,7 +2071,7 @@ void autoUpdate() {
 		debug_out(String(SOFTWARE_VERSION),DEBUG_MIN_INFO,1);
 		debug_out(String(update_host),DEBUG_MED_INFO,1);
 		debug_out(String(update_url),DEBUG_MED_INFO,1);
-		
+
 		if (sds_read) { SDS_version = SDS_version_date();}
 		//SDS_version = "999";
 		display_debug(F("Looking for OTA update"));
@@ -2311,7 +2313,7 @@ void loop() {
 	String result_BME280 = "";
 	String result_GPS = "";
 	String signal_strength = "";
-	
+
 	unsigned long sum_send_time = 0;
 	unsigned long start_send;
 
@@ -2385,7 +2387,7 @@ void loop() {
 		if (WiFi.psk() != "") {
 			httpPort_madavi = 80;
 			httpPort_dusti = 80;
-		} 
+		}
 		debug_out(F("Creating data string:"),DEBUG_MIN_INFO,1);
 		data = data_first_part;
 		data_sample_times  = Value2Json("samples",String(long(sample_count)));
