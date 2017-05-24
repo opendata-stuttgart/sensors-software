@@ -507,7 +507,7 @@ String SDS_version_date() {
 
 	serialSDS.write(version_SDS_cmd,sizeof(version_SDS_cmd));
 
-	delay(100);
+	delay(500);
 
 	while (serialSDS.available() > 0) {
 		buffer = serialSDS.read();

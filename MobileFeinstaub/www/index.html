@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
+        <meta name="format-detection" content="telephone=no">
+        <meta name="msapplication-tap-highlight" content="no">
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+        <link rel="stylesheet" type="text/css" href="css/index.css">
+        <title>Mobile Feinstaubmessung</title>
+    </head>
+    <body>
+        <div class="app">
+			<img id="logo" src="img/CFG_logo.svg"><br /><br />
+			
+			<h2>Mobile Feinstaubmessung</h2>
+			<div id="value_out">
+				<h2>PM10: <span id="P1"> </span></h1>
+				<h2>PM2.5: <span id="P2"> </span></h1>
+				<p id="debug_out">...</p>
+				<canvas id="graph" height="150"></canvas>
+			</div>
+        </div>
+        <script type="text/javascript" src="cordova.js"></script>
+        <script type="text/javascript" src="js/index.js"></script>
+    </body>
+</html>
