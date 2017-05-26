@@ -2570,7 +2570,7 @@ void loop() {
 			data_4_custom = "{\"esp8266id\": \""+String(esp_chipid)+"\", "+data_4_custom;
 			debug_out(F("## Sending to custom api: "),DEBUG_MIN_INFO,1);
 			start_send = micros();
-			sendData(data,0,host_custom,port_custom,url_custom,basic_auth_custom.c_str(),FPSTR(TXT_CONTENT_TYPE_JSON));
+			sendData(data_4_custom,0,host_custom,port_custom,url_custom,basic_auth_custom.c_str(),FPSTR(TXT_CONTENT_TYPE_JSON));
 			sum_send_time += micros() - start_send;
 		}
 
