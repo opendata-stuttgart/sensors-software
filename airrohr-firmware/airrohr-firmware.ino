@@ -58,7 +58,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2017-082"
+#define SOFTWARE_VERSION "NRZ-2017-083"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -258,9 +258,6 @@ bool is_SDS_running = true;
 
 const unsigned long display_update_interval = 5000;
 unsigned long display_last_update;
-float sds_display_values_10[5];
-float sds_display_values_25[5];
-unsigned int sds_display_value_pos = 0;
 
 const unsigned long sampletime_GPS_ms = 50;
 
@@ -275,13 +272,11 @@ bool will_check_for_update = false;
 int sds_pm10_sum = 0;
 int sds_pm25_sum = 0;
 int sds_val_count = 0;
+int sds_pm10_max = 0;
+int sds_pm10_min = 2000;
+int sds_pm25_max = 0;
+int sds_pm25_min = 2000;
 
-String last_result_PPD = "";
-String last_result_SDS = "";
-String last_result_DHT = "";
-String last_result_BMP = "";
-String last_result_BME280 = "";
-String last_result_GPS = "";
 String last_value_PPD_P1 = "";
 String last_value_PPD_P2 = "";
 String last_value_SDS_P1 = "";
@@ -880,8 +875,7 @@ String table_row_from_value(const String& sensor, const String& param, const Str
 
 String wlan_ssid_to_table_row(const String& ssid, const String& encryption, const long rssi) {
 	long rssi_temp = rssi;
-	if (rssi_temp > -50) {rssi_temp = -50; }
-	if (rssi_temp < -100) {rssi_temp = -100; }
+	rssi_temp = std::max((long)-100,std::min((long)-50,rssi_temp));
 	int quality = (rssi_temp+100)*2;
 	String s = F("<tr><td><a href='#wlanpwd' onclick='setSSID(this)' style='background:none;color:blue;padding:5px;display:inline;'>{n}</a>&nbsp;{e}</a></td><td style='width:80%;vertical-align:middle;'>{v}%</td></tr>");
 	s.replace("{n}",ssid);s.replace("{e}",encryption);s.replace("{v}",String(quality));
@@ -917,10 +911,10 @@ void webserver_root() {
 		page_content = make_header(" ");
 		page_content += FPSTR(WEB_ROOT_PAGE_CONTENT);
 		page_content.replace("{t}",FPSTR(INTL_AKTUELLE_WERTE));
-		page_content.replace("{karte}",FPSTR(INTL_KARTE_DER_AKTIVEN_SENSOREN));
-		page_content.replace("{conf}",FPSTR(INTL_KONFIGURATION));
-		page_content.replace("{conf_delete}",FPSTR(INTL_KONFIGURATION_LOSCHEN));
-		page_content.replace("{restart}",FPSTR(INTL_SENSOR_NEU_STARTEN));
+		page_content.replace(F("{karte}"),FPSTR(INTL_KARTE_DER_AKTIVEN_SENSOREN));
+		page_content.replace(F("{conf}"),FPSTR(INTL_KONFIGURATION));
+		page_content.replace(F("{conf_delete}"),FPSTR(INTL_KONFIGURATION_LOSCHEN));
+		page_content.replace(F("{restart}"),FPSTR(INTL_SENSOR_NEU_STARTEN));
 		page_content += make_footer();
 		server.send(200,FPSTR(TXT_CONTENT_TYPE_TEXT_HTML),page_content);
 	}
@@ -1012,7 +1006,7 @@ void webserver_config() {
 		page_content += form_checkbox(F("bmp_read"),FPSTR(INTL_BMP180),bmp_read);
 		page_content += form_checkbox(F("bme280_read"),FPSTR(INTL_BME280),bme280_read);
 		page_content += form_checkbox(F("gps_read"),F("GPS (NEO 6M)"),gps_read);
-		page_content += F("<br/><b>"); page_content += FPSTR(INTL_WEITERE_EINSTELLUNGEN); page_content+=("</b><br/>");
+		page_content += F("<br/><b>"); page_content += FPSTR(INTL_WEITERE_EINSTELLUNGEN); page_content+=F("</b><br/>");
 		page_content += form_checkbox(F("auto_update"),FPSTR(INTL_AUTO_UPDATE),auto_update);
 		page_content += form_checkbox(F("has_display"),FPSTR(INTL_DISPLAY),has_display);
 		page_content += form_checkbox(F("has_lcd1602"),FPSTR(INTL_LCD1602),has_lcd1602);
@@ -1020,7 +1014,7 @@ void webserver_config() {
 		page_content += F("<table>");
 		page_content += form_input(F("debug"),FPSTR(INTL_DEBUG_LEVEL),String(debug),5);
 		page_content += F("</table><br/><b>");page_content += FPSTR(INTL_WEITERE_APIS); page_content += F("</b><br/><br/>");
-		page_content += form_checkbox(F("send2sensemap"),tmpl(FPSTR(INTL_SENDEN_AN),"OpenSenseMap"),send2sensemap);
+		page_content += form_checkbox(F("send2sensemap"),tmpl(FPSTR(INTL_SENDEN_AN),F("OpenSenseMap")),send2sensemap);
 		page_content += F("<table>");
 		page_content += form_input(F("senseboxid"),F("senseBox-ID: "),senseboxid,50);
 		page_content += F("</table><br/>");
@@ -1032,7 +1026,7 @@ void webserver_config() {
 		page_content += form_input(F("user_custom"),FPSTR(INTL_BENUTZER),user_custom,50);
 		page_content += form_input(F("pwd_custom"),FPSTR(INTL_PASSWORT),pwd_custom,50);
 		page_content += F("</table><br/>");
-		page_content += form_checkbox(F("send2influx"),tmpl(FPSTR(INTL_SENDEN_AN),"InfluxDB"),send2influx);
+		page_content += form_checkbox(F("send2influx"),tmpl(FPSTR(INTL_SENDEN_AN),F("InfluxDB")),send2influx);
 		page_content += F("<table>");
 		page_content += form_input(F("host_influx"),FPSTR(INTL_SERVER),host_influx,50);
 		page_content += form_input(F("url_influx"),FPSTR(INTL_PFAD),url_influx,50);
@@ -1048,7 +1042,7 @@ void webserver_config() {
 #define readBoolParam(param) if (server.hasArg(#param)){ param = server.arg(#param) == "1"; }
 #define readIntParam(param)  if (server.hasArg(#param)){ int val = server.arg(#param).toInt(); if (val != 0){ param = val; }}
 
-		if (server.hasArg("wlanssid") && server.arg("wlanssid") != "") {
+		if (server.hasArg(F("wlanssid")) && server.arg(F("wlanssid")) != "") {
 			readCharParam(wlanssid);
 			readCharParam(wlanpwd);
 		}
@@ -1092,8 +1086,8 @@ void webserver_config() {
 
 		config_needs_write = true;
 
-		page_content += line_from_value(tmpl(FPSTR(INTL_SENDEN_AN),"Luftdaten.info"),String(send2dusti));
-		page_content += line_from_value(tmpl(FPSTR(INTL_SENDEN_AN),"Madavi"),String(send2madavi));
+		page_content += line_from_value(tmpl(FPSTR(INTL_SENDEN_AN),F("Luftdaten.info")),String(send2dusti));
+		page_content += line_from_value(tmpl(FPSTR(INTL_SENDEN_AN),F("Madavi")),String(send2madavi));
 		page_content += line_from_value(tmpl(FPSTR(INTL_LESE),"DHT"),String(dht_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_LESE),"SDS"),String(sds_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_LESE),"PPD"),String(ppd_read));
@@ -1138,49 +1132,44 @@ void webserver_values() {
 		server.send(302,FPSTR(TXT_CONTENT_TYPE_TEXT_HTML),"");
 	} else {
 		String page_content = "";
+		String empty_row = F("<tr><td colspan='3'>&nbsp;</td></tr>");
 		last_page_load = millis();
 		long signal_strength = WiFi.RSSI();
-		long signal_temp = signal_strength;
-		if (signal_temp > -50) {signal_temp = -50; }
-		if (signal_temp < -100) {signal_temp = -100; }
-		int signal_quality = (signal_temp+100)*2;
-		int value_count = 0;
+		int signal_quality = int((std::max((long)-100,std::min((long)-50,signal_strength))+100)*2);
 		debug_out(F("output values to web page..."),DEBUG_MIN_INFO,1);
 		page_content += make_header(FPSTR(INTL_AKTUELLE_WERTE));
 		page_content += F("<table cellspacing='0' border='1' cellpadding='5'>");
 		page_content += tmpl(F("<tr><th>{v1}</th><th>{v2}</th><th>{v3}</th>"),FPSTR(INTL_SENSOR),FPSTR(INTL_PARAMETER),FPSTR(INTL_WERT));
 		if (ppd_read) {
-			page_content += "<tr><td colspan='3'>&nbsp;</td></tr>";
-			page_content += table_row_from_value(F("PPD42NS"),F("PM1"),  last_value_PPD_P1,FPSTR(INTL_PARTIKEL_LITER));
-			page_content += table_row_from_value(F("PPD42NS"),F("PM2.5"),last_value_PPD_P2,FPSTR(INTL_PARTIKEL_LITER));
+			page_content += empty_row;
+			page_content += table_row_from_value("PPD42NS","PM1",  last_value_PPD_P1,FPSTR(INTL_PARTIKEL_LITER));
+			page_content += table_row_from_value("PPD42NS","PM2.5",last_value_PPD_P2,FPSTR(INTL_PARTIKEL_LITER));
 		}
 		if (sds_read) {
-			Serial.println('a');
-			page_content += "<tr><td colspan='3'>&nbsp;</td></tr>";
-			page_content += table_row_from_value(F("SDS011"),F("PM2.5"),last_value_SDS_P2,F("µg/m³"));
-			page_content += table_row_from_value(F("SDS011"),F("PM10"), last_value_SDS_P1,F("µg/m³"));
+			page_content += empty_row;
+			page_content += table_row_from_value("SDS011","PM2.5",last_value_SDS_P2,"µg/m³");
+			page_content += table_row_from_value("SDS011","PM10", last_value_SDS_P1,"µg/m³");
 		}
 		if (dht_read) {
-			page_content += "<tr><td colspan='3'>&nbsp;</td></tr>";
-			page_content += table_row_from_value(F("DHT22"),FPSTR(INTL_TEMPERATUR), last_value_DHT_T,"°C");
-			page_content += table_row_from_value(F("DHT22"),FPSTR(INTL_LUFTFEUCHTE),last_value_DHT_H,"%");
+			page_content += empty_row;
+			page_content += table_row_from_value("DHT22",FPSTR(INTL_TEMPERATUR), last_value_DHT_T,"°C");
+			page_content += table_row_from_value("DHT22",FPSTR(INTL_LUFTFEUCHTE),last_value_DHT_H,"%");
 		}
 		if (bmp_read) {
-			page_content += "<tr><td colspan='3'>&nbsp;</td></tr>";
-			page_content += table_row_from_value(F("BMP180"),FPSTR(INTL_TEMPERATUR),last_value_BMP_T,"°C");
-			page_content += table_row_from_value(F("BMP180"),FPSTR(INTL_LUFTDRUCK), last_value_BMP_P,"Pascal");
+			page_content += empty_row;
+			page_content += table_row_from_value("BMP180",FPSTR(INTL_TEMPERATUR),last_value_BMP_T,"°C");
+			page_content += table_row_from_value("BMP180",FPSTR(INTL_LUFTDRUCK), Float2String(last_value_BMP_P.toFloat()/100.0),"hPa");
 		}
 		if (bme280_read) {
-			Serial.println('2');
-			page_content += "<tr><td colspan='3'>&nbsp;</td></tr>";
-			page_content += table_row_from_value(F("BME280"),FPSTR(INTL_TEMPERATUR), last_value_BME280_T,"°C");
-			page_content += table_row_from_value(F("BME280"),FPSTR(INTL_LUFTFEUCHTE),last_value_BME280_H,"%");
-			page_content += table_row_from_value(F("BME280"),FPSTR(INTL_LUFTDRUCK),  last_value_BME280_P,"Pascal");
+			page_content += empty_row;
+			page_content += table_row_from_value("BME280",FPSTR(INTL_TEMPERATUR), last_value_BME280_T,"°C");
+			page_content += table_row_from_value("BME280",FPSTR(INTL_LUFTFEUCHTE),last_value_BME280_H,"%");
+			page_content += table_row_from_value("BME280",FPSTR(INTL_LUFTDRUCK),  Float2String(last_value_BME280_P.toFloat()/100.0),"hPa");
 		}
 
-		page_content += "<tr><td colspan='3'>&nbsp;</td></tr>";
-		page_content += table_row_from_value(F("WiFi"),FPSTR(INTL_SIGNAL),  String(signal_strength),"dBm");
-		page_content += table_row_from_value(F("WiFi"),FPSTR(INTL_QUALITAT),String(signal_quality),"%");
+		page_content += empty_row;
+		page_content += table_row_from_value("WiFi",FPSTR(INTL_SIGNAL),  String(signal_strength),"dBm");
+		page_content += table_row_from_value("WiFi",FPSTR(INTL_QUALITAT),String(signal_quality),"%");
 		page_content += F("</table>");
 		page_content += make_footer();
 		server.send(200,FPSTR(TXT_CONTENT_TYPE_TEXT_HTML),page_content);
@@ -1195,18 +1184,19 @@ void webserver_debug_level() {
 	webserver_request_auth();
 
 	String page_content = "";
+	String message_string = F("<h3>{v1} {v2}.</h3>");
 	last_page_load = millis();
 	debug_out(F("output change debug level page..."),DEBUG_MIN_INFO,1);
 	page_content += make_header(FPSTR(INTL_DEBUG_LEVEL));
 
 	if (server.hasArg("level")) {
 		switch (server.arg("level").toInt()) {
-			case (0): debug=0; page_content += tmpl("<h3>{v1} {v2}.</h3>",FPSTR(INTL_SETZE_DEBUG_AUF),FPSTR(INTL_NONE));break;
-			case (1): debug=1; page_content += tmpl("<h3>{v1} {v2}.</h3>",FPSTR(INTL_SETZE_DEBUG_AUF),FPSTR(INTL_ERROR));break;
-			case (2): debug=2; page_content += tmpl("<h3>{v1} {v2}.</h3>",FPSTR(INTL_SETZE_DEBUG_AUF),FPSTR(INTL_WARNING));break;
-			case (3): debug=3; page_content += tmpl("<h3>{v1} {v2}.</h3>",FPSTR(INTL_SETZE_DEBUG_AUF),FPSTR(INTL_MIN_INFO));break;
-			case (4): debug=4; page_content += tmpl("<h3>{v1} {v2}.</h3>",FPSTR(INTL_SETZE_DEBUG_AUF),FPSTR(INTL_MED_INFO));break;
-			case (5): debug=5; page_content += tmpl("<h3>{v1} {v2}.</h3>",FPSTR(INTL_SETZE_DEBUG_AUF),FPSTR(INTL_MAX_INFO));break;
+			case (0): debug=0; page_content += tmpl(message_string,FPSTR(INTL_SETZE_DEBUG_AUF),FPSTR(INTL_NONE));break;
+			case (1): debug=1; page_content += tmpl(message_string,FPSTR(INTL_SETZE_DEBUG_AUF),FPSTR(INTL_ERROR));break;
+			case (2): debug=2; page_content += tmpl(message_string,FPSTR(INTL_SETZE_DEBUG_AUF),FPSTR(INTL_WARNING));break;
+			case (3): debug=3; page_content += tmpl(message_string,FPSTR(INTL_SETZE_DEBUG_AUF),FPSTR(INTL_MIN_INFO));break;
+			case (4): debug=4; page_content += tmpl(message_string,FPSTR(INTL_SETZE_DEBUG_AUF),FPSTR(INTL_MED_INFO));break;
+			case (5): debug=5; page_content += tmpl(message_string,FPSTR(INTL_SETZE_DEBUG_AUF),FPSTR(INTL_MAX_INFO));break;
 		}
 	}
 	page_content += make_footer();
@@ -1220,6 +1210,7 @@ void webserver_removeConfig() {
 	webserver_request_auth();
 
 	String page_content = "";
+	String message_string = F("<h3>{v}.</h3>");
 	last_page_load = millis();
 	debug_out(F("output remove config page..."),DEBUG_MIN_INFO,1);
 	page_content += make_header(FPSTR(INTL_CONFIG_LOSCHEN));
@@ -1235,12 +1226,12 @@ void webserver_removeConfig() {
 		if (SPIFFS.exists("/config.json")) {	//file exists
 			debug_out(F("removing config.json..."),DEBUG_MIN_INFO,1);
 			if (SPIFFS.remove("/config.json")) {
-				page_content += tmpl("<h3>{v}.</h3>",FPSTR(INTL_CONFIG_GELOSCHT));
+				page_content += tmpl(message_string,FPSTR(INTL_CONFIG_GELOSCHT));
 			} else {
-				page_content += tmpl("<h3>{v}.</h3>",FPSTR(INTL_CONFIG_KONNTE_NICHT_GELOSCHT_WERDEN));
+				page_content += tmpl(message_string,FPSTR(INTL_CONFIG_KONNTE_NICHT_GELOSCHT_WERDEN));
 			}
 		} else {
-			page_content += tmpl("<h3>{v}}.</h3>",FPSTR(INTL_CONFIG_NICHT_GEFUNDEN));
+			page_content += tmpl(message_string,FPSTR(INTL_CONFIG_NICHT_GEFUNDEN));
 		}
 #endif
 	}
@@ -1704,8 +1695,10 @@ String sensorDHT() {
 
 	// Check if valid number if non NaN (not a number) will be send.
 
+	last_value_DHT_T = "";
+	last_value_DHT_H = "";
+
 	while ((i++ < 5) && (s == "")) {
-//		dht.begin();
 		h = dht.readHumidity(); //Read Humidity
 		t = dht.readTemperature(); //Read Temperature
 		if (isnan(t) || isnan(h)) {
@@ -1747,6 +1740,8 @@ String sensorBMP() {
 
 	p = bmp.readPressure();
 	t = bmp.readTemperature();
+	last_value_BMP_T = "";
+	last_value_BMP_P = "";
 	if (isnan(p) || isnan(t)) {
 		debug_out(F("BMP180 couldn't be read"),DEBUG_ERROR,1);
 	} else {
@@ -1759,7 +1754,6 @@ String sensorBMP() {
 		s += Value2Json(F("BMP_pressure"),last_value_BMP_P);
 		s += Value2Json(F("BMP_temperature"),last_value_BMP_T);
 		last_value_BMP_T.remove(last_value_BMP_T.length()-1);
-		last_value_BMP_P.remove(last_value_BMP_P.length()-1);
 	}
 	debug_out(F("------"),DEBUG_MIN_INFO,1);
 
@@ -1782,6 +1776,9 @@ String sensorBME280() {
 	t = bme280.readTemperature();
 	h = bme280.readHumidity();
 	p = bme280.readPressure();
+	last_value_BME280_T = "";
+	last_value_BME280_H = "";
+	last_value_BME280_P = "";
 	if (isnan(t) || isnan(h) || isnan(p)) {
 		debug_out(F("BME280 couldn't be read"),DEBUG_ERROR,1);
 	} else {
@@ -1848,7 +1845,8 @@ String sensorSDS() {
 				case (6): checksum_is += value; break;
 				case (7): checksum_is += value; break;
 				case (8):
-						debug_out("Checksum is: "+String(checksum_is % 256)+" - should: "+String(value),DEBUG_MED_INFO,1);
+						debug_out(F("Checksum is: "),DEBUG_MED_INFO,0);debug_out(String(checksum_is % 256),DEBUG_MED_INFO,0);
+						debug_out(F(" - should: "),DEBUG_MED_INFO,0);debug_out(String(value),DEBUG_MED_INFO,1);
 						if (value == (checksum_is % 256)) { checksum_ok = 1; } else { len = -1; }; break;
 				case (9): if (value != 171) { len = -1; }; break;
 			}
@@ -1857,11 +1855,12 @@ String sensorSDS() {
 				if ((! isnan(pm10_serial)) && (! isnan(pm25_serial))) {
 					sds_pm10_sum += pm10_serial;
 					sds_pm25_sum += pm25_serial;
-					sds_display_values_10[sds_display_value_pos] = pm10_serial;
-					sds_display_values_25[sds_display_value_pos] = pm25_serial;
-					sds_display_value_pos = (sds_display_value_pos+1) % 5;
-					debug_out("PM10 (sec.) : "+Float2String(float(pm10_serial)/10),DEBUG_MED_INFO,1);
-					debug_out("PM2.5 (sec.): "+Float2String(float(pm25_serial)/10),DEBUG_MED_INFO,1);
+					if (sds_pm10_min > pm10_serial) { sds_pm10_min = pm10_serial; }
+					if (sds_pm10_max < pm10_serial) { sds_pm10_max = pm10_serial; }
+					if (sds_pm25_min > pm25_serial) { sds_pm25_min = pm25_serial; }
+					if (sds_pm25_max < pm25_serial) { sds_pm25_max = pm25_serial; }
+					debug_out(F("PM10 (sec.) : "),DEBUG_MED_INFO,0);debug_out(Float2String(float(pm10_serial)/10),DEBUG_MED_INFO,1);
+					debug_out(F("PM2.5 (sec.): "),DEBUG_MED_INFO,0);debug_out(Float2String(float(pm25_serial)/10),DEBUG_MED_INFO,1);
 					sds_val_count++;
 				}
 				len = 0; checksum_ok = 0; pm10_serial = 0.0; pm25_serial = 0.0; checksum_is = 0;
@@ -1870,16 +1869,25 @@ String sensorSDS() {
 		}
 
 	}
-	if (send_now && (sds_val_count > 0)) {
-		debug_out("PM10:  "+Float2String(float(sds_pm10_sum)/(sds_val_count*10.0)),DEBUG_MIN_INFO,1);
-		debug_out("PM2.5: "+Float2String(float(sds_pm25_sum)/(sds_val_count*10.0)),DEBUG_MIN_INFO,1);
-		debug_out("------",DEBUG_MIN_INFO,1);
-		last_value_SDS_P1 = Float2String(float(sds_pm10_sum)/(sds_val_count*10.0));
-		last_value_SDS_P2 = Float2String(float(sds_pm25_sum)/(sds_val_count*10.0));
-		s += Value2Json("SDS_P1",last_value_SDS_P1);
-		s += Value2Json("SDS_P2",last_value_SDS_P2);
-		last_value_SDS_P1.remove(last_value_SDS_P1.length()-1);
-		last_value_SDS_P2.remove(last_value_SDS_P2.length()-1);
+	if (send_now) {
+		last_value_SDS_P1 = "";
+		last_value_SDS_P2 = "";
+		if (sds_val_count > 2) {
+			sds_pm10_sum = sds_pm10_sum - sds_pm10_min - sds_pm10_max;
+			sds_pm25_sum = sds_pm25_sum - sds_pm25_min - sds_pm25_max;
+			sds_val_count = sds_val_count - 2;
+		}
+		if (sds_val_count > 0) {
+			debug_out("PM10:  "+Float2String(float(sds_pm10_sum)/(sds_val_count*10.0)),DEBUG_MIN_INFO,1);
+			debug_out("PM2.5: "+Float2String(float(sds_pm25_sum)/(sds_val_count*10.0)),DEBUG_MIN_INFO,1);
+			debug_out("------",DEBUG_MIN_INFO,1);
+			last_value_SDS_P1 = Float2String(float(sds_pm10_sum)/(sds_val_count*10.0));
+			last_value_SDS_P2 = Float2String(float(sds_pm25_sum)/(sds_val_count*10.0));
+			s += Value2Json("SDS_P1",last_value_SDS_P1);
+			s += Value2Json("SDS_P2",last_value_SDS_P2);
+			last_value_SDS_P1.remove(last_value_SDS_P1.length()-1);
+			last_value_SDS_P2.remove(last_value_SDS_P2.length()-1);
+		}
 		sds_pm10_sum = 0; sds_pm25_sum = 0; sds_val_count = 0;
 		if ((sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms)) && (! will_check_for_update)) {
 			stop_SDS();
@@ -1934,6 +1942,8 @@ String sensorPPD() {
 	}
 	// Checking if it is time to sample
 	if (send_now) {
+		last_value_PPD_P1 = "";
+		last_value_PPD_P2 = "";
 		ratio = lowpulseoccupancyP1/(sampletime_ms*10.0);					// int percentage 0 to 100
 		concentration = (1.1*pow(ratio,3)-3.8*pow(ratio,2)+520*ratio+0.62);	// spec sheet curve
 		// Begin printing
@@ -2125,6 +2135,10 @@ void display_values(const String& value_DHT_T, const String& value_DHT_H, const 
 		h_value = value_BME280_H; h_sensor = "BME280";
 		p_value = value_BME280_P; p_sensor = "BME280";
 	}
+	if (t_value == "") { t_value = "-";}
+	if (h_value == "") { h_value = "-";}
+	if (p_value == "") { p_value = "-";}
+
 	if (has_display) {
 		display.resetDisplay();
 		display.clear();
@@ -2146,14 +2160,14 @@ void display_values(const String& value_DHT_T, const String& value_DHT_H, const 
 				display.drawString(0,10*(value_count++),"lat: "+String(gps.location.lat(),6));
 				display.drawString(0,10*(value_count++),"long: "+String(gps.location.lng(),6));
 			}
-			display.drawString(0,10*(value_count++),"satelites: "+String(gps.satellites.value()));
+			display.drawString(0,10*(value_count++),"satellites: "+String(gps.satellites.value()));
 		}
 		display.display();
 	}
 	if (has_lcd1602) {
 		lcd.clear();
 		lcd.setCursor(0,0);
-		lcd.print("PM: "+value_SDS_P1+" "+value_SDS_P2);
+		lcd.print("PM: "+(value_SDS_P1 != ""?value_SDS_P1:"-")+" "+(value_SDS_P2 != ""?value_SDS_P2:"-"));
 		lcd.setCursor(0,1);
 		lcd.print("T/H:"+t_value+char(223)+"C "+h_value+"%");
 	}
@@ -2185,7 +2199,7 @@ void init_lcd1602() {
 /* Init BME280                                                   *
 /*****************************************************************/
 bool initBME280(char addr) {
-	debug_out("Trying BME280 sensor on ",DEBUG_MIN_INFO,0);
+	debug_out(F("Trying BME280 sensor on "),DEBUG_MIN_INFO,0);
 	debug_out(String(addr,HEX),DEBUG_MIN_INFO,0);
 
 	if (bme280.begin(addr)) {
@@ -2233,7 +2247,7 @@ void setup() {
 	dht.begin();	// Start DHT
 	delay(10);
 #if defined(ESP8266)
-  debug_out("\nChipId: ",DEBUG_MIN_INFO,0);
+  debug_out(F("\nChipId: "),DEBUG_MIN_INFO,0);
   debug_out(esp_chipid,DEBUG_MIN_INFO,1);
 #endif
 #if defined(ARDUINO_SAMD_ZERO)
@@ -2359,12 +2373,12 @@ void loop() {
 
 		if (bmp_read) {
 			debug_out(F("Call sensorBMP"),DEBUG_MAX_INFO,1);
-			result_BMP = sensorBMP();			// getting temperature and humidity (optional)
+			result_BMP = sensorBMP();			// getting temperature and pressure (optional)
 		}
 
 		if (bme280_read) {
 			debug_out(F("Call sensorBME280"),DEBUG_MAX_INFO,1);
-			result_BME280 = sensorBME280();			// getting temperature and humidity (optional)
+			result_BME280 = sensorBME280();			// getting temperature, humidity and pressure (optional)
 		}
 	}
 
@@ -2374,7 +2388,7 @@ void loop() {
 		starttime_GPS = act_milli;
 	}
 
-	if (has_display || has_lcd1602) {
+/*	if (has_display || has_lcd1602) {
 		if ((act_milli-display_last_update) > display_update_interval) {
 			if (sds_read) {
 				last_value_SDS_P1 = Float2String(float(sds_display_values_10[0]+sds_display_values_10[1]+sds_display_values_10[2]+sds_display_values_10[3]+sds_display_values_10[4])/50.0);
@@ -2385,7 +2399,7 @@ void loop() {
 			display_values(last_value_DHT_T,last_value_DHT_H,last_value_BMP_T,last_value_BMP_P,last_value_BME280_T,last_value_BME280_H,last_value_BME280_P,last_value_PPD_P1,last_value_PPD_P2,last_value_SDS_P1,last_value_SDS_P2);
 			display_last_update = act_milli;
 		}
-	}
+	}*/
 
 	if (send_now) {
 		if (WiFi.psk() != "") {
@@ -2407,7 +2421,6 @@ void loop() {
 		server.handleClient();
 		server.stop();
 		if (ppd_read) {
-			last_result_PPD = result_PPD;
 			data += result_PPD;
 			data_4_dusti  = data_first_part + result_PPD;
 			data_4_dusti.remove(data_4_dusti.length()-1);
@@ -2441,7 +2454,6 @@ void loop() {
 			}
 		}
 		if (dht_read) {
-			last_result_DHT = result_DHT;
 			data += result_DHT;
 			data_4_dusti  = data_first_part + result_DHT;
 			data_4_dusti.remove(data_4_dusti.length()-1);
@@ -2458,7 +2470,6 @@ void loop() {
 			}
 		}
 		if (bmp_read) {
-			last_result_BMP = result_BMP;
 			data += result_BMP;
 			data_4_dusti  = data_first_part + result_BMP;
 			data_4_dusti.remove(data_4_dusti.length()-1);
@@ -2476,7 +2487,6 @@ void loop() {
 			}
 		}
 		if (bme280_read) {
-			last_result_BME280 = result_BME280;
 			data += result_BME280;
 			data_4_dusti  = data_first_part + result_BME280;
 			data_4_dusti.remove(data_4_dusti.length()-1);
