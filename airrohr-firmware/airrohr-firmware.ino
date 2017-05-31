@@ -58,7 +58,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2017-083"
+#define SOFTWARE_VERSION "NRZ-2017-085"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -273,9 +273,9 @@ int sds_pm10_sum = 0;
 int sds_pm25_sum = 0;
 int sds_val_count = 0;
 int sds_pm10_max = 0;
-int sds_pm10_min = 2000;
+int sds_pm10_min = 20000;
 int sds_pm25_max = 0;
-int sds_pm25_min = 2000;
+int sds_pm25_min = 20000;
 
 String last_value_PPD_P1 = "";
 String last_value_PPD_P2 = "";
@@ -1277,7 +1277,10 @@ void webserver_data_json() {
 /*****************************************************************/
 void webserver_luftdaten_logo() {
 	debug_out(F("output luftdaten.info logo..."),DEBUG_MIN_INFO,1);
-	server.send(200, FPSTR(TXT_CONTENT_TYPE_IMAGE_SVG),FPSTR(LUFTDATEN_INFO_LOGO_SVG));
+	server.sendHeader(F("Content-Encoding"),"gzip");
+	server.setContentLength(LUFTDATEN_INFO_LOGO_SVG_GZIP_LEN);
+	server.send_P(200, (const char *)TXT_CONTENT_TYPE_IMAGE_SVG, (const char*)LUFTDATEN_INFO_LOGO_SVG_GZIP, LUFTDATEN_INFO_LOGO_SVG_GZIP_LEN);
+//	server.send(200, FPSTR(TXT_CONTENT_TYPE_IMAGE_SVG),FPSTR(LUFTDATEN_INFO_LOGO_SVG));
 }
 
 /*****************************************************************
@@ -1285,7 +1288,9 @@ void webserver_luftdaten_logo() {
 /*****************************************************************/
 void webserver_cfg_logo() {
 	debug_out(F("output codefor.de logo..."),DEBUG_MIN_INFO,1);
-	server.send(200, FPSTR(TXT_CONTENT_TYPE_IMAGE_SVG),FPSTR(CFG_LOGO_SVG));
+	server.sendHeader(F("Content-Encoding"),"gzip");
+	server.setContentLength(CFG_LOGO_SVG_GZIP_LEN);
+	server.send_P(200, (const char *)TXT_CONTENT_TYPE_IMAGE_SVG, (const char*)CFG_LOGO_SVG_GZIP, CFG_LOGO_SVG_GZIP_LEN);
 }
 
 /*****************************************************************
@@ -1294,7 +1299,7 @@ void webserver_cfg_logo() {
 void webserver_not_found() {
 	last_page_load = millis();
 	debug_out(F("output not found page..."),DEBUG_MIN_INFO,1);
-	 server.send(404, FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN), F("Not found."));
+	server.send(404, FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN), F("Not found."));
 }
 
 /*****************************************************************
@@ -1889,6 +1894,7 @@ String sensorSDS() {
 			last_value_SDS_P2.remove(last_value_SDS_P2.length()-1);
 		}
 		sds_pm10_sum = 0; sds_pm25_sum = 0; sds_val_count = 0;
+		sds_pm10_max = 0; sds_pm10_min = 20000; sds_pm25_max = 0; sds_pm25_min = 20000; 
 		if ((sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms)) && (! will_check_for_update)) {
 			stop_SDS();
 		}
