@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#define INTL_DE
+#define INTL_NL
 /*****************************************************************
 /* OK LAB Particulate Matter Sensor                              *
 /*      - nodemcu-LoLin board                                    *
@@ -58,7 +58,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2017-085"
+#define SOFTWARE_VERSION "NRZ-2017-086"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -98,6 +98,8 @@
 #include "intl_es.h"
 #elif defined(INTL_FR)
 #include "intl_fr.h"
+#elif defined(INTL_IT)
+#include "intl_it.h"
 #elif defined(INTL_NL)
 #include "intl_nl.h"
 #else
@@ -817,7 +819,7 @@ String form_submit(const String& value) {
 
 String form_select_lang() {
 	String s_select = F("selected='selected'");
-	String s = F("{t} <select name='current_lang'><option value='DE' {s_DE}>Deutsch (DE)</option><option value='BG' {s_BG}>Bulgarian (BG)</option><option value='EN' {s_EN}>English (EN)</option><option value='ES' {s_ES}>Español (ES)</option><option value='FR' {s_FR}>Français (FR)</option><option value='NL' {s_NL}>Nederlands (NL)</option></select><br/>");
+	String s = F("{t} <select name='current_lang'><option value='DE' {s_DE}>Deutsch (DE)</option><option value='BG' {s_BG}>Bulgarian (BG)</option><option value='EN' {s_EN}>English (EN)</option><option value='ES' {s_ES}>Español (ES)</option><option value='FR' {s_FR}>Français (FR)</option><option value='IT' {s_IT}>Italiano (IT)</option><option value='NL' {s_NL}>Nederlands (NL)</option></select><br/>");
 
 	s.replace("{t}",FPSTR(INTL_SPRACHE));
 	if(String(current_lang) == "DE"){
@@ -830,6 +832,8 @@ String form_select_lang() {
 		s.replace(F("{s_ES}"),s_select);
 	}else if(String(current_lang) == "FR"){
 		s.replace(F("{s_FR}"),s_select);
+	}else if(String(current_lang) == "IT"){
+		s.replace(F("{s_IT}"),s_select);
 	}else if(String(current_lang) == "NL"){
 		s.replace(F("{s_NL}"),s_select);
 	}
