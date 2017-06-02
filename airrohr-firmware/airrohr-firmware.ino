@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#define INTL_NL
+#define INTL_DE
 /*****************************************************************
 /* OK LAB Particulate Matter Sensor                              *
 /*      - nodemcu-LoLin board                                    *
