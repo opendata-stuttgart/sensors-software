@@ -58,7 +58,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2017-086"
+#define SOFTWARE_VERSION "NRZ-2017-087"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -879,7 +879,8 @@ String table_row_from_value(const String& sensor, const String& param, const Str
 
 String wlan_ssid_to_table_row(const String& ssid, const String& encryption, const long rssi) {
 	long rssi_temp = rssi;
-	rssi_temp = std::max((long)-100,std::min((long)-50,rssi_temp));
+	if (rssi_temp > -50) {rssi_temp = -50; }
+	if (rssi_temp < -100) {rssi_temp = -100; }
 	int quality = (rssi_temp+100)*2;
 	String s = F("<tr><td><a href='#wlanpwd' onclick='setSSID(this)' style='background:none;color:blue;padding:5px;display:inline;'>{n}</a>&nbsp;{e}</a></td><td style='width:80%;vertical-align:middle;'>{v}%</td></tr>");
 	s.replace("{n}",ssid);s.replace("{e}",encryption);s.replace("{v}",String(quality));
@@ -1139,7 +1140,9 @@ void webserver_values() {
 		String empty_row = F("<tr><td colspan='3'>&nbsp;</td></tr>");
 		last_page_load = millis();
 		long signal_strength = WiFi.RSSI();
-		int signal_quality = int((std::max((long)-100,std::min((long)-50,signal_strength))+100)*2);
+		if (signal_strength -50) {signal_strength = -50; }
+		if (signal_strength < -100) {signal_strength = -100; }
+		int signal_quality = (signal_strength+100)*2;
 		debug_out(F("output values to web page..."),DEBUG_MIN_INFO,1);
 		page_content += make_header(FPSTR(INTL_AKTUELLE_WERTE));
 		page_content += F("<table cellspacing='0' border='1' cellpadding='5'>");
@@ -1281,10 +1284,9 @@ void webserver_data_json() {
 /*****************************************************************/
 void webserver_luftdaten_logo() {
 	debug_out(F("output luftdaten.info logo..."),DEBUG_MIN_INFO,1);
-	server.sendHeader(F("Content-Encoding"),"gzip");
-	server.setContentLength(LUFTDATEN_INFO_LOGO_SVG_GZIP_LEN);
-	server.send_P(200, (const char *)TXT_CONTENT_TYPE_IMAGE_SVG, (const char*)LUFTDATEN_INFO_LOGO_SVG_GZIP, LUFTDATEN_INFO_LOGO_SVG_GZIP_LEN);
-//	server.send(200, FPSTR(TXT_CONTENT_TYPE_IMAGE_SVG),FPSTR(LUFTDATEN_INFO_LOGO_SVG));
+//	server.sendHeader(F("Content-Encoding"),"gzip");
+//	server.send_P(200, TXT_CONTENT_TYPE_IMAGE_SVG, LUFTDATEN_INFO_LOGO_SVG_GZIP, LUFTDATEN_INFO_LOGO_SVG_GZIP_LEN);
+	server.send(200, FPSTR(TXT_CONTENT_TYPE_IMAGE_SVG), FPSTR(LUFTDATEN_INFO_LOGO_SVG));
 }
 
 /*****************************************************************
@@ -1292,9 +1294,9 @@ void webserver_luftdaten_logo() {
 /*****************************************************************/
 void webserver_cfg_logo() {
 	debug_out(F("output codefor.de logo..."),DEBUG_MIN_INFO,1);
-	server.sendHeader(F("Content-Encoding"),"gzip");
-	server.setContentLength(CFG_LOGO_SVG_GZIP_LEN);
-	server.send_P(200, (const char *)TXT_CONTENT_TYPE_IMAGE_SVG, (const char*)CFG_LOGO_SVG_GZIP, CFG_LOGO_SVG_GZIP_LEN);
+//	server.sendHeader(F("Content-Encoding"),"gzip");
+//	server.send_P(200, TXT_CONTENT_TYPE_IMAGE_SVG, CFG_LOGO_SVG_GZIP, CFG_LOGO_SVG_GZIP_LEN);
+	server.send(200, FPSTR(TXT_CONTENT_TYPE_IMAGE_SVG), FPSTR(CFG_LOGO_SVG));
 }
 
 /*****************************************************************
@@ -2398,19 +2400,6 @@ void loop() {
 		starttime_GPS = act_milli;
 	}
 
-/*	if (has_display || has_lcd1602) {
-		if ((act_milli-display_last_update) > display_update_interval) {
-			if (sds_read) {
-				last_value_SDS_P1 = Float2String(float(sds_display_values_10[0]+sds_display_values_10[1]+sds_display_values_10[2]+sds_display_values_10[3]+sds_display_values_10[4])/50.0);
-				last_value_SDS_P2 = Float2String(float(sds_display_values_25[0]+sds_display_values_25[1]+sds_display_values_25[2]+sds_display_values_25[3]+sds_display_values_25[4])/50.0);
-				last_value_SDS_P1.remove(last_value_SDS_P1.length()-1);
-				last_value_SDS_P2.remove(last_value_SDS_P2.length()-1);
-			}
-			display_values(last_value_DHT_T,last_value_DHT_H,last_value_BMP_T,last_value_BMP_P,last_value_BME280_T,last_value_BME280_H,last_value_BME280_P,last_value_PPD_P1,last_value_PPD_P2,last_value_SDS_P1,last_value_SDS_P2);
-			display_last_update = act_milli;
-		}
-	}*/
-
 	if (send_now) {
 		if (WiFi.psk() != "") {
 			httpPort_madavi = 80;
@@ -2429,6 +2418,7 @@ void loop() {
 		debug_out(F("------"),DEBUG_MIN_INFO,1);
 
 		server.handleClient();
+		yield();
 		server.stop();
 		if (ppd_read) {
 			data += result_PPD;
