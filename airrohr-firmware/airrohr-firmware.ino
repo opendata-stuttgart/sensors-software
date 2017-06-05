@@ -940,48 +940,12 @@ void webserver_config() {
 		page_content += F("<form method='POST' action='/config' style='width: 100%;'><b>");
 		page_content += FPSTR(INTL_WLAN_DATEN);
 		page_content += F("</b><br/>");
+		debug_out(F("output config page 1"),DEBUG_MIN_INFO,1);
+		page_content += F("<div id='wifilist'>Loading Wifi network</div>");
 		if (WiFi.status() != WL_CONNECTED) {  // scan for wlan ssids
-			WiFi.disconnect();
-			debug_out(F("scan for wifi networks..."),DEBUG_MIN_INFO,1);
-			int n = WiFi.scanNetworks();
-			debug_out(F("wifi networks found: "),DEBUG_MIN_INFO,0);
-			debug_out(String(n),DEBUG_MIN_INFO,1);
-			if (n == 0) {
-				page_content += F("<br/>");
-				page_content += FPSTR(INTL_KEINE_NETZWERKE);
-				page_content += F("<br/>");
-			} else {
-				page_content += FPSTR(INTL_NETZWERKE_GEFUNDEN);
-				page_content += String(n);
-				page_content += F("<br/>");
-				int indices[n];
-				for (int i = 0; i < n; i++) { indices[i] = i; }
-				for (int i = 0; i < n; i++) {
-					for (int j = i + 1; j < n; j++) {
-						if (WiFi.RSSI(indices[j]) > WiFi.RSSI(indices[i])) {
-							std::swap(indices[i], indices[j]);
-						}
-					}
-				}
-				String cssid;
-				for (int i = 0; i < n; i++) {
-					if (indices[i] == -1) continue;
-						cssid = WiFi.SSID(indices[i]);
-						for (int j = i + 1; j < n; j++) {
-							if (cssid == WiFi.SSID(indices[j])) {
-							indices[j] = -1; // set dup aps to index -1
-						}
-					}
-				}
-				page_content += F("<br/><table>");
-				for (int i = 0; i < n; ++i) {
-					if (indices[i] == -1) continue;
-					// Print SSID and RSSI for each network found
-					page_content += wlan_ssid_to_table_row(WiFi.SSID(indices[i]),((WiFi.encryptionType(indices[i]) == ENC_TYPE_NONE)?" ":"*"),WiFi.RSSI(indices[i]));
-				}
-				page_content += F("</table><br/><br/>");
-			}
+			
 		}
+		
 		page_content += F("<table>");
 		page_content += form_input(F("wlanssid"),F("WLAN"),wlanssid,64);
 		page_content += form_password(F("wlanpwd"),FPSTR(INTL_PASSWORT),wlanpwd,64);
@@ -1040,6 +1004,7 @@ void webserver_config() {
 		page_content += form_submit(FPSTR(INTL_SPEICHERN));
 		page_content += F("</table><br/>");
 		page_content += F("<br/></form>");
+		page_content += "<script>var x=new XMLHttpRequest();x.open('GET','/wifi');x.onload = function(){if (x.status === 200) {document.getElementById('wifilist').innerHtml = xhr.responseText;}};r.send();</script>";
 	} else {
 
 #define readCharParam(param) if (server.hasArg(#param)){ server.arg(#param).toCharArray(param, sizeof(param)); }
@@ -1126,6 +1091,56 @@ void webserver_config() {
 	server.send(200,FPSTR(TXT_CONTENT_TYPE_TEXT_HTML),page_content);
 }
 
+/*****************************************************************
+/* Webserver root: show latest values                            *
+/*****************************************************************/
+void webserver_wifi() {
+	WiFi.disconnect();
+	debug_out(F("scan for wifi networks..."),DEBUG_MIN_INFO,1);
+	int n = WiFi.scanNetworks();
+	debug_out(F("wifi networks found: "),DEBUG_MIN_INFO,0);
+	debug_out(String(n),DEBUG_MIN_INFO,1);
+	String page_content = "";
+	if (n == 0) {
+		page_content += F("<br/>");
+		page_content += FPSTR(INTL_KEINE_NETZWERKE);
+		page_content += F("<br/>");
+	} else {
+		page_content += FPSTR(INTL_NETZWERKE_GEFUNDEN);
+		page_content += String(n);
+		page_content += F("<br/>");
+		int indices[n];
+		debug_out(F("output config page 2"),DEBUG_MIN_INFO,1);
+		for (int i = 0; i < n; i++) { indices[i] = i; }
+		for (int i = 0; i < n; i++) {
+			for (int j = i + 1; j < n; j++) {
+				if (WiFi.RSSI(indices[j]) > WiFi.RSSI(indices[i])) {
+					std::swap(indices[i], indices[j]);
+				}
+			}
+		}
+		String cssid;
+		debug_out(F("output config page 3"),DEBUG_MIN_INFO,1);
+		for (int i = 0; i < n; i++) {
+			if (indices[i] == -1) continue;
+				cssid = WiFi.SSID(indices[i]);
+				for (int j = i + 1; j < n; j++) {
+					if (cssid == WiFi.SSID(indices[j])) {
+					indices[j] = -1; // set dup aps to index -1
+				}
+			}
+		}
+		page_content += F("<br/><table>");
+		//if(n > 30) n=30;
+		for (int i = 0; i < n; ++i) {
+			if (indices[i] == -1) continue;
+			// Print SSID and RSSI for each network found
+			page_content += wlan_ssid_to_table_row(WiFi.SSID(indices[i]),((WiFi.encryptionType(indices[i]) == ENC_TYPE_NONE)?" ":"*"),WiFi.RSSI(indices[i]));
+		}
+		page_content += F("</table><br/><br/>");
+	}
+	server.send(200,FPSTR(TXT_CONTENT_TYPE_TEXT_HTML),page_content);
+}
 /*****************************************************************
 /* Webserver root: show latest values                            *
 /*****************************************************************/
@@ -1315,6 +1330,7 @@ void setup_webserver() {
 
 	server.on("/", webserver_root);
 	server.on("/config", webserver_config);
+	server.on("/wifi", webserver_wifi);
 	server.on("/values", webserver_values);
 	server.on("/generate_204", webserver_config);
 	server.on("/fwlink", webserver_config);
