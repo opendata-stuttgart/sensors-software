@@ -58,7 +58,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2017-087"
+#define SOFTWARE_VERSION "NRZ-2017-089"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -1140,7 +1140,7 @@ void webserver_values() {
 		String empty_row = F("<tr><td colspan='3'>&nbsp;</td></tr>");
 		last_page_load = millis();
 		long signal_strength = WiFi.RSSI();
-		if (signal_strength -50) {signal_strength = -50; }
+		if (signal_strength > -50) {signal_strength = -50; }
 		if (signal_strength < -100) {signal_strength = -100; }
 		int signal_quality = (signal_strength+100)*2;
 		debug_out(F("output values to web page..."),DEBUG_MIN_INFO,1);
@@ -1284,8 +1284,10 @@ void webserver_data_json() {
 /*****************************************************************/
 void webserver_luftdaten_logo() {
 	debug_out(F("output luftdaten.info logo..."),DEBUG_MIN_INFO,1);
+//	server.client().setNoDelay(1);
 //	server.sendHeader(F("Content-Encoding"),"gzip");
 //	server.send_P(200, TXT_CONTENT_TYPE_IMAGE_SVG, LUFTDATEN_INFO_LOGO_SVG_GZIP, LUFTDATEN_INFO_LOGO_SVG_GZIP_LEN);
+//	server.client().setNoDelay(0);
 	server.send(200, FPSTR(TXT_CONTENT_TYPE_IMAGE_SVG), FPSTR(LUFTDATEN_INFO_LOGO_SVG));
 }
 
@@ -1294,8 +1296,10 @@ void webserver_luftdaten_logo() {
 /*****************************************************************/
 void webserver_cfg_logo() {
 	debug_out(F("output codefor.de logo..."),DEBUG_MIN_INFO,1);
+//	server.client().setNoDelay(1);
 //	server.sendHeader(F("Content-Encoding"),"gzip");
 //	server.send_P(200, TXT_CONTENT_TYPE_IMAGE_SVG, CFG_LOGO_SVG_GZIP, CFG_LOGO_SVG_GZIP_LEN);
+//	server.client().setNoDelay(0);
 	server.send(200, FPSTR(TXT_CONTENT_TYPE_IMAGE_SVG), FPSTR(CFG_LOGO_SVG));
 }
 
