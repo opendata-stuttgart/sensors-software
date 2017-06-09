@@ -1004,7 +1004,7 @@ void webserver_config() {
 		page_content += form_submit(FPSTR(INTL_SPEICHERN));
 		page_content += F("</table><br/>");
 		page_content += F("<br/></form>");
-		page_content += "<script>var x=new XMLHttpRequest();x.open('GET','/wifi');x.onload = function(){if (x.status === 200) {document.getElementById('wifilist').innerHtml = xhr.responseText;}};r.send();</script>";
+		page_content += "<script>var x=new XMLHttpRequest();x.open('GET','/wifi');x.onload = function(){if (x.status === 200) {document.getElementById('wifilist').innerHTML = x.responseText;}};x.send();</script>";
 	} else {
 
 #define readCharParam(param) if (server.hasArg(#param)){ server.arg(#param).toCharArray(param, sizeof(param)); }
