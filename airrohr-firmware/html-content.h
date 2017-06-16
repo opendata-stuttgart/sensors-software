@@ -21,12 +21,12 @@ input[type='submit']{border-radius:5px;font-size:medium;padding:5px;}\
 </style>\
 </head><body>\
 <div style='min-height:120px;background-color:#38b5ad;margin-bottom:20px'>\
-	<a href='/' style='background:none;width:0;display:inline'><img src='/luftdaten_logo.svg' style='float:left;margin:20px'/></a>\
+	<a href='/' style='background:none;width:0;display:inline'><img src='/images?name=luftdaten_logo' style='float:left;margin:20px'/></a>\
 	<h3 style='margin:0'>{tt}</h3>\
 	<small>ID: {id}<br/>MAC: {mac}<br/>{fwt}: {fw}</small></div><div class='content'><h4>{h} {n} {t}</h4>";
 
 const char WEB_PAGE_FOOTER[] PROGMEM = "<br/><br/><a href='/' style='display:inline;'>{t}</a><br/><br/><br/>\
-<a href='http://codefor.de/' target='_blank' style='display:inline;background:none;width:0px;'><img src='/cfg_logo.svg' style='width:200px;max-width:50%;'/></a>\
+<a href='http://codefor.de/' target='_blank' style='display:inline;background:none;width:0px;'><img src='/images?name=cfg_logo' style='width:200px;max-width:50%;'/></a>\
 </div></body></html>\r\n";
 
 const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a href='/values'>{t}</a><br/>\
