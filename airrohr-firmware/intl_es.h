@@ -2,6 +2,7 @@ const char INTL_LANG[] = "ES";
 const char INTL_FEINSTAUBSENSOR[] PROGMEM = "Sensor de partículas finas";
 const char INTL_KONFIGURATION[] PROGMEM = "Configuración";
 const char INTL_WLAN_DATEN[] PROGMEM = "Configuración WiFi";
+const char INTL_WLAN_LISTE[] PROGMEM = "Carga de redes wifi ...";
 const char INTL_SPRACHE[] PROGMEM = "Idioma";
 const char INTL_KEINE_NETZWERKE[] PROGMEM =  "Red WiFi no detectada";
 const char INTL_NETZWERKE_GEFUNDEN[] PROGMEM = "Redes encontradas: ";

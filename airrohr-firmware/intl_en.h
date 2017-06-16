@@ -2,6 +2,7 @@ const char INTL_LANG[] = "EN";
 const char INTL_FEINSTAUBSENSOR[] PROGMEM = "Particulate matter sensor";
 const char INTL_KONFIGURATION[] PROGMEM = "Configuration";
 const char INTL_WLAN_DATEN[] PROGMEM = "WiFi Settings";
+const char INTL_WLAN_LISTE[] PROGMEM = "Loading wifi networks ...";
 const char INTL_SPRACHE[] PROGMEM = "Language";
 const char INTL_KEINE_NETZWERKE[] PROGMEM =  "No WiFi Network Found";
 const char INTL_NETZWERKE_GEFUNDEN[] PROGMEM = "Found Networks: ";

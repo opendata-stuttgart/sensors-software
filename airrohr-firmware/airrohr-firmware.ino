@@ -58,7 +58,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2017-089"
+#define SOFTWARE_VERSION "NRZ-2017-090"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -942,11 +942,11 @@ void webserver_config() {
 		page_content += FPSTR(INTL_WLAN_DATEN);
 		page_content += F("</b><br/>");
 		debug_out(F("output config page 1"),DEBUG_MIN_INFO,1);
-		page_content += F("<div id='wifilist'>Loading Wifi network</div>");
 		if (WiFi.status() != WL_CONNECTED) {  // scan for wlan ssids
-			
+			page_content += F("<div id='wifilist'>");
+			page_content += FPSTR(INTL_WLAN_LISTE);
+			page_content += F("</div><br/>");	
 		}
-		
 		page_content += F("<table>");
 		page_content += form_input(F("wlanssid"),F("WLAN"),wlanssid,64);
 		page_content += form_password(F("wlanpwd"),FPSTR(INTL_PASSWORT),wlanpwd,64);
@@ -1005,7 +1005,9 @@ void webserver_config() {
 		page_content += form_submit(FPSTR(INTL_SPEICHERN));
 		page_content += F("</table><br/>");
 		page_content += F("<br/></form>");
-		page_content += "<script>var x=new XMLHttpRequest();x.open('GET','/wifi');x.onload = function(){if (x.status === 200) {document.getElementById('wifilist').innerHTML = x.responseText;}};x.send();</script>";
+		if (WiFi.status() != WL_CONNECTED) {  // scan for wlan ssids
+			page_content += F("<script>load_wifi_list();</script>");
+		}
 	} else {
 
 #define readCharParam(param) if (server.hasArg(#param)){ server.arg(#param).toCharArray(param, sizeof(param)); }

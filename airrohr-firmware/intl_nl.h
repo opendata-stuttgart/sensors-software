@@ -2,6 +2,7 @@ const char INTL_LANG[] = "NL";
 const char INTL_FEINSTAUBSENSOR[] PROGMEM = "Fijn stof sensor";
 const char INTL_KONFIGURATION[] PROGMEM = "Configuratie";
 const char INTL_WLAN_DATEN[] PROGMEM = "WiFi Settings";
+const char INTL_WLAN_LISTE[] PROGMEM = "Het opladen van wifi-netwerken ...";
 const char INTL_SPRACHE[] PROGMEM = "Taal";
 const char INTL_KEINE_NETZWERKE[] PROGMEM =  "Geen WiFi Netwerk Gevonden";
 const char INTL_NETZWERKE_GEFUNDEN[] PROGMEM = "Netwerk gevonden: ";

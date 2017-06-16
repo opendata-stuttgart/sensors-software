@@ -2,6 +2,7 @@ const char INTL_LANG[] = "BG";
 const char INTL_FEINSTAUBSENSOR[] PROGMEM = "Сензор за прахови частици";
 const char INTL_KONFIGURATION[] PROGMEM = "Конфигурация";
 const char INTL_WLAN_DATEN[] PROGMEM = "Настройки за WiFi";
+const char INTL_WLAN_LISTE[] PROGMEM = "Зареждането WiFi мрежи ...";
 const char INTL_SPRACHE[] PROGMEM = "Език";
 const char INTL_KEINE_NETZWERKE[] PROGMEM =  "Няма намерени мрежи";
 const char INTL_NETZWERKE_GEFUNDEN[] PROGMEM = "Намерени мрежи: ";

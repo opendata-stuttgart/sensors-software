@@ -46,7 +46,10 @@ const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a href='/values'>{t}</a><br/>\
 </table>\
 ";
 
-const char WEB_CONFIG_SCRIPT[] PROGMEM = "<script>function setSSID(ssid){document.getElementById('wlanssid').value=ssid.innerText||ssid.textContent;document.getElementById('wlanpwd').focus();}</script>";
+const char WEB_CONFIG_SCRIPT[] PROGMEM = "<script>\
+function setSSID(ssid){document.getElementById('wlanssid').value=ssid.innerText||ssid.textContent;document.getElementById('wlanpwd').focus();}\
+function load_wifi_list(){var x=new XMLHttpRequest();x.open('GET','/wifi');x.onload = function(){if (x.status === 200) {document.getElementById('wifilist').innerHTML = x.responseText;}};x.send();}\
+</script>";
 
 const char WEB_REMOVE_CONFIG_CONTENT[] PROGMEM = "<h3>{t}</h3>\
 <table><tr><td><form method='POST' action='/removeConfig'><input type='submit' class='submit_green' name='submit' value='{b}'/></form></td><td><a href='/'>{c}</a></td></tr></table>\
