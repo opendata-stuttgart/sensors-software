@@ -8,8 +8,7 @@ Features:
 * nutzbar für ESP8266 und Arduino Feather M0 (LoRa)
 
 ToDo's:
-* TimeOut für WifiKonfig zum Laufen bekommen
-* MQTT-Konfig ergänzen
+* Optimierungen (eigentlich immer)
 
 Die grundsätzliche Konfiguration der Parameter erfolgt über die Datei `ext_dev.h`.
 
