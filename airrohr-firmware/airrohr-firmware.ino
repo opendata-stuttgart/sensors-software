@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#define INTL_NL
+#define INTL_DE
 /*****************************************************************
 /* OK LAB Particulate Matter Sensor                              *
 /*      - nodemcu-LoLin board                                    *
@@ -58,7 +58,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2017-090"
+#define SOFTWARE_VERSION "NRZ-2017-092"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -263,9 +263,11 @@ unsigned long display_last_update;
 
 const unsigned long sampletime_GPS_ms = 50;
 
-const unsigned long sending_intervall_ms = 145000;
+unsigned long sending_intervall_ms = 145000;
 unsigned long sending_time = 0;
 bool send_failed = false;
+
+unsigned long time_for_wifi_config = 600000;
 
 unsigned long last_update_attempt;
 const unsigned long pause_between_update_attempts = 86400000;
@@ -310,6 +312,8 @@ bool restart_needed = false;
 bool config_needs_write = false;
 
 bool first_csv_line = 1;
+
+bool first_cycle = 1;
 
 String data_first_part = "{\"software_version\": \"" + String(SOFTWARE_VERSION) + "\"FEATHERCHIPID, \"sensordatavalues\":[";
 
@@ -651,6 +655,8 @@ void readConfig() {
 					setFromJSON(has_display);
 					setFromJSON(has_lcd1602);
 					setFromJSON(debug);
+					setFromJSON(sending_intervall_ms);
+					setFromJSON(time_for_wifi_config);
 					strcpyFromJSON(senseboxid);
 					setFromJSON(send2custom);
 					strcpyFromJSON(host_custom);
@@ -713,6 +719,8 @@ void writeConfig() {
 	copyToJSON_Bool(has_display);
 	copyToJSON_Bool(has_lcd1602);
 	copyToJSON_String(debug);
+	copyToJSON_String(sending_intervall_ms);
+	copyToJSON_String(time_for_wifi_config);
 	copyToJSON_String(senseboxid);
 	copyToJSON_Bool(send2custom);
 	copyToJSON_String(host_custom);
@@ -819,7 +827,7 @@ String form_submit(const String& value) {
 
 String form_select_lang() {
 	String s_select = F("selected='selected'");
-	String s = F("{t} <select name='current_lang'><option value='DE' {s_DE}>Deutsch (DE)</option><option value='BG' {s_BG}>Bulgarian (BG)</option><option value='EN' {s_EN}>English (EN)</option><option value='ES' {s_ES}>Español (ES)</option><option value='FR' {s_FR}>Français (FR)</option><option value='IT' {s_IT}>Italiano (IT)</option><option value='NL' {s_NL}>Nederlands (NL)</option></select><br/>");
+	String s = F("<tr><td>{t}</td><td><select name='current_lang'><option value='DE' {s_DE}>Deutsch (DE)</option><option value='BG' {s_BG}>Bulgarian (BG)</option><option value='EN' {s_EN}>English (EN)</option><option value='ES' {s_ES}>Español (ES)</option><option value='FR' {s_FR}>Français (FR)</option><option value='IT' {s_IT}>Italiano (IT)</option><option value='NL' {s_NL}>Nederlands (NL)</option></select></td></tr>");
 
 	s.replace("{t}",FPSTR(INTL_SPRACHE));
 	if(String(current_lang) == "DE"){
@@ -884,6 +892,12 @@ String wlan_ssid_to_table_row(const String& ssid, const String& encryption, cons
 	int quality = (rssi_temp+100)*2;
 	String s = F("<tr><td><a href='#wlanpwd' onclick='setSSID(this)' style='background:none;color:blue;padding:5px;display:inline;'>{n}</a>&nbsp;{e}</a></td><td style='width:80%;vertical-align:middle;'>{v}%</td></tr>");
 	s.replace("{n}",ssid);s.replace("{e}",encryption);s.replace("{v}",String(quality));
+	return s;
+}
+
+String warning_first_cycle() {
+	String s = FPSTR(INTL_ERSTER_MESSZYKLUS);
+	s.replace("{v}",String(round((sending_intervall_ms-(act_milli-starttime))/1000.0)));
 	return s;
 }
 
@@ -979,9 +993,11 @@ void webserver_config() {
 		page_content += form_checkbox(F("auto_update"),FPSTR(INTL_AUTO_UPDATE),auto_update);
 		page_content += form_checkbox(F("has_display"),FPSTR(INTL_DISPLAY),has_display);
 		page_content += form_checkbox(F("has_lcd1602"),FPSTR(INTL_LCD1602),has_lcd1602);
-		page_content += form_select_lang();
 		page_content += F("<table>");
+		page_content += form_select_lang();
 		page_content += form_input(F("debug"),FPSTR(INTL_DEBUG_LEVEL),String(debug),5);
+		page_content += form_input(F("sending_intervall_ms"),FPSTR(INTL_MESSINTERVALL),String(sending_intervall_ms/1000),5);
+		page_content += form_input(F("time_for_wifi_config"),FPSTR(INTL_DAUER_ROUTERMODUS),String(time_for_wifi_config/1000),5);
 		page_content += F("</table><br/><b>");page_content += FPSTR(INTL_WEITERE_APIS); page_content += F("</b><br/><br/>");
 		page_content += form_checkbox(F("send2sensemap"),tmpl(FPSTR(INTL_SENDEN_AN),F("OpenSenseMap")),send2sensemap);
 		page_content += F("<table>");
@@ -1013,6 +1029,7 @@ void webserver_config() {
 #define readCharParam(param) if (server.hasArg(#param)){ server.arg(#param).toCharArray(param, sizeof(param)); }
 #define readBoolParam(param) if (server.hasArg(#param)){ param = server.arg(#param) == "1"; }
 #define readIntParam(param)  if (server.hasArg(#param)){ int val = server.arg(#param).toInt(); if (val != 0){ param = val; }}
+#define readTimeParam(param)  if (server.hasArg(#param)){ int val = server.arg(#param).toInt(); if (val != 0){ param = val*1000; }}
 
 		if (server.hasArg(F("wlanssid")) && server.arg(F("wlanssid")) != "") {
 			readCharParam(wlanssid);
@@ -1035,6 +1052,8 @@ void webserver_config() {
 		readBoolParam(has_display);
 		readBoolParam(has_lcd1602);
 		readIntParam(debug);
+		readTimeParam(sending_intervall_ms);
+		readTimeParam(time_for_wifi_config);
 
 		readCharParam(senseboxid);
 
@@ -1070,6 +1089,7 @@ void webserver_config() {
 		page_content += line_from_value(FPSTR(INTL_DISPLAY),String(has_display));
 		page_content += line_from_value(FPSTR(INTL_LCD1602),String(has_lcd1602));
 		page_content += line_from_value(FPSTR(INTL_DEBUG_LEVEL),String(debug));
+		page_content += line_from_value(FPSTR(INTL_MESSINTERVALL),String(sending_intervall_ms));
 		page_content += line_from_value(tmpl(FPSTR(INTL_SENDEN_AN),"opensensemap"),String(send2sensemap));
 		page_content += F("<br/>senseBox-ID "); page_content += senseboxid;
 		page_content += F("<br/><br/>Eigene API: "); page_content += String(send2custom);
@@ -1162,6 +1182,11 @@ void webserver_values() {
 		int signal_quality = (signal_strength+100)*2;
 		debug_out(F("output values to web page..."),DEBUG_MIN_INFO,1);
 		page_content += make_header(FPSTR(INTL_AKTUELLE_WERTE));
+		if (first_cycle) {
+			page_content += F("<b style='color: red'>");
+			page_content += warning_first_cycle();
+			page_content += F("</b><br/><br/>");
+		}
 		page_content += F("<table cellspacing='0' border='1' cellpadding='5'>");
 		page_content += tmpl(F("<tr><th>{v1}</th><th>{v2}</th><th>{v3}</th>"),FPSTR(INTL_SENSOR),FPSTR(INTL_PARAMETER),FPSTR(INTL_WERT));
 		if (ppd_read) {
@@ -1315,7 +1340,7 @@ void webserver_images() {
 	}
 //		server.client().setNoDelay(1);
 //		server.sendHeader(F("Content-Encoding"),"gzip");
-//		server.send_P(200, TXT_CONTENT_TYPE_IMAGE_SVG, LUFTDATEN_INFO_LOGO_SVG_GZIP, LUFTDATEN_INFO_LOGO_SVG_GZIP_LEN);
+//		server.send_P(200, TXT_CONTENT_TYPE_IMAGE_SVG, CFG_LOGO_SVG_GZIP, CFG_LOGO_SVG_GZIP_LEN);
 //		server.client().setNoDelay(0);
 }
 
@@ -1379,7 +1404,7 @@ void wifiConfig() {
 
 	// 10 minutes timeout for wifi config
 	last_page_load = millis();
-	while (((millis() - last_page_load) < 600000) && (! config_needs_write)) {
+	while (((millis() - last_page_load) < time_for_wifi_config) && (! config_needs_write)) {
 		dnsServer.processNextRequest();
 		server.handleClient();
 		wdt_reset(); // nodemcu is alive
@@ -1448,7 +1473,7 @@ void connectWifi() {
 	debug_out(F("Connecting to "),DEBUG_MIN_INFO,0);
 	debug_out(wlanssid,DEBUG_MIN_INFO,1);
 
-	while ((WiFi.status() != WL_CONNECTED) && (retry_count < 20)) {
+	while ((WiFi.status() != WL_CONNECTED) && (retry_count < 40)) {
 		delay(500);
 		debug_out(".",DEBUG_MIN_INFO,0);
 		retry_count++;
@@ -2289,10 +2314,10 @@ void setup() {
 		debug_out("setFrequency failed",DEBUG_MIN_INFO,1);
 		while (1);
 	}
-	debug_out("Set Freq to: ",DEBUG_MIN_INFO,0);
+	debug_out(F("Set Freq to: "),DEBUG_MIN_INFO,0);
 	debug_out(String(RF69_FREQ),DEBUG_MIN_INFO,1);
 	rf69.setTxPower(20);
-	debug_out("\nChipId: ",DEBUG_MIN_INFO,0);
+	debug_out(F("\nChipId: "),DEBUG_MIN_INFO,0);
 	debug_out(FeatherChipId(),DEBUG_MIN_INFO,1);
 #endif
 
@@ -2637,6 +2662,7 @@ void loop() {
 			}
 			debug_out("",DEBUG_MIN_INFO,1);
 		}
+		first_cycle = false;
 	}
 	if (config_needs_write) { writeConfig(); create_basic_auth_strings(); }
 	server.handleClient();

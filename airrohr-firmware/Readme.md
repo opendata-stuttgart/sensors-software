@@ -34,36 +34,36 @@ Die Daten können als CSV via USB ausgegeben werden. Dafür sollte sowohl in ext
 
 * SDS and DHT wiring: [pdf/sds_dht_wiring.pdf](pdf/sds_dht_wiring.pdf)
 
-## Benötigte Software (in Klammern getestete Version):
+## Benötigte Software (in Klammern getestete Version und die Art der Lizenz):
 
-* [Arduino IDE](https://www.arduino.cc/en/Main/Software)  (Version 1.8.3)
+* [Arduino IDE](https://www.arduino.cc/en/Main/Software)  (Version 1.8.3) (GNU Lesser General Public License v2.1)
 * [ESP8266 für Arduino](http://arduino.esp8266.com/stable/package_esp8266com_index.json) (Version 2.3.0)
 
 ### Verwendete Bibliotheken (für ESP8266):
 
 In Arduino enthalten:
-* Wire
+* Wire (GNU Lesser General Public License v2.1)
 
 In ESP8266 für Arduino IDE enthalten:
-* FS
-* ESP8266WiFi
-* ESP8266WebServer
-* DNSServer
+* FS (GNU Lesser Public License >=2.1)
+* ESP8266WiFi (GNU Lesser Public License >=2.1)
+* ESP8266WebServer (GNU Lesser Public License >=2.1)
+* ESP8266httpUpdate (1.1.0) (GNU Lesser Public License >=2.1)
+* DNSServer (GNU Lesser Public License >=2.1)
 
-Installierbar über Arduino IDE (Menü Sketch -> Bibliothek einbinden -> Bibliotheken verwalten, in Klammern die getestete Version):
-* [ArduinoJson](https://github.com/bblanchon/ArduinoJson) (5.10.1)
-* [Adafruit Unified Sensor](https://github.com/adafruit/Adafruit_Sensor) (1.0.2)
-* [Adafruit BMP085 library](https://github.com/adafruit/Adafruit-BMP085-Library) (1.0.0)
-* [Adafruit BME280 library](https://github.com/adafruit/Adafruit_BME280_Library) (1.0.5)
-* [DHT sensor library](https://github.com/adafruit/DHT-sensor-library) (1.3.0)
-* [ESP8266 and ESP32 Oled driver for SSD1306 display](https://github.com/squix78/esp8266-oled-ssd1306) (3.2.7)
-* ESP8266httpUpdate (1.1.0)
+Installierbar über Arduino IDE (Menü Sketch -> Bibliothek einbinden -> Bibliotheken verwalten, in Klammern die getestete Version und die Art der Lizenz):
+* [ArduinoJson](https://github.com/bblanchon/ArduinoJson) (5.10.1) (MIT)
+* [Adafruit Unified Sensor](https://github.com/adafruit/Adafruit_Sensor) (1.0.2) (Apache)
+* [Adafruit BMP085 library](https://github.com/adafruit/Adafruit-BMP085-Library) (1.0.0) (BSD)
+* [Adafruit BME280 library](https://github.com/adafruit/Adafruit_BME280_Library) (1.0.5) (BSD)
+* [DHT sensor library](https://github.com/adafruit/DHT-sensor-library) (1.3.0) (MIT)
+* [ESP8266 and ESP32 Oled driver for SSD1306 display](https://github.com/squix78/esp8266-oled-ssd1306) (3.2.7) (MIT)
 * [LiquidCrystal I2C](https://github.com/marcoschwartz/LiquidCrystal_I2C) (1.1.2)
-* [PubSubClient](http://pubsubclient.knolleary.net/) (2.6.0)
-* [SoftwareSerial](https://github.com/plerup/espsoftwareserial) (1.0.0)
+* [PubSubClient](http://pubsubclient.knolleary.net/) (2.6.0) (MIT)
+* [SoftwareSerial](https://github.com/plerup/espsoftwareserial) (1.0.0) (GNU Lesser Public License >=2.1)
 
 Manuell zu installieren:
-* [TinyGPS++](http://arduiniana.org/libraries/tinygpsplus/) (0.94b)
+* [TinyGPS++](http://arduiniana.org/libraries/tinygpsplus/) (0.94b) (GNU Lesser Public License >=2.1)
 
 
 Bis Version NRZ-2016-15:
@@ -121,17 +121,17 @@ In "Adafruit SAMD Boards" enthalten:
 
 
 Installierbar über Arduino IDE (für Versionen siehe auch ESP8266):
-* [ArduinoJson](https://github.com/bblanchon/ArduinoJson) (5.10.1)
-* [Adafruit Unified Sensor](https://github.com/adafruit/Adafruit_Sensor) (1.0.2)
-* [Adafruit BMP085 library](https://github.com/adafruit/Adafruit-BMP085-Library) (1.0.0)
-* [Adafruit BME280 library](https://github.com/adafruit/Adafruit_BME280_Library) (1.0.5)
-* [DHT sensor library](https://github.com/adafruit/DHT-sensor-library) (1.3.0)
+* [ArduinoJson](https://github.com/bblanchon/ArduinoJson) (5.10.1) (MIT)
+* [Adafruit Unified Sensor](https://github.com/adafruit/Adafruit_Sensor) (1.0.2) (Apache)
+* [Adafruit BMP085 library](https://github.com/adafruit/Adafruit-BMP085-Library) (1.0.0) (BSD)
+* [Adafruit BME280 library](https://github.com/adafruit/Adafruit_BME280_Library) (1.0.5) (BSD)
+* [DHT sensor library](https://github.com/adafruit/DHT-sensor-library) (1.3.0) (MIT)
 * [LiquidCrystal I2C](https://github.com/marcoschwartz/LiquidCrystal_I2C) (1.1.2)
-* [PubSubClient](http://pubsubclient.knolleary.net/) (2.6.0)
-* [SoftwareSerial](https://github.com/plerup/espsoftwareserial) (1.0.0)
+* [PubSubClient](http://pubsubclient.knolleary.net/) (2.6.0) (MIT)
+* [SoftwareSerial](https://github.com/plerup/espsoftwareserial) (1.0.0) (GNU Lesser Public License >=2.1)
 
 Manuell zu installieren:
 * [RadioHead Packet Radio library](http://www.airspayce.com/mikem/arduino/RadioHead/) (1.6.1), Link zum Download des Ziparchivs im 2. Abschnitt
-* [TinyGPS++](http://arduiniana.org/libraries/tinygpsplus/) (0.94b)
+* [TinyGPS++](http://arduiniana.org/libraries/tinygpsplus/) (0.94b) (GNU Lesser Public License >=2.1)
 
 Ich hoffe, alle Bibliotheken erwischt zu haben. Falls beim Kompilieren eine Bibliothek fehlt, bitte als [Issue](https://github.com/opendata-stuttgart/sensors-software/issues/) melden. Ich trage dann die Infos nach.

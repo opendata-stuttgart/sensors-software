@@ -1,3 +1,9 @@
+NRZ-2017-092
+online as update since 2017-06-24
+* added time of first measurement to value page
+* timeout for wifi connect set to 20 seconds, some networks seem to need more than 10 seconds
+* time between measurements and timeout of wifi config mode now configurable
+
 NRZ-2017-090
 online as update since 2017-06-17
 * list of available wifi networks implemented as ajax request to speedup config page
