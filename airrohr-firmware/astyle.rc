@@ -1,0 +1,6 @@
+--style=attach
+--indent=force-tab
+--pad-oper
+--keep-one-line-blocks
+--keep-one-line-statements
+--add-one-line-braces
