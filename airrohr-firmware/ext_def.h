@@ -117,7 +117,7 @@
 #define HAS_LCD1602 0
 
 // Wieviele Informationen sollen über die serielle Schnittstelle ausgegeben werden?
-#define DEBUG 5
+#define DEBUG 3
 
 // Definition der Debuglevel
 #define DEBUG_ERROR 1
