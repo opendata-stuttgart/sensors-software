@@ -91,6 +91,14 @@
 #define BME280_PIN_SDA D3
 #endif
 
+// DS18B20, Temperatur-Sensor
+#define DS18B20_READ 0
+#define DS18B20_API_PIN 13
+#if defined(ESP8266)
+#define DS18B20_PIN D8
+#endif
+
+
 // GPS, bevorzugt Neo-6M
 #define GPS_READ 0
 #define GPS_API_PIN 9
@@ -109,7 +117,7 @@
 #define HAS_LCD1602 0
 
 // Wieviele Informationen sollen über die serielle Schnittstelle ausgegeben werden?
-#define DEBUG 3
+#define DEBUG 5
 
 // Definition der Debuglevel
 #define DEBUG_ERROR 1

@@ -14,6 +14,7 @@ const char INTL_PPD42NS[] PROGMEM = "PPD42NS";
 const char INTL_DHT22[] PROGMEM = "DHT22";
 const char INTL_BMP180[] PROGMEM = "BMP180";
 const char INTL_BME280[] PROGMEM = "BME280";
+const char INTL_DS18B20[] PROGMEM = "DS18B20";
 const char INTL_BASICAUTH[] PROGMEM = "Autorización";
 const char INTL_WEITERE_EINSTELLUNGEN[] PROGMEM ="Otras configruaciones";
 const char INTL_AUTO_UPDATE[] PROGMEM = "Actualización automática del Firmware";
