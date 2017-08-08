@@ -47,6 +47,7 @@
 /*                                                               *
 /*****************************************************************
 /* Extensions connected via I2C:                                 *
+/* HTU21D (https://www.sparkfun.com/products/13763),						 *
 /* BMP180, BME280, OLED Display with SSD1309                     *
 /*                                                               *
 /* Wiring Instruction                                            *
@@ -85,6 +86,7 @@
 #include <ArduinoJson.h>
 #include <Wire.h>
 #include <DHT.h>
+#include <SparkFunHTU21D.h>
 #include <Adafruit_BMP085.h>
 #include <Adafruit_BME280.h>
 #include <TinyGPS++.h>
@@ -121,6 +123,7 @@ bool www_basicauth_enabled = 0;
 char version_from_local_config[30] = "";
 
 bool dht_read = 1;
+bool htu21d_read = 0;
 bool ppd_read = 0;
 bool sds_read = 1;
 bool bmp_read = 0;
@@ -206,6 +209,10 @@ SoftwareSerial serialGPS(GPS_PIN_RX, GPS_PIN_TX, false, 128);
 /*****************************************************************/
 DHT dht(DHT_PIN, DHT_TYPE);
 
+/* HTU21D declaration                                               *
+/*****************************************************************/
+HTU21D htu21d;
+
 /*****************************************************************
 /* BMP declaration                                               *
 /*****************************************************************/
@@ -287,6 +294,8 @@ String last_value_SDS_P1 = "";
 String last_value_SDS_P2 = "";
 String last_value_DHT_T = "";
 String last_value_DHT_H = "";
+String last_value_HTU21D_T = "";
+String last_value_HTU21D_H = "";
 String last_value_BMP_T = "";
 String last_value_BMP_P = "";
 String last_value_BME280_T = "";
@@ -564,6 +573,7 @@ void copyExtDef() {
 	strcpyDef(www_password, WWW_PASSWORD);
 	setDef(www_basicauth_enabled, WWW_BASICAUTH_ENABLED);
 	setDef(dht_read, DHT_READ);
+	setDef(htu21d_read, HTU21D_READ);
 	setDef(ppd_read, PPD_READ);
 	setDef(sds_read, SDS_READ);
 	setDef(bmp_read, BMP_READ);
@@ -641,6 +651,7 @@ void readConfig() {
 					strcpyFromJSON(www_password);
 					setFromJSON(www_basicauth_enabled);
 					setFromJSON(dht_read);
+					setFromJSON(htu21d_read);
 					setFromJSON(ppd_read);
 					setFromJSON(sds_read);
 					setFromJSON(bmp_read);
@@ -705,6 +716,7 @@ void writeConfig() {
 	copyToJSON_String(www_password);
 	copyToJSON_Bool(www_basicauth_enabled);
 	copyToJSON_Bool(dht_read);
+	copyToJSON_Bool(htu21d_read);
 	copyToJSON_Bool(ppd_read);
 	copyToJSON_Bool(sds_read);
 	copyToJSON_Bool(bmp_read);
@@ -985,6 +997,7 @@ void webserver_config() {
 		page_content += F("</b><br/>");
 		page_content += form_checkbox(F("sds_read"), FPSTR(INTL_SDS011), sds_read);
 		page_content += form_checkbox(F("dht_read"), FPSTR(INTL_DHT22), dht_read);
+		page_content += form_checkbox(F("htu21d_read"), FPSTR(INTL_HTU21D), htu21d_read);
 		page_content += form_checkbox(F("ppd_read"), FPSTR(INTL_PPD42NS), ppd_read);
 		page_content += form_checkbox(F("bmp_read"), FPSTR(INTL_BMP180), bmp_read);
 		page_content += form_checkbox(F("bme280_read"), FPSTR(INTL_BME280), bme280_read);
@@ -1043,6 +1056,7 @@ void webserver_config() {
 		readBoolParam(send2madavi);
 		readBoolParam(send2sensemap);
 		readBoolParam(dht_read);
+		readBoolParam(htu21d_read);
 		readBoolParam(sds_read);
 		readBoolParam(ppd_read);
 		readBoolParam(bmp_read);
@@ -1080,6 +1094,7 @@ void webserver_config() {
 		page_content += line_from_value(tmpl(FPSTR(INTL_SENDEN_AN), F("Luftdaten.info")), String(send2dusti));
 		page_content += line_from_value(tmpl(FPSTR(INTL_SENDEN_AN), F("Madavi")), String(send2madavi));
 		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "DHT"), String(dht_read));
+		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "HTU21D"), String(htu21d_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "SDS"), String(sds_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "PPD"), String(ppd_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "BMP180"), String(bmp_read));
@@ -1204,6 +1219,11 @@ void webserver_values() {
 			page_content += table_row_from_value("DHT22", FPSTR(INTL_TEMPERATUR), last_value_DHT_T, "°C");
 			page_content += table_row_from_value("DHT22", FPSTR(INTL_LUFTFEUCHTE), last_value_DHT_H, "%");
 		}
+    if (htu21d_read) {
+      page_content += empty_row;
+      page_content += table_row_from_value("HTU21D", FPSTR(INTL_TEMPERATUR), last_value_HTU21D_T, "°C");
+      page_content += table_row_from_value("HTU21D", FPSTR(INTL_LUFTFEUCHTE), last_value_HTU21D_H, "%");
+    }
 		if (bmp_read) {
 			page_content += empty_row;
 			page_content += table_row_from_value("BMP180", FPSTR(INTL_TEMPERATUR), last_value_BMP_T, "°C");
@@ -1783,6 +1803,37 @@ String sensorDHT() {
 }
 
 /*****************************************************************
+/* read HTU21D sensor values                                     *
+/*****************************************************************/
+String sensorHTU21D() {
+  String s = "";
+  float t;
+  float h;
+
+  debug_out(F("Start reading HTU21D"),DEBUG_MED_INFO,1);
+
+  t = htu21d.readTemperature();
+  h = htu21d.readHumidity();
+  if (isnan(t) || isnan(h)) {
+    debug_out(F("HTU21D couldn't be read"),DEBUG_ERROR,1);
+  } else {
+    debug_out(F("Temperature : "),DEBUG_MIN_INFO,0);
+    debug_out(Float2String(t)+" C",DEBUG_MIN_INFO,1);
+    debug_out(F("humidity : "),DEBUG_MIN_INFO,0);
+    debug_out(Float2String(h)+" %",DEBUG_MIN_INFO,1);
+    last_value_HTU21D_T = Float2String(t);
+    last_value_HTU21D_H = Float2String(h);
+    s += Value2Json(F("HTU21D_temperature"),last_value_HTU21D_T);
+    s += Value2Json(F("HTU21D_humidity"),last_value_HTU21D_H);
+  }
+  debug_out(F("------"),DEBUG_MIN_INFO,1);
+
+  debug_out(F("End reading HTU21D"),DEBUG_MED_INFO,1);
+
+  return s;
+}
+
+/*****************************************************************
 /* read BMP180 sensor values                                     *
 /*****************************************************************/
 String sensorBMP() {
@@ -2300,6 +2351,7 @@ void setup() {
 	pinMode(PPD_PIN_PM1, INPUT_PULLUP);	// Listen at the designated PIN
 	pinMode(PPD_PIN_PM2, INPUT_PULLUP);	// Listen at the designated PIN
 	dht.begin();	// Start DHT
+	htu21d.begin(); // Start HTU21D
 	delay(10);
 #if defined(ESP8266)
 	debug_out(F("\nChipId: "), DEBUG_MIN_INFO, 0);
@@ -2322,6 +2374,7 @@ void setup() {
 	if (ppd_read) { debug_out(F("Lese PPD..."), DEBUG_MIN_INFO, 1); }
 	if (sds_read) { debug_out(F("Lese SDS..."), DEBUG_MIN_INFO, 1); }
 	if (dht_read) { debug_out(F("Lese DHT..."), DEBUG_MIN_INFO, 1); }
+	if (htu21d_read) { debug_out(F("Lese HTU21D..."), DEBUG_MIN_INFO, 1); }
 	if (bmp_read) { debug_out(F("Lese BMP..."), DEBUG_MIN_INFO, 1); }
 	if (bme280_read) { debug_out(F("Lese BME280..."), DEBUG_MIN_INFO, 1); }
 	if (gps_read) { debug_out(F("Lese GPS..."), DEBUG_MIN_INFO, 1); }
@@ -2382,6 +2435,7 @@ void loop() {
 	String result_PPD = "";
 	String result_SDS = "";
 	String result_DHT = "";
+	String result_HTU21D = "";
 	String result_BMP = "";
 	String result_BME280 = "";
 	String result_GPS = "";
@@ -2427,6 +2481,11 @@ void loop() {
 			debug_out(F("Call sensorDHT"), DEBUG_MAX_INFO, 1);
 			result_DHT = sensorDHT();			// getting temperature and humidity (optional)
 		}
+
+    if (htu21d_read) {
+      debug_out(F("Call sensorHTU21D"), DEBUG_MAX_INFO, 1);
+      result_HTU21D = sensorHTU21D();			// getting temperature and humidity (optional)
+    }
 
 		if (bmp_read) {
 			debug_out(F("Call sensorBMP"), DEBUG_MAX_INFO, 1);
@@ -2514,6 +2573,22 @@ void loop() {
 				sum_send_time += micros() - start_send;
 			}
 		}
+    if (htu21d_read) {
+      data += result_HTU21D;
+      data_4_dusti  = data_first_part + result_HTU21D;
+      data_4_dusti.remove(data_4_dusti.length() - 1);
+      data_4_dusti += "]}";
+      if (send2dusti) {
+        debug_out(F("## Sending to luftdaten.info (HTU21D): "), DEBUG_MIN_INFO, 1);
+        start_send = micros();
+        if (result_HTU21D != "") {
+          sendData(data_4_dusti, HTU21D_API_PIN, host_dusti, httpPort_dusti, url_dusti, "", FPSTR(TXT_CONTENT_TYPE_JSON));
+        } else {
+          debug_out(F("No data sent..."), DEBUG_MIN_INFO, 1);
+        }
+        sum_send_time += micros() - start_send;
+      }
+    }
 		if (bmp_read) {
 			data += result_BMP;
 			data_4_dusti  = data_first_part + result_BMP;

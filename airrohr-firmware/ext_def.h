@@ -55,6 +55,14 @@
 #define DHT_PIN D9
 #endif
 
+// HTU21D, Sensor Temperatur und Luftfeuchte
+#define HTU21D_READ 0
+#define HTU21D_API_PIN 7
+#if defined(ESP8266)
+#define HTU21D_PIN_SCL D4
+#define HTU21D_PIN_SDA D3
+#endif
+
 // PPD42NS, der günstigere der beiden Feinstaubsensoren
 #define PPD_READ 0
 #define PPD_API_PIN 5

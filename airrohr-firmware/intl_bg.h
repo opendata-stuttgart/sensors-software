@@ -12,6 +12,7 @@ const char INTL_SENSOREN[] PROGMEM = "Сензори";
 const char INTL_SDS011[] PROGMEM = "SDS011 (прахови частици)";
 const char INTL_PPD42NS[] PROGMEM = "PPD42NS";
 const char INTL_DHT22[] PROGMEM = "DHT22";
+const char INTL_HTU21D[] PROGMEM = "HTU21D";
 const char INTL_BMP180[] PROGMEM = "BMP180";
 const char INTL_BME280[] PROGMEM = "BME280";
 const char INTL_BASICAUTH[] PROGMEM = "Оторизация";
