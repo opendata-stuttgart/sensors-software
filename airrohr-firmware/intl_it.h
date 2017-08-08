@@ -12,6 +12,7 @@ const char INTL_SENSOREN[] PROGMEM = "Sensori";
 const char INTL_SDS011[] PROGMEM = "SDS011 (polveri sottili)";
 const char INTL_PPD42NS[] PROGMEM = "PPD42NS";
 const char INTL_DHT22[] PROGMEM = "DHT22 (temperatura, umidità relativa)";
+const char INTL_HTU21D[] PROGMEM = "HTU21D (temperatura, umidità relativa)";
 const char INTL_BMP180[] PROGMEM = "BMP180";
 const char INTL_BME280[] PROGMEM = "BME280";
 const char INTL_BASICAUTH[] PROGMEM = "Autorizzazione";
