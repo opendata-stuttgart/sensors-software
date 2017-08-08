@@ -1,4 +1,7 @@
 #! /usr/bin/perl
+
+# decoding data from Plantronics PMS 1003, PMS 7003
+
 use strict;
 
 my $data_file = shift or die "Usage: $0 <device path>\n";

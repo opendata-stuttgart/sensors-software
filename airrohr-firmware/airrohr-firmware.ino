@@ -2420,6 +2420,8 @@ void loop() {
 		starttime_SDS = act_milli;
 	}
 
+	server.handleClient();
+
 	if (send_now) {
 		if (dht_read) {
 			debug_out(F("Call sensorDHT"), DEBUG_MAX_INFO, 1);
@@ -2640,15 +2642,8 @@ void loop() {
 		if (! send_failed) { sending_time = (4 * sending_time + sum_send_time) / 5; }
 		debug_out(F("Time for sending data: "), DEBUG_MIN_INFO, 0);
 		debug_out(String(sending_time), DEBUG_MIN_INFO, 1);
-		// Resetting for next sampling
-		last_data_string = data;
-		lowpulseoccupancyP1 = 0;
-		lowpulseoccupancyP2 = 0;
-		sample_count = 0;
-		last_micro = 0;
-		min_micro = 1000000000;
-		max_micro = 0;
-		starttime = millis(); // store the start time
+
+
 		if (WiFi.status() != WL_CONNECTED) {  // reconnect if connection lost
 			int retry_count = 0;
 			debug_out(F("Connection lost, reconnecting "), DEBUG_MIN_INFO, 0);
@@ -2660,9 +2655,18 @@ void loop() {
 			}
 			debug_out("", DEBUG_MIN_INFO, 1);
 		}
+
+		// Resetting for next sampling
+		last_data_string = data;
+		lowpulseoccupancyP1 = 0;
+		lowpulseoccupancyP2 = 0;
+		sample_count = 0;
+		last_micro = 0;
+		min_micro = 1000000000;
+		max_micro = 0;
+		starttime = millis(); // store the start time
 		first_cycle = false;
 	}
 	if (config_needs_write) { writeConfig(); create_basic_auth_strings(); }
-	server.handleClient();
 	yield();
 }
