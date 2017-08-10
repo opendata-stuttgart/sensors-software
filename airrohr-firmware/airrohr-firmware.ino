@@ -47,8 +47,8 @@
 /*                                                               *
 /*****************************************************************
 /* Extensions connected via I2C:                                 *
-/* HTU21D (https://www.sparkfun.com/products/13763),						 *
-/* BMP180, BME280, OLED Display with SSD1309                     *
+/* HTU21D (https://www.sparkfun.com/products/13763),             *
+/* BMP180, BMP280, BME280, OLED Display with SSD1309             *
 /*                                                               *
 /* Wiring Instruction                                            *
 /* (see labels on display or sensor board)                       *
@@ -88,6 +88,7 @@
 #include <DHT.h>
 #include <SparkFunHTU21D.h>
 #include <Adafruit_BMP085.h>
+#include <Adafruit_BMP280.h>
 #include <Adafruit_BME280.h>
 #include <TinyGPS++.h>
 #include <Ticker.h>
@@ -127,6 +128,7 @@ bool htu21d_read = 0;
 bool ppd_read = 0;
 bool sds_read = 1;
 bool bmp_read = 0;
+bool bmp280_read = 0;
 bool bme280_read = 0;
 bool gps_read = 0;
 bool send2dusti = 1;
@@ -219,6 +221,11 @@ HTU21D htu21d;
 Adafruit_BMP085 bmp;
 
 /*****************************************************************
+/* BMP280 declaration                                               *
+/*****************************************************************/
+Adafruit_BMP280 bmp280;
+
+/*****************************************************************
 /* BME280 declaration                                            *
 /*****************************************************************/
 Adafruit_BME280 bme280;
@@ -298,6 +305,8 @@ String last_value_HTU21D_T = "";
 String last_value_HTU21D_H = "";
 String last_value_BMP_T = "";
 String last_value_BMP_P = "";
+String last_value_BMP280_T = "";
+String last_value_BMP280_P = "";
 String last_value_BME280_T = "";
 String last_value_BME280_H = "";
 String last_value_BME280_P = "";
@@ -577,6 +586,7 @@ void copyExtDef() {
 	setDef(ppd_read, PPD_READ);
 	setDef(sds_read, SDS_READ);
 	setDef(bmp_read, BMP_READ);
+	setDef(bmp280_read, BMP280_READ);
 	setDef(bme280_read, BME280_READ);
 	setDef(gps_read, GPS_READ);
 	setDef(send2dusti, SEND2DUSTI);
@@ -655,6 +665,7 @@ void readConfig() {
 					setFromJSON(ppd_read);
 					setFromJSON(sds_read);
 					setFromJSON(bmp_read);
+					setFromJSON(bmp280_read);
 					setFromJSON(bme280_read);
 					setFromJSON(gps_read);
 					setFromJSON(send2dusti);
@@ -720,6 +731,7 @@ void writeConfig() {
 	copyToJSON_Bool(ppd_read);
 	copyToJSON_Bool(sds_read);
 	copyToJSON_Bool(bmp_read);
+	copyToJSON_Bool(bmp280_read);
 	copyToJSON_Bool(bme280_read);
 	copyToJSON_Bool(gps_read);
 	copyToJSON_Bool(send2dusti);
@@ -1000,6 +1012,7 @@ void webserver_config() {
 		page_content += form_checkbox(F("htu21d_read"), FPSTR(INTL_HTU21D), htu21d_read);
 		page_content += form_checkbox(F("ppd_read"), FPSTR(INTL_PPD42NS), ppd_read);
 		page_content += form_checkbox(F("bmp_read"), FPSTR(INTL_BMP180), bmp_read);
+		page_content += form_checkbox(F("bmp280_read"), FPSTR(INTL_BMP280), bmp280_read);
 		page_content += form_checkbox(F("bme280_read"), FPSTR(INTL_BME280), bme280_read);
 		page_content += form_checkbox(F("gps_read"), F("GPS (NEO 6M)"), gps_read);
 		page_content += F("<br/><b>"); page_content += FPSTR(INTL_WEITERE_EINSTELLUNGEN); page_content += F("</b><br/>");
@@ -1060,6 +1073,7 @@ void webserver_config() {
 		readBoolParam(sds_read);
 		readBoolParam(ppd_read);
 		readBoolParam(bmp_read);
+		readBoolParam(bmp280_read);
 		readBoolParam(bme280_read);
 		readBoolParam(gps_read);
 		readBoolParam(auto_update);
@@ -1098,6 +1112,7 @@ void webserver_config() {
 		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "SDS"), String(sds_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "PPD"), String(ppd_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "BMP180"), String(bmp_read));
+		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "BMP280"), String(bmp280_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "BME280"), String(bme280_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "GPS"), String(gps_read));
 		page_content += line_from_value(FPSTR(INTL_AUTO_UPDATE), String(auto_update));
@@ -1228,6 +1243,11 @@ void webserver_values() {
 			page_content += empty_row;
 			page_content += table_row_from_value("BMP180", FPSTR(INTL_TEMPERATUR), last_value_BMP_T, "°C");
 			page_content += table_row_from_value("BMP180", FPSTR(INTL_LUFTDRUCK), Float2String(last_value_BMP_P.toFloat() / 100.0), "hPa");
+		}
+		if (bmp280_read) {
+			page_content += empty_row;
+			page_content += table_row_from_value("BMP280", FPSTR(INTL_TEMPERATUR), last_value_BMP280_T, "°C");
+			page_content += table_row_from_value("BMP280", FPSTR(INTL_LUFTDRUCK), Float2String(last_value_BMP280_P.toFloat() / 100.0), "hPa");
 		}
 		if (bme280_read) {
 			page_content += empty_row;
@@ -1868,6 +1888,40 @@ String sensorBMP() {
 }
 
 /*****************************************************************
+/* read BMP280 sensor values                                     *
+/*****************************************************************/
+String sensorBMP280() {
+	String s = "";
+	int p;
+	float t;
+
+	debug_out(F("Start reading BMP280"), DEBUG_MED_INFO, 1);
+
+	p = bmp280.readPressure();
+	t = bmp280.readTemperature();
+	last_value_BMP280_T = "";
+	last_value_BMP280_P = "";
+	if (isnan(p) || isnan(t)) {
+		debug_out(F("BMP280 couldn't be read"), DEBUG_ERROR, 1);
+	} else {
+		debug_out(F("Pressure    : "), DEBUG_MIN_INFO, 0);
+		debug_out(Float2String(float(p) / 100) + " hPa", DEBUG_MIN_INFO, 1);
+		debug_out(F("Temperature : "), DEBUG_MIN_INFO, 0);
+		debug_out(String(t) + " C", DEBUG_MIN_INFO, 1);
+		last_value_BMP280_T = Float2String(t);
+		last_value_BMP280_P = String(p);
+		s += Value2Json(F("BMP_pressure"), last_value_BMP280_P);
+		s += Value2Json(F("BMP_temperature"), last_value_BMP280_T);
+		last_value_BMP280_T.remove(last_value_BMP280_T.length() - 1);
+	}
+	debug_out(F("------"), DEBUG_MIN_INFO, 1);
+
+	debug_out(F("End reading BMP180"), DEBUG_MED_INFO, 1);
+
+	return s;
+}
+
+/*****************************************************************
 /* read BME280 sensor values                                     *
 /*****************************************************************/
 String sensorBME280() {
@@ -2218,7 +2272,7 @@ void autoUpdate() {
 /*****************************************************************
 /* display values                                                *
 /*****************************************************************/
-void display_values(const String& value_DHT_T, const String& value_DHT_H, const String& value_BMP_T, const String& value_BMP_P, const String& value_BME280_T, const String& value_BME280_H, const String& value_BME280_P, const String& value_PPD_P1, const String& value_PPD_P2, const String& value_SDS_P1, const String& value_SDS_P2) {
+void display_values(const String& value_DHT_T, const String& value_DHT_H, const String& value_BMP_T, const String& value_BMP_P, const String& value_BMP280_T, const String& value_BMP280_P, const String& value_BME280_T, const String& value_BME280_H, const String& value_BME280_P, const String& value_PPD_P1, const String& value_PPD_P2, const String& value_SDS_P1, const String& value_SDS_P2) {
 #if defined(ESP8266)
 	int value_count = 0;
 	String t_value = "";
@@ -2235,6 +2289,10 @@ void display_values(const String& value_DHT_T, const String& value_DHT_H, const 
 	if (bmp_read) {
 		t_value = value_BMP_T; t_sensor = "BMP180";
 		p_value = value_BMP_P; p_sensor = "BMP180";
+	}
+	if (bmp280_read) {
+		t_value = value_BMP280_T; t_sensor = "BMP280";
+		p_value = value_BMP280_P; p_sensor = "BMP280";
 	}
 	if (bme280_read) {
 		t_value = value_BME280_T; t_sensor = "BME280";
@@ -2299,6 +2357,22 @@ void init_lcd1602() {
 	lcd.init();
 	lcd.backlight();
 #endif
+}
+
+/*****************************************************************
+/* Init BMP280                                                   *
+/*****************************************************************/
+bool initBMP280(char addr) {
+	debug_out(F("Trying BMP280 sensor on "), DEBUG_MIN_INFO, 0);
+	debug_out(String(addr, HEX), DEBUG_MIN_INFO, 0);
+
+	if (bmp280.begin(addr)) {
+		debug_out(F(" ... found"), DEBUG_MIN_INFO, 1);
+		return true;
+	} else {
+		debug_out(F(" ... not found"), DEBUG_MIN_INFO, 1);
+		return false;
+	}
 }
 
 /*****************************************************************
@@ -2376,6 +2450,7 @@ void setup() {
 	if (dht_read) { debug_out(F("Lese DHT..."), DEBUG_MIN_INFO, 1); }
 	if (htu21d_read) { debug_out(F("Lese HTU21D..."), DEBUG_MIN_INFO, 1); }
 	if (bmp_read) { debug_out(F("Lese BMP..."), DEBUG_MIN_INFO, 1); }
+	if (bmp280_read) { debug_out(F("Lese BMP280..."), DEBUG_MIN_INFO, 1); }
 	if (bme280_read) { debug_out(F("Lese BME280..."), DEBUG_MIN_INFO, 1); }
 	if (gps_read) { debug_out(F("Lese GPS..."), DEBUG_MIN_INFO, 1); }
 	if (send2dusti) { debug_out(F("Sende an luftdaten.info..."), DEBUG_MIN_INFO, 1); }
@@ -2392,6 +2467,10 @@ void setup() {
 			debug_out(F("No valid BMP085 sensor, check wiring!"), DEBUG_MIN_INFO, 1);
 			bmp_read = 0;
 		}
+	}
+	if (bmp280_read && !initBMP280(0x76) && !initBMP280(0x77)) {
+		debug_out(F("Check BMP280 wiring"), DEBUG_MIN_INFO, 1);
+		bmp280_read = 0;
 	}
 	if (bme280_read && !initBME280(0x76) && !initBME280(0x77)) {
 		debug_out(F("Check BME280 wiring"), DEBUG_MIN_INFO, 1);
@@ -2437,6 +2516,7 @@ void loop() {
 	String result_DHT = "";
 	String result_HTU21D = "";
 	String result_BMP = "";
+	String result_BMP280 = "";
 	String result_BME280 = "";
 	String result_GPS = "";
 	String signal_strength = "";
@@ -2491,7 +2571,12 @@ void loop() {
 			debug_out(F("Call sensorBMP"), DEBUG_MAX_INFO, 1);
 			result_BMP = sensorBMP();			// getting temperature and pressure (optional)
 		}
-
+		
+		if (bmp280_read) {
+			debug_out(F("Call sensorBMP280"), DEBUG_MAX_INFO, 1);
+			result_BMP280 = sensorBMP280();			// getting temperature, humidity and pressure (optional)
+		}
+		
 		if (bme280_read) {
 			debug_out(F("Call sensorBME280"), DEBUG_MAX_INFO, 1);
 			result_BME280 = sensorBME280();			// getting temperature, humidity and pressure (optional)
@@ -2606,6 +2691,23 @@ void loop() {
 				sum_send_time += micros() - start_send;
 			}
 		}
+		if (bmp280_read) {
+			data += result_BMP280;
+			data_4_dusti  = data_first_part + result_BMP280;
+			data_4_dusti.remove(data_4_dusti.length() - 1);
+			data_4_dusti.replace("BMP280_", "");
+			data_4_dusti += "]}";
+			if (send2dusti) {
+				debug_out(F("## Sending to luftdaten.info (BMP280): "), DEBUG_MIN_INFO, 1);
+				start_send = micros();
+				if (result_BMP280 != "") {
+					sendData(data_4_dusti, BMP280_API_PIN, host_dusti, httpPort_dusti, url_dusti, "", FPSTR(TXT_CONTENT_TYPE_JSON));
+				} else {
+					debug_out(F("No data sent..."), DEBUG_MIN_INFO, 1);
+				}
+				sum_send_time += micros() - start_send;
+			}
+		}
 		if (bme280_read) {
 			data += result_BME280;
 			data_4_dusti  = data_first_part + result_BME280;
@@ -2657,7 +2759,7 @@ void loop() {
 		}
 
 		if (has_display || has_lcd1602) {
-			display_values(last_value_DHT_T, last_value_DHT_H, last_value_BMP_T, last_value_BMP_P, last_value_BME280_T, last_value_BME280_H, last_value_BME280_P, last_value_PPD_P1, last_value_PPD_P2, last_value_SDS_P1, last_value_SDS_P2);
+			display_values(last_value_DHT_T, last_value_DHT_H, last_value_BMP_T, last_value_BMP_P, last_value_BMP280_T, last_value_BMP280_P, last_value_BME280_T, last_value_BME280_H, last_value_BME280_P, last_value_PPD_P1, last_value_PPD_P2, last_value_SDS_P1, last_value_SDS_P2);
 		}
 
 		if (send2madavi) {

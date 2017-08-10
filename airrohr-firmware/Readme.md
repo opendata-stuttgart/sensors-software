@@ -51,6 +51,7 @@ Installierbar über Arduino IDE (Menü Sketch -> Bibliothek einbinden -> Bibliot
 * [ArduinoJson](https://github.com/bblanchon/ArduinoJson) (5.10.1) (MIT)
 * [Adafruit Unified Sensor](https://github.com/adafruit/Adafruit_Sensor) (1.0.2) (Apache)
 * [Adafruit BMP085 library](https://github.com/adafruit/Adafruit-BMP085-Library) (1.0.0) (BSD)
+* [Adafruit BMP280 library](https://github.com/adafruit/Adafruit_BMP280_Library) (1.0.2) (BSD)
 * [Adafruit BME280 library](https://github.com/adafruit/Adafruit_BME280_Library) (1.0.5) (BSD)
 * [DHT sensor library](https://github.com/adafruit/DHT-sensor-library) (1.3.0) (MIT)
 * [ESP8266 and ESP32 Oled driver for SSD1306 display](https://github.com/squix78/esp8266-oled-ssd1306) (3.2.7) (MIT)
@@ -100,6 +101,7 @@ Diese Firmware definiert die Pins für die verschiedenenen Sensoren wie folgt:
 * DHT22 => Pin 7
 * SDS011 => Pin 1
 * BMP180 => Pin 3
+* BMP280 => Pin 3
 * BME280 => Pin 11
 * GPS(Neo-6M) => Pin 9
 
@@ -120,6 +122,7 @@ Installierbar über Arduino IDE (für Versionen siehe auch ESP8266):
 * [ArduinoJson](https://github.com/bblanchon/ArduinoJson) (5.10.1) (MIT)
 * [Adafruit Unified Sensor](https://github.com/adafruit/Adafruit_Sensor) (1.0.2) (Apache)
 * [Adafruit BMP085 library](https://github.com/adafruit/Adafruit-BMP085-Library) (1.0.0) (BSD)
+* [Adafruit BMP280 library](https://github.com/adafruit/Adafruit_BMP280_Library) (1.0.2) (BSD)
 * [Adafruit BME280 library](https://github.com/adafruit/Adafruit_BME280_Library) (1.0.5) (BSD)
 * [DHT sensor library](https://github.com/adafruit/DHT-sensor-library) (1.3.0) (MIT)
 * [LiquidCrystal I2C](https://github.com/marcoschwartz/LiquidCrystal_I2C) (1.1.2)
