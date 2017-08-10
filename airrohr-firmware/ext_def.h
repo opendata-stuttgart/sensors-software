@@ -91,6 +91,14 @@
 #define BMP_PIN_SDA D3
 #endif
 
+// BMP280, Luftdruck-Sensor
+#define BMP280_READ 0
+#define BMP280_API_PIN 3
+#if defined(ESP8266)
+#define BMP280_PIN_SCL D4
+#define BMP280_PIN_SDA D3
+#endif
+
 // BME280, Luftdruck-Sensor
 #define BME280_READ 0
 #define BME280_API_PIN 11

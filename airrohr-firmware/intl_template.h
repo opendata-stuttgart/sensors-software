@@ -13,6 +13,7 @@ const char INTL_PPD42NS[] PROGMEM = "";
 const char INTL_DHT22[] PROGMEM = "";
 const char INTL_HTU21D[] PROGMEM = "";
 const char INTL_BMP180[] PROGMEM = "";
+const char INTL_BMP280[] PROGMEM = "";
 const char INTL_BME280[] PROGMEM = "";
 const char INTL_BASICAUTH[] PROGMEM = "";
 const char INTL_WEITERE_EINSTELLUNGEN[] PROGMEM ="";
