@@ -30,6 +30,10 @@ Nach 5 Minuten sollte der Access-Point wieder deaktiviert werden (funktioniert z
 
 Die Daten können als CSV via USB ausgegeben werden. Dafür sollte sowohl in ext_def.h als auch in der WLAN-Konfiguration Debug auf 0 gesetzt werden, damit die ausgegebenen Daten nur noch die Sensordaten sind. Beim Neustart des ESP8266 erscheinen dann nur noch ein paar wenige Zeichen, die den Startzustand darstellen.
 
+## Wiring
+
+* SDS and DHT wiring: [https://raw.githubusercontent.com/opendata-stuttgart/meta/master/files/nodemcu-v3-schaltplan-sds011.jpg](https://raw.githubusercontent.com/opendata-stuttgart/meta/master/files/nodemcu-v3-schaltplan-sds011.jpg)
+
 ## Benötigte Software (in Klammern getestete Version und die Art der Lizenz):
 
 * [Arduino IDE](https://www.arduino.cc/en/Main/Software)  (Version 1.8.3) (GNU Lesser General Public License v2.1)
@@ -48,7 +52,7 @@ In ESP8266 für Arduino IDE enthalten:
 * DNSServer (GNU Lesser Public License >=2.1)
 
 Installierbar über Arduino IDE (Menü Sketch -> Bibliothek einbinden -> Bibliotheken verwalten, in Klammern die getestete Version und die Art der Lizenz):
-* [ArduinoJson](https://github.com/bblanchon/ArduinoJson) (5.10.1) (MIT)
+* [ArduinoJson](https://github.com/bblanchon/ArduinoJson) (5.11.1) (MIT)
 * [Adafruit Unified Sensor](https://github.com/adafruit/Adafruit_Sensor) (1.0.2) (Apache)
 * [Adafruit BMP085 library](https://github.com/adafruit/Adafruit-BMP085-Library) (1.0.0) (BSD)
 * [Adafruit BMP280 library](https://github.com/adafruit/Adafruit_BMP280_Library) (1.0.2) (BSD)
@@ -56,6 +60,7 @@ Installierbar über Arduino IDE (Menü Sketch -> Bibliothek einbinden -> Bibliot
 * [DHT sensor library](https://github.com/adafruit/DHT-sensor-library) (1.3.0) (MIT)
 * [ESP8266 and ESP32 Oled driver for SSD1306 display](https://github.com/squix78/esp8266-oled-ssd1306) (3.2.7) (MIT)
 * [LiquidCrystal I2C](https://github.com/marcoschwartz/LiquidCrystal_I2C) (1.1.2)
+* [SparkFun HTU21D Humidity and Temperature Sensor Breakout](https://github.com/sparkfun/SparkFun_HTU21D_Breakout_Arduino_Library) (1.1.3)
 * [PubSubClient](http://pubsubclient.knolleary.net/) (2.6.0) (MIT)
 * [SoftwareSerial](https://github.com/plerup/espsoftwareserial) (1.0.0) (GNU Lesser Public License >=2.1)
 

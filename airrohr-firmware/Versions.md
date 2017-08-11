@@ -1,3 +1,9 @@
+NRZ-2017-094
+test version
+* added support for HTU21D
+* added support for BMP280
+* added support for PMS1003, PMS3003, PMS7003
+
 NRZ-2017-092
 online as update since 2017-06-24
 * added time of first measurement to value page

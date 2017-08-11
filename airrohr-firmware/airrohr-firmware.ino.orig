@@ -967,7 +967,7 @@ String warning_first_cycle() {
 
 String age_last_values() {
 	String s = "<b>";
-	s += String(round((act_milli - starttime) / 1000.0));
+	s += String(round((act_milli - starttime)/1000.0));
 	s += FPSTR(INTL_ZEIT_SEIT_LETZTER_MESSUNG);
 	s += F("</b><br/><br/>");
 	return s;
@@ -1426,10 +1426,10 @@ void webserver_data_json() {
 	String s1 = last_data_string;
 	debug_out(F("last data: "), DEBUG_MIN_INFO, 0);
 	debug_out(s1, DEBUG_MIN_INFO, 1);
-	String s2 = ", \"age\":\"" + String(round((act_milli - starttime) / 1000.0)) + "\", \"sensordatavalues\"";
+	String s2 = ", \"age\":\""+String(round((act_milli-starttime)/1000.0))+"\", \"sensordatavalues\"";
 	debug_out(F("replace with: "), DEBUG_MIN_INFO, 0);
 	debug_out(s2, DEBUG_MIN_INFO, 1);
-	s1.replace(F(", \"sensordatavalues\""), s2);
+	s1.replace(F(", \"sensordatavalues\""),s2);
 	debug_out(F("replaced: "), DEBUG_MIN_INFO, 0);
 	debug_out(s1, DEBUG_MIN_INFO, 1);
 	server.send(200, FPSTR(TXT_CONTENT_TYPE_JSON), s1);
@@ -1900,31 +1900,31 @@ String sensorDHT() {
 /* read HTU21D sensor values                                     *
 /*****************************************************************/
 String sensorHTU21D() {
-	String s = "";
-	float t;
-	float h;
+  String s = "";
+  float t;
+  float h;
 
-	debug_out(F("Start reading HTU21D"), DEBUG_MED_INFO, 1);
+  debug_out(F("Start reading HTU21D"),DEBUG_MED_INFO,1);
 
-	t = htu21d.readTemperature();
-	h = htu21d.readHumidity();
-	if (isnan(t) || isnan(h)) {
-		debug_out(F("HTU21D couldn't be read"), DEBUG_ERROR, 1);
-	} else {
-		debug_out(F("Temperature : "), DEBUG_MIN_INFO, 0);
-		debug_out(Float2String(t) + " C", DEBUG_MIN_INFO, 1);
-		debug_out(F("humidity : "), DEBUG_MIN_INFO, 0);
-		debug_out(Float2String(h) + " %", DEBUG_MIN_INFO, 1);
-		last_value_HTU21D_T = Float2String(t);
-		last_value_HTU21D_H = Float2String(h);
-		s += Value2Json(F("HTU21D_temperature"), last_value_HTU21D_T);
-		s += Value2Json(F("HTU21D_humidity"), last_value_HTU21D_H);
-	}
-	debug_out(F("------"), DEBUG_MIN_INFO, 1);
+  t = htu21d.readTemperature();
+  h = htu21d.readHumidity();
+  if (isnan(t) || isnan(h)) {
+    debug_out(F("HTU21D couldn't be read"),DEBUG_ERROR,1);
+  } else {
+    debug_out(F("Temperature : "),DEBUG_MIN_INFO,0);
+    debug_out(Float2String(t)+" C",DEBUG_MIN_INFO,1);
+    debug_out(F("humidity : "),DEBUG_MIN_INFO,0);
+    debug_out(Float2String(h)+" %",DEBUG_MIN_INFO,1);
+    last_value_HTU21D_T = Float2String(t);
+    last_value_HTU21D_H = Float2String(h);
+    s += Value2Json(F("HTU21D_temperature"),last_value_HTU21D_T);
+    s += Value2Json(F("HTU21D_humidity"),last_value_HTU21D_H);
+  }
+  debug_out(F("------"),DEBUG_MIN_INFO,1);
 
-	debug_out(F("End reading HTU21D"), DEBUG_MED_INFO, 1);
+  debug_out(F("End reading HTU21D"),DEBUG_MED_INFO,1);
 
-	return s;
+  return s;
 }
 
 /*****************************************************************
@@ -2780,7 +2780,7 @@ void loop() {
 			starttime_SDS = act_milli;
 		}
 	}
-
+	
 	server.handleClient();
 
 	if (send_now) {
@@ -2798,12 +2798,12 @@ void loop() {
 			debug_out(F("Call sensorBMP"), DEBUG_MAX_INFO, 1);
 			result_BMP = sensorBMP();			// getting temperature and pressure (optional)
 		}
-
+		
 		if (bmp280_read) {
 			debug_out(F("Call sensorBMP280"), DEBUG_MAX_INFO, 1);
 			result_BMP280 = sensorBMP280();			// getting temperature, humidity and pressure (optional)
 		}
-
+		
 		if (bme280_read) {
 			debug_out(F("Call sensorBME280"), DEBUG_MAX_INFO, 1);
 			result_BME280 = sensorBME280();			// getting temperature, humidity and pressure (optional)

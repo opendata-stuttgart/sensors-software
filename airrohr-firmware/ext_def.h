@@ -83,6 +83,19 @@
 #define SDS_PIN_TX D2
 #endif
 
+// PMS3003
+#define PMS24_READ 0
+
+// PMS1003, PMS7003
+#define PMS32_READ 0
+
+// all Plantower (PMS) sensors
+#define PMS_API_PIN 1
+#if defined(ESP8266)
+#define PMS_PIN_RX D1
+#define PMS_PIN_TX D2
+#endif
+
 // BMP180, Luftdruck-Sensor
 #define BMP_READ 0
 #define BMP_API_PIN 3
