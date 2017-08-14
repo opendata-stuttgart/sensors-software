@@ -578,7 +578,7 @@ void copyExtDef() {
 	setDef(sds_read, SDS_READ);
 	setDef(bmp_read, BMP_READ);
 	setDef(bme280_read, BME280_READ);
-  setDef(ds18b20_read, DS18B20_READ);
+	setDef(ds18b20_read, DS18B20_READ);
 	setDef(gps_read, GPS_READ);
 	setDef(send2dusti, SEND2DUSTI);
 	setDef(send2madavi, SEND2MADAVI);
@@ -656,7 +656,7 @@ void readConfig() {
 					setFromJSON(sds_read);
 					setFromJSON(bmp_read);
 					setFromJSON(bme280_read);
-          setFromJSON(ds18b20_read);
+					setFromJSON(ds18b20_read);
 					setFromJSON(gps_read);
 					setFromJSON(send2dusti);
 					setFromJSON(send2madavi);
@@ -721,7 +721,7 @@ void writeConfig() {
 	copyToJSON_Bool(sds_read);
 	copyToJSON_Bool(bmp_read);
 	copyToJSON_Bool(bme280_read);
-  copyToJSON_Bool(ds18b20_read);
+	copyToJSON_Bool(ds18b20_read);
 	copyToJSON_Bool(gps_read);
 	copyToJSON_Bool(send2dusti);
 	copyToJSON_Bool(send2madavi);
@@ -1001,7 +1001,7 @@ void webserver_config() {
 		page_content += form_checkbox(F("ppd_read"), FPSTR(INTL_PPD42NS), ppd_read);
 		page_content += form_checkbox(F("bmp_read"), FPSTR(INTL_BMP180), bmp_read);
 		page_content += form_checkbox(F("bme280_read"), FPSTR(INTL_BME280), bme280_read);
-    page_content += form_checkbox(F("ds18b20_read"), FPSTR(INTL_DS18B20), ds18b20_read);
+		page_content += form_checkbox(F("ds18b20_read"), FPSTR(INTL_DS18B20), ds18b20_read);
 		page_content += form_checkbox(F("gps_read"), F("GPS (NEO 6M)"), gps_read);
 		page_content += F("<br/><b>"); page_content += FPSTR(INTL_WEITERE_EINSTELLUNGEN); page_content += F("</b><br/>");
 		page_content += form_checkbox(F("auto_update"), FPSTR(INTL_AUTO_UPDATE), auto_update);
@@ -1061,7 +1061,7 @@ void webserver_config() {
 		readBoolParam(ppd_read);
 		readBoolParam(bmp_read);
 		readBoolParam(bme280_read);
-    readBoolParam(ds18b20_read);
+		readBoolParam(ds18b20_read);
 		readBoolParam(gps_read);
 		readBoolParam(auto_update);
 		readBoolParam(has_display);
@@ -1099,7 +1099,7 @@ void webserver_config() {
 		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "PPD"), String(ppd_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "BMP180"), String(bmp_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "BME280"), String(bme280_read));
-    page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "DS18B20"), String(ds18b20_read));
+		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "DS18B20"), String(ds18b20_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "GPS"), String(gps_read));
 		page_content += line_from_value(FPSTR(INTL_AUTO_UPDATE), String(auto_update));
 		page_content += line_from_value(FPSTR(INTL_DISPLAY), String(has_display));
@@ -1231,10 +1231,10 @@ void webserver_values() {
 			page_content += table_row_from_value("BME280", FPSTR(INTL_LUFTFEUCHTE), last_value_BME280_H, "%");
 			page_content += table_row_from_value("BME280", FPSTR(INTL_LUFTDRUCK),  Float2String(last_value_BME280_P.toFloat() / 100.0), "hPa");
 		}
-    if (ds18b20_read) {
-      page_content += empty_row;
-      page_content += table_row_from_value("DS18B20", FPSTR(INTL_TEMPERATUR), last_value_DS18B20_T, "°C");
-    }
+		if (ds18b20_read) {
+			page_content += empty_row;
+			page_content += table_row_from_value("DS18B20", FPSTR(INTL_TEMPERATUR), last_value_DS18B20_T, "°C");
+		}
 
 		page_content += empty_row;
 		page_content += table_row_from_value("WiFi", FPSTR(INTL_SIGNAL),  String(signal_strength), "dBm");
@@ -1466,7 +1466,7 @@ void wifiConfig() {
 	debug_out(F("PPD_read: "), DEBUG_MIN_INFO, 0); debug_out(String(ppd_read), DEBUG_MIN_INFO, 1);
 	debug_out(F("SDS_read: "), DEBUG_MIN_INFO, 0); debug_out(String(sds_read), DEBUG_MIN_INFO, 1);
 	debug_out(F("BMP_read: "), DEBUG_MIN_INFO, 0); debug_out(String(bmp_read), DEBUG_MIN_INFO, 1);
-  debug_out(F("DS18B20_read: "), DEBUG_MIN_INFO, 0); debug_out(String(ds18b20_read), DEBUG_MIN_INFO, 1);
+	debug_out(F("DS18B20_read: "), DEBUG_MIN_INFO, 0); debug_out(String(ds18b20_read), DEBUG_MIN_INFO, 1);
 	debug_out(F("Dusti: "), DEBUG_MIN_INFO, 0); debug_out(String(send2dusti), DEBUG_MIN_INFO, 1);
 	debug_out(F("Madavi: "), DEBUG_MIN_INFO, 0); debug_out(String(send2madavi), DEBUG_MIN_INFO, 1);
 	debug_out(F("CSV: "), DEBUG_MIN_INFO, 0); debug_out(String(send2csv), DEBUG_MIN_INFO, 1);
@@ -1884,38 +1884,38 @@ String sensorBME280() {
 /* read DS18B20 sensor values                                     *
 /*****************************************************************/
 String sensorDS18B20() {
-  String s = "";
-  int i = 0;
-  float t;
-  debug_out(F("Start reading DS18B20"), DEBUG_MED_INFO, 1);
+	String s = "";
+	int i = 0;
+	float t;
+	debug_out(F("Start reading DS18B20"), DEBUG_MED_INFO, 1);
 
-  //it's very unlikely (-127: impossible) to get these temperatures in reality. Most times this means that the sensor is currently faulty
-  //try 5 times to read the sensor, otherwise fail
-  do
-  {
-    ds18b20.requestTemperatures();
-    //for now, we want to read only the first sensor
-    t = ds18b20.getTempCByIndex(0);
-    last_value_DS18B20_T = "";
-    i++;
-    debug_out(F("DS18B20 trying...."), DEBUG_MIN_INFO, 0);
-    debug_out(String(i), DEBUG_MIN_INFO, 1);
-  } while(i<5 && (isnan(t) || t == 85.0 || t == (-127.0)));
-  if(i==5)
-  {
-    debug_out(F("DS18B20 couldn't be read."), DEBUG_ERROR, 1);
-  } else { 
-    debug_out(F("Temperature : "), DEBUG_MIN_INFO, 0);
-    debug_out(Float2String(t) + " C", DEBUG_MIN_INFO, 1);
-    last_value_DS18B20_T = Float2String(t);
-    s += Value2Json(F("DS18B20_temperature"), last_value_DS18B20_T);
-    last_value_DS18B20_T.remove(last_value_DS18B20_T.length() - 1);
-  }
-  debug_out(F("------"), DEBUG_MIN_INFO, 1);
+	//it's very unlikely (-127: impossible) to get these temperatures in reality. Most times this means that the sensor is currently faulty
+	//try 5 times to read the sensor, otherwise fail
+	do
+	{
+		ds18b20.requestTemperatures();
+		//for now, we want to read only the first sensor
+		t = ds18b20.getTempCByIndex(0);
+		last_value_DS18B20_T = "";
+		i++;
+		debug_out(F("DS18B20 trying...."), DEBUG_MIN_INFO, 0);
+		debug_out(String(i), DEBUG_MIN_INFO, 1);
+	} while(i<5 && (isnan(t) || t == 85.0 || t == (-127.0)));
 
-  debug_out(F("End reading DS18B20"), DEBUG_MED_INFO, 1);
+	if(i==5)
+	{
+		debug_out(F("DS18B20 couldn't be read."), DEBUG_ERROR, 1);
+	} else { 
+		debug_out(F("Temperature : "), DEBUG_MIN_INFO, 0);
+		debug_out(Float2String(t) + " C", DEBUG_MIN_INFO, 1);
+		last_value_DS18B20_T = Float2String(t);
+		s += Value2Json(F("DS18B20_temperature"), last_value_DS18B20_T);
+		last_value_DS18B20_T.remove(last_value_DS18B20_T.length() - 1);
+	}
+	debug_out(F("------"), DEBUG_MIN_INFO, 1);
+	debug_out(F("End reading DS18B20"), DEBUG_MED_INFO, 1);
 
-  return s;
+	return s;
 }
 
 
@@ -2357,7 +2357,7 @@ void setup() {
 	create_basic_auth_strings();
 	serialSDS.begin(9600);
 	serialGPS.begin(9600);
-  ds18b20.begin();
+	ds18b20.begin();
 	pinMode(PPD_PIN_PM1, INPUT_PULLUP);	// Listen at the designated PIN
 	pinMode(PPD_PIN_PM2, INPUT_PULLUP);	// Listen at the designated PIN
 	dht.begin();	// Start DHT
@@ -2385,7 +2385,7 @@ void setup() {
 	if (dht_read) { debug_out(F("Lese DHT..."), DEBUG_MIN_INFO, 1); }
 	if (bmp_read) { debug_out(F("Lese BMP..."), DEBUG_MIN_INFO, 1); }
 	if (bme280_read) { debug_out(F("Lese BME280..."), DEBUG_MIN_INFO, 1); }
-  if (ds18b20_read) { debug_out(F("Lese DS18B20..."), DEBUG_MIN_INFO, 1); }
+	if (ds18b20_read) { debug_out(F("Lese DS18B20..."), DEBUG_MIN_INFO, 1); }
 	if (gps_read) { debug_out(F("Lese GPS..."), DEBUG_MIN_INFO, 1); }
 	if (send2dusti) { debug_out(F("Sende an luftdaten.info..."), DEBUG_MIN_INFO, 1); }
 	if (send2madavi) { debug_out(F("Sende an madavi.de..."), DEBUG_MIN_INFO, 1); }
@@ -2446,7 +2446,7 @@ void loop() {
 	String result_DHT = "";
 	String result_BMP = "";
 	String result_BME280 = "";
-  String result_DS18B20 = "";
+	String result_DS18B20 = "";
 	String result_GPS = "";
 	String signal_strength = "";
 
@@ -2499,10 +2499,10 @@ void loop() {
 			result_BME280 = sensorBME280();			// getting temperature, humidity and pressure (optional)
 		}
 
-   if (ds18b20_read) {
-      debug_out(F("Call sensorDS18B20"), DEBUG_MAX_INFO, 1);
-      result_DS18B20 = sensorDS18B20();     // getting temperature (optional)
-   }
+		if (ds18b20_read) {
+			debug_out(F("Call sensorDS18B20"), DEBUG_MAX_INFO, 1);
+			result_DS18B20 = sensorDS18B20();     // getting temperature (optional)
+		}
 	}
 
 	if (gps_read && (((act_milli - starttime_GPS) > sampletime_GPS_ms) || ((act_milli - starttime) > sending_intervall_ms))) {
@@ -2615,23 +2615,23 @@ void loop() {
 			}
 		}
 
-   if (ds18b20_read) {
-      data += result_DS18B20;
-      data_4_dusti = data_first_part + result_DS18B20;
-      data_4_dusti.remove(data_4_dusti.length() - 1);
-      data_4_dusti.replace("DS18B20_", "");
-      data_4_dusti += "]}";
-      if (send2dusti) {
-        debug_out(F("## Sending to luftdaten.info (DS18B20): "), DEBUG_MIN_INFO, 1);
-        start_send = micros();
-        if (result_DS18B20 != "") {
-          sendData(data_4_dusti, BME280_API_PIN, host_dusti, httpPort_dusti, url_dusti, "", FPSTR(TXT_CONTENT_TYPE_JSON));
-        } else {
-          debug_out(F("No data sent..."), DEBUG_MIN_INFO, 1);
-        }
-        sum_send_time += micros() - start_send;
-      }
-   }
+		if (ds18b20_read) {
+			data += result_DS18B20;
+			data_4_dusti = data_first_part + result_DS18B20;
+			data_4_dusti.remove(data_4_dusti.length() - 1);
+			data_4_dusti.replace("DS18B20_", "");
+			data_4_dusti += "]}";
+			if (send2dusti) {
+				debug_out(F("## Sending to luftdaten.info (DS18B20): "), DEBUG_MIN_INFO, 1);
+				start_send = micros();
+				if (result_DS18B20 != "") {
+					sendData(data_4_dusti, BME280_API_PIN, host_dusti, httpPort_dusti, url_dusti, "", FPSTR(TXT_CONTENT_TYPE_JSON));
+				} else {
+					debug_out(F("No data sent..."), DEBUG_MIN_INFO, 1);
+				}
+			sum_send_time += micros() - start_send;
+			}
+		}
 
 		if (gps_read) {
 			data += result_GPS;

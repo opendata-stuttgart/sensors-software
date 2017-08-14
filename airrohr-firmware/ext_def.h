@@ -95,7 +95,7 @@
 #define DS18B20_READ 0
 #define DS18B20_API_PIN 13
 #if defined(ESP8266)
-#define DS18B20_PIN D8
+#define DS18B20_PIN D7
 #endif
 
 
