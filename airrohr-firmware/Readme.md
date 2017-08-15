@@ -13,8 +13,7 @@ ToDo's:
 Die grundsätzliche Konfiguration der Parameter erfolgt über die Datei `ext_dev.h`.
 
 ## WLAN Konfiguration
-
-(siehe auch Wiki-Seite auf Github [https://github.com/opendata-stuttgart/meta/wiki/Konfiguration-der-Sensoren](Konfiguration der Sensoren)
+siehe auch Wiki-Seite auf Github [Konfiguration der Sensoren](https://github.com/opendata-stuttgart/meta/wiki/Konfiguration-der-Sensoren)
 
 Wenn das vorgegebene WLAN nach 10 Sekunden nicht erreichbar ist, wird ein Access-Point eingerichtet, der über "Feinstaubsensor-\[Sensor-ID\]" erreichbar ist. Nach dem Verbinden zu diesem Accesspoint sollten alle Anfragen auf die Konfigurationsseite umgeleitet werden. Direkte Adresse der Seite ist http://192.168.4.1/ .
 
