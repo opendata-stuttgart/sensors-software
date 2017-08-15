@@ -883,7 +883,7 @@ String form_input(const String& name, const String& info, const String& value, c
 
 String form_password(const String& name, const String& info, const String& value, const int length) {
 	String password = "";
-	for (int i=0;i<value.length();i++) password += "*";
+	for (int i = 0; i < value.length(); i++) { password += "*"; }
 	String s = F("<tr><td>{i} </td><td style='width:90%;'><input type='password' name='{n}' id='{n}' placeholder='{i}' value='{v}' maxlength='{l}'/></td></tr>");
 	s.replace("{i}", info); s.replace("{n}", name); s.replace("{v}", password); s.replace("{l}", String(length));
 	return s;
@@ -1128,7 +1128,7 @@ void webserver_config() {
 		if (server.hasArg(F("wlanssid")) && server.arg(F("wlanssid")) != "") {
 			readCharParam(wlanssid);
 			if (server.hasArg(F("wlanssid"))) {
-				while (i++ < server.arg(F("wlanpwd")).length()) masked_pwd += "*";
+				while (i++ < server.arg(F("wlanpwd")).length()) { masked_pwd += "*"; }
 				if (masked_pwd != server.arg(F("wlanpwd")) || server.arg(F("wlanpwd")) == "") {
 					readCharParam(wlanpwd);
 				}
@@ -2077,8 +2077,7 @@ String sensorDS18B20() {
 
 	//it's very unlikely (-127: impossible) to get these temperatures in reality. Most times this means that the sensor is currently faulty
 	//try 5 times to read the sensor, otherwise fail
-	do
-	{
+	do {
 		ds18b20.requestTemperatures();
 		//for now, we want to read only the first sensor
 		t = ds18b20.getTempCByIndex(0);
@@ -2086,12 +2085,11 @@ String sensorDS18B20() {
 		i++;
 		debug_out(F("DS18B20 trying...."), DEBUG_MIN_INFO, 0);
 		debug_out(String(i), DEBUG_MIN_INFO, 1);
-	} while(i<5 && (isnan(t) || t == 85.0 || t == (-127.0)));
+	} while(i < 5 && (isnan(t) || t == 85.0 || t == (-127.0)));
 
-	if(i==5)
-	{
+	if(i == 5) {
 		debug_out(F("DS18B20 couldn't be read."), DEBUG_ERROR, 1);
-	} else { 
+	} else {
 		debug_out(F("Temperature : "), DEBUG_MIN_INFO, 0);
 		debug_out(Float2String(t) + " C", DEBUG_MIN_INFO, 1);
 		last_value_DS18B20_T = Float2String(t);
@@ -3059,7 +3057,7 @@ void loop() {
 				} else {
 					debug_out(F("No data sent..."), DEBUG_MIN_INFO, 1);
 				}
-			sum_send_time += micros() - start_send;
+				sum_send_time += micros() - start_send;
 			}
 		}
 
