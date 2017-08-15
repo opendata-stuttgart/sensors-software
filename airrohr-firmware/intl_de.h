@@ -18,6 +18,7 @@ const char INTL_HTU21D[] PROGMEM = "HTU21D (Temperatur, rel. Luftfeuchte)";
 const char INTL_BMP180[] PROGMEM = "BMP180";
 const char INTL_BMP280[] PROGMEM = "BMP280";
 const char INTL_BME280[] PROGMEM = "BME280";
+const char INTL_DS18B20[] PROGMEM = "DS18B20";
 const char INTL_BASICAUTH[] PROGMEM = "BasicAuth aktivieren";
 const char INTL_WEITERE_EINSTELLUNGEN[] PROGMEM ="Weitere Einstellungen";
 const char INTL_AUTO_UPDATE[] PROGMEM = "Auto Update";

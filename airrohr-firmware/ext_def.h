@@ -120,6 +120,14 @@
 #define BME280_PIN_SDA D3
 #endif
 
+// DS18B20, Temperatur-Sensor
+#define DS18B20_READ 0
+#define DS18B20_API_PIN 13
+#if defined(ESP8266)
+#define DS18B20_PIN D7
+#endif
+
+
 // GPS, bevorzugt Neo-6M
 #define GPS_READ 0
 #define GPS_API_PIN 9
