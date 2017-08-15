@@ -59,7 +59,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2017-094"
+#define SOFTWARE_VERSION "NRZ-2017-095"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -84,13 +84,11 @@
 #include <SPI.h>
 #endif
 #include <ArduinoJson.h>
-#include <Wire.h>
 #include <DHT.h>
 #include <SparkFunHTU21D.h>
 #include <Adafruit_BMP085.h>
 #include <Adafruit_BMP280.h>
 #include <Adafruit_BME280.h>
-#include <OneWire.h>
 #include <DallasTemperature.h>
 #include <TinyGPS++.h>
 #include <Ticker.h>
@@ -884,8 +882,10 @@ String form_input(const String& name, const String& info, const String& value, c
 }
 
 String form_password(const String& name, const String& info, const String& value, const int length) {
+	String password = "";
+	for (int i=0;i<value.length();i++) password += "*";
 	String s = F("<tr><td>{i} </td><td style='width:90%;'><input type='password' name='{n}' id='{n}' placeholder='{i}' value='{v}' maxlength='{l}'/></td></tr>");
-	s.replace("{i}", info); s.replace("{n}", name); s.replace("{v}", value); s.replace("{l}", String(length));
+	s.replace("{i}", info); s.replace("{n}", name); s.replace("{v}", password); s.replace("{l}", String(length));
 	return s;
 }
 
@@ -1031,6 +1031,8 @@ void webserver_config() {
 	webserver_request_auth();
 
 	String page_content = "";
+	String masked_pwd = "";
+	int i = 0;
 	last_page_load = millis();
 
 	debug_out(F("output config page ..."), DEBUG_MIN_INFO, 1);
@@ -1125,7 +1127,12 @@ void webserver_config() {
 
 		if (server.hasArg(F("wlanssid")) && server.arg(F("wlanssid")) != "") {
 			readCharParam(wlanssid);
-			readCharParam(wlanpwd);
+			if (server.hasArg(F("wlanssid"))) {
+				while (i++ < server.arg(F("wlanpwd")).length()) masked_pwd += "*";
+				if (masked_pwd != server.arg(F("wlanpwd")) || server.arg(F("wlanpwd")) == "") {
+					readCharParam(wlanpwd);
+				}
+			}
 		}
 		readCharParam(current_lang);
 		readCharParam(www_username);

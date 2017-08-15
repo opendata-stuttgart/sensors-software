@@ -1,8 +1,10 @@
-NRZ-2017-094
+NRZ-2017-095
 test version
 * added support for HTU21D
+* added support for DS18B20
 * added support for BMP280
 * added support for PMS1003, PMS3003, PMS7003
+* masked wifi password in config page
 
 NRZ-2017-092
 online as update since 2017-06-24
