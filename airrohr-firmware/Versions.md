@@ -1,5 +1,5 @@
 NRZ-2017-095
-test version
+online as update since 2017-08-17
 * added support for HTU21D
 * added support for DS18B20
 * added support for BMP280
