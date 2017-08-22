@@ -19,6 +19,7 @@ const char INTL_BMP180[] PROGMEM = "";
 const char INTL_BMP280[] PROGMEM = "";
 const char INTL_BME280[] PROGMEM = "";
 const char INTL_DS18B20[] PROGMEM = "";
+const char INTL_NEO6M[] PROGMEM = "";
 const char INTL_BASICAUTH[] PROGMEM = "";
 const char INTL_WEITERE_EINSTELLUNGEN[] PROGMEM ="";
 const char INTL_AUTO_UPDATE[] PROGMEM = "";

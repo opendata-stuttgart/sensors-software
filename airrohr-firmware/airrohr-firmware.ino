@@ -59,7 +59,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2017-095"
+#define SOFTWARE_VERSION "NRZ-2017-097"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -885,7 +885,7 @@ String form_password(const String& name, const String& info, const String& value
 	String password = "";
 	for (int i = 0; i < value.length(); i++) { password += "*"; }
 	String s = F("<tr><td>{i} </td><td style='width:90%;'><input type='password' name='{n}' id='{n}' placeholder='{i}' value='{v}' maxlength='{l}'/></td></tr>");
-	s.replace("{i}", info); s.replace("{n}", name); s.replace("{v}", password); s.replace("{l}", String(length));
+	s.replace("{i}", info); s.replace("{n}", name); s.replace("{v}", value); s.replace("{l}", String(length));
 	return s;
 }
 
@@ -907,6 +907,7 @@ String form_select_lang() {
 	String s = F("<tr><td>{t}</td><td><select name='current_lang'><option value='DE' {s_DE}>Deutsch (DE)</option><option value='BG' {s_BG}>Bulgarian (BG)</option><option value='EN' {s_EN}>English (EN)</option><option value='ES' {s_ES}>Español (ES)</option><option value='FR' {s_FR}>Français (FR)</option><option value='IT' {s_IT}>Italiano (IT)</option><option value='NL' {s_NL}>Nederlands (NL)</option></select></td></tr>");
 
 	s.replace("{t}", FPSTR(INTL_SPRACHE));
+
 	if(String(current_lang) == "DE") {
 		s.replace(F("{s_DE}"), s_select);
 	} else if(String(current_lang) == "BG") {
@@ -1061,57 +1062,57 @@ void webserver_config() {
 		page_content += FPSTR(INTL_BASICAUTH);
 		page_content += F("</b><br/>");
 		page_content += F("<table>");
-		page_content += form_input(F("www_username"), FPSTR(INTL_BENUTZER), www_username, 64);
-		page_content += form_password(F("www_password"), FPSTR(INTL_PASSWORT), www_password, 64);
-		page_content += form_checkbox(F("www_basicauth_enabled"), FPSTR(INTL_BASICAUTH), www_basicauth_enabled);
+		page_content += form_input("www_username", FPSTR(INTL_BENUTZER), www_username, 64);
+		page_content += form_password("www_password", FPSTR(INTL_PASSWORT), www_password, 64);
+		page_content += form_checkbox("www_basicauth_enabled", FPSTR(INTL_BASICAUTH), www_basicauth_enabled);
 		page_content += form_submit(FPSTR(INTL_SPEICHERN));
 
 		page_content += F("</table><br/><b>APIs</b><br/>");
-		page_content += form_checkbox(F("send2dusti"), F("API Luftdaten.info"), send2dusti);
-		page_content += form_checkbox(F("send2madavi"), F("API Madavi.de"), send2madavi);
+		page_content += form_checkbox("send2dusti", F("API Luftdaten.info"), send2dusti);
+		page_content += form_checkbox("send2madavi", F("API Madavi.de"), send2madavi);
 		page_content += F("<br/><b>");
 		page_content += FPSTR(INTL_SENSOREN);
 		page_content += F("</b><br/>");
-		page_content += form_checkbox(F("sds_read"), FPSTR(INTL_SDS011), sds_read);
-		page_content += form_checkbox(F("pms32_read"), FPSTR(INTL_PMS32), pms32_read);
-		page_content += form_checkbox(F("pms24_read"), FPSTR(INTL_PMS24), pms24_read);
-		page_content += form_checkbox(F("dht_read"), FPSTR(INTL_DHT22), dht_read);
-		page_content += form_checkbox(F("htu21d_read"), FPSTR(INTL_HTU21D), htu21d_read);
-		page_content += form_checkbox(F("ppd_read"), FPSTR(INTL_PPD42NS), ppd_read);
-		page_content += form_checkbox(F("bmp_read"), FPSTR(INTL_BMP180), bmp_read);
-		page_content += form_checkbox(F("bmp280_read"), FPSTR(INTL_BMP280), bmp280_read);
-		page_content += form_checkbox(F("bme280_read"), FPSTR(INTL_BME280), bme280_read);
-		page_content += form_checkbox(F("ds18b20_read"), FPSTR(INTL_DS18B20), ds18b20_read);
-		page_content += form_checkbox(F("gps_read"), F("GPS (NEO 6M)"), gps_read);
+		page_content += form_checkbox("sds_read", FPSTR(INTL_SDS011), sds_read);
+		page_content += form_checkbox("pms32_read", FPSTR(INTL_PMS32), pms32_read);
+		page_content += form_checkbox("pms24_read", FPSTR(INTL_PMS24), pms24_read);
+		page_content += form_checkbox("dht_read", FPSTR(INTL_DHT22), dht_read);
+		page_content += form_checkbox("htu21d_read", FPSTR(INTL_HTU21D), htu21d_read);
+		page_content += form_checkbox("ppd_read", FPSTR(INTL_PPD42NS), ppd_read);
+		page_content += form_checkbox("bmp_read", FPSTR(INTL_BMP180), bmp_read);
+		page_content += form_checkbox("bmp280_read", FPSTR(INTL_BMP280), bmp280_read);
+		page_content += form_checkbox("bme280_read", FPSTR(INTL_BME280), bme280_read);
+		page_content += form_checkbox("ds18b20_read", FPSTR(INTL_DS18B20), ds18b20_read);
+		page_content += form_checkbox("gps_read", FPSTR(INTL_NEO6M), gps_read);
 		page_content += F("<br/><b>"); page_content += FPSTR(INTL_WEITERE_EINSTELLUNGEN); page_content += F("</b><br/>");
-		page_content += form_checkbox(F("auto_update"), FPSTR(INTL_AUTO_UPDATE), auto_update);
-		page_content += form_checkbox(F("has_display"), FPSTR(INTL_DISPLAY), has_display);
-		page_content += form_checkbox(F("has_lcd1602"), FPSTR(INTL_LCD1602), has_lcd1602);
+		page_content += form_checkbox("auto_update", FPSTR(INTL_AUTO_UPDATE), auto_update);
+		page_content += form_checkbox("has_display", FPSTR(INTL_DISPLAY), has_display);
+		page_content += form_checkbox("has_lcd1602", FPSTR(INTL_LCD1602), has_lcd1602);
 		page_content += F("<table>");
 		page_content += form_select_lang();
-		page_content += form_input(F("debug"), FPSTR(INTL_DEBUG_LEVEL), String(debug), 5);
-		page_content += form_input(F("sending_intervall_ms"), FPSTR(INTL_MESSINTERVALL), String(sending_intervall_ms / 1000), 5);
-		page_content += form_input(F("time_for_wifi_config"), FPSTR(INTL_DAUER_ROUTERMODUS), String(time_for_wifi_config / 1000), 5);
+		page_content += form_input("debug", FPSTR(INTL_DEBUG_LEVEL), String(debug), 5);
+		page_content += form_input("sending_intervall_ms", FPSTR(INTL_MESSINTERVALL), String(sending_intervall_ms / 1000), 5);
+		page_content += form_input("time_for_wifi_config", FPSTR(INTL_DAUER_ROUTERMODUS), String(time_for_wifi_config / 1000), 5);
 		page_content += F("</table><br/><b>"); page_content += FPSTR(INTL_WEITERE_APIS); page_content += F("</b><br/><br/>");
-		page_content += form_checkbox(F("send2sensemap"), tmpl(FPSTR(INTL_SENDEN_AN), F("OpenSenseMap")), send2sensemap);
+		page_content += form_checkbox("send2sensemap", tmpl(FPSTR(INTL_SENDEN_AN), F("OpenSenseMap")), send2sensemap);
 		page_content += F("<table>");
-		page_content += form_input(F("senseboxid"), F("senseBox-ID: "), senseboxid, 50);
+		page_content += form_input("senseboxid", "senseBox-ID: ", senseboxid, 50);
 		page_content += F("</table><br/>");
-		page_content += form_checkbox(F("send2custom"), FPSTR(INTL_AN_EIGENE_API_SENDEN), send2custom);
+		page_content += form_checkbox("send2custom", FPSTR(INTL_AN_EIGENE_API_SENDEN), send2custom);
 		page_content += F("<table>");
-		page_content += form_input(F("host_custom"), FPSTR(INTL_SERVER), host_custom, 50);
-		page_content += form_input(F("url_custom"), FPSTR(INTL_PFAD), url_custom, 50);
-		page_content += form_input(F("port_custom"), FPSTR(INTL_PORT), String(port_custom), 30);
-		page_content += form_input(F("user_custom"), FPSTR(INTL_BENUTZER), user_custom, 50);
-		page_content += form_input(F("pwd_custom"), FPSTR(INTL_PASSWORT), pwd_custom, 50);
+		page_content += form_input("host_custom", FPSTR(INTL_SERVER), host_custom, 50);
+		page_content += form_input("url_custom", FPSTR(INTL_PFAD), url_custom, 50);
+		page_content += form_input("port_custom", FPSTR(INTL_PORT), String(port_custom), 30);
+		page_content += form_input("user_custom", FPSTR(INTL_BENUTZER), user_custom, 50);
+		page_content += form_input("pwd_custom", FPSTR(INTL_PASSWORT), pwd_custom, 50);
 		page_content += F("</table><br/>");
 		page_content += form_checkbox(F("send2influx"), tmpl(FPSTR(INTL_SENDEN_AN), F("InfluxDB")), send2influx);
 		page_content += F("<table>");
-		page_content += form_input(F("host_influx"), FPSTR(INTL_SERVER), host_influx, 50);
-		page_content += form_input(F("url_influx"), FPSTR(INTL_PFAD), url_influx, 50);
-		page_content += form_input(F("port_influx"), FPSTR(INTL_PORT), String(port_influx), 30);
-		page_content += form_input(F("user_influx"), FPSTR(INTL_BENUTZER), user_influx, 50);
-		page_content += form_input(F("pwd_influx"), FPSTR(INTL_PASSWORT), pwd_influx, 50);
+		page_content += form_input("host_influx", FPSTR(INTL_SERVER), host_influx, 50);
+		page_content += form_input("url_influx", FPSTR(INTL_PFAD), url_influx, 50);
+		page_content += form_input("port_influx", FPSTR(INTL_PORT), String(port_influx), 30);
+		page_content += form_input("user_influx", FPSTR(INTL_BENUTZER), user_influx, 50);
+		page_content += form_input("pwd_influx", FPSTR(INTL_PASSWORT), pwd_influx, 50);
 		page_content += form_submit(FPSTR(INTL_SPEICHERN));
 		page_content += F("</table><br/>");
 		page_content += F("<br/></form>");
@@ -1124,19 +1125,15 @@ void webserver_config() {
 #define readBoolParam(param) if (server.hasArg(#param)){ param = server.arg(#param) == "1"; }
 #define readIntParam(param)  if (server.hasArg(#param)){ int val = server.arg(#param).toInt(); if (val != 0){ param = val; }}
 #define readTimeParam(param)  if (server.hasArg(#param)){ int val = server.arg(#param).toInt(); if (val != 0){ param = val*1000; }}
+#define readPasswdParam(param) if (server.hasArg(#param)){ i = 0; masked_pwd = ""; if (masked_pwd != server.arg(#param) || server.arg(#param) == "") { server.arg(#param).toCharArray(param, sizeof(param)); } }
 
-		if (server.hasArg(F("wlanssid")) && server.arg(F("wlanssid")) != "") {
+		if (server.hasArg("wlanssid") && server.arg("wlanssid") != "") {
 			readCharParam(wlanssid);
-			if (server.hasArg(F("wlanssid"))) {
-				while (i++ < server.arg(F("wlanpwd")).length()) { masked_pwd += "*"; }
-				if (masked_pwd != server.arg(F("wlanpwd")) || server.arg(F("wlanpwd")) == "") {
-					readCharParam(wlanpwd);
-				}
-			}
+			readPasswdParam(wlanpwd);
 		}
 		readCharParam(current_lang);
 		readCharParam(www_username);
-		readCharParam(www_password);
+		readPasswdParam(www_password);
 		readBoolParam(www_basicauth_enabled);
 		readBoolParam(send2dusti);
 		readBoolParam(send2madavi);

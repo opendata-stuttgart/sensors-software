@@ -19,6 +19,7 @@ const char INTL_BMP180[] PROGMEM = "BMP180";
 const char INTL_BMP280[] PROGMEM = "BMP280";
 const char INTL_BME280[] PROGMEM = "BME280";
 const char INTL_DS18B20[] PROGMEM = "DS18B20";
+const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Autorisation";
 const char INTL_WEITERE_EINSTELLUNGEN[] PROGMEM ="Autres paramètres";
 const char INTL_AUTO_UPDATE[] PROGMEM = "Mise a jour automatique";

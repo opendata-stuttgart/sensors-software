@@ -1,3 +1,8 @@
+NRZ-2017-097
+online as beta since 2017-08-21
+* basic auth password was saved as stars on saving config again
+* some minor changes to reduce flash memory usage
+
 NRZ-2017-095
 online as update since 2017-08-17
 * added support for HTU21D
