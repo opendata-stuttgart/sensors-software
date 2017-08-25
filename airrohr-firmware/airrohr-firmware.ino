@@ -59,7 +59,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2017-097"
+#define SOFTWARE_VERSION "NRZ-2017-098"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -105,6 +105,8 @@
 #include "intl_it.h"
 #elif defined(INTL_NL)
 #include "intl_nl.h"
+#elif defined(INTL_PT)
+#include "intl_pt.h"
 #else
 #include "intl_de.h"
 #endif
@@ -904,7 +906,7 @@ String form_submit(const String& value) {
 
 String form_select_lang() {
 	String s_select = F("selected='selected'");
-	String s = F("<tr><td>{t}</td><td><select name='current_lang'><option value='DE' {s_DE}>Deutsch (DE)</option><option value='BG' {s_BG}>Bulgarian (BG)</option><option value='EN' {s_EN}>English (EN)</option><option value='ES' {s_ES}>Español (ES)</option><option value='FR' {s_FR}>Français (FR)</option><option value='IT' {s_IT}>Italiano (IT)</option><option value='NL' {s_NL}>Nederlands (NL)</option></select></td></tr>");
+	String s = F("<tr><td>{t}</td><td><select name='current_lang'><option value='DE' {s_DE}>Deutsch (DE)</option><option value='BG' {s_BG}>Bulgarian (BG)</option><option value='EN' {s_EN}>English (EN)</option><option value='ES' {s_ES}>Español (ES)</option><option value='FR' {s_FR}>Français (FR)</option><option value='IT' {s_IT}>Italiano (IT)</option><option value='NL' {s_NL}>Nederlands (NL)</option><option value='PT' {s_PT}>Português (PT)</option></select></td></tr>");
 
 	s.replace("{t}", FPSTR(INTL_SPRACHE));
 
@@ -922,6 +924,8 @@ String form_select_lang() {
 		s.replace(F("{s_IT}"), s_select);
 	} else if(String(current_lang) == "NL") {
 		s.replace(F("{s_NL}"), s_select);
+	} else if(String(current_lang) == "PT") {
+		s.replace(F("{s_PT}"), s_select);
 	}
 	s.replace(F("{s_DE}"), "");
 	s.replace(F("{s_BG}"), "");
@@ -929,6 +933,7 @@ String form_select_lang() {
 	s.replace(F("{s_ES}"), "");
 	s.replace(F("{s_FR}"), "");
 	s.replace(F("{s_NL}"), "");
+	s.replace(F("{s_PT}"), "");
 	return s;
 }
 
@@ -2098,7 +2103,6 @@ String sensorDS18B20() {
 
 	return s;
 }
-
 
 /*****************************************************************
 /* read SDS011 sensor values                                     *
