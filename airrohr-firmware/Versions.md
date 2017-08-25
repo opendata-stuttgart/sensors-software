@@ -1,5 +1,10 @@
+NRZ-2017-098
+beta
+* added support for PMS5003, PMS6003
+* portuguese version added
+
 NRZ-2017-097
-online as beta since 2017-08-21
+online since 2017-08-21
 * basic auth password was saved as stars on saving config again
 * some minor changes to reduce flash memory usage
 
