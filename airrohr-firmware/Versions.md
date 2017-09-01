@@ -2,6 +2,7 @@ NRZ-2017-098
 beta
 * added support for PMS5003, PMS6003
 * portuguese version added
+* reenabled masked passwords
 
 NRZ-2017-097
 online since 2017-08-21

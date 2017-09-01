@@ -132,8 +132,11 @@ bool sds_read = 1;
 bool pms24_read = 0;
 bool pms32_read = 0;
 bool bmp_read = 0;
+bool bmp_init_failed = 1;
 bool bmp280_read = 0;
+bool bmp280_init_failed = 1;
 bool bme280_read = 0;
+bool bme280_init_failed = 1;
 bool ds18b20_read = 0;
 bool gps_read = 0;
 bool send2dusti = 1;
@@ -887,7 +890,7 @@ String form_password(const String& name, const String& info, const String& value
 	String password = "";
 	for (int i = 0; i < value.length(); i++) { password += "*"; }
 	String s = F("<tr><td>{i} </td><td style='width:90%;'><input type='password' name='{n}' id='{n}' placeholder='{i}' value='{v}' maxlength='{l}'/></td></tr>");
-	s.replace("{i}", info); s.replace("{n}", name); s.replace("{v}", value); s.replace("{l}", String(length));
+	s.replace("{i}", info); s.replace("{n}", name); s.replace("{v}", password); s.replace("{l}", String(length));
 	return s;
 }
 
@@ -1109,7 +1112,7 @@ void webserver_config() {
 		page_content += form_input("url_custom", FPSTR(INTL_PFAD), url_custom, 50);
 		page_content += form_input("port_custom", FPSTR(INTL_PORT), String(port_custom), 30);
 		page_content += form_input("user_custom", FPSTR(INTL_BENUTZER), user_custom, 50);
-		page_content += form_input("pwd_custom", FPSTR(INTL_PASSWORT), pwd_custom, 50);
+		page_content += form_password("pwd_custom", FPSTR(INTL_PASSWORT), pwd_custom, 50);
 		page_content += F("</table><br/>");
 		page_content += form_checkbox(F("send2influx"), tmpl(FPSTR(INTL_SENDEN_AN), F("InfluxDB")), send2influx);
 		page_content += F("<table>");
@@ -1117,7 +1120,7 @@ void webserver_config() {
 		page_content += form_input("url_influx", FPSTR(INTL_PFAD), url_influx, 50);
 		page_content += form_input("port_influx", FPSTR(INTL_PORT), String(port_influx), 30);
 		page_content += form_input("user_influx", FPSTR(INTL_BENUTZER), user_influx, 50);
-		page_content += form_input("pwd_influx", FPSTR(INTL_PASSWORT), pwd_influx, 50);
+		page_content += form_password("pwd_influx", FPSTR(INTL_PASSWORT), pwd_influx, 50);
 		page_content += form_submit(FPSTR(INTL_SPEICHERN));
 		page_content += F("</table><br/>");
 		page_content += F("<br/></form>");
@@ -1130,7 +1133,7 @@ void webserver_config() {
 #define readBoolParam(param) if (server.hasArg(#param)){ param = server.arg(#param) == "1"; }
 #define readIntParam(param)  if (server.hasArg(#param)){ int val = server.arg(#param).toInt(); if (val != 0){ param = val; }}
 #define readTimeParam(param)  if (server.hasArg(#param)){ int val = server.arg(#param).toInt(); if (val != 0){ param = val*1000; }}
-#define readPasswdParam(param) if (server.hasArg(#param)){ i = 0; masked_pwd = ""; if (masked_pwd != server.arg(#param) || server.arg(#param) == "") { server.arg(#param).toCharArray(param, sizeof(param)); } }
+#define readPasswdParam(param) if (server.hasArg(#param)){ i = 0; masked_pwd = ""; for (i=0;i<server.arg(#param).length();i++) masked_pwd += "*"; if (masked_pwd != server.arg(#param) || server.arg(#param) == "") { server.arg(#param).toCharArray(param, sizeof(param)); } }
 
 		if (server.hasArg("wlanssid") && server.arg("wlanssid") != "") {
 			readCharParam(wlanssid);
@@ -1168,14 +1171,14 @@ void webserver_config() {
 		readCharParam(url_custom);
 		readIntParam(port_custom);
 		readCharParam(user_custom);
-		readCharParam(pwd_custom);
+		readPasswdParam(pwd_custom);
 
 		readBoolParam(send2influx);
 		readCharParam(host_influx);
 		readCharParam(url_influx);
 		readIntParam(port_influx);
 		readCharParam(user_influx);
-		readCharParam(pwd_influx);
+		readPasswdParam(pwd_influx);
 
 #undef readCharParam
 #undef readBoolParam
@@ -1188,7 +1191,7 @@ void webserver_config() {
 		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "DHT"), String(dht_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "HTU21D"), String(htu21d_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "SDS"), String(sds_read));
-		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "PMS1003 or PMS7003"), String(pms32_read));
+		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "PMS1003, PMS5003, PMS6003, PMS7003"), String(pms32_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "PMS3003"), String(pms24_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "PPD"), String(ppd_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "BMP180"), String(bmp_read));
@@ -2069,7 +2072,7 @@ String sensorBME280() {
 }
 
 /*****************************************************************
-/* read DS18B20 sensor values                                     *
+/* read DS18B20 sensor values                                    *
 /*****************************************************************/
 String sensorDS18B20() {
 	String s = "";
@@ -2740,16 +2743,16 @@ void setup() {
 	if (bmp_read) {
 		if (!bmp.begin()) {
 			debug_out(F("No valid BMP085 sensor, check wiring!"), DEBUG_MIN_INFO, 1);
-			bmp_read = 0;
+			bmp_init_failed = 1;
 		}
 	}
 	if (bmp280_read && !initBMP280(0x76) && !initBMP280(0x77)) {
 		debug_out(F("Check BMP280 wiring"), DEBUG_MIN_INFO, 1);
-		bmp280_read = 0;
+		bmp280_init_failed = 1;
 	}
 	if (bme280_read && !initBME280(0x76) && !initBME280(0x77)) {
 		debug_out(F("Check BME280 wiring"), DEBUG_MIN_INFO, 1);
-		bme280_read = 0;
+		bme280_init_failed = 1;
 	}
 	if (sds_read) {
 		debug_out(F("Stoppe SDS011..."), DEBUG_MIN_INFO, 1);
@@ -2863,17 +2866,17 @@ void loop() {
 			result_HTU21D = sensorHTU21D();			// getting temperature and humidity (optional)
 		}
 
-		if (bmp_read) {
+		if (bmp_read && (! bmp_init_failed)) {
 			debug_out(F("Call sensorBMP"), DEBUG_MAX_INFO, 1);
 			result_BMP = sensorBMP();			// getting temperature and pressure (optional)
 		}
 
-		if (bmp280_read) {
+		if (bmp280_read && (! bmp280_init_failed)) {
 			debug_out(F("Call sensorBMP280"), DEBUG_MAX_INFO, 1);
 			result_BMP280 = sensorBMP280();			// getting temperature, humidity and pressure (optional)
 		}
 
-		if (bme280_read) {
+		if (bme280_read && (! bme280_init_failed)) {
 			debug_out(F("Call sensorBME280"), DEBUG_MAX_INFO, 1);
 			result_BME280 = sensorBME280();			// getting temperature, humidity and pressure (optional)
 		}
@@ -2992,7 +2995,7 @@ void loop() {
 				sum_send_time += micros() - start_send;
 			}
 		}
-		if (bmp_read) {
+		if (bmp_read && (! bmp_init_failed)) {
 			data += result_BMP;
 			data_4_dusti  = data_first_part + result_BMP;
 			data_4_dusti.remove(data_4_dusti.length() - 1);
@@ -3009,7 +3012,7 @@ void loop() {
 				sum_send_time += micros() - start_send;
 			}
 		}
-		if (bmp280_read) {
+		if (bmp280_read && (! bmp280_init_failed)) {
 			data += result_BMP280;
 			data_4_dusti  = data_first_part + result_BMP280;
 			data_4_dusti.remove(data_4_dusti.length() - 1);
@@ -3026,7 +3029,7 @@ void loop() {
 				sum_send_time += micros() - start_send;
 			}
 		}
-		if (bme280_read) {
+		if (bme280_read && (! bme280_init_failed)) {
 			data += result_BME280;
 			data_4_dusti  = data_first_part + result_BME280;
 			data_4_dusti.remove(data_4_dusti.length() - 1);
