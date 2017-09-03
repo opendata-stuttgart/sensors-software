@@ -2506,6 +2506,29 @@ String sensorGPS() {
 	return s;
 }
 
+unsigned long maybeSend2dusti(const String& result, const String& name, const int pin, const String& remove) {
+	String data_4_dusti = "";
+	unsigned long start_send;
+	if (send2dusti) {
+		data_4_dusti = data_first_part + result;
+		data_4_dusti.remove(data_4_dusti.length() - 1);
+		if (remove != "") data_4_dusti.replace(remove, "");
+		data_4_dusti += "]}";
+		debug_out(F("## Sending to luftdaten.info: "), DEBUG_MIN_INFO, 1);
+		debug_out(name, DEBUG_MIN_INFO, 1);
+		debug_out(F(": "), DEBUG_MIN_INFO, 1);
+		start_send = micros();
+		if (result != "") {
+			sendData(data_4_dusti, pin, host_dusti, httpPort_dusti, url_dusti, "", FPSTR(TXT_CONTENT_TYPE_JSON));
+		} else {
+			debug_out(F("No data sent..."), DEBUG_MIN_INFO, 1);
+		}
+		return micros() - start_send;
+	}
+	return 0;
+}
+
+
 /*****************************************************************
 /* AutoUpdate                                                    *
 /*****************************************************************/
@@ -2786,7 +2809,6 @@ void setup() {
 void loop() {
 	String data = "";
 	String tmp_str;
-	String data_4_dusti = "";
 	String data_4_influxdb = "";
 	String data_4_custom = "";
 	String data_sample_times = "";
@@ -2915,172 +2937,44 @@ void loop() {
 		server.stop();
 		if (ppd_read) {
 			data += result_PPD;
-			data_4_dusti  = data_first_part + result_PPD;
-			data_4_dusti.remove(data_4_dusti.length() - 1);
-			data_4_dusti += "]}";
-			if (send2dusti) {
-				debug_out(F("## Sending to luftdaten.info (PPD): "), DEBUG_MIN_INFO, 1);
-				start_send = micros();
-				if (result_PPD != "") {
-					sendData(data_4_dusti, PPD_API_PIN, host_dusti, httpPort_dusti, url_dusti, "", FPSTR(TXT_CONTENT_TYPE_JSON));
-				} else {
-					debug_out(F("No data sent..."), DEBUG_MIN_INFO, 1);
-				}
-				sum_send_time += micros() - start_send;
-			}
+			sum_send_time += maybeSend2dusti(result_PPD, "PPD", PPD_API_PIN, "");
 		}
 		if (sds_read) {
 			data += result_SDS;
-			data_4_dusti  = data_first_part + result_SDS;
-			data_4_dusti.remove(data_4_dusti.length() - 1);
-			data_4_dusti.replace("SDS_", "");
-			data_4_dusti += "]}";
-			if (send2dusti) {
-				debug_out(F("## Sending to luftdaten.info (SDS): "), DEBUG_MIN_INFO, 1);
-				start_send = micros();
-				if (result_SDS != "") {
-					sendData(data_4_dusti, SDS_API_PIN, host_dusti, httpPort_dusti, url_dusti, "", FPSTR(TXT_CONTENT_TYPE_JSON));
-				} else {
-					debug_out(F("No data sent..."), DEBUG_MIN_INFO, 1);
-				}
-				sum_send_time += micros() - start_send;
-			}
+			sum_send_time += maybeSend2dusti(result_SDS, "SDS", SDS_API_PIN, "SDS_");
 		}
 		if (pms24_read || pms32_read) {
 			data += result_PMS;
-			data_4_dusti  = data_first_part + result_PMS;
-			data_4_dusti.remove(data_4_dusti.length() - 1);
-			data_4_dusti.replace("PMS_", "");
-			data_4_dusti += "]}";
-			if (send2dusti) {
-				debug_out(F("## Sending to luftdaten.info (PMS): "), DEBUG_MIN_INFO, 1);
-				start_send = micros();
-				if (result_PMS != "") {
-					sendData(data_4_dusti, PMS_API_PIN, host_dusti, httpPort_dusti, url_dusti, "", FPSTR(TXT_CONTENT_TYPE_JSON));
-				} else {
-					debug_out(F("No data sent..."), DEBUG_MIN_INFO, 1);
-				}
-				sum_send_time += micros() - start_send;
-			}
+			sum_send_time += maybeSend2dusti(result_PMS, "PMS", PMS_API_PIN, "PMS_");
 		}
 		if (dht_read) {
 			data += result_DHT;
-			data_4_dusti  = data_first_part + result_DHT;
-			data_4_dusti.remove(data_4_dusti.length() - 1);
-			data_4_dusti += "]}";
-			if (send2dusti) {
-				debug_out(F("## Sending to luftdaten.info (DHT): "), DEBUG_MIN_INFO, 1);
-				start_send = micros();
-				if (result_DHT != "") {
-					sendData(data_4_dusti, DHT_API_PIN, host_dusti, httpPort_dusti, url_dusti, "", FPSTR(TXT_CONTENT_TYPE_JSON));
-				} else {
-					debug_out(F("No data sent..."), DEBUG_MIN_INFO, 1);
-				}
-				sum_send_time += micros() - start_send;
-			}
+			sum_send_time += maybeSend2dusti(result_DHT, "DHT", DHT_API_PIN, "");
 		}
 		if (htu21d_read) {
 			data += result_HTU21D;
-			data_4_dusti  = data_first_part + result_HTU21D;
-			data_4_dusti.remove(data_4_dusti.length() - 1);
-			data_4_dusti += "]}";
-			if (send2dusti) {
-				debug_out(F("## Sending to luftdaten.info (HTU21D): "), DEBUG_MIN_INFO, 1);
-				start_send = micros();
-				if (result_HTU21D != "") {
-					sendData(data_4_dusti, HTU21D_API_PIN, host_dusti, httpPort_dusti, url_dusti, "", FPSTR(TXT_CONTENT_TYPE_JSON));
-				} else {
-					debug_out(F("No data sent..."), DEBUG_MIN_INFO, 1);
-				}
-				sum_send_time += micros() - start_send;
-			}
+			sum_send_time += maybeSend2dusti(result_HTU21D, "HTU21D", HTU21D_API_PIN, "PMS_");
 		}
 		if (bmp_read && (! bmp_init_failed)) {
 			data += result_BMP;
-			data_4_dusti  = data_first_part + result_BMP;
-			data_4_dusti.remove(data_4_dusti.length() - 1);
-			data_4_dusti.replace("BMP_", "");
-			data_4_dusti += "]}";
-			if (send2dusti) {
-				debug_out(F("## Sending to luftdaten.info (BMP): "), DEBUG_MIN_INFO, 1);
-				start_send = micros();
-				if (result_BMP != "") {
-					sendData(data_4_dusti, BMP_API_PIN, host_dusti, httpPort_dusti, url_dusti, "", FPSTR(TXT_CONTENT_TYPE_JSON));
-				} else {
-					debug_out(F("No data sent..."), DEBUG_MIN_INFO, 1);
-				}
-				sum_send_time += micros() - start_send;
-			}
+			sum_send_time += maybeSend2dusti(result_BMP, "BMP", BMP_API_PIN, "BMP_");
 		}
 		if (bmp280_read && (! bmp280_init_failed)) {
 			data += result_BMP280;
-			data_4_dusti  = data_first_part + result_BMP280;
-			data_4_dusti.remove(data_4_dusti.length() - 1);
-			data_4_dusti.replace("BMP280_", "");
-			data_4_dusti += "]}";
-			if (send2dusti) {
-				debug_out(F("## Sending to luftdaten.info (BMP280): "), DEBUG_MIN_INFO, 1);
-				start_send = micros();
-				if (result_BMP280 != "") {
-					sendData(data_4_dusti, BMP280_API_PIN, host_dusti, httpPort_dusti, url_dusti, "", FPSTR(TXT_CONTENT_TYPE_JSON));
-				} else {
-					debug_out(F("No data sent..."), DEBUG_MIN_INFO, 1);
-				}
-				sum_send_time += micros() - start_send;
-			}
+			sum_send_time += maybeSend2dusti(result_BMP280, "BMP280", BMP280_API_PIN, "BMP280_");
 		}
 		if (bme280_read && (! bme280_init_failed)) {
 			data += result_BME280;
-			data_4_dusti  = data_first_part + result_BME280;
-			data_4_dusti.remove(data_4_dusti.length() - 1);
-			data_4_dusti.replace("BME280_", "");
-			data_4_dusti += "]}";
-			if (send2dusti) {
-				debug_out(F("## Sending to luftdaten.info (BME280): "), DEBUG_MIN_INFO, 1);
-				start_send = micros();
-				if (result_BME280 != "") {
-					sendData(data_4_dusti, BME280_API_PIN, host_dusti, httpPort_dusti, url_dusti, "", FPSTR(TXT_CONTENT_TYPE_JSON));
-				} else {
-					debug_out(F("No data sent..."), DEBUG_MIN_INFO, 1);
-				}
-				sum_send_time += micros() - start_send;
-			}
+			sum_send_time += maybeSend2dusti(result_BME280, "BME280", BME280_API_PIN, "BME280_");
 		}
-
 		if (ds18b20_read) {
 			data += result_DS18B20;
-			data_4_dusti = data_first_part + result_DS18B20;
-			data_4_dusti.remove(data_4_dusti.length() - 1);
-			data_4_dusti.replace("DS18B20_", "");
-			data_4_dusti += "]}";
-			if (send2dusti) {
-				debug_out(F("## Sending to luftdaten.info (DS18B20): "), DEBUG_MIN_INFO, 1);
-				start_send = micros();
-				if (result_DS18B20 != "") {
-					sendData(data_4_dusti, BME280_API_PIN, host_dusti, httpPort_dusti, url_dusti, "", FPSTR(TXT_CONTENT_TYPE_JSON));
-				} else {
-					debug_out(F("No data sent..."), DEBUG_MIN_INFO, 1);
-				}
-				sum_send_time += micros() - start_send;
-			}
+			sum_send_time += maybeSend2dusti(result_DS18B20, "DS18B20", BME280_API_PIN, "DS18B20_");
 		}
 
 		if (gps_read) {
 			data += result_GPS;
-			data_4_dusti  = data_first_part + result_GPS;
-			data_4_dusti.remove(data_4_dusti.length() - 1);
-			data_4_dusti.replace("GPS_", "");
-			data_4_dusti += "]}";
-			if (send2dusti) {
-				debug_out(F("## Sending to luftdaten.info (GPS): "), DEBUG_MIN_INFO, 1);
-				start_send = micros();
-				if (result_GPS != "") {
-					sendData(data_4_dusti, GPS_API_PIN, host_dusti, httpPort_dusti, url_dusti, "", FPSTR(TXT_CONTENT_TYPE_JSON));
-				} else {
-					debug_out(F("No data sent..."), DEBUG_MIN_INFO, 1);
-				}
-				sum_send_time += micros() - start_send;
-			}
+			sum_send_time += maybeSend2dusti(result_GPS, "GPS", GPS_API_PIN, "GPS_");
 		}
 
 		data_sample_times += Value2Json("signal", signal_strength);
