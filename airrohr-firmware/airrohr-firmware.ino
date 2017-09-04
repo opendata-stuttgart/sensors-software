@@ -2596,8 +2596,8 @@ void display_values(const String& value_DHT_T, const String& value_DHT_H, const 
 		display.setTextAlignment(TEXT_ALIGN_LEFT);
 		value_count = 0;
     
-		display.drawString(0, 10 * (value_count++), "Temperatuur: " + t_value + "°C");
-    display.drawString(0, 10 * (value_count++), "luchtvochtigheid: " + h_value+ " %");
+		display.drawString(0, 10 * (value_count++), String(FPSTR(INTL_TEMPERATUR)) + ": " + t_value + "°C");
+    display.drawString(0, 10 * (value_count++), String(FPSTR(INTL_LUFTFEUCHTE)) + ": " + h_value+ " %");
     
 		if (ppd_read) {
 			display.drawString(0, 10 * (value_count++), "PPD P1: " + value_PPD_P1);
@@ -2619,14 +2619,14 @@ void display_values(const String& value_DHT_T, const String& value_DHT_H, const 
     }
     
     //increment value
-    display.drawString(0, 10 * (value_count++), "Incrementort: " + String(looper));
+    display.drawString(0, 10 * (value_count++), "Meetingen: " + String(looper));
     
 		if (gps_read) {
 			if(gps.location.isValid()) {
-				display.drawString(0, 10 * (value_count++), "lat: " + String(gps.location.lat(), 6));
-				display.drawString(0, 10 * (value_count++), "long: " + String(gps.location.lng(), 6));
+				display.drawString(0, 10 * (value_count++), "Lat: " + String(gps.location.lat(), 6));
+				display.drawString(0, 10 * (value_count++), "Long: " + String(gps.location.lng(), 6));
 			}
-			display.drawString(0, 10 * (value_count++), "satellites: " + String(gps.satellites.value()));
+			display.drawString(0, 10 * (value_count++), "Satellites: " + String(gps.satellites.value()));
 		}
 		display.display();
 	}
