@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#define INTL_NL
+#define INTL_DE
 /*****************************************************************
 /* OK LAB Particulate Matter Sensor                              *
 /*      - nodemcu-LoLin board                                    *
@@ -2609,18 +2609,13 @@ void display_values(const String& value_DHT_T, const String& value_DHT_H, const 
       display.drawString(0, 10 * (value_count++), "SDS PM 2.5: " + value_SDS_P2 + " µg/m³");
     }
 
-    if(show_IP){
-      if (WiFi.status() != WL_CONNECTED){
+    if(show_IP){      
         long signal_strength = WiFi.RSSI();
         long signal_temp = signal_strength;
         if (signal_temp > -50) {signal_temp = -50; }
         if (signal_temp < -100) {signal_temp = -100; }
         int signal_quality = (signal_temp+100)*2;
-        display.drawString(0,10*(value_count++),"IP: "+IPAddress2String(WiFi.localIP()) + " - "+ String(signal_quality)+" %");
-      }
-      else{
-        display.drawString(0, 10 * (value_count++), "Wifi: NOT Connected");      
-      }
+        display.drawString(0,10*(value_count++),"IP: " +IPAddress2String(WiFi.localIP()) + " - "+ String(signal_quality)+F(" %"));      
     }
     
     //increment value
