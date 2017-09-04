@@ -59,7 +59,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2017-098"
+#define SOFTWARE_VERSION "NRZ-2017-098-Kris"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -125,8 +125,9 @@ bool www_basicauth_enabled = 0;
 
 char version_from_local_config[30] = "";
 
-bool dht_read = 1;
-bool htu21d_read = 0;
+bool show_IP = 1;
+bool dht_read = 0;
+bool htu21d_read = 1;
 bool ppd_read = 0;
 bool sds_read = 1;
 bool pms24_read = 0;
@@ -138,20 +139,21 @@ bool bmp280_init_failed = 0;
 bool bme280_read = 0;
 bool bme280_init_failed = 0;
 bool ds18b20_read = 0;
-bool gps_read = 0;
+bool gps_read = 1;
 bool send2dusti = 1;
 bool send2madavi = 1;
 bool send2sensemap = 0;
 bool send2custom = 0;
-bool send2lora = 1;
+bool send2lora = 0;
 bool send2influx = 0;
 bool send2csv = 0;
 bool auto_update = 0;
-bool has_display = 0;
+bool has_display = 1;
 bool has_lcd1602 = 0;
 int  debug = 3;
 
 long int sample_count = 0;
+unsigned long looper = 0;
 
 const char* host_madavi = "api-rrd.madavi.de";
 const char* url_madavi = "/data.php";
@@ -2546,7 +2548,7 @@ void autoUpdate() {
 /*****************************************************************
 /* display values                                                *
 /*****************************************************************/
-void display_values(const String& value_DHT_T, const String& value_DHT_H, const String& value_BMP_T, const String& value_BMP_P, const String& value_BMP280_T, const String& value_BMP280_P, const String& value_BME280_T, const String& value_BME280_H, const String& value_BME280_P, const String& value_PPD_P1, const String& value_PPD_P2, const String& value_SDS_P1, const String& value_SDS_P2) {
+void display_values(const String& value_DHT_T, const String& value_DHT_H, const String& value_HTU21D_T, const String& value_HTU21D_H, const String& value_BMP_T, const String& value_BMP_P, const String& value_BMP280_T, const String& value_BMP280_P, const String& value_BME280_T, const String& value_BME280_H, const String& value_BME280_P, const String& value_PPD_P1, const String& value_PPD_P2, const String& value_SDS_P1, const String& value_SDS_P2) {
 #if defined(ESP8266)
 	int value_count = 0;
 	String t_value = "";
@@ -2556,18 +2558,27 @@ void display_values(const String& value_DHT_T, const String& value_DHT_H, const 
 	String h_sensor = "";
 	String p_sensor = "";
 	debug_out(F("output values to display..."), DEBUG_MIN_INFO, 1);
+ 
 	if (dht_read) {
 		t_value = value_DHT_T; t_sensor = "DHT22";
 		h_value = value_DHT_H; h_sensor = "DHT22";
 	}
+ 
+  if(htu21d_read){
+    t_value = last_value_HTU21D_T; t_sensor = "HTU21D";
+    h_value = last_value_HTU21D_H; h_sensor = "HTU21D";
+  }
+  
 	if (bmp_read) {
 		t_value = value_BMP_T; t_sensor = "BMP180";
 		p_value = value_BMP_P; p_sensor = "BMP180";
 	}
+ 
 	if (bmp280_read) {
 		t_value = value_BMP280_T; t_sensor = "BMP280";
 		p_value = value_BMP280_P; p_sensor = "BMP280";
 	}
+ 
 	if (bme280_read) {
 		t_value = value_BME280_T; t_sensor = "BME280";
 		h_value = value_BME280_H; h_sensor = "BME280";
@@ -2584,24 +2595,42 @@ void display_values(const String& value_DHT_T, const String& value_DHT_H, const 
 		display.setFont(Monospaced_plain_9);
 		display.setTextAlignment(TEXT_ALIGN_LEFT);
 		value_count = 0;
-		display.drawString(0, 10 * (value_count++), "Temp:" + t_value + "  Hum.:" + h_value);
+    
+		display.drawString(0, 10 * (value_count++), String(FPSTR(INTL_TEMPERATUR)) + ": " + t_value + "°C");
+    display.drawString(0, 10 * (value_count++), String(FPSTR(INTL_LUFTFEUCHTE)) + ": " + h_value+ " %");
+    
 		if (ppd_read) {
 			display.drawString(0, 10 * (value_count++), "PPD P1: " + value_PPD_P1);
 			display.drawString(0, 10 * (value_count++), "PPD P2: " + value_PPD_P2);
 		}
+   
 		if (sds_read) {
-			display.drawString(0, 10 * (value_count++), "SDS P1: " + value_SDS_P1);
-			display.drawString(0, 10 * (value_count++), "SDS P2: " + value_SDS_P2);
-		}
+      display.drawString(0, 10 * (value_count++), "SDS PM 10: " + value_SDS_P1 + " µg/m³");
+      display.drawString(0, 10 * (value_count++), "SDS PM 2.5: " + value_SDS_P2 + " µg/m³");
+    }
+
+    if(show_IP){      
+        long signal_strength = WiFi.RSSI();
+        long signal_temp = signal_strength;
+        if (signal_temp > -50) {signal_temp = -50; }
+        if (signal_temp < -100) {signal_temp = -100; }
+        int signal_quality = (signal_temp+100)*2;
+        display.drawString(0,10*(value_count++),"IP: " +IPAddress2String(WiFi.localIP()) + " - "+ String(signal_quality)+F(" %"));      
+    }
+    
+    //increment value
+    display.drawString(0, 10 * (value_count++), "Meetingen: " + String(looper));
+    
 		if (gps_read) {
 			if(gps.location.isValid()) {
-				display.drawString(0, 10 * (value_count++), "lat: " + String(gps.location.lat(), 6));
-				display.drawString(0, 10 * (value_count++), "long: " + String(gps.location.lng(), 6));
+				display.drawString(0, 10 * (value_count++), "Lat: " + String(gps.location.lat(), 6));
+				display.drawString(0, 10 * (value_count++), "Long: " + String(gps.location.lng(), 6));
 			}
-			display.drawString(0, 10 * (value_count++), "satellites: " + String(gps.satellites.value()));
+			display.drawString(0, 10 * (value_count++), "Satellites: " + String(gps.satellites.value()));
 		}
 		display.display();
 	}
+ 
 	if (has_lcd1602) {
 		lcd.clear();
 		lcd.setCursor(0, 0);
@@ -3098,7 +3127,7 @@ void loop() {
 		}
 
 		if (has_display || has_lcd1602) {
-			display_values(last_value_DHT_T, last_value_DHT_H, last_value_BMP_T, last_value_BMP_P, last_value_BMP280_T, last_value_BMP280_P, last_value_BME280_T, last_value_BME280_H, last_value_BME280_P, last_value_PPD_P1, last_value_PPD_P2, last_value_SDS_P1, last_value_SDS_P2);
+			display_values(last_value_DHT_T, last_value_DHT_H, last_value_HTU21D_T, last_value_HTU21D_H, last_value_BMP_T, last_value_BMP_P, last_value_BMP280_T, last_value_BMP280_P, last_value_BME280_T, last_value_BME280_H, last_value_BME280_P, last_value_PPD_P1, last_value_PPD_P2, last_value_SDS_P1, last_value_SDS_P2);
 		}
 
 		if (send2madavi) {
@@ -3182,6 +3211,7 @@ void loop() {
 		max_micro = 0;
 		starttime = millis(); // store the start time
 		first_cycle = false;
+    looper++;
 	}
 	if (config_needs_write) { writeConfig(); create_basic_auth_strings(); }
 	yield();
