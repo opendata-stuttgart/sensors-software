@@ -149,6 +149,7 @@ bool send2csv = 0;
 bool auto_update = 0;
 bool has_display = 0;
 bool has_lcd1602 = 0;
+bool has_lcd1602_27 = 0;
 int  debug = 3;
 
 long int sample_count = 0;
@@ -201,7 +202,8 @@ RHReliableDatagram manager(rf69, CLIENT_ADDRESS);
 /*****************************************************************/
 #if defined(ESP8266)
 SSD1306   display(0x3c, D3, D4);
-LiquidCrystal_I2C lcd(0x3F, 16, 2);
+LiquidCrystal_I2C lcd_27(0x27, 16, 2);
+LiquidCrystal_I2C lcd_3f(0x3F, 16, 2);
 #endif
 
 /*****************************************************************
@@ -647,6 +649,7 @@ void copyExtDef() {
 	setDef(auto_update, AUTO_UPDATE);
 	setDef(has_display, HAS_DISPLAY);
 	setDef(has_lcd1602, HAS_LCD1602);
+	setDef(has_lcd1602_27, HAS_LCD1602_27);
 
 	setDef(debug, DEBUG);
 
@@ -729,6 +732,7 @@ void readConfig() {
 					setFromJSON(auto_update);
 					setFromJSON(has_display);
 					setFromJSON(has_lcd1602);
+					setFromJSON(has_lcd1602_27);
 					setFromJSON(debug);
 					setFromJSON(sending_intervall_ms);
 					setFromJSON(time_for_wifi_config);
@@ -798,6 +802,7 @@ void writeConfig() {
 	copyToJSON_Bool(auto_update);
 	copyToJSON_Bool(has_display);
 	copyToJSON_Bool(has_lcd1602);
+	copyToJSON_Bool(has_lcd1602_27);
 	copyToJSON_String(debug);
 	copyToJSON_String(sending_intervall_ms);
 	copyToJSON_String(time_for_wifi_config);
@@ -983,13 +988,17 @@ String wlan_ssid_to_table_row(const String& ssid, const String& encryption, cons
 
 String warning_first_cycle() {
 	String s = FPSTR(INTL_ERSTER_MESSZYKLUS);
-	s.replace("{v}", String(round((sending_intervall_ms - (act_milli - starttime)) / 1000.0)));
+	float time_to_first = round((sending_intervall_ms - (act_milli - starttime)) / 1000.0);
+	if (((time_to_first * 1000) > sending_intervall_ms) || (time_to_first < 0)) { time_to_first = 0; }
+	s.replace("{v}", String(time_to_first));
 	return s;
 }
 
 String age_last_values() {
 	String s = "<b>";
-	s += String(round((act_milli - starttime) / 1000.0));
+	float time_since_last = round((sending_intervall_ms - (act_milli - starttime)) / 1000.0);
+	if (((time_since_last * 1000) > sending_intervall_ms) || (time_since_last < 0)) { time_since_last = 0; }
+	s += String(time_since_last);
 	s += FPSTR(INTL_ZEIT_SEIT_LETZTER_MESSUNG);
 	s += F("</b><br/><br/>");
 	return s;
@@ -1095,7 +1104,8 @@ void webserver_config() {
 		page_content += F("<br/><b>"); page_content += FPSTR(INTL_WEITERE_EINSTELLUNGEN); page_content += F("</b><br/>");
 		page_content += form_checkbox("auto_update", FPSTR(INTL_AUTO_UPDATE), auto_update);
 		page_content += form_checkbox("has_display", FPSTR(INTL_DISPLAY), has_display);
-		page_content += form_checkbox("has_lcd1602", FPSTR(INTL_LCD1602), has_lcd1602);
+		page_content += form_checkbox("has_lcd1602_27", FPSTR(INTL_LCD1602_27), has_lcd1602_27);
+		page_content += form_checkbox("has_lcd1602", FPSTR(INTL_LCD1602_3F), has_lcd1602);
 		page_content += F("<table>");
 		page_content += form_select_lang();
 		page_content += form_input("debug", FPSTR(INTL_DEBUG_LEVEL), String(debug), 5);
@@ -1160,6 +1170,7 @@ void webserver_config() {
 		readBoolParam(auto_update);
 		readBoolParam(has_display);
 		readBoolParam(has_lcd1602);
+		readBoolParam(has_lcd1602_27);
 		readIntParam(debug);
 		readTimeParam(sending_intervall_ms);
 		readTimeParam(time_for_wifi_config);
@@ -1201,7 +1212,8 @@ void webserver_config() {
 		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "GPS"), String(gps_read));
 		page_content += line_from_value(FPSTR(INTL_AUTO_UPDATE), String(auto_update));
 		page_content += line_from_value(FPSTR(INTL_DISPLAY), String(has_display));
-		page_content += line_from_value(FPSTR(INTL_LCD1602), String(has_lcd1602));
+		page_content += line_from_value(FPSTR(INTL_LCD1602_27), String(has_lcd1602_27));
+		page_content += line_from_value(FPSTR(INTL_LCD1602_3F), String(has_lcd1602));
 		page_content += line_from_value(FPSTR(INTL_DEBUG_LEVEL), String(debug));
 		page_content += line_from_value(FPSTR(INTL_MESSINTERVALL), String(sending_intervall_ms));
 		page_content += line_from_value(tmpl(FPSTR(INTL_SENDEN_AN), "opensensemap"), String(send2sensemap));
@@ -1737,6 +1749,22 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 	wdt_reset(); // nodemcu is alive
 	yield();
 #endif
+}
+
+/*****************************************************************
+/* send single sensor data to luftdaten.info api                 *
+/*****************************************************************/
+void sendLuftdaten(const String& data, const int pin, const char* host, const int httpPort, const char* url, const char* replace_str) {
+	String data_4_dusti = "";
+	data_4_dusti  = data_first_part + data;
+	data_4_dusti.remove(data_4_dusti.length() - 1);
+	data_4_dusti.replace(replace_str, "");
+	data_4_dusti += "]}";
+	if (data != "") {
+		sendData(data_4_dusti, pin, host, httpPort, url, "", FPSTR(TXT_CONTENT_TYPE_JSON));
+	} else {
+		debug_out(F("No data sent..."), DEBUG_MIN_INFO, 1);
+	}
 }
 
 /*****************************************************************
@@ -2602,12 +2630,19 @@ void display_values(const String& value_DHT_T, const String& value_DHT_H, const 
 		}
 		display.display();
 	}
+	if (has_lcd1602_27) {
+		lcd_27.clear();
+		lcd_27.setCursor(0, 0);
+		lcd_27.print("PM: " + (value_SDS_P1 != "" ? value_SDS_P1 : "-") + " " + (value_SDS_P2 != "" ? value_SDS_P2 : "-"));
+		lcd_27.setCursor(0, 1);
+		lcd_27.print("T/H:" + t_value + char(223) + "C " + h_value + "%");
+	}
 	if (has_lcd1602) {
-		lcd.clear();
-		lcd.setCursor(0, 0);
-		lcd.print("PM: " + (value_SDS_P1 != "" ? value_SDS_P1 : "-") + " " + (value_SDS_P2 != "" ? value_SDS_P2 : "-"));
-		lcd.setCursor(0, 1);
-		lcd.print("T/H:" + t_value + char(223) + "C " + h_value + "%");
+		lcd_3f.clear();
+		lcd_3f.setCursor(0, 0);
+		lcd_3f.print("PM: " + (value_SDS_P1 != "" ? value_SDS_P1 : "-") + " " + (value_SDS_P2 != "" ? value_SDS_P2 : "-"));
+		lcd_3f.setCursor(0, 1);
+		lcd_3f.print("T/H:" + t_value + char(223) + "C " + h_value + "%");
 	}
 	yield();
 #endif
@@ -2628,8 +2663,10 @@ void init_display() {
 /*****************************************************************/
 void init_lcd1602() {
 #if defined(ESP8266)
-	lcd.init();
-	lcd.backlight();
+	lcd_27.init();
+	lcd_27.backlight();
+	lcd_3f.init();
+	lcd_3f.backlight();
 #endif
 }
 
@@ -2915,170 +2952,93 @@ void loop() {
 		server.stop();
 		if (ppd_read) {
 			data += result_PPD;
-			data_4_dusti  = data_first_part + result_PPD;
-			data_4_dusti.remove(data_4_dusti.length() - 1);
-			data_4_dusti += "]}";
 			if (send2dusti) {
-				debug_out(F("## Sending to luftdaten.info (PPD): "), DEBUG_MIN_INFO, 1);
+				debug_out(F("## Sending to luftdaten.info (PPD42NS): "), DEBUG_MIN_INFO, 1);
 				start_send = micros();
-				if (result_PPD != "") {
-					sendData(data_4_dusti, PPD_API_PIN, host_dusti, httpPort_dusti, url_dusti, "", FPSTR(TXT_CONTENT_TYPE_JSON));
-				} else {
-					debug_out(F("No data sent..."), DEBUG_MIN_INFO, 1);
-				}
+				sendLuftdaten(result_PPD, PPD_API_PIN, host_dusti, httpPort_dusti, url_dusti, "PPD_");
 				sum_send_time += micros() - start_send;
 			}
 		}
 		if (sds_read) {
 			data += result_SDS;
-			data_4_dusti  = data_first_part + result_SDS;
-			data_4_dusti.remove(data_4_dusti.length() - 1);
-			data_4_dusti.replace("SDS_", "");
-			data_4_dusti += "]}";
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (SDS): "), DEBUG_MIN_INFO, 1);
 				start_send = micros();
-				if (result_SDS != "") {
-					sendData(data_4_dusti, SDS_API_PIN, host_dusti, httpPort_dusti, url_dusti, "", FPSTR(TXT_CONTENT_TYPE_JSON));
-				} else {
-					debug_out(F("No data sent..."), DEBUG_MIN_INFO, 1);
-				}
+				sendLuftdaten(result_SDS, SDS_API_PIN, host_dusti, httpPort_dusti, url_dusti, "SDS_");
 				sum_send_time += micros() - start_send;
 			}
 		}
 		if (pms24_read || pms32_read) {
 			data += result_PMS;
-			data_4_dusti  = data_first_part + result_PMS;
-			data_4_dusti.remove(data_4_dusti.length() - 1);
-			data_4_dusti.replace("PMS_", "");
-			data_4_dusti += "]}";
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (PMS): "), DEBUG_MIN_INFO, 1);
 				start_send = micros();
-				if (result_PMS != "") {
-					sendData(data_4_dusti, PMS_API_PIN, host_dusti, httpPort_dusti, url_dusti, "", FPSTR(TXT_CONTENT_TYPE_JSON));
-				} else {
-					debug_out(F("No data sent..."), DEBUG_MIN_INFO, 1);
-				}
+				sendLuftdaten(result_PMS, PMS_API_PIN, host_dusti, httpPort_dusti, url_dusti, "PMS_");
 				sum_send_time += micros() - start_send;
 			}
 		}
 		if (dht_read) {
 			data += result_DHT;
-			data_4_dusti  = data_first_part + result_DHT;
-			data_4_dusti.remove(data_4_dusti.length() - 1);
-			data_4_dusti += "]}";
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (DHT): "), DEBUG_MIN_INFO, 1);
 				start_send = micros();
-				if (result_DHT != "") {
-					sendData(data_4_dusti, DHT_API_PIN, host_dusti, httpPort_dusti, url_dusti, "", FPSTR(TXT_CONTENT_TYPE_JSON));
-				} else {
-					debug_out(F("No data sent..."), DEBUG_MIN_INFO, 1);
-				}
+				sendLuftdaten(result_DHT, DHT_API_PIN, host_dusti, httpPort_dusti, url_dusti, "DHT_");
 				sum_send_time += micros() - start_send;
 			}
 		}
 		if (htu21d_read) {
 			data += result_HTU21D;
-			data_4_dusti  = data_first_part + result_HTU21D;
-			data_4_dusti.remove(data_4_dusti.length() - 1);
-			data_4_dusti += "]}";
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (HTU21D): "), DEBUG_MIN_INFO, 1);
 				start_send = micros();
-				if (result_HTU21D != "") {
-					sendData(data_4_dusti, HTU21D_API_PIN, host_dusti, httpPort_dusti, url_dusti, "", FPSTR(TXT_CONTENT_TYPE_JSON));
-				} else {
-					debug_out(F("No data sent..."), DEBUG_MIN_INFO, 1);
-				}
+				sendLuftdaten(result_HTU21D, HTU21D_API_PIN, host_dusti, httpPort_dusti, url_dusti, "HTU_");
 				sum_send_time += micros() - start_send;
 			}
 		}
 		if (bmp_read && (! bmp_init_failed)) {
 			data += result_BMP;
-			data_4_dusti  = data_first_part + result_BMP;
-			data_4_dusti.remove(data_4_dusti.length() - 1);
-			data_4_dusti.replace("BMP_", "");
-			data_4_dusti += "]}";
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (BMP): "), DEBUG_MIN_INFO, 1);
 				start_send = micros();
-				if (result_BMP != "") {
-					sendData(data_4_dusti, BMP_API_PIN, host_dusti, httpPort_dusti, url_dusti, "", FPSTR(TXT_CONTENT_TYPE_JSON));
-				} else {
-					debug_out(F("No data sent..."), DEBUG_MIN_INFO, 1);
-				}
+				sendLuftdaten(result_BMP, BMP_API_PIN, host_dusti, httpPort_dusti, url_dusti, "BMP_");
 				sum_send_time += micros() - start_send;
 			}
 		}
 		if (bmp280_read && (! bmp280_init_failed)) {
 			data += result_BMP280;
-			data_4_dusti  = data_first_part + result_BMP280;
-			data_4_dusti.remove(data_4_dusti.length() - 1);
-			data_4_dusti.replace("BMP280_", "");
-			data_4_dusti += "]}";
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (BMP280): "), DEBUG_MIN_INFO, 1);
 				start_send = micros();
-				if (result_BMP280 != "") {
-					sendData(data_4_dusti, BMP280_API_PIN, host_dusti, httpPort_dusti, url_dusti, "", FPSTR(TXT_CONTENT_TYPE_JSON));
-				} else {
-					debug_out(F("No data sent..."), DEBUG_MIN_INFO, 1);
-				}
+				sendLuftdaten(result_BMP280, BMP280_API_PIN, host_dusti, httpPort_dusti, url_dusti, "BMP280_");
 				sum_send_time += micros() - start_send;
 			}
 		}
 		if (bme280_read && (! bme280_init_failed)) {
 			data += result_BME280;
-			data_4_dusti  = data_first_part + result_BME280;
-			data_4_dusti.remove(data_4_dusti.length() - 1);
-			data_4_dusti.replace("BME280_", "");
-			data_4_dusti += "]}";
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (BME280): "), DEBUG_MIN_INFO, 1);
 				start_send = micros();
-				if (result_BME280 != "") {
-					sendData(data_4_dusti, BME280_API_PIN, host_dusti, httpPort_dusti, url_dusti, "", FPSTR(TXT_CONTENT_TYPE_JSON));
-				} else {
-					debug_out(F("No data sent..."), DEBUG_MIN_INFO, 1);
-				}
+				sendLuftdaten(result_BME280, BME280_API_PIN, host_dusti, httpPort_dusti, url_dusti, "BME280_");
 				sum_send_time += micros() - start_send;
 			}
 		}
 
 		if (ds18b20_read) {
 			data += result_DS18B20;
-			data_4_dusti = data_first_part + result_DS18B20;
-			data_4_dusti.remove(data_4_dusti.length() - 1);
-			data_4_dusti.replace("DS18B20_", "");
-			data_4_dusti += "]}";
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (DS18B20): "), DEBUG_MIN_INFO, 1);
 				start_send = micros();
-				if (result_DS18B20 != "") {
-					sendData(data_4_dusti, BME280_API_PIN, host_dusti, httpPort_dusti, url_dusti, "", FPSTR(TXT_CONTENT_TYPE_JSON));
-				} else {
-					debug_out(F("No data sent..."), DEBUG_MIN_INFO, 1);
-				}
+				sendLuftdaten(result_DS18B20, BME280_API_PIN, host_dusti, httpPort_dusti, url_dusti, "DS18B20_");
 				sum_send_time += micros() - start_send;
 			}
 		}
 
 		if (gps_read) {
 			data += result_GPS;
-			data_4_dusti  = data_first_part + result_GPS;
-			data_4_dusti.remove(data_4_dusti.length() - 1);
-			data_4_dusti.replace("GPS_", "");
-			data_4_dusti += "]}";
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (GPS): "), DEBUG_MIN_INFO, 1);
 				start_send = micros();
-				if (result_GPS != "") {
-					sendData(data_4_dusti, GPS_API_PIN, host_dusti, httpPort_dusti, url_dusti, "", FPSTR(TXT_CONTENT_TYPE_JSON));
-				} else {
-					debug_out(F("No data sent..."), DEBUG_MIN_INFO, 1);
-				}
+				sendLuftdaten(data_4_dusti, GPS_API_PIN, host_dusti, httpPort_dusti, url_dusti, "GPS_");
 				sum_send_time += micros() - start_send;
 			}
 		}
@@ -3097,7 +3057,7 @@ void loop() {
 			will_check_for_update = true;
 		}
 
-		if (has_display || has_lcd1602) {
+		if (has_display || has_lcd1602 || has_lcd1602_27) {
 			display_values(last_value_DHT_T, last_value_DHT_H, last_value_BMP_T, last_value_BMP_P, last_value_BMP280_T, last_value_BMP280_P, last_value_BME280_T, last_value_BME280_H, last_value_BME280_P, last_value_PPD_P1, last_value_PPD_P2, last_value_SDS_P1, last_value_SDS_P2);
 		}
 

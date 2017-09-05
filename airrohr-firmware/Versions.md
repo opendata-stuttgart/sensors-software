@@ -3,6 +3,8 @@ beta
 * added support for PMS5003, PMS6003
 * portuguese version added
 * reenabled masked passwords
+* refactored sending to luftdaten.api
+* time to first and time since last measurement had shown impossible values
 
 NRZ-2017-097
 online since 2017-08-21
