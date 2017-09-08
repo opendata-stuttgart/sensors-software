@@ -304,8 +304,7 @@ namespace cfg {
 	}
 }
 
-  #define JSON_BUFFER_SIZE 2300
-
+ #define JSON_BUFFER_SIZE 2300
 enum class PmSensorCmd {
 	Start,
 	Stop,
