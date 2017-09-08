@@ -34,6 +34,7 @@ const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM ="";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
+const char INTL_GSM[] PROGMEM = "GSM";
 const char INTL_BASICAUTH[] PROGMEM = "";
 
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "";

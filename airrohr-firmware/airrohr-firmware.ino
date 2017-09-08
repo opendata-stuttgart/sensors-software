@@ -59,6 +59,10 @@
 #include <WString.h>
 #include <pgmspace.h>
 
+#include <Arduino.h>
+#include <ESP8266WiFi.h>
+#define INTL_EN
+
 // increment on change
 #define SOFTWARE_VERSION_STR "NRZ-2020-129"
 String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
@@ -69,6 +73,10 @@ String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 #if defined(ESP8266)
 #include <FS.h>                     // must be first
+#include <DNSServer.h>
+#include <WiFiUdp.h>
+#include <ESP8266httpUpdate.h>
+#include <WiFiClientSecure.h>
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
@@ -78,6 +86,13 @@ String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 #include <ctime>
 #include <coredecls.h>
 #include <sntp.h>
+#include <Adafruit_FONA.h>
+#include <base64.h>
+#endif
+#if defined(ARDUINO_SAMD_ZERO)
+#include <RHReliableDataGram.h>
+#include <RH.RF69.h>
+#include <SPI.h>
 #endif
 
 #if defined(ESP32)
@@ -221,8 +236,10 @@ namespace cfg {
 	bool dnms_read = DNMS_READ;
 	char dnms_correction[LEN_DNMS_CORRECTION] = DNMS_CORRECTION;
 	bool gps_read = GPS_READ;
+  bool gsm_capable = GSM_CAPABLE;
 
 	// send to "APIs"
+  bool send2cfa = SEND2CFA;
 	bool send2dusti = SEND2SENSORCOMMUNITY;
 	bool send2madavi = SEND2MADAVI;
 	bool send2sensemap = SEND2SENSEMAP;
@@ -248,6 +265,7 @@ namespace cfg {
 	bool display_device_info = DISPLAY_DEVICE_INFO;
 
 	// API settings
+  bool ssl_cfa = SSL_CFA;
 	bool ssl_madavi = SSL_MADAVI;
 	bool ssl_dusti = SSL_SENSORCOMMUNITY;
 	char senseboxid[LEN_SENSEBOXID] = SENSEBOXID;
@@ -286,13 +304,16 @@ namespace cfg {
 	}
 }
 
-#define JSON_BUFFER_SIZE 2300
+  #define JSON_BUFFER_SIZE 2300
 
 enum class PmSensorCmd {
 	Start,
 	Stop,
 	ContinuousMode
 };
+
+String basic_auth_influx;
+String basic_auth_custom;
 
 LoggerConfig loggerConfigs[LoggerCount];
 
@@ -333,7 +354,7 @@ LiquidCrystal_I2C* lcd_2004 = nullptr;
  * SDS011 declarations                                           *
  *****************************************************************/
 #if defined(ESP8266)
-SoftwareSerial serialSDS;
+SoftwareSerial serialSDS(PM_SERIAL_TX, PM_SERIAL_RX, false, 128);
 SoftwareSerial* serialGPS;
 #endif
 #if defined(ESP32)
@@ -377,6 +398,24 @@ DallasTemperature ds18b20(&oneWire);
  *****************************************************************/
 TinyGPSPlus gps;
 
+/* ************************************************ ****************
+/ * GSM declaration *
+/ ************************************************** ************** */
+# if defined (ESP8266)
+SoftwareSerial fonaSS (FONA_TX, FONA_RX);
+SoftwareSerial * fonaSerial = & fonaSS;
+Adafruit_FONA fona = Adafruit_FONA (FONA_RST);
+
+uint8_t GSM_CONNECTED = 1 ;
+uint8_t GPRS_CONNECTED = 1 ;
+
+bool gsm_capable = 0 ;
+char gsm_pin [ 5 ] = " " ;
+
+char gprs_apn [ 100 ] = " " ;
+char gprs_username [ 100 ] = " " ;
+char gprs_password [ 100 ] = " " ;
+# endif
 /*****************************************************************
  * Variable Definitions for PPD24NS                              *
  * P1 for PM10 & P2 for PM25                                     *
@@ -997,6 +1036,13 @@ static void createLoggerConfigs() {
 #else
 	auto new_session = []() { return nullptr; };
 #endif
+ if (cfg::send2CFA) {
+    loggerConfigs[LoggerCFA].destport = 80;
+    if (cfg::ssl_cfa) {
+      loggerConfigs[LoggerCFA].destport = 80;
+      loggerConfigs[LoggerCFA].session = new_session();
+    }
+  }
 	if (cfg::send2dusti) {
 		loggerConfigs[LoggerSensorCommunity].destport = 80;
 		if (cfg::ssl_dusti) {
@@ -1465,6 +1511,7 @@ static void webserver_config_send_body_get(String& page_content) {
 	add_form_checkbox_sensor(Config_pms_read, FPSTR(INTL_PMS));
 	add_form_checkbox_sensor(Config_bmp_read, FPSTR(INTL_BMP180));
 	add_form_checkbox(Config_gps_read, FPSTR(INTL_NEO6M));
+  add_form_checkbox(Config_gsm_capable, FPSTR(INTL_GSM_CAPABLE));
 
 	page_content += FPSTR(WEB_BR_LF_B);
 	page_content += F("APIs");
@@ -2435,6 +2482,105 @@ static WiFiClient* getNewLoggerWiFiClient(const LoggerEntry logger) {
 }
 
 /*****************************************************************
+/* GSM auto connecting script                                   *
+/*****************************************************************/
+void connectGSM(){
+
+  int retry_count = 0;
+
+  fonaSerial->begin(4800);
+  if (! fona.begin(*fonaSerial)) {
+    debug_out(F("Couldn't find FONA"), DEBUG_MIN_INFO, 1);
+
+    debug_out(F("Switching to Wifi"), DEBUG_MIN_INFO, 1);
+    gsm_capable = 0;
+    connectWifi();
+  } else {
+    debug_out(F("FONA is OK"), DEBUG_MIN_INFO, 0);
+
+    unlock_pin();
+
+    fona.setGPRSNetworkSettings(FPSTR(gprs_apn), FPSTR(gprs_username), FPSTR(gprs_password));
+
+    char imei[16] = {0}; // MUST use a 16 character buffer for IMEI!
+    uint8_t imeiLen = fona.getIMEI(imei);
+    if (imeiLen > 0) {
+     debug_out(F("Module IMEI: "), DEBUG_MIN_INFO, 1); debug_out(String(imei),DEBUG_MIN_INFO,1);
+    }
+
+    while((fona.getNetworkStatus() != GSM_CONNECTED) && (retry_count < 40)){
+      Serial.println("Not registered on network");
+      delay(5000);
+      retry_count++;
+
+      if (retry_count > 30){
+        delay(5000);
+        restart_GSM();
+      }
+
+      flushSerial();
+    }
+
+    if (fona.getNetworkStatus() != GSM_CONNECTED) {
+      display_debug("AP ID: Feinstaubsensor-" + esp_chipid + " - IP: 192.168.4.1");
+      wifiConfig();
+      if (fona.getNetworkStatus() != GSM_CONNECTED) {
+        retry_count = 0;
+        while ((fona.getNetworkStatus() != GSM_CONNECTED) && (retry_count < 20)) {
+          delay(500);
+          debug_out(".", DEBUG_MIN_INFO, 0);
+          retry_count++;
+        }
+        debug_out("", DEBUG_MIN_INFO, 1);
+      }
+    }else{
+      enableGPRS();
+   }
+ }
+}
+
+void enableGPRS(){
+  int retry_count = 0;
+  while((fona.GPRSstate() != GPRS_CONNECTED) && (retry_count < 40)){
+    delay(3000);
+    fona.enableGPRS(true);
+    retry_count++;
+   }
+
+   fona.setGPRSNetworkSettings(FONAFlashStringPtr("internet"), FONAFlashStringPtr(""), FONAFlashStringPtr(""));
+}
+
+void restart_GSM(){
+
+  flushSerial();
+
+  fonaSerial->begin(4800);
+  if (! fona.begin(*fonaSerial)) {
+    debug_out(F("Couldn't find FONA"), DEBUG_MIN_INFO, 1);
+    //while (1);
+  }
+
+  unlock_pin();
+
+  enableGPRS();
+
+}
+
+
+void unlock_pin(){
+  flushSerial();
+  if (strlen(gsm_pin) > 1){
+    debug_out(F("\nAttempting to Unlock SIM please wait: "), DEBUG_MIN_INFO, 1);
+    delay(10000);
+    if (! fona.unlockSIM(gsm_pin)) {
+       debug_out(F("Failed to Unlock SIM card with pin: "), DEBUG_MIN_INFO, 1);
+       debug_out(gsm_pin, DEBUG_MIN_INFO, 1);
+       delay(10000);
+    }
+  }
+
+}
+/*****************************************************************
  * send data to rest api                                         *
  *****************************************************************/
 static unsigned long sendData(const LoggerEntry logger, const String& data, const int pin, const char* host, const char* url) {
@@ -2520,7 +2666,6 @@ static unsigned long sendSensorCommunity(const String& data, const int pin, cons
 
 	return sum_send_time;
 }
-
 /*****************************************************************
  * send data to mqtt api                                         *
  *****************************************************************/
@@ -4075,6 +4220,9 @@ static void logEnabledAPIs() {
 	if (cfg::send2dusti) {
 		debug_outln_info(F("sensor.community"));
 	}
+  if (cfg::send2cfa) {
+    debug_outln_info(F("CFA"));
+  }
 
 	if (cfg::send2fsapp) {
 		debug_outln_info(F("Feinstaub-App"));
@@ -4408,23 +4556,27 @@ void loop(void) {
 
 		if (cfg::ppd_read) {
 			data += result_PPD;
+      sum_send_time += send2CFA(result_PPD, PPD_API_PIN, FPSTR(SENSORS_PPD42NS), "PPD_");
 			sum_send_time += sendSensorCommunity(result_PPD, PPD_API_PIN, FPSTR(SENSORS_PPD42NS), "PPD_");
-		}
 		if (cfg::sds_read) {
 			data += result_SDS;
+      sum_send_time += send2CFA(result_SDS, SDS_API_PIN, FPSTR(SENSORS_SDS011), "SDS_");
 			sum_send_time += sendSensorCommunity(result_SDS, SDS_API_PIN, FPSTR(SENSORS_SDS011), "SDS_");
 		}
 		if (cfg::pms_read) {
 			data += result_PMS;
+      sum_send_time += send2CFA(result_PMS, PMS_API_PIN, FPSTR(SENSORS_PMSx003), "PMS_");
 			sum_send_time += sendSensorCommunity(result_PMS, PMS_API_PIN, FPSTR(SENSORS_PMSx003), "PMS_");
 		}
 		if (cfg::hpm_read) {
 			data += result_HPM;
+      sum_send_time += send2CFA(result_HPM, HPM_API_PIN, FPSTR(SENSORS_HPM), "HPM_");
 			sum_send_time += sendSensorCommunity(result_HPM, HPM_API_PIN, FPSTR(SENSORS_HPM), "HPM_");
 		}
 		if (cfg::sps30_read && (! sps30_init_failed)) {
 			fetchSensorSPS30(result);
 			data += result;
+      sum_send_time += send2CFA(result, SPS30_API_PIN, FPSTR(SENSORS_SPS30), "SPS30_");
 			sum_send_time += sendSensorCommunity(result, SPS30_API_PIN, FPSTR(SENSORS_SPS30), "SPS30_");
 			result = emptyString;
 		}
@@ -4432,6 +4584,7 @@ void loop(void) {
 			// getting temperature and humidity (optional)
 			fetchSensorDHT(result);
 			data += result;
+      sum_send_time += send2CFA(result, DHT_API_PIN, FPSTR(SENSORS_DHT22), "DHT_");
 			sum_send_time += sendSensorCommunity(result, DHT_API_PIN, FPSTR(SENSORS_DHT22), "DHT_");
 			result = emptyString;
 		}
@@ -4439,6 +4592,7 @@ void loop(void) {
 			// getting temperature and humidity (optional)
 			fetchSensorHTU21D(result);
 			data += result;
+      sum_send_time += send2CFA(result, HTU21D_API_PIN, FPSTR(SENSORS_HTU21D), "HTU21D_");
 			sum_send_time += sendSensorCommunity(result, HTU21D_API_PIN, FPSTR(SENSORS_HTU21D), "HTU21D_");
 			result = emptyString;
 		}
@@ -4446,6 +4600,7 @@ void loop(void) {
 			// getting temperature and pressure (optional)
 			fetchSensorBMP(result);
 			data += result;
+      sum_send_time += send2CFA(result, BMP_API_PIN, FPSTR(SENSORS_BMP180), "BMP_");
 			sum_send_time += sendSensorCommunity(result, BMP_API_PIN, FPSTR(SENSORS_BMP180), "BMP_");
 			result = emptyString;
 		}
@@ -4454,8 +4609,10 @@ void loop(void) {
 			fetchSensorBMX280(result);
 			data += result;
 			if (bmx280.sensorID() == BME280_SENSOR_ID) {
+				sum_send_time += send2CFA(result, BME280_API_PIN, FPSTR(SENSORS_BMX280), "BME280_");
 				sum_send_time += sendSensorCommunity(result, BME280_API_PIN, FPSTR(SENSORS_BMX280), "BME280_");
 			} else {
+				sum_send_time += send2CFA(result, BMP280_API_PIN, FPSTR(SENSORS_BMX280), "BMP280_");
 				sum_send_time += sendSensorCommunity(result, BMP280_API_PIN, FPSTR(SENSORS_BMX280), "BMP280_");
 			}
 			result = emptyString;
@@ -4464,6 +4621,7 @@ void loop(void) {
 			// getting temperature and humidity (optional)
 			fetchSensorSHT3x(result);
 			data += result;
+      sum_send_time += send2CFA(result, SHT3X_API_PIN, FPSTR(SENSORS_SHT3X), "SHT3X_");
 			sum_send_time += sendSensorCommunity(result, SHT3X_API_PIN, FPSTR(SENSORS_SHT3X), "SHT3X_");
 			result = emptyString;
 		}
@@ -4471,6 +4629,7 @@ void loop(void) {
 			// getting temperature (optional)
 			fetchSensorDS18B20(result);
 			data += result;
+      sum_send_time += send2CFA(result, DS18B20_API_PIN, FPSTR(SENSORS_DS18B20), "DS18B20_");
 			sum_send_time += sendSensorCommunity(result, DS18B20_API_PIN, FPSTR(SENSORS_DS18B20), "DS18B20_");
 			result = emptyString;
 		}
@@ -4478,11 +4637,13 @@ void loop(void) {
 			// getting noise measurement values from dnms (optional)
 			fetchSensorDNMS(result);
 			data += result;
+      sum_send_time += send2CFA(result, DNMS_API_PIN, FPSTR(SENSORS_DNMS), "DNMS_");
 			sum_send_time += sendSensorCommunity(result, DNMS_API_PIN, FPSTR(SENSORS_DNMS), "DNMS_");
 			result = emptyString;
 		}
 		if (cfg::gps_read) {
 			data += result_GPS;
+      sum_send_time += send2CFA(result_GPS, GPS_API_PIN, F("GPS"), "GPS_");
 			sum_send_time += sendSensorCommunity(result_GPS, GPS_API_PIN, F("GPS"), "GPS_");
 			result = emptyString;
 		}

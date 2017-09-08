@@ -23,6 +23,9 @@ Bool		ds18b20_read
 Bool		dnms_read
 String		dnms_correction
 Bool		gps_read
+Bool            gsm_capable
+Bool            send2cfa
+Bool            ssl_cfa
 Bool		send2dusti
 Bool		ssl_dusti
 Bool		send2madavi
@@ -74,6 +77,7 @@ enum ConfigEntryType : unsigned short {
 	Config_Type_UInt,
 	Config_Type_Time,
 	Config_Type_String,
+	Config_Type_Char,
 	Config_Type_Password
 };
 
