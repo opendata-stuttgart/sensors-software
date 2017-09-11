@@ -1,5 +1,13 @@
-NRZ-2017-098
+NRZ-2017-100
 beta
+* optimizing display function
+
+NRZ-2017-099
+online since 2017-09-10
+* time since last measurement counts in wrong direction
+
+NRZ-2017-098
+online as update since 2017-09-06
 * added support for PMS5003, PMS6003
 * portuguese version added
 * reenabled masked passwords

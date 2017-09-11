@@ -59,7 +59,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2017-098"
+#define SOFTWARE_VERSION "NRZ-2017-100"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -988,17 +988,17 @@ String wlan_ssid_to_table_row(const String& ssid, const String& encryption, cons
 
 String warning_first_cycle() {
 	String s = FPSTR(INTL_ERSTER_MESSZYKLUS);
-	float time_to_first = round((sending_intervall_ms - (act_milli - starttime)) / 1000.0);
-	if (((time_to_first * 1000) > sending_intervall_ms) || (time_to_first < 0)) { time_to_first = 0; }
-	s.replace("{v}", String(time_to_first));
+	unsigned long time_to_first = sending_intervall_ms - (act_milli - starttime);
+	if ((time_to_first > sending_intervall_ms) || (time_to_first < 0)) { time_to_first = 0; }
+	s.replace("{v}", String((long)((time_to_first + 500) / 1000)));
 	return s;
 }
 
 String age_last_values() {
 	String s = "<b>";
-	float time_since_last = round((sending_intervall_ms - (act_milli - starttime)) / 1000.0);
-	if (((time_since_last * 1000) > sending_intervall_ms) || (time_since_last < 0)) { time_since_last = 0; }
-	s += String(time_since_last);
+	unsigned long time_since_last = act_milli - starttime;
+	if ((time_since_last > sending_intervall_ms) || (time_since_last < 0)) { time_since_last = 0; }
+	s += String((long)((time_since_last + 500) / 1000));
 	s += FPSTR(INTL_ZEIT_SEIT_LETZTER_MESSUNG);
 	s += F("</b><br/><br/>");
 	return s;
@@ -1470,7 +1470,7 @@ void webserver_data_json() {
 	String s1 = last_data_string;
 	debug_out(F("last data: "), DEBUG_MIN_INFO, 0);
 	debug_out(s1, DEBUG_MIN_INFO, 1);
-	String s2 = ", \"age\":\"" + String(round((act_milli - starttime) / 1000.0)) + "\", \"sensordatavalues\"";
+	String s2 = ", \"age\":\"" + String((long)((act_milli - starttime + 500) / 1000)) + "\", \"sensordatavalues\"";
 	debug_out(F("replace with: "), DEBUG_MIN_INFO, 0);
 	debug_out(s2, DEBUG_MIN_INFO, 1);
 	s1.replace(F(", \"sensordatavalues\""), s2);
@@ -2583,24 +2583,42 @@ void display_values(const String& value_DHT_T, const String& value_DHT_H, const 
 	String t_sensor = "";
 	String h_sensor = "";
 	String p_sensor = "";
+	String pm10_value = "";
+	String pm25_value = "";
+	String pm10_sensor = "";
+	String pm25_sensor = "";
 	debug_out(F("output values to display..."), DEBUG_MIN_INFO, 1);
 	if (dht_read) {
-		t_value = value_DHT_T; t_sensor = "DHT22";
-		h_value = value_DHT_H; h_sensor = "DHT22";
+		t_value = last_value_DHT_T; t_sensor = "DHT22";
+		h_value = last_value_DHT_H; h_sensor = "DHT22";
 	}
 	if (bmp_read) {
-		t_value = value_BMP_T; t_sensor = "BMP180";
-		p_value = value_BMP_P; p_sensor = "BMP180";
+		t_value = last_value_BMP_T; t_sensor = "BMP180";
+		p_value = last_value_BMP_P; p_sensor = "BMP180";
 	}
 	if (bmp280_read) {
-		t_value = value_BMP280_T; t_sensor = "BMP280";
-		p_value = value_BMP280_P; p_sensor = "BMP280";
+		t_value = last_value_BMP280_T; t_sensor = "BMP280";
+		p_value = last_value_BMP280_P; p_sensor = "BMP280";
 	}
 	if (bme280_read) {
-		t_value = value_BME280_T; t_sensor = "BME280";
-		h_value = value_BME280_H; h_sensor = "BME280";
-		p_value = value_BME280_P; p_sensor = "BME280";
+		t_value = last_value_BME280_T; t_sensor = "BME280";
+		h_value = last_value_BME280_H; h_sensor = "BME280";
+		p_value = last_value_BME280_P; p_sensor = "BME280";
 	}
+	if (ppd_read) {
+		pm10_value = last_value_PPD_P1; pm10_sensor = "PPD42NS";
+		pm25_value = last_value_PPD_P2; pm25_sensor = "PPD42NS";
+	}
+	if (pms24_read || pms32_read) {
+		pm10_value = last_value_PMS_P1; pm10_sensor = "PMSx003";
+		pm25_value = last_value_PMS_P2; pm25_sensor = "PMSx003";
+	}
+	if (sds_read) {
+		pm10_value = last_value_SDS_P1; pm10_sensor = "SDS011";
+		pm25_value = last_value_SDS_P2; pm25_sensor = "SDS011";
+	}
+	if (pm10_value == "") { pm10_value = "-";}
+	if (pm25_value == "") { pm25_value = "-";}
 	if (t_value == "") { t_value = "-";}
 	if (h_value == "") { h_value = "-";}
 	if (p_value == "") { p_value = "-";}
@@ -2630,6 +2648,11 @@ void display_values(const String& value_DHT_T, const String& value_DHT_H, const 
 		}
 		display.display();
 	}
+	
+// ----5----0----5----0
+// T/H: -10.0°C/100.0%
+// T/P: -10.0°C/1000hPa
+
 	if (has_lcd1602_27) {
 		lcd_27.clear();
 		lcd_27.setCursor(0, 0);
