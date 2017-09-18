@@ -1,6 +1,8 @@
 NRZ-2017-100
 beta
 * optimizing display function
+* added dependencies for OneWire
+* added wiring for new sensors to Readme.md
 
 NRZ-2017-099
 online since 2017-09-10

@@ -15,7 +15,7 @@ Die grundsätzliche Konfiguration der Parameter erfolgt über die Datei `ext_dev
 ## WLAN Konfiguration
 siehe auch Wiki-Seite auf Github [Konfiguration der Sensoren](https://github.com/opendata-stuttgart/meta/wiki/Konfiguration-der-Sensoren)
 
-Wenn das vorgegebene WLAN nach 10 Sekunden nicht erreichbar ist, wird ein Access-Point eingerichtet, der über "Feinstaubsensor-\[Sensor-ID\]" erreichbar ist. Nach dem Verbinden zu diesem Accesspoint sollten alle Anfragen auf die Konfigurationsseite umgeleitet werden. Direkte Adresse der Seite ist http://192.168.4.1/ .
+Wenn das vorgegebene WLAN nach 20 Sekunden nicht erreichbar ist, wird ein Access-Point eingerichtet, der über "Feinstaubsensor-\[Sensor-ID\]" erreichbar ist. Nach dem Verbinden zu diesem Accesspoint sollten alle Anfragen auf die Konfigurationsseite umgeleitet werden. Direkte Adresse der Seite ist http://192.168.4.1/ .
 
 Konfigurierbar sind:
 * WLAN-Name und Passwort
@@ -38,6 +38,13 @@ Die Daten können als CSV via USB ausgegeben werden. Dafür sollte sowohl in ext
 * [Arduino IDE](https://www.arduino.cc/en/Main/Software)  (Version 1.8.3) (GNU Lesser General Public License v2.1)
 * [ESP8266 für Arduino](http://arduino.esp8266.com/stable/package_esp8266com_index.json) (Version 2.3.0)
 
+
+### Einstellungen Arduino IDE
+
+* Board: NodeMCU 1.0 (ESP-12E Module)
+* CPU Frequency: 80MHz
+* Flash Size: 4M (3M SPIFFS)
+
 ### Verwendete Bibliotheken (für ESP8266):
 
 In Arduino enthalten:
@@ -59,6 +66,7 @@ Installierbar über Arduino IDE (Menü Sketch -> Bibliothek einbinden -> Bibliot
 * [DallasTemperature](https://github.com/milesburton/Arduino-Temperature-Control-Library) (3.7.6)
 * [DHT sensor library](https://github.com/adafruit/DHT-sensor-library) (1.3.0) (MIT)
 * [ESP8266 and ESP32 Oled driver for SSD1306 display](https://github.com/squix78/esp8266-oled-ssd1306) (3.2.7) (MIT)
+* [OneWire](www.pjrc.com/teensy/td_libs_OneWire.html) (2.3.3)
 * [LiquidCrystal I2C](https://github.com/marcoschwartz/LiquidCrystal_I2C) (1.1.2)
 * [SparkFun HTU21D Humidity and Temperature Sensor Breakout](https://github.com/sparkfun/SparkFun_HTU21D_Breakout_Arduino_Library) (1.1.3)
 * [PubSubClient](http://pubsubclient.knolleary.net/) (2.6.0) (MIT)
@@ -79,24 +87,79 @@ Beim Anschluss von Sensoren mit 5V bitte die Board-Version beachten. NodeMCU v3 
 
 ### PPD42NS
 * Pin 1 => GND
-* Pin 2 => Pin D5 / GPIO14
+* Pin 2 => Pin D5 (GPIO14)
 * Pin 3 => VU
-* Pin 4 => Pin D6 / GPIO12
+* Pin 4 => Pin D6 (GPIO12)
 * Pin 5 => unused
 
 ### DHT22
 * Pin 1 => 3V3
-* Pin 2 => Pin D7 / GPIO13
+* Pin 2 => Pin D7 (GPIO13)
 * Pin 3 => unused
 * Pin 4 => GND
 
 ### SDS011
-* Pin 1 (TX)   -> Pin D1 / GPIO5
-* Pin 2 (RX)   -> Pin D2 / GPIO4
+
+* Pin 1 (TX)   -> Pin D1 (GPIO5)
+* Pin 2 (RX)   -> Pin D2 (GPIO4)
 * Pin 3 (GND)  -> GND
 * Pin 4 (2.5m) -> unused
 * Pin 5 (5V)   -> VU
 * Pin 6 (1m)   -> unused
+
+### PMS1003 to PMS6003
+Pinout:
+   8 7 6 5 4 3 2 1
+
+* Pin 1 (VCC)   -> VU
+* Pin 2 (GND)   -> GND
+* Pin 3 (SET)   -> unused
+* Pin 4 (RX)    -> Pin D2 (GPIO4)
+* Pin 5 (TX)    -> Pin D1 (GPIO5)
+* Pin 6 (RESET) -> unused
+* Pin 7	(NC)	_> unused
+* Pin 8 (NC)	-> unused
+
+### PMS7003
+
+Pinout PMS7003:
+   9  7  5  3  1
+  10  8  6  4  2
+
+* Pin  1/2 (VCC) -> VU
+* Pin  3/4 (GND) -> GND
+* Pin  5 (RESET) -> GND
+* Pin  6 (NC)    -> unused
+* Pin  7 (RX)    -> Pin D2 (GPIO4)
+* Pin  8 (NC)    -> unused
+* Pin  9 (TX)    -> Pin D1 (GPIO5)
+* Pin 10 (SET)   -> unused
+
+### BMP180 / BMP280 / BME280 (I2C)
+* VCC  ->  Pin 3V3
+* GND  ->  Pin GND
+* SCL  ->  Pin D4 (GPIO2)
+* SDA  ->  Pin D3 (GPIO0)
+
+### HTU21D (I2C)
+* VCC  ->  Pin 3V3
+* GND  ->  Pin GND
+* SCL  ->  Pin D4 (GPIO2)
+* SDA  ->  Pin D3 (GPIO0)
+
+### DS18B20 (OneWire interface)
+Please check your version (pinout) at [https://datasheets.maximintegrated.com/en/ds/DS18B20.pdf]
+* GND  -> Pin GND
+* DQ   -> Pin D6 (GPIO 13)
+* VCC  -> Pin 3V3 or Pin VU
+
+### LCD1602 (I2C, 5V - check your version)
+VCC  ->  Pin VU
+GND  ->  Pin GND
+SCL  ->  Pin D4 (GPIO2)
+SDA  ->  Pin D3 (GPIO0)
+
+### OLED displays with SSD1306 (I2C, 128x64 pixels)
 
 
 Luftdaten.info API "Pins"

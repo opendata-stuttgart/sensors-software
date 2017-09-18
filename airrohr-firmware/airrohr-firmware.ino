@@ -1,5 +1,11 @@
 #include <Arduino.h>
 #define INTL_DE
+
+/*****************************************************************
+/*                                                               *
+/*  This source code needs to be compiled for the board          *
+/*  NodeMCU 1.0 (ESP-12E Module)                                 *
+/*                                                               *
 /*****************************************************************
 /* OK LAB Particulate Matter Sensor                              *
 /*      - nodemcu-LoLin board                                    *
@@ -48,7 +54,7 @@
 /*****************************************************************
 /* Extensions connected via I2C:                                 *
 /* HTU21D (https://www.sparkfun.com/products/13763),             *
-/* BMP180, BMP280, BME280, OLED Display with SSD1309             *
+/* BMP180, BMP280, BME280, OLED Display with SSD1306 (128x64 px) *
 /*                                                               *
 /* Wiring Instruction                                            *
 /* (see labels on display or sensor board)                       *
@@ -56,6 +62,10 @@
 /*      GND       ->     Pin GND                                 *
 /*      SCL       ->     Pin D4 (GPIO2)                          *
 /*      SDA       ->     Pin D3 (GPIO0)                          *
+/*                                                               *
+/*****************************************************************
+/*                                                               *
+/* Please check Readme.md for other sensors and hardware         *
 /*                                                               *
 /*****************************************************************/
 // increment on change
@@ -2650,6 +2660,7 @@ void display_values(const String& value_DHT_T, const String& value_DHT_H, const 
 	}
 	
 // ----5----0----5----0
+// PM10/2.5: 1999/999
 // T/H: -10.0°C/100.0%
 // T/P: -10.0°C/1000hPa
 
