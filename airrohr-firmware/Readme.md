@@ -85,6 +85,14 @@ Bis Version NRZ-2016-15:
 
 Beim Anschluss von Sensoren mit 5V bitte die Board-Version beachten. NodeMCU v3 liefert 5V an `VU`, Version 2 fehlt dieser Anschluss und `VIN` kann dafür genutzt werden.
 
+### SDS011
+* Pin 1 (TX)   -> Pin D1 (GPIO5)
+* Pin 2 (RX)   -> Pin D2 (GPIO4)
+* Pin 3 (GND)  -> GND
+* Pin 4 (2.5m) -> unused
+* Pin 5 (5V)   -> VU
+* Pin 6 (1m)   -> unused
+
 ### PPD42NS
 * Pin 1 => GND
 * Pin 2 => Pin D5 (GPIO14)
@@ -98,14 +106,11 @@ Beim Anschluss von Sensoren mit 5V bitte die Board-Version beachten. NodeMCU v3 
 * Pin 3 => unused
 * Pin 4 => GND
 
-### SDS011
-
-* Pin 1 (TX)   -> Pin D1 (GPIO5)
-* Pin 2 (RX)   -> Pin D2 (GPIO4)
-* Pin 3 (GND)  -> GND
-* Pin 4 (2.5m) -> unused
-* Pin 5 (5V)   -> VU
-* Pin 6 (1m)   -> unused
+### DS18B20 (OneWire interface)
+Please check your version (pinout) at [https://datasheets.maximintegrated.com/en/ds/DS18B20.pdf]
+* GND  -> Pin GND
+* DQ   -> Pin D6 (GPIO 13)
+* VCC  -> Pin 3V3 or Pin VU
 
 ### PMS1003 to PMS6003
 Pinout:
@@ -121,7 +126,6 @@ Pinout:
 * Pin 8 (NC)	-> unused
 
 ### PMS7003
-
 Pinout PMS7003:
    9  7  5  3  1
   10  8  6  4  2
@@ -147,22 +151,25 @@ Pinout PMS7003:
 * SCL  ->  Pin D4 (GPIO2)
 * SDA  ->  Pin D3 (GPIO0)
 
-### DS18B20 (OneWire interface)
-Please check your version (pinout) at [https://datasheets.maximintegrated.com/en/ds/DS18B20.pdf]
-* GND  -> Pin GND
-* DQ   -> Pin D6 (GPIO 13)
-* VCC  -> Pin 3V3 or Pin VU
-
 ### LCD1602 (I2C, 5V - check your version)
-VCC  ->  Pin VU
-GND  ->  Pin GND
-SCL  ->  Pin D4 (GPIO2)
-SDA  ->  Pin D3 (GPIO0)
+* VCC  ->  Pin VU
+* GND  ->  Pin GND
+* SCL  ->  Pin D4 (GPIO2)
+* SDA  ->  Pin D3 (GPIO0)
 
 ### OLED displays with SSD1306 (I2C, 128x64 pixels)
+* VCC -> Pin VU
+* GND -> Pin GND
+* SCL  ->  Pin D4 (GPIO2)
+* SDA  ->  Pin D3 (GPIO0)
+
+### GPS NEO 6M (seriell)
+Strom und Masse vom Board.
+* RX-Pin vom NEO an D5
+* TX-Pin vom NEO an D6
 
 
-Luftdaten.info API "Pins"
+### Luftdaten.info API "Pins"
 Bei Aktivierung von mehreren Sensoren, z.B. "gleichzeitig" DHT22 und PPD42NS, benötigt die API zur Zuordnung der Sensorwerte die Angabe eines Pins, an dem der Sensor (virtuell) angeschlossen ist.
 Diese Firmware definiert die Pins für die verschiedenenen Sensoren wie folgt:
 * PPD42NS => Pin 5
