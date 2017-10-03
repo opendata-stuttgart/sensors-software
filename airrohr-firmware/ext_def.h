@@ -96,6 +96,14 @@
 #define PMS_PIN_TX D2
 #endif
 
+// Honeywell PM sensor
+#define HPM_READ 0
+#define HPM_API_PIN 1
+#if defined(ESP8266)
+#define HPM_PIN_RX D1
+#define HPM_PIN_TX D2
+#endif
+
 // BMP180, Luftdruck-Sensor
 #define BMP_READ 0
 #define BMP_API_PIN 3
@@ -138,6 +146,9 @@
 
 // Automatische Firmware-Updates über WLAN
 #define AUTO_UPDATE 1
+
+// use beta firmware
+#define USE_BETA 0
 
 // OLED Display SSD1306 angeschlossen?
 #define HAS_DISPLAY 0

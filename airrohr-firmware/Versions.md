@@ -3,6 +3,9 @@ beta
 * optimizing display function
 * added dependencies for OneWire
 * added wiring for new sensors to Readme.md
+* added support for Honeywell PM sensor
+* enable configurable usage of beta firmware
+* removing Arduino Feather code
 
 NRZ-2017-099
 online since 2017-09-10

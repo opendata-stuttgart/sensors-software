@@ -22,7 +22,7 @@ Konfigurierbar sind:
 * Auszulesende Sensoren
 * Ziele für den Versand der Daten
 
-Nach 5 Minuten sollte der Access-Point wieder deaktiviert werden (funktioniert zur Zeit noch nicht stabil).
+Nach 10 Minuten sollte der Access-Point wieder deaktiviert werden (funktioniert zur Zeit noch nicht stabil).
 
 
 ## Speichern als CSV
@@ -85,6 +85,14 @@ Bis Version NRZ-2016-15:
 
 Beim Anschluss von Sensoren mit 5V bitte die Board-Version beachten. NodeMCU v3 liefert 5V an `VU`, Version 2 fehlt dieser Anschluss und `VIN` kann dafür genutzt werden.
 
+### SDS011
+* Pin 1 (TX)   -> Pin D1 (GPIO5)
+* Pin 2 (RX)   -> Pin D2 (GPIO4)
+* Pin 3 (GND)  -> GND
+* Pin 4 (2.5m) -> unused
+* Pin 5 (5V)   -> VU
+* Pin 6 (1m)   -> unused
+
 ### PPD42NS
 * Pin 1 => GND
 * Pin 2 => Pin D5 (GPIO14)
@@ -98,14 +106,12 @@ Beim Anschluss von Sensoren mit 5V bitte die Board-Version beachten. NodeMCU v3 
 * Pin 3 => unused
 * Pin 4 => GND
 
-### SDS011
-
-* Pin 1 (TX)   -> Pin D1 (GPIO5)
-* Pin 2 (RX)   -> Pin D2 (GPIO4)
-* Pin 3 (GND)  -> GND
-* Pin 4 (2.5m) -> unused
-* Pin 5 (5V)   -> VU
-* Pin 6 (1m)   -> unused
+### DS18B20 (OneWire interface)
+Please check your version (pinout) at [https://datasheets.maximintegrated.com/en/ds/DS18B20.pdf]
+Uses the same PIN D7 as DHT22, so DHT22 OR DS18B20 can be used. 
+* GND  -> Pin GND
+* DQ   -> Pin D7 (GPIO 13)
+* VCC  -> Pin 3V3 or Pin VU
 
 ### PMS1003 to PMS6003
 Pinout:
@@ -117,11 +123,10 @@ Pinout:
 * Pin 4 (RX)    -> Pin D2 (GPIO4)
 * Pin 5 (TX)    -> Pin D1 (GPIO5)
 * Pin 6 (RESET) -> unused
-* Pin 7	(NC)	_> unused
+* Pin 7	(NC)	-> unused
 * Pin 8 (NC)	-> unused
 
 ### PMS7003
-
 Pinout PMS7003:
    9  7  5  3  1
   10  8  6  4  2
@@ -135,6 +140,18 @@ Pinout PMS7003:
 * Pin  9 (TX)    -> Pin D1 (GPIO5)
 * Pin 10 (SET)   -> unused
 
+### Honeywell PM sensor
+Pinout:
+   8 7 6 5 4 3 2 1
+* Pin 1 (3.3V)   -> unused
+* Pin 2 (5V)     -> VU
+* Pin 3 (NC)     -> unused
+* Pin 4 (NC)     -> unused
+* Pin 5 TEST)    -> unused
+* Pin 6 (TX)     -> Pin D1 (GPIO5)
+* Pin 7	(RX)     -> Pin D2 (GPIO4)
+* Pin 8 (GND)    -> GND
+
 ### BMP180 / BMP280 / BME280 (I2C)
 * VCC  ->  Pin 3V3
 * GND  ->  Pin GND
@@ -147,22 +164,25 @@ Pinout PMS7003:
 * SCL  ->  Pin D4 (GPIO2)
 * SDA  ->  Pin D3 (GPIO0)
 
-### DS18B20 (OneWire interface)
-Please check your version (pinout) at [https://datasheets.maximintegrated.com/en/ds/DS18B20.pdf]
-* GND  -> Pin GND
-* DQ   -> Pin D6 (GPIO 13)
-* VCC  -> Pin 3V3 or Pin VU
-
 ### LCD1602 (I2C, 5V - check your version)
-VCC  ->  Pin VU
-GND  ->  Pin GND
-SCL  ->  Pin D4 (GPIO2)
-SDA  ->  Pin D3 (GPIO0)
+* VCC  ->  Pin VU
+* GND  ->  Pin GND
+* SCL  ->  Pin D4 (GPIO2)
+* SDA  ->  Pin D3 (GPIO0)
 
 ### OLED displays with SSD1306 (I2C, 128x64 pixels)
+* VCC -> Pin VU
+* GND -> Pin GND
+* SCL  ->  Pin D4 (GPIO2)
+* SDA  ->  Pin D3 (GPIO0)
+
+### GPS NEO 6M (seriell)
+Strom und Masse vom Board.
+* RX-Pin vom NEO an D5
+* TX-Pin vom NEO an D6
 
 
-Luftdaten.info API "Pins"
+### Luftdaten.info API "Pins"
 Bei Aktivierung von mehreren Sensoren, z.B. "gleichzeitig" DHT22 und PPD42NS, benötigt die API zur Zuordnung der Sensorwerte die Angabe eines Pins, an dem der Sensor (virtuell) angeschlossen ist.
 Diese Firmware definiert die Pins für die verschiedenenen Sensoren wie folgt:
 * PPD42NS => Pin 5
