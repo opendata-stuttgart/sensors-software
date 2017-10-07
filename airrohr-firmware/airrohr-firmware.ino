@@ -69,7 +69,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2017-100"
+#define SOFTWARE_VERSION "NRZ-2017-100-B2"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -1377,54 +1377,54 @@ void webserver_values() {
         page_content += tmpl(F("<tr><th>{v1}</th><th>{v2}</th><th>{v3}</th>"), FPSTR(INTL_SENSOR), FPSTR(INTL_PARAMETER), FPSTR(INTL_WERT));
         if (ppd_read) {
             page_content += empty_row;
-            page_content += table_row_from_value("PPD42NS", "PM1",  Float2String(last_value_PPD_P1), FPSTR(INTL_PARTIKEL_LITER));
-            page_content += table_row_from_value("PPD42NS", "PM2.5", Float2String(last_value_PPD_P2), FPSTR(INTL_PARTIKEL_LITER));
+            page_content += table_row_from_value("PPD42NS", "PM1",  Float2String(last_value_PPD_P1,1), FPSTR(INTL_PARTIKEL_LITER));
+            page_content += table_row_from_value("PPD42NS", "PM2.5", Float2String(last_value_PPD_P2,1), FPSTR(INTL_PARTIKEL_LITER));
         }
         if (sds_read) {
             page_content += empty_row;
-            page_content += table_row_from_value("SDS011", "PM2.5", Float2String(last_value_SDS_P2), "µg/m³");
-            page_content += table_row_from_value("SDS011", "PM10", Float2String(last_value_SDS_P1), "µg/m³");
+            page_content += table_row_from_value("SDS011", "PM2.5", Float2String(last_value_SDS_P2,1), "µg/m³");
+            page_content += table_row_from_value("SDS011", "PM10", Float2String(last_value_SDS_P1,1), "µg/m³");
         }
         if (pms24_read || pms32_read) {
             page_content += empty_row;
-            page_content += table_row_from_value("PMS", "PM1", Float2String(last_value_PMS_P0), "µg/m³");
-            page_content += table_row_from_value("PMS", "PM2.5", Float2String(last_value_PMS_P2), "µg/m³");
-            page_content += table_row_from_value("PMS", "PM10", Float2String(last_value_PMS_P1), "µg/m³");
+            page_content += table_row_from_value("PMS", "PM1", Float2String(last_value_PMS_P0,1), "µg/m³");
+            page_content += table_row_from_value("PMS", "PM2.5", Float2String(last_value_PMS_P2,1), "µg/m³");
+            page_content += table_row_from_value("PMS", "PM10", Float2String(last_value_PMS_P1,1), "µg/m³");
         }
         if (hpm_read) {
             page_content += empty_row;
-            page_content += table_row_from_value("Honeywell PMS", "PM2.5", Float2String(last_value_HPM_P2), "µg/m³");
-            page_content += table_row_from_value("Honeywell PMS", "PM10", Float2String(last_value_HPM_P1), "µg/m³");
+            page_content += table_row_from_value("Honeywell PMS", "PM2.5", Float2String(last_value_HPM_P2,1), "µg/m³");
+            page_content += table_row_from_value("Honeywell PMS", "PM10", Float2String(last_value_HPM_P1,1), "µg/m³");
         }
         if (dht_read) {
             page_content += empty_row;
-            page_content += table_row_from_value("DHT22", FPSTR(INTL_TEMPERATUR), Float2String(last_value_DHT_T), "°C");
-            page_content += table_row_from_value("DHT22", FPSTR(INTL_LUFTFEUCHTE), Float2String(last_value_DHT_H), "%");
+            page_content += table_row_from_value("DHT22", FPSTR(INTL_TEMPERATUR), Float2String(last_value_DHT_T,1), "°C");
+            page_content += table_row_from_value("DHT22", FPSTR(INTL_LUFTFEUCHTE), Float2String(last_value_DHT_H,1), "%");
         }
         if (htu21d_read) {
             page_content += empty_row;
-            page_content += table_row_from_value("HTU21D", FPSTR(INTL_TEMPERATUR), Float2String(last_value_HTU21D_T), "°C");
-            page_content += table_row_from_value("HTU21D", FPSTR(INTL_LUFTFEUCHTE), Float2String(last_value_HTU21D_H), "%");
+            page_content += table_row_from_value("HTU21D", FPSTR(INTL_TEMPERATUR), Float2String(last_value_HTU21D_T,1), "°C");
+            page_content += table_row_from_value("HTU21D", FPSTR(INTL_LUFTFEUCHTE), Float2String(last_value_HTU21D_H,1), "%");
         }
         if (bmp_read) {
             page_content += empty_row;
-            page_content += table_row_from_value("BMP180", FPSTR(INTL_TEMPERATUR), Float2String(last_value_BMP_T), "°C");
-            page_content += table_row_from_value("BMP180", FPSTR(INTL_LUFTDRUCK), Float2String(last_value_BMP_P / 100.0), "hPa");
+            page_content += table_row_from_value("BMP180", FPSTR(INTL_TEMPERATUR), Float2String(last_value_BMP_T,1), "°C");
+            page_content += table_row_from_value("BMP180", FPSTR(INTL_LUFTDRUCK), Float2String(last_value_BMP_P / 100.0,2), "hPa");
         }
         if (bmp280_read) {
             page_content += empty_row;
-            page_content += table_row_from_value("BMP280", FPSTR(INTL_TEMPERATUR), Float2String(last_value_BMP280_T), "°C");
-            page_content += table_row_from_value("BMP280", FPSTR(INTL_LUFTDRUCK), Float2String(last_value_BMP280_P / 100.0), "hPa");
+            page_content += table_row_from_value("BMP280", FPSTR(INTL_TEMPERATUR), Float2String(last_value_BMP280_T,1), "°C");
+            page_content += table_row_from_value("BMP280", FPSTR(INTL_LUFTDRUCK), Float2String(last_value_BMP280_P / 100.0,2), "hPa");
         }
         if (bme280_read) {
             page_content += empty_row;
-            page_content += table_row_from_value("BME280", FPSTR(INTL_TEMPERATUR), Float2String(last_value_BME280_T), "°C");
-            page_content += table_row_from_value("BME280", FPSTR(INTL_LUFTFEUCHTE), Float2String(last_value_BME280_H), "%");
-            page_content += table_row_from_value("BME280", FPSTR(INTL_LUFTDRUCK),  Float2String(last_value_BME280_P / 100.0), "hPa");
+            page_content += table_row_from_value("BME280", FPSTR(INTL_TEMPERATUR), Float2String(last_value_BME280_T,1), "°C");
+            page_content += table_row_from_value("BME280", FPSTR(INTL_LUFTFEUCHTE), Float2String(last_value_BME280_H,1), "%");
+            page_content += table_row_from_value("BME280", FPSTR(INTL_LUFTDRUCK),  Float2String(last_value_BME280_P / 100.0,2), "hPa");
         }
         if (ds18b20_read) {
             page_content += empty_row;
-            page_content += table_row_from_value("DS18B20", FPSTR(INTL_TEMPERATUR), Float2String(last_value_DS18B20_T), "°C");
+            page_content += table_row_from_value("DS18B20", FPSTR(INTL_TEMPERATUR), Float2String(last_value_DS18B20_T,1), "°C");
         }
 
         page_content += empty_row;
