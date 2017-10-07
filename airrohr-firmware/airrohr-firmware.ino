@@ -396,7 +396,7 @@ void display_debug(const String& text) {
         display.resetDisplay();
         display.clear();
         display.displayOn();
-        display.setFont(Monospaced_plain_9);
+        display.setFont(Roboto_Mono_9);
         display.setTextAlignment(TEXT_ALIGN_LEFT);
         display.drawStringMaxWidth(0, 12, 120, text);
         display.display();
@@ -1091,7 +1091,7 @@ void webserver_config() {
         page_content += FPSTR(WEB_CONFIG_SCRIPT);
     }
     if (server.method() == HTTP_GET) {
-        page_content += F("<form method='POST' action='/config' style='width: 100%;'><b>");
+        page_content += F("<form method='POST' action='/config' style='width:100%;'><b>");
         page_content += FPSTR(INTL_WLAN_DATEN);
         page_content += F("</b><br/>");
         debug_out(F("output config page 1"), DEBUG_MIN_INFO, 1);
@@ -1602,7 +1602,7 @@ void setup_webserver() {
     server.on("/images", webserver_images);
     server.onNotFound(webserver_not_found);
 
-    debug_out(F("Starte Webserver... "), DEBUG_MIN_INFO, 0);
+    debug_out(F("Starting Webserver... "), DEBUG_MIN_INFO, 0);
     debug_out(IPAddress2String(WiFi.localIP()), DEBUG_MIN_INFO, 1);
     server.begin();
 }
@@ -1668,7 +1668,7 @@ void wifiConfig() {
     debug_out("", DEBUG_MIN_INFO, 1);
 
 
-    debug_out(F("------ Result from Webconfig ------"), DEBUG_MIN_INFO, 1);
+    debug_out(F("---- Result from Webconfig ----"), DEBUG_MIN_INFO, 1);
     debug_out(F("WLANSSID: "), DEBUG_MIN_INFO, 0);
     debug_out(wlanssid, DEBUG_MIN_INFO, 1);
     debug_out(F("DHT_read: "), DEBUG_MIN_INFO, 0);
@@ -1943,7 +1943,7 @@ String sensorDHT() {
     float h;
     float t;
 
-    debug_out(F("Start reading DHT11/22"), DEBUG_MED_INFO, 1);
+    debug_out(String(FPSTR(DBG_TXT_START_READING)) + "DHT11/22", DEBUG_MED_INFO, 1);
 
     // Check if valid number if non NaN (not a number) will be send.
 
@@ -1961,10 +1961,10 @@ String sensorDHT() {
         if (isnan(t) || isnan(h)) {
             debug_out(F("DHT22 couldn't be read"), DEBUG_ERROR, 1);
         } else {
-            debug_out(F("Humidity    : "), DEBUG_MIN_INFO, 0);
-            debug_out(String(h) + "%", DEBUG_MIN_INFO, 1);
-            debug_out(F("Temperature : "), DEBUG_MIN_INFO, 0);
+            debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO, 0);
             debug_out(String(t) + char(223) + "C", DEBUG_MIN_INFO, 1);
+            debug_out(FPSTR(DBG_TXT_HUMIDITY), DEBUG_MIN_INFO, 0);
+            debug_out(String(h) + "%", DEBUG_MIN_INFO, 1);
             last_value_DHT_T = t;
             last_value_DHT_H = h;
             s += Value2Json(F("temperature"), Float2String(last_value_DHT_T));
@@ -1973,7 +1973,7 @@ String sensorDHT() {
     }
     debug_out(F("------"), DEBUG_MIN_INFO, 1);
 
-    debug_out(F("End reading DHT11/22"), DEBUG_MED_INFO, 1);
+    debug_out(String(FPSTR(DBG_TXT_END_READING)) + "DHT11/22", DEBUG_MED_INFO, 1);
 
     return s;
 }
@@ -1986,16 +1986,16 @@ String sensorHTU21D() {
     float t;
     float h;
 
-    debug_out(F("Start reading HTU21D"), DEBUG_MED_INFO, 1);
+    debug_out(String(FPSTR(DBG_TXT_START_READING)) + "HTU21D", DEBUG_MED_INFO, 1);
 
     t = htu21d.readTemperature();
     h = htu21d.readHumidity();
     if (isnan(t) || isnan(h)) {
         debug_out(F("HTU21D couldn't be read"), DEBUG_ERROR, 1);
     } else {
-        debug_out(F("Temperature : "), DEBUG_MIN_INFO, 0);
+        debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO, 0);
         debug_out(Float2String(t) + " C", DEBUG_MIN_INFO, 1);
-        debug_out(F("humidity : "), DEBUG_MIN_INFO, 0);
+        debug_out(FPSTR(DBG_TXT_HUMIDITY), DEBUG_MIN_INFO, 0);
         debug_out(Float2String(h) + " %", DEBUG_MIN_INFO, 1);
         last_value_HTU21D_T = t;
         last_value_HTU21D_H = h;
@@ -2004,7 +2004,7 @@ String sensorHTU21D() {
     }
     debug_out(F("------"), DEBUG_MIN_INFO, 1);
 
-    debug_out(F("End reading HTU21D"), DEBUG_MED_INFO, 1);
+    debug_out(String(FPSTR(DBG_TXT_END_READING)) + "HTU21D", DEBUG_MED_INFO, 1);
 
     return s;
 }
@@ -2017,7 +2017,7 @@ String sensorBMP() {
     int p;
     float t;
 
-    debug_out(F("Start reading BMP180"), DEBUG_MED_INFO, 1);
+    debug_out(String(FPSTR(DBG_TXT_START_READING)) + "BMP180", DEBUG_MED_INFO, 1);
 
     p = bmp.readPressure();
     t = bmp.readTemperature();
@@ -2026,10 +2026,10 @@ String sensorBMP() {
     if (isnan(p) || isnan(t)) {
         debug_out(F("BMP180 couldn't be read"), DEBUG_ERROR, 1);
     } else {
-        debug_out(F("Pressure    : "), DEBUG_MIN_INFO, 0);
-        debug_out(Float2String(float(p) / 100) + " hPa", DEBUG_MIN_INFO, 1);
-        debug_out(F("Temperature : "), DEBUG_MIN_INFO, 0);
+        debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO, 0);
         debug_out(String(t) + " C", DEBUG_MIN_INFO, 1);
+        debug_out(FPSTR(DBG_TXT_PRESSURE), DEBUG_MIN_INFO, 0);
+        debug_out(Float2String(float(p) / 100) + " hPa", DEBUG_MIN_INFO, 1);
         last_value_BMP_T = t;
         last_value_BMP_P = (float)p;
         s += Value2Json(F("BMP_pressure"), Float2String(last_value_BMP_P));
@@ -2037,7 +2037,7 @@ String sensorBMP() {
     }
     debug_out(F("------"), DEBUG_MIN_INFO, 1);
 
-    debug_out(F("End reading BMP180"), DEBUG_MED_INFO, 1);
+    debug_out(String(FPSTR(DBG_TXT_END_READING)) + "BMP180", DEBUG_MED_INFO, 1);
 
     return s;
 }
@@ -2050,7 +2050,7 @@ String sensorBMP280() {
     int p;
     float t;
 
-    debug_out(F("Start reading BMP280"), DEBUG_MED_INFO, 1);
+    debug_out(String(FPSTR(DBG_TXT_START_READING)) + "BMP280", DEBUG_MED_INFO, 1);
 
     p = bmp280.readPressure();
     t = bmp280.readTemperature();
@@ -2059,10 +2059,10 @@ String sensorBMP280() {
     if (isnan(p) || isnan(t)) {
         debug_out(F("BMP280 couldn't be read"), DEBUG_ERROR, 1);
     } else {
-        debug_out(F("Pressure    : "), DEBUG_MIN_INFO, 0);
-        debug_out(Float2String(float(p) / 100) + " hPa", DEBUG_MIN_INFO, 1);
-        debug_out(F("Temperature : "), DEBUG_MIN_INFO, 0);
+        debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO, 0);
         debug_out(String(t) + " C", DEBUG_MIN_INFO, 1);
+        debug_out(FPSTR(DBG_TXT_PRESSURE), DEBUG_MIN_INFO, 0);
+        debug_out(Float2String(float(p) / 100) + " hPa", DEBUG_MIN_INFO, 1);
         last_value_BMP280_T = t;
         last_value_BMP280_P = (float)p;
         s += Value2Json(F("BMP_pressure"), Float2String(last_value_BMP280_P));
@@ -2070,7 +2070,7 @@ String sensorBMP280() {
     }
     debug_out(F("------"), DEBUG_MIN_INFO, 1);
 
-    debug_out(F("End reading BMP180"), DEBUG_MED_INFO, 1);
+    debug_out(String(FPSTR(DBG_TXT_END_READING)) + "BMP280", DEBUG_MED_INFO, 1);
 
     return s;
 }
@@ -2084,7 +2084,7 @@ String sensorBME280() {
     float h;
     float p;
 
-    debug_out(F("Start reading BME280"), DEBUG_MED_INFO, 1);
+    debug_out(String(FPSTR(DBG_TXT_START_READING)) + "BME280", DEBUG_MED_INFO, 1);
 
     t = bme280.readTemperature();
     h = bme280.readHumidity();
@@ -2095,11 +2095,11 @@ String sensorBME280() {
     if (isnan(t) || isnan(h) || isnan(p)) {
         debug_out(F("BME280 couldn't be read"), DEBUG_ERROR, 1);
     } else {
-        debug_out(F("Temperature : "), DEBUG_MIN_INFO, 0);
+        debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO, 0);
         debug_out(Float2String(t) + " C", DEBUG_MIN_INFO, 1);
-        debug_out(F("humidity : "), DEBUG_MIN_INFO, 0);
+        debug_out(FPSTR(DBG_TXT_HUMIDITY), DEBUG_MIN_INFO, 0);
         debug_out(Float2String(h) + " %", DEBUG_MIN_INFO, 1);
-        debug_out(F("Pressure    : "), DEBUG_MIN_INFO, 0);
+        debug_out(FPSTR(DBG_TXT_PRESSURE), DEBUG_MIN_INFO, 0);
         debug_out(Float2String(float(p) / 100) + " hPa", DEBUG_MIN_INFO, 1);
         last_value_BME280_T = t;
         last_value_BME280_H = h;
@@ -2110,7 +2110,7 @@ String sensorBME280() {
     }
     debug_out(F("------"), DEBUG_MIN_INFO, 1);
 
-    debug_out(F("End reading BME280"), DEBUG_MED_INFO, 1);
+    debug_out(String(FPSTR(DBG_TXT_END_READING)) + "BME280", DEBUG_MED_INFO, 1);
 
     return s;
 }
@@ -2122,7 +2122,7 @@ String sensorDS18B20() {
     String s = "";
     int i = 0;
     float t;
-    debug_out(F("Start reading DS18B20"), DEBUG_MED_INFO, 1);
+    debug_out(String(FPSTR(DBG_TXT_START_READING)) + "DS18B20", DEBUG_MED_INFO, 1);
 
     //it's very unlikely (-127: impossible) to get these temperatures in reality. Most times this means that the sensor is currently faulty
     //try 5 times to read the sensor, otherwise fail
@@ -2139,13 +2139,13 @@ String sensorDS18B20() {
     if(i == 5) {
         debug_out(F("DS18B20 couldn't be read."), DEBUG_ERROR, 1);
     } else {
-        debug_out(F("Temperature : "), DEBUG_MIN_INFO, 0);
+        debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO, 0);
         debug_out(Float2String(t) + " C", DEBUG_MIN_INFO, 1);
         last_value_DS18B20_T = t;
         s += Value2Json(F("DS18B20_temperature"), Float2String(last_value_DS18B20_T));
     }
     debug_out(F("------"), DEBUG_MIN_INFO, 1);
-    debug_out(F("End reading DS18B20"), DEBUG_MED_INFO, 1);
+    debug_out(String(FPSTR(DBG_TXT_END_READING)) + "DS18B20", DEBUG_MED_INFO, 1);
 
     return s;
 }
@@ -2165,7 +2165,7 @@ String sensorSDS() {
     int checksum_ok = 0;
     int position = 0;
 
-    debug_out(F("Start reading SDS011"), DEBUG_MED_INFO, 1);
+    debug_out(String(FPSTR(DBG_TXT_START_READING)) + "SDS011", DEBUG_MED_INFO, 1);
     if (long(act_milli - starttime) < (long(sending_intervall_ms) - long(warmup_time_SDS_ms + reading_time_SDS_ms))) {
         if (is_SDS_running) {
             stop_SDS();
@@ -2293,7 +2293,7 @@ String sensorSDS() {
         }
     }
 
-    debug_out(F("End reading SDS011"), DEBUG_MED_INFO, 1);
+    debug_out(String(FPSTR(DBG_TXT_END_READING)) + "SDS011", DEBUG_MED_INFO, 1);
 
     return s;
 }
@@ -2315,7 +2315,7 @@ String sensorPMS(int msg_len) {
     int checksum_ok = 0;
     int position = 0;
 
-    debug_out(F("Start reading PMS"), DEBUG_MED_INFO, 1);
+    debug_out(String(FPSTR(DBG_TXT_START_READING)) + "PMS", DEBUG_MED_INFO, 1);
     if (long(act_milli - starttime) < (long(sending_intervall_ms) - long(warmup_time_SDS_ms + reading_time_SDS_ms))) {
         if (is_PMS_running) {
             stop_PMS();
@@ -2540,7 +2540,7 @@ String sensorPMS(int msg_len) {
         }
     }
 
-    debug_out(F("End reading PMS"), DEBUG_MED_INFO, 1);
+    debug_out(String(FPSTR(DBG_TXT_END_READING)) + "PMS", DEBUG_MED_INFO, 1);
 
     return s;
 }
@@ -2561,7 +2561,7 @@ String sensorHPM() {
     int checksum_ok = 0;
     int position = 0;
 
-    debug_out(F("Start reading HPM"), DEBUG_MED_INFO, 1);
+    debug_out(String(FPSTR(DBG_TXT_START_READING)) + "HPM", DEBUG_MED_INFO, 1);
     if (long(act_milli - starttime) < (long(sending_intervall_ms) - long(warmup_time_SDS_ms + reading_time_SDS_ms))) {
         if (is_HPM_running) {
             stop_HPM();
@@ -2756,7 +2756,7 @@ String sensorHPM() {
         }
     }
 
-    debug_out(F("End reading HPM"), DEBUG_MED_INFO, 1);
+    debug_out(String(FPSTR(DBG_TXT_END_READING)) + "HPM", DEBUG_MED_INFO, 1);
 
     return s;
 }
@@ -2771,7 +2771,7 @@ String sensorPPD() {
     float concentration = 0;
     String s = "";
 
-    debug_out(F("Start reading PPD42NS"), DEBUG_MED_INFO, 1);
+    debug_out(String(FPSTR(DBG_TXT_START_READING)) + "PPD42NS", DEBUG_MED_INFO, 1);
 
     if ((act_milli - starttime) <= sampletime_ms) {
 
@@ -2841,7 +2841,7 @@ String sensorPPD() {
         debug_out(F("------"), DEBUG_MIN_INFO, 1);
     }
 
-    debug_out(F("End reading PPD42NS"), DEBUG_MED_INFO, 1);
+    debug_out(String(FPSTR(DBG_TXT_END_READING)) + "PPD42NS", DEBUG_MED_INFO, 1);
 
     return s;
 }
@@ -2857,7 +2857,7 @@ String sensorGPS() {
     String gps_date = "";
     String gps_time = "";
 
-    debug_out(F("Start reading GPS"), DEBUG_MED_INFO, 1);
+    debug_out(String(FPSTR(DBG_TXT_START_READING)) + "GPS", DEBUG_MED_INFO, 1);
 
     while (serialGPS.available() > 0) {
         if (gps.encode(serialGPS.read())) {
@@ -2939,7 +2939,7 @@ String sensorGPS() {
         debug_out(F("No GPS data received: check wiring"), DEBUG_ERROR, 1);
     }
 
-    debug_out(F("End reading GPS"), DEBUG_MED_INFO, 1);
+    debug_out(String(FPSTR(DBG_TXT_END_READING)) + "GPS", DEBUG_MED_INFO, 1);
 
     return s;
 }
@@ -2987,7 +2987,6 @@ void autoUpdate() {
 /* display values                                                *
 /*****************************************************************/
 void display_values() {
-    int value_count = 0;
     float t_value = 0;
     float h_value = 0;
     float p_value = 0;
@@ -2998,13 +2997,11 @@ void display_values() {
     float pm25_value = 0;
     String pm10_sensor = "";
     String pm25_sensor = "";
-    String lcd_line1 = "";
-    String lcd_line2 = "";
-    String oled_header = "";
-    String oled_line1 = "";
-    String oled_line3 = "";
-    String oled_line2 = "";
-    String oled_footer = "";
+    String display_header = "";
+    String display_line1 = "";
+    String display_line3 = "";
+    String display_line2 = "";
+    String display_footer = "";
     int signal = 0;
     debug_out(F("output values to display..."), DEBUG_MIN_INFO, 1);
     if (dht_read) {
@@ -3060,58 +3057,59 @@ void display_values() {
 
     if (has_display) {
         if ((next_display_count % 4) == 0) {
-            oled_header = pm25_sensor;
+            display_header = pm25_sensor;
             if (pm25_sensor != pm10_sensor) {
-                oled_header += " / " + pm25_sensor;
+                display_header += " / " + pm25_sensor;
             }
-            oled_line1 = "PM2.5: " + (pm25_value != 0 ? Float2String(pm25_value,1) : "-");
-            oled_line2 = "PM10:  " + (pm10_value != 0 ? Float2String(pm10_value,1) : "-");
-            oled_footer = "o...";
+            display_line1 = "PM2.5: " + (pm25_value != 0 ? Float2String(pm25_value,1) : "-");
+            display_line2 = "PM10:  " + (pm10_value != 0 ? Float2String(pm10_value,1) : "-");
+            display_footer = "o...";
         }
         if ((next_display_count % 4) == 1) {
-            oled_header = t_sensor;
+            display_header = t_sensor;
             if (t_sensor != h_sensor) {
-                oled_header += " / " + h_sensor;
+                display_header += " / " + h_sensor;
             }
             if (h_sensor != p_sensor) {
-                oled_header += " / " + p_sensor;
+                display_header += " / " + p_sensor;
             }
-            oled_line1 = "Temp.: " + (t_value != 0 ? Float2String(t_value,1) : "-") + char(223) + "C";
-            oled_line2 = "Hum.:  " + (h_value != 0 ? Float2String(h_value,1) : "-") + "%";
-            oled_line3 = "Pres.: " + (p_value != 0 ? Float2String(p_value/100,1) : "-") + "hPa";
-            oled_footer = ".o..";
+            display_line1 = "Temp.: " + (t_value != 0 ? Float2String(t_value,1) : "-") + char(223) + "C";
+            display_line2 = "Hum.:  " + (h_value != 0 ? Float2String(h_value,1) : "-") + "%";
+            display_line3 = "Pres.: " + (p_value != 0 ? Float2String(p_value/100,1) : "-") + "hPa";
+            display_footer = ".o..";
         }
         if ((next_display_count % 4) == 2) {
             signal = WiFi.RSSI();
             if (signal > -50) signal = -50;
             if (signal < -100) signal = -100;
             signal = (signal + 100) / 2;
-            oled_header = "Wifi info";
-            oled_line1 = "IP: " + IPAddress2String(WiFi.localIP());
-            oled_line2 = "SSID:" + WiFi.SSID();
-            oled_line3 = "Signal: " + String(signal) + "%";
-            oled_footer = "..o.";
+            display_header = "Wifi info";
+            display_line1 = "IP: " + IPAddress2String(WiFi.localIP());
+            display_line2 = "SSID:" + WiFi.SSID();
+            display_line3 = "Signal: " + String(signal) + "%";
+            display_footer = "..o.";
         }
         if ((next_display_count % 4) == 3) {
-            oled_header = "Device Info";
-            oled_line1 = "Firmware: " + String(SOFTWARE_VERSION);
-            oled_line2 = "Measurements: " + String(count_sends);
-            oled_footer = "...o";
+            display_header = "Device Info";
+			display_line1 = "ID: " + esp_chipid;
+            display_line2 = "FW: " + String(SOFTWARE_VERSION);
+            display_line3 = "Measurements: " + String(count_sends);
+            display_footer = "...o";
         }
 
 
         display.resetDisplay();
         display.clear();
         display.displayOn();
-        display.setFont(Monospaced_plain_9);
+        display.setFont(Roboto_Mono_9);
         display.setTextAlignment(TEXT_ALIGN_CENTER);
-        display.drawString(64, 0, oled_header);
+        display.drawString(64, 1, display_header);
         display.setTextAlignment(TEXT_ALIGN_LEFT);
-        display.drawString(0, 15, oled_line1);
-        display.drawString(0, 25, oled_line2);
-        display.drawString(0, 35, oled_line3);
+        display.drawString(0, 16, display_line1);
+        display.drawString(0, 28, display_line2);
+        display.drawString(0, 40, display_line3);
         display.setTextAlignment(TEXT_ALIGN_CENTER);
-        display.drawString(64, 55, oled_footer);
+        display.drawString(64, 52, display_footer);
         display.display();
     }
 
@@ -3121,35 +3119,35 @@ void display_values() {
 // T/P: -10.0°C/1000hPa
 
     if ((next_display_count % 4) == 0) {
-        lcd_line1 = "PM2.5: " + (pm25_value != 0 ? Float2String(pm25_value,1) : "-");
-        lcd_line2 = "PM10:  " + (pm10_value != 0 ? Float2String(pm10_value,1) : "-");
+        display_line1 = "PM2.5: " + (pm25_value != 0 ? Float2String(pm25_value,1) : "-");
+        display_line2 = "PM10:  " + (pm10_value != 0 ? Float2String(pm10_value,1) : "-");
     }
     if ((next_display_count % 4) == 1) {
-        lcd_line1 = "T: " + (t_value != 0 ? Float2String(t_value,1) : "-") + char(223) + "C";
-        lcd_line2 = "H: " + (h_value != 0 ? Float2String(h_value,1) : "-") + "%";
+        display_line1 = "T: " + (t_value != 0 ? Float2String(t_value,1) : "-") + char(223) + "C";
+        display_line2 = "H: " + (h_value != 0 ? Float2String(h_value,1) : "-") + "%";
     }
     if ((next_display_count % 4) == 2) {
-        lcd_line1 = "ID: " + esp_chipid;
-        lcd_line2 = "FW: " + String(SOFTWARE_VERSION);
+        display_line1 = "ID: " + esp_chipid;
+        display_line2 = "FW: " + String(SOFTWARE_VERSION);
     }
     if ((next_display_count % 4) == 3) {
-        lcd_line1 = IPAddress2String(WiFi.localIP());
-        lcd_line2 = WiFi.SSID();
+        display_line1 = IPAddress2String(WiFi.localIP());
+        display_line2 = WiFi.SSID();
     }
 
     if (has_lcd1602_27) {
         lcd_27.clear();
         lcd_27.setCursor(0, 0);
-        lcd_27.print(lcd_line1);
+        lcd_27.print(display_line1);
         lcd_27.setCursor(0, 1);
-        lcd_27.print(lcd_line2);
+        lcd_27.print(display_line2);
     }
     if (has_lcd1602) {
         lcd_3f.clear();
         lcd_3f.setCursor(0, 0);
-        lcd_3f.print(lcd_line1);
+        lcd_3f.print(display_line1);
         lcd_3f.setCursor(0, 1);
-        lcd_3f.print(lcd_line2);
+        lcd_3f.print(display_line2);
     }
     yield();
     next_display_count += 1;
@@ -3243,25 +3241,8 @@ void setup() {
     dht.begin();	// Start DHT
     htu21d.begin(); // Start HTU21D
     delay(10);
-#if defined(ESP8266)
     debug_out(F("\nChipId: "), DEBUG_MIN_INFO, 0);
     debug_out(esp_chipid, DEBUG_MIN_INFO, 1);
-#endif
-#if defined(ARDUINO_SAMD_ZERO)
-    if (!manager.init())
-    {
-        debug_out("Manager init failed", DEBUG_MIN_INFO, 1);
-    }
-    if (!rf69.setFrequency(RF69_FREQ)) {
-        debug_out("setFrequency failed", DEBUG_MIN_INFO, 1);
-        while (1);
-    }
-    debug_out(F("Set Freq to: "), DEBUG_MIN_INFO, 0);
-    debug_out(String(RF69_FREQ), DEBUG_MIN_INFO, 1);
-    rf69.setTxPower(20);
-    debug_out(F("\nChipId: "), DEBUG_MIN_INFO, 0);
-    debug_out(FeatherChipId(), DEBUG_MIN_INFO, 1);
-#endif
 
     if (ppd_read) {
         debug_out(F("Lese PPD..."), DEBUG_MIN_INFO, 1);
@@ -3352,11 +3333,6 @@ void setup() {
         debug_out(F("Stoppe HPM..."), DEBUG_MIN_INFO, 1);
         stop_HPM();
     }
-#if defined(ARDUINO_SAMD_ZERO)
-    data_first_part.replace("FEATHERCHIPID", ", \"chipid\": \"" + FeatherChipId() + "\"");
-#else
-    data_first_part.replace("FEATHERCHIPID", "");
-#endif
 
     if (MDNS.begin(server_name.c_str())) {
         MDNS.addService("http", "tcp", 80);
@@ -3506,9 +3482,9 @@ void loop() {
         }
         debug_out(F("Creating data string:"), DEBUG_MIN_INFO, 1);
         data = data_first_part;
-        data_sample_times  = Value2Json("samples", String(long(sample_count)));
-        data_sample_times += Value2Json("min_micro", String(long(min_micro)));
-        data_sample_times += Value2Json("max_micro", String(long(max_micro)));
+        data_sample_times  = Value2Json(F("samples"), String(long(sample_count)));
+        data_sample_times += Value2Json(F("min_micro"), String(long(min_micro)));
+        data_sample_times += Value2Json(F("max_micro"), String(long(max_micro)));
 
         signal_strength = String(WiFi.RSSI());
         debug_out(F("WLAN signal strength: "), DEBUG_MIN_INFO, 0);

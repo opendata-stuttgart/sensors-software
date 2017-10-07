@@ -1,6 +1,6 @@
 NRZ-2017-100
 beta
-* optimizing display function
+* optimizing display function: more than one 'screen' for infos
 * added dependencies for OneWire
 * added wiring for new sensors to Readme.md
 * added support for Honeywell PM sensor
