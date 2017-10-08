@@ -69,7 +69,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2017-100-B2"
+#define SOFTWARE_VERSION "NRZ-2017-100-B3"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -323,27 +323,27 @@ int hpm_pm10_min = 20000;
 int hpm_pm25_max = 0;
 int hpm_pm25_min = 20000;
 
-float last_value_PPD_P1 = 0;
-float last_value_PPD_P2 = 0;
-float last_value_SDS_P1 = 0;
-float last_value_SDS_P2 = 0;
-float last_value_PMS_P0 = 0;
-float last_value_PMS_P1 = 0;
-float last_value_PMS_P2 = 0;
-float last_value_HPM_P1 = 0;
-float last_value_HPM_P2 = 0;
-float last_value_DHT_T = 0;
-float last_value_DHT_H = 0;
-float last_value_HTU21D_T = 0;
-float last_value_HTU21D_H = 0;
-float last_value_BMP_T = 0;
-float last_value_BMP_P = 0;
-float last_value_BMP280_T = 0;
-float last_value_BMP280_P = 0;
-float last_value_BME280_T = 0;
-float last_value_BME280_H = 0;
-float last_value_BME280_P = 0;
-float last_value_DS18B20_T = 0;
+float last_value_PPD_P1 = -1;
+float last_value_PPD_P2 = -1;
+float last_value_SDS_P1 = -1;
+float last_value_SDS_P2 = -1;
+float last_value_PMS_P0 = -1;
+float last_value_PMS_P1 = -1;
+float last_value_PMS_P2 = -1;
+float last_value_HPM_P1 = -1;
+float last_value_HPM_P2 = -1;
+float last_value_DHT_T = -128;
+float last_value_DHT_H = -1;
+float last_value_HTU21D_T = -128;
+float last_value_HTU21D_H = -1;
+float last_value_BMP_T = -128;
+float last_value_BMP_P = -1;
+float last_value_BMP280_T = -128;
+float last_value_BMP280_P = -1;
+float last_value_BME280_T = -128;
+float last_value_BME280_H = -1;
+float last_value_BME280_P = -1;
+float last_value_DS18B20_T = -1;
 String last_data_string = "";
 
 String last_gps_lat;
@@ -410,6 +410,13 @@ String IPAddress2String(const IPAddress& ipaddress) {
     char myIpString[24];
     sprintf(myIpString, "%d.%d.%d.%d", ipaddress[0], ipaddress[1], ipaddress[2], ipaddress[3]);
     return String(myIpString);
+}
+
+/*****************************************************************
+/* check display values, return '-' if undefined                 *
+/*****************************************************************/
+String check_display_value(float value, float undef, int len) {
+	return (value != undef ? Float2String(value,len) : "-");
 }
 
 /*****************************************************************
@@ -1354,6 +1361,10 @@ void webserver_values() {
         server.send(302, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), "");
     } else {
         String page_content = "";
+		const String unit_PM = " µg/m³";
+		const String unit_T = " °C";
+		const String unit_H = " %";
+		const String unit_P = " hPa";
         String empty_row = F("<tr><td colspan='3'>&nbsp;</td></tr>");
         last_page_load = millis();
         long signal_strength = WiFi.RSSI();
@@ -1377,54 +1388,54 @@ void webserver_values() {
         page_content += tmpl(F("<tr><th>{v1}</th><th>{v2}</th><th>{v3}</th>"), FPSTR(INTL_SENSOR), FPSTR(INTL_PARAMETER), FPSTR(INTL_WERT));
         if (ppd_read) {
             page_content += empty_row;
-            page_content += table_row_from_value("PPD42NS", "PM1",  Float2String(last_value_PPD_P1,1), FPSTR(INTL_PARTIKEL_LITER));
-            page_content += table_row_from_value("PPD42NS", "PM2.5", Float2String(last_value_PPD_P2,1), FPSTR(INTL_PARTIKEL_LITER));
+            page_content += table_row_from_value("PPD42NS", "PM1",  check_display_value(last_value_PPD_P1, -1, 1), FPSTR(INTL_PARTIKEL_LITER));
+            page_content += table_row_from_value("PPD42NS", "PM2.5", check_display_value(last_value_PPD_P2, -1, 1), FPSTR(INTL_PARTIKEL_LITER));
         }
         if (sds_read) {
             page_content += empty_row;
-            page_content += table_row_from_value("SDS011", "PM2.5", Float2String(last_value_SDS_P2,1), "µg/m³");
-            page_content += table_row_from_value("SDS011", "PM10", Float2String(last_value_SDS_P1,1), "µg/m³");
+            page_content += table_row_from_value("SDS011", "PM2.5", check_display_value(last_value_SDS_P2, -1, 1), unit_PM);
+            page_content += table_row_from_value("SDS011", "PM10", check_display_value(last_value_SDS_P1, -1, 1), unit_PM);
         }
         if (pms24_read || pms32_read) {
             page_content += empty_row;
-            page_content += table_row_from_value("PMS", "PM1", Float2String(last_value_PMS_P0,1), "µg/m³");
-            page_content += table_row_from_value("PMS", "PM2.5", Float2String(last_value_PMS_P2,1), "µg/m³");
-            page_content += table_row_from_value("PMS", "PM10", Float2String(last_value_PMS_P1,1), "µg/m³");
+            page_content += table_row_from_value("PMS", "PM1", check_display_value(last_value_PMS_P0, -1, 1), unit_PM);
+            page_content += table_row_from_value("PMS", "PM2.5", check_display_value(last_value_PMS_P2, -1, 1), unit_PM);
+            page_content += table_row_from_value("PMS", "PM10", check_display_value(last_value_PMS_P1, -1, 1), unit_PM);
         }
         if (hpm_read) {
             page_content += empty_row;
-            page_content += table_row_from_value("Honeywell PMS", "PM2.5", Float2String(last_value_HPM_P2,1), "µg/m³");
-            page_content += table_row_from_value("Honeywell PMS", "PM10", Float2String(last_value_HPM_P1,1), "µg/m³");
+            page_content += table_row_from_value("Honeywell PMS", "PM2.5", check_display_value(last_value_HPM_P2, -1, 1), unit_PM);
+            page_content += table_row_from_value("Honeywell PMS", "PM10", check_display_value(last_value_HPM_P1, -1, 1), unit_PM);
         }
         if (dht_read) {
             page_content += empty_row;
-            page_content += table_row_from_value("DHT22", FPSTR(INTL_TEMPERATUR), Float2String(last_value_DHT_T,1), "°C");
-            page_content += table_row_from_value("DHT22", FPSTR(INTL_LUFTFEUCHTE), Float2String(last_value_DHT_H,1), "%");
+            page_content += table_row_from_value("DHT22", FPSTR(INTL_TEMPERATUR), check_display_value(last_value_DHT_T, -128, 1), unit_T);
+            page_content += table_row_from_value("DHT22", FPSTR(INTL_LUFTFEUCHTE), check_display_value(last_value_DHT_H, -1, 1), unit_H);
         }
         if (htu21d_read) {
             page_content += empty_row;
-            page_content += table_row_from_value("HTU21D", FPSTR(INTL_TEMPERATUR), Float2String(last_value_HTU21D_T,1), "°C");
-            page_content += table_row_from_value("HTU21D", FPSTR(INTL_LUFTFEUCHTE), Float2String(last_value_HTU21D_H,1), "%");
+            page_content += table_row_from_value("HTU21D", FPSTR(INTL_TEMPERATUR), check_display_value(last_value_HTU21D_T, -128, 1), unit_T);
+            page_content += table_row_from_value("HTU21D", FPSTR(INTL_LUFTFEUCHTE), check_display_value(last_value_HTU21D_H, -1, 1), unit_H);
         }
         if (bmp_read) {
             page_content += empty_row;
-            page_content += table_row_from_value("BMP180", FPSTR(INTL_TEMPERATUR), Float2String(last_value_BMP_T,1), "°C");
-            page_content += table_row_from_value("BMP180", FPSTR(INTL_LUFTDRUCK), Float2String(last_value_BMP_P / 100.0,2), "hPa");
+            page_content += table_row_from_value("BMP180", FPSTR(INTL_TEMPERATUR), check_display_value(last_value_BMP_T, -128, 1), unit_T);
+            page_content += table_row_from_value("BMP180", FPSTR(INTL_LUFTDRUCK), check_display_value(last_value_BMP_P / 100.0, (-1 / 100.0), 2), unit_P);
         }
         if (bmp280_read) {
             page_content += empty_row;
-            page_content += table_row_from_value("BMP280", FPSTR(INTL_TEMPERATUR), Float2String(last_value_BMP280_T,1), "°C");
-            page_content += table_row_from_value("BMP280", FPSTR(INTL_LUFTDRUCK), Float2String(last_value_BMP280_P / 100.0,2), "hPa");
+            page_content += table_row_from_value("BMP280", FPSTR(INTL_TEMPERATUR), check_display_value(last_value_BMP280_T, -128, 1), unit_T);
+            page_content += table_row_from_value("BMP280", FPSTR(INTL_LUFTDRUCK), check_display_value(last_value_BMP280_P / 100.0, (-1 / 100.0), 2), unit_P);
         }
         if (bme280_read) {
             page_content += empty_row;
-            page_content += table_row_from_value("BME280", FPSTR(INTL_TEMPERATUR), Float2String(last_value_BME280_T,1), "°C");
-            page_content += table_row_from_value("BME280", FPSTR(INTL_LUFTFEUCHTE), Float2String(last_value_BME280_H,1), "%");
-            page_content += table_row_from_value("BME280", FPSTR(INTL_LUFTDRUCK),  Float2String(last_value_BME280_P / 100.0,2), "hPa");
+            page_content += table_row_from_value("BME280", FPSTR(INTL_TEMPERATUR), check_display_value(last_value_BME280_T, -128, 1), unit_T);
+            page_content += table_row_from_value("BME280", FPSTR(INTL_LUFTFEUCHTE), check_display_value(last_value_BME280_H, -1, 1), unit_H);
+            page_content += table_row_from_value("BME280", FPSTR(INTL_LUFTDRUCK),  check_display_value(last_value_BME280_P / 100.0, (-1 / 100.0), 2), unit_P);
         }
         if (ds18b20_read) {
             page_content += empty_row;
-            page_content += table_row_from_value("DS18B20", FPSTR(INTL_TEMPERATUR), Float2String(last_value_DS18B20_T,1), "°C");
+            page_content += table_row_from_value("DS18B20", FPSTR(INTL_TEMPERATUR), check_display_value(last_value_DS18B20_T, -128, 1), unit_T);
         }
 
         page_content += empty_row;
@@ -1947,8 +1958,8 @@ String sensorDHT() {
 
     // Check if valid number if non NaN (not a number) will be send.
 
-    last_value_DHT_T = 0;
-    last_value_DHT_H = 0;
+    last_value_DHT_T = -128;
+    last_value_DHT_H = -1;
 
     while ((i++ < 5) && (s == "")) {
         h = dht.readHumidity(); //Read Humidity
@@ -1988,6 +1999,9 @@ String sensorHTU21D() {
 
     debug_out(String(FPSTR(DBG_TXT_START_READING)) + "HTU21D", DEBUG_MED_INFO, 1);
 
+	last_value_HTU21D_T = -128;
+    last_value_HTU21D_H = -1;
+
     t = htu21d.readTemperature();
     h = htu21d.readHumidity();
     if (isnan(t) || isnan(h)) {
@@ -2021,8 +2035,8 @@ String sensorBMP() {
 
     p = bmp.readPressure();
     t = bmp.readTemperature();
-    last_value_BMP_T = 0;
-    last_value_BMP_P = 0;
+    last_value_BMP_T = -128;
+    last_value_BMP_P = -1;
     if (isnan(p) || isnan(t)) {
         debug_out(F("BMP180 couldn't be read"), DEBUG_ERROR, 1);
     } else {
@@ -2054,8 +2068,8 @@ String sensorBMP280() {
 
     p = bmp280.readPressure();
     t = bmp280.readTemperature();
-    last_value_BMP280_T = 0;
-    last_value_BMP280_P = 0;
+    last_value_BMP280_T = -128;
+    last_value_BMP280_P = -1;
     if (isnan(p) || isnan(t)) {
         debug_out(F("BMP280 couldn't be read"), DEBUG_ERROR, 1);
     } else {
@@ -2089,9 +2103,9 @@ String sensorBME280() {
     t = bme280.readTemperature();
     h = bme280.readHumidity();
     p = bme280.readPressure();
-    last_value_BME280_T = 0;
-    last_value_BME280_H = 0;
-    last_value_BME280_P = 0;
+    last_value_BME280_T = -128;
+    last_value_BME280_H = -1;
+    last_value_BME280_P = -1;
     if (isnan(t) || isnan(h) || isnan(p)) {
         debug_out(F("BME280 couldn't be read"), DEBUG_ERROR, 1);
     } else {
@@ -2124,13 +2138,14 @@ String sensorDS18B20() {
     float t;
     debug_out(String(FPSTR(DBG_TXT_START_READING)) + "DS18B20", DEBUG_MED_INFO, 1);
 
+    last_value_DS18B20_T = -128;
+
     //it's very unlikely (-127: impossible) to get these temperatures in reality. Most times this means that the sensor is currently faulty
     //try 5 times to read the sensor, otherwise fail
     do {
         ds18b20.requestTemperatures();
         //for now, we want to read only the first sensor
         t = ds18b20.getTempCByIndex(0);
-        last_value_DS18B20_T = 0;
         i++;
         debug_out(F("DS18B20 trying...."), DEBUG_MIN_INFO, 0);
         debug_out(String(i), DEBUG_MIN_INFO, 1);
@@ -2265,8 +2280,8 @@ String sensorSDS() {
 
     }
     if (send_now) {
-        last_value_SDS_P1 = 0;
-        last_value_SDS_P2 = 0;
+        last_value_SDS_P1 = -1;
+        last_value_SDS_P2 = -1;
         if (sds_val_count > 2) {
             sds_pm10_sum = sds_pm10_sum - sds_pm10_min - sds_pm10_max;
             sds_pm25_sum = sds_pm25_sum - sds_pm25_min - sds_pm25_max;
@@ -2504,9 +2519,9 @@ String sensorPMS(int msg_len) {
 
     }
     if (send_now) {
-        last_value_PMS_P0 = 0;
-        last_value_PMS_P1 = 0;
-        last_value_PMS_P2 = 0;
+        last_value_PMS_P0 = -1;
+        last_value_PMS_P1 = -1;
+        last_value_PMS_P2 = -1;
         if (pms_val_count > 2) {
             pms_pm1_sum = pms_pm1_sum - pms_pm1_min - pms_pm1_max;
             pms_pm10_sum = pms_pm10_sum - pms_pm10_min - pms_pm10_max;
@@ -2728,8 +2743,8 @@ String sensorHPM() {
 
     }
     if (send_now) {
-        last_value_HPM_P1 = 0;
-        last_value_HPM_P2 = 0;
+        last_value_HPM_P1 = -1;
+        last_value_HPM_P2 = -1;
         if (hpm_val_count > 2) {
             hpm_pm10_sum = hpm_pm10_sum - hpm_pm10_min - hpm_pm10_max;
             hpm_pm25_sum = hpm_pm25_sum - hpm_pm25_min - hpm_pm25_max;
@@ -2804,8 +2819,8 @@ String sensorPPD() {
     }
     // Checking if it is time to sample
     if (send_now) {
-        last_value_PPD_P1 = 0;
-        last_value_PPD_P2 = 0;
+        last_value_PPD_P1 = -1;
+        last_value_PPD_P2 = -1;
         ratio = lowpulseoccupancyP1 / (sampletime_ms * 10.0);					// int percentage 0 to 100
         concentration = (1.1 * pow(ratio, 3) - 3.8 * pow(ratio, 2) + 520 * ratio + 0.62);	// spec sheet curve
         // Begin printing
@@ -2987,14 +3002,14 @@ void autoUpdate() {
 /* display values                                                *
 /*****************************************************************/
 void display_values() {
-    float t_value = 0;
-    float h_value = 0;
-    float p_value = 0;
+    float t_value = -128;
+    float h_value = -1;
+    float p_value = -1;
     String t_sensor = "";
     String h_sensor = "";
     String p_sensor = "";
-    float pm10_value = 0;
-    float pm25_value = 0;
+    float pm10_value = -1;
+    float pm25_value = -1;
     String pm10_sensor = "";
     String pm25_sensor = "";
     String display_header = "";
@@ -3061,8 +3076,8 @@ void display_values() {
             if (pm25_sensor != pm10_sensor) {
                 display_header += " / " + pm25_sensor;
             }
-            display_line1 = "PM2.5: " + (pm25_value != 0 ? Float2String(pm25_value,1) : "-");
-            display_line2 = "PM10:  " + (pm10_value != 0 ? Float2String(pm10_value,1) : "-");
+            display_line1 = "PM2.5: " + check_display_value(pm25_value, -1, 1) + " µg/m³";
+            display_line2 = "PM10:  " + check_display_value(pm10_value, -1, 1) + " µg/m³";
             display_footer = "o...";
         }
         if ((next_display_count % 4) == 1) {
@@ -3073,9 +3088,9 @@ void display_values() {
             if (h_sensor != p_sensor) {
                 display_header += " / " + p_sensor;
             }
-            display_line1 = "Temp.: " + (t_value != 0 ? Float2String(t_value,1) : "-") + char(223) + "C";
-            display_line2 = "Hum.:  " + (h_value != 0 ? Float2String(h_value,1) : "-") + "%";
-            display_line3 = "Pres.: " + (p_value != 0 ? Float2String(p_value/100,1) : "-") + "hPa";
+            display_line1 = "Temp.: " + check_display_value(t_value, -128, 1) + " °C";
+            display_line2 = "Hum.:  " + check_display_value(h_value, -1, 1) + " %";
+            display_line3 = "Pres.: " + check_display_value(p_value / 100, (-1 / 100.0), 1) + " hPa";
             display_footer = ".o..";
         }
         if ((next_display_count % 4) == 2) {
@@ -3119,20 +3134,20 @@ void display_values() {
 // T/P: -10.0°C/1000hPa
 
     if ((next_display_count % 4) == 0) {
-        display_line1 = "PM2.5: " + (pm25_value != 0 ? Float2String(pm25_value,1) : "-");
-        display_line2 = "PM10:  " + (pm10_value != 0 ? Float2String(pm10_value,1) : "-");
+        display_line1 = "PM2.5: " + check_display_value(pm25_value, -1, 1);
+        display_line2 = "PM10:  " + check_display_value(pm10_value, -1, 1);
     }
     if ((next_display_count % 4) == 1) {
-        display_line1 = "T: " + (t_value != 0 ? Float2String(t_value,1) : "-") + char(223) + "C";
-        display_line2 = "H: " + (h_value != 0 ? Float2String(h_value,1) : "-") + "%";
+        display_line1 = "T: " + check_display_value(t_value, -128, 1) + char(223) + "C";
+        display_line2 = "H: " + check_display_value(h_value, -1, 1) + "%";
     }
     if ((next_display_count % 4) == 2) {
-        display_line1 = "ID: " + esp_chipid;
-        display_line2 = "FW: " + String(SOFTWARE_VERSION);
-    }
-    if ((next_display_count % 4) == 3) {
         display_line1 = IPAddress2String(WiFi.localIP());
         display_line2 = WiFi.SSID();
+    }
+    if ((next_display_count % 4) == 3) {
+        display_line1 = "ID: " + esp_chipid;
+        display_line2 = "FW: " + String(SOFTWARE_VERSION);
     }
 
     if (has_lcd1602_27) {
