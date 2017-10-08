@@ -3082,10 +3082,10 @@ void display_values() {
         }
         if ((next_display_count % 4) == 1) {
             display_header = t_sensor;
-            if (t_sensor != h_sensor) {
+            if (h_sensor != "" && t_sensor != h_sensor) {
                 display_header += " / " + h_sensor;
             }
-            if (h_sensor != p_sensor) {
+            if ((h_sensor != "" && p_sensor != "" && (h_sensor != p_sensor)) || (h_sensor == "" && p_sensor != "" && (t_sensor != p_sensor))) {
                 display_header += " / " + p_sensor;
             }
             display_line1 = "Temp.: " + check_display_value(t_value, -128, 1) + " °C";
