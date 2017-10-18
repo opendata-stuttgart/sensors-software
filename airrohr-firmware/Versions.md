@@ -1,11 +1,14 @@
 NRZ-2017-100
 beta
 * optimizing display function: more than one 'screen' for infos
+* (vB4 left align values)
 * added dependencies for OneWire
 * added wiring for new sensors to Readme.md
 * added support for Honeywell PM sensor
 * enable configurable usage of beta firmware
 * removing Arduino Feather code
+* version B4: left align values
+* version B4: added display of DS18B20 and HTU21D values
 
 NRZ-2017-099
 online since 2017-09-10
