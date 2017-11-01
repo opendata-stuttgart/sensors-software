@@ -10,6 +10,11 @@ const char DBG_TXT_PRESSURE[] PROGMEM = "Pressure: ";
 const char DBG_TXT_START_READING[] PROGMEM = "Start reading ";
 const char DBG_TXT_END_READING[] PROGMEM = "End reading ";
 
+const uint8_t start_SDS_cmd[] PROGMEM = {0xAA, 0xB4, 0x06, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x06, 0xAB};
+const uint8_t stop_SDS_cmd[] PROGMEM = {0xAA, 0xB4, 0x06, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x05, 0xAB};
+const uint8_t start_PMS_cmd[] PROGMEM = { 0x42, 0x4D, 0xE4, 0x00, 0x01, 0x01, 0x74 };
+const uint8_t stop_PMS_cmd[] PROGMEM = { 0x42, 0x4D, 0xE4, 0x00, 0x00, 0x01, 0x73 };
+
 const char WEB_PAGE_HEADER[] PROGMEM = "<html>\
 <head>\
 <title>{t}</title>\
@@ -27,27 +32,27 @@ input[type='submit']{border-radius:5px;font-size:medium;padding:5px;}\
 </style>\
 </head><body>\
 <div style='min-height:120px;background-color:#38b5ad;margin-bottom:20px'>\
-	<a href='/' style='background:none;width:0;display:inline'><img src='/images?name=luftdaten_logo' style='float:left;margin:20px'/></a>\
-	<h3 style='margin:0'>{tt}</h3>\
-	<small>ID: {id}<br/>MAC: {mac}<br/>{fwt}: {fw}</small></div><div class='content'><h4>{h} {n} {t}</h4>";
+<a href='/' style='background:none;width:0;display:inline'><img src='/images?name=luftdaten_logo' style='float:left;margin:20px'/></a>\
+<h3 style='margin:0'>{tt}</h3>\
+<small>ID: {id}<br/>MAC: {mac}<br/>{fwt}: {fw}</small></div><div class='content'><h4>{h} {n} {t}</h4>";
 
 const char WEB_PAGE_FOOTER[] PROGMEM = "<br/><br/><a href='/' style='display:inline;'>{t}</a><br/><br/><br/>\
 <a href='http://codefor.de/' target='_blank' style='display:inline;background:none;width:0px;'><img src='/images?name=cfg_logo' style='width:200px;max-width:50%;'/></a>\
 </div></body></html>\r\n";
 
 const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a href='/values'>{t}</a><br/>\
-<a href='http://deutschland.maps.luftdaten.info/' target='_blank'>{karte}</a><br/>\
+<a href='http://maps.luftdaten.info/' target='_blank'>{map}</a><br/>\
 <a href='/config'>{conf}</a><br/>\
 <a href='/removeConfig'>{conf_delete}</a><br/>\
 <a href='/reset'>{restart}</a><br/>\
 <table style='width:100%;'>\
-<tr><td style='width:33%;'><a href='/debug?level=0'>Debug null</a></td>\
-<td style='width:33%;'><a href='/debug?level=1'>Debug Error</a></td>\
-<td style='width:33%;'><a href='/debug?level=2'>Debug Warning</a></td>\
+<tr><td style='width:33%;'><a href='/debug?lvl=0'>Debug null</a></td>\
+<td style='width:33%;'><a href='/debug?lvl=1'>Debug Error</a></td>\
+<td style='width:33%;'><a href='/debug?lvl=2'>Debug Warning</a></td>\
 </tr><tr>\
-<td><a href='/debug?level=3'>Debug Info low</a></td>\
-<td><a href='/debug?level=4'>Debug Info medium</a></td>\
-<td><a href='/debug?level=5'>Debug Info high</a></td>\
+<td><a href='/debug?lvl=3'>Debug Info low</a></td>\
+<td><a href='/debug?lvl=4'>Debug Info medium</a></td>\
+<td><a href='/debug?lvl=5'>Debug Info high</a></td>\
 </tr>\
 </table>\
 ";

@@ -326,33 +326,34 @@ int hpm_pm10_min = 20000;
 int hpm_pm25_max = 0;
 int hpm_pm25_min = 20000;
 
-double last_value_PPD_P1 = -1.0;
-double last_value_PPD_P2 = -1.0;
-double last_value_SDS_P1 = -1.0;
-double last_value_SDS_P2 = -1.0;
-double last_value_PMS_P0 = -1.0;
-double last_value_PMS_P1 = -1.0;
-double last_value_PMS_P2 = -1.0;
-double last_value_HPM_P1 = -1.0;
-double last_value_HPM_P2 = -1.0;
-double last_value_DHT_T = -128.0;
-double last_value_DHT_H = -1.0;
-double last_value_HTU21D_T = -128-0;
-double last_value_HTU21D_H = -1.0;
-double last_value_BMP_T = -128.0;
-double last_value_BMP_P = -1.0;
-double last_value_BMP280_T = -128.0;
-double last_value_BMP280_P = -1.0;
-double last_value_BME280_T = -128.0;
-double last_value_BME280_H = -1.0;
-double last_value_BME280_P = -1.0;
-double last_value_DS18B20_T = -1.0;
-double last_value_GPS_lat = -200.0;
-double last_value_GPS_lon = -200.0;
-double last_value_GPS_alt = -1000.0;
+double last_value_PPD_P1 = -1;
+double last_value_PPD_P2 = -1;
+double last_value_SDS_P1 = -1;
+double last_value_SDS_P2 = -1;
+double last_value_PMS_P0 = -1;
+double last_value_PMS_P1 = -1;
+double last_value_PMS_P2 = -1;
+double last_value_HPM_P1 = -1;
+double last_value_HPM_P2 = -1;
+double last_value_DHT_T = -128;
+double last_value_DHT_H = -1;
+double last_value_HTU21D_T = -128;
+double last_value_HTU21D_H = -1;
+double last_value_BMP_T = -128;
+double last_value_BMP_P = -1;
+double last_value_BMP280_T = -128;
+double last_value_BMP280_P = -1;
+double last_value_BME280_T = -128;
+double last_value_BME280_H = -1;
+double last_value_BME280_P = -1;
+double last_value_DS18B20_T = -1;
+double last_value_GPS_lat = -200;
+double last_value_GPS_lon = -200;
+double last_value_GPS_alt = -1000;
+String last_data_string = "";
+
 String last_value_GPS_date;
 String last_value_GPS_time;
-String last_data_string = "";
 
 String esp_chipid;
 
@@ -1484,7 +1485,7 @@ void webserver_values() {
             page_content += table_row_from_value("GPS", FPSTR(INTL_ALTITUDE),  check_display_value(last_value_GPS_alt, -1000.0, 2, 0), "m");
             page_content += table_row_from_value("GPS", FPSTR(INTL_DATE), last_value_GPS_date, "");
             page_content += table_row_from_value("GPS", FPSTR(INTL_TIME), last_value_GPS_time, "");
-        }
+		}
 
         page_content += empty_row;
         page_content += table_row_from_value("WiFi", FPSTR(INTL_SIGNAL),  String(signal_strength), "dBm");
@@ -1600,32 +1601,32 @@ void webserver_reset() {
 /* Webserver data.json                                           *
 /*****************************************************************/
 void webserver_data_json() {
-    String s1 = "";
-    unsigned long age = 0;
+	String s1 = "";
+	unsigned long age = 0;
     debug_out(F("output data json..."), DEBUG_MIN_INFO, 1);
     if (first_cycle) {
-        s1 = data_first_part + "]}";
-        age = sending_intervall_ms - (act_milli - starttime);
-        if ((age > sending_intervall_ms) || (age < 0)) {
-            age = 0;
-        }
-    } else {
-        s1 = last_data_string;
-        debug_out(F("last data: "), DEBUG_MIN_INFO, 0);
-        debug_out(s1, DEBUG_MIN_INFO, 1);
-        age = act_milli - starttime;
-        if ((age > sending_intervall_ms) || (age < 0)) {
-            age = 0;
-        }
-    }
-    String s2 = F(", \"age\":\"");
-    s2 += String((long)((age + 500) / 1000));
-    s2 += F("\", \"sensordatavalues\"");
-    debug_out(F("replace with: "), DEBUG_MIN_INFO, 0);
-    debug_out(s2, DEBUG_MIN_INFO, 1);
-    s1.replace(F(", \"sensordatavalues\""), s2);
-    debug_out(F("replaced: "), DEBUG_MIN_INFO, 0);
-    debug_out(s1, DEBUG_MIN_INFO, 1);
+		s1 = data_first_part + "]}";
+	    age = sending_intervall_ms - (act_milli - starttime);
+		if ((age > sending_intervall_ms) || (age < 0)) {
+			age = 0;
+		}
+	} else {
+		s1 = last_data_string;
+		debug_out(F("last data: "), DEBUG_MIN_INFO, 0);
+		debug_out(s1, DEBUG_MIN_INFO, 1);
+		age = act_milli - starttime;
+		if ((age > sending_intervall_ms) || (age < 0)) {
+			age = 0;
+		}
+	}
+	String s2 = F(", \"age\":\"");
+	s2 += String((long)((age + 500) / 1000));
+	s2 += F("\", \"sensordatavalues\"");
+	debug_out(F("replace with: "), DEBUG_MIN_INFO, 0);
+	debug_out(s2, DEBUG_MIN_INFO, 1);
+	s1.replace(F(", \"sensordatavalues\""), s2);
+	debug_out(F("replaced: "), DEBUG_MIN_INFO, 0);
+	debug_out(s1, DEBUG_MIN_INFO, 1);
     server.send(200, FPSTR(TXT_CONTENT_TYPE_JSON), s1);
 }
 
@@ -2941,8 +2942,8 @@ String sensorGPS() {
     String gps_lat = "";
     String gps_lon = "";
     String gps_alt = "";
-    String gps_date = "";
-    String gps_time = "";
+	String gps_date = "";
+	String gps_time = "";
 
     debug_out(String(FPSTR(DBG_TXT_START_READING)) + "GPS", DEBUG_MED_INFO, 1);
 
@@ -2954,15 +2955,15 @@ String sensorGPS() {
                 gps_lat = Float2String(last_value_GPS_lat,6);
                 gps_lon = Float2String(last_value_GPS_lon,6);
             } else {
-                last_value_GPS_lat = -200;
-                last_value_GPS_lon = -200;
+				last_value_GPS_lat = -200;
+				last_value_GPS_lon = -200;
                 debug_out(F("Lat/Lng INVALID"), DEBUG_MAX_INFO, 1);
             }
             if (gps.altitude.isValid()) {
                 last_value_GPS_alt = gps.altitude.meters();
                 gps_alt = Float2String(last_value_GPS_lat,2);
             } else {
-                last_value_GPS_alt = -1000;
+				last_value_GPS_alt = -1000;
                 debug_out(F("Altitude INVALID"), DEBUG_MAX_INFO, 1);
             }
             if (gps.date.isValid()) {
@@ -3014,11 +3015,11 @@ String sensorGPS() {
         debug_out("Date: " + last_value_GPS_date, DEBUG_MIN_INFO, 1);
         debug_out("Time " + last_value_GPS_time, DEBUG_MIN_INFO, 1);
         debug_out("----", DEBUG_MIN_INFO, 1);
-        s += Value2Json(F("GPS_lat"), gps_lat);
-        s += Value2Json(F("GPS_lon"), gps_lon);
-        s += Value2Json(F("GPS_height"), gps_alt);
-        s += Value2Json(F("GPS_date"), gps_date);
-        s += Value2Json(F("GPS_time"), gps_time);
+		s += Value2Json(F("GPS_lat"), gps_lat);
+		s += Value2Json(F("GPS_lon"), gps_lon);
+		s += Value2Json(F("GPS_height"), gps_alt);
+		s += Value2Json(F("GPS_date"), gps_date);
+		s += Value2Json(F("GPS_time"), gps_time);
     }
 
     if ( gps.charsProcessed() < 10) {
@@ -3073,19 +3074,19 @@ void autoUpdate() {
 /* display values                                                *
 /*****************************************************************/
 void display_values() {
-    double t_value = -128.0;
-    double h_value = -1.0;
-    double p_value = -1.0;
+    double t_value = -128;
+    double h_value = -1;
+    double p_value = -1;
     String t_sensor = "";
     String h_sensor = "";
     String p_sensor = "";
-    double pm10_value = -1.0;
-    double pm25_value = -1.0;
+    double pm10_value = -1;
+    double pm25_value = -1;
     String pm10_sensor = "";
     String pm25_sensor = "";
-    double lat_value = -200.0;
-    double lon_value = -200.0;
-    double alt_value = -1000.0;
+    double lat_value = -200;
+    double lon_value = -200;
+    double alt_value = -1000;
     String gps_sensor = "";
     String display_header = "";
     String display_line1 = "";
@@ -3154,12 +3155,12 @@ void display_values() {
         p_value = last_value_BME280_P;
         p_sensor = "BME280";
     }
-    if (gps_read) {
-        lat_value = last_value_GPS_lat;
-        lon_value = last_value_GPS_lon;
-        alt_value = last_value_GPS_alt;
-        gps_sensor = "NEO6M";
-    }
+	if (gps_read) {
+		lat_value = last_value_GPS_lat;
+		lon_value = last_value_GPS_lon;
+		alt_value = last_value_GPS_alt;
+		gps_sensor = "NEO6M";
+	}
     if (has_display) {
         if ((next_display_count % 4) == 0) {
             display_header = pm25_sensor;

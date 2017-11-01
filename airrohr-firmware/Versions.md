@@ -1,14 +1,18 @@
 NRZ-2017-100
 beta
 * optimizing display function: more than one 'screen' for infos
-* (vB4 left align values)
 * added dependencies for OneWire
 * added wiring for new sensors to Readme.md
 * added support for Honeywell PM sensor
 * enable configurable usage of beta firmware
 * removing Arduino Feather code
-* version B4: left align values
+* version B4: right align values
 * version B4: added display of DS18B20 and HTU21D values
+* version B5: wpa2 password can be configured for sensor in AP mode
+* version B5: more info to sensors on config page
+* version B5: some flash memory optimizations
+* version B5: parseable data.json before first measurement
+* version B5: GPS data on value page
 
 NRZ-2017-099
 online since 2017-09-10
