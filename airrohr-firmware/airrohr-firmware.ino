@@ -110,6 +110,8 @@
 #include "intl_nl.h"
 #elif defined(INTL_PT)
 #include "intl_pt.h"
+#elif defined(INTL_SV)
+#include "intl_sv.h"
 #else
 #include "intl_de.h"
 #endif
@@ -951,7 +953,7 @@ String form_submit(const String& value) {
 
 String form_select_lang() {
     String s_select = F("selected='selected'");
-    String s = F("<tr><td>{t}</td><td><select name='current_lang'><option value='DE' {s_DE}>Deutsch (DE)</option><option value='BG' {s_BG}>Bulgarian (BG)</option><option value='EN' {s_EN}>English (EN)</option><option value='ES' {s_ES}>Español (ES)</option><option value='FR' {s_FR}>Français (FR)</option><option value='IT' {s_IT}>Italiano (IT)</option><option value='NL' {s_NL}>Nederlands (NL)</option><option value='PT' {s_PT}>Português (PT)</option></select></td></tr>");
+    String s = F("<tr><td>{t}</td><td><select name='current_lang'><option value='DE' {s_DE}>Deutsch (DE)</option><option value='BG' {s_BG}>Bulgarian (BG)</option><option value='EN' {s_EN}>English (EN)</option><option value='ES' {s_ES}>Español (ES)</option><option value='FR' {s_FR}>Français (FR)</option><option value='IT' {s_IT}>Italiano (IT)</option><option value='NL' {s_NL}>Nederlands (NL)</option><option value='PT' {s_PT}>Português (PT)</option><option value='SV' {s_SV}>Svenska (SV)</option></select></td></tr>");
 
     s.replace("{t}", FPSTR(INTL_SPRACHE));
 
@@ -971,6 +973,8 @@ String form_select_lang() {
         s.replace(F("{s_NL}"), s_select);
     } else if(String(current_lang) == "PT") {
         s.replace(F("{s_PT}"), s_select);
+    } else if(String(current_lang) == "SV") {
+        s.replace(F("{s_SV}"), s_select);
     }
     s.replace(F("{s_DE}"), "");
     s.replace(F("{s_BG}"), "");
@@ -979,6 +983,7 @@ String form_select_lang() {
     s.replace(F("{s_FR}"), "");
     s.replace(F("{s_NL}"), "");
     s.replace(F("{s_PT}"), "");
+    s.replace(F("{s_SV}"), "");
     return s;
 }
 
