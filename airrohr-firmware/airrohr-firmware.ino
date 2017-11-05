@@ -460,79 +460,79 @@ String Value2Json(const String& type, const String& value) {
 /* start SDS011 sensor                                           *
 /*****************************************************************/
 void start_SDS() {
-	uint8_t * buf = new uint8_t[start_SDS_cmd_len];
-	if (buf) {
-		memcpy_P(buf,start_SDS_cmd,start_SDS_cmd_len);
-		serialSDS.write(buf, start_SDS_cmd_len);
-		is_SDS_running = true;
-	}
+    uint8_t * buf = new uint8_t[start_SDS_cmd_len];
+    if (buf) {
+        memcpy_P(buf,start_SDS_cmd,start_SDS_cmd_len);
+        serialSDS.write(buf, start_SDS_cmd_len);
+        is_SDS_running = true;
+    }
 }
 
 /*****************************************************************
 /* stop SDS011 sensor                                            *
 /*****************************************************************/
 void stop_SDS() {
-	uint8_t * buf = new uint8_t[stop_SDS_cmd_len];
-	if (buf) {
-		memcpy_P(buf,stop_SDS_cmd,stop_SDS_cmd_len);
-		serialSDS.write(buf, stop_SDS_cmd_len);
-		is_SDS_running = false;
-	}
+    uint8_t * buf = new uint8_t[stop_SDS_cmd_len];
+    if (buf) {
+        memcpy_P(buf,stop_SDS_cmd,stop_SDS_cmd_len);
+        serialSDS.write(buf, stop_SDS_cmd_len);
+        is_SDS_running = false;
+    }
 }
 
 /*****************************************************************
 /* start Plantower PMS sensor                                    *
 /*****************************************************************/
 void start_PMS() {
-	uint8_t * buf = new uint8_t[start_PMS_cmd_len];
-	if (buf) {
-		memcpy_P(buf,start_PMS_cmd,start_PMS_cmd_len);
-		serialSDS.write(buf, start_PMS_cmd_len);
-		is_PMS_running = true;
-	}
+    uint8_t * buf = new uint8_t[start_PMS_cmd_len];
+    if (buf) {
+        memcpy_P(buf,start_PMS_cmd,start_PMS_cmd_len);
+        serialSDS.write(buf, start_PMS_cmd_len);
+        is_PMS_running = true;
+    }
 }
 
 /*****************************************************************
 /* stop Plantower PMS sensor                                     *
 /*****************************************************************/
 void stop_PMS() {
-	uint8_t * buf = new uint8_t[stop_PMS_cmd_len];
-	if (buf) {
-		memcpy_P(buf,stop_PMS_cmd,stop_PMS_cmd_len);
-		serialSDS.write(buf, stop_PMS_cmd_len);
-		is_PMS_running = false;
-	}
+    uint8_t * buf = new uint8_t[stop_PMS_cmd_len];
+    if (buf) {
+        memcpy_P(buf,stop_PMS_cmd,stop_PMS_cmd_len);
+        serialSDS.write(buf, stop_PMS_cmd_len);
+        is_PMS_running = false;
+    }
 }
 
 /*****************************************************************
 /* start Honeywell PMS sensor                                    *
 /*****************************************************************/
 void start_HPM() {
-	uint8_t * buf = new uint8_t[start_HPM_cmd_len];
-	if (buf) {
-		memcpy_P(buf,start_HPM_cmd,start_HPM_cmd_len);
-		serialSDS.write(buf, start_HPM_cmd_len);
-		is_PMS_running = true;
-	}
+    uint8_t * buf = new uint8_t[start_HPM_cmd_len];
+    if (buf) {
+        memcpy_P(buf,start_HPM_cmd,start_HPM_cmd_len);
+        serialSDS.write(buf, start_HPM_cmd_len);
+        is_PMS_running = true;
+    }
 }
 
 /*****************************************************************
 /* stop Honeywell PMS sensor                                     *
 /*****************************************************************/
 void stop_HPM() {
-	uint8_t * buf = new uint8_t[stop_HPM_cmd_len];
-	if (buf) {
-		memcpy_P(buf,stop_HPM_cmd,stop_HPM_cmd_len);
-		serialSDS.write(buf, stop_HPM_cmd_len);
-		is_PMS_running = false;
-	}
+    uint8_t * buf = new uint8_t[stop_HPM_cmd_len];
+    if (buf) {
+        memcpy_P(buf,stop_HPM_cmd,stop_HPM_cmd_len);
+        serialSDS.write(buf, stop_HPM_cmd_len);
+        is_PMS_running = false;
+    }
 }
 
 /*****************************************************************
 /* read SDS011 sensor serial and firmware date                   *
 /*****************************************************************/
 String SDS_version_date() {
-    const uint8_t version_SDS_cmd[] = {0xAA, 0xB4, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x05, 0xAB};
+    uint8_t * buf = new uint8_t[version_SDS_cmd_len];
     String s = "";
     char buffer;
     int value;
@@ -549,7 +549,10 @@ String SDS_version_date() {
 
     delay(100);
 
-    serialSDS.write(version_SDS_cmd, sizeof(version_SDS_cmd));
+    if (buf) {
+        memcpy_P(buf,version_SDS_cmd,version_SDS_cmd_len);
+        serialSDS.write(buf, version_SDS_cmd_len);
+    }
 
     delay(500);
 
