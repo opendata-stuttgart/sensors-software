@@ -13,6 +13,8 @@ beta
 * version B5: some flash memory optimizations
 * version B5: parseable data.json before first measurement
 * version B5: GPS data on value page
+* version B6: added swedish translations
+* version B6: error in start/stop commands corrected
 
 NRZ-2017-099
 online since 2017-09-10

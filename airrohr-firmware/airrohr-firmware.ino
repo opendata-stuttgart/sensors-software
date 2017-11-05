@@ -69,7 +69,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2017-100-B5"
+#define SOFTWARE_VERSION "NRZ-2017-100-B6"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -110,8 +110,8 @@
 #include "intl_nl.h"
 #elif defined(INTL_PT)
 #include "intl_pt.h"
-#elif defined(INTL_SV)
-#include "intl_sv.h"
+#elif defined(INTL_SE)
+#include "intl_se.h"
 #else
 #include "intl_de.h"
 #endif
@@ -460,54 +460,72 @@ String Value2Json(const String& type, const String& value) {
 /* start SDS011 sensor                                           *
 /*****************************************************************/
 void start_SDS() {
-//    const uint8_t start_SDS_cmd[] = {0xAA, 0xB4, 0x06, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x06, 0xAB};
-    serialSDS.write(start_SDS_cmd, sizeof(start_SDS_cmd));
-    is_SDS_running = true;
+	uint8_t * buf = new uint8_t[start_SDS_cmd_len];
+	if (buf) {
+		memcpy_P(buf,start_SDS_cmd,start_SDS_cmd_len);
+		serialSDS.write(buf, start_SDS_cmd_len);
+		is_SDS_running = true;
+	}
 }
 
 /*****************************************************************
 /* stop SDS011 sensor                                            *
 /*****************************************************************/
 void stop_SDS() {
-//    const uint8_t stop_SDS_cmd[] = {0xAA, 0xB4, 0x06, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x05, 0xAB};
-    serialSDS.write(stop_SDS_cmd, sizeof(stop_SDS_cmd));
-    is_SDS_running = false;
+	uint8_t * buf = new uint8_t[stop_SDS_cmd_len];
+	if (buf) {
+		memcpy_P(buf,stop_SDS_cmd,stop_SDS_cmd_len);
+		serialSDS.write(buf, stop_SDS_cmd_len);
+		is_SDS_running = false;
+	}
 }
 
 /*****************************************************************
 /* start Plantower PMS sensor                                    *
 /*****************************************************************/
 void start_PMS() {
-//    const uint8_t start_PMS_cmd[] = { 0x42, 0x4D, 0xE4, 0x00, 0x01, 0x01, 0x74 };
-    serialSDS.write(start_PMS_cmd, sizeof(start_PMS_cmd));
-    is_PMS_running = true;
+	uint8_t * buf = new uint8_t[start_PMS_cmd_len];
+	if (buf) {
+		memcpy_P(buf,start_PMS_cmd,start_PMS_cmd_len);
+		serialSDS.write(buf, start_PMS_cmd_len);
+		is_PMS_running = true;
+	}
 }
 
 /*****************************************************************
 /* stop Plantower PMS sensor                                     *
 /*****************************************************************/
 void stop_PMS() {
-//    const uint8_t stop_PMS_cmd[] PROGMEM = { 0x42, 0x4D, 0xE4, 0x00, 0x00, 0x01, 0x73 };
-    serialSDS.write(stop_PMS_cmd, sizeof(stop_PMS_cmd));
-    is_PMS_running = false;
+	uint8_t * buf = new uint8_t[stop_PMS_cmd_len];
+	if (buf) {
+		memcpy_P(buf,stop_PMS_cmd,stop_PMS_cmd_len);
+		serialSDS.write(buf, stop_PMS_cmd_len);
+		is_PMS_running = false;
+	}
 }
 
 /*****************************************************************
 /* start Honeywell PMS sensor                                    *
 /*****************************************************************/
 void start_HPM() {
-    const uint8_t start_HPM_cmd[] = { 0x68, 0x01, 0x01, 0x96 };
-    serialSDS.write(start_HPM_cmd, sizeof(start_HPM_cmd));
-    is_HPM_running = true;
+	uint8_t * buf = new uint8_t[start_HPM_cmd_len];
+	if (buf) {
+		memcpy_P(buf,start_HPM_cmd,start_HPM_cmd_len);
+		serialSDS.write(buf, start_HPM_cmd_len);
+		is_PMS_running = true;
+	}
 }
 
 /*****************************************************************
 /* stop Honeywell PMS sensor                                     *
 /*****************************************************************/
 void stop_HPM() {
-    const uint8_t stop_HPM_cmd[] = { 0x68, 0x01, 0x02, 0x95 };
-    serialSDS.write(stop_HPM_cmd, sizeof(stop_HPM_cmd));
-    is_HPM_running = false;
+	uint8_t * buf = new uint8_t[stop_HPM_cmd_len];
+	if (buf) {
+		memcpy_P(buf,stop_HPM_cmd,stop_HPM_cmd_len);
+		serialSDS.write(buf, stop_HPM_cmd_len);
+		is_PMS_running = false;
+	}
 }
 
 /*****************************************************************
@@ -953,7 +971,7 @@ String form_submit(const String& value) {
 
 String form_select_lang() {
     String s_select = F("selected='selected'");
-    String s = F("<tr><td>{t}</td><td><select name='current_lang'><option value='DE' {s_DE}>Deutsch (DE)</option><option value='BG' {s_BG}>Bulgarian (BG)</option><option value='EN' {s_EN}>English (EN)</option><option value='ES' {s_ES}>Español (ES)</option><option value='FR' {s_FR}>Français (FR)</option><option value='IT' {s_IT}>Italiano (IT)</option><option value='NL' {s_NL}>Nederlands (NL)</option><option value='PT' {s_PT}>Português (PT)</option><option value='SV' {s_SV}>Svenska (SV)</option></select></td></tr>");
+    String s = F("<tr><td>{t}</td><td><select name='current_lang'><option value='DE' {s_DE}>Deutsch (DE)</option><option value='BG' {s_BG}>Bulgarian (BG)</option><option value='EN' {s_EN}>English (EN)</option><option value='ES' {s_ES}>Español (ES)</option><option value='FR' {s_FR}>Français (FR)</option><option value='IT' {s_IT}>Italiano (IT)</option><option value='NL' {s_NL}>Nederlands (NL)</option><option value='PT' {s_PT}>Português (PT)</option><option value='SE' {s_SE}>Svenska (SE)</option></select></td></tr>");
 
     s.replace("{t}", FPSTR(INTL_SPRACHE));
 
@@ -973,8 +991,8 @@ String form_select_lang() {
         s.replace(F("{s_NL}"), s_select);
     } else if(String(current_lang) == "PT") {
         s.replace(F("{s_PT}"), s_select);
-    } else if(String(current_lang) == "SV") {
-        s.replace(F("{s_SV}"), s_select);
+    } else if(String(current_lang) == "SE") {
+        s.replace(F("{s_SE}"), s_select);
     }
     s.replace(F("{s_DE}"), "");
     s.replace(F("{s_BG}"), "");
@@ -983,7 +1001,7 @@ String form_select_lang() {
     s.replace(F("{s_FR}"), "");
     s.replace(F("{s_NL}"), "");
     s.replace(F("{s_PT}"), "");
-    s.replace(F("{s_SV}"), "");
+    s.replace(F("{s_SE}"), "");
     return s;
 }
 

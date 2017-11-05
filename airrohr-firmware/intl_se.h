@@ -1,4 +1,4 @@
-const char INTL_LANG[] = "SV";
+const char INTL_LANG[] = "SE";
 const char INTL_FEINSTAUBSENSOR[] PROGMEM = "Partikelsensor";
 const char INTL_KONFIGURATION[] PROGMEM = "Inställningar";
 const char INTL_WLAN_DATEN[] PROGMEM = "WLAN konfiguration";
