@@ -15,6 +15,10 @@ beta
 * version B5: GPS data on value page
 * version B6: added swedish translations
 * version B6: error in start/stop commands corrected
+* version B7: showing GPS data on displays
+* version B7: wrong output on config save corrected
+* version B7: double date/time on values page corrected
+* version B7: changed codefor logo to png
 
 NRZ-2017-099
 online since 2017-09-10

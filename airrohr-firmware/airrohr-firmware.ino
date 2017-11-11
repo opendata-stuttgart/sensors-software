@@ -69,7 +69,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2017-100-B6"
+#define SOFTWARE_VERSION "NRZ-2017-100-B7"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -352,8 +352,8 @@ double last_value_DS18B20_T = -1.0;
 double last_value_GPS_lat = -200.0;
 double last_value_GPS_lon = -200.0;
 double last_value_GPS_alt = -1000.0;
-String last_value_GPS_date;
-String last_value_GPS_time;
+String last_value_GPS_date = "";
+String last_value_GPS_time = "";
 String last_data_string = "";
 
 String esp_chipid;
@@ -1094,6 +1094,7 @@ String add_sensor_type(const String& sensor_text) {
     s.replace("{p}",FPSTR(INTL_LUFTDRUCK));
     return s;
 }
+
 /*****************************************************************
 /* Webserver request auth: prompt for BasicAuth
  *
@@ -1177,9 +1178,11 @@ void webserver_config() {
         page_content += form_checkbox("www_basicauth_enabled", FPSTR(INTL_BASICAUTH), www_basicauth_enabled);
         page_content += form_submit(FPSTR(INTL_SPEICHERN));
 
-        page_content += F("</table><br/><b>Sensor WiFi</b><br/>");
-        page_content += FPSTR(INTL_FS_WIFI_NAME);
+        page_content += F("</table><br/><b>");
+        page_content += FPSTR(INTL_FS_WIFI);
         page_content += F("</b><br/>");
+        page_content += FPSTR(INTL_FS_WIFI_BESCHREIBUNG);
+        page_content += F("<br/>");
         page_content += F("<table>");
         page_content += form_input("fs_ssid", FPSTR(INTL_FS_WIFI_NAME), fs_ssid, 64);
         page_content += form_password("fs_pwd", FPSTR(INTL_PASSWORT), fs_pwd, 64);
@@ -1515,6 +1518,13 @@ void webserver_values() {
         page_content += empty_row;
         page_content += table_row_from_value("WiFi", FPSTR(INTL_SIGNAL),  String(signal_strength), "dBm");
         page_content += table_row_from_value("WiFi", FPSTR(INTL_QUALITAT), String(signal_quality), "%");
+
+        page_content += empty_row;
+		page_content += F("<tr><td colspan='2'>");
+		page_content += FPSTR(INTL_ANZAHL_MESSUNGEN);
+		page_content += F("</td><td class='r'>");
+		page_content += String(count_sends);
+		page_content += F("</td></tr>");
         page_content += F("</table>");
         page_content += make_footer();
         server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
@@ -1635,6 +1645,7 @@ void webserver_data_json() {
         if ((age > sending_intervall_ms) || (age < 0)) {
             age = 0;
         }
+        age = 0 - age;
     } else {
         s1 = last_data_string;
         debug_out(F("last data: "), DEBUG_MIN_INFO, 0);
@@ -1665,7 +1676,7 @@ void webserver_images() {
             server.send(200, FPSTR(TXT_CONTENT_TYPE_IMAGE_SVG), FPSTR(LUFTDATEN_INFO_LOGO_SVG));
         } else if (server.arg("name") == F("cfg_logo")) {
             debug_out(F("output codefor.de logo..."), DEBUG_MIN_INFO, 1);
-            server.send(200, FPSTR(TXT_CONTENT_TYPE_IMAGE_SVG), FPSTR(CFG_LOGO_SVG));
+            server.send_P(200, TXT_CONTENT_TYPE_IMAGE_PNG, CFG_LOGO_PNG, CFG_LOGO_PNG_len);
         } else {
             webserver_not_found();
         }
@@ -2992,6 +3003,7 @@ String sensorGPS() {
                 debug_out(F("Altitude INVALID"), DEBUG_MAX_INFO, 1);
             }
             if (gps.date.isValid()) {
+				gps_date = "";
                 if (gps.date.month() < 10) {
                     gps_date += "0";
                 }
@@ -3008,6 +3020,7 @@ String sensorGPS() {
                 debug_out(F("Date INVALID"), DEBUG_MAX_INFO, 1);
             }
             if (gps.time.isValid()) {
+				gps_time = "";
                 if (gps.time.hour() < 10) {
                     gps_time += "0";
                 }
@@ -3114,10 +3127,11 @@ void display_values() {
     double alt_value = -1000.0;
     String gps_sensor = "";
     String display_header = "";
-    String display_line1 = "";
-    String display_line3 = "";
-    String display_line2 = "";
+    String display_lines[3] = { "", "", ""};
     String display_footer = "";
+    int screen_count = 0;
+    int screens[5];
+    int line_count = 0;
     int signal = 0;
     debug_out(F("output values to display..."), DEBUG_MIN_INFO, 1);
     if (ppd_read) {
@@ -3186,49 +3200,72 @@ void display_values() {
         alt_value = last_value_GPS_alt;
         gps_sensor = "NEO6M";
     }
+	if (ppd_read || pms24_read || pms32_read || hpm_read || sds_read) {
+		screens[screen_count++] = 1;
+	}
+	if (dht_read || ds18b20_read || htu21d_read || bmp_read || bmp280_read || bme280_read) {
+		screens[screen_count++] = 2;
+	}
+	if (gps_read) {
+		screens[screen_count++] = 3;
+	}
+	screens[screen_count++] = 4;	// Wifi info
+	screens[screen_count++] = 5;	// chipID, firmware and count of measurements
     if (has_display) {
-        if ((next_display_count % 4) == 0) {
-            display_header = pm25_sensor;
-            if (pm25_sensor != pm10_sensor) {
-                display_header += " / " + pm25_sensor;
-            }
-            display_line1 = "PM2.5: " + check_display_value(pm25_value, -1, 1, 6) + " µg/m³";
-            display_line2 = "PM10:  " + check_display_value(pm10_value, -1, 1, 6) + " µg/m³";
-            display_footer = F("o  .  .  .");
-        }
-        if ((next_display_count % 4) == 1) {
-            display_header = t_sensor;
-            if (h_sensor != "" && t_sensor != h_sensor) {
-                display_header += " / " + h_sensor;
-            }
-            if ((h_sensor != "" && p_sensor != "" && (h_sensor != p_sensor)) || (h_sensor == "" && p_sensor != "" && (t_sensor != p_sensor))) {
-                display_header += " / " + p_sensor;
-            }
-            display_line1 = "Temp.: " + check_display_value(t_value, -128, 1, 6) + " °C";
-            display_line2 = "Hum.:  " + check_display_value(h_value, -1, 1, 6) + " %";
-            display_line3 = "Pres.: " + check_display_value(p_value / 100, (-1 / 100.0), 1, 6) + " hPa";
-            display_footer = F(".  o  .  .");
-        }
-        if ((next_display_count % 4) == 2) {
-            signal = WiFi.RSSI();
-            if (signal > -50) signal = -50;
-            if (signal < -100) signal = -100;
-            signal = (signal + 100) / 2;
-            display_header = F("Wifi info");
-            display_line1 = "IP: " + IPAddress2String(WiFi.localIP());
-            display_line2 = "SSID:" + WiFi.SSID();
-            display_line3 = "Signal: " + String(signal) + "%";
-            display_footer = F(".  .  o  .");
-        }
-        if ((next_display_count % 4) == 3) {
-            display_header = F("Device Info");
-            display_line1 = "ID: " + esp_chipid;
-            display_line2 = "FW: " + String(SOFTWARE_VERSION);
-            display_line3 = "Measurements: " + String(count_sends);
-            display_footer = F(".  .  .  o");
-        }
-
-
+		switch (screens[next_display_count % screen_count]) {
+		case (1):
+				display_header = pm25_sensor;
+				if (pm25_sensor != pm10_sensor) {
+					display_header += " / " + pm25_sensor;
+				}
+				display_lines[0] = "PM2.5: " + check_display_value(pm25_value, -1, 1, 6) + " µg/m³";
+				display_lines[1] = "PM10:  " + check_display_value(pm10_value, -1, 1, 6) + " µg/m³";
+				display_lines[2] = "";
+				break;
+		case (2):
+				display_header = t_sensor;
+				if (h_sensor != "" && t_sensor != h_sensor) {
+					display_header += " / " + h_sensor;
+				}
+				if ((h_sensor != "" && p_sensor != "" && (h_sensor != p_sensor)) || (h_sensor == "" && p_sensor != "" && (t_sensor != p_sensor))) {
+					display_header += " / " + p_sensor;
+				}
+				if (t_sensor != "") display_lines[line_count++] = "Temp.: " + check_display_value(t_value, -128, 1, 6) + " °C";
+				if (h_sensor != "") display_lines[line_count++] = "Hum.:  " + check_display_value(h_value, -1, 1, 6) + " %";
+				if (p_sensor != "") display_lines[line_count++] = "Pres.: " + check_display_value(p_value / 100, (-1 / 100.0), 1, 6) + " hPa";
+				while (line_count < 3) display_lines[line_count++] = "";
+				break;
+		case (3):
+				display_header = gps_sensor;
+				display_lines[0] = "Lat: " + check_display_value(lat_value, -200.0, 6, 10);
+				display_lines[1] = "Lon: " + check_display_value(lon_value, -200.0, 6, 10);
+				display_lines[2] = "Alt: " + check_display_value(alt_value, -1000.0, 2, 10);
+				display_footer = F("o  .  .  .");
+				break;
+		case (4):
+				signal = WiFi.RSSI();
+				if (signal > -50) signal = -50;
+				if (signal < -100) signal = -100;
+				signal = (signal + 100) / 2;
+				display_header = F("Wifi info");
+				display_lines[0] = "IP: " + IPAddress2String(WiFi.localIP());
+				display_lines[1] = "SSID:" + WiFi.SSID();
+				display_lines[2] = "Signal: " + String(signal) + "%";
+				break;
+		case (5):
+				display_header = F("Device Info");
+				display_lines[0] = "ID: " + esp_chipid;
+				display_lines[1] = "FW: " + String(SOFTWARE_VERSION);
+				display_lines[2] = "Measurements: " + String(count_sends);
+				break;
+		}
+		for (int i=0;i < screen_count;i++) {
+			if (i != (next_display_count % screen_count)) {
+				display_footer += " . ";
+			} else {
+				display_footer += " o ";
+			}
+		}
         display.resetDisplay();
         display.clear();
         display.displayOn();
@@ -3236,9 +3273,9 @@ void display_values() {
         display.setTextAlignment(TEXT_ALIGN_CENTER);
         display.drawString(64, 1, display_header);
         display.setTextAlignment(TEXT_ALIGN_LEFT);
-        display.drawString(0, 16, display_line1);
-        display.drawString(0, 28, display_line2);
-        display.drawString(0, 40, display_line3);
+        display.drawString(0, 16, display_lines[0]);
+        display.drawString(0, 28, display_lines[1]);
+        display.drawString(0, 40, display_lines[2]);
         display.setTextAlignment(TEXT_ALIGN_CENTER);
         display.drawString(64, 52, display_footer);
         display.display();
@@ -3249,36 +3286,42 @@ void display_values() {
 // T/H: -10.0°C/100.0%
 // T/P: -10.0°C/1000hPa
 
-    if ((next_display_count % 4) == 0) {
-        display_line1 = "PM2.5: " + check_display_value(pm25_value, -1, 1, 6);
-        display_line2 = "PM10:  " + check_display_value(pm10_value, -1, 1, 6);
-    }
-    if ((next_display_count % 4) == 1) {
-        display_line1 = "T: " + check_display_value(t_value, -128, 1, 6) + char(223) + "C";
-        display_line2 = "H: " + check_display_value(h_value, -1, 1, 6) + "%";
-    }
-    if ((next_display_count % 4) == 2) {
-        display_line1 = IPAddress2String(WiFi.localIP());
-        display_line2 = WiFi.SSID();
-    }
-    if ((next_display_count % 4) == 3) {
-        display_line1 = "ID: " + esp_chipid;
-        display_line2 = "FW: " + String(SOFTWARE_VERSION);
+	switch (screens[next_display_count % screen_count]) {
+	case (1):
+			display_lines[0] = "PM2.5: " + check_display_value(pm25_value, -1, 1, 6);
+			display_lines[1] = "PM10:  " + check_display_value(pm10_value, -1, 1, 6);
+			break;
+	case (2):
+			display_lines[0] = "T: " + check_display_value(t_value, -128, 1, 6) + char(223) + "C";
+			display_lines[1] = "H: " + check_display_value(h_value, -1, 1, 6) + "%";
+			break;
+	case (3):
+			display_lines[0] = "Lat: " + check_display_value(lat_value, -200.0, 6, 11);
+			display_lines[1] = "Lon: " + check_display_value(lon_value, -200.0, 6, 11);
+			break;
+	case (4):
+			display_lines[0] = IPAddress2String(WiFi.localIP());
+			display_lines[1] = WiFi.SSID();
+			break;
+	case (5):
+			display_lines[0] = "ID: " + esp_chipid;
+			display_lines[1] = "FW: " + String(SOFTWARE_VERSION);
+			break;
     }
 
     if (has_lcd1602_27) {
         lcd_27.clear();
         lcd_27.setCursor(0, 0);
-        lcd_27.print(display_line1);
+        lcd_27.print(display_lines[0]);
         lcd_27.setCursor(0, 1);
-        lcd_27.print(display_line2);
+        lcd_27.print(display_lines[1]);
     }
     if (has_lcd1602) {
         lcd_3f.clear();
         lcd_3f.setCursor(0, 0);
-        lcd_3f.print(display_line1);
+        lcd_3f.print(display_lines[0]);
         lcd_3f.setCursor(0, 1);
-        lcd_3f.print(display_line2);
+        lcd_3f.print(display_lines[1]);
     }
     yield();
     next_display_count += 1;
@@ -3371,6 +3414,7 @@ void setup() {
     pinMode(PPD_PIN_PM2, INPUT_PULLUP);	// Listen at the designated PIN
     dht.begin();	// Start DHT
     htu21d.begin(); // Start HTU21D
+    pinMode(DHT_PIN, INPUT_PULLUP);		// Set DHT pin to input with pullup
     delay(10);
     debug_out(F("\nChipId: "), DEBUG_MIN_INFO, 0);
     debug_out(esp_chipid, DEBUG_MIN_INFO, 1);

@@ -79,6 +79,7 @@ const char INTL_DATE[] PROGMEM = "";
 const char INTL_TIME[] PROGMEM = "";
 const char INTL_SIGNAL[] PROGMEM = "";
 const char INTL_QUALITAT[] PROGMEM = "";
+const char INTL_ANZAHL_MESSUNGEN[] PROGMEM = "";
 const char INTL_SENSOR[] PROGMEM = "";
 const char INTL_PARAMETER[] PROGMEM = "";
 const char INTL_WERT[] PROGMEM = "";
