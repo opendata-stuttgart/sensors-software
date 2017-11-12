@@ -69,7 +69,7 @@
 /*                                                               *
 /*****************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2017-100-B7"
+#define SOFTWARE_VERSION "NRZ-2017-100-B8"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -211,7 +211,7 @@ LiquidCrystal_I2C lcd_3f(0x3F, 16, 2);
 /* SDS011 declarations                                           *
 /*****************************************************************/
 SoftwareSerial serialSDS(SDS_PIN_RX, SDS_PIN_TX, false, 128);
-SoftwareSerial serialGPS(GPS_PIN_RX, GPS_PIN_TX, false, 128);
+SoftwareSerial serialGPS(GPS_PIN_RX, GPS_PIN_TX, false, 256);
 
 /*****************************************************************
 /* DHT declaration                                               *
@@ -3240,7 +3240,6 @@ void display_values() {
 				display_lines[0] = "Lat: " + check_display_value(lat_value, -200.0, 6, 10);
 				display_lines[1] = "Lon: " + check_display_value(lon_value, -200.0, 6, 10);
 				display_lines[2] = "Alt: " + check_display_value(alt_value, -1000.0, 2, 10);
-				display_footer = F("o  .  .  .");
 				break;
 		case (4):
 				signal = WiFi.RSSI();
@@ -3408,18 +3407,12 @@ void setup() {
     autoUpdate();
     create_basic_auth_strings();
     serialSDS.begin(9600);
-    serialGPS.begin(9600);
-    ds18b20.begin();
-    pinMode(PPD_PIN_PM1, INPUT_PULLUP);	// Listen at the designated PIN
-    pinMode(PPD_PIN_PM2, INPUT_PULLUP);	// Listen at the designated PIN
-    dht.begin();	// Start DHT
-    htu21d.begin(); // Start HTU21D
-    pinMode(DHT_PIN, INPUT_PULLUP);		// Set DHT pin to input with pullup
-    delay(10);
     debug_out(F("\nChipId: "), DEBUG_MIN_INFO, 0);
     debug_out(esp_chipid, DEBUG_MIN_INFO, 1);
 
     if (ppd_read) {
+		pinMode(PPD_PIN_PM1, INPUT_PULLUP);		// Listen at the designated PIN
+		pinMode(PPD_PIN_PM2, INPUT_PULLUP);		// Listen at the designated PIN
         debug_out(F("Read PPD..."), DEBUG_MIN_INFO, 1);
     }
     if (sds_read) {
@@ -3435,9 +3428,11 @@ void setup() {
         debug_out(F("Read HPM..."), DEBUG_MIN_INFO, 1);
     }
     if (dht_read) {
+		dht.begin();		// Start DHT
         debug_out(F("Read DHT..."), DEBUG_MIN_INFO, 1);
     }
     if (htu21d_read) {
+		htu21d.begin();		// Start HTU21D
         debug_out(F("Read HTU21D..."), DEBUG_MIN_INFO, 1);
     }
     if (bmp_read) {
@@ -3450,9 +3445,11 @@ void setup() {
         debug_out(F("Read BME280..."), DEBUG_MIN_INFO, 1);
     }
     if (ds18b20_read) {
+		ds18b20.begin();	// Start DS18B20
         debug_out(F("Read DS18B20..."), DEBUG_MIN_INFO, 1);
     }
     if (gps_read) {
+		serialGPS.begin(9600);
         debug_out(F("Read GPS..."), DEBUG_MIN_INFO, 1);
     }
     if (send2dusti) {
@@ -3512,6 +3509,8 @@ void setup() {
     if (MDNS.begin(server_name.c_str())) {
         MDNS.addService("http", "tcp", 80);
     }
+
+    delay(50);
 
     // sometimes parallel sending data and web page will stop nodemcu, watchdogtimer set to 30 seconds
     wdt_disable();

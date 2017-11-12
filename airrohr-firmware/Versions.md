@@ -19,6 +19,9 @@ beta
 * version B7: wrong output on config save corrected
 * version B7: double date/time on values page corrected
 * version B7: changed codefor logo to png
+* version B8: new TinyGPS++ 0.94a -> 0.95
+* version B8: larger buffer for GPS SoftSerial
+* version B8: removed INPUT_PULLUP for DHT22
 
 NRZ-2017-099
 online since 2017-09-10
