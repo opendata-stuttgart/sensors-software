@@ -87,6 +87,8 @@
 #include <SSD1306.h>
 #include <LiquidCrystal_I2C.h>
 #include <base64.h>
+#include <PubSubClient.h>
+#include <ESP8266HTTPClient.h>
 #endif
 #if defined(ARDUINO_SAMD_ZERO)
 #include <RHReliableDatagram.h>
@@ -153,6 +155,7 @@ bool send2dusti = 1;
 bool send2madavi = 1;
 bool send2sensemap = 0;
 bool send2custom = 0;
+bool send2rmap = 0;
 bool send2lora = 1;
 bool send2influx = 0;
 bool send2csv = 0;
@@ -193,6 +196,15 @@ char user_custom[100] = "";
 char pwd_custom[100] = "";
 String basic_auth_custom = "";
 
+char user_rmap[10] = "";
+char pwd_rmap[51] = "";
+char longitude_rmap[10] = "";
+char latitude_rmap[10] = "";
+char server_rmap[50] = "rmap.cc";
+char station_rmap[50] = "luftdaten";
+char mqttrootpath_rmap[50] = "sample";
+char mqttmaintpath_rmap[50] = "maint";
+
 const char* update_host = "www.madavi.de";
 const char* update_url = "/sensor/update/firmware.php";
 const int update_port = 80;
@@ -200,6 +212,10 @@ const int update_port = 80;
 #if defined(ESP8266)
 ESP8266WebServer server(80);
 int TimeZone = 1;
+
+// mqtt rmap
+WiFiClient espClient;
+PubSubClient mqttclient(espClient);
 #endif
 
 #if defined(ARDUINO_SAMD_ZERO)
@@ -672,6 +688,14 @@ void copyExtDef() {
 	strcpyDef(user_custom, USER_CUSTOM);
 	strcpyDef(pwd_custom, PWD_CUSTOM);
 
+	setDef(send2rmap, SEND2RMAP);
+	strcpyDef(user_rmap, USER_CUSTOM);
+	strcpyDef(pwd_rmap, PWD_CUSTOM);
+	strcpy(longitude_rmap, "");
+	strcpy(latitude_rmap, "");
+	strcpy(server_rmap,SERVERRMAP);
+	strcpy(station_rmap,STATIONRMAP);
+	
 	setDef(send2influx, SEND2INFLUX);
 	strcpyDef(host_influx, HOST_INFLUX);
 	strcpyDef(url_influx, URL_INFLUX);
@@ -753,6 +777,17 @@ void readConfig() {
 					setFromJSON(port_custom);
 					strcpyFromJSON(user_custom);
 					strcpyFromJSON(pwd_custom);
+
+					setFromJSON(send2rmap);
+					strcpyFromJSON(user_rmap);
+					strcpyFromJSON(pwd_rmap);
+					strcpyFromJSON(longitude_rmap);
+					strcpyFromJSON(latitude_rmap);
+					strcpyFromJSON(server_rmap);
+					strcpyFromJSON(station_rmap);
+					strcpyFromJSON(mqttrootpath_rmap);
+					strcpyFromJSON(mqttmaintpath_rmap);
+					
 					setFromJSON(send2influx);
 					strcpyFromJSON(host_influx);
 					strcpyFromJSON(url_influx);
@@ -824,6 +859,16 @@ void writeConfig() {
 	copyToJSON_String(user_custom);
 	copyToJSON_String(pwd_custom);
 
+	copyToJSON_Bool(send2rmap);
+	copyToJSON_String(user_rmap);
+	copyToJSON_String(pwd_rmap);
+	copyToJSON_String(longitude_rmap);
+	copyToJSON_String(latitude_rmap);
+	copyToJSON_String(server_rmap);
+	copyToJSON_String(station_rmap);
+	copyToJSON_String(mqttrootpath_rmap);
+	copyToJSON_String(mqttmaintpath_rmap);
+	
 	copyToJSON_Bool(send2influx);
 	copyToJSON_String(host_influx);
 	copyToJSON_String(url_influx);
@@ -1141,6 +1186,16 @@ void webserver_config() {
 		page_content += form_input("port_influx", FPSTR(INTL_PORT), String(port_influx), 30);
 		page_content += form_input("user_influx", FPSTR(INTL_BENUTZER), user_influx, 50);
 		page_content += form_password("pwd_influx", FPSTR(INTL_PASSWORT), pwd_influx, 50);
+		page_content += F("</table><br/>");
+
+		page_content += form_checkbox("send2rmap", FPSTR(INTL_AN_EIGENE_API_RMAP), send2rmap);
+		page_content += F("<table>");
+		page_content += form_input("user_rmap", FPSTR(INTL_BENUTZER), user_rmap, 9);
+		page_content += form_password("pwd_rmap", FPSTR(INTL_PASSWORT), pwd_rmap, 50);
+		page_content += form_input("longitude_rmap", FPSTR(INTL_LONGITUDE), longitude_rmap, 9);
+		page_content += form_input("latitude_rmap", FPSTR(INTL_LATITUDE), latitude_rmap, 9);
+		page_content += form_input("server_rmap", FPSTR(INTL_SERVERRMAP), server_rmap, 50);
+		page_content += form_input("station_rmap", FPSTR(INTL_STATIONRMAP), station_rmap, 50);
 		page_content += form_submit(FPSTR(INTL_SPEICHERN));
 		page_content += F("</table><br/>");
 		page_content += F("<br/></form>");
@@ -1201,6 +1256,15 @@ void webserver_config() {
 		readCharParam(user_influx);
 		readPasswdParam(pwd_influx);
 
+		readBoolParam(send2rmap);
+		readCharParam(user_rmap);
+		readPasswdParam(pwd_rmap);
+		readCharParam(longitude_rmap);
+		readCharParam(latitude_rmap);
+
+		readCharParam(server_rmap);
+		readCharParam(station_rmap);
+				
 #undef readCharParam
 #undef readBoolParam
 #undef readIntParam
@@ -1240,6 +1304,15 @@ void webserver_config() {
 		page_content += line_from_value(FPSTR(INTL_PORT), String(port_influx));
 		page_content += line_from_value(FPSTR(INTL_BENUTZER), user_influx);
 		page_content += line_from_value(FPSTR(INTL_PASSWORT), pwd_influx);
+
+		page_content += F("<br/><br/>RMAP API: "); page_content += String(send2rmap);
+		page_content += line_from_value(FPSTR(INTL_BENUTZER), user_rmap);
+		page_content += line_from_value(FPSTR(INTL_PASSWORT), pwd_rmap);
+		page_content += line_from_value(FPSTR(INTL_LONGITUDE), longitude_rmap);
+		page_content += line_from_value(FPSTR(INTL_LATITUDE), latitude_rmap);
+		page_content += line_from_value(FPSTR(INTL_SERVERRMAP), server_rmap);
+		page_content += line_from_value(FPSTR(INTL_STATIONRMAP), station_rmap);
+
 		if (wificonfig_loop) {
 			page_content += F("<br/><br/>"); page_content += FPSTR(INTL_GERAT_WIRD_NEU_GESTARTET);
 		} else {
@@ -1858,6 +1931,101 @@ void send_lora(const String& data) {
 /* send data to mqtt api                                         *
 /*****************************************************************/
 // rejected (see issue #33)
+
+void send_rmap(const String& data) {
+
+
+  if (!mqttclient.connected()) {
+    //String clientId = "ESP8266Client-";
+    //clientId += String(random(0xffff), HEX);
+    mqttclient.setServer(server_rmap, 1883);
+
+    char mainttopic[100]="";
+    strcpy (mainttopic,mqttmaintpath_rmap);
+    strcat(mainttopic,"/");
+    strcat(mainttopic,user_rmap);
+    strcat(mainttopic,"/");
+    char longitude [10];
+    char latitude [10];
+    itoa (coordCharToInt(longitude_rmap),longitude,10);
+    itoa (coordCharToInt(latitude_rmap),latitude,10);
+
+    strcat(mainttopic,longitude);
+    strcat(mainttopic,",");
+    strcat(mainttopic,latitude);
+    strcat (mainttopic,"/fixed/-,-,-/-,-,-,-/B01213");
+    debug_out(F("MQTT maint topic: "), DEBUG_MAX_INFO, 0);
+    debug_out(mainttopic, DEBUG_MAX_INFO, 1);
+    
+    debug_out(F("Connet to mqtt broker"), DEBUG_MIN_INFO, 1);
+    //mqttclient.connect(esp_chipid.c_str());
+    if (mqttclient.connect(esp_chipid.c_str(),user_rmap,pwd_rmap,mainttopic,1,1,"{\"v\":\"error01\"}")){
+      debug_out(F("MQTT connected"), DEBUG_MAX_INFO, 1);
+
+      if (!mqttclient.publish(mainttopic,(uint8_t*)"{\"v\":\"conn\"}", 12,1)){
+	debug_out(F("MQTT maint published"), DEBUG_MAX_INFO, 1);
+      }
+    }else{
+      debug_out(F("Error connecting MQTT"), DEBUG_MAX_INFO, 1);
+    }
+  }
+
+  StaticJsonBuffer<200> jsonBuffer;
+  debug_out("{"+data.substring(0, data.length()-1)+"}", DEBUG_MIN_INFO, 1);
+
+  JsonArray& array = jsonBuffer.parseArray("["+data.substring(0, data.length()-1)+"]");
+  if (array.success()){
+    for (int i = 0; i < array.size(); i++) {
+      
+      bool havetopublish = false;
+      const char* sensor = array[i]["value_type"];
+      char topic[100]="";
+      char payload[100]="{\"v\":";
+
+      strcpy(topic,mqttrootpath_rmap);
+      strcat(topic,"/");
+      strcat(topic,user_rmap);
+      strcat(topic,"/");
+      char longitude [10];
+      char latitude [10];
+      itoa (coordCharToInt(longitude_rmap),longitude,10);
+      itoa (coordCharToInt(latitude_rmap),latitude,10);
+
+      strcat(topic,longitude);
+      strcat(topic,",");
+      strcat(topic,latitude);
+      strcat(topic,"/fixed/254,0,0/103,2000,-,-/");
+      
+      debug_out(sensor, DEBUG_MAX_INFO, 1);
+      if (strcmp(sensor,"SDS_P1")== 0)
+	{
+	  debug_out("SDS_P1 found", DEBUG_MAX_INFO, 1);
+	  strcat(topic,"B15195");
+	  havetopublish=true;
+	}
+      if (strcmp(sensor,"SDS_P2")== 0)
+	{
+	  debug_out("SDS_P2 found", DEBUG_MAX_INFO, 1);
+	  strcat(topic,"B15198");
+	  havetopublish=true;
+	}
+      if (havetopublish){
+	float fvalue = array[i]["value"];
+
+	// itoa str should be an array long enough to contain any possible value: (sizeof(int)*8+1) for radix=2, i.e. 17 bytes in 16-bits platforms 
+	char value[17];
+	itoa (round(fvalue*10.),value,10);
+	strcat(payload,value);
+	strcat(payload,"}");
+	debug_out(F("mqtt publish: "), DEBUG_MIN_INFO, 0);
+	debug_out(topic, DEBUG_MIN_INFO, 0);
+	debug_out(payload, DEBUG_MIN_INFO, 1);
+	mqttclient.publish(topic, payload);
+	havetopublish=false;
+      }
+    }
+  }
+}
 
 /*****************************************************************
 /* send data to influxdb                                         *
@@ -2736,6 +2904,99 @@ bool initBME280(char addr) {
 	}
 }
 
+unsigned int coordCharToInt(char* lat){
+  String mylat(lat);
+
+  char* sep=".";
+  // without "." or ","
+  if (mylat.indexOf(".") < 0 ) {
+    if (mylat.indexOf(".") < 0 ) return 0;
+    strcpy(sep,",");
+  }
+  // separator sep found
+  
+  mylat=mylat.substring(0,mylat.indexOf(sep));
+  mylat.trim();
+  int latdegree =mylat.toInt();
+
+  mylat=lat;
+  mylat=mylat.substring(mylat.indexOf(sep)+1);
+  mylat.trim();
+  mylat=mylat.substring(0,5);
+  for (int i = 0; i < (5-mylat.length()); i++){
+    mylat+= String("0");
+  }
+  return latdegree*100000+mylat.toInt();
+}
+
+const char* coordIntToChar(int lat){
+  if ( lat == 0) return "";
+  
+  String mylat=String(lat/100000);
+  mylat+=".";
+  mylat+=String(lat-((lat/100000)*100000));
+  return mylat.c_str();
+}
+
+
+void readRmapRemoteConfig(){
+
+  String payload;
+  
+  HTTPClient http;
+  // Make a HTTP request:
+
+  String url="http://";
+  url += server_rmap;
+  url+="/stations/";
+  url+=user_rmap;
+  url+="/";
+  url+=station_rmap;
+  url+="/json/";
+
+  debug_out(F("readRmapRemoteConfig url: "), DEBUG_MAX_INFO, 0);  
+  debug_out(url, DEBUG_MAX_INFO, 1);  
+  //http.begin("http://rmap.cc/stations/pat1/luftdaten/json/");
+  http.begin(url.c_str());
+
+  int httpCode = http.GET();
+  if (httpCode == HTTP_CODE_OK) { //Check the returning code
+    payload = http.getString();
+    debug_out(payload, DEBUG_MAX_INFO, 1);
+  }else{
+    debug_out(F("Error http: "), DEBUG_MAX_INFO, 0);
+    debug_out(String(httpCode), DEBUG_MAX_INFO, 0);
+    debug_out(http.errorToString(httpCode), DEBUG_MAX_INFO, 1);
+  }
+  http.end();					\
+
+  StaticJsonBuffer<1000> jsonBuffer;
+
+  JsonArray& array = jsonBuffer.parseArray(payload);
+  if (array.success()){
+    for (int i = 0; i < array.size(); i++) {
+      
+      if  (array[i]["model"] == "stations.stationmetadata"){
+	if (array[i]["fields"]["active"]){
+	  strncpy (mqttrootpath_rmap, array[i]["fields"]["mqttrootpath"].as< const char*>(),49);
+	  mqttrootpath_rmap[49]='\0';
+	  strncpy (mqttmaintpath_rmap, array[i]["fields"]["mqttmaintpath"].as< const char*>(),49);
+	  mqttmaintpath_rmap[49]='\0';
+	  strncpy (longitude_rmap, array[i]["fields"]["lon"].as< const char*>(),9);
+	  longitude_rmap[9]='\0';
+	  strncpy (latitude_rmap , array[i]["fields"]["lat"].as< const char*>(),9);
+	  latitude_rmap[9]='\0';
+	  debug_out(F("lon: "), DEBUG_MAX_INFO, 0);
+	  debug_out(longitude_rmap, DEBUG_MAX_INFO, 1);
+	  debug_out(F("lat: "), DEBUG_MAX_INFO, 0);
+	  debug_out(latitude_rmap, DEBUG_MAX_INFO, 1);
+	  config_needs_write = true;
+	}
+      }
+    }
+  }
+}
+  
 /*****************************************************************
 /* The Setup                                                     *
 /*****************************************************************/
@@ -2764,6 +3025,12 @@ void setup() {
 		ESP.restart();
 	}
 	autoUpdate();
+
+	if (send2rmap && strcmp(longitude_rmap,"")==0 && strcmp(latitude_rmap,"")==0) {
+	  debug_out(F("Reading rmapconfig from RMAP server"), DEBUG_MIN_INFO, 1);
+	  readRmapRemoteConfig();
+	}
+	
 	create_basic_auth_strings();
 	serialSDS.begin(9600);
 	serialGPS.begin(9600);
@@ -2889,6 +3156,8 @@ void loop() {
 
 	wdt_reset(); // nodemcu is alive
 
+	mqttclient.loop();
+	
 	if (last_micro != 0) {
 		diff_micro = act_micro - last_micro;
 		if (max_micro < diff_micro) { max_micro = diff_micro;}
@@ -3139,6 +3408,14 @@ void loop() {
 			sum_send_time += micros() - start_send;
 		}
 
+		if (send2rmap && strcmp(longitude_rmap,"")!=0 && strcmp(latitude_rmap,"")!=0) {
+			debug_out(F("## Sending to RMAP api: "), DEBUG_MIN_INFO, 1);
+			start_send = micros();
+			send_rmap(result_SDS);
+			sum_send_time += micros() - start_send;
+		}
+
+		
 		server.begin();
 
 		if ((act_milli - last_update_attempt) > (28 * pause_between_update_attempts)) {
