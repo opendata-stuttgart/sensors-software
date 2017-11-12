@@ -20,6 +20,7 @@
 #define SEND2LORA 0
 #define SEND2CSV 0
 #define SEND2CUSTOM 0
+#define SEND2RMAP 1
 
 // NTP Server
 #define NTP_SERVER "0.europe.pool.ntp.org"
@@ -27,6 +28,9 @@
 // OpenSenseMap
 #define SENSEBOXID ""
 
+// RMAP
+#define SERVERRMAP "rmap.cc"
+#define STATIONRMAP "luftdaten"
 
 // IMPORTANT: NO MORE CHANGES TO VARIABLE NAMES NEEDED FOR EXTERNAL APIS
 
