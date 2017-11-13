@@ -22,6 +22,9 @@ beta
 * version B8: new TinyGPS++ 0.94a -> 0.95
 * version B8: larger buffer for GPS SoftSerial
 * version B8: removed INPUT_PULLUP for DHT22
+* version B9: wrong value for signal quality was shown on display
+* version B9: 'memory leak' removed
+* version B9: added LICENSE.md
 
 NRZ-2017-099
 online since 2017-09-10
