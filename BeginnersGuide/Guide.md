@@ -46,7 +46,7 @@ Beim CP2102 wäre das auf dem Mac der **/dev/cu.SLAB_USBTOUART**, für den CH340
 ## Code auf den NodeMCU überspielen
 Den aktuellsten Code von GitHub in die Arduino IDE einfügen.
 *Tipp: um den Code besser zu kopieren einfach auf den **RAW** Button klicken*
-https://github.com/opendata-stuttgart/sensors-software/blob/master/esp8266-arduino/ppd42ns-wificonfig-ppd-sds-dht/ppd42ns-wificonfig-ppd-sds-dht.ino
+https://github.com/opendata-stuttgart/sensors-software/tree/master/airrohr-firmware
 
 #### Wifi einstellen
 ![Wifi Einstellungen](img/Wifi.jpg)
