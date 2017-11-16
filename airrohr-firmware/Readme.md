@@ -178,8 +178,8 @@ Pinout:
 
 ### GPS NEO 6M (seriell)
 Strom und Masse vom Board.
-* RX-Pin vom NEO an D5
-* TX-Pin vom NEO an D6
+* TX-Pin vom NEO an D5
+* RX-Pin vom NEO an D6
 
 
 ### Luftdaten.info API "Pins"

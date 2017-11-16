@@ -25,6 +25,9 @@ beta
 * version B9: wrong value for signal quality was shown on display
 * version B9: 'memory leak' removed
 * version B9: added LICENSE.md
+* version B10: reduced amount of NMEA messages
+* version B10: don't fall back to plain HTTP on WPA2 wifi
+* version B10: larger buffer for serialGPS
 
 NRZ-2017-099
 online since 2017-09-10

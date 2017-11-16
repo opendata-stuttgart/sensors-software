@@ -87,7 +87,7 @@
 /*                                                                      *
 /************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2017-100-B9"
+#define SOFTWARE_VERSION "NRZ-2017-100-B10"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -229,7 +229,7 @@ LiquidCrystal_I2C lcd_3f(0x3F, 16, 2);
 /* SDS011 declarations                                           *
 /*****************************************************************/
 SoftwareSerial serialSDS(SDS_PIN_RX, SDS_PIN_TX, false, 128);
-SoftwareSerial serialGPS(GPS_PIN_RX, GPS_PIN_TX, false, 256);
+SoftwareSerial serialGPS(GPS_PIN_RX, GPS_PIN_TX, false, 512);
 
 /*****************************************************************
 /* DHT declaration                                               *
@@ -668,6 +668,19 @@ String SDS_version_date() {
 
     return s;
 }
+
+/*****************************************************************
+/* disable unneeded NMEA sentences, TinyGPS++ needs GGA, RMC     *
+/*****************************************************************/
+void disable_unneeded_nmea() {
+	serialGPS.println("$PUBX,40,GLL,0,0,0,0*5C");       // Geographic position, latitude / longitude
+//	serialGPS.println("$PUBX,40,GGA,0,0,0,0*5A");       // Global Positioning System Fix Data
+	serialGPS.println("$PUBX,40,GSA,0,0,0,0*4E");       // GPS DOP and active satellites
+//	serialGPS.println("$PUBX,40,RMC,0,0,0,0*47");       // Recommended minimum specific GPS/Transit data
+	serialGPS.println("$PUBX,40,GSV,0,0,0,0*59");       // GNSS satellites in view
+	serialGPS.println("$PUBX,40,VTG,0,0,0,0*5E");       // Track made good and ground speed
+}
+
 
 /*****************************************************************
 /* copy config from ext_def                                      *
@@ -3436,8 +3449,8 @@ void setup() {
     debug_out(esp_chipid, DEBUG_MIN_INFO, 1);
 
     if (ppd_read) {
-		pinMode(PPD_PIN_PM1, INPUT_PULLUP);		// Listen at the designated PIN
-		pinMode(PPD_PIN_PM2, INPUT_PULLUP);		// Listen at the designated PIN
+		pinMode(PPD_PIN_PM1, INPUT_PULLUP);                 // Listen at the designated PIN
+		pinMode(PPD_PIN_PM2, INPUT_PULLUP);                 // Listen at the designated PIN
         debug_out(F("Read PPD..."), DEBUG_MIN_INFO, 1);
     }
     if (sds_read) {
@@ -3453,11 +3466,11 @@ void setup() {
         debug_out(F("Read HPM..."), DEBUG_MIN_INFO, 1);
     }
     if (dht_read) {
-		dht.begin();		// Start DHT
+		dht.begin();                                        // Start DHT
         debug_out(F("Read DHT..."), DEBUG_MIN_INFO, 1);
     }
     if (htu21d_read) {
-		htu21d.begin();		// Start HTU21D
+		htu21d.begin();                                     // Start HTU21D
         debug_out(F("Read HTU21D..."), DEBUG_MIN_INFO, 1);
     }
     if (bmp_read) {
@@ -3470,12 +3483,13 @@ void setup() {
         debug_out(F("Read BME280..."), DEBUG_MIN_INFO, 1);
     }
     if (ds18b20_read) {
-		ds18b20.begin();	// Start DS18B20
+		ds18b20.begin();                                    // Start DS18B20
         debug_out(F("Read DS18B20..."), DEBUG_MIN_INFO, 1);
     }
     if (gps_read) {
 		serialGPS.begin(9600);
         debug_out(F("Read GPS..."), DEBUG_MIN_INFO, 1);
+        disable_unneeded_nmea();
     }
     if (send2dusti) {
         debug_out(F("Send to luftdaten.info..."), DEBUG_MIN_INFO, 1);
@@ -3504,11 +3518,9 @@ void setup() {
     if (has_lcd1602) {
         debug_out(F("Show on LCD 1602..."), DEBUG_MIN_INFO, 1);
     }
-    if (bmp_read) {
-        if (!bmp.begin()) {
-            debug_out(F("No valid BMP085 sensor, check wiring!"), DEBUG_MIN_INFO, 1);
-            bmp_init_failed = 1;
-        }
+    if (bmp_read && !bmp.begin()) {
+        debug_out(F("No valid BMP085 sensor, check wiring!"), DEBUG_MIN_INFO, 1);
+        bmp_init_failed = 1;
     }
     if (bmp280_read && !initBMP280(0x76) && !initBMP280(0x77)) {
         debug_out(F("Check BMP280 wiring"), DEBUG_MIN_INFO, 1);
@@ -3541,7 +3553,7 @@ void setup() {
     wdt_disable();
     wdt_enable(30000);// 30 sec
 
-    starttime = millis();					// store the start time
+    starttime = millis();                                   // store the start time
     starttime_SDS = millis();
     next_display_millis = millis() + 5000;
 }
@@ -3635,38 +3647,38 @@ void loop() {
     if (send_now) {
         if (dht_read) {
             debug_out(F("Call sensorDHT"), DEBUG_MAX_INFO, 1);
-            result_DHT = sensorDHT();			// getting temperature and humidity (optional)
+            result_DHT = sensorDHT();                       // getting temperature and humidity (optional)
         }
 
         if (htu21d_read) {
             debug_out(F("Call sensorHTU21D"), DEBUG_MAX_INFO, 1);
-            result_HTU21D = sensorHTU21D();			// getting temperature and humidity (optional)
+            result_HTU21D = sensorHTU21D();                 // getting temperature and humidity (optional)
         }
 
         if (bmp_read && (! bmp_init_failed)) {
             debug_out(F("Call sensorBMP"), DEBUG_MAX_INFO, 1);
-            result_BMP = sensorBMP();			// getting temperature and pressure (optional)
+            result_BMP = sensorBMP();                       // getting temperature and pressure (optional)
         }
 
         if (bmp280_read && (! bmp280_init_failed)) {
             debug_out(F("Call sensorBMP280"), DEBUG_MAX_INFO, 1);
-            result_BMP280 = sensorBMP280();			// getting temperature, humidity and pressure (optional)
+            result_BMP280 = sensorBMP280();                 // getting temperature, humidity and pressure (optional)
         }
 
         if (bme280_read && (! bme280_init_failed)) {
             debug_out(F("Call sensorBME280"), DEBUG_MAX_INFO, 1);
-            result_BME280 = sensorBME280();			// getting temperature, humidity and pressure (optional)
+            result_BME280 = sensorBME280();                 // getting temperature, humidity and pressure (optional)
         }
 
         if (ds18b20_read) {
             debug_out(F("Call sensorDS18B20"), DEBUG_MAX_INFO, 1);
-            result_DS18B20 = sensorDS18B20();     // getting temperature (optional)
+            result_DS18B20 = sensorDS18B20();               // getting temperature (optional)
         }
     }
 
     if (gps_read && (((act_milli - starttime_GPS) > sampletime_GPS_ms) || ((act_milli - starttime) > sending_intervall_ms))) {
         debug_out(F("Call sensorGPS"), DEBUG_MAX_INFO, 1);
-        result_GPS = sensorGPS();			// getting GPS coordinates
+        result_GPS = sensorGPS();                           // getting GPS coordinates
         starttime_GPS = act_milli;
     }
 
@@ -3675,10 +3687,10 @@ void loop() {
     }
 
     if (send_now) {
-        if (WiFi.psk() != "") {
-            httpPort_madavi = 80;
-            httpPort_dusti = 80;
-        }
+//        if (WiFi.psk() != "") {
+//            httpPort_madavi = 80;
+//            httpPort_dusti = 80;
+//        }
         debug_out(F("Creating data string:"), DEBUG_MIN_INFO, 1);
         data = data_first_part;
         data_sample_times  = Value2Json(F("samples"), String(long(sample_count)));
@@ -3871,7 +3883,7 @@ void loop() {
         debug_out(String(sending_time), DEBUG_MIN_INFO, 1);
 
 
-        if (WiFi.status() != WL_CONNECTED) {  // reconnect if connection lost
+        if (WiFi.status() != WL_CONNECTED) {                // reconnect if connection lost
             int retry_count = 0;
             debug_out(F("Connection lost, reconnecting "), DEBUG_MIN_INFO, 0);
             WiFi.reconnect();
@@ -3891,7 +3903,7 @@ void loop() {
         last_micro = 0;
         min_micro = 1000000000;
         max_micro = 0;
-        starttime = millis(); // store the start time
+        starttime = millis();                               // store the start time
         first_cycle = false;
         count_sends += 1;
     }
