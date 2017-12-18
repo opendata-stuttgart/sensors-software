@@ -162,6 +162,9 @@
 // LCD Display LCD1602 (0x27) angeschlossen?
 #define HAS_LCD1602_27 0
 
+// LCD Display LCD2004 (0x27) angeschlossen?
+#define HAS_LCD2004_27 0
+
 // Wieviele Informationen sollen über die serielle Schnittstelle ausgegeben werden?
 #define DEBUG 3
 

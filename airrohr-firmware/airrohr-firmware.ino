@@ -87,7 +87,7 @@
 /*                                                                      *
 /************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2017-100-B10"
+#define SOFTWARE_VERSION "NRZ-2017-100-B11"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -106,7 +106,8 @@
 #include <base64.h>
 #include <ArduinoJson.h>
 #include <DHT.h>
-#include <SparkFunHTU21D.h>
+//#include <SparkFunHTU21D.h>
+#include <Adafruit_HTU21DF.h>
 #include <Adafruit_BMP085.h>
 #include <Adafruit_BMP280.h>
 #include <Adafruit_BME280.h>
@@ -178,6 +179,7 @@ bool use_beta = 0;
 bool has_display = 0;
 bool has_lcd1602 = 0;
 bool has_lcd1602_27 = 0;
+bool has_lcd2004_27 = 0;
 int  debug = 3;
 
 long int sample_count = 0;
@@ -222,8 +224,9 @@ int TimeZone = 1;
 /* Display definitions                                           *
 /*****************************************************************/
 SSD1306   display(0x3c, D3, D4);
-LiquidCrystal_I2C lcd_27(0x27, 16, 2);
-LiquidCrystal_I2C lcd_3f(0x3F, 16, 2);
+LiquidCrystal_I2C lcd_1602_27(0x27, 16, 2);
+LiquidCrystal_I2C lcd_1602_3f(0x3F, 16, 2);
+LiquidCrystal_I2C lcd_2004_27(0x27, 20, 4);
 
 /*****************************************************************
 /* SDS011 declarations                                           *
@@ -239,7 +242,7 @@ DHT dht(DHT_PIN, DHT_TYPE);
 /*****************************************************************
 /* HTU21D declaration                                            *
 /*****************************************************************/
-HTU21D htu21d;
+Adafruit_HTU21DF htu21d;
 
 /*****************************************************************
 /* BMP declaration                                               *
@@ -411,18 +414,40 @@ void debug_out(const String& text, const int level, const bool linebreak) {
 /*****************************************************************
 /* display values                                                *
 /*****************************************************************/
-void display_debug(const String& text) {
+void display_debug(const String& text1, const String& text2) {
     if (has_display) {
         debug_out(F("output debug text to display..."), DEBUG_MIN_INFO, 1);
-        debug_out(text, DEBUG_MAX_INFO, 1);
+        debug_out(text1+"\n"+text2, DEBUG_MAX_INFO, 1);
         display.resetDisplay();
         display.clear();
         display.displayOn();
         display.setFont(Roboto_Mono_9);
         display.setTextAlignment(TEXT_ALIGN_LEFT);
-        display.drawStringMaxWidth(0, 12, 120, text);
+        display.drawString(0, 12, text1);
+        display.drawString(0, 24, text2);
         display.display();
     }
+    if (has_lcd1602) {
+		lcd_1602_3f.clear();
+		lcd_1602_3f.setCursor(0,0);
+		lcd_1602_3f.print(text1);
+		lcd_1602_3f.setCursor(0,1);
+		lcd_1602_3f.print(text2);
+	}
+    if (has_lcd1602_27) {
+		lcd_1602_27.clear();
+		lcd_1602_27.setCursor(0,0);
+		lcd_1602_27.print(text1);
+		lcd_1602_27.setCursor(0,1);
+		lcd_1602_27.print(text2);
+	}
+    if (has_lcd2004_27) {
+		lcd_2004_27.clear();
+		lcd_2004_27.setCursor(0,0);
+		lcd_2004_27.print(text1);
+		lcd_2004_27.setCursor(0,1);
+		lcd_2004_27.print(text2);
+	}
 }
 
 /*****************************************************************
@@ -681,7 +706,6 @@ void disable_unneeded_nmea() {
 	serialGPS.println("$PUBX,40,VTG,0,0,0,0*5E");       // Track made good and ground speed
 }
 
-
 /*****************************************************************
 /* copy config from ext_def                                      *
 /*****************************************************************/
@@ -724,6 +748,7 @@ void copyExtDef() {
     setDef(has_display, HAS_DISPLAY);
     setDef(has_lcd1602, HAS_LCD1602);
     setDef(has_lcd1602_27, HAS_LCD1602_27);
+    setDef(has_lcd2004_27, HAS_LCD2004_27);
 
     setDef(debug, DEBUG);
 
@@ -812,6 +837,7 @@ void readConfig() {
                     setFromJSON(has_display);
                     setFromJSON(has_lcd1602);
                     setFromJSON(has_lcd1602_27);
+                    setFromJSON(has_lcd2004_27);
                     setFromJSON(debug);
                     setFromJSON(sending_intervall_ms);
                     setFromJSON(time_for_wifi_config);
@@ -884,6 +910,7 @@ void writeConfig() {
     copyToJSON_Bool(has_display);
     copyToJSON_Bool(has_lcd1602);
     copyToJSON_Bool(has_lcd1602_27);
+    copyToJSON_Bool(has_lcd2004_27);
     copyToJSON_String(debug);
     copyToJSON_String(sending_intervall_ms);
     copyToJSON_String(time_for_wifi_config);
@@ -1252,6 +1279,7 @@ void webserver_config() {
         page_content += form_checkbox("has_display", FPSTR(INTL_DISPLAY), has_display);
         page_content += form_checkbox("has_lcd1602_27", FPSTR(INTL_LCD1602_27), has_lcd1602_27);
         page_content += form_checkbox("has_lcd1602", FPSTR(INTL_LCD1602_3F), has_lcd1602);
+        page_content += form_checkbox("has_lcd2004_27", FPSTR(INTL_LCD2004_27), has_lcd2004_27);
         page_content += F("<table>");
         page_content += form_select_lang();
         page_content += form_input("debug", FPSTR(INTL_DEBUG_LEVEL), String(debug), 5);
@@ -1325,6 +1353,7 @@ void webserver_config() {
         readBoolParam(has_display);
         readBoolParam(has_lcd1602);
         readBoolParam(has_lcd1602_27);
+        readBoolParam(has_lcd2004_27);
         readIntParam(debug);
         readTimeParam(sending_intervall_ms);
         readTimeParam(time_for_wifi_config);
@@ -1370,6 +1399,7 @@ void webserver_config() {
         page_content += line_from_value(FPSTR(INTL_DISPLAY), String(has_display));
         page_content += line_from_value(FPSTR(INTL_LCD1602_27), String(has_lcd1602_27));
         page_content += line_from_value(FPSTR(INTL_LCD1602_3F), String(has_lcd1602));
+        page_content += line_from_value(FPSTR(INTL_LCD2004_27), String(has_lcd2004_27));
         page_content += line_from_value(FPSTR(INTL_DEBUG_LEVEL), String(debug));
         page_content += line_from_value(FPSTR(INTL_MESSINTERVALL), String(sending_intervall_ms));
         page_content += line_from_value(tmpl(FPSTR(INTL_SENDEN_AN), F("opensensemap")), String(send2sensemap));
@@ -1867,6 +1897,8 @@ void wifiConfig() {
 /*****************************************************************/
 void connectWifi() {
     int retry_count = 0;
+    String s1 = "";
+    String s2 = "";
     debug_out(String(WiFi.status()), DEBUG_MIN_INFO, 1);
     WiFi.mode(WIFI_STA);
     WiFi.begin(wlanssid, wlanpwd); // Start WiFI
@@ -1881,7 +1913,11 @@ void connectWifi() {
     }
     debug_out("", DEBUG_MIN_INFO, 1);
     if (WiFi.status() != WL_CONNECTED) {
-        display_debug("AP ID: " + String(fs_ssid) + " - IP: 192.168.4.1");
+		s1 = String(fs_ssid);
+		s1 = s1.substring(0,16);
+		s2 = String(fs_ssid);
+		s2 = s2.substring(16);
+		display_debug(s1,s2);
         wifiConfig();
         if (WiFi.status() != WL_CONNECTED) {
             retry_count = 0;
@@ -2249,6 +2285,8 @@ String sensorBME280() {
     double p;
 
     debug_out(String(FPSTR(DBG_TXT_START_READING)) + "BME280", DEBUG_MED_INFO, 1);
+
+	bme280.takeForcedMeasurement();
 
     t = bme280.readTemperature();
     h = bme280.readHumidity();
@@ -3091,11 +3129,11 @@ String sensorGPS() {
         debug_out("Date: " + last_value_GPS_date, DEBUG_MIN_INFO, 1);
         debug_out("Time " + last_value_GPS_time, DEBUG_MIN_INFO, 1);
         debug_out("----", DEBUG_MIN_INFO, 1);
-        s += Value2Json(F("GPS_lat"), gps_lat);
-        s += Value2Json(F("GPS_lon"), gps_lon);
-        s += Value2Json(F("GPS_height"), gps_alt);
-        s += Value2Json(F("GPS_date"), gps_date);
-        s += Value2Json(F("GPS_time"), gps_time);
+        s += Value2Json(F("GPS_lat"), Float2String(last_value_GPS_lat,6));
+        s += Value2Json(F("GPS_lon"), Float2String(last_value_GPS_lon,6));
+        s += Value2Json(F("GPS_height"), Float2String(last_value_GPS_alt,2));
+        s += Value2Json(F("GPS_date"), last_value_GPS_date);
+        s += Value2Json(F("GPS_time"), last_value_GPS_time);
     }
 
     if ( gps.charsProcessed() < 10) {
@@ -3124,18 +3162,18 @@ void autoUpdate() {
             SDS_version = SDS_version_date();
         }
         //SDS_version = "999";
-        display_debug(F("Looking for OTA update"));
+        display_debug(F("Looking for"),F("OTA update"));
         last_update_attempt = millis();
         t_httpUpdate_return ret = ESPhttpUpdate.update(update_host, update_port, update_url, String(SOFTWARE_VERSION) + String(" ") + esp_chipid + String(" ") + SDS_version + String(" ") + String(current_lang) + String(" ") + String(INTL_LANG) + String(" ") + String(use_beta ? "BETA" : ""));
         switch(ret) {
         case HTTP_UPDATE_FAILED:
             debug_out(F("[update] Update failed."), DEBUG_ERROR, 0);
             debug_out(ESPhttpUpdate.getLastErrorString().c_str(), DEBUG_ERROR, 1);
-            display_debug(F("Update failed."));
+            display_debug(F("Update failed."),"");
             break;
         case HTTP_UPDATE_NO_UPDATES:
             debug_out(F("[update] No Update."), DEBUG_MIN_INFO, 1);
-            display_debug(F("No update found."));
+            display_debug(F("No update found."),"");
             break;
         case HTTP_UPDATE_OK:
             debug_out(F("[update] Update ok."), DEBUG_MIN_INFO, 1); // may not called we reboot the ESP
@@ -3249,7 +3287,7 @@ void display_values() {
 	}
 	screens[screen_count++] = 4;	// Wifi info
 	screens[screen_count++] = 5;	// chipID, firmware and count of measurements
-    if (has_display) {
+    if (has_display || has_lcd2004_27) {
 		switch (screens[next_display_count % screen_count]) {
 		case (1):
 				display_header = pm25_sensor;
@@ -3303,19 +3341,36 @@ void display_values() {
 				display_footer += " o ";
 			}
 		}
-        display.resetDisplay();
-        display.clear();
-        display.displayOn();
-        display.setFont(Roboto_Mono_9);
-        display.setTextAlignment(TEXT_ALIGN_CENTER);
-        display.drawString(64, 1, display_header);
-        display.setTextAlignment(TEXT_ALIGN_LEFT);
-        display.drawString(0, 16, display_lines[0]);
-        display.drawString(0, 28, display_lines[1]);
-        display.drawString(0, 40, display_lines[2]);
-        display.setTextAlignment(TEXT_ALIGN_CENTER);
-        display.drawString(64, 52, display_footer);
-        display.display();
+		if (has_display) {
+			display.resetDisplay();
+			display.clear();
+			display.displayOn();
+			display.setFont(Roboto_Mono_9);
+			display.setTextAlignment(TEXT_ALIGN_CENTER);
+			display.drawString(64, 1, display_header);
+			display.setTextAlignment(TEXT_ALIGN_LEFT);
+			display.drawString(0, 16, display_lines[0]);
+			display.drawString(0, 28, display_lines[1]);
+			display.drawString(0, 40, display_lines[2]);
+			display.setTextAlignment(TEXT_ALIGN_CENTER);
+			display.drawString(64, 52, display_footer);
+			display.display();
+		}
+		if (has_lcd2004_27) {
+			display_header = String((next_display_count % screen_count)+1) + "/" + String(screen_count) + " " + display_header;
+			display_lines[0].replace(" µg/m³","");
+			display_lines[0].replace("°",String(char(223)));
+			display_lines[1].replace(" µg/m³","");
+			lcd_2004_27.clear();
+			lcd_2004_27.setCursor(0, 0);
+			lcd_2004_27.print(display_header);
+			lcd_2004_27.setCursor(0, 1);
+			lcd_2004_27.print(display_lines[0]);
+			lcd_2004_27.setCursor(0, 2);
+			lcd_2004_27.print(display_lines[1]);
+			lcd_2004_27.setCursor(0, 3);
+			lcd_2004_27.print(display_lines[2]);
+		}
     }
 
 // ----5----0----5----0
@@ -3347,18 +3402,18 @@ void display_values() {
     }
 
     if (has_lcd1602_27) {
-        lcd_27.clear();
-        lcd_27.setCursor(0, 0);
-        lcd_27.print(display_lines[0]);
-        lcd_27.setCursor(0, 1);
-        lcd_27.print(display_lines[1]);
+        lcd_1602_27.clear();
+        lcd_1602_27.setCursor(0, 0);
+        lcd_1602_27.print(display_lines[0]);
+        lcd_1602_27.setCursor(0, 1);
+        lcd_1602_27.print(display_lines[1]);
     }
     if (has_lcd1602) {
-        lcd_3f.clear();
-        lcd_3f.setCursor(0, 0);
-        lcd_3f.print(display_lines[0]);
-        lcd_3f.setCursor(0, 1);
-        lcd_3f.print(display_lines[1]);
+        lcd_1602_3f.clear();
+        lcd_1602_3f.setCursor(0, 0);
+        lcd_1602_3f.print(display_lines[0]);
+        lcd_1602_3f.setCursor(0, 1);
+        lcd_1602_3f.print(display_lines[1]);
     }
     yield();
     next_display_count += 1;
@@ -3376,11 +3431,19 @@ void init_display() {
 /*****************************************************************
 /* Init display                                                  *
 /*****************************************************************/
-void init_lcd1602() {
-    lcd_27.init();
-    lcd_27.backlight();
-    lcd_3f.init();
-    lcd_3f.backlight();
+void init_lcd() {
+	if (has_lcd1602_27) {
+		lcd_1602_27.init();
+		lcd_1602_27.backlight();
+	}
+	if (has_lcd1602) {
+		lcd_1602_3f.init();
+		lcd_1602_3f.backlight();
+	}
+	if (has_lcd2004_27) {
+		lcd_2004_27.init();
+		lcd_2004_27.backlight();
+	}
 }
 
 /*****************************************************************
@@ -3408,6 +3471,12 @@ bool initBME280(char addr) {
 
     if (bme280.begin(addr)) {
         debug_out(F(" ... found"), DEBUG_MIN_INFO, 1);
+        bme280.setSampling(
+        Adafruit_BME280::MODE_FORCED,
+        Adafruit_BME280::SAMPLING_X1,
+        Adafruit_BME280::SAMPLING_X1,
+        Adafruit_BME280::SAMPLING_X1,
+        Adafruit_BME280::FILTER_OFF);
         return true;
     } else {
         debug_out(F(" ... not found"), DEBUG_MIN_INFO, 1);
@@ -3428,16 +3497,15 @@ void setup() {
 #if defined(ARDUINO_SAMD_ZERO)
     Wire.begin();
 #endif
-    init_display();
-    init_lcd1602();
     copyExtDef();
-    display_debug(F("Reading config from SPIFFS"));
     readConfig();
+    init_display();
+    init_lcd();
     setup_webserver();
-    display_debug("Connecting to " + String(wlanssid));
+    display_debug(F("Connecting to"),String(wlanssid));
     connectWifi();						// Start ConnectWifi
     if (restart_needed) {
-        display_debug(F("Writing config to SPIFFS and restarting sensor"));
+        display_debug(F("Writing config"),F("and restarting"));
         writeConfig();
         delay(500);
         ESP.restart();
@@ -3515,8 +3583,14 @@ void setup() {
     if (has_display) {
         debug_out(F("Show on OLED..."), DEBUG_MIN_INFO, 1);
     }
+    if (has_lcd1602_27) {
+        debug_out(F("Show on LCD 1602 (0x27)..."), DEBUG_MIN_INFO, 1);
+    }
     if (has_lcd1602) {
-        debug_out(F("Show on LCD 1602..."), DEBUG_MIN_INFO, 1);
+        debug_out(F("Show on LCD 1602 (0x3F)..."), DEBUG_MIN_INFO, 1);
+    }
+    if (has_lcd2004_27) {
+        debug_out(F("Show on LCD 2004 (0x27)..."), DEBUG_MIN_INFO, 1);
     }
     if (bmp_read && !bmp.begin()) {
         debug_out(F("No valid BMP085 sensor, check wiring!"), DEBUG_MIN_INFO, 1);
@@ -3756,7 +3830,7 @@ void loop() {
             if (send2dusti) {
                 debug_out(F("## Sending to luftdaten.info (HTU21D): "), DEBUG_MIN_INFO, 1);
                 start_send = micros();
-                sendLuftdaten(result_HTU21D, HTU21D_API_PIN, host_dusti, httpPort_dusti, url_dusti, "HTU_");
+                sendLuftdaten(result_HTU21D, HTU21D_API_PIN, host_dusti, httpPort_dusti, url_dusti, "HTU21D_");
                 sum_send_time += micros() - start_send;
             }
         }

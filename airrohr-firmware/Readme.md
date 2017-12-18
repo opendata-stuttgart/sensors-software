@@ -5,7 +5,7 @@ Features:
 * Konfiguration über WLAN (Sensor als Access Point) möglich
 * Unterstützung von OLED-Displays mit SSD1306
 * Auswahl der API(s), an welche die Daten gesendet werden, inklusive der Möglichkeit, die Daten als CSV über USB auszugeben
-* nutzbar für ESP8266 und Arduino Feather M0 (LoRa)
+* nutzbar mit ESP8266 (NodeMCU und kompatible Boards)
 
 ToDo's:
 * Optimierungen (eigentlich immer)
@@ -79,6 +79,8 @@ Manuell zu installieren:
 Bis Version NRZ-2016-15:
 * [DHT](https://github.com/adafruit/DHT-sensor-library)
   (`DHT.cpp` und `DHT.h` downloaden und in das Softwareverzeichnis kopieren)
+
+Ich hoffe, alle Bibliotheken erwischt zu haben. Falls beim Kompilieren eine Bibliothek fehlt, bitte als [Issue](https://github.com/opendata-stuttgart/sensors-software/issues/) melden. Ich trage dann die Infos nach.
 
 
 ## Anschluss der Sensoren
@@ -176,7 +178,7 @@ Pinout:
 * SCL  ->  Pin D4 (GPIO2)
 * SDA  ->  Pin D3 (GPIO0)
 
-### GPS NEO 6M (seriell)
+### GPS NEO 6M (seriell) ACHTUNG: Läuft sehr instabil
 Strom und Masse vom Board.
 * TX-Pin vom NEO an D5
 * RX-Pin vom NEO an D6
@@ -193,32 +195,3 @@ Diese Firmware definiert die Pins für die verschiedenenen Sensoren wie folgt:
 * BME280 => Pin 11
 * GPS(Neo-6M) => Pin 9
 
-
-Verwendete Bibliotheken für Adafruit Feather M0 LoRa:
-
-Für die Verwendung der Adafruit Feather Boards muss im Arduino IDE noch der Adafruit Board Index eingetragen werden. Dazu in den Einstellungen die URL
-https://adafruit.github.io/arduino-board-index/package_adafruit_index.json als zusätzliche Boardverwalter-URL eintragen. Nach einem Neustart der IDE im Boardverwalter "Adafruit SAMD boards" installieren.
-
-In Arduino enthalten:
-* Wire
-* SPI
-
-In "Adafruit SAMD Boards" enthalten:
-
-
-Installierbar über Arduino IDE (für Versionen siehe auch ESP8266):
-* [ArduinoJson](https://github.com/bblanchon/ArduinoJson) (5.10.1) (MIT)
-* [Adafruit Unified Sensor](https://github.com/adafruit/Adafruit_Sensor) (1.0.2) (Apache)
-* [Adafruit BMP085 library](https://github.com/adafruit/Adafruit-BMP085-Library) (1.0.0) (BSD)
-* [Adafruit BMP280 library](https://github.com/adafruit/Adafruit_BMP280_Library) (1.0.2) (BSD)
-* [Adafruit BME280 library](https://github.com/adafruit/Adafruit_BME280_Library) (1.0.5) (BSD)
-* [DHT sensor library](https://github.com/adafruit/DHT-sensor-library) (1.3.0) (MIT)
-* [LiquidCrystal I2C](https://github.com/marcoschwartz/LiquidCrystal_I2C) (1.1.2)
-* [PubSubClient](http://pubsubclient.knolleary.net/) (2.6.0) (MIT)
-* [SoftwareSerial](https://github.com/plerup/espsoftwareserial) (1.0.0) (GNU Lesser Public License >=2.1)
-
-Manuell zu installieren:
-* [RadioHead Packet Radio library](http://www.airspayce.com/mikem/arduino/RadioHead/) (1.6.1), Link zum Download des Ziparchivs im 2. Abschnitt
-* [TinyGPS++](http://arduiniana.org/libraries/tinygpsplus/) (0.94b) (GNU Lesser Public License >=2.1)
-
-Ich hoffe, alle Bibliotheken erwischt zu haben. Falls beim Kompilieren eine Bibliothek fehlt, bitte als [Issue](https://github.com/opendata-stuttgart/sensors-software/issues/) melden. Ich trage dann die Infos nach.

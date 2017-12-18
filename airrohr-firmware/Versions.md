@@ -28,6 +28,12 @@ beta
 * version B10: reduced amount of NMEA messages
 * version B10: don't fall back to plain HTTP on WPA2 wifi
 * version B10: larger buffer for serialGPS
+* version B11: new languages RU and CZ
+* version B11: changed lib for HTU21D from Sparkfun to Adafruit
+* version B11: added LCD2004 display
+* version B11: debug infos on LCD displays
+* version B11: changed BME280 to forced measurements to get more accurate temperature values
+* version B11: corrected error in sending HTU21D data to luftdaten.info API
 
 NRZ-2017-099
 online since 2017-09-10
