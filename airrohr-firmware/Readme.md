@@ -9,8 +9,16 @@ Features:
 
 ToDo's:
 * Optimierungen (eigentlich immer)
+* neue Sensoren
 
-Die grundsätzliche Konfiguration der Parameter erfolgt über die Datei `ext_dev.h`.
+Dateien in diesem Verzeichnis:
+airrohr-firmware.ino	-	Sourcecode der eigentlichen Firmware
+ext_dev.h				-	grundsätzliche Konfiguration der Parameter (WLAN, Sensoren, APIs)
+html-content.h			-	allgemeine HTML-Sourcen und Bilder für HTML- und Text-Ausgaben
+intl_xx.h				-	Dateien mit übersetzten Texten für die Internationalisierung, 'xx' ist der 2 letter ISO code der 'Sprache'
+intl_template.h			-	Vorlage für Übersetzungen
+astyle.rc				-	Formatierungsvorlage für Astyle
+ppd42ns-wificonfig-ppd-sds-dht.spiffs.bin	-	Binary mit leerem Dateisystem, zum Löschen der Konfiguration, siehe Anleitung im Wiki
 
 ## WLAN Konfiguration
 siehe auch Wiki-Seite auf Github [Konfiguration der Sensoren](https://github.com/opendata-stuttgart/meta/wiki/Konfiguration-der-Sensoren)
@@ -58,18 +66,17 @@ In ESP8266 für Arduino IDE enthalten:
 * DNSServer (GNU Lesser Public License >=2.1)
 
 Installierbar über Arduino IDE (Menü Sketch -> Bibliothek einbinden -> Bibliotheken verwalten, in Klammern die getestete Version und die Art der Lizenz):
-* [ArduinoJson](https://github.com/bblanchon/ArduinoJson) (5.11.1) (MIT)
+* [ArduinoJson](https://github.com/bblanchon/ArduinoJson) (5.12.0) (MIT)
 * [Adafruit Unified Sensor](https://github.com/adafruit/Adafruit_Sensor) (1.0.2) (Apache)
 * [Adafruit BMP085 library](https://github.com/adafruit/Adafruit-BMP085-Library) (1.0.0) (BSD)
 * [Adafruit BMP280 library](https://github.com/adafruit/Adafruit_BMP280_Library) (1.0.2) (BSD)
-* [Adafruit BME280 library](https://github.com/adafruit/Adafruit_BME280_Library) (1.0.5) (BSD)
+* [Adafruit BME280 library](https://github.com/adafruit/Adafruit_BME280_Library) (1.0.7) (BSD)
 * [DallasTemperature](https://github.com/milesburton/Arduino-Temperature-Control-Library) (3.7.6)
 * [DHT sensor library](https://github.com/adafruit/DHT-sensor-library) (1.3.0) (MIT)
 * [ESP8266 and ESP32 Oled driver for SSD1306 display](https://github.com/squix78/esp8266-oled-ssd1306) (3.2.7) (MIT)
 * [OneWire](www.pjrc.com/teensy/td_libs_OneWire.html) (2.3.3)
 * [LiquidCrystal I2C](https://github.com/marcoschwartz/LiquidCrystal_I2C) (1.1.2)
-* [SparkFun HTU21D Humidity and Temperature Sensor Breakout](https://github.com/sparkfun/SparkFun_HTU21D_Breakout_Arduino_Library) (1.1.3)
-* [PubSubClient](http://pubsubclient.knolleary.net/) (2.6.0) (MIT)
+* [Adafruit HTU21DF Library](https://github.com/adafruit/Adafruit_HTU21DF_Library) (1.0.1)
 * [SoftwareSerial](https://github.com/plerup/espsoftwareserial) (1.0.0) (GNU Lesser Public License >=2.1)
 
 Manuell zu installieren:
@@ -194,4 +201,3 @@ Diese Firmware definiert die Pins für die verschiedenenen Sensoren wie folgt:
 * BMP280 => Pin 3
 * BME280 => Pin 11
 * GPS(Neo-6M) => Pin 9
-
