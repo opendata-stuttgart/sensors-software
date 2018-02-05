@@ -2286,7 +2286,7 @@ String sensorBME280() {
 
     debug_out(String(FPSTR(DBG_TXT_START_READING)) + "BME280", DEBUG_MED_INFO, 1);
 
-	bme280.takeForcedMeasurement();
+    bme280.takeForcedMeasurement();
 
     t = bme280.readTemperature();
     h = bme280.readHumidity();
@@ -3472,11 +3472,11 @@ bool initBME280(char addr) {
     if (bme280.begin(addr)) {
         debug_out(F(" ... found"), DEBUG_MIN_INFO, 1);
         bme280.setSampling(
-        Adafruit_BME280::MODE_FORCED,
-        Adafruit_BME280::SAMPLING_X1,
-        Adafruit_BME280::SAMPLING_X1,
-        Adafruit_BME280::SAMPLING_X1,
-        Adafruit_BME280::FILTER_OFF);
+            Adafruit_BME280::MODE_FORCED,
+            Adafruit_BME280::SAMPLING_X1,
+            Adafruit_BME280::SAMPLING_X1,
+            Adafruit_BME280::SAMPLING_X1,
+            Adafruit_BME280::FILTER_OFF);
         return true;
     } else {
         debug_out(F(" ... not found"), DEBUG_MIN_INFO, 1);
