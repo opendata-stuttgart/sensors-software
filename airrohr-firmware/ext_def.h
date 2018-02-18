@@ -45,11 +45,11 @@
 #define PWD_INFLUX "info"
 
 // DHT22, Sensor Temperatur und Luftfeuchte
-#define DHT_READ 1
+#define DHT_READ 0
 #define DHT_TYPE DHT22
 #define DHT_API_PIN 7
 #if defined(ESP8266)
-#define DHT_PIN D7
+#define DHT_PIN D4
 #endif
 #if defined(ARDUINO_SAMD_ZERO)
 #define DHT_PIN D9
@@ -59,8 +59,8 @@
 #define HTU21D_READ 0
 #define HTU21D_API_PIN 7
 #if defined(ESP8266)
-#define HTU21D_PIN_SCL D4
-#define HTU21D_PIN_SDA D3
+#define HTU21D_PIN_SCL D1
+#define HTU21D_PIN_SDA D2
 #endif
 
 // PPD42NS, der günstigere der beiden Feinstaubsensoren
@@ -79,8 +79,8 @@
 // TX (transmitting) pin on one side goes to RX (receiving) pin on other side
 // SoftSerial RX PIN is D1 and goes to SDS TX
 // SoftSerial TX PIN is D2 and goes to SDS RX
-#define SDS_PIN_RX D1
-#define SDS_PIN_TX D2
+#define SDS_PIN_RX D3
+#define SDS_PIN_TX D4
 #endif
 
 // PMS3003
@@ -92,32 +92,32 @@
 // all Plantower (PMS) sensors
 #define PMS_API_PIN 1
 #if defined(ESP8266)
-#define PMS_PIN_RX D1
-#define PMS_PIN_TX D2
+#define PMS_PIN_RX D3
+#define PMS_PIN_TX D4
 #endif
 
 // BMP180, Luftdruck-Sensor
 #define BMP_READ 0
 #define BMP_API_PIN 3
 #if defined(ESP8266)
-#define BMP_PIN_SCL D4
-#define BMP_PIN_SDA D3
+#define BMP_PIN_SCL D1
+#define BMP_PIN_SDA D2
 #endif
 
 // BMP280, Luftdruck-Sensor
 #define BMP280_READ 1
 #define BMP280_API_PIN 3
 #if defined(ESP8266)
-#define BMP280_PIN_SCL D4
-#define BMP280_PIN_SDA D3
+#define BMP280_PIN_SCL D1
+#define BMP280_PIN_SDA D2
 #endif
 
 // BME280, Luftdruck-Sensor
 #define BME280_READ 1
 #define BME280_API_PIN 11
 #if defined(ESP8266)
-#define BME280_PIN_SCL D4
-#define BME280_PIN_SDA D3
+#define BME280_PIN_SCL D1
+#define BME280_PIN_SDA D2
 #endif
 
 // DS18B20, Temperatur-Sensor

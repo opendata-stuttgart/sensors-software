@@ -534,186 +534,15 @@ String FeatherChipId() {
 /*****************************************************************/
 void start_SDS() {
 	const uint8_t start_SDS_cmd[] = {0xAA, 0xB4, 0x06, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x06, 0xAB};
-	serialSDS.write(start_SDS_cmd, sizeof(start_SDS_cmd));
-	delay(100);
-	char buffer;
-	int value;
-	int len = 0;
-	int checksum_is = 0;
-	int checksum_ok = 0;
-	while (serialSDS.available() > 0) {
-		buffer = serialSDS.read();
-		debug_out(String(len) + " - " + String(buffer, DEC) + " - " + String(buffer, HEX) + " - " + int(buffer) + " .", DEBUG_MAX_INFO, 1);
-		value = int(buffer);
-		switch (len) {
-		case (0): if (value != 0xAA) { len = -1; }; break;
-		case (1): if (value != 0xC5) { len = -1; }; break;
-		case (2): if (value != 0x06) { len = -1; }; checksum_is = value; break;
-		case (3): if (value != 0x01) { len = -1; }; checksum_is += value; break;
-		case (4): if (value != 0x01) { len = -1; }; checksum_is += value; break;
-		case (5): if (value != 0x00) { len = -1; }; checksum_is += value; break;
-		case (6): checksum_is += value; break;
-		case (7): checksum_is += value; break;
-		case (8):
-			debug_out(F("Checksum is: "), DEBUG_MED_INFO, 0); debug_out(String(checksum_is % 256), DEBUG_MED_INFO, 0);
-			debug_out(F(" - should: "), DEBUG_MED_INFO, 0); debug_out(String(value), DEBUG_MED_INFO, 1);
-			if (value == (checksum_is % 256)) { checksum_ok = 1; }
-			else { len = -1; };
-			break;
-		case (9): if (value != 0xAB) { len = -1; }; break;
-		}
-		len++;
-		if (len == 10 && checksum_ok == 1) {
-			is_SDS_running = true;
-			break;
-		}
-		yield();
-	}
+	serialSDS.write(start_SDS_cmd, sizeof(start_SDS_cmd)); is_SDS_running = true;
 }
 
 /*****************************************************************
 /* stop SDS011 sensor                                            *
 /*****************************************************************/
 void stop_SDS() {
-	const uint8_t stop_SDS_cmd[] = { 0xAA, 0xB4, 0x06, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x05, 0xAB };
-	serialSDS.write(stop_SDS_cmd, sizeof(stop_SDS_cmd));
-	delay(100);
-	char buffer;
-	int value;
-	int len = 0;
-	int checksum_is = 0;
-	int checksum_ok = 0;
-	while (serialSDS.available() > 0) {
-		buffer = serialSDS.read();
-		debug_out(String(len) + " - " + String(buffer, DEC) + " - " + String(buffer, HEX) + " - " + int(buffer) + " .", DEBUG_MAX_INFO, 1);
-		value = int(buffer);
-		switch (len) {
-		case (0): if (value != 0xAA) { len = -1; }; break;
-		case (1): if (value != 0xC5) { len = -1; }; break;
-		case (2): if (value != 0x06) { len = -1; }; checksum_is = value; break;
-		case (3): if (value != 0x01) { len = -1; }; checksum_is += value; break;
-		case (4): if (value != 0x00) { len = -1; }; checksum_is += value; break;
-		case (5): if (value != 0x00) { len = -1; }; checksum_is += value; break;
-		case (6): checksum_is += value; break;
-		case (7): checksum_is += value; break;
-		case (8):
-			debug_out(F("Checksum is: "), DEBUG_MED_INFO, 0); debug_out(String(checksum_is % 256), DEBUG_MED_INFO, 0);
-			debug_out(F(" - should: "), DEBUG_MED_INFO, 0); debug_out(String(value), DEBUG_MED_INFO, 1);
-			if (value == (checksum_is % 256)) { checksum_ok = 1; }
-			else { len = -1; }; break;
-		case (9): if (value != 0xAB) { len = -1; }; break;
-		}
-		len++;
-		if (len == 10 && checksum_ok == 1) {
-			is_SDS_running = false;
-			break;
-		}
-		yield();
-	}
-}
-
-/*****************************************************************
-/* read SDS011 sensor values                                     *
-/*****************************************************************/
-String SDS_version_date() {
-	const uint8_t version_SDS_cmd[] = { 0xAA, 0xB4, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x05, 0xAB };
-	String s = "";
-	String value_hex;
-	char buffer;
-	int value;
-	int len = 0;
-	String version_date = "";
-	String device_id = "";
-	int checksum_is = 0;
-	int checksum_ok = 0;
-	int position = 0;
-
-	debug_out(F("Start reading SDS011 version date"), DEBUG_MED_INFO, 1);
-
-	serialSDS.write(version_SDS_cmd, sizeof(version_SDS_cmd));
-	delay(100);
-
-	while (serialSDS.available() > 0) {
-		buffer = serialSDS.read();
-		debug_out(String(len) + " - " + String(buffer, DEC) + " - " + String(buffer, HEX) + " - " + int(buffer) + " .", DEBUG_MED_INFO, 1);
-		//		"aa" = 170, "ab" = 171, "c0" = 192
-		value = int(buffer);
-		switch (len) {
-		case (0): if (value != 170) { len = -1; }; break;
-		case (1): if (value != 197) { len = -1; }; break;
-		case (2): if (value != 7) { len = -1; }; checksum_is = value; break;
-		case (3): version_date = String(value); checksum_is += value; break;
-		case (4): version_date += "-" + String(value); checksum_is += value; break;
-		case (5): version_date += "-" + String(value); checksum_is += value; break;
-		case (6): if (value < 0x10) { device_id = "0" + String(value, HEX); }
-				  else { device_id = String(value, HEX); }; checksum_is += value; break;
-		case (7): if (value < 0x10) { device_id += "0"; }; device_id += String(value, HEX); checksum_is += value; break;
-		case (8):
-			debug_out(F("Checksum is: "), DEBUG_MED_INFO, 0);
-			debug_out(String(checksum_is % 256), DEBUG_MED_INFO, 0);
-			debug_out(F(" - should: "), DEBUG_MED_INFO, 0);
-			debug_out(String(value), DEBUG_MED_INFO, 1);
-			if (value == (checksum_is % 256)) { checksum_ok = 1; }
-			else { len = -1; }; break;
-		case (9): if (value != 171) { len = -1; }; break;
-		}
-		len++;
-		if (len == 10 && checksum_ok == 1) {
-			s = version_date + "(" + device_id + ")";
-			debug_out(F("SDS version date : "), DEBUG_MIN_INFO, 0);
-			debug_out(version_date, DEBUG_MIN_INFO, 1);
-			debug_out(F("SDS device ID:     "), DEBUG_MIN_INFO, 0);
-			debug_out(device_id, DEBUG_MIN_INFO, 1);
-			break;
-		}
-		yield();
-	}
-
-	debug_out(F("End reading SDS011 version date"), DEBUG_MED_INFO, 1);
-
-	return s;
-}
-
-/*****************************************************************
-/* read SDS011 sensor values                                     *
-/*****************************************************************/
-void SDS_sensor_values(int& pm25_serial, int& pm10_serial) {
-	char buffer;
-	int value;
-	int len = 0;
-	int checksum_is = 0;
-	int checksum_ok = 0;
-
-	debug_out(F("Start reading SDS011"), DEBUG_MED_INFO, 1);
-
-	while (serialSDS.available() > 0) {
-		buffer = serialSDS.read();
-		debug_out(String(len) + " - " + String(buffer, DEC) + " - " + String(buffer, HEX) + " - " + int(buffer) + " .", DEBUG_MAX_INFO, 1);
-		//			"aa" = 170, "ab" = 171, "c0" = 192
-		value = int(buffer);
-		switch (len) {
-		case (0): if (value != 170) { len = -1; }; break;
-		case (1): if (value != 192) { len = -1; }; break;
-		case (2): pm25_serial = value; checksum_is = value; break;
-		case (3): pm25_serial += (value << 8); checksum_is += value; break;
-		case (4): pm10_serial = value; checksum_is += value; break;
-		case (5): pm10_serial += (value << 8); checksum_is += value; break;
-		case (6): checksum_is += value; break;
-		case (7): checksum_is += value; break;
-		case (8):
-			debug_out(F("Checksum is: "), DEBUG_MED_INFO, 0); debug_out(String(checksum_is % 256), DEBUG_MED_INFO, 0);
-			debug_out(F(" - should: "), DEBUG_MED_INFO, 0); debug_out(String(value), DEBUG_MED_INFO, 1);
-			if (value == (checksum_is % 256)) { checksum_ok = 1; }
-			else { len = -1; }; break;
-		case (9): if (value != 171) { len = -1; }; break;
-		}
-		len++;
-		if (len == 10 && checksum_ok == 1) {
-			break;
-		}
-		yield();
-	}
-	debug_out(F("End reading SDS011"), DEBUG_MED_INFO, 1);
+	const uint8_t stop_SDS_cmd[] = {0xAA, 0xB4, 0x06, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x05, 0xAB};
+	serialSDS.write(stop_SDS_cmd, sizeof(stop_SDS_cmd)); is_SDS_running = false;
 }
 
 /*****************************************************************
@@ -730,6 +559,71 @@ void start_PMS() {
 void stop_PMS() {
 	const uint8_t stop_PMS_cmd[] = { 0x42, 0x4D, 0xE4, 0x00, 0x00, 0x01, 0x73 };
 	serialSDS.write(stop_PMS_cmd, sizeof(stop_PMS_cmd)); is_PMS_running = false;
+}
+
+/*****************************************************************
+/* read SDS011 sensor values                                     *
+/*****************************************************************/
+String SDS_version_date() {
+	const uint8_t version_SDS_cmd[] = {0xAA, 0xB4, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x05, 0xAB};
+	String s = "";
+	String value_hex;
+	char buffer;
+	int value;
+	int len = 0;
+	String version_date = "";
+	String device_id = "";
+	int checksum_is;
+	int checksum_ok = 0;
+	int position = 0;
+
+	debug_out(F("Start reading SDS011 version date"), DEBUG_MED_INFO, 1);
+
+	start_SDS();
+
+	delay(100);
+
+	serialSDS.write(version_SDS_cmd, sizeof(version_SDS_cmd));
+
+	delay(500);
+
+	while (serialSDS.available() > 0) {
+		buffer = serialSDS.read();
+		debug_out(String(len) + " - " + String(buffer, DEC) + " - " + String(buffer, HEX) + " - " + int(buffer) + " .", DEBUG_MED_INFO, 1);
+//		"aa" = 170, "ab" = 171, "c0" = 192
+		value = int(buffer);
+		switch (len) {
+		case (0): if (value != 170) { len = -1; }; break;
+		case (1): if (value != 197) { len = -1; }; break;
+		case (2): if (value != 7) { len = -1; }; break;
+		case (3): version_date  = String(value); checksum_is = 7 + value; break;
+		case (4): version_date += "-" + String(value); checksum_is += value; break;
+		case (5): version_date += "-" + String(value); checksum_is += value; break;
+		case (6): if (value < 0x10) {device_id  = "0" + String(value, HEX);} else {device_id  = String(value, HEX);}; checksum_is += value; break;
+		case (7): if (value < 0x10) {device_id += "0";}; device_id += String(value, HEX); checksum_is += value; break;
+		case (8):
+			debug_out(F("Checksum is: "), DEBUG_MED_INFO, 0);
+			debug_out(String(checksum_is % 256), DEBUG_MED_INFO, 0);
+			debug_out(F(" - should: "), DEBUG_MED_INFO, 0);
+			debug_out(String(value), DEBUG_MED_INFO, 1);
+			if (value == (checksum_is % 256)) { checksum_ok = 1; } else { len = -1; }; break;
+		case (9): if (value != 171) { len = -1; }; break;
+		}
+		len++;
+		if (len == 10 && checksum_ok == 1) {
+			s = version_date + "(" + device_id + ")";
+			debug_out(F("SDS version date : "), DEBUG_MIN_INFO, 0);
+			debug_out(version_date, DEBUG_MIN_INFO, 1);
+			debug_out(F("SDS device ID:     "), DEBUG_MIN_INFO, 0);
+			debug_out(device_id, DEBUG_MIN_INFO, 1);
+			len = 0; checksum_ok = 0; version_date = ""; device_id = ""; checksum_is = 0;
+		}
+		yield();
+	}
+
+	debug_out(F("End reading SDS011 version date"), DEBUG_MED_INFO, 1);
+
+	return s;
 }
 
 /*****************************************************************
@@ -2256,31 +2150,64 @@ String sensorBME280() {
 /*****************************************************************/
 String sensorSDS() {
 	String s = "";
+	String value_hex;
+	char buffer;
+	int value;
+	int len = 0;
+	int pm10_serial = 0;
+	int pm25_serial = 0;
+	int checksum_is;
+	int checksum_ok = 0;
+	int position = 0;
 
+	debug_out(F("Start reading SDS011"), DEBUG_MED_INFO, 1);
 	if (long(act_milli - starttime) < (long(sending_intervall_ms) - long(warmup_time_SDS_ms + reading_time_SDS_ms))) {
-		while (is_SDS_running) {
+		if (is_SDS_running) {
 			stop_SDS();
 		}
 	} else {
-		while (! is_SDS_running) {
+		if (! is_SDS_running) {
 			start_SDS();
 		}
-		int pm10_serial = 0;
-		int pm25_serial = 0;
-		SDS_sensor_values(pm25_serial, pm10_serial);
-		if (long(act_milli - starttime) > (long(sending_intervall_ms) - long(reading_time_SDS_ms))) {
-			if ((! isnan(pm10_serial)) && (! isnan(pm25_serial))) {
-				sds_pm10_sum += pm10_serial;
-				sds_pm25_sum += pm25_serial;
-				if (sds_pm10_min > pm10_serial) { sds_pm10_min = pm10_serial; }
-				if (sds_pm10_max < pm10_serial) { sds_pm10_max = pm10_serial; }
-				if (sds_pm25_min > pm25_serial) { sds_pm25_min = pm25_serial; }
-				if (sds_pm25_max < pm25_serial) { sds_pm25_max = pm25_serial; }
-				debug_out(F("PM10 (sec.) : "), DEBUG_MED_INFO, 0); debug_out(Float2String(float(pm10_serial) / 10), DEBUG_MED_INFO, 1);
-				debug_out(F("PM2.5 (sec.): "), DEBUG_MED_INFO, 0); debug_out(Float2String(float(pm25_serial) / 10), DEBUG_MED_INFO, 1);
-				sds_val_count++;
+
+		while (serialSDS.available() > 0) {
+			buffer = serialSDS.read();
+			debug_out(String(len) + " - " + String(buffer, DEC) + " - " + String(buffer, HEX) + " - " + int(buffer) + " .", DEBUG_MAX_INFO, 1);
+//			"aa" = 170, "ab" = 171, "c0" = 192
+			value = int(buffer);
+			switch (len) {
+			case (0): if (value != 170) { len = -1; }; break;
+			case (1): if (value != 192) { len = -1; }; break;
+			case (2): pm25_serial = value; checksum_is = value; break;
+			case (3): pm25_serial += (value << 8); checksum_is += value; break;
+			case (4): pm10_serial = value; checksum_is += value; break;
+			case (5): pm10_serial += (value << 8); checksum_is += value; break;
+			case (6): checksum_is += value; break;
+			case (7): checksum_is += value; break;
+			case (8):
+				debug_out(F("Checksum is: "), DEBUG_MED_INFO, 0); debug_out(String(checksum_is % 256), DEBUG_MED_INFO, 0);
+				debug_out(F(" - should: "), DEBUG_MED_INFO, 0); debug_out(String(value), DEBUG_MED_INFO, 1);
+				if (value == (checksum_is % 256)) { checksum_ok = 1; } else { len = -1; }; break;
+			case (9): if (value != 171) { len = -1; }; break;
 			}
+			len++;
+			if (len == 10 && checksum_ok == 1 && (long(act_milli - starttime) > (long(sending_intervall_ms) - long(reading_time_SDS_ms)))) {
+				if ((! isnan(pm10_serial)) && (! isnan(pm25_serial))) {
+					sds_pm10_sum += pm10_serial;
+					sds_pm25_sum += pm25_serial;
+					if (sds_pm10_min > pm10_serial) { sds_pm10_min = pm10_serial; }
+					if (sds_pm10_max < pm10_serial) { sds_pm10_max = pm10_serial; }
+					if (sds_pm25_min > pm25_serial) { sds_pm25_min = pm25_serial; }
+					if (sds_pm25_max < pm25_serial) { sds_pm25_max = pm25_serial; }
+					debug_out(F("PM10 (sec.) : "), DEBUG_MED_INFO, 0); debug_out(Float2String(float(pm10_serial) / 10), DEBUG_MED_INFO, 1);
+					debug_out(F("PM2.5 (sec.): "), DEBUG_MED_INFO, 0); debug_out(Float2String(float(pm25_serial) / 10), DEBUG_MED_INFO, 1);
+					sds_val_count++;
+				}
+				len = 0; checksum_ok = 0; pm10_serial = 0.0; pm25_serial = 0.0; checksum_is = 0;
+			}
+			yield();
 		}
+
 	}
 	if (send_now) {
 		last_value_SDS_P1 = "";
@@ -2304,9 +2231,7 @@ String sensorSDS() {
 		sds_pm10_sum = 0; sds_pm25_sum = 0; sds_val_count = 0;
 		sds_pm10_max = 0; sds_pm10_min = 20000; sds_pm25_max = 0; sds_pm25_min = 20000;
 		if ((sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms)) && (! will_check_for_update)) {
-			while (is_SDS_running) {
-				stop_SDS();
-			}
+			stop_SDS();
 		}
 	}
 
@@ -2817,7 +2742,7 @@ bool initBME280(char addr) {
 void setup() {
 	Serial.begin(9600);					// Output to Serial at 9600 baud
 #if defined(ESP8266)
-	Wire.begin(D3, D4);
+	Wire.begin(D2, D1);
 	esp_chipid = String(ESP.getChipId());
 	WiFi.persistent(false);
 #endif
@@ -2838,10 +2763,10 @@ void setup() {
 		delay(500);
 		ESP.restart();
 	}
-	serialSDS.begin(9600);
-	serialGPS.begin(9600);
 	autoUpdate();
 	create_basic_auth_strings();
+	serialSDS.begin(9600);
+	serialGPS.begin(9600);
 	//ds18b20.begin();
 	pinMode(PPD_PIN_PM1, INPUT_PULLUP);	// Listen at the designated PIN
 	pinMode(PPD_PIN_PM2, INPUT_PULLUP);	// Listen at the designated PIN
@@ -2902,9 +2827,7 @@ void setup() {
 	}
 	if (sds_read) {
 		debug_out(F("Stoppe SDS011..."), DEBUG_MIN_INFO, 1);
-		while (is_SDS_running) {
-			stop_SDS();
-		}
+		stop_SDS();
 	}
 	if (pms24_read || pms32_read) {
 		debug_out(F("Stoppe PMS..."), DEBUG_MIN_INFO, 1);
