@@ -12,8 +12,8 @@
 #define WWW_BASICAUTH_ENABLED 0
 
 // Wohin gehen die Daten?
-#define SEND2DUSTI 1
-#define SEND2MADAVI 1
+#define SEND2DUSTI 0
+#define SEND2MADAVI 0
 #define SEND2SENSEMAP 0
 #define SEND2MQTT 0
 #define SEND2INFLUX 0
@@ -105,7 +105,7 @@
 #endif
 
 // BMP280, Luftdruck-Sensor
-#define BMP280_READ 0
+#define BMP280_READ 1
 #define BMP280_API_PIN 3
 #if defined(ESP8266)
 #define BMP280_PIN_SCL D4
@@ -113,7 +113,7 @@
 #endif
 
 // BME280, Luftdruck-Sensor
-#define BME280_READ 0
+#define BME280_READ 1
 #define BME280_API_PIN 11
 #if defined(ESP8266)
 #define BME280_PIN_SCL D4
@@ -137,7 +137,7 @@
 #endif
 
 // Automatische Firmware-Updates über WLAN
-#define AUTO_UPDATE 1
+#define AUTO_UPDATE 0
 
 // OLED Display SSD1306 angeschlossen?
 #define HAS_DISPLAY 0
