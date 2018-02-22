@@ -209,7 +209,8 @@ RHReliableDatagram manager(rf69, CLIENT_ADDRESS);
 /* Display definitions                                           *
 /*****************************************************************/
 #if defined(ESP8266)
-Adafruit_SSD1306 display(0x3c, D3, D4);
+#define OLED_RESET 0  // GPIO0
+Adafruit_SSD1306 display(OLED_RESET);
 //LiquidCrystal_I2C lcd_27(0x27, 16, 2);
 //LiquidCrystal_I2C lcd_3f(0x3F, 16, 2);
 #endif
@@ -401,13 +402,14 @@ void display_debug(const String& text) {
 	if (has_display) {
 		debug_out(F("output debug text to display..."), DEBUG_MIN_INFO, 1);
 		debug_out(text, DEBUG_MAX_INFO, 1);
-		//display.resetDisplay();
-		//display.clear();
-		//display.displayOn();
+		display.clearDisplay();
 		//display.setFont(Monospaced_plain_9);
 		//display.setTextAlignment(TEXT_ALIGN_LEFT);
-		//display.drawStringMaxWidth(0, 12, 120, text);
-		//display.display();
+		display.setTextSize(1);
+		display.setTextColor(WHITE);
+		display.setCursor(0, 0);
+		display.print(text);
+		display.display();
 	}
 #endif
 }
@@ -2708,32 +2710,37 @@ void display_values(const String& value_DHT_T, const String& value_DHT_H, const 
 	if (h_value == "") { h_value = "-";}
 	if (p_value == "") { p_value = "-";}
 
-	//if (has_display) {
-	//	display.resetDisplay();
-	//	display.clear();
-	//	display.displayOn();
-	//	display.setFont(Monospaced_plain_9);
-	//	//display.setTextAlignment(TEXT_ALIGN_LEFT);
-	//	value_count = 0;
-	//	display.drawString(0, 10 * (value_count++), "Temp:" + t_value + "  Hum.:" + h_value);
-	//	if (ppd_read) {
-	//		display.drawString(0, 10 * (value_count++), "PPD P1: " + value_PPD_P1);
-	//		display.drawString(0, 10 * (value_count++), "PPD P2: " + value_PPD_P2);
-	//	}
-	//	if (sds_read) {
-	//		display.drawString(0, 10 * (value_count++), "SDS P1: " + value_SDS_P1);
-	//		display.drawString(0, 10 * (value_count++), "SDS P2: " + value_SDS_P2);
-	//	}
-	//	if (gps_read) {
-	//		if(gps.location.isValid()) {
-	//			display.drawString(0, 10 * (value_count++), "lat: " + String(gps.location.lat(), 6));
-	//			display.drawString(0, 10 * (value_count++), "long: " + String(gps.location.lng(), 6));
-	//		}
-	//		display.drawString(0, 10 * (value_count++), "satellites: " + String(gps.satellites.value()));
-	//	}
-	//	display.display();
-	//}
-	//
+	if (has_display) {
+		display.clearDisplay();
+		display.setTextSize(1);
+		display.setTextColor(WHITE);
+		value_count = 0;
+		display.setCursor(0, 10 * (value_count++));
+		display.print("Temp:" + t_value);
+		display.setCursor(0, 10 * (value_count++));
+		display.print("Pres.:" + p_value);
+		if (ppd_read) {
+			display.setCursor(0, 10 * (value_count++));
+			display.print("PPD P1: " + value_PPD_P1);
+			display.setCursor(0, 10 * (value_count++));
+			display.print("PPD P2: " + value_PPD_P2);
+		}
+		if (sds_read) {
+			display.setCursor(0, 10 * (value_count++));
+			display.print("P2.5: " + value_SDS_P2);
+			display.setCursor(0, 10 * (value_count++));
+			display.print("P10: " + value_SDS_P1);
+		}
+		//if (gps_read) {
+		//	if(gps.location.isValid()) {
+		//		display.drawString(0, 10 * (value_count++), "lat: " + String(gps.location.lat(), 6));
+		//		display.drawString(0, 10 * (value_count++), "long: " + String(gps.location.lng(), 6));
+		//	}
+		//	display.drawString(0, 10 * (value_count++), "satellites: " + String(gps.satellites.value()));
+		//}
+		display.display();
+	}
+	
 // ----5----0----5----0
 // PM10/2.5: 1999/999
 // T/H: -10.0°C/100.0%
@@ -2757,16 +2764,18 @@ void display_values(const String& value_DHT_T, const String& value_DHT_H, const 
 #endif
 }
 
-///*****************************************************************
-///* Init display                                                  *
-///*****************************************************************/
-//void init_display() {
-//#if defined(ESP8266)
-//	display.init();
-//	display.resetDisplay();
-//#endif
-//}
-//
+/*****************************************************************
+/* Init display                                                  *
+/*****************************************************************/
+void init_display() {
+#if defined(ESP8266)
+	// by default, we'll generate the high voltage from the 3.3v line internally! (neat!)
+	display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C (for the 64x48)
+	display.display();
+
+#endif
+}
+
 ///*****************************************************************
 ///* Init display                                                  *
 ///*****************************************************************/
@@ -2824,7 +2833,7 @@ void setup() {
 #if defined(ARDUINO_SAMD_ZERO)
 	Wire.begin();
 #endif
-	//init_display();
+	init_display();
 	//init_lcd1602();
 	copyExtDef();
 	display_debug(F("Reading config from SPIFFS"));
