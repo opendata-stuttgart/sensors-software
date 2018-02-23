@@ -3227,7 +3227,7 @@ void loop() {
 
 		server.begin();
 
-		if ((act_milli - last_update_attempt) > (28 * pause_between_update_attempts)) {
+		if ((act_milli - last_update_attempt) > (28 * pause_between_update_attempts) && auto_update) {
 			ESP.restart();
 		}
 
@@ -3264,5 +3264,4 @@ void loop() {
 		first_cycle = false;
 	}
 	if (config_needs_write) { writeConfig(); create_basic_auth_strings(); }
-	yield();
 }
