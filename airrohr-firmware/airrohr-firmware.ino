@@ -196,6 +196,7 @@ const char* update_url = "/sensor/update/firmware.php";
 const int update_port = 80;
 
 #if defined(ESP8266)
+DNSServer dnsServer;
 ESP8266WebServer server(80);
 int TimeZone = 1;
 #endif
@@ -368,7 +369,7 @@ String server_name;
 
 long last_page_load = millis();
 
-bool wificonfig_loop = false;
+bool is_wificonfig = false;
 bool restart_needed = false;
 
 bool config_needs_write = false;
@@ -569,7 +570,6 @@ void start_SDS() {
 			is_SDS_running = true;
 			break;
 		}
-		yield();
 	}
 }
 
@@ -610,7 +610,6 @@ void stop_SDS() {
 			is_SDS_running = false;
 			break;
 		}
-		yield();
 	}
 }
 
@@ -668,7 +667,6 @@ String SDS_version_date() {
 			debug_out(device_id, DEBUG_MIN_INFO, 1);
 			break;
 		}
-		yield();
 	}
 
 	debug_out(F("End reading SDS011 version date"), DEBUG_MED_INFO, 1);
@@ -713,7 +711,6 @@ void SDS_sensor_values(int& pm25_serial, int& pm10_serial) {
 		if (len == 10 && checksum_ok == 1) {
 			break;
 		}
-		yield();
 	}
 	debug_out(F("End reading SDS011"), DEBUG_MED_INFO, 1);
 }
@@ -1348,7 +1345,7 @@ void webserver_config() {
 		page_content += line_from_value(FPSTR(INTL_PORT), String(port_influx));
 		page_content += line_from_value(FPSTR(INTL_BENUTZER), user_influx);
 		page_content += line_from_value(FPSTR(INTL_PASSWORT), pwd_influx);
-		if (wificonfig_loop) {
+		if (is_wificonfig) {
 			page_content += F("<br/><br/>"); page_content += FPSTR(INTL_GERAT_WIRD_NEU_GESTARTET);
 		} else {
 			page_content += F("<br/><br/><a href='/reset?confirm=yes'>"); page_content += FPSTR(INTL_GERAT_NEU_STARTEN); page_content += F("?</a>");
@@ -1633,9 +1630,6 @@ void webserver_not_found() {
 /* Webserver setup                                               *
 /*****************************************************************/
 void setup_webserver() {
-	server_name  = F("Feinstaubsensor-");
-	server_name += esp_chipid;
-
 	server.on("/", webserver_root);
 	server.on("/config", webserver_config);
 	server.on("/wifi", webserver_wifi);
@@ -1655,51 +1649,47 @@ void setup_webserver() {
 }
 
 /*****************************************************************
-/* WifiConfig                                                    *
+/* beginWifiConfig                                                    *
 /*****************************************************************/
-void wifiConfig() {
+void beginWifiConfig() {
 #if defined(ESP8266)
 	const char *softAP_password = "";
 	const byte DNS_PORT = 53;
-	int retry_count = 0;
-	DNSServer dnsServer;
 	IPAddress apIP(192, 168, 4, 1);
 	IPAddress netMsk(255, 255, 255, 0);
 
 	debug_out(F("Starting WiFiManager"), DEBUG_MIN_INFO, 1);
 	debug_out(F("AP ID: Feinstaubsensor-"), DEBUG_MIN_INFO, 0);
-	debug_out(String(ESP.getChipId()), DEBUG_MIN_INFO, 1);
+	debug_out(server_name, DEBUG_MIN_INFO, 1);
 
-	wificonfig_loop = true;
+	is_wificonfig = true;
+	last_page_load = millis();
 
-	WiFi.softAPConfig(apIP, apIP, netMsk);
+	WiFi.mode(WiFiMode::WIFI_AP);
 	WiFi.softAP(server_name.c_str(), "");
+	WiFi.softAPConfig(apIP, apIP, netMsk);
 
 	dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
 	dnsServer.start(DNS_PORT, "*", apIP);
 
-	// 10 minutes timeout for wifi config
-	last_page_load = millis();
-	while (((millis() - last_page_load) < time_for_wifi_config) && (! config_needs_write)) {
-		dnsServer.processNextRequest();
-		server.handleClient();
-		wdt_reset(); // nodemcu is alive
-		yield();
-	}
+#endif
+}
 
-	// half second to answer last requests
-	last_page_load = millis();
-	while (((millis() - last_page_load) < 500)) {
-		dnsServer.processNextRequest();
-		server.handleClient();
-		yield();
-	}
+/*****************************************************************
+/* endWifiConfig                                                    *
+/*****************************************************************/
+bool endWifiConfig() {
+#if defined(ESP8266)
+	int retry_count = 0;
+	if (!is_wificonfig) return true;
+	// 10 minutes timeout for wifi config
+	if (((millis() - last_page_load) < time_for_wifi_config) && !config_needs_write) return false;
+
+	dnsServer.stop();
 
 	WiFi.softAPdisconnect(true);
 	WiFi.mode(WIFI_STA);
 	WiFi.disconnect();
-
-	dnsServer.stop();
 
 	delay(100);
 
@@ -1715,6 +1705,7 @@ void wifiConfig() {
 	}
 	debug_out("", DEBUG_MIN_INFO, 1);
 
+	MDNS.notifyAPChange();
 
 	debug_out(F("------ Result from Webconfig ------"), DEBUG_MIN_INFO, 1);
 	debug_out(F("WLANSSID: "), DEBUG_MIN_INFO, 0); debug_out(wlanssid, DEBUG_MIN_INFO, 1);
@@ -1731,16 +1722,25 @@ void wifiConfig() {
 	debug_out(F("LCD 1602: "), DEBUG_MIN_INFO, 0); debug_out(String(has_lcd1602), DEBUG_MIN_INFO, 1);
 	debug_out(F("Debug: "), DEBUG_MIN_INFO, 0); debug_out(String(debug), DEBUG_MIN_INFO, 1);
 	debug_out(F("------"), DEBUG_MIN_INFO, 1);
-	debug_out(F("Restart needed ..."), DEBUG_MIN_INFO, 1);
-	wificonfig_loop = false;
-	restart_needed = true;
+	if (config_needs_write) {
+		debug_out(F("Restart needed ..."), DEBUG_MIN_INFO, 1);
+		display_debug(F("Writing config to SPIFFS and restarting sensor"));
+		writeConfig();
+		delay(500);
+		ESP.restart();
+	}
+	is_wificonfig = false;
 #endif
+	return true;
 }
 
 /*****************************************************************
 /* WiFi auto connecting script                                   *
 /*****************************************************************/
 void connectWifi() {
+	server_name = F("Feinstaubsensor-");
+	server_name += esp_chipid;
+
 #if defined(ESP8266)
 	int retry_count = 0;
 	debug_out(String(WiFi.status()), DEBUG_MIN_INFO, 1);
@@ -1757,19 +1757,8 @@ void connectWifi() {
 	}
 	debug_out("", DEBUG_MIN_INFO, 1);
 	if (WiFi.status() != WL_CONNECTED) {
-		display_debug("AP ID: Feinstaubsensor-" + esp_chipid + " - IP: 192.168.4.1");
-		wifiConfig();
-		if (WiFi.status() != WL_CONNECTED) {
-			retry_count = 0;
-			while ((WiFi.status() != WL_CONNECTED) && (retry_count < 20)) {
-				delay(500);
-				debug_out(".", DEBUG_MIN_INFO, 0);
-				retry_count++;
-			}
-			debug_out("", DEBUG_MIN_INFO, 1);
-		}
+		beginWifiConfig();
 	}
-	WiFi.softAPdisconnect(true);
 	debug_out(F("WiFi connected\nIP address: "), DEBUG_MIN_INFO, 0);
 	debug_out(IPAddress2String(WiFi.localIP()), DEBUG_MIN_INFO, 1);
 #endif
@@ -2260,12 +2249,16 @@ String sensorSDS() {
 	String s = "";
 
 	if (long(act_milli - starttime) < (long(sending_intervall_ms) - long(warmup_time_SDS_ms + reading_time_SDS_ms))) {
+		int retry = 3;
 		while (is_SDS_running) {
 			stop_SDS();
+			if (!--retry) break;
 		}
 	} else {
-		while (! is_SDS_running) {
+		int retry = 3;
+		while (!is_SDS_running) {
 			start_SDS();
+			if (!--retry) break;
 		}
 		int pm10_serial = 0;
 		int pm25_serial = 0;
@@ -2306,13 +2299,13 @@ String sensorSDS() {
 		sds_pm10_sum = 0; sds_pm25_sum = 0; sds_val_count = 0;
 		sds_pm10_max = 0; sds_pm10_min = 20000; sds_pm25_max = 0; sds_pm25_min = 20000;
 		if ((sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms)) && (! will_check_for_update)) {
+			int retry = 3;
 			while (is_SDS_running) {
 				stop_SDS();
+				if (!--retry) break;
 			}
 		}
 	}
-
-	debug_out(F("End reading SDS011"), DEBUG_MED_INFO, 1);
 
 	return s;
 }
@@ -2407,7 +2400,6 @@ String sensorPMS(int msg_len) {
 				}
 				len = 0; checksum_ok = 0; pm1_serial = 0.0; pm10_serial = 0.0; pm25_serial = 0.0; checksum_is = 0;
 			}
-			yield();
 		}
 
 	}
@@ -2838,15 +2830,9 @@ void setup() {
 	copyExtDef();
 	display_debug(F("Reading config from SPIFFS"));
 	readConfig();
-	setup_webserver();
 	display_debug("Connecting to " + String(wlanssid));
 	connectWifi();						// Start ConnectWifi
-	if (restart_needed) {
-		display_debug(F("Writing config to SPIFFS and restarting sensor"));
-		writeConfig();
-		delay(500);
-		ESP.restart();
-	}
+	setup_webserver();
 	serialSDS.begin(9600);
 	serialGPS.begin(9600);
 	autoUpdate();
@@ -2911,8 +2897,10 @@ void setup() {
 	}
 	if (sds_read) {
 		debug_out(F("Stoppe SDS011..."), DEBUG_MIN_INFO, 1);
+		int retry = 3;
 		while (is_SDS_running) {
 			stop_SDS();
+			if (!--retry) break;
 		}
 	}
 	if (pms24_read || pms32_read) {
@@ -2929,9 +2917,9 @@ void setup() {
 		MDNS.addService("http", "tcp", 80);
 	}
 
-	// sometimes parallel sending data and web page will stop nodemcu, watchdogtimer set to 30 seconds
-	wdt_disable();
-	wdt_enable(30000);// 30 sec
+	//// sometimes parallel sending data and web page will stop nodemcu, watchdogtimer set to 30 seconds
+	//wdt_disable();
+	//wdt_enable(30000);// 30 sec
 
 	starttime = millis();					// store the start time
 	starttime_SDS = millis();
@@ -2973,7 +2961,7 @@ void loop() {
 
 	sample_count++;
 
-	wdt_reset(); // nodemcu is alive
+	//wdt_reset(); // nodemcu is alive
 
 	if (last_micro != 0) {
 		diff_micro = act_micro - last_micro;
@@ -3054,6 +3042,9 @@ void loop() {
 		if (WiFi.psk() != "") {
 			httpPort_madavi = 80;
 			httpPort_dusti = 80;
+		} else {
+			httpPort_madavi = 443;
+			httpPort_dusti = 443;
 		}
 		debug_out(F("Creating data string:"), DEBUG_MIN_INFO, 1);
 		data = data_first_part;
@@ -3069,7 +3060,7 @@ void loop() {
 
 		server.handleClient();
 		yield();
-		server.stop();
+		//server.stop();
 		if (ppd_read) {
 			data += result_PPD;
 			if (send2dusti) {
@@ -3225,32 +3216,11 @@ void loop() {
 			sum_send_time += micros() - start_send;
 		}
 
-		server.begin();
-
-		if ((act_milli - last_update_attempt) > (28 * pause_between_update_attempts) && auto_update) {
-			ESP.restart();
-		}
-
-		if ((act_milli - last_update_attempt) > pause_between_update_attempts) {
-			autoUpdate();
-		}
-
-		if (! send_failed) { sending_time = (4 * sending_time + sum_send_time) / 5; }
+		if (!send_failed) { sending_time = (4 * sending_time + sum_send_time) / 5; }
 		debug_out(F("Time for sending data: "), DEBUG_MIN_INFO, 0);
 		debug_out(String(sending_time), DEBUG_MIN_INFO, 1);
 
-
-		if (WiFi.status() != WL_CONNECTED) {  // reconnect if connection lost
-			int retry_count = 0;
-			debug_out(F("Connection lost, reconnecting "), DEBUG_MIN_INFO, 0);
-			WiFi.reconnect();
-			while ((WiFi.status() != WL_CONNECTED) && (retry_count < 20)) {
-				delay(500);
-				debug_out(".", DEBUG_MIN_INFO, 0);
-				retry_count++;
-			}
-			debug_out("", DEBUG_MIN_INFO, 1);
-		}
+		//server.begin();
 
 		// Resetting for next sampling
 		last_data_string = data;
@@ -3263,5 +3233,26 @@ void loop() {
 		starttime = millis(); // store the start time
 		first_cycle = false;
 	}
+
+	if ((act_milli - last_update_attempt) > (28 * pause_between_update_attempts) && auto_update) {
+		ESP.restart();
+	}
+
+	if ((act_milli - last_update_attempt) > pause_between_update_attempts) {
+		autoUpdate();
+	}
+
+	if (endWifiConfig() && WiFi.status() != WL_CONNECTED) {  // reconnect if connection lost
+		int retry_count = 0;
+		debug_out(F("Connection lost, reconnecting "), DEBUG_MIN_INFO, 0);
+		WiFi.reconnect();
+		while ((WiFi.status() != WL_CONNECTED) && (retry_count < 20)) {
+			delay(500);
+			debug_out(".", DEBUG_MIN_INFO, 0);
+			retry_count++;
+		}
+		debug_out("", DEBUG_MIN_INFO, 1);
+	}
+
 	if (config_needs_write) { writeConfig(); create_basic_auth_strings(); }
 }
