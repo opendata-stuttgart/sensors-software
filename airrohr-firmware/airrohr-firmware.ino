@@ -312,6 +312,7 @@ unsigned long sending_time = 0;
 bool send_failed = false;
 
 unsigned long time_for_wifi_config = 600000;
+long wifi_reconnect_deadline = -1;
 
 unsigned long last_update_attempt;
 const unsigned long pause_between_update_attempts = 86400000;
@@ -1690,22 +1691,7 @@ bool endWifiConfig() {
 	WiFi.softAPdisconnect(true);
 	WiFi.mode(WIFI_STA);
 	WiFi.disconnect();
-
-	delay(100);
-
-	debug_out(F("Connecting to "), DEBUG_MIN_INFO, 0);
-	debug_out(wlanssid, DEBUG_MIN_INFO, 1);
-
-	WiFi.begin(wlanssid, wlanpwd);
-
-	while ((WiFi.status() != WL_CONNECTED) && (retry_count < 20)) {
-		delay(500);
-		debug_out(".", DEBUG_MIN_INFO, 0);
-		retry_count++;
-	}
-	debug_out("", DEBUG_MIN_INFO, 1);
-
-	MDNS.notifyAPChange();
+	is_wificonfig = false;
 
 	debug_out(F("------ Result from Webconfig ------"), DEBUG_MIN_INFO, 1);
 	debug_out(F("WLANSSID: "), DEBUG_MIN_INFO, 0); debug_out(wlanssid, DEBUG_MIN_INFO, 1);
@@ -1729,7 +1715,14 @@ bool endWifiConfig() {
 		delay(500);
 		ESP.restart();
 	}
-	is_wificonfig = false;
+
+	yield();
+
+	debug_out(F("Connecting to "), DEBUG_MIN_INFO, 0);
+	debug_out(wlanssid, DEBUG_MIN_INFO, 1);
+
+	WiFi.begin(wlanssid, wlanpwd);
+	wifi_reconnect_deadline = ESP.getCycleCount() + 10 * 1000000 * ESP.getCpuFreqMHz();
 #endif
 	return true;
 }
@@ -3242,16 +3235,15 @@ void loop() {
 		autoUpdate();
 	}
 
-	if (endWifiConfig() && WiFi.status() != WL_CONNECTED) {  // reconnect if connection lost
-		int retry_count = 0;
-		debug_out(F("Connection lost, reconnecting "), DEBUG_MIN_INFO, 0);
-		WiFi.reconnect();
-		while ((WiFi.status() != WL_CONNECTED) && (retry_count < 20)) {
-			delay(500);
-			debug_out(".", DEBUG_MIN_INFO, 0);
-			retry_count++;
+	if (endWifiConfig()) {  // reconnect if connection lost
+		if (WiFi.status() != WL_CONNECTED && wifi_reconnect_deadline < ESP.getCycleCount()) {
+			WiFi.reconnect();
+			wifi_reconnect_deadline = ESP.getCycleCount() + 10 * 1000000 * ESP.getCpuFreqMHz();
+		} else if (WiFi.status() == WL_CONNECTED && wifi_reconnect_deadline >= 0)
+		{
+			wifi_reconnect_deadline = -1;
+			MDNS.notifyAPChange();
 		}
-		debug_out("", DEBUG_MIN_INFO, 1);
 	}
 
 	if (config_needs_write) { writeConfig(); create_basic_auth_strings(); }
