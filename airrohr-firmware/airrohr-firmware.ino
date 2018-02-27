@@ -1660,7 +1660,7 @@ void beginWifiConfig() {
 	IPAddress netMsk(255, 255, 255, 0);
 
 	debug_out(F("Starting WiFiManager"), DEBUG_MIN_INFO, 1);
-	debug_out(F("AP ID: Feinstaubsensor-"), DEBUG_MIN_INFO, 0);
+	debug_out(F("AP ID: "), DEBUG_MIN_INFO, 0);
 	debug_out(server_name, DEBUG_MIN_INFO, 1);
 
 	is_wificonfig = true;
@@ -2703,7 +2703,7 @@ void display_values(const String& value_DHT_T, const String& value_DHT_H, const 
 		display.setCursor(0, 10 * (value_count++));
 		display.print("Temp:" + t_value);
 		display.setCursor(0, 10 * (value_count++));
-		display.print("Pres.:" + p_value);
+		display.print("BP:" + p_value);
 		if (ppd_read) {
 			display.setCursor(0, 10 * (value_count++));
 			display.print("PPD P1: " + value_PPD_P1);
