@@ -572,14 +572,18 @@ void start_SDS() {
                 debug_out(F(" - should: "), DEBUG_MED_INFO, 0); debug_out(String(value), DEBUG_MED_INFO, 1);
             };
             break;
-        case (9): if (value != 0xAB) { len = -1; }; break;
+        case (9):
+            if (value != 0xAB)
+            {
+                len = -1;
+                debug_out(F("Received incomplete message"), DEBUG_MED_INFO, 1);
+            }; break;
         }
         len++;
         if (len == 10 && checksum_ok == 1) {
             is_SDS_running = true;
             break;
         }
-        else debug_out(F("Received incomplete message"), DEBUG_MED_INFO, 1);
     }
 
     debug_out(F("End wakeup SDS011"), DEBUG_MED_INFO, 1);
@@ -622,14 +626,18 @@ void stop_SDS() {
                 debug_out(F(" - should: "), DEBUG_MED_INFO, 0); debug_out(String(value), DEBUG_MED_INFO, 1);
             };
             break;
-        case (9): if (value != 0xAB) { len = -1; }; break;
+        case (9):
+            if (value != 0xAB)
+            {
+                len = -1;
+                debug_out(F("Received incomplete message"), DEBUG_MED_INFO, 1);
+            }; break;
         }
         len++;
         if (len == 10 && checksum_ok == 1) {
             is_SDS_running = false;
             break;
         }
-        else debug_out(F("Received incomplete message"), DEBUG_MED_INFO, 1);
     }
 
     debug_out(F("End sleep SDS011"), DEBUG_MED_INFO, 1);
@@ -682,7 +690,12 @@ String SDS_version_date() {
                 debug_out(String(value), DEBUG_MED_INFO, 1);
             };
             break;
-        case (9): if (value != 171) { len = -1; }; break;
+        case (9):
+            if (value != 171)
+            {
+                len = -1;
+                debug_out(F("Received incomplete message"), DEBUG_MED_INFO, 1);
+            }; break;
         }
         len++;
         if (len == 10 && checksum_ok == 1) {
@@ -693,7 +706,6 @@ String SDS_version_date() {
             debug_out(device_id, DEBUG_MIN_INFO, 1);
             break;
         }
-        else debug_out(F("Received incomplete message"), DEBUG_MED_INFO, 1);
     }
 
     debug_out(F("End reading SDS011 version date"), DEBUG_MED_INFO, 1);
@@ -736,13 +748,17 @@ void SDS_sensor_values(int& pm25_serial, int& pm10_serial) {
                 debug_out(F(" - should: "), DEBUG_MED_INFO, 0); debug_out(String(value), DEBUG_MED_INFO, 1);
             };
             break;
-        case (9): if (value != 171) { len = -1; }; break;
+        case (9):
+            if (value != 171)
+            {
+                len = -1;
+                debug_out(F("Received incomplete message"), DEBUG_MED_INFO, 1);
+            }; break;
         }
         len++;
         if (len == 10 && checksum_ok == 1) {
             break;
         }
-        else debug_out(F("Received incomplete message"), DEBUG_MED_INFO, 1);
     }
     debug_out(F("End reading SDS011"), DEBUG_MED_INFO, 1);
 }
