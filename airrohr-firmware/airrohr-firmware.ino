@@ -538,6 +538,9 @@ String FeatherChipId() {
 /*****************************************************************/
 void start_SDS() {
 	const uint8_t start_SDS_cmd[] = {0xAA, 0xB4, 0x06, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x06, 0xAB};
+
+	debug_out(F("Start wakeup SDS011"), DEBUG_MED_INFO, 1);
+
 	serialSDS.write(start_SDS_cmd, sizeof(start_SDS_cmd));
 	delay(100);
 	char buffer;
@@ -559,10 +562,13 @@ void start_SDS() {
 		case (6): checksum_is += value; break;
 		case (7): checksum_is += value; break;
 		case (8):
-			debug_out(F("Checksum is: "), DEBUG_MED_INFO, 0); debug_out(String(checksum_is % 256), DEBUG_MED_INFO, 0);
-			debug_out(F(" - should: "), DEBUG_MED_INFO, 0); debug_out(String(value), DEBUG_MED_INFO, 1);
 			if (value == (checksum_is % 256)) { checksum_ok = 1; }
-			else { len = -1; };
+			else
+			{
+				len = -1;
+				debug_out(F("Checksum is: "), DEBUG_MED_INFO, 0); debug_out(String(checksum_is % 256), DEBUG_MED_INFO, 0);
+				debug_out(F(" - should: "), DEBUG_MED_INFO, 0); debug_out(String(value), DEBUG_MED_INFO, 1);
+			};
 			break;
 		case (9): if (value != 0xAB) { len = -1; }; break;
 		}
@@ -571,7 +577,10 @@ void start_SDS() {
 			is_SDS_running = true;
 			break;
 		}
+		else debug_out(F("Received incomplete message"), DEBUG_MED_INFO, 1);
 	}
+
+	debug_out(F("End wakeup SDS011"), DEBUG_MED_INFO, 1);
 }
 
 /*****************************************************************
@@ -579,6 +588,9 @@ void start_SDS() {
 /*****************************************************************/
 void stop_SDS() {
 	const uint8_t stop_SDS_cmd[] = { 0xAA, 0xB4, 0x06, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x05, 0xAB };
+
+	debug_out(F("Start sleep SDS011"), DEBUG_MED_INFO, 1);
+
 	serialSDS.write(stop_SDS_cmd, sizeof(stop_SDS_cmd));
 	delay(100);
 	char buffer;
@@ -600,10 +612,14 @@ void stop_SDS() {
 		case (6): checksum_is += value; break;
 		case (7): checksum_is += value; break;
 		case (8):
-			debug_out(F("Checksum is: "), DEBUG_MED_INFO, 0); debug_out(String(checksum_is % 256), DEBUG_MED_INFO, 0);
-			debug_out(F(" - should: "), DEBUG_MED_INFO, 0); debug_out(String(value), DEBUG_MED_INFO, 1);
 			if (value == (checksum_is % 256)) { checksum_ok = 1; }
-			else { len = -1; }; break;
+			else
+			{
+				len = -1;
+				debug_out(F("Checksum is: "), DEBUG_MED_INFO, 0); debug_out(String(checksum_is % 256), DEBUG_MED_INFO, 0);
+				debug_out(F(" - should: "), DEBUG_MED_INFO, 0); debug_out(String(value), DEBUG_MED_INFO, 1);
+			};
+			break;
 		case (9): if (value != 0xAB) { len = -1; }; break;
 		}
 		len++;
@@ -611,7 +627,10 @@ void stop_SDS() {
 			is_SDS_running = false;
 			break;
 		}
+		else debug_out(F("Received incomplete message"), DEBUG_MED_INFO, 1);
 	}
+
+	debug_out(F("End sleep SDS011"), DEBUG_MED_INFO, 1);
 }
 
 /*****************************************************************
@@ -651,12 +670,16 @@ String SDS_version_date() {
 				  else { device_id = String(value, HEX); }; checksum_is += value; break;
 		case (7): if (value < 0x10) { device_id += "0"; }; device_id += String(value, HEX); checksum_is += value; break;
 		case (8):
-			debug_out(F("Checksum is: "), DEBUG_MED_INFO, 0);
-			debug_out(String(checksum_is % 256), DEBUG_MED_INFO, 0);
-			debug_out(F(" - should: "), DEBUG_MED_INFO, 0);
-			debug_out(String(value), DEBUG_MED_INFO, 1);
 			if (value == (checksum_is % 256)) { checksum_ok = 1; }
-			else { len = -1; }; break;
+			else
+			{
+				len = -1;
+				debug_out(F("Checksum is: "), DEBUG_MED_INFO, 0);
+				debug_out(String(checksum_is % 256), DEBUG_MED_INFO, 0);
+				debug_out(F(" - should: "), DEBUG_MED_INFO, 0);
+				debug_out(String(value), DEBUG_MED_INFO, 1);
+			};
+			break;
 		case (9): if (value != 171) { len = -1; }; break;
 		}
 		len++;
@@ -668,6 +691,7 @@ String SDS_version_date() {
 			debug_out(device_id, DEBUG_MIN_INFO, 1);
 			break;
 		}
+		else debug_out(F("Received incomplete message"), DEBUG_MED_INFO, 1);
 	}
 
 	debug_out(F("End reading SDS011 version date"), DEBUG_MED_INFO, 1);
@@ -702,16 +726,20 @@ void SDS_sensor_values(int& pm25_serial, int& pm10_serial) {
 		case (6): checksum_is += value; break;
 		case (7): checksum_is += value; break;
 		case (8):
-			debug_out(F("Checksum is: "), DEBUG_MED_INFO, 0); debug_out(String(checksum_is % 256), DEBUG_MED_INFO, 0);
-			debug_out(F(" - should: "), DEBUG_MED_INFO, 0); debug_out(String(value), DEBUG_MED_INFO, 1);
 			if (value == (checksum_is % 256)) { checksum_ok = 1; }
-			else { len = -1; }; break;
+			else
+			{
+				len = -1;
+				debug_out(F("Checksum is: "), DEBUG_MED_INFO, 0); debug_out(String(checksum_is % 256), DEBUG_MED_INFO, 0);
+				debug_out(F(" - should: "), DEBUG_MED_INFO, 0); debug_out(String(value), DEBUG_MED_INFO, 1);
+			};
+			break;
 		case (9): if (value != 171) { len = -1; }; break;
 		}
 		len++;
 		if (len == 10 && checksum_ok == 1) {
 			break;
-		}
+		} else debug_out(F("Received incomplete message"), DEBUG_MED_INFO, 1);
 	}
 	debug_out(F("End reading SDS011"), DEBUG_MED_INFO, 1);
 }
