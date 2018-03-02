@@ -2694,16 +2694,16 @@ void display_values(const String& value_DHT_T, const String& value_DHT_H, const 
 	}
 	if (bmp_read) {
 		t_value = last_value_BMP_T; t_sensor = "BMP180";
-		p_value = last_value_BMP_P; p_sensor = "BMP180";
+		p_value = Float2String(last_value_BMP_P.toFloat() / 100.0); p_sensor = "BMP180";
 	}
 	if (bmp280_read) {
 		t_value = last_value_BMP280_T; t_sensor = "BMP280";
-		p_value = last_value_BMP280_P; p_sensor = "BMP280";
+		p_value = Float2String(last_value_BMP280_P.toFloat() / 100.0); p_sensor = "BMP280";
 	}
 	if (bme280_read) {
 		t_value = last_value_BME280_T; t_sensor = "BME280";
 		h_value = last_value_BME280_H; h_sensor = "BME280";
-		p_value = last_value_BME280_P; p_sensor = "BME280";
+		p_value = Float2String(last_value_BME280_P.toFloat() / 100.0); p_sensor = "BME280";
 	}
 	if (ppd_read) {
 		pm10_value = last_value_PPD_P1; pm10_sensor = "PPD42NS";
