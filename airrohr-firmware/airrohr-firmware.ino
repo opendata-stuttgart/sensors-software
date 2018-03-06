@@ -659,7 +659,7 @@ String SDS_version_date() {
     int checksum_ok = 0;
     int position = 0;
 
-    debug_out(F("Start reading SDS011 version date"), DEBUG_MED_INFO, 1);
+    debug_out(F("Start fetch SDS011 version date"), DEBUG_MED_INFO, 1);
 
     serialSDS.write(version_SDS_cmd, sizeof(version_SDS_cmd));
     delay(100);
@@ -708,7 +708,7 @@ String SDS_version_date() {
         }
     }
 
-    debug_out(F("End reading SDS011 version date"), DEBUG_MED_INFO, 1);
+    debug_out(F("End fetch SDS011 version date"), DEBUG_MED_INFO, 1);
 
     return s;
 }
