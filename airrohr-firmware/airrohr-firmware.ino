@@ -716,12 +716,12 @@ String SDS_version_date() {
 /*****************************************************************
 /* read SDS011 sensor values                                     *
 /*****************************************************************/
-void SDS_sensor_values(int& pm25_serial, int& pm10_serial) {
+bool SDS_sensor_values(int& pm25_serial, int& pm10_serial) {
     char buffer;
     int value;
     int len = 0;
     int checksum_is = 0;
-    int checksum_ok = 0;
+    bool msg_ok = false;
 
     debug_out(F("Start reading SDS011"), DEBUG_MED_INFO, 1);
 
@@ -740,27 +740,28 @@ void SDS_sensor_values(int& pm25_serial, int& pm10_serial) {
         case (6): checksum_is += value; break;
         case (7): checksum_is += value; break;
         case (8):
-            if (value == (checksum_is % 256)) { checksum_ok = 1; }
-            else
-            {
+            if (value != (checksum_is % 256)) {
                 len = -1;
                 debug_out(F("Checksum is: "), DEBUG_MED_INFO, 0); debug_out(String(checksum_is % 256), DEBUG_MED_INFO, 0);
                 debug_out(F(" - should: "), DEBUG_MED_INFO, 0); debug_out(String(value), DEBUG_MED_INFO, 1);
             };
             break;
         case (9):
-            if (value != 171)
+            if (value == 171)
             {
+                msg_ok = true;
+            } else {
                 len = -1;
                 debug_out(F("Received incomplete message"), DEBUG_MED_INFO, 1);
             }; break;
         }
         len++;
-        if (len == 10 && checksum_ok == 1) {
+        if (len == 10 && msg_ok == 1) {
             break;
         }
     }
     debug_out(F("End reading SDS011"), DEBUG_MED_INFO, 1);
+    return msg_ok;
 }
 
 /*****************************************************************
@@ -2347,10 +2348,10 @@ String sensorSDS() {
             start_SDS();
             if (!--retry) break;
         }
-        int pm10_serial = 0;
-        int pm25_serial = 0;
-        SDS_sensor_values(pm25_serial, pm10_serial);
-        if (long(act_milli - starttime) > (long(sending_intervall_ms) - long(reading_time_SDS_ms))) {
+        int pm10_serial;
+        int pm25_serial;
+        if (SDS_sensor_values(pm25_serial, pm10_serial) &&
+            long(act_milli - starttime) > (long(sending_intervall_ms) - long(reading_time_SDS_ms))) {
             if ((!isnan(pm10_serial)) && (!isnan(pm25_serial))) {
                 sds_pm10_sum += pm10_serial;
                 sds_pm25_sum += pm25_serial;
