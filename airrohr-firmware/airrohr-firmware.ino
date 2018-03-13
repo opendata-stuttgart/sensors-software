@@ -544,7 +544,7 @@ void start_SDS() {
     debug_out(F("Start wakeup SDS011"), DEBUG_MED_INFO, 1);
 
     serialSDS.write(start_SDS_cmd, sizeof(start_SDS_cmd));
-    delay(100);
+    delay(200);
     char buffer;
     int value;
     int len = 0;
@@ -598,7 +598,7 @@ void stop_SDS() {
     debug_out(F("Start sleep SDS011"), DEBUG_MED_INFO, 1);
 
     serialSDS.write(stop_SDS_cmd, sizeof(stop_SDS_cmd));
-    delay(100);
+    delay(200);
     char buffer;
     int value;
     int len = 0;
@@ -662,7 +662,7 @@ String SDS_version_date() {
     debug_out(F("Start fetch SDS011 version date"), DEBUG_MED_INFO, 1);
 
     serialSDS.write(version_SDS_cmd, sizeof(version_SDS_cmd));
-    delay(100);
+    delay(200);
 
     while (serialSDS.available() > 0) {
         buffer = serialSDS.read();
