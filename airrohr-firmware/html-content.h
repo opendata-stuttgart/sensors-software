@@ -48,7 +48,7 @@ input[type='submit']{border-radius:5px;font-size:medium;padding:5px;}\
 <small>ID: {id}<br/>MAC: {mac}<br/>{fwt}: {fw}</small></div><div class='content'><h4>{h} {n} {t}</h4>";
 
 const char WEB_PAGE_FOOTER[] PROGMEM = "<br/><br/><a href='/' style='display:inline;'>{t}</a><br/><br/><br/>\
-<a href='http://codefor.de/' target='_blank' style='display:inline;background:none;width:0px;'><img src='/images?name=cfg_logo' style='width:200px;max-width:50%;'/></a>\
+<a href='http://codefor.de/stuttgart/' target='_blank' style='display:inline;background:none;width:0px;'>&copy; Open Knowledge Lab Stuttgart a.o. (Code for Germany)</a>\
 </div></body></html>\r\n";
 
 const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a href='/values'>{t}</a><br/>\
@@ -288,7 +288,6 @@ const char CFG_LOGO_PNG[] PROGMEM = {
 };
 unsigned int CFG_LOGO_PNG_len = 2427;
 
-/*
 const char CFG_LOGO_SVG[] PROGMEM = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\
 <!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\
 <svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" width=\"413.859px\" height=\"100px\" viewBox=\"0 0 413.859 100\" enable-background=\"new 0 0 413.859 100\" xml:space=\"preserve\">\
@@ -328,8 +327,6 @@ const char CFG_LOGO_SVG[] PROGMEM = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\
 </g>\
 </g>\
 </svg>";
-
-*/
 
 // Created by http://oleddisplay.squix.ch/ Consider a donation
 // In case of problems make sure that you are using the font file with the correct version!

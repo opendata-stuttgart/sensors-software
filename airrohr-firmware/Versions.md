@@ -34,6 +34,7 @@ beta
 * version B11: debug infos on LCD displays
 * version B11: changed BME280 to forced measurements to get more accurate temperature values
 * version B11: corrected error in sending HTU21D data to luftdaten.info API
+* version B12: switched to ESP8266 library/extension version 2.4 (including KRACK patch)
 
 NRZ-2017-099
 online since 2017-09-10
