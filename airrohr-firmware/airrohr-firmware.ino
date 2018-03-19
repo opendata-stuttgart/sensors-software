@@ -1,10 +1,3 @@
-#include <Adafruit_BME280.h>
-#include <Adafruit_BMP280.h>
-#include <dummy.h>
-#include <Wire.h>
-#include <ESP8266HTTPClient.h>
-#include <ArduinoOTA.h>
-#include <Adafruit_SSD1306.h>
 #include <Arduino.h>
 #define INTL_DE
 
@@ -91,7 +84,12 @@
 #include <ESP8266httpUpdate.h>
 #include <WiFiClientSecure.h>
 #include <SoftwareSerial.h>
+//#include <LiquidCrystal_I2C.h>
 #include <base64.h>
+#include <Wire.h>
+#include <ESP8266HTTPClient.h>
+#include <ArduinoOTA.h>
+#include <Adafruit_SSD1306.h>
 #endif
 #if defined(ARDUINO_SAMD_ZERO)
 #include <RHReliableDatagram.h>
@@ -100,6 +98,10 @@
 #endif
 #include <ArduinoJson.h>
 #include <DHT.h>
+#include <Adafruit_BME280.h>
+#include <Adafruit_BMP280.h>
+//#include <DallasTemperature.h>
+//#include <TinyGPS++.h>
 #include <Ticker.h>
 
 #if defined(INTL_BG)
@@ -247,8 +249,6 @@ DHT dht(DHT_PIN, DHT_TYPE);
 /*****************************************************************/
 Adafruit_BMP280 bmp280;
 
-/*****************************************************************
-#if defined(ARDUINO_SAMD_ZERO) || defined(ESP8266)
 /*****************************************************************
 /* BME280 declaration                                            *
 /*****************************************************************/
@@ -3363,8 +3363,6 @@ void loop() {
         if (!send_failed) { sending_time = (4 * sending_time + sum_send_time) / 5; }
         debug_out(F("Time for sending data: "), DEBUG_MIN_INFO, 0);
         debug_out(String(sending_time), DEBUG_MIN_INFO, 1);
-
-        //server.begin();
 
         // Resetting for next sampling
         last_data_string = data;

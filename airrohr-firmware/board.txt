@@ -1,0 +1,5 @@
+# airrohr-firmware build property overrides
+#
+network.password=feinstaub
+network.auth_upload=yes
+network.port=8266
