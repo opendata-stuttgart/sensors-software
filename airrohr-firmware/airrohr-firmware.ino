@@ -3873,7 +3873,7 @@ void loop() {
             if (send2dusti) {
                 debug_out(F("## Sending to luftdaten.info (DS18B20): "), DEBUG_MIN_INFO, 1);
                 start_send = micros();
-                sendLuftdaten(result_DS18B20, BME280_API_PIN, host_dusti, httpPort_dusti, url_dusti, "DS18B20_");
+                sendLuftdaten(result_DS18B20, DS18B20_API_PIN, host_dusti, httpPort_dusti, url_dusti, "DS18B20_");
                 sum_send_time += micros() - start_send;
             }
         }
