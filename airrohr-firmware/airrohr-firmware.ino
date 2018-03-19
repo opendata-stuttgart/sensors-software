@@ -84,7 +84,6 @@
 #include <ESP8266httpUpdate.h>
 #include <WiFiClientSecure.h>
 #include <SoftwareSerial.h>
-//#include <LiquidCrystal_I2C.h>
 #include <base64.h>
 #include <Wire.h>
 #include <ESP8266HTTPClient.h>
@@ -100,8 +99,13 @@
 #include <DHT.h>
 #include <Adafruit_BME280.h>
 #include <Adafruit_BMP280.h>
-//#include <DallasTemperature.h>
-//#include <TinyGPS++.h>
+#if not defined(ARDUINO_ESP8266_WEMOS_D1MINI)
+#include <SparkFunHTU21D.h>
+#include <Adafruit_BMP085.h>
+#include <LiquidCrystal_I2C.h>
+#include <DallasTemperature.h>
+#include <TinyGPS++.h>
+#endif
 #include <Ticker.h>
 
 #if defined(INTL_BG)
@@ -215,8 +219,10 @@ RHReliableDatagram manager(rf69, CLIENT_ADDRESS);
 #if defined(ESP8266)
 #define OLED_RESET 0  // GPIO0
 Adafruit_SSD1306 display(OLED_RESET);
-//LiquidCrystal_I2C lcd_27(0x27, 16, 2);
-//LiquidCrystal_I2C lcd_3f(0x3F, 16, 2);
+#endif
+#if defined(ESP8266) and not defined(ARDUINO_ESP8266_WEMOS_D1MINI)
+LiquidCrystal_I2C lcd_27(0x27, 16, 2);
+LiquidCrystal_I2C lcd_3f(0x3F, 16, 2);
 #endif
 
 /*****************************************************************
@@ -234,16 +240,19 @@ SoftwareSerial serialGPS(GPS_PIN_RX, GPS_PIN_TX, false, 128);
 /*****************************************************************/
 DHT dht(DHT_PIN, DHT_TYPE);
 
-///*****************************************************************
-///* HTU21D declaration                                            *
-///*****************************************************************/
-//HTU21D htu21d;
-//
-///*****************************************************************
-///* BMP declaration                                               *
-///*****************************************************************/
-//Adafruit_BMP085 bmp;
-//
+#if not defined(ARDUINO_ESP8266_WEMOS_D1MINI)
+/*****************************************************************
+/* HTU21D declaration                                            *
+/*****************************************************************/
+HTU21D htu21d;
+
+/*****************************************************************
+/* BMP declaration                                               *
+/*****************************************************************/
+Adafruit_BMP085 bmp;
+
+#endif
+
 /*****************************************************************
 /* BMP280 declaration                                               *
 /*****************************************************************/
@@ -254,17 +263,19 @@ Adafruit_BMP280 bmp280;
 /*****************************************************************/
 Adafruit_BME280 bme280;
 
-///*****************************************************************
-///* DS18B20 declaration                                            *
-///*****************************************************************/
-//OneWire oneWire(DS18B20_PIN);
-//DallasTemperature ds18b20(&oneWire);
-//
-///*****************************************************************
-///* GPS declaration                                               *
-///*****************************************************************/
-#if defined(ARDUINO_SAMD_ZERO) || defined(ESP8266)
-//TinyGPSPlus gps;
+#if not defined(ARDUINO_ESP8266_WEMOS_D1MINI)
+/*****************************************************************
+/* DS18B20 declaration                                            *
+/*****************************************************************/
+OneWire oneWire(DS18B20_PIN);
+DallasTemperature ds18b20(&oneWire);
+#endif
+
+/*****************************************************************
+/* GPS declaration                                               *
+/*****************************************************************/
+#if not defined(ARDUINO_ESP8266_WEMOS_D1MINI) && (defined(ARDUINO_SAMD_ZERO) || defined(ESP8266))
+TinyGPSPlus gps;
 #endif
 
 /*****************************************************************
@@ -430,7 +441,7 @@ String IPAddress2String(const IPAddress& ipaddress) {
 /*****************************************************************
 /* dtostrf for Arduino feather                                   *
 /*****************************************************************/
-//#if defined(ARDUINO_SAMD_ZERO) && defined(SERIAL_PORT_USBVIRTUAL)
+#if defined(ARDUINO_ESP8266_WEMOS_D1MINI) || (defined(ARDUINO_SAMD_ZERO) && defined(SERIAL_PORT_USBVIRTUAL))
 #if 0
 char *dtostrf(double val, signed char width, unsigned char prec, char *sout) {
     char fmt[20];
@@ -486,7 +497,7 @@ char *dtostrf(double val, int width, unsigned int prec, char *sout) {
     return sout;
 }
 #endif
-//#endif
+#endif
 
 /*****************************************************************
 /* convert float to string with a                                *
@@ -2151,71 +2162,74 @@ String sensorDHT() {
     return s;
 }
 
-///*****************************************************************
-///* read HTU21D sensor values                                     *
-///*****************************************************************/
-//String sensorHTU21D() {
-//	String s = "";
-//	float t;
-//	float h;
-//
-//	debug_out(F("Start reading HTU21D"), DEBUG_MED_INFO, 1);
-//
-//	t = htu21d.readTemperature();
-//	h = htu21d.readHumidity();
-//	if (isnan(t) || isnan(h)) {
-//		debug_out(F("HTU21D couldn't be read"), DEBUG_ERROR, 1);
-//	} else {
-//		debug_out(F("Temperature : "), DEBUG_MIN_INFO, 0);
-//		debug_out(Float2String(t) + " C", DEBUG_MIN_INFO, 1);
-//		debug_out(F("humidity : "), DEBUG_MIN_INFO, 0);
-//		debug_out(Float2String(h) + " %", DEBUG_MIN_INFO, 1);
-//		last_value_HTU21D_T = Float2String(t);
-//		last_value_HTU21D_H = Float2String(h);
-//		s += Value2Json(F("HTU21D_temperature"), last_value_HTU21D_T);
-//		s += Value2Json(F("HTU21D_humidity"), last_value_HTU21D_H);
-//	}
-//	debug_out(F("------"), DEBUG_MIN_INFO, 1);
-//
-//	debug_out(F("End reading HTU21D"), DEBUG_MED_INFO, 1);
-//
-//	return s;
-//}
-//
-///*****************************************************************
-///* read BMP180 sensor values                                     *
-///*****************************************************************/
-//String sensorBMP() {
-//	String s = "";
-//	int p;
-//	float t;
-//
-//	debug_out(F("Start reading BMP180"), DEBUG_MED_INFO, 1);
-//
-//	p = bmp.readPressure();
-//	t = bmp.readTemperature();
-//	last_value_BMP_T = "";
-//	last_value_BMP_P = "";
-//	if (isnan(p) || isnan(t)) {
-//		debug_out(F("BMP180 couldn't be read"), DEBUG_ERROR, 1);
-//	} else {
-//		debug_out(F("Pressure    : "), DEBUG_MIN_INFO, 0);
-//		debug_out(Float2String(float(p) / 100) + " hPa", DEBUG_MIN_INFO, 1);
-//		debug_out(F("Temperature : "), DEBUG_MIN_INFO, 0);
-//		debug_out(String(t) + " C", DEBUG_MIN_INFO, 1);
-//		last_value_BMP_T = Float2String(t);
-//		last_value_BMP_P = String(p);
-//		s += Value2Json(F("BMP_pressure"), last_value_BMP_P);
-//		s += Value2Json(F("BMP_temperature"), last_value_BMP_T);
-//		last_value_BMP_T.remove(last_value_BMP_T.length() - 1);
-//	}
-//	debug_out(F("------"), DEBUG_MIN_INFO, 1);
-//
-//	debug_out(F("End reading BMP180"), DEBUG_MED_INFO, 1);
-//
-//	return s;
-//}
-//
+#if not defined(ARDUINO_ESP8266_WEMOS_D1MINI)
+/*****************************************************************
+/* read HTU21D sensor values                                     *
+/*****************************************************************/
+String sensorHTU21D() {
+    String s = "";
+    float t;
+    float h;
+
+    debug_out(F("Start reading HTU21D"), DEBUG_MED_INFO, 1);
+
+    t = htu21d.readTemperature();
+    h = htu21d.readHumidity();
+    if (isnan(t) || isnan(h)) {
+        debug_out(F("HTU21D couldn't be read"), DEBUG_ERROR, 1);
+    }
+    else {
+        debug_out(F("Temperature : "), DEBUG_MIN_INFO, 0);
+        debug_out(Float2String(t) + " C", DEBUG_MIN_INFO, 1);
+        debug_out(F("humidity : "), DEBUG_MIN_INFO, 0);
+        debug_out(Float2String(h) + " %", DEBUG_MIN_INFO, 1);
+        last_value_HTU21D_T = Float2String(t);
+        last_value_HTU21D_H = Float2String(h);
+        s += Value2Json(F("HTU21D_temperature"), last_value_HTU21D_T);
+        s += Value2Json(F("HTU21D_humidity"), last_value_HTU21D_H);
+    }
+    debug_out(F("------"), DEBUG_MIN_INFO, 1);
+
+    debug_out(F("End reading HTU21D"), DEBUG_MED_INFO, 1);
+
+    return s;
+}
+
+/*****************************************************************
+/* read BMP180 sensor values                                     *
+/*****************************************************************/
+String sensorBMP() {
+    String s = "";
+    int p;
+    float t;
+
+    debug_out(F("Start reading BMP180"), DEBUG_MED_INFO, 1);
+
+    p = bmp.readPressure();
+    t = bmp.readTemperature();
+    last_value_BMP_T = "";
+    last_value_BMP_P = "";
+    if (isnan(p) || isnan(t)) {
+        debug_out(F("BMP180 couldn't be read"), DEBUG_ERROR, 1);
+    }
+    else {
+        debug_out(F("Pressure    : "), DEBUG_MIN_INFO, 0);
+        debug_out(Float2String(float(p) / 100) + " hPa", DEBUG_MIN_INFO, 1);
+        debug_out(F("Temperature : "), DEBUG_MIN_INFO, 0);
+        debug_out(String(t) + " C", DEBUG_MIN_INFO, 1);
+        last_value_BMP_T = Float2String(t);
+        last_value_BMP_P = String(p);
+        s += Value2Json(F("BMP_pressure"), last_value_BMP_P);
+        s += Value2Json(F("BMP_temperature"), last_value_BMP_T);
+        last_value_BMP_T.remove(last_value_BMP_T.length() - 1);
+    }
+    debug_out(F("------"), DEBUG_MIN_INFO, 1);
+
+    debug_out(F("End reading BMP180"), DEBUG_MED_INFO, 1);
+
+    return s;
+}
+#endif
 /*****************************************************************
 /* read BMP280 sensor values                                     *
 /*****************************************************************/
@@ -2295,42 +2309,45 @@ String sensorBME280() {
     return s;
 }
 
-///*****************************************************************
-///* read DS18B20 sensor values                                    *
-///*****************************************************************/
-//String sensorDS18B20() {
-//	String s = "";
-//	int i = 0;
-//	float t;
-//	debug_out(F("Start reading DS18B20"), DEBUG_MED_INFO, 1);
-//
-//	//it's very unlikely (-127: impossible) to get these temperatures in reality. Most times this means that the sensor is currently faulty
-//	//try 5 times to read the sensor, otherwise fail
-//	do {
-//		ds18b20.requestTemperatures();
-//		//for now, we want to read only the first sensor
-//		t = ds18b20.getTempCByIndex(0);
-//		last_value_DS18B20_T = "";
-//		i++;
-//		debug_out(F("DS18B20 trying...."), DEBUG_MIN_INFO, 0);
-//		debug_out(String(i), DEBUG_MIN_INFO, 1);
-//	} while(i < 5 && (isnan(t) || t == 85.0 || t == (-127.0)));
-//
-//	if(i == 5) {
-//		debug_out(F("DS18B20 couldn't be read."), DEBUG_ERROR, 1);
-//	} else {
-//		debug_out(F("Temperature : "), DEBUG_MIN_INFO, 0);
-//		debug_out(Float2String(t) + " C", DEBUG_MIN_INFO, 1);
-//		last_value_DS18B20_T = Float2String(t);
-//		s += Value2Json(F("DS18B20_temperature"), last_value_DS18B20_T);
-//		last_value_DS18B20_T.remove(last_value_DS18B20_T.length() - 1);
-//	}
-//	debug_out(F("------"), DEBUG_MIN_INFO, 1);
-//	debug_out(F("End reading DS18B20"), DEBUG_MED_INFO, 1);
-//
-//	return s;
-//}
-//
+#if not defined(ARDUINO_ESP8266_WEMOS_D1MINI)
+/*****************************************************************
+/* read DS18B20 sensor values                                    *
+/*****************************************************************/
+String sensorDS18B20() {
+    String s = "";
+    int i = 0;
+    float t;
+    debug_out(F("Start reading DS18B20"), DEBUG_MED_INFO, 1);
+
+    //it's very unlikely (-127: impossible) to get these temperatures in reality. Most times this means that the sensor is currently faulty
+    //try 5 times to read the sensor, otherwise fail
+    do {
+        ds18b20.requestTemperatures();
+        //for now, we want to read only the first sensor
+        t = ds18b20.getTempCByIndex(0);
+        last_value_DS18B20_T = "";
+        i++;
+        debug_out(F("DS18B20 trying...."), DEBUG_MIN_INFO, 0);
+        debug_out(String(i), DEBUG_MIN_INFO, 1);
+    } while (i < 5 && (isnan(t) || t == 85.0 || t == (-127.0)));
+
+    if (i == 5) {
+        debug_out(F("DS18B20 couldn't be read."), DEBUG_ERROR, 1);
+    }
+    else {
+        debug_out(F("Temperature : "), DEBUG_MIN_INFO, 0);
+        debug_out(Float2String(t) + " C", DEBUG_MIN_INFO, 1);
+        last_value_DS18B20_T = Float2String(t);
+        s += Value2Json(F("DS18B20_temperature"), last_value_DS18B20_T);
+        last_value_DS18B20_T.remove(last_value_DS18B20_T.length() - 1);
+    }
+    debug_out(F("------"), DEBUG_MIN_INFO, 1);
+    debug_out(F("End reading DS18B20"), DEBUG_MED_INFO, 1);
+
+    return s;
+}
+#endif
+
 /*****************************************************************
 /* read SDS011 sensor values                                     *
 /*****************************************************************/
@@ -2619,94 +2636,100 @@ String sensorPPD() {
     return s;
 }
 
-///*****************************************************************
-///* read GPS sensor values                                        *
-///*****************************************************************/
-//String sensorGPS() {
-//	String s = "";
-//#if defined(ARDUINO_SAMD_ZERO) || defined(ESP8266)
-//	String gps_lat = "";
-//	String gps_lng = "";
-//	String gps_alt = "";
-//	String gps_date = "";
-//	String gps_time = "";
-//
-//	debug_out(F("Start reading GPS"), DEBUG_MED_INFO, 1);
-//
-//	while (serialGPS.available() > 0) {
-//		if (gps.encode(serialGPS.read())) {
-//			if (gps.location.isValid()) {
-//				last_gps_lat = String(gps.location.lat(), 6);
-//				last_gps_lng = String(gps.location.lng(), 6);
-//			} else {
-//				debug_out(F("Lat/Lng INVALID"), DEBUG_MAX_INFO, 1);
-//			}
-//			if (gps.altitude.isValid()) {
-//				last_gps_alt = String(gps.altitude.meters(), 2);
-//			} else {
-//				debug_out(F("Altitude INVALID"), DEBUG_MAX_INFO, 1);
-//			}
-//			if (gps.date.isValid()) {
-//				gps_date = "";
-//				if (gps.date.month() < 10) { gps_date += "0"; }
-//				gps_date += String(gps.date.month());
-//				gps_date += "/";
-//				if (gps.date.day() < 10) { gps_date += "0"; }
-//				gps_date += String(gps.date.day());
-//				gps_date += "/";
-//				gps_date += String(gps.date.year());
-//				last_gps_date = gps_date;
-//			} else {
-//				debug_out(F("Date INVALID"), DEBUG_MAX_INFO, 1);
-//			}
-//			if (gps.time.isValid()) {
-//				gps_time = "";
-//				if (gps.time.hour() < 10) { gps_time += "0"; }
-//				gps_time += String(gps.time.hour());
-//				gps_time += ":";
-//				if (gps.time.minute() < 10) { gps_time += "0"; }
-//				gps_time += String(gps.time.minute());
-//				gps_time += ":";
-//				if (gps.time.second() < 10) { gps_time += "0"; }
-//				gps_time += String(gps.time.second());
-//				gps_time += ".";
-//				if (gps.time.centisecond() < 10) { gps_time += "0"; }
-//				gps_time += String(gps.time.centisecond());
-//				last_gps_time = gps_time;
-//			} else {
-//				debug_out(F("Time: INVALID"), DEBUG_MAX_INFO, 1);
-//			}
-//		}
-//	}
-//
-//	if (send_now) {
-//		debug_out("Lat/Lng: " + last_gps_lat + "," + last_gps_lng, DEBUG_MIN_INFO, 1);
-//		debug_out("Altitude: " + last_gps_alt, DEBUG_MIN_INFO, 1);
-//		debug_out("Date: " + last_gps_date, DEBUG_MIN_INFO, 1);
-//		debug_out("Time " + last_gps_time, DEBUG_MIN_INFO, 1);
-//		debug_out("------", DEBUG_MIN_INFO, 1);
-//		s += Value2Json(F("GPS_lat"), last_gps_lat);
-//		s += Value2Json(F("GPS_lon"), last_gps_lng);
-//		s += Value2Json(F("GPS_height"), last_gps_alt);
-//		s += Value2Json(F("GPS_date"), last_gps_date);
-//		s += Value2Json(F("GPS_time"), last_gps_time);
-//		last_gps_lat = "";
-//		last_gps_lng = "";
-//		last_gps_alt = "";
-//		last_gps_date = "";
-//		last_gps_time = "";
-//	}
-//
-//	if ( gps.charsProcessed() < 10) {
-//		debug_out(F("No GPS data received: check wiring"), DEBUG_ERROR, 1);
-//	}
-//
-//	debug_out(F("End reading GPS"), DEBUG_MED_INFO, 1);
-//
-//#endif
-//	return s;
-//}
-//
+#if not defined(ARDUINO_ESP8266_WEMOS_D1MINI)
+/*****************************************************************
+/* read GPS sensor values                                        *
+/*****************************************************************/
+String sensorGPS() {
+    String s = "";
+#if defined(ARDUINO_SAMD_ZERO) || defined(ESP8266)
+    String gps_lat = "";
+    String gps_lng = "";
+    String gps_alt = "";
+    String gps_date = "";
+    String gps_time = "";
+
+    debug_out(F("Start reading GPS"), DEBUG_MED_INFO, 1);
+
+    while (serialGPS.available() > 0) {
+        if (gps.encode(serialGPS.read())) {
+            if (gps.location.isValid()) {
+                last_gps_lat = String(gps.location.lat(), 6);
+                last_gps_lng = String(gps.location.lng(), 6);
+            }
+            else {
+                debug_out(F("Lat/Lng INVALID"), DEBUG_MAX_INFO, 1);
+            }
+            if (gps.altitude.isValid()) {
+                last_gps_alt = String(gps.altitude.meters(), 2);
+            }
+            else {
+                debug_out(F("Altitude INVALID"), DEBUG_MAX_INFO, 1);
+            }
+            if (gps.date.isValid()) {
+                gps_date = "";
+                if (gps.date.month() < 10) { gps_date += "0"; }
+                gps_date += String(gps.date.month());
+                gps_date += "/";
+                if (gps.date.day() < 10) { gps_date += "0"; }
+                gps_date += String(gps.date.day());
+                gps_date += "/";
+                gps_date += String(gps.date.year());
+                last_gps_date = gps_date;
+            }
+            else {
+                debug_out(F("Date INVALID"), DEBUG_MAX_INFO, 1);
+            }
+            if (gps.time.isValid()) {
+                gps_time = "";
+                if (gps.time.hour() < 10) { gps_time += "0"; }
+                gps_time += String(gps.time.hour());
+                gps_time += ":";
+                if (gps.time.minute() < 10) { gps_time += "0"; }
+                gps_time += String(gps.time.minute());
+                gps_time += ":";
+                if (gps.time.second() < 10) { gps_time += "0"; }
+                gps_time += String(gps.time.second());
+                gps_time += ".";
+                if (gps.time.centisecond() < 10) { gps_time += "0"; }
+                gps_time += String(gps.time.centisecond());
+                last_gps_time = gps_time;
+            }
+            else {
+                debug_out(F("Time: INVALID"), DEBUG_MAX_INFO, 1);
+            }
+        }
+    }
+
+    if (send_now) {
+        debug_out("Lat/Lng: " + last_gps_lat + "," + last_gps_lng, DEBUG_MIN_INFO, 1);
+        debug_out("Altitude: " + last_gps_alt, DEBUG_MIN_INFO, 1);
+        debug_out("Date: " + last_gps_date, DEBUG_MIN_INFO, 1);
+        debug_out("Time " + last_gps_time, DEBUG_MIN_INFO, 1);
+        debug_out("------", DEBUG_MIN_INFO, 1);
+        s += Value2Json(F("GPS_lat"), last_gps_lat);
+        s += Value2Json(F("GPS_lon"), last_gps_lng);
+        s += Value2Json(F("GPS_height"), last_gps_alt);
+        s += Value2Json(F("GPS_date"), last_gps_date);
+        s += Value2Json(F("GPS_time"), last_gps_time);
+        last_gps_lat = "";
+        last_gps_lng = "";
+        last_gps_alt = "";
+        last_gps_date = "";
+        last_gps_time = "";
+    }
+
+    if (gps.charsProcessed() < 10) {
+        debug_out(F("No GPS data received: check wiring"), DEBUG_ERROR, 1);
+    }
+
+    debug_out(F("End reading GPS"), DEBUG_MED_INFO, 1);
+
+#endif
+    return s;
+}
+#endif
+
 /*****************************************************************
 /* AutoUpdate                                                    *
 /*****************************************************************/
@@ -2817,13 +2840,18 @@ void display_values(const String& value_DHT_T, const String& value_DHT_H, const 
             display.setCursor(0, 10 * (value_count++));
             display.print("P10: " + value_SDS_P1);
         }
-        //if (gps_read) {
-        //	if(gps.location.isValid()) {
-        //		display.drawString(0, 10 * (value_count++), "lat: " + String(gps.location.lat(), 6));
-        //		display.drawString(0, 10 * (value_count++), "long: " + String(gps.location.lng(), 6));
-        //	}
-        //	display.drawString(0, 10 * (value_count++), "satellites: " + String(gps.satellites.value()));
-        //}
+#if not defined(ARDUINO_ESP8266_WEMOS_D1MINI)
+        if (gps_read) {
+            if (gps.location.isValid()) {
+                display.setCursor(0, 10 * (value_count++));
+                display.print("lat: " + String(gps.location.lat(), 6));
+                display.setCursor(0, 10 * (value_count++));
+                display.print("long: " + String(gps.location.lng(), 6));
+            }
+            display.setCursor(0, 10 * (value_count++));
+            display.print("satellites: " + String(gps.satellites.value()));
+        }
+#endif
         display.display();
     }
 
@@ -2832,20 +2860,22 @@ void display_values(const String& value_DHT_T, const String& value_DHT_H, const 
     // T/H: -10.0°C/100.0%
     // T/P: -10.0°C/1000hPa
 
-        //if (has_lcd1602_27) {
-        //	lcd_27.clear();
-        //	lcd_27.setCursor(0, 0);
-        //	lcd_27.print("PM: " + (value_SDS_P1 != "" ? value_SDS_P1 : "-") + " " + (value_SDS_P2 != "" ? value_SDS_P2 : "-"));
-        //	lcd_27.setCursor(0, 1);
-        //	lcd_27.print("T/H:" + t_value + char(223) + "C " + h_value + "%");
-        //}
-        //if (has_lcd1602) {
-        //	lcd_3f.clear();
-        //	lcd_3f.setCursor(0, 0);
-        //	lcd_3f.print("PM: " + (value_SDS_P1 != "" ? value_SDS_P1 : "-") + " " + (value_SDS_P2 != "" ? value_SDS_P2 : "-"));
-        //	lcd_3f.setCursor(0, 1);
-        //	lcd_3f.print("T/H:" + t_value + char(223) + "C " + h_value + "%");
-        //}
+#if not defined(ARDUINO_ESP8266_WEMOS_D1MINI)
+    if (has_lcd1602_27) {
+        lcd_27.clear();
+        lcd_27.setCursor(0, 0);
+        lcd_27.print("PM: " + (value_SDS_P1 != "" ? value_SDS_P1 : "-") + " " + (value_SDS_P2 != "" ? value_SDS_P2 : "-"));
+        lcd_27.setCursor(0, 1);
+        lcd_27.print("T/H:" + t_value + char(223) + "C " + h_value + "%");
+    }
+    if (has_lcd1602) {
+        lcd_3f.clear();
+        lcd_3f.setCursor(0, 0);
+        lcd_3f.print("PM: " + (value_SDS_P1 != "" ? value_SDS_P1 : "-") + " " + (value_SDS_P2 != "" ? value_SDS_P2 : "-"));
+        lcd_3f.setCursor(0, 1);
+        lcd_3f.print("T/H:" + t_value + char(223) + "C " + h_value + "%");
+    }
+#endif
     yield();
 #endif
 }
@@ -2862,18 +2892,20 @@ void init_display() {
 #endif
 }
 
-///*****************************************************************
-///* Init display                                                  *
-///*****************************************************************/
-//void init_lcd1602() {
-//#if defined(ESP8266)
-//	lcd_27.init();
-//	lcd_27.backlight();
-//	lcd_3f.init();
-//	lcd_3f.backlight();
-//#endif
-//}
-//
+#if not defined(ARDUINO_ESP8266_WEMOS_D1MINI)
+/*****************************************************************
+/* Init display                                                  *
+/*****************************************************************/
+void init_lcd1602() {
+#if defined(ESP8266)
+    lcd_27.init();
+    lcd_27.backlight();
+    lcd_3f.init();
+    lcd_3f.backlight();
+#endif
+}
+#endif
+
 /*****************************************************************
 /* Init BMP280                                                   *
 /*****************************************************************/
@@ -2909,7 +2941,7 @@ bool initBME280(char addr) {
 }
 
 #if defined(ESP8266)
-bool ota_started = false; 
+bool ota_started = false;
 
 void StartOTAIfRequired()
 {
@@ -2965,7 +2997,9 @@ void setup() {
     Wire.begin();
 #endif
     init_display();
-    //init_lcd1602();
+#if not defined(ARDUINO_ESP8266_WEMOS_D1MINI)
+    init_lcd1602();
+#endif
     copyExtDef();
     display_debug(F("Reading config from SPIFFS"));
     readConfig();
@@ -2976,11 +3010,15 @@ void setup() {
     serialGPS.begin(9600);
     autoUpdate();
     create_basic_auth_strings();
-    //ds18b20.begin();
+#if not defined(ARDUINO_ESP8266_WEMOS_D1MINI)
+    ds18b20.begin();
+#endif
     pinMode(PPD_PIN_PM1, INPUT_PULLUP);	// Listen at the designated PIN
     pinMode(PPD_PIN_PM2, INPUT_PULLUP);	// Listen at the designated PIN
     dht.begin();	// Start DHT
-    //htu21d.begin(); // Start HTU21D
+#if not defined(ARDUINO_ESP8266_WEMOS_D1MINI)
+    htu21d.begin(); // Start HTU21D
+#endif
     delay(10);
 #if defined(ESP8266)
     StartOTAIfRequired();
@@ -3023,12 +3061,14 @@ void setup() {
     if (auto_update) { debug_out(F("Auto-Update wird ausgeführt..."), DEBUG_MIN_INFO, 1); }
     if (has_display) { debug_out(F("Zeige auf Display..."), DEBUG_MIN_INFO, 1); }
     if (has_lcd1602) { debug_out(F("Zeige auf LCD 1602..."), DEBUG_MIN_INFO, 1); }
-    //if (bmp_read) {
-    //	if (!bmp.begin()) {
-    //		debug_out(F("No valid BMP085 sensor, check wiring!"), DEBUG_MIN_INFO, 1);
-    //		bmp_init_failed = 1;
-    //	}
-    //}
+#if not defined(ARDUINO_ESP8266_WEMOS_D1MINI)
+    if (bmp_read) {
+        if (!bmp.begin()) {
+            debug_out(F("No valid BMP085 sensor, check wiring!"), DEBUG_MIN_INFO, 1);
+            bmp_init_failed = 1;
+        }
+    }
+#endif
     if (bmp280_read && !initBMP280(0x76) && !initBMP280(0x77)) {
         debug_out(F("Check BMP280 wiring"), DEBUG_MIN_INFO, 1);
         bmp280_init_failed = 1;
@@ -3149,15 +3189,17 @@ void loop() {
             result_DHT = sensorDHT();			// getting temperature and humidity (optional)
         }
 
-        //if (htu21d_read) {
-        //	debug_out(F("Call sensorHTU21D"), DEBUG_MAX_INFO, 1);
-        //	result_HTU21D = sensorHTU21D();			// getting temperature and humidity (optional)
-        //}
+#if not defined(ARDUINO_ESP8266_WEMOS_D1MINI)
+        if (htu21d_read) {
+            debug_out(F("Call sensorHTU21D"), DEBUG_MAX_INFO, 1);
+            result_HTU21D = sensorHTU21D();			// getting temperature and humidity (optional)
+        }
 
-        //if (bmp_read && (! bmp_init_failed)) {
-        //	debug_out(F("Call sensorBMP"), DEBUG_MAX_INFO, 1);
-        //	result_BMP = sensorBMP();			// getting temperature and pressure (optional)
-        //}
+        if (bmp_read && (!bmp_init_failed)) {
+            debug_out(F("Call sensorBMP"), DEBUG_MAX_INFO, 1);
+            result_BMP = sensorBMP();			// getting temperature and pressure (optional)
+        }
+#endif
 
         if (bmp280_read && (!bmp280_init_failed)) {
             debug_out(F("Call sensorBMP280"), DEBUG_MAX_INFO, 1);
@@ -3169,17 +3211,21 @@ void loop() {
             result_BME280 = sensorBME280();			// getting temperature, humidity and pressure (optional)
         }
 
-        //if (ds18b20_read) {
-        //	debug_out(F("Call sensorDS18B20"), DEBUG_MAX_INFO, 1);
-        //	result_DS18B20 = sensorDS18B20();     // getting temperature (optional)
-        //}
+#if not defined(ARDUINO_ESP8266_WEMOS_D1MINI)
+        if (ds18b20_read) {
+            debug_out(F("Call sensorDS18B20"), DEBUG_MAX_INFO, 1);
+            result_DS18B20 = sensorDS18B20();     // getting temperature (optional)
+        }
+#endif
     }
 
-    //if (gps_read && (((act_milli - starttime_GPS) > sampletime_GPS_ms) || ((act_milli - starttime) > sending_intervall_ms))) {
-    //	debug_out(F("Call sensorGPS"), DEBUG_MAX_INFO, 1);
-    //	result_GPS = sensorGPS();			// getting GPS coordinates
-    //	starttime_GPS = act_milli;
-    //}
+#if not defined(ARDUINO_ESP8266_WEMOS_D1MINI)
+    if (gps_read && (((act_milli - starttime_GPS) > sampletime_GPS_ms) || ((act_milli - starttime) > sending_intervall_ms))) {
+        debug_out(F("Call sensorGPS"), DEBUG_MAX_INFO, 1);
+        result_GPS = sensorGPS();			// getting GPS coordinates
+        starttime_GPS = act_milli;
+    }
+#endif
 
     if (send_now) {
         if (WiFi.psk() != "") {
@@ -3204,7 +3250,6 @@ void loop() {
 
         server.handleClient();
         yield();
-        //server.stop();
         if (ppd_read) {
             data += result_PPD;
             if (send2dusti) {
