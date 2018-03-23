@@ -52,6 +52,11 @@ Die Daten können als CSV via USB ausgegeben werden. Dafür sollte sowohl in ext
 * Board: NodeMCU 1.0 (ESP-12E Module)
 * CPU Frequency: 80MHz
 * Flash Size: 4M (3M SPIFFS)
+Ab "ESP für Arduino 2.4":
+* Debug Port: Disabled
+* Debug Level: NoAssert-NDEBUG
+* lwIP Variant: v2 Higher Bandwidth
+* Erase Flash: Only Sketch
 
 ### Verwendete Bibliotheken (für ESP8266):
 
@@ -66,21 +71,21 @@ In ESP8266 für Arduino IDE enthalten:
 * DNSServer (GNU Lesser Public License >=2.1)
 
 Installierbar über Arduino IDE (Menü Sketch -> Bibliothek einbinden -> Bibliotheken verwalten, in Klammern die getestete Version und die Art der Lizenz):
-* [ArduinoJson](https://github.com/bblanchon/ArduinoJson) (5.12.0) (MIT)
+* [ArduinoJson](https://github.com/bblanchon/ArduinoJson) (5.13.1) (MIT)
 * [Adafruit Unified Sensor](https://github.com/adafruit/Adafruit_Sensor) (1.0.2) (Apache)
 * [Adafruit BMP085 library](https://github.com/adafruit/Adafruit-BMP085-Library) (1.0.0) (BSD)
 * [Adafruit BMP280 library](https://github.com/adafruit/Adafruit_BMP280_Library) (1.0.2) (BSD)
 * [Adafruit BME280 library](https://github.com/adafruit/Adafruit_BME280_Library) (1.0.7) (BSD)
-* [DallasTemperature](https://github.com/milesburton/Arduino-Temperature-Control-Library) (3.7.6)
+* [DallasTemperature](https://github.com/milesburton/Arduino-Temperature-Control-Library) (3.8.0)
 * [DHT sensor library](https://github.com/adafruit/DHT-sensor-library) (1.3.0) (MIT)
-* [ESP8266 and ESP32 Oled driver for SSD1306 display](https://github.com/squix78/esp8266-oled-ssd1306) (3.2.7) (MIT)
-* [OneWire](www.pjrc.com/teensy/td_libs_OneWire.html) (2.3.3)
+* [ESP8266 and ESP32 Oled driver for SSD1306 display](https://github.com/squix78/esp8266-oled-ssd1306) (4.0.0) (MIT)
+* [OneWire](www.pjrc.com/teensy/td_libs_OneWire.html) (2.3.4)
 * [LiquidCrystal I2C](https://github.com/marcoschwartz/LiquidCrystal_I2C) (1.1.2)
 * [Adafruit HTU21DF Library](https://github.com/adafruit/Adafruit_HTU21DF_Library) (1.0.1)
 * [SoftwareSerial](https://github.com/plerup/espsoftwareserial) (1.0.0) (GNU Lesser Public License >=2.1)
 
 Manuell zu installieren:
-* [TinyGPS++](http://arduiniana.org/libraries/tinygpsplus/) (0.94b) (GNU Lesser Public License >=2.1)
+* [TinyGPS++](http://arduiniana.org/libraries/tinygpsplus/) (0.95) (GNU Lesser Public License >=2.1)
 
 
 Bis Version NRZ-2016-15:
