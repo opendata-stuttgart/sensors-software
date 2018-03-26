@@ -96,6 +96,7 @@
 #include <SPI.h>
 #endif
 #include <ArduinoJson.h>
+#include <Sds011.h>
 #include <DHT.h>
 #include <Adafruit_BME280.h>
 #include <Adafruit_BMP280.h>
@@ -231,6 +232,7 @@ LiquidCrystal_I2C lcd_3f(0x3F, 16, 2);
 #if defined(ESP8266)
 SoftwareSerial serialSDS(SDS_PIN_RX, SDS_PIN_TX, false, 128);
 SoftwareSerial serialGPS(GPS_PIN_RX, GPS_PIN_TX, false, 128);
+Sds011 sds011(serialSDS);
 #endif
 #if defined(ARDUINO_SAMD_ZERO)
 #define serialSDS SERIAL_PORT_HARDWARE
@@ -551,52 +553,9 @@ String FeatherChipId() {
 /* start SDS011 sensor                                           *
 /*****************************************************************/
 void start_SDS() {
-    const uint8_t start_SDS_cmd[] = { 0xAA, 0xB4, 0x06, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x06, 0xAB };
-
     debug_out(F("Start wakeup SDS011"), DEBUG_MED_INFO, 1);
 
-    serialSDS.write(start_SDS_cmd, sizeof(start_SDS_cmd));
-    delay(200);
-    char buffer;
-    int value;
-    int len = 0;
-    int checksum_is = 0;
-    int checksum_ok = 0;
-    while (serialSDS.available() > 0) {
-        buffer = serialSDS.read();
-        debug_out(String(len) + " - " + String(buffer, DEC) + " - " + String(buffer, HEX) + " - " + int(buffer) + " .", DEBUG_MAX_INFO, 1);
-        value = int(buffer);
-        switch (len) {
-        case (0): if (value != 0xAA) { len = -1; }; break;
-        case (1): if (value != 0xC5) { len = -1; }; break;
-        case (2): if (value != 0x06) { len = -1; }; checksum_is = value; break;
-        case (3): if (value != 0x01) { len = -1; }; checksum_is += value; break;
-        case (4): if (value != 0x01) { len = -1; }; checksum_is += value; break;
-        case (5): if (value != 0x00) { len = -1; }; checksum_is += value; break;
-        case (6): checksum_is += value; break;
-        case (7): checksum_is += value; break;
-        case (8):
-            if (value == (checksum_is % 256)) { checksum_ok = 1; }
-            else
-            {
-                len = -1;
-                debug_out(F("Checksum is: "), DEBUG_MED_INFO, 0); debug_out(String(checksum_is % 256), DEBUG_MED_INFO, 0);
-                debug_out(F(" - should: "), DEBUG_MED_INFO, 0); debug_out(String(value), DEBUG_MED_INFO, 1);
-            };
-            break;
-        case (9):
-            if (value != 0xAB)
-            {
-                len = -1;
-                debug_out(F("Received incomplete message"), DEBUG_MED_INFO, 1);
-            }; break;
-        }
-        len++;
-        if (len == 10 && checksum_ok == 1) {
-            is_SDS_running = true;
-            break;
-        }
-    }
+    if (sds011.set_sleep(false)) is_SDS_running = true;
 
     debug_out(F("End wakeup SDS011"), DEBUG_MED_INFO, 1);
 }
@@ -605,52 +564,9 @@ void start_SDS() {
 /* stop SDS011 sensor                                            *
 /*****************************************************************/
 void stop_SDS() {
-    const uint8_t stop_SDS_cmd[] = { 0xAA, 0xB4, 0x06, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x05, 0xAB };
-
     debug_out(F("Start sleep SDS011"), DEBUG_MED_INFO, 1);
 
-    serialSDS.write(stop_SDS_cmd, sizeof(stop_SDS_cmd));
-    delay(200);
-    char buffer;
-    int value;
-    int len = 0;
-    int checksum_is = 0;
-    int checksum_ok = 0;
-    while (serialSDS.available() > 0) {
-        buffer = serialSDS.read();
-        debug_out(String(len) + " - " + String(buffer, DEC) + " - " + String(buffer, HEX) + " - " + int(buffer) + " .", DEBUG_MAX_INFO, 1);
-        value = int(buffer);
-        switch (len) {
-        case (0): if (value != 0xAA) { len = -1; }; break;
-        case (1): if (value != 0xC5) { len = -1; }; break;
-        case (2): if (value != 0x06) { len = -1; }; checksum_is = value; break;
-        case (3): if (value != 0x01) { len = -1; }; checksum_is += value; break;
-        case (4): if (value != 0x00) { len = -1; }; checksum_is += value; break;
-        case (5): if (value != 0x00) { len = -1; }; checksum_is += value; break;
-        case (6): checksum_is += value; break;
-        case (7): checksum_is += value; break;
-        case (8):
-            if (value == (checksum_is % 256)) { checksum_ok = 1; }
-            else
-            {
-                len = -1;
-                debug_out(F("Checksum is: "), DEBUG_MED_INFO, 0); debug_out(String(checksum_is % 256), DEBUG_MED_INFO, 0);
-                debug_out(F(" - should: "), DEBUG_MED_INFO, 0); debug_out(String(value), DEBUG_MED_INFO, 1);
-            };
-            break;
-        case (9):
-            if (value != 0xAB)
-            {
-                len = -1;
-                debug_out(F("Received incomplete message"), DEBUG_MED_INFO, 1);
-            }; break;
-        }
-        len++;
-        if (len == 10 && checksum_ok == 1) {
-            is_SDS_running = false;
-            break;
-        }
-    }
+    if (sds011.set_sleep(true)) is_SDS_running = false;
 
     debug_out(F("End sleep SDS011"), DEBUG_MED_INFO, 1);
 }
@@ -659,65 +575,17 @@ void stop_SDS() {
 /* read SDS011 sensor values                                     *
 /*****************************************************************/
 String SDS_version_date() {
-    const uint8_t version_SDS_cmd[] = { 0xAA, 0xB4, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x05, 0xAB };
-    String s = "";
-    String value_hex;
-    char buffer;
-    int value;
-    int len = 0;
-    String version_date = "";
-    String device_id = "";
-    int checksum_is = 0;
-    int checksum_ok = 0;
-    int position = 0;
-
     debug_out(F("Start fetch SDS011 version date"), DEBUG_MED_INFO, 1);
 
-    serialSDS.write(version_SDS_cmd, sizeof(version_SDS_cmd));
-    delay(200);
-
-    while (serialSDS.available() > 0) {
-        buffer = serialSDS.read();
-        debug_out(String(len) + " - " + String(buffer, DEC) + " - " + String(buffer, HEX) + " - " + int(buffer) + " .", DEBUG_MED_INFO, 1);
-        //		"aa" = 170, "ab" = 171, "c0" = 192
-        value = int(buffer);
-        switch (len) {
-        case (0): if (value != 170) { len = -1; }; break;
-        case (1): if (value != 197) { len = -1; }; break;
-        case (2): if (value != 7) { len = -1; }; checksum_is = value; break;
-        case (3): version_date = String(value); checksum_is += value; break;
-        case (4): version_date += "-" + String(value); checksum_is += value; break;
-        case (5): version_date += "-" + String(value); checksum_is += value; break;
-        case (6): if (value < 0x10) { device_id = "0" + String(value, HEX); }
-                  else { device_id = String(value, HEX); }; checksum_is += value; break;
-        case (7): if (value < 0x10) { device_id += "0"; }; device_id += String(value, HEX); checksum_is += value; break;
-        case (8):
-            if (value == (checksum_is % 256)) { checksum_ok = 1; }
-            else
-            {
-                len = -1;
-                debug_out(F("Checksum is: "), DEBUG_MED_INFO, 0);
-                debug_out(String(checksum_is % 256), DEBUG_MED_INFO, 0);
-                debug_out(F(" - should: "), DEBUG_MED_INFO, 0);
-                debug_out(String(value), DEBUG_MED_INFO, 1);
-            };
-            break;
-        case (9):
-            if (value != 171)
-            {
-                len = -1;
-                debug_out(F("Received incomplete message"), DEBUG_MED_INFO, 1);
-            }; break;
-        }
-        len++;
-        if (len == 10 && checksum_ok == 1) {
-            s = version_date + "(" + device_id + ")";
-            debug_out(F("SDS version date : "), DEBUG_MIN_INFO, 0);
-            debug_out(version_date, DEBUG_MIN_INFO, 1);
-            debug_out(F("SDS device ID:     "), DEBUG_MIN_INFO, 0);
-            debug_out(device_id, DEBUG_MIN_INFO, 1);
-            break;
-        }
+    String version_date;
+    String device_id;
+    String s;
+    if (sds011.device_info(version_date, device_id)) {
+        s = version_date + "(" + device_id + ")";
+        debug_out(F("SDS version date : "), DEBUG_MIN_INFO, 0);
+        debug_out(version_date, DEBUG_MIN_INFO, 1);
+        debug_out(F("SDS device ID:     "), DEBUG_MIN_INFO, 0);
+        debug_out(device_id, DEBUG_MIN_INFO, 1);
     }
 
     debug_out(F("End fetch SDS011 version date"), DEBUG_MED_INFO, 1);
@@ -729,50 +597,10 @@ String SDS_version_date() {
 /* read SDS011 sensor values                                     *
 /*****************************************************************/
 bool SDS_sensor_values(int& pm25_serial, int& pm10_serial) {
-    char buffer;
-    int value;
-    int len = 0;
-    int checksum_is = 0;
-    bool msg_ok = false;
-
     debug_out(F("Start reading SDS011"), DEBUG_MED_INFO, 1);
 
-    while (serialSDS.available() > 0) {
-        buffer = serialSDS.read();
-        debug_out(String(len) + " - " + String(buffer, DEC) + " - " + String(buffer, HEX) + " - " + int(buffer) + " .", DEBUG_MAX_INFO, 1);
-        //			"aa" = 170, "ab" = 171, "c0" = 192
-        value = int(buffer);
-        switch (len) {
-        case (0): if (value != 170) { len = -1; }; break;
-        case (1): if (value != 192) { len = -1; }; break;
-        case (2): pm25_serial = value; checksum_is = value; break;
-        case (3): pm25_serial += (value << 8); checksum_is += value; break;
-        case (4): pm10_serial = value; checksum_is += value; break;
-        case (5): pm10_serial += (value << 8); checksum_is += value; break;
-        case (6): checksum_is += value; break;
-        case (7): checksum_is += value; break;
-        case (8):
-            if (value != (checksum_is % 256)) {
-                len = -1;
-                debug_out(F("Checksum is: "), DEBUG_MED_INFO, 0); debug_out(String(checksum_is % 256), DEBUG_MED_INFO, 0);
-                debug_out(F(" - should: "), DEBUG_MED_INFO, 0); debug_out(String(value), DEBUG_MED_INFO, 1);
-            };
-            break;
-        case (9):
-            if (value == 171)
-            {
-                msg_ok = true;
-            }
-            else {
-                len = -1;
-                debug_out(F("Received incomplete message"), DEBUG_MED_INFO, 1);
-            }; break;
-        }
-        len++;
-        if (len == 10 && msg_ok == 1) {
-            break;
-        }
-    }
+    bool msg_ok = sds011.query_data_auto(pm25_serial, pm10_serial);
+
     debug_out(F("End reading SDS011"), DEBUG_MED_INFO, 1);
     return msg_ok;
 }
@@ -2916,12 +2744,12 @@ bool initBMP280(char addr) {
     if (bmp280.begin(addr)) {
         debug_out(F(" ... found"), DEBUG_MIN_INFO, 1);
         return true;
-    }
+}
     else {
         debug_out(F(" ... not found"), DEBUG_MIN_INFO, 1);
         return false;
     }
-}
+            }
 
 /*****************************************************************
 /* Init BME280                                                   *
@@ -3084,7 +2912,7 @@ void setup() {
             stop_SDS();
             if (!--retry) break;
         }
-    }
+        }
     if (pms24_read || pms32_read) {
         debug_out(F("Stoppe PMS..."), DEBUG_MIN_INFO, 1);
         stop_PMS();
@@ -3257,7 +3085,7 @@ void loop() {
                 start_send = micros();
                 sendLuftdaten(result_PPD, PPD_API_PIN, host_dusti, httpPort_dusti, url_dusti, "PPD_");
                 sum_send_time += micros() - start_send;
-            }
+        }
         }
         if (sds_read) {
             data += result_SDS;
@@ -3266,8 +3094,8 @@ void loop() {
                 start_send = micros();
                 sendLuftdaten(result_SDS, SDS_API_PIN, host_dusti, httpPort_dusti, url_dusti, "SDS_");
                 sum_send_time += micros() - start_send;
-            }
-        }
+    }
+}
         if (pms24_read || pms32_read) {
             data += result_PMS;
             if (send2dusti) {
@@ -3446,4 +3274,4 @@ void loop() {
 #if defined(ESP8266)
     HandleOTA();
 #endif
-}
+    }
