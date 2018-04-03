@@ -89,7 +89,7 @@
 // PMS3003
 #define PMS24_READ 0
 
-// PMS1003, PMS7003
+// PMS1003, PMS5005, PMS6003, PMS7003
 #define PMS32_READ 0
 
 // all Plantower (PMS) sensors

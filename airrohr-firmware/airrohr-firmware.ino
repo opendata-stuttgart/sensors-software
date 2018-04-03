@@ -87,7 +87,7 @@
 /*                                                                      *
 /************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2017-100-B13"
+#define SOFTWARE_VERSION "NRZ-2017-100-B14"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -116,6 +116,8 @@
 
 #if defined(INTL_BG)
 #include "intl_bg.h"
+#elif defined(INTL_CZ)
+#include "intl_cz.h"
 #elif defined(INTL_EN)
 #include "intl_en.h"
 #elif defined(INTL_ES)
@@ -124,14 +126,16 @@
 #include "intl_fr.h"
 #elif defined(INTL_IT)
 #include "intl_it.h"
+#elif defined(INTL_LU)
+#include "intl_lu.h"
 #elif defined(INTL_NL)
 #include "intl_nl.h"
 #elif defined(INTL_PT)
 #include "intl_pt.h"
+#elif defined(INTL_RU)
+#include "intl_ru.h"
 #elif defined(INTL_SE)
 #include "intl_se.h"
-#elif defined(INTL_LU)
-#include "intl_lu.h"
 #else
 #include "intl_de.h"
 #endif
@@ -141,7 +145,7 @@
 /*****************************************************************
 /* Variables with defaults                                       *
 /*****************************************************************/
-char wlanssid[33] = "Freifunk-disabled";
+char wlanssid[35] = "Freifunk-disabled";
 char wlanpwd[65] = "";
 char current_lang[3] = "de";
 char www_username[65] = "admin";
@@ -527,6 +531,18 @@ void stop_SDS() {
 }
 
 /*****************************************************************
+/* set continuous mode SDS011 sensor                             *
+/*****************************************************************/
+void continuous_mode_SDS() {
+	uint8_t * buf = new uint8_t[continuous_mode_SDS_cmd_len];
+	if (buf) {
+		memcpy_P(buf, continuous_mode_SDS_cmd, continuous_mode_SDS_cmd_len);
+		serialSDS.write(buf, continuous_mode_SDS_cmd_len);
+	}
+	free(buf);
+}
+
+/*****************************************************************
 /* start Plantower PMS sensor                                    *
 /*****************************************************************/
 void start_PMS() {
@@ -553,6 +569,18 @@ void stop_PMS() {
 }
 
 /*****************************************************************
+/* continuous mode Plantower PMS sensor                          *
+/*****************************************************************/
+void continuous_mode_PMS() {
+	uint8_t * buf = new uint8_t[continuous_mode_PMS_cmd_len];
+	if (buf) {
+		memcpy_P(buf, continuous_mode_PMS_cmd, continuous_mode_PMS_cmd_len);
+		serialSDS.write(buf, continuous_mode_PMS_cmd_len);
+	}
+	free(buf);
+}
+
+/*****************************************************************
 /* start Honeywell PMS sensor                                    *
 /*****************************************************************/
 void start_HPM() {
@@ -573,6 +601,19 @@ void stop_HPM() {
 	if (buf) {
 		memcpy_P(buf, stop_HPM_cmd, stop_HPM_cmd_len);
 		serialSDS.write(buf, stop_HPM_cmd_len);
+		is_PMS_running = false;
+	}
+	free(buf);
+}
+
+/*****************************************************************
+/* continuous mode Honeywell PMS sensor                          *
+/*****************************************************************/
+void continuous_mode_HPM() {
+	uint8_t * buf = new uint8_t[continuous_mode_HPM_cmd_len];
+	if (buf) {
+		memcpy_P(buf, continuous_mode_HPM_cmd, continuous_mode_HPM_cmd_len);
+		serialSDS.write(buf, continuous_mode_HPM_cmd_len);
 		is_PMS_running = false;
 	}
 	free(buf);
@@ -1043,7 +1084,7 @@ String form_submit(const String& value) {
 
 String form_select_lang() {
 	String s_select = F("selected='selected'");
-	String s = F("<tr><td>{t}</td><td><select name='current_lang'><option value='DE' {s_DE}>Deutsch (DE)</option><option value='BG' {s_BG}>Bulgarian (BG)</option><option value='EN' {s_EN}>English (EN)</option><option value='ES' {s_ES}>Español (ES)</option><option value='FR' {s_FR}>Français (FR)</option><option value='IT' {s_IT}>Italiano (IT)</option><option value='NL' {s_NL}>Nederlands (NL)</option><option value='PT' {s_PT}>Português (PT)</option><option value='SE' {s_SE}>Svenska (SE)</option><option value='LU' {s_LU}>Lëtzebuergesch (LU)</option></select></td></tr>");
+	String s = F("<tr><td>{t}</td><td><select name='current_lang'><option value='DE' {s_DE}>Deutsch (DE)</option><option value='BG' {s_BG}>Bulgarian (BG)</option><option value='CZ' {s_CZ}>Český (CZ)</option><option value='EN' {s_EN}>English (EN)</option><option value='ES' {s_ES}>Español (ES)</option><option value='FR' {s_FR}>Français (FR)</option><option value='IT' {s_IT}>Italiano (IT)</option><option value='LU' {s_LU}>Lëtzebuergesch (LU)</option><option value='NL' {s_NL}>Nederlands (NL)</option><option value='PT' {s_PT}>Português (PT)</option><option value='RU' {s_RU}>Русский (RU)</option><option value='SE' {s_SE}>Svenska (SE)</option></select></td></tr>");
 
 	s.replace("{t}", FPSTR(INTL_SPRACHE));
 
@@ -1051,6 +1092,8 @@ String form_select_lang() {
 		s.replace(F("{s_DE}"), s_select);
 	} else if(String(current_lang) == "BG") {
 		s.replace(F("{s_BG}"), s_select);
+	} else if(String(current_lang) == "CZ") {
+		s.replace(F("{CZ}"), s_select);
 	} else if(String(current_lang) == "EN") {
 		s.replace(F("{s_EN}"), s_select);
 	} else if(String(current_lang) == "ES") {
@@ -1059,24 +1102,29 @@ String form_select_lang() {
 		s.replace(F("{s_FR}"), s_select);
 	} else if(String(current_lang) == "IT") {
 		s.replace(F("{s_IT}"), s_select);
+	} else if(String(current_lang) == "LU") {
+		s.replace(F("{s_LU}"), s_select);
 	} else if(String(current_lang) == "NL") {
 		s.replace(F("{s_NL}"), s_select);
 	} else if(String(current_lang) == "PT") {
 		s.replace(F("{s_PT}"), s_select);
+	} else if(String(current_lang) == "RU") {
+		s.replace(F("{s_RU}"), s_select);
 	} else if(String(current_lang) == "SE") {
 		s.replace(F("{s_SE}"), s_select);
-	} else if(String(current_lang) == "LU") {
-		s.replace(F("{s_LU}"), s_select);
 	}
 	s.replace(F("{s_DE}"), "");
 	s.replace(F("{s_BG}"), "");
+	s.replace(F("{s_CZ}"), "");
 	s.replace(F("{s_EN}"), "");
 	s.replace(F("{s_ES}"), "");
 	s.replace(F("{s_FR}"), "");
+	s.replace(F("{s_IT}"), "");
+	s.replace(F("{s_LU}"), "");
 	s.replace(F("{s_NL}"), "");
 	s.replace(F("{s_PT}"), "");
+	s.replace(F("{s_RU}"), "");
 	s.replace(F("{s_SE}"), "");
-	s.replace(F("{s_LU}"), "");
 	return s;
 }
 
@@ -1504,10 +1552,10 @@ void webserver_values() {
 		server.send(302, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), "");
 	} else {
 		String page_content = "";
-		const String unit_PM = " µg/m³";
-		const String unit_T = " °C";
-		const String unit_H = " %";
-		const String unit_P = " hPa";
+		const String unit_PM = "µg/m³";
+		const String unit_T = "°C";
+		const String unit_H = "%";
+		const String unit_P = "hPa";
 		String empty_row = F("<tr><td colspan='3'>&nbsp;</td></tr>");
 		last_page_load = millis();
 		long signal_strength = WiFi.RSSI();
@@ -1792,7 +1840,7 @@ void setup_webserver() {
 
 	debug_out(F("Starting Webserver... "), DEBUG_MIN_INFO, 0);
 	debug_out(IPAddress2String(WiFi.localIP()), DEBUG_MIN_INFO, 1);
-	server.begin();
+	server.begin(80);
 }
 
 /*****************************************************************
@@ -3534,6 +3582,10 @@ void setup() {
 	}
 	if (sds_read) {
 		debug_out(F("Read SDS..."), DEBUG_MIN_INFO, 1);
+		start_SDS();
+		delay(100);
+		continuous_mode_SDS();
+		delay(100);
 		debug_out(F("Stopping SDS011..."), DEBUG_MIN_INFO, 1);
 		stop_SDS();
 	}
@@ -3541,10 +3593,14 @@ void setup() {
 		debug_out(F("Read PMS3003..."), DEBUG_MIN_INFO, 1);
 	}
 	if (pms32_read) {
-		debug_out(F("Read (1,5,6,7)003..."), DEBUG_MIN_INFO, 1);
+		debug_out(F("Read PMS(1,5,6,7)003..."), DEBUG_MIN_INFO, 1);
 	}
 	if (hpm_read) {
 		debug_out(F("Read HPM..."), DEBUG_MIN_INFO, 1);
+		start_HPM();
+		delay(100);
+		continuous_mode_HPM();
+		delay(100);
 		debug_out(F("Stopping HPM..."), DEBUG_MIN_INFO, 1);
 		stop_HPM();
 	}
@@ -3620,6 +3676,10 @@ void setup() {
 		debug_out(F("Show on LCD 2004 (0x27)..."), DEBUG_MIN_INFO, 1);
 	}
 	if (pms24_read || pms32_read) {
+		start_PMS();
+		delay(100);
+		continuous_mode_PMS();
+		delay(100);
 		debug_out(F("Stopping PMS..."), DEBUG_MIN_INFO, 1);
 		stop_PMS();
 	}
