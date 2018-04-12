@@ -44,7 +44,7 @@ Die Daten können als CSV via USB ausgegeben werden. Dafür sollte sowohl in ext
 ## Benötigte Software (in Klammern getestete Version und die Art der Lizenz):
 
 * [Arduino IDE](https://www.arduino.cc/en/Main/Software)  (Version 1.8.5) (GNU Lesser General Public License v2.1)
-* [ESP8266 für Arduino](http://arduino.esp8266.com/stable/package_esp8266com_index.json) (Version 2.3.0)
+* [ESP8266 für Arduino](http://arduino.esp8266.com/stable/package_esp8266com_index.json) (Version 2.4.1)
 
 
 ### Einstellungen Arduino IDE
@@ -55,7 +55,7 @@ Die Daten können als CSV via USB ausgegeben werden. Dafür sollte sowohl in ext
 Ab "ESP für Arduino 2.4":
 * Debug Port: Disabled
 * Debug Level: NoAssert-NDEBUG
-* lwIP Variant: v2 Higher Bandwidth
+* lwIP Variant: v1.4 Higher Bandwidth (Prebuild)
 * Erase Flash: Only Sketch
 
 ### Verwendete Bibliotheken (für ESP8266):
