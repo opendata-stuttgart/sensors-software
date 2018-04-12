@@ -115,6 +115,8 @@
 #include "intl_it.h"
 #elif defined(INTL_NL)
 #include "intl_nl.h"
+#elif defined(INTL_PL)
+#include "intl_pl.h"
 #elif defined(INTL_PT)
 #include "intl_pt.h"
 #else
@@ -942,6 +944,8 @@ String form_select_lang() {
 		s.replace(F("{s_IT}"), s_select);
 	} else if(String(current_lang) == "NL") {
 		s.replace(F("{s_NL}"), s_select);
+	} else if(String(current_lang) == "PL") {
+		s.replace(F("{s_PL}"), s_select);
 	} else if(String(current_lang) == "PT") {
 		s.replace(F("{s_PT}"), s_select);
 	}
@@ -951,6 +955,7 @@ String form_select_lang() {
 	s.replace(F("{s_ES}"), "");
 	s.replace(F("{s_FR}"), "");
 	s.replace(F("{s_NL}"), "");
+	s.replace(F("{s_PL}"), "");
 	s.replace(F("{s_PT}"), "");
 	return s;
 }
