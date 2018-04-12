@@ -87,7 +87,7 @@
 /*                                                                      *
 /************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2017-100-B15"
+#define SOFTWARE_VERSION "NRZ-2017-100-B16"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -130,6 +130,8 @@
 #include "intl_lu.h"
 #elif defined(INTL_NL)
 #include "intl_nl.h"
+#elif defined(INTL_PL)
+#include "intl_pl.h"
 #elif defined(INTL_PT)
 #include "intl_pt.h"
 #elif defined(INTL_RU)
@@ -1084,7 +1086,7 @@ String form_submit(const String& value) {
 
 String form_select_lang() {
 	String s_select = F("selected='selected'");
-	String s = F("<tr><td>{t}</td><td><select name='current_lang'><option value='DE' {s_DE}>Deutsch (DE)</option><option value='BG' {s_BG}>Bulgarian (BG)</option><option value='CZ' {s_CZ}>Český (CZ)</option><option value='EN' {s_EN}>English (EN)</option><option value='ES' {s_ES}>Español (ES)</option><option value='FR' {s_FR}>Français (FR)</option><option value='IT' {s_IT}>Italiano (IT)</option><option value='LU' {s_LU}>Lëtzebuergesch (LU)</option><option value='NL' {s_NL}>Nederlands (NL)</option><option value='PT' {s_PT}>Português (PT)</option><option value='RU' {s_RU}>Русский (RU)</option><option value='SE' {s_SE}>Svenska (SE)</option></select></td></tr>");
+	String s = F("<tr><td>{t}</td><td><select name='current_lang'><option value='DE' {s_DE}>Deutsch (DE)</option><option value='BG' {s_BG}>Bulgarian (BG)</option><option value='CZ' {s_CZ}>Český (CZ)</option><option value='EN' {s_EN}>English (EN)</option><option value='ES' {s_ES}>Español (ES)</option><option value='FR' {s_FR}>Français (FR)</option><option value='IT' {s_IT}>Italiano (IT)</option><option value='LU' {s_LU}>Lëtzebuergesch (LU)</option><option value='NL' {s_NL}>Nederlands (NL)</option><option value='PL' {s_PL}>Polski (PL)</option><option value='PT' {s_PT}>Português (PT)</option><option value='RU' {s_RU}>Русский (RU)</option><option value='SE' {s_SE}>Svenska (SE)</option></select></td></tr>");
 
 	s.replace("{t}", FPSTR(INTL_SPRACHE));
 
@@ -1106,6 +1108,8 @@ String form_select_lang() {
 		s.replace(F("{s_LU}"), s_select);
 	} else if(String(current_lang) == "NL") {
 		s.replace(F("{s_NL}"), s_select);
+	} else if(String(current_lang) == "PL") {
+		s.replace(F("{s_PL}"), s_select);
 	} else if(String(current_lang) == "PT") {
 		s.replace(F("{s_PT}"), s_select);
 	} else if(String(current_lang) == "RU") {
@@ -1122,6 +1126,7 @@ String form_select_lang() {
 	s.replace(F("{s_IT}"), "");
 	s.replace(F("{s_LU}"), "");
 	s.replace(F("{s_NL}"), "");
+	s.replace(F("{s_PL}"), "");
 	s.replace(F("{s_PT}"), "");
 	s.replace(F("{s_RU}"), "");
 	s.replace(F("{s_SE}"), "");
@@ -1840,7 +1845,7 @@ void setup_webserver() {
 
 	debug_out(F("Starting Webserver... "), DEBUG_MIN_INFO, 0);
 	debug_out(IPAddress2String(WiFi.localIP()), DEBUG_MIN_INFO, 1);
-	server.begin(80);
+	server.begin();
 }
 
 /*****************************************************************

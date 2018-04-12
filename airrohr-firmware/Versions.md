@@ -37,6 +37,8 @@ beta
 * version B12: switched to ESP8266 library/extension version 2.4 (including KRACK patch)
 * version B13: added new Arduino Options, CodeFor.de logo removed and other unneeded binary data removed, problem with lwIP v2 solved
 * version B14: setting 'continuous mode' for pm sensors
+* version B15: test of esp8266 lib 2.4.1 with prebuilt lwIP 1.4
+* version B16: changed back to esp8266 lib 2.3.0
 
 NRZ-2017-099
 online since 2017-09-10
