@@ -1,3 +1,6 @@
+NRZ-2018-101
+* same as NRZ-2017-100-B16
+
 NRZ-2017-100
 beta
 * optimizing display function: more than one 'screen' for infos
