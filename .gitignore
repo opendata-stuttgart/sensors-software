@@ -4,3 +4,5 @@ build-uno
 esp8266-arduino/.DS_Store
 
 .DS_Store
+
+compile_mac.sh

@@ -1,15 +1,18 @@
-
-//Lang Konfig
+// Language config
 #define CURRENT_LANG INTL_LANG
 
-// WLAN Konfig
+// Wifi config
 #define WLANSSID "Freifunk-disabled"
 #define WLANPWD ""
 
-// BasicAuth Konfig
+// BasicAuth config
 #define WWW_USERNAME "admin"
 #define WWW_PASSWORD "feinstaub"
 #define WWW_BASICAUTH_ENABLED 0
+
+// Sensor Wifi config (config mode)
+#define FS_SSID ""
+#define FS_PWD ""
 
 // Wohin gehen die Daten?
 #define SEND2DUSTI 1
@@ -44,7 +47,7 @@
 #define USER_INFLUX "luftdaten"
 #define PWD_INFLUX "info"
 
-// DHT22, Sensor Temperatur und Luftfeuchte
+// DHT22, temperature, humidity
 #define DHT_READ 1
 #define DHT_TYPE DHT22
 #define DHT_API_PIN 7
@@ -55,7 +58,7 @@
 #define DHT_PIN D9
 #endif
 
-// HTU21D, Sensor Temperatur und Luftfeuchte
+// HTU21D, temperature, humidity
 #define HTU21D_READ 0
 #define HTU21D_API_PIN 7
 #if defined(ESP8266)
@@ -86,7 +89,7 @@
 // PMS3003
 #define PMS24_READ 0
 
-// PMS1003, PMS7003
+// PMS1003, PMS5003, PMS6003, PMS7003
 #define PMS32_READ 0
 
 // all Plantower (PMS) sensors
@@ -96,7 +99,15 @@
 #define PMS_PIN_TX D2
 #endif
 
-// BMP180, Luftdruck-Sensor
+// Honeywell PM sensor
+#define HPM_READ 0
+#define HPM_API_PIN 1
+#if defined(ESP8266)
+#define HPM_PIN_RX D1
+#define HPM_PIN_TX D2
+#endif
+
+// BMP180, temperature, pressure
 #define BMP_READ 0
 #define BMP_API_PIN 3
 #if defined(ESP8266)
@@ -104,7 +115,7 @@
 #define BMP_PIN_SDA D3
 #endif
 
-// BMP280, Luftdruck-Sensor
+// BMP280, temperature, pressure
 #define BMP280_READ 0
 #define BMP280_API_PIN 3
 #if defined(ESP8266)
@@ -112,7 +123,7 @@
 #define BMP280_PIN_SDA D3
 #endif
 
-// BME280, Luftdruck-Sensor
+// BME280, temperature, humidity, pressure
 #define BME280_READ 0
 #define BME280_API_PIN 11
 #if defined(ESP8266)
@@ -120,7 +131,7 @@
 #define BME280_PIN_SDA D3
 #endif
 
-// DS18B20, Temperatur-Sensor
+// DS18B20, temperature
 #define DS18B20_READ 0
 #define DS18B20_API_PIN 13
 #if defined(ESP8266)
@@ -136,8 +147,11 @@
 #define GPS_PIN_TX D6
 #endif
 
-// Automatische Firmware-Updates über WLAN
+// automatic firmware updates
 #define AUTO_UPDATE 1
+
+// use beta firmware
+#define USE_BETA 0
 
 // OLED Display SSD1306 angeschlossen?
 #define HAS_DISPLAY 0
@@ -147,6 +161,9 @@
 
 // LCD Display LCD1602 (0x27) angeschlossen?
 #define HAS_LCD1602_27 0
+
+// LCD Display LCD2004 (0x27) angeschlossen?
+#define HAS_LCD2004_27 0
 
 // Wieviele Informationen sollen über die serielle Schnittstelle ausgegeben werden?
 #define DEBUG 3
