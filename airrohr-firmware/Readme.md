@@ -164,7 +164,7 @@ Pinout PMS7003:
 * SCL  ->  Pin D4 (GPIO2)
 * SDA  ->  Pin D3 (GPIO0)
 
-### GPS NEO 6M (seriell)
+### GPS NEO 6M (seriell) ACHTUNG: Läuft sehr instabil
 Strom und Masse vom Board. (GND und üblicherweise 3,3v, vorher prüfen/Anleitung, Beschreibung GPS!) 
 TX (senden) und RX (empfangen) werden gekreuzt verkabelt! 
 * TX von Neo -> Pin D5 (RX) 
