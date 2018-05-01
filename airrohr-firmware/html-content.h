@@ -352,7 +352,7 @@ const char CFG_LOGO_SVG_GZIP[] PROGMEM = {
 
 // Created by http://oleddisplay.squix.ch/ Consider a donation
 // In case of problems make sure that you are using the font file with the correct version!
-const char Monospaced_plain_9[] PROGMEM = {
+const uint8_t Monospaced_plain_9[] PROGMEM = {
 	0x05, // Width: 5
 	0x0C, // Height: 12
 	0x20, // First Char: 32
