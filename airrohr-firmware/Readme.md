@@ -191,10 +191,10 @@ Pinout:
 * SDA  ->  Pin D3 (GPIO0)
 
 ### GPS NEO 6M (seriell) ACHTUNG: Läuft sehr instabil
-Strom und Masse vom Board.
-* TX-Pin vom NEO an D5
-* RX-Pin vom NEO an D6
-
+Strom und Masse vom Board. (GND und üblicherweise 3,3v, vorher prüfen/Anleitung, Beschreibung GPS!) 
+TX (senden) und RX (empfangen) werden gekreuzt verkabelt! 
+* TX von Neo -> Pin D5 (RX) 
+* RX von Neo -> Pin D6 (TX) 
 
 ### Luftdaten.info API "Pins"
 Bei Aktivierung von mehreren Sensoren, z.B. "gleichzeitig" DHT22 und PPD42NS, benötigt die API zur Zuordnung der Sensorwerte die Angabe eines Pins, an dem der Sensor (virtuell) angeschlossen ist.
