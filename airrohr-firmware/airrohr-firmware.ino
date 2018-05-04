@@ -3710,7 +3710,6 @@ void setup() {
 void loop() {
 	String data = "";
 	String tmp_str;
-	String data_4_dusti = "";
 	String data_4_influxdb = "";
 	String data_4_custom = "";
 	String data_sample_times = "";
@@ -3945,7 +3944,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (GPS): "), DEBUG_MIN_INFO, 1);
 				start_send = micros();
-				sendLuftdaten(data_4_dusti, GPS_API_PIN, host_dusti, httpPort_dusti, url_dusti, "GPS_");
+				sendLuftdaten(result_GPS, GPS_API_PIN, host_dusti, httpPort_dusti, url_dusti, "GPS_");
 				sum_send_time += micros() - start_send;
 			}
 		}
