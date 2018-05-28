@@ -1379,6 +1379,14 @@ void webserver_values() {
 			page_content += empty_row;
 			page_content += table_row_from_value("DS18B20", FPSTR(INTL_TEMPERATUR), last_value_DS18B20_T, "°C");
 		}
+		if (gps_read) {
+			page_content += empty_row;
+			page_content += table_row_from_value("GPS", FPSTR(INTL_LATITUDE), String(gps.location.lat()), "");
+			page_content += table_row_from_value("GPS", FPSTR(INTL_LONGITUDE), String(gps.location.lng()), "");
+			page_content += table_row_from_value("GPS", FPSTR(INTL_ALTITUDE), String(gps.altitude.meters()), "m");
+			page_content += table_row_from_value("GPS", FPSTR(INTL_DATE), String(gps.date.year())+"-"+String(gps.date.month())+"-"+String(gps.date.day()), "");
+			page_content += table_row_from_value("GPS", FPSTR(INTL_TIME), String(gps.time.hour())+":"+String(gps.time.minute())+":"+String(gps.time.second()), "");
+		}
 
 		page_content += empty_row;
 		page_content += table_row_from_value("WiFi", FPSTR(INTL_SIGNAL),  String(signal_strength), "dBm");
@@ -2663,7 +2671,7 @@ void display_values(const String& value_DHT_T, const String& value_DHT_H, const 
 		}
 		display.display();
 	}
-	
+
 // ----5----0----5----0
 // PM10/2.5: 1999/999
 // T/H: -10.0°C/100.0%
