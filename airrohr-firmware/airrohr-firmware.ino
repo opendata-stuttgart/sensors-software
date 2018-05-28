@@ -87,7 +87,7 @@
 /*                                                                      *
 /************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-101"
+#define SOFTWARE_VERSION "NRZ-2018-102-B1"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -2221,8 +2221,8 @@ String sensorDHT() {
 		t = dht.readTemperature(); //Read Temperature
 		if (isnan(t) || isnan(h)) {
 			delay(100);
-			h = dht.readHumidity(true); //Read Humidity
-			t = dht.readTemperature(false, true); //Read Temperature
+			h = dht.readHumidity(); //Read Humidity
+			t = dht.readTemperature(false); //Read Temperature
 		}
 		if (isnan(t) || isnan(h)) {
 			debug_out(F("DHT22 couldn't be read"), DEBUG_ERROR, 1);

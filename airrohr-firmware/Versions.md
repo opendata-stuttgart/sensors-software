@@ -1,3 +1,6 @@
+NRZ-2018-102-B1
+* test with DHT sensor library 1.1.1 instead of 1.3.0
+
 NRZ-2018-101
 * same as NRZ-2017-100-B16
 
