@@ -1379,6 +1379,14 @@ void webserver_values() {
 			page_content += empty_row;
 			page_content += table_row_from_value("DS18B20", FPSTR(INTL_TEMPERATUR), last_value_DS18B20_T, "°C");
 		}
+		if (gps_read) {
+			page_content += empty_row;
+			page_content += table_row_from_value("GPS", FPSTR(INTL_LATITUDE), String(gps.location.lat()), "");
+			page_content += table_row_from_value("GPS", FPSTR(INTL_LONGITUDE), String(gps.location.lng()), "");
+			page_content += table_row_from_value("GPS", FPSTR(INTL_ALTITUDE), String(gps.altitude.meters()), "m");
+			page_content += table_row_from_value("GPS", FPSTR(INTL_DATE), String(gps.date.year())+"-"+String(gps.date.month())+"-"+String(gps.date.day()), "");
+			page_content += table_row_from_value("GPS", FPSTR(INTL_TIME), String(gps.time.hour())+":"+String(gps.time.minute())+":"+String(gps.time.second()), "");
+		}
 
 		page_content += empty_row;
 		page_content += table_row_from_value("WiFi", FPSTR(INTL_SIGNAL),  String(signal_strength), "dBm");
@@ -2645,25 +2653,25 @@ void display_values(const String& value_DHT_T, const String& value_DHT_H, const 
 		display.setFont(Monospaced_plain_9);
 		display.setTextAlignment(TEXT_ALIGN_LEFT);
 		value_count = 0;
-		display.drawString(0, 10 * (value_count++), "Temp:" + t_value + "  Hum.:" + h_value);
+		display.drawString(0, 10 * (value_count++), "Temp: " + t_value + "°C  Hum: " + h_value+"%");
+		display.drawString(0, 10 * (value_count++), "Press: " + String(p_value.toFloat()/100) + " hPa" );
 		if (ppd_read) {
 			display.drawString(0, 10 * (value_count++), "PPD P1: " + value_PPD_P1);
 			display.drawString(0, 10 * (value_count++), "PPD P2: " + value_PPD_P2);
 		}
 		if (sds_read) {
-			display.drawString(0, 10 * (value_count++), "SDS P1: " + value_SDS_P1);
-			display.drawString(0, 10 * (value_count++), "SDS P2: " + value_SDS_P2);
+			display.drawString(0, 10 * (value_count++), "PM10: " + value_SDS_P1 + "  PM2.5: " + value_SDS_P2);
 		}
 		if (gps_read) {
 			if(gps.location.isValid()) {
-				display.drawString(0, 10 * (value_count++), "lat: " + String(gps.location.lat(), 6));
-				display.drawString(0, 10 * (value_count++), "long: " + String(gps.location.lng(), 6));
+				display.drawString(0, 10 * (value_count++), "Lat: " + String(gps.location.lat(), 6));
+				display.drawString(0, 10 * (value_count++), "Lon: " + String(gps.location.lng(), 6));
 			}
-			display.drawString(0, 10 * (value_count++), "satellites: " + String(gps.satellites.value()));
+			display.drawString(0, 10 * (value_count++), "Hei: " + String(gps.altitude.meters()) + "  Sat: " + String(gps.satellites.value()));
 		}
 		display.display();
 	}
-	
+
 // ----5----0----5----0
 // PM10/2.5: 1999/999
 // T/H: -10.0°C/100.0%

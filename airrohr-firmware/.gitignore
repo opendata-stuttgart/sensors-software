@@ -7,3 +7,6 @@ TinyGPS++.cpp
 TinyGPS++.h
 builds/*
 !builds/readme.md
+.travis.yml
+.clang_complete
+.gcc-flags.json
