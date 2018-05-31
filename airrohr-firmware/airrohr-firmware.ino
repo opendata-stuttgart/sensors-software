@@ -295,6 +295,7 @@ unsigned long lowpulseoccupancyP2 = 0;
 
 bool send_now = false;
 unsigned long starttime;
+unsigned long uptime;
 unsigned long starttime_SDS;
 unsigned long starttime_GPS;
 unsigned long act_micro;
@@ -1794,6 +1795,46 @@ void webserver_data_json() {
 }
 
 /*****************************************************************
+/* prepare data for prometheus
+/*****************************************************************/
+String create_prometheus_string(const String& data) {
+	String tmp_str;
+	String data_4_prometheus;
+	String dim = F("node=\"esp8266-");
+	dim += esp_chipid +"\"";
+	debug_out(F("Parse JSON for Prometheus"), DEBUG_MIN_INFO, 1);
+	debug_out(data, DEBUG_MIN_INFO, 1);
+	data_4_prometheus = "software_version{version=\"" + String(SOFTWARE_VERSION) + "\"," + dim  + "} 1\n";
+	data_4_prometheus += "uptime_ms{" + dim + "} " + String((act_milli - uptime)) + "\n";
+	data_4_prometheus += "sending_intervall_ms{"+ dim + "} " + String((sending_intervall_ms)) + "\n";
+	data_4_prometheus += "number_of_measurements{"+ dim + "} " + String((count_sends)) + "\n";
+	StaticJsonBuffer<2000> jsonBuffer;
+	JsonObject& json2data = jsonBuffer.parseObject(data);
+	if (json2data.success()) {
+		for (int i = 0; i < json2data["sensordatavalues"].size() - 1; i++) {
+		tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value_type"].as<char*>());
+		data_4_prometheus += tmp_str + "{" + dim + "} ";
+		tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value"].as<char*>());
+		data_4_prometheus += tmp_str + "\n";
+	}
+		data_4_prometheus += "last_sample_age_ms{" + dim + "} " + String(act_milli - starttime) + "\n";
+	} else {
+		debug_out(F("Data read failed"), DEBUG_ERROR, 1);
+	}
+	return data_4_prometheus;
+}
+
+/*****************************************************************
+/* Webserver prometheus metrics endpoint                         *
+/*****************************************************************/
+void webserver_prometheus_endpoint() {
+	debug_out(F("output prometheus endpoint..."), DEBUG_MIN_INFO, 1);
+	String s1 = create_prometheus_string(last_data_string);
+	debug_out(s1, DEBUG_MIN_INFO, 1);
+	server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN), s1);
+}
+
+/*****************************************************************
 /* Webserver Images                                              *
 /*****************************************************************/
 void webserver_images() {
@@ -1840,6 +1881,7 @@ void setup_webserver() {
 	server.on("/removeConfig", webserver_removeConfig);
 	server.on("/reset", webserver_reset);
 	server.on("/data.json", webserver_data_json);
+	server.on("/metrics", webserver_prometheus_endpoint);
 	server.on("/images", webserver_images);
 	server.onNotFound(webserver_not_found);
 
@@ -3700,6 +3742,7 @@ void setup() {
 	wdt_enable(30000);// 30 sec
 
 	starttime = millis();                                   // store the start time
+	uptime = starttime;
 	starttime_SDS = millis();
 	next_display_millis = millis() + 5000;
 }
