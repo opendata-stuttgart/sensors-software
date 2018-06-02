@@ -174,6 +174,7 @@
 #define DEBUG_MIN_INFO 3
 #define DEBUG_MED_INFO 4
 #define DEBUG_MAX_INFO 5
+
 // Definition GPIOs for Zero based Arduino Feather M0 LoRaWAN
 #if defined(ARDUINO_SAMD_ZERO) && defined(SERIAL_PORT_USBVIRTUAL)
 // Required for Serial on Zero based boards

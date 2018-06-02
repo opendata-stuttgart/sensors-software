@@ -87,7 +87,7 @@
 /*                                                                      *
 /************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-102-B1"
+#define SOFTWARE_VERSION "NRZ-2018-102-B2"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -824,12 +824,6 @@ void readConfig() {
 
 	if (SPIFFS.begin()) {
 		debug_out(F("mounted file system..."), DEBUG_MIN_INFO, 1);
-		Dir dir = SPIFFS.openDir("/");
-		while (dir.next()) {
-			Serial.print(dir.fileName());
-			File f = dir.openFile("r");
-			Serial.println(f.size());
-		}
 		if (SPIFFS.exists("/config.json")) {
 			//file exists, reading and loading
 			debug_out(F("reading config file..."), DEBUG_MIN_INFO, 1);
@@ -1017,8 +1011,7 @@ void create_basic_auth_strings() {
 /*****************************************************************/
 
 String make_header(const String& title) {
-	String s = "";
-	s += FPSTR(WEB_PAGE_HEADER);
+	String s = FPSTR(WEB_PAGE_HEADER);
 	s.replace("{tt}", FPSTR(INTL_FEINSTAUBSENSOR));
 	s.replace("{h}", FPSTR(INTL_UBERSICHT));
 	if(title != " ") {
@@ -1035,8 +1028,7 @@ String make_header(const String& title) {
 }
 
 String make_footer() {
-	String s = "";
-	s += FPSTR(WEB_PAGE_FOOTER);
+	String s = FPSTR(WEB_PAGE_FOOTER);
 	s.replace("{t}", FPSTR(INTL_ZURUCK_ZUR_STARTSEITE));
 	return s;
 }
@@ -1213,8 +1205,7 @@ String age_last_values() {
 }
 
 String add_sensor_type(const String& sensor_text) {
-	String s = "";
-	s += sensor_text;
+	String s = sensor_text;
 	s.replace("{t}", FPSTR(INTL_TEMPERATUR));
 	s.replace("{h}", FPSTR(INTL_LUFTFEUCHTE));
 	s.replace("{p}", FPSTR(INTL_LUFTDRUCK));
@@ -1266,13 +1257,13 @@ void webserver_root() {
 void webserver_config() {
 	webserver_request_auth();
 
-	String page_content = "";
+	String page_content = make_header(FPSTR(INTL_KONFIGURATION));
 	String masked_pwd = "";
 	int i = 0;
 	last_page_load = millis();
 
 	debug_out(F("output config page ..."), DEBUG_MIN_INFO, 1);
-	page_content += make_header(FPSTR(INTL_KONFIGURATION));
+//	page_content += make_header(FPSTR(INTL_KONFIGURATION));
 	if (WiFi.status() != WL_CONNECTED) {  // scan for wlan ssids
 		page_content += FPSTR(WEB_CONFIG_SCRIPT);
 	}
@@ -1557,7 +1548,7 @@ void webserver_values() {
 		server.sendHeader(F("Location"), F("http://192.168.4.1/config"));
 		server.send(302, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), "");
 	} else {
-		String page_content = "";
+		String page_content = make_header(FPSTR(INTL_AKTUELLE_WERTE));
 		const String unit_PM = "µg/m³";
 		const String unit_T = "°C";
 		const String unit_H = "%";
@@ -1573,7 +1564,6 @@ void webserver_values() {
 		}
 		int signal_quality = (signal_strength + 100) * 2;
 		debug_out(F("output values to web page..."), DEBUG_MIN_INFO, 1);
-		page_content += make_header(FPSTR(INTL_AKTUELLE_WERTE));
 		if (first_cycle) {
 			page_content += F("<b style='color:red'>");
 			page_content += warning_first_cycle();
@@ -1665,7 +1655,7 @@ void webserver_values() {
 void webserver_debug_level() {
 	webserver_request_auth();
 
-	String page_content = "";
+	String page_content = make_header(FPSTR(INTL_DEBUG_LEVEL));
 	String message_string = F("<h3>{v1} {v2}.</h3>");
 	last_page_load = millis();
 	debug_out(F("output change debug level page..."), DEBUG_MIN_INFO, 1);
@@ -1709,11 +1699,10 @@ void webserver_debug_level() {
 void webserver_removeConfig() {
 	webserver_request_auth();
 
-	String page_content = "";
+	String page_content = make_header(FPSTR(INTL_CONFIG_LOSCHEN));
 	String message_string = F("<h3>{v}.</h3>");
 	last_page_load = millis();
 	debug_out(F("output remove config page..."), DEBUG_MIN_INFO, 1);
-	page_content += make_header(FPSTR(INTL_CONFIG_LOSCHEN));
 
 	if (server.method() == HTTP_GET) {
 		page_content += FPSTR(WEB_REMOVE_CONFIG_CONTENT);
@@ -1743,10 +1732,9 @@ void webserver_removeConfig() {
 void webserver_reset() {
 	webserver_request_auth();
 
-	String page_content = "";
+	String page_content = make_header(FPSTR(INTL_SENSOR_NEU_STARTEN));
 	last_page_load = millis();
 	debug_out(F("output reset NodeMCU page..."), DEBUG_MIN_INFO, 1);
-	page_content += make_header(FPSTR(INTL_SENSOR_NEU_STARTEN));
 
 	if (server.method() == HTTP_GET) {
 		page_content += FPSTR(WEB_RESET_CONTENT);
@@ -1795,43 +1783,37 @@ void webserver_data_json() {
 }
 
 /*****************************************************************
-/* prepare data for prometheus
-/*****************************************************************/
-String create_prometheus_string(const String& data) {
-	String tmp_str;
-	String data_4_prometheus;
-	String dim = F("node=\"esp8266-");
-	dim += esp_chipid +"\"";
-	debug_out(F("Parse JSON for Prometheus"), DEBUG_MIN_INFO, 1);
-	debug_out(data, DEBUG_MIN_INFO, 1);
-	data_4_prometheus = "software_version{version=\"" + String(SOFTWARE_VERSION) + "\"," + dim  + "} 1\n";
-	data_4_prometheus += "uptime_ms{" + dim + "} " + String((act_milli - uptime)) + "\n";
-	data_4_prometheus += "sending_intervall_ms{"+ dim + "} " + String((sending_intervall_ms)) + "\n";
-	data_4_prometheus += "number_of_measurements{"+ dim + "} " + String((count_sends)) + "\n";
-	StaticJsonBuffer<2000> jsonBuffer;
-	JsonObject& json2data = jsonBuffer.parseObject(data);
-	if (json2data.success()) {
-		for (int i = 0; i < json2data["sensordatavalues"].size() - 1; i++) {
-		tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value_type"].as<char*>());
-		data_4_prometheus += tmp_str + "{" + dim + "} ";
-		tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value"].as<char*>());
-		data_4_prometheus += tmp_str + "\n";
-	}
-		data_4_prometheus += "last_sample_age_ms{" + dim + "} " + String(act_milli - starttime) + "\n";
-	} else {
-		debug_out(F("Data read failed"), DEBUG_ERROR, 1);
-	}
-	return data_4_prometheus;
-}
-
-/*****************************************************************
 /* Webserver prometheus metrics endpoint                         *
 /*****************************************************************/
 void webserver_prometheus_endpoint() {
 	debug_out(F("output prometheus endpoint..."), DEBUG_MIN_INFO, 1);
-	String s1 = create_prometheus_string(last_data_string);
-	debug_out(s1, DEBUG_MIN_INFO, 1);
-	server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN), s1);
+	String tmp_str;
+	String data_4_prometheus = F("software_version{version=\"{ver}\",{id}} 1\nuptime_ms{{id}} {up}\nsending_intervall_ms{{id}} {si}\nnumber_of_measurements{{id}} {cs}\n");
+	String id = F("node=\"esp8266-");
+	id += esp_chipid +"\"";
+	debug_out(F("Parse JSON for Prometheus"), DEBUG_MIN_INFO, 1);
+	debug_out(last_data_string, DEBUG_MED_INFO, 1);
+	data_4_prometheus.replace("{id}",id);
+	data_4_prometheus.replace("{ver}",String(SOFTWARE_VERSION));
+	data_4_prometheus.replace("{up}",String(act_milli - uptime));
+	data_4_prometheus.replace("{si}",String(sending_intervall_ms));
+	data_4_prometheus.replace("{cs}",String(count_sends));
+	StaticJsonBuffer<2000> jsonBuffer;
+	JsonObject& json2data = jsonBuffer.parseObject(last_data_string);
+	if (json2data.success()) {
+		for (int i = 0; i < json2data["sensordatavalues"].size() - 1; i++) {
+			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value_type"].as<char*>());
+			data_4_prometheus += tmp_str + "{" + id + "} ";
+			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value"].as<char*>());
+			data_4_prometheus += tmp_str + "\n";
+		}
+		data_4_prometheus += F("last_sample_age_ms{");
+		data_4_prometheus += id + "} " + String(act_milli - starttime) + "\n";
+	} else {
+		debug_out(F("Data read failed"), DEBUG_ERROR, 1);
+	}
+	debug_out(data_4_prometheus, DEBUG_MED_INFO, 1);
+	server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN), data_4_prometheus);
 }
 
 /*****************************************************************
@@ -2000,8 +1982,8 @@ void wifiConfig() {
 /*****************************************************************/
 void connectWifi() {
 	int retry_count = 0;
-	String s1 = "";
-	String s2 = "";
+	String s1 = String(fs_ssid);
+	String s2 = String(fs_ssid);
 	debug_out(String(WiFi.status()), DEBUG_MIN_INFO, 1);
 	WiFi.disconnect();
 	WiFi.mode(WIFI_STA);
@@ -2017,9 +1999,7 @@ void connectWifi() {
 	}
 	debug_out("", DEBUG_MIN_INFO, 1);
 	if (WiFi.status() != WL_CONNECTED) {
-		s1 = String(fs_ssid);
 		s1 = s1.substring(0, 16);
-		s2 = String(fs_ssid);
 		s2 = s2.substring(16);
 		display_debug(s1, s2);
 		wifiConfig();
@@ -2179,13 +2159,12 @@ void send_lora(const String& data) {
 /*****************************************************************/
 String create_influxdb_string(const String& data) {
 	String tmp_str;
-	String data_4_influxdb;
+	String data_4_influxdb = "";
 	debug_out(F("Parse JSON for influx DB"), DEBUG_MIN_INFO, 1);
 	debug_out(data, DEBUG_MIN_INFO, 1);
 	StaticJsonBuffer<2000> jsonBuffer;
 	JsonObject& json2data = jsonBuffer.parseObject(data);
 	if (json2data.success()) {
-		data_4_influxdb = "";
 		data_4_influxdb += F("feinstaub,node=esp8266-");
 		data_4_influxdb += esp_chipid + " ";
 		for (int i = 0; i < json2data["sensordatavalues"].size() - 1; i++) {

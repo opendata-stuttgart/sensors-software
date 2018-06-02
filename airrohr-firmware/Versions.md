@@ -1,3 +1,7 @@
+NRZ-2018-102-B2
+* added Prometheus endpoint
+* optimizing flash and memory usage
+
 NRZ-2018-102-B1
 * test with DHT sensor library 1.1.1 instead of 1.3.0
 
