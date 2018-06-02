@@ -1,8 +1,57 @@
+NRZ-2018-103
+* same as NRZ-2018-102-B2
+
+NRZ-2018-102-B2
+* added Prometheus endpoint
+* optimizing flash and memory usage
+
+NRZ-2018-102-B1
+* test with DHT sensor library 1.1.1 instead of 1.3.0
+
+NRZ-2018-101
+* same as NRZ-2017-100-B16
+
 NRZ-2017-100
 beta
-* optimizing display function
+* optimizing display function: more than one 'screen' for infos
 * added dependencies for OneWire
 * added wiring for new sensors to Readme.md
+* added support for Honeywell PM sensor
+* enable configurable usage of beta firmware
+* removing Arduino Feather code
+* version B4: right align values
+* version B4: added display of DS18B20 and HTU21D values
+* version B5: wpa2 password can be configured for sensor in AP mode
+* version B5: more info to sensors on config page
+* version B5: some flash memory optimizations
+* version B5: parseable data.json before first measurement
+* version B5: GPS data on value page
+* version B6: added swedish translations
+* version B6: error in start/stop commands corrected
+* version B7: showing GPS data on displays
+* version B7: wrong output on config save corrected
+* version B7: double date/time on values page corrected
+* version B7: changed codefor logo to png
+* version B8: new TinyGPS++ 0.94a -> 0.95
+* version B8: larger buffer for GPS SoftSerial
+* version B8: removed INPUT_PULLUP for DHT22
+* version B9: wrong value for signal quality was shown on display
+* version B9: 'memory leak' removed
+* version B9: added LICENSE.md
+* version B10: reduced amount of NMEA messages
+* version B10: don't fall back to plain HTTP on WPA2 wifi
+* version B10: larger buffer for serialGPS
+* version B11: new languages RU and CZ
+* version B11: changed lib for HTU21D from Sparkfun to Adafruit
+* version B11: added LCD2004 display
+* version B11: debug infos on LCD displays
+* version B11: changed BME280 to forced measurements to get more accurate temperature values
+* version B11: corrected error in sending HTU21D data to luftdaten.info API
+* version B12: switched to ESP8266 library/extension version 2.4 (including KRACK patch)
+* version B13: added new Arduino Options, CodeFor.de logo removed and other unneeded binary data removed, problem with lwIP v2 solved
+* version B14: setting 'continuous mode' for pm sensors
+* version B15: test of esp8266 lib 2.4.1 with prebuilt lwIP 1.4
+* version B16: changed back to esp8266 lib 2.3.0
 
 NRZ-2017-099
 online since 2017-09-10
