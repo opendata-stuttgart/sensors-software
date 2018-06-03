@@ -149,6 +149,7 @@
 /*****************************************************************/
 char wlanssid[35] = "Freifunk-disabled";
 char wlanpwd[65] = "";
+int wlanpwr = 20;
 char current_lang[3] = "de";
 char www_username[65] = "admin";
 char www_password[65] = "feinstaub";
@@ -760,6 +761,7 @@ void copyExtDef() {
 	strcpyDef(current_lang, CURRENT_LANG);
 	strcpyDef(wlanssid, WLANSSID);
 	strcpyDef(wlanpwd, WLANPWD);
+	setDef(wlanpwr, WLANPWR);
 	strcpyDef(www_username, WWW_USERNAME);
 	strcpyDef(www_password, WWW_PASSWORD);
 	strcpyDef(fs_ssid, FS_SSID);
@@ -857,6 +859,7 @@ void readConfig() {
 					strcpyFromJSON(www_password);
 					strcpyFromJSON(fs_ssid);
 					strcpyFromJSON(fs_pwd);
+					setFromJSON(wlanpwr);
 					setFromJSON(www_basicauth_enabled);
 					setFromJSON(dht_read);
 					setFromJSON(htu21d_read);
@@ -931,6 +934,7 @@ void writeConfig() {
 	copyToJSON_String(www_password);
 	copyToJSON_String(fs_ssid);
 	copyToJSON_String(fs_pwd);
+	copyToJSON_Int(wlanpwr);
 	copyToJSON_Bool(www_basicauth_enabled);
 	copyToJSON_Bool(dht_read);
 	copyToJSON_Bool(htu21d_read);
@@ -1281,6 +1285,7 @@ void webserver_config() {
 		page_content += F("<table>");
 		page_content += form_input("wlanssid", F("WLAN"), wlanssid, 64);
 		page_content += form_password("wlanpwd", FPSTR(INTL_PASSWORT), wlanpwd, 64);
+		page_content += form_input("wlanpwr", F("tx dBm"), String(wlanpwr), 64);
 		page_content += form_submit(FPSTR(INTL_SPEICHERN));
 		page_content += F("</table><br/><hr/><b>");
 
@@ -1377,6 +1382,7 @@ void webserver_config() {
 			readCharParam(wlanssid);
 			readPasswdParam(wlanpwd);
 		}
+		readIntParam(wlanpwr);
 		readCharParam(current_lang);
 		readCharParam(www_username);
 		readPasswdParam(www_password);
@@ -1894,6 +1900,9 @@ void wifiConfig() {
 
 	WiFi.softAPConfig(apIP, apIP, netMsk);
 	WiFi.softAP(fs_ssid, fs_pwd);
+	WiFi.setOutputPower(float(WLANPWR));
+	debug_out(F("Setting tx power to: "), DEBUG_MIN_INFO, 0);
+	debug_out(String(WLANPWD), DEBUG_MIN_INFO, 1);
 
 	dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
 	dnsServer.start(DNS_PORT, "*", apIP);
@@ -1917,6 +1926,9 @@ void wifiConfig() {
 
 	WiFi.softAPdisconnect(true);
 	WiFi.mode(WIFI_STA);
+	WiFi.setOutputPower(float(wlanpwr));
+	debug_out(F("Setting tx power to: "), DEBUG_MIN_INFO, 0);
+	debug_out(String(wlanpwr), DEBUG_MIN_INFO, 1);
 	WiFi.disconnect();
 
 	dnsServer.stop();
@@ -1988,6 +2000,9 @@ void connectWifi() {
 	debug_out(String(WiFi.status()), DEBUG_MIN_INFO, 1);
 	WiFi.disconnect();
 	WiFi.mode(WIFI_STA);
+	WiFi.setOutputPower(float(wlanpwr));
+	debug_out(F("Setting tx power to: "), DEBUG_MIN_INFO, 0);
+	debug_out(String(wlanpwr), DEBUG_MIN_INFO, 1);
 	WiFi.begin(wlanssid, wlanpwd); // Start WiFI
 
 	debug_out(F("Connecting to "), DEBUG_MIN_INFO, 0);
