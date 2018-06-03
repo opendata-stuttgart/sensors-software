@@ -1,3 +1,6 @@
+NRZ-2018-104-B1
+* double quote in config strings (i.e. passwords) should work now
+
 NRZ-2018-103
 * same as NRZ-2018-102-B2
 

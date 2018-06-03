@@ -87,7 +87,7 @@
 /*                                                                      *
 /************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-103"
+#define SOFTWARE_VERSION "NRZ-2018-104-B1"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -916,12 +916,13 @@ void readConfig() {
 /*****************************************************************/
 void writeConfig() {
 	String json_string = "";
+	String tmp = "";
 	debug_out(F("saving config..."), DEBUG_MIN_INFO, 1);
 
 	json_string = "{";
 #define copyToJSON_Bool(varname) json_string +="\""+String(#varname)+"\":"+(varname ? "true":"false")+",";
 #define copyToJSON_Int(varname) json_string +="\""+String(#varname)+"\":"+String(varname)+",";
-#define copyToJSON_String(varname) json_string +="\""+String(#varname)+"\":\""+String(varname)+"\",";
+#define copyToJSON_String(varname) tmp = String(varname); tmp.replace("\"","\\\""); json_string +="\""+String(#varname)+"\":\""+tmp+"\",";
 	copyToJSON_String(current_lang);
 	copyToJSON_String(SOFTWARE_VERSION);
 	copyToJSON_String(wlanssid);
