@@ -3388,6 +3388,55 @@ void display_values() {
 	}
 	screens[screen_count++] = 4;	// Wifi info
 	screens[screen_count++] = 5;	// chipID, firmware and count of measurements
+	screens[screen_count++] = 6;	// Date & Time, perhaps uptime
+	
+// ----5----0----5----0
+// PM10/2.5: 1999/999
+// T/H: -10.0°C/100.0%
+// T/P: -10.0°C/1000hPa
+
+        //part for lcd1602_27 or lcd1602
+	if (has_lcd1602_27 || has_lcd1602) {
+		switch (screens[next_display_count % screen_count]) {
+		case (1):
+			display_lines[0] = "PM2.5: " + check_display_value(pm25_value, -1, 1, 6);
+			display_lines[1] = "PM10:  " + check_display_value(pm10_value, -1, 1, 6);
+			break;
+		case (2):
+			display_lines[0] = "T: " + check_display_value(t_value, -128, 1, 6) + char(223) + "C";
+			display_lines[1] = "H: " + check_display_value(h_value, -1, 1, 6) + "%";
+			break;
+		case (3):
+			display_lines[0] = "Lat: " + check_display_value(lat_value, -200.0, 6, 11);
+			display_lines[1] = "Lon: " + check_display_value(lon_value, -200.0, 6, 11);
+			break;
+		case (4):
+			display_lines[0] = IPAddress2String(WiFi.localIP());
+			display_lines[1] = WiFi.SSID();
+			break;
+		case (5):
+			display_lines[0] = "ID: " + esp_chipid;
+			display_lines[1] = "FW: " + String(SOFTWARE_VERSION);
+			break;
+		}
+        }
+
+	if (has_lcd1602_27) {
+		lcd_1602_27.clear();
+		lcd_1602_27.setCursor(0, 0);
+		lcd_1602_27.print(display_lines[0]);
+		lcd_1602_27.setCursor(0, 1);
+		lcd_1602_27.print(display_lines[1]);
+	}
+	if (has_lcd1602) {
+		lcd_1602_3f.clear();
+		lcd_1602_3f.setCursor(0, 0);
+		lcd_1602_3f.print(display_lines[0]);
+		lcd_1602_3f.setCursor(0, 1);
+		lcd_1602_3f.print(display_lines[1]);
+	}
+	
+	//part for display or lcd2004_27
 	if (has_display || has_lcd2004_27) {
 		switch (screens[next_display_count % screen_count]) {
 		case (1):
@@ -3434,6 +3483,12 @@ void display_values() {
 			display_lines[1] = "FW: " + String(SOFTWARE_VERSION);
 			display_lines[2] = "Measurements: " + String(count_sends);
 			break;
+                case (6):
+			display_header = F("Date & Time");
+			display_lines[0] = "NTP: " + String(NTP_SERVER);
+			display_lines[1] = "Date: beta";
+			display_lines[2] = "Time: beta";
+			break;
 		}
 		for (int i = 0; i < screen_count; i++) {
 			if (i != (next_display_count % screen_count)) {
@@ -3462,7 +3517,7 @@ void display_values() {
 			display_lines[0].replace(" µg/m³", "");
 			display_lines[0].replace("°", String(char(223)));
 			display_lines[1].replace(" µg/m³", "");
-			lcd_2004_27.clear();
+			//lcd_2004_27.clear();   // uncommented because the backlight flashes everytime
 			lcd_2004_27.setCursor(0, 0);
 			lcd_2004_27.print(display_header);
 			lcd_2004_27.setCursor(0, 1);
@@ -3474,48 +3529,7 @@ void display_values() {
 		}
 	}
 
-// ----5----0----5----0
-// PM10/2.5: 1999/999
-// T/H: -10.0°C/100.0%
-// T/P: -10.0°C/1000hPa
 
-	switch (screens[next_display_count % screen_count]) {
-	case (1):
-		display_lines[0] = "PM2.5: " + check_display_value(pm25_value, -1, 1, 6);
-		display_lines[1] = "PM10:  " + check_display_value(pm10_value, -1, 1, 6);
-		break;
-	case (2):
-		display_lines[0] = "T: " + check_display_value(t_value, -128, 1, 6) + char(223) + "C";
-		display_lines[1] = "H: " + check_display_value(h_value, -1, 1, 6) + "%";
-		break;
-	case (3):
-		display_lines[0] = "Lat: " + check_display_value(lat_value, -200.0, 6, 11);
-		display_lines[1] = "Lon: " + check_display_value(lon_value, -200.0, 6, 11);
-		break;
-	case (4):
-		display_lines[0] = IPAddress2String(WiFi.localIP());
-		display_lines[1] = WiFi.SSID();
-		break;
-	case (5):
-		display_lines[0] = "ID: " + esp_chipid;
-		display_lines[1] = "FW: " + String(SOFTWARE_VERSION);
-		break;
-	}
-
-	if (has_lcd1602_27) {
-		lcd_1602_27.clear();
-		lcd_1602_27.setCursor(0, 0);
-		lcd_1602_27.print(display_lines[0]);
-		lcd_1602_27.setCursor(0, 1);
-		lcd_1602_27.print(display_lines[1]);
-	}
-	if (has_lcd1602) {
-		lcd_1602_3f.clear();
-		lcd_1602_3f.setCursor(0, 0);
-		lcd_1602_3f.print(display_lines[0]);
-		lcd_1602_3f.setCursor(0, 1);
-		lcd_1602_3f.print(display_lines[1]);
-	}
 	yield();
 	next_display_count += 1;
 	next_display_millis = millis() + 5000;
