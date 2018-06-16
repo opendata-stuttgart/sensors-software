@@ -3485,6 +3485,7 @@ void display_values() {
 			display_lines[2] = "Measurements: " + String(count_sends);
 			break;
                 case (6):
+			getTimeStamp();
 			display_header = F("Date & Time");
 			display_lines[0] = "NTP: " + String(NTP_SERVER);
 			display_lines[1] = "Date: " + dayStamp;
