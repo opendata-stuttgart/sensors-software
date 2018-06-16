@@ -87,7 +87,7 @@
 /*                                                                      *
 /************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-104-B1"
+#define SOFTWARE_VERSION "NRZ-2018-104-B2"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -101,6 +101,7 @@
 #include <ESP8266httpUpdate.h>
 #include <WiFiClientSecure.h>
 #include <SoftwareSerial.h>
+#include <NTPClient.h>              // using git@github.com:taranais/NTPClient.git
 #include <SSD1306.h>
 #include <LiquidCrystal_I2C.h>
 #include <base64.h>
@@ -3486,8 +3487,8 @@ void display_values() {
                 case (6):
 			display_header = F("Date & Time");
 			display_lines[0] = "NTP: " + String(NTP_SERVER);
-			display_lines[1] = "Date: beta";
-			display_lines[2] = "Time: beta";
+			display_lines[1] = "Date: " + dayStamp;
+			display_lines[2] = "Time: " + timeStamp;
 			break;
 		}
 		for (int i = 0; i < screen_count; i++) {
@@ -3539,8 +3540,10 @@ void display_values() {
 /* Init OLED display                                             *
 /*****************************************************************/
 void init_display() {
-	display.init();
-	display.resetDisplay();
+        if (has_display) {
+            display.init();
+            display.resetDisplay();
+        }
 }
 
 /*****************************************************************
@@ -3597,6 +3600,28 @@ bool initBME280(char addr) {
 		debug_out(F(" ... not found"), DEBUG_MIN_INFO, 1);
 		return false;
 	}
+}
+
+/*****************************************************************
+/* Function to get date and time from NTPClient                  *
+/*****************************************************************/
+void getTimeStamp() {
+  while(!timeClient.update()) {
+    timeClient.forceUpdate();
+  }
+  // The formattedDate comes with the following format:
+  // 2018-05-28T16:00:13Z
+  // We need to extract date and time
+  formattedDate = timeClient.getFormattedDate();
+  //Serial.println(formattedDate);
+
+  // Extract date
+  int splitT = formattedDate.indexOf("T");
+  dayStamp = formattedDate.substring(0, splitT);
+  //Serial.println(dayStamp);
+  // Extract time
+  timeStamp = formattedDate.substring(splitT+1, formattedDate.length()-1);
+  //Serial.println(timeStamp);
 }
 
 /*****************************************************************
@@ -3754,6 +3779,23 @@ void setup() {
 	uptime = starttime;
 	starttime_SDS = millis();
 	next_display_millis = millis() + 5000;
+	
+        // Initialize a NTPClient to get time
+        // NTPClient timeClient(ntpUDP);
+        // You can specify the time server pool and the offset, (in seconds)
+        // additionaly you can specify the update interval (in milliseconds).
+        // NTPClient timeClient(ntpUDP, "europe.pool.ntp.org", 3600, 60000);
+  
+        timeClient.begin();
+        // Set offset time in seconds to adjust for your timezone, for example:
+        // GMT +1 = 3600
+        // GMT +8 = 28800
+        // GMT -1 = -3600
+        // GMT 0 = 0
+        timeClient.setTimeOffset(TimeZone*3600+3600);   //+3600 for summertime
+        Serial.println(timeClient.getFormattedTime());
+        getTimeStamp();
+                
 }
 
 /*****************************************************************
