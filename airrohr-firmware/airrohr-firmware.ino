@@ -3519,7 +3519,7 @@ void display_values() {
 			display_lines[0].replace(" µg/m³", "");
 			display_lines[0].replace("°", String(char(223)));
 			display_lines[1].replace(" µg/m³", "");
-			//lcd_2004_27.clear();   // uncommented because the backlight flashes everytime
+			lcd_2004_27.clear();
 			lcd_2004_27.setCursor(0, 0);
 			lcd_2004_27.print(display_header);
 			lcd_2004_27.setCursor(0, 1);
@@ -3553,15 +3553,15 @@ void init_display() {
 void init_lcd() {
 	if (has_lcd1602_27) {
 		lcd_1602_27.init();
-		lcd_1602_27.backlight();
+		lcd_1602_27.setBacklight(255);
 	}
 	if (has_lcd1602) {
 		lcd_1602_3f.init();
-		lcd_1602_3f.backlight();
+		lcd_1602_3f.setBacklight(255);
 	}
 	if (has_lcd2004_27) {
 		lcd_2004_27.init();
-		lcd_2004_27.backlight();
+		lcd_2004_27.setBacklight(255);
 	}
 }
 
