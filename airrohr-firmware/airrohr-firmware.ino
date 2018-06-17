@@ -3419,6 +3419,11 @@ void display_values() {
 			display_lines[0] = "ID: " + esp_chipid;
 			display_lines[1] = "FW: " + String(SOFTWARE_VERSION);
 			break;
+                case (6):
+			getTimeStamp();
+			display_lines[0] = String(NTP_SERVER);
+			display_lines[1] = dayStamp + " " + timeStamp;
+			break;
 		}
         }
 
