@@ -28,6 +28,20 @@
 // NTP Server
 #define NTP_SERVER "0.europe.pool.ntp.org"
 
+// Define NTP Client to get time
+// NTPClient timeClient(ntpUDP);
+// You can specify the time server pool and the offset, (in seconds)
+// additionaly you can specify the update interval (in milliseconds).
+// NTPClient timeClient(ntpUDP, "europe.pool.ntp.org", 3600, 60000);
+// 600000 = 600.000 = 600 sec = 6 min
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, NTP_SERVER, 3600, 600000);
+
+// Variables to save date and time
+String formattedDate;
+String dayStamp;
+String timeStamp;
+
 // OpenSenseMap
 #define SENSEBOXID ""
 

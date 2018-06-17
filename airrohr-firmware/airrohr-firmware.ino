@@ -87,7 +87,7 @@
 /*                                                                      *
 /************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-104-B1"
+#define SOFTWARE_VERSION "NRZ-2018-104-B2"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -101,6 +101,7 @@
 #include <ESP8266httpUpdate.h>
 #include <WiFiClientSecure.h>
 #include <SoftwareSerial.h>
+#include <NTPClient.h>              // using git@github.com:taranais/NTPClient.git
 #include <SSD1306.h>
 #include <LiquidCrystal_I2C.h>
 #include <base64.h>
@@ -3388,6 +3389,60 @@ void display_values() {
 	}
 	screens[screen_count++] = 4;	// Wifi info
 	screens[screen_count++] = 5;	// chipID, firmware and count of measurements
+	screens[screen_count++] = 6;	// Date & Time, perhaps uptime
+	
+// ----5----0----5----0
+// PM10/2.5: 1999/999
+// T/H: -10.0°C/100.0%
+// T/P: -10.0°C/1000hPa
+
+        //part for lcd1602_27 or lcd1602
+	if (has_lcd1602_27 || has_lcd1602) {
+		switch (screens[next_display_count % screen_count]) {
+		case (1):
+			display_lines[0] = "PM2.5: " + check_display_value(pm25_value, -1, 1, 6);
+			display_lines[1] = "PM10:  " + check_display_value(pm10_value, -1, 1, 6);
+			break;
+		case (2):
+			display_lines[0] = "T: " + check_display_value(t_value, -128, 1, 6) + char(223) + "C";
+			display_lines[1] = "H: " + check_display_value(h_value, -1, 1, 6) + "%";
+			break;
+		case (3):
+			display_lines[0] = "Lat: " + check_display_value(lat_value, -200.0, 6, 11);
+			display_lines[1] = "Lon: " + check_display_value(lon_value, -200.0, 6, 11);
+			break;
+		case (4):
+			display_lines[0] = IPAddress2String(WiFi.localIP());
+			display_lines[1] = WiFi.SSID();
+			break;
+		case (5):
+			display_lines[0] = "ID: " + esp_chipid;
+			display_lines[1] = "FW: " + String(SOFTWARE_VERSION);
+			break;
+                case (6):
+			getTimeStamp();
+			display_lines[0] = String(NTP_SERVER);
+			display_lines[1] = dayStamp + " " + timeStamp;
+			break;
+		}
+        }
+
+	if (has_lcd1602_27) {
+		lcd_1602_27.clear();
+		lcd_1602_27.setCursor(0, 0);
+		lcd_1602_27.print(display_lines[0]);
+		lcd_1602_27.setCursor(0, 1);
+		lcd_1602_27.print(display_lines[1]);
+	}
+	if (has_lcd1602) {
+		lcd_1602_3f.clear();
+		lcd_1602_3f.setCursor(0, 0);
+		lcd_1602_3f.print(display_lines[0]);
+		lcd_1602_3f.setCursor(0, 1);
+		lcd_1602_3f.print(display_lines[1]);
+	}
+	
+	//part for display or lcd2004_27
 	if (has_display || has_lcd2004_27) {
 		switch (screens[next_display_count % screen_count]) {
 		case (1):
@@ -3434,6 +3489,13 @@ void display_values() {
 			display_lines[1] = "FW: " + String(SOFTWARE_VERSION);
 			display_lines[2] = "Measurements: " + String(count_sends);
 			break;
+                case (6):
+			getTimeStamp();
+			display_header = F("Date & Time");
+			display_lines[0] = "NTP: " + String(NTP_SERVER);
+			display_lines[1] = "Date: " + dayStamp;
+			display_lines[2] = "Time: " + timeStamp;
+			break;
 		}
 		for (int i = 0; i < screen_count; i++) {
 			if (i != (next_display_count % screen_count)) {
@@ -3474,48 +3536,7 @@ void display_values() {
 		}
 	}
 
-// ----5----0----5----0
-// PM10/2.5: 1999/999
-// T/H: -10.0°C/100.0%
-// T/P: -10.0°C/1000hPa
 
-	switch (screens[next_display_count % screen_count]) {
-	case (1):
-		display_lines[0] = "PM2.5: " + check_display_value(pm25_value, -1, 1, 6);
-		display_lines[1] = "PM10:  " + check_display_value(pm10_value, -1, 1, 6);
-		break;
-	case (2):
-		display_lines[0] = "T: " + check_display_value(t_value, -128, 1, 6) + char(223) + "C";
-		display_lines[1] = "H: " + check_display_value(h_value, -1, 1, 6) + "%";
-		break;
-	case (3):
-		display_lines[0] = "Lat: " + check_display_value(lat_value, -200.0, 6, 11);
-		display_lines[1] = "Lon: " + check_display_value(lon_value, -200.0, 6, 11);
-		break;
-	case (4):
-		display_lines[0] = IPAddress2String(WiFi.localIP());
-		display_lines[1] = WiFi.SSID();
-		break;
-	case (5):
-		display_lines[0] = "ID: " + esp_chipid;
-		display_lines[1] = "FW: " + String(SOFTWARE_VERSION);
-		break;
-	}
-
-	if (has_lcd1602_27) {
-		lcd_1602_27.clear();
-		lcd_1602_27.setCursor(0, 0);
-		lcd_1602_27.print(display_lines[0]);
-		lcd_1602_27.setCursor(0, 1);
-		lcd_1602_27.print(display_lines[1]);
-	}
-	if (has_lcd1602) {
-		lcd_1602_3f.clear();
-		lcd_1602_3f.setCursor(0, 0);
-		lcd_1602_3f.print(display_lines[0]);
-		lcd_1602_3f.setCursor(0, 1);
-		lcd_1602_3f.print(display_lines[1]);
-	}
 	yield();
 	next_display_count += 1;
 	next_display_millis = millis() + 5000;
@@ -3525,8 +3546,10 @@ void display_values() {
 /* Init OLED display                                             *
 /*****************************************************************/
 void init_display() {
-	display.init();
-	display.resetDisplay();
+        if (has_display) {
+            display.init();
+            display.resetDisplay();
+        }
 }
 
 /*****************************************************************
@@ -3535,15 +3558,15 @@ void init_display() {
 void init_lcd() {
 	if (has_lcd1602_27) {
 		lcd_1602_27.init();
-		lcd_1602_27.backlight();
+		lcd_1602_27.setBacklight(255);
 	}
 	if (has_lcd1602) {
 		lcd_1602_3f.init();
-		lcd_1602_3f.backlight();
+		lcd_1602_3f.setBacklight(255);
 	}
 	if (has_lcd2004_27) {
 		lcd_2004_27.init();
-		lcd_2004_27.backlight();
+		lcd_2004_27.setBacklight(255);
 	}
 }
 
@@ -3583,6 +3606,28 @@ bool initBME280(char addr) {
 		debug_out(F(" ... not found"), DEBUG_MIN_INFO, 1);
 		return false;
 	}
+}
+
+/*****************************************************************
+/* Function to get date and time from NTPClient                  *
+/*****************************************************************/
+void getTimeStamp() {
+  while(!timeClient.update()) {
+    timeClient.forceUpdate();
+  }
+  // The formattedDate comes with the following format:
+  // 2018-05-28T16:00:13Z
+  // We need to extract date and time
+  formattedDate = timeClient.getFormattedDate();
+  //Serial.println(formattedDate);
+
+  // Extract date
+  int splitT = formattedDate.indexOf("T");
+  dayStamp = formattedDate.substring(0, splitT);
+  //Serial.println(dayStamp);
+  // Extract time
+  timeStamp = formattedDate.substring(splitT+1, formattedDate.length()-1);
+  //Serial.println(timeStamp);
 }
 
 /*****************************************************************
@@ -3740,6 +3785,23 @@ void setup() {
 	uptime = starttime;
 	starttime_SDS = millis();
 	next_display_millis = millis() + 5000;
+	
+        // Initialize a NTPClient to get time
+        // NTPClient timeClient(ntpUDP);
+        // You can specify the time server pool and the offset, (in seconds)
+        // additionaly you can specify the update interval (in milliseconds).
+        // NTPClient timeClient(ntpUDP, "europe.pool.ntp.org", 3600, 60000);
+  
+        timeClient.begin();
+        // Set offset time in seconds to adjust for your timezone, for example:
+        // GMT +1 = 3600
+        // GMT +8 = 28800
+        // GMT -1 = -3600
+        // GMT 0 = 0
+        timeClient.setTimeOffset(TimeZone*3600+3600);   //+3600 for summertime
+        Serial.println(timeClient.getFormattedTime());
+        getTimeStamp();
+                
 }
 
 /*****************************************************************
