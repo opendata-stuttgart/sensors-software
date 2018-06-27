@@ -1,7 +1,8 @@
-# plot the files created via subsample.py
+# plot the meansfiles created via subsample.py
 require(ggplot2)
 require(reshape2)
 require(plotly)
+source("read_sampled.R")
 
 ymax=200
 
@@ -11,15 +12,17 @@ if (!dir.exists(datadir)){
     datadir="."
 }
 
-measnames=c("P1","P2","temperature","humidity")
+measnames=c("P1","P2","temperature","humidity","numobs")
 legdata=data.frame("P1"=c("PM 10","[µm/m³]"),"P2"=c("PM 2.5","[µm/m³]"),"temperature"=c("Temperatur","[°C]"),"humidity"=c("Luftfeuchtigkeit","[%]"))
 
 for (meas in measnames){
   for (dh in c("daily","hourly")){
     
-    csvfn<-paste("all_",dh,"_",meas,".csv", sep="")
-    infilename<-file.path(datadir, csvfn)
-    dat<-read.csv(infilename)
+#     csvfn<-paste("all_",dh,"_",meas,".csv", sep="")
+#     infilename<-file.path(datadir, csvfn)
+#     if (!file.exists(infilename)){next;}
+#     dat<-read.csv(infilename)
+    dat<-read_sampled(meas,dh,datadir)
 
     # have the time parsed 
     if (dh=="hourly"){

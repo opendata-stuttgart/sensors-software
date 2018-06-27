@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # subsample luftdaten.info data from archive.luftdaten.info
 # to hourly and daily means
@@ -37,13 +37,20 @@ for csvfilename in args.csvfilenames:
             if dat.size < 1:
                 sys.stderr.write("no data in "+csvfilename)
                 continue
-            dat.index=pd.DatetimeIndex(dat["timestamp"])
+            # Explicitly set utc after parsing
+            dat.index=pd.DatetimeIndex(dat["timestamp"]).tz_localize('utc')
             # hourly
             h=dat.resample('H').mean()
+            n=dat["timestamp"].resample('H').count()
+            n.name='numobs'
+            h=pd.concat([h,n],axis=1)
             sid=np.int(h["sensor_id"][0])
             rdh[sid]=pd.concat([rdh.get(sid),h])
             # daily
             d=dat.resample('D').mean()
+            n=dat["timestamp"].resample('D').count()
+            n.name='numobs'
+            d=pd.concat([d,n],axis=1)
             rdd[sid]=pd.concat([rdd.get(sid),d])
         except Exception as e:
             sys.stderr.write("error processing "+csvfilename+"\n")
@@ -68,12 +75,14 @@ for k in rdd.keys():
 # dict of all sensors
 dasd={} # daily
 dash={} # hourly
-measurements=['P1','P2','temperature','humidity']
+dasdc={} # daily counts
+dashc={} # hourly counts
+measurements=['P1','P2','temperature','humidity','numobs']
 for k in rdd.keys():
     for m in measurements:
         if m in rdd[k]:
             s=rdd[k][m]
-            s.name=k         
+            s.name=k
             dasd[m]=pd.concat([dasd.get(m),s],axis=1)
         if m in rdh[k]:
             s=rdh[k][m]
@@ -82,6 +91,8 @@ for k in rdd.keys():
 
 for m in measurements:
     ofilen=os.path.join(args.outdir, "all_hourly_"+str(m)+".csv")
+    if m not in dash.keys():
+        continue
     with open(ofilen, 'w') as o:
         dash[m].sort_index().to_csv(o)
     ofilen=os.path.join(args.outdir, "all_daily_"+str(m)+".csv")
