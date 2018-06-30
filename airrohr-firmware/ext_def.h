@@ -4,7 +4,6 @@
 // Wifi config
 #define WLANSSID "Freifunk-disabled"
 #define WLANPWD ""
-#define WLANPWR 20
 
 // BasicAuth config
 #define WWW_USERNAME "admin"
@@ -42,11 +41,11 @@
 #define PWD_CUSTOM ""
 
 // Definition eigene InfluxDB
-#define HOST_INFLUX "api.luftdaten.info"
+#define HOST_INFLUX "influx.server"
 #define URL_INFLUX "/write?db=luftdaten"
 #define PORT_INFLUX 8086
-#define USER_INFLUX "luftdaten"
-#define PWD_INFLUX "info"
+#define USER_INFLUX ""
+#define PWD_INFLUX ""
 
 // DHT22, temperature, humidity
 #define DHT_READ 1

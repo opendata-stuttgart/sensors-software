@@ -85,9 +85,12 @@
 /*                                                                      *
 /* Please check Readme.md for other sensors and hardware                *
 /*                                                                      *
+/* Der Sketch verwendet 459431 Bytes (43%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
+/* Globale Variablen verwenden 48704 Bytes (59%) des dynamischen Speichers, 33216 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
+/*
 /************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-104-B1"
+#define SOFTWARE_VERSION "NRZ-2018-104-B2"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -149,8 +152,7 @@
 /*****************************************************************/
 char wlanssid[35] = "Freifunk-disabled";
 char wlanpwd[65] = "";
-int wlanpwr = 20;
-char current_lang[3] = "de";
+char current_lang[3] = "DE";
 char www_username[65] = "admin";
 char www_password[65] = "feinstaub";
 bool www_basicauth_enabled = 0;
@@ -207,11 +209,11 @@ String url_sensemap = "/boxes/BOXID/data?luftdaten=1";
 const int httpPort_sensemap = 443;
 char senseboxid[30] = "";
 
-char host_influx[100] = "api.luftdaten.info";
+char host_influx[100] = "influx.server";
 char url_influx[100] = "/write?db=luftdaten";
 int port_influx = 8086;
-char user_influx[65] = "luftdaten";
-char pwd_influx[65] = "info";
+char user_influx[65] = "";
+char pwd_influx[65] = "";
 String basic_auth_influx = "";
 
 char host_custom[100] = "192.168.234.1";
@@ -672,18 +674,16 @@ String SDS_version_date() {
 			if (value != 7) {
 				len = -1;
 			};
+			checksum_is = 7;
 			break;
 		case (3):
 			version_date  = String(value);
-			checksum_is = 7 + value;
 			break;
 		case (4):
 			version_date += "-" + String(value);
-			checksum_is += value;
 			break;
 		case (5):
 			version_date += "-" + String(value);
-			checksum_is += value;
 			break;
 		case (6):
 			if (value < 0x10) {
@@ -691,14 +691,12 @@ String SDS_version_date() {
 			} else {
 				device_id  = String(value, HEX);
 			};
-			checksum_is += value;
 			break;
 		case (7):
 			if (value < 0x10) {
 				device_id += "0";
 			};
 			device_id += String(value, HEX);
-			checksum_is += value;
 			break;
 		case (8):
 			debug_out(F("Checksum is: "), DEBUG_MED_INFO, 0);
@@ -717,12 +715,13 @@ String SDS_version_date() {
 			};
 			break;
 		}
+		if (len > 2) { checksum_is += value; }
 		len++;
 		if (len == 10 && checksum_ok == 1) {
 			s = version_date + "(" + device_id + ")";
 			debug_out(F("SDS version date : "), DEBUG_MIN_INFO, 0);
 			debug_out(version_date, DEBUG_MIN_INFO, 1);
-			debug_out(F("SDS device ID:     "), DEBUG_MIN_INFO, 0);
+			debug_out(F("SDS device ID: "), DEBUG_MIN_INFO, 0);
 			debug_out(device_id, DEBUG_MIN_INFO, 1);
 			len = 0;
 			checksum_ok = 0;
@@ -761,7 +760,6 @@ void copyExtDef() {
 	strcpyDef(current_lang, CURRENT_LANG);
 	strcpyDef(wlanssid, WLANSSID);
 	strcpyDef(wlanpwd, WLANPWD);
-	setDef(wlanpwr, WLANPWR);
 	strcpyDef(www_username, WWW_USERNAME);
 	strcpyDef(www_password, WWW_PASSWORD);
 	strcpyDef(fs_ssid, FS_SSID);
@@ -859,7 +857,6 @@ void readConfig() {
 					strcpyFromJSON(www_password);
 					strcpyFromJSON(fs_ssid);
 					strcpyFromJSON(fs_pwd);
-					setFromJSON(wlanpwr);
 					setFromJSON(www_basicauth_enabled);
 					setFromJSON(dht_read);
 					setFromJSON(htu21d_read);
@@ -888,6 +885,10 @@ void readConfig() {
 					setFromJSON(sending_intervall_ms);
 					setFromJSON(time_for_wifi_config);
 					strcpyFromJSON(senseboxid);
+					if (strcmp(senseboxid, "00112233445566778899aabb")) {
+						strcpy(senseboxid, "");
+						send2sensemap = 0;
+					}
 					setFromJSON(send2custom);
 					strcpyFromJSON(host_custom);
 					strcpyFromJSON(url_custom);
@@ -900,6 +901,10 @@ void readConfig() {
 					setFromJSON(port_influx);
 					strcpyFromJSON(user_influx);
 					strcpyFromJSON(pwd_influx);
+					if (strcmp(host_influx, "api.luftdaten.info")) {
+						strcpy(host_influx, "");
+						send2influx = 0;
+					}
 #undef setFromJSON
 #undef strcpyFromJSON
 				} else {
@@ -918,11 +923,10 @@ void readConfig() {
 /* write config to spiffs                                        *
 /*****************************************************************/
 void writeConfig() {
-	String json_string = "";
+	String json_string = "{";
 	String tmp = "";
 	debug_out(F("saving config..."), DEBUG_MIN_INFO, 1);
 
-	json_string = "{";
 #define copyToJSON_Bool(varname) json_string +="\""+String(#varname)+"\":"+(varname ? "true":"false")+",";
 #define copyToJSON_Int(varname) json_string +="\""+String(#varname)+"\":"+String(varname)+",";
 #define copyToJSON_String(varname) tmp = String(varname); tmp.replace("\"","\\\""); json_string +="\""+String(#varname)+"\":\""+tmp+"\",";
@@ -934,7 +938,6 @@ void writeConfig() {
 	copyToJSON_String(www_password);
 	copyToJSON_String(fs_ssid);
 	copyToJSON_String(fs_pwd);
-	copyToJSON_Int(wlanpwr);
 	copyToJSON_Bool(www_basicauth_enabled);
 	copyToJSON_Bool(dht_read);
 	copyToJSON_Bool(htu21d_read);
@@ -1040,9 +1043,11 @@ String make_footer() {
 
 String form_input(const String& name, const String& info, const String& value, const int length) {
 	String s = F("<tr><td>{i} </td><td style='width:90%;'><input type='text' name='{n}' id='{n}' placeholder='{i}' value='{v}' maxlength='{l}'/></td></tr>");
+	String t_value = value;
+	t_value.replace("'", "\\'");
 	s.replace("{i}", info);
 	s.replace("{n}", name);
-	s.replace("{v}", value);
+	s.replace("{v}", t_value);
 	s.replace("{l}", String(length));
 	return s;
 }
@@ -1083,38 +1088,39 @@ String form_submit(const String& value) {
 }
 
 String form_select_lang() {
-	String s_select = F("selected='selected'");
-	String s = F("<tr><td>{t}</td><td><select name='current_lang'><option value='DE' {s_DE}>Deutsch (DE)</option><option value='BG' {s_BG}>Bulgarian (BG)</option><option value='CZ' {s_CZ}>Český (CZ)</option><option value='EN' {s_EN}>English (EN)</option><option value='ES' {s_ES}>Español (ES)</option><option value='FR' {s_FR}>Français (FR)</option><option value='IT' {s_IT}>Italiano (IT)</option><option value='LU' {s_LU}>Lëtzebuergesch (LU)</option><option value='NL' {s_NL}>Nederlands (NL)</option><option value='PL' {s_PL}>Polski (PL)</option><option value='PT' {s_PT}>Português (PT)</option><option value='RU' {s_RU}>Русский (RU)</option><option value='SE' {s_SE}>Svenska (SE)</option></select></td></tr>");
+	String s_select = F(" selected='selected'");
+	String s = F("<tr><td>{t}</td><td><select name='current_lang'><option value='DE'{s_DE}>Deutsch (DE)</option><option value='BG'{s_BG}>Bulgarian (BG)</option><option value='CZ'{s_CZ}>Český (CZ)</option><option value='EN'{s_EN}>English (EN)</option><option value='ES'{s_ES}>Español (ES)</option><option value='FR'{s_FR}>Français (FR)</option><option value='IT'{s_IT}>Italiano (IT)</option><option value='LU'{s_LU}>Lëtzebuergesch (LU)</option><option value='NL'{s_NL}>Nederlands (NL)</option><option value='PL'{s_PL}>Polski (PL)</option><option value='PT'{s_PT}>Português (PT)</option><option value='RU'{s_RU}>Русский (RU)</option><option value='SE'{s_SE}>Svenska (SE)</option></select></td></tr>");
 
 	s.replace("{t}", FPSTR(INTL_SPRACHE));
 
-	if(String(current_lang) == "DE") {
-		s.replace(F("{s_DE}"), s_select);
-	} else if(String(current_lang) == "BG") {
-		s.replace(F("{s_BG}"), s_select);
-	} else if(String(current_lang) == "CZ") {
-		s.replace(F("{CZ}"), s_select);
-	} else if(String(current_lang) == "EN") {
-		s.replace(F("{s_EN}"), s_select);
-	} else if(String(current_lang) == "ES") {
-		s.replace(F("{s_ES}"), s_select);
-	} else if(String(current_lang) == "FR") {
-		s.replace(F("{s_FR}"), s_select);
-	} else if(String(current_lang) == "IT") {
-		s.replace(F("{s_IT}"), s_select);
-	} else if(String(current_lang) == "LU") {
-		s.replace(F("{s_LU}"), s_select);
-	} else if(String(current_lang) == "NL") {
-		s.replace(F("{s_NL}"), s_select);
-	} else if(String(current_lang) == "PL") {
-		s.replace(F("{s_PL}"), s_select);
-	} else if(String(current_lang) == "PT") {
-		s.replace(F("{s_PT}"), s_select);
-	} else if(String(current_lang) == "RU") {
-		s.replace(F("{s_RU}"), s_select);
-	} else if(String(current_lang) == "SE") {
-		s.replace(F("{s_SE}"), s_select);
-	}
+	s.replace("{s_" + String(current_lang) + "}", s_select);
+	/*	if(String(current_lang) == "DE") {
+			s.replace(F("{s_DE}"), s_select);
+		} else if(String(current_lang) == "BG") {
+			s.replace(F("{s_BG}"), s_select);
+		} else if(String(current_lang) == "CZ") {
+			s.replace(F("{CZ}"), s_select);
+		} else if(String(current_lang) == "EN") {
+			s.replace(F("{s_EN}"), s_select);
+		} else if(String(current_lang) == "ES") {
+			s.replace(F("{s_ES}"), s_select);
+		} else if(String(current_lang) == "FR") {
+			s.replace(F("{s_FR}"), s_select);
+		} else if(String(current_lang) == "IT") {
+			s.replace(F("{s_IT}"), s_select);
+		} else if(String(current_lang) == "LU") {
+			s.replace(F("{s_LU}"), s_select);
+		} else if(String(current_lang) == "NL") {
+			s.replace(F("{s_NL}"), s_select);
+		} else if(String(current_lang) == "PL") {
+			s.replace(F("{s_PL}"), s_select);
+		} else if(String(current_lang) == "PT") {
+			s.replace(F("{s_PT}"), s_select);
+		} else if(String(current_lang) == "RU") {
+			s.replace(F("{s_RU}"), s_select);
+		} else if(String(current_lang) == "SE") {
+			s.replace(F("{s_SE}"), s_select);
+		} */
 	s.replace(F("{s_DE}"), "");
 	s.replace(F("{s_BG}"), "");
 	s.replace(F("{s_CZ}"), "");
@@ -1285,7 +1291,6 @@ void webserver_config() {
 		page_content += F("<table>");
 		page_content += form_input("wlanssid", F("WLAN"), wlanssid, 64);
 		page_content += form_password("wlanpwd", FPSTR(INTL_PASSWORT), wlanpwd, 64);
-		page_content += form_input("wlanpwr", F("tx dBm"), String(wlanpwr), 64);
 		page_content += form_submit(FPSTR(INTL_SPEICHERN));
 		page_content += F("</table><br/><hr/><b>");
 
@@ -1382,7 +1387,6 @@ void webserver_config() {
 			readCharParam(wlanssid);
 			readPasswdParam(wlanpwd);
 		}
-		readIntParam(wlanpwr);
 		readCharParam(current_lang);
 		readCharParam(www_username);
 		readPasswdParam(www_password);
@@ -1435,6 +1439,8 @@ void webserver_config() {
 #undef readCharParam
 #undef readBoolParam
 #undef readIntParam
+#undef readTimeParam
+#undef readPasswdParam
 
 		config_needs_write = true;
 
@@ -1797,14 +1803,14 @@ void webserver_prometheus_endpoint() {
 	String tmp_str;
 	String data_4_prometheus = F("software_version{version=\"{ver}\",{id}} 1\nuptime_ms{{id}} {up}\nsending_intervall_ms{{id}} {si}\nnumber_of_measurements{{id}} {cs}\n");
 	String id = F("node=\"esp8266-");
-	id += esp_chipid +"\"";
+	id += esp_chipid + "\"";
 	debug_out(F("Parse JSON for Prometheus"), DEBUG_MIN_INFO, 1);
 	debug_out(last_data_string, DEBUG_MED_INFO, 1);
-	data_4_prometheus.replace("{id}",id);
-	data_4_prometheus.replace("{ver}",String(SOFTWARE_VERSION));
-	data_4_prometheus.replace("{up}",String(act_milli - uptime));
-	data_4_prometheus.replace("{si}",String(sending_intervall_ms));
-	data_4_prometheus.replace("{cs}",String(count_sends));
+	data_4_prometheus.replace("{id}", id);
+	data_4_prometheus.replace("{ver}", String(SOFTWARE_VERSION));
+	data_4_prometheus.replace("{up}", String(act_milli - uptime));
+	data_4_prometheus.replace("{si}", String(sending_intervall_ms));
+	data_4_prometheus.replace("{cs}", String(count_sends));
 	StaticJsonBuffer<2000> jsonBuffer;
 	JsonObject& json2data = jsonBuffer.parseObject(last_data_string);
 	if (json2data.success()) {
@@ -1900,8 +1906,6 @@ void wifiConfig() {
 
 	WiFi.softAPConfig(apIP, apIP, netMsk);
 	WiFi.softAP(fs_ssid, fs_pwd);
-	WiFi.setOutputPower(float(WLANPWR));
-	debug_out(F("Setting tx power to: "), DEBUG_MIN_INFO, 0);
 	debug_out(String(WLANPWD), DEBUG_MIN_INFO, 1);
 
 	dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
@@ -1926,9 +1930,6 @@ void wifiConfig() {
 
 	WiFi.softAPdisconnect(true);
 	WiFi.mode(WIFI_STA);
-	WiFi.setOutputPower(float(wlanpwr));
-	debug_out(F("Setting tx power to: "), DEBUG_MIN_INFO, 0);
-	debug_out(String(wlanpwr), DEBUG_MIN_INFO, 1);
 	WiFi.disconnect();
 
 	dnsServer.stop();
@@ -1947,7 +1948,7 @@ void wifiConfig() {
 	}
 	debug_out("", DEBUG_MIN_INFO, 1);
 
-	debug_out(F("---- Result from Webconfig ----"), DEBUG_MIN_INFO, 1);
+	debug_out(F("---- Result Webconfig ----"), DEBUG_MIN_INFO, 1);
 	debug_out(F("WLANSSID: "), DEBUG_MIN_INFO, 0);
 	debug_out(wlanssid, DEBUG_MIN_INFO, 1);
 	debug_out(F("----\nReading ..."), DEBUG_MIN_INFO, 1);
@@ -2000,9 +2001,6 @@ void connectWifi() {
 	debug_out(String(WiFi.status()), DEBUG_MIN_INFO, 1);
 	WiFi.disconnect();
 	WiFi.mode(WIFI_STA);
-	WiFi.setOutputPower(float(wlanpwr));
-	debug_out(F("Setting tx power to: "), DEBUG_MIN_INFO, 0);
-	debug_out(String(wlanpwr), DEBUG_MIN_INFO, 1);
 	WiFi.begin(wlanssid, wlanpwd); // Start WiFI
 
 	debug_out(F("Connecting to "), DEBUG_MIN_INFO, 0);
@@ -2147,8 +2145,7 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 /* send single sensor data to luftdaten.info api                 *
 /*****************************************************************/
 void sendLuftdaten(const String& data, const int pin, const char* host, const int httpPort, const char* url, const char* replace_str) {
-	String data_4_dusti = "";
-	data_4_dusti  = data_first_part + data;
+	String data_4_dusti = data_first_part + data;
 	data_4_dusti.remove(data_4_dusti.length() - 1);
 	data_4_dusti.replace(replace_str, "");
 	data_4_dusti += "]}";
@@ -2183,12 +2180,12 @@ String create_influxdb_string(const String& data) {
 	if (json2data.success()) {
 		data_4_influxdb += F("feinstaub,node=esp8266-");
 		data_4_influxdb += esp_chipid + " ";
-		for (int i = 0; i < json2data["sensordatavalues"].size() - 1; i++) {
+		for (int i = 0; i < json2data["sensordatavalues"].size(); i++) {
 			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value_type"].as<char*>());
 			data_4_influxdb += tmp_str + "=";
 			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value"].as<char*>());
 			data_4_influxdb += tmp_str;
-			if (i < (json2data["sensordatavalues"].size() - 2)) {
+			if (i < (json2data["sensordatavalues"].size() - 1)) {
 				data_4_influxdb += ",";
 			}
 		}
@@ -2505,21 +2502,12 @@ String sensorSDS() {
 				break;
 			case (3):
 				pm25_serial += (value << 8);
-				checksum_is += value;
 				break;
 			case (4):
 				pm10_serial = value;
-				checksum_is += value;
 				break;
 			case (5):
 				pm10_serial += (value << 8);
-				checksum_is += value;
-				break;
-			case (6):
-				checksum_is += value;
-				break;
-			case (7):
-				checksum_is += value;
 				break;
 			case (8):
 				debug_out(F("Checksum is: "), DEBUG_MED_INFO, 0);
@@ -2538,6 +2526,7 @@ String sensorSDS() {
 				};
 				break;
 			}
+			if (len > 2) { checksum_is += value; }
 			len++;
 			if (len == 10 && checksum_ok == 1 && (long(act_milli - starttime) > (long(sending_intervall_ms) - long(reading_time_SDS_ms)))) {
 				if ((! isnan(pm10_serial)) && (! isnan(pm25_serial))) {
@@ -2650,100 +2639,33 @@ String sensorPMS(int msg_len) {
 			case (2):
 				checksum_is = value;
 				break;
-			case (3):
-				checksum_is += value;
-				break;
-			case (4):
-				checksum_is += value;
-				break;
-			case (5):
-				checksum_is += value;
-				break;
-			case (6):
-				checksum_is += value;
-				break;
-			case (7):
-				checksum_is += value;
-				break;
-			case (8):
-				checksum_is += value;
-				break;
-			case (9):
-				checksum_is += value;
-				break;
 			case (10):
 				pm1_serial += ( value << 8);
-				checksum_is += value;
 				break;
 			case (11):
 				pm1_serial += value;
-				checksum_is += value;
 				break;
 			case (12):
 				pm25_serial = ( value << 8);
-				checksum_is += value;
 				break;
 			case (13):
 				pm25_serial += value;
-				checksum_is += value;
 				break;
 			case (14):
 				pm10_serial = ( value << 8);
-				checksum_is += value;
 				break;
 			case (15):
 				pm10_serial += value;
-				checksum_is += value;
-				break;
-			case (16):
-				checksum_is += value;
-				break;
-			case (17):
-				checksum_is += value;
-				break;
-			case (18):
-				checksum_is += value;
-				break;
-			case (19):
-				checksum_is += value;
-				break;
-			case (20):
-				checksum_is += value;
-				break;
-			case (21):
-				checksum_is += value;
 				break;
 			case (22):
 				if (msg_len == 24) {
 					checksum_should = ( value << 8 );
-				} else {
-					checksum_is += value;
 				};
 				break;
 			case (23):
 				if (msg_len == 24) {
 					checksum_should += value;
-				} else {
-					checksum_is += value;
 				};
-				break;
-			case (24):
-				checksum_is += value;
-				break;
-			case (25):
-				checksum_is += value;
-				break;
-			case (26):
-				checksum_is += value;
-				break;
-			case (27):
-				checksum_is += value;
-				break;
-			case (28):
-				checksum_is += value;
-				break;
-			case (29):
-				checksum_is += value;
 				break;
 			case (30):
 				checksum_should = ( value << 8 );
@@ -2752,6 +2674,7 @@ String sensorPMS(int msg_len) {
 				checksum_should += value;
 				break;
 			}
+			if ((len > 2) && (len < (msg_len - 2))) { checksum_is += value; }
 			len++;
 			if (len == msg_len) {
 				debug_out(F("Checksum is: "), DEBUG_MED_INFO, 0);
@@ -2763,44 +2686,44 @@ String sensorPMS(int msg_len) {
 				} else {
 					len = 0;
 				};
-			}
-			if (len == msg_len && checksum_ok == 1 && (long(act_milli - starttime) > (long(sending_intervall_ms) - long(reading_time_SDS_ms)))) {
-				if ((! isnan(pm1_serial)) && (! isnan(pm10_serial)) && (! isnan(pm25_serial))) {
-					pms_pm1_sum += pm1_serial;
-					pms_pm10_sum += pm10_serial;
-					pms_pm25_sum += pm25_serial;
-					if (pms_pm1_min > pm10_serial) {
-						pms_pm1_min = pm1_serial;
+				if (checksum_ok == 1 && (long(act_milli - starttime) > (long(sending_intervall_ms) - long(reading_time_SDS_ms)))) {
+					if ((! isnan(pm1_serial)) && (! isnan(pm10_serial)) && (! isnan(pm25_serial))) {
+						pms_pm1_sum += pm1_serial;
+						pms_pm10_sum += pm10_serial;
+						pms_pm25_sum += pm25_serial;
+						if (pms_pm1_min > pm10_serial) {
+							pms_pm1_min = pm1_serial;
+						}
+						if (pms_pm1_max < pm10_serial) {
+							pms_pm1_max = pm1_serial;
+						}
+						if (pms_pm10_min > pm10_serial) {
+							pms_pm10_min = pm10_serial;
+						}
+						if (pms_pm10_max < pm10_serial) {
+							pms_pm10_max = pm10_serial;
+						}
+						if (pms_pm25_min > pm25_serial) {
+							pms_pm25_min = pm25_serial;
+						}
+						if (pms_pm25_max < pm25_serial) {
+							pms_pm25_max = pm25_serial;
+						}
+						debug_out(F("PM1 (sec.): "), DEBUG_MED_INFO, 0);
+						debug_out(Float2String(double(pm1_serial)), DEBUG_MED_INFO, 1);
+						debug_out(F("PM2.5 (sec.): "), DEBUG_MED_INFO, 0);
+						debug_out(Float2String(double(pm25_serial)), DEBUG_MED_INFO, 1);
+						debug_out(F("PM10 (sec.) : "), DEBUG_MED_INFO, 0);
+						debug_out(Float2String(double(pm10_serial)), DEBUG_MED_INFO, 1);
+						pms_val_count++;
 					}
-					if (pms_pm1_max < pm10_serial) {
-						pms_pm1_max = pm1_serial;
-					}
-					if (pms_pm10_min > pm10_serial) {
-						pms_pm10_min = pm10_serial;
-					}
-					if (pms_pm10_max < pm10_serial) {
-						pms_pm10_max = pm10_serial;
-					}
-					if (pms_pm25_min > pm25_serial) {
-						pms_pm25_min = pm25_serial;
-					}
-					if (pms_pm25_max < pm25_serial) {
-						pms_pm25_max = pm25_serial;
-					}
-					debug_out(F("PM1 (sec.): "), DEBUG_MED_INFO, 0);
-					debug_out(Float2String(double(pm1_serial)), DEBUG_MED_INFO, 1);
-					debug_out(F("PM2.5 (sec.): "), DEBUG_MED_INFO, 0);
-					debug_out(Float2String(double(pm25_serial)), DEBUG_MED_INFO, 1);
-					debug_out(F("PM10 (sec.) : "), DEBUG_MED_INFO, 0);
-					debug_out(Float2String(double(pm10_serial)), DEBUG_MED_INFO, 1);
-					pms_val_count++;
+					len = 0;
+					checksum_ok = 0;
+					pm1_serial = 0.0;
+					pm10_serial = 0.0;
+					pm25_serial = 0.0;
+					checksum_is = 0;
 				}
-				len = 0;
-				checksum_ok = 0;
-				pm1_serial = 0.0;
-				pm10_serial = 0.0;
-				pm25_serial = 0.0;
-				checksum_is = 0;
 			}
 			yield();
 		}
@@ -2892,90 +2815,17 @@ String sensorHPM() {
 			case (2):
 				checksum_is = value;
 				break;
-			case (3):
-				checksum_is += value;
-				break;
-			case (4):
-				checksum_is += value;
-				break;
-			case (5):
-				checksum_is += value;
-				break;
 			case (6):
 				pm25_serial += ( value << 8);
-				checksum_is += value;
 				break;
 			case (7):
 				pm25_serial += value;
-				checksum_is += value;
 				break;
 			case (8):
 				pm10_serial = ( value << 8);
-				checksum_is += value;
 				break;
 			case (9):
 				pm10_serial += value;
-				checksum_is += value;
-				break;
-			case (10):
-				checksum_is += value;
-				break;
-			case (11):
-				checksum_is += value;
-				break;
-			case (12):
-				checksum_is += value;
-				break;
-			case (13):
-				checksum_is += value;
-				break;
-			case (14):
-				checksum_is += value;
-				break;
-			case (15):
-				checksum_is += value;
-				break;
-			case (16):
-				checksum_is += value;
-				break;
-			case (17):
-				checksum_is += value;
-				break;
-			case (18):
-				checksum_is += value;
-				break;
-			case (19):
-				checksum_is += value;
-				break;
-			case (20):
-				checksum_is += value;
-				break;
-			case (21):
-				checksum_is += value;
-				break;
-			case (22):
-				checksum_is += value;
-				break;
-			case (23):
-				checksum_is += value;
-				break;
-			case (24):
-				checksum_is += value;
-				break;
-			case (25):
-				checksum_is += value;
-				break;
-			case (26):
-				checksum_is += value;
-				break;
-			case (27):
-				checksum_is += value;
-				break;
-			case (28):
-				checksum_is += value;
-				break;
-			case (29):
-				checksum_is += value;
 				break;
 			case (30):
 				checksum_should = ( value << 8 );
@@ -2984,6 +2834,7 @@ String sensorHPM() {
 				checksum_should += value;
 				break;
 			}
+			if (len > 2 && len < 30) { checksum_is += value; }
 			len++;
 			if (len == 32) {
 				debug_out(F("Checksum is: "), DEBUG_MED_INFO, 0);
@@ -2995,34 +2846,34 @@ String sensorHPM() {
 				} else {
 					len = 0;
 				};
-			}
-			if (len == 32 && checksum_ok == 1 && (long(act_milli - starttime) > (long(sending_intervall_ms) - long(reading_time_SDS_ms)))) {
-				if ((! isnan(pm10_serial)) && (! isnan(pm25_serial))) {
-					hpm_pm10_sum += pm10_serial;
-					hpm_pm25_sum += pm25_serial;
-					if (hpm_pm10_min > pm10_serial) {
-						hpm_pm10_min = pm10_serial;
+				if (checksum_ok == 1 && (long(act_milli - starttime) > (long(sending_intervall_ms) - long(reading_time_SDS_ms)))) {
+					if ((! isnan(pm10_serial)) && (! isnan(pm25_serial))) {
+						hpm_pm10_sum += pm10_serial;
+						hpm_pm25_sum += pm25_serial;
+						if (hpm_pm10_min > pm10_serial) {
+							hpm_pm10_min = pm10_serial;
+						}
+						if (hpm_pm10_max < pm10_serial) {
+							hpm_pm10_max = pm10_serial;
+						}
+						if (hpm_pm25_min > pm25_serial) {
+							hpm_pm25_min = pm25_serial;
+						}
+						if (hpm_pm25_max < pm25_serial) {
+							hpm_pm25_max = pm25_serial;
+						}
+						debug_out(F("PM2.5 (sec.): "), DEBUG_MED_INFO, 0);
+						debug_out(Float2String(double(pm25_serial)), DEBUG_MED_INFO, 1);
+						debug_out(F("PM10 (sec.) : "), DEBUG_MED_INFO, 0);
+						debug_out(Float2String(double(pm10_serial)), DEBUG_MED_INFO, 1);
+						hpm_val_count++;
 					}
-					if (hpm_pm10_max < pm10_serial) {
-						hpm_pm10_max = pm10_serial;
-					}
-					if (hpm_pm25_min > pm25_serial) {
-						hpm_pm25_min = pm25_serial;
-					}
-					if (hpm_pm25_max < pm25_serial) {
-						hpm_pm25_max = pm25_serial;
-					}
-					debug_out(F("PM2.5 (sec.): "), DEBUG_MED_INFO, 0);
-					debug_out(Float2String(double(pm25_serial)), DEBUG_MED_INFO, 1);
-					debug_out(F("PM10 (sec.) : "), DEBUG_MED_INFO, 0);
-					debug_out(Float2String(double(pm10_serial)), DEBUG_MED_INFO, 1);
-					hpm_val_count++;
+					len = 0;
+					checksum_ok = 0;
+					pm10_serial = 0.0;
+					pm25_serial = 0.0;
+					checksum_is = 0;
 				}
-				len = 0;
-				checksum_ok = 0;
-				pm10_serial = 0.0;
-				pm25_serial = 0.0;
-				checksum_is = 0;
 			}
 			yield();
 		}

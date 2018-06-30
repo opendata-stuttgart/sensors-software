@@ -1,7 +1,15 @@
+NRZ-2018-104-B2
+* sending signal strength to InfluxDB
+* optimizations in reading PM sensors 
+* disable sending data to OpenSenseMap with 'default' BoxID
+* disable sending data to InfluxDB at Luftdaten.info (only used internally)
+* character ' in text input fields (i.e. wifi SSID) should be displayed correctly
+
 NRZ-2018-104-B1
 * double quote in config strings (i.e. passwords) should work now
 
 NRZ-2018-103
+online since 2018-06-02
 * same as NRZ-2018-102-B2
 
 NRZ-2018-102-B2
