@@ -13,17 +13,20 @@ rm archive.luftdaten.info/index.html -f
 # echo "stopping here."
 # exit 0
 
-urlfile=$(mktemp)
+#urlfile=$(mktemp tmp.currurl)
 
 # do it by dates backwards from yesterday to one year ago
 for dd in {1..365}
 do
 	fetchdate=$(date -I --date="$dd days ago")
 	if [ -d "$urlbase/$fetchdate" ] ; then continue ; fi
-	echo "$fetchdate" >> "$urlfile"	
+#	echo "$fetchdate" >> "$urlfile"	
+        wget --force-directories -r -c -np -N -k "$urlbase/$fetchdate"
+# -nc
+#--base="http://$urlbase/" 
+# -i "$urlfile"
 done
 
-wget --base="http://$urlbase" --force-directories -r -c -np -nc -N -k -i "$urlfile"
 
 # cleanup
-rm "$urlfile"
+#rm "$urlfile"
