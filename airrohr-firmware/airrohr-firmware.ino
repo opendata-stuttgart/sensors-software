@@ -1289,7 +1289,7 @@ void webserver_config() {
 			page_content += F("</div><br/>");
 		}
 		page_content += F("<table>");
-		page_content += form_input("wlanssid", F("WLAN"), wlanssid, 64);
+		page_content += form_input("wlanssid", FPSTR(INTL_FS_WIFI_NAME), wlanssid, 64);
 		page_content += form_password("wlanpwd", FPSTR(INTL_PASSWORT), wlanpwd, 64);
 		page_content += form_submit(FPSTR(INTL_SPEICHERN));
 		page_content += F("</table><br/><hr/><b>");
@@ -1469,8 +1469,8 @@ void webserver_config() {
 		page_content += line_from_value(tmpl(FPSTR(INTL_SENDEN_AN), F("opensensemap")), String(send2sensemap));
 		page_content += F("<br/>senseBox-ID ");
 		page_content += senseboxid;
-		page_content += F("<br/><br/>Eigene API: ");
-		page_content += String(send2custom);
+		page_content += F("<br/><br/>");
+		page_content += line_from_value(FPSTR(INTL_AN_EIGENE_API_SENDEN), String(send2custom));
 		page_content += line_from_value(FPSTR(INTL_SERVER), host_custom);
 		page_content += line_from_value(FPSTR(INTL_PFAD), url_custom);
 		page_content += line_from_value(FPSTR(INTL_PORT), String(port_custom));
