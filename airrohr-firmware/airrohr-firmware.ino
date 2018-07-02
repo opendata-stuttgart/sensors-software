@@ -209,7 +209,7 @@ String url_sensemap = "/boxes/BOXID/data?luftdaten=1";
 const int httpPort_sensemap = 443;
 char senseboxid[30] = "";
 
-char host_influx[100] = "influx.server";
+char host_influx[100] = "influx server";
 char url_influx[100] = "/write?db=luftdaten";
 int port_influx = 8086;
 char user_influx[65] = "";
@@ -429,7 +429,7 @@ void display_debug(const String& text1, const String& text2) {
 	if (has_display) {
 		debug_out(F("output debug text to display..."), DEBUG_MIN_INFO, 1);
 		debug_out(text1 + "\n" + text2, DEBUG_MAX_INFO, 1);
-		display.resetDisplay();
+//		display.resetDisplay();
 		display.clear();
 		display.displayOn();
 		display.setFont(Roboto_Mono_9);
