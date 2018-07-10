@@ -1,3 +1,8 @@
+NRZ-2018-104-B3
+* handling of special chars in config json and config page (i.e ', ", \)
+* added support for OLED displays with SH1106 chipset
+* some space optimisations
+
 NRZ-2018-104-B2
 * sending signal strength to InfluxDB
 * optimizations in reading PM sensors 

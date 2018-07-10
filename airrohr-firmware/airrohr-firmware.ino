@@ -9,7 +9,7 @@
 /************************************************************************
 /*                                                                      *
 /*    airRohr firmware                                                  *
-/*    Copyright (C) 2016  Code for Stuttgart a.o.                       *
+/*    Copyright (C) 2016-2018  Code for Stuttgart a.o.                  *
 /*                                                                      *
 /* This program is free software: you can redistribute it and/or modify *
 /* it under the terms of the GNU General Public License as published by *
@@ -88,6 +88,10 @@
 /* Der Sketch verwendet 459431 Bytes (43%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
 /* Globale Variablen verwenden 48704 Bytes (59%) des dynamischen Speichers, 33216 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
 /*
+ * 06.07.2017
+ * Der Sketch verwendet 459607 Bytes (44%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
+ * Globale Variablen verwenden 48736 Bytes (59%) des dynamischen Speichers, 33184 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
+ *
 /************************************************************************/
 // increment on change
 #define SOFTWARE_VERSION "NRZ-2018-104-B3"
@@ -105,6 +109,7 @@
 #include <WiFiClientSecure.h>
 #include <SoftwareSerial.h>
 #include <SSD1306.h>
+#include <SH1106.h>
 #include <LiquidCrystal_I2C.h>
 #include <base64.h>
 #include <ArduinoJson.h>
@@ -187,6 +192,7 @@ bool send2csv = 0;
 bool auto_update = 0;
 bool use_beta = 0;
 bool has_display = 0;
+bool has_sh1106 = 0;
 bool has_lcd1602 = 0;
 bool has_lcd1602_27 = 0;
 bool has_lcd2004_27 = 0;
@@ -233,7 +239,8 @@ int TimeZone = 1;
 /*****************************************************************
 /* Display definitions                                           *
 /*****************************************************************/
-SSD1306   display(0x3c, D3, D4);
+SSD1306 display(0x3c, D3, D4);
+SH1106 display_sh1106(0x3c, D3, D4);
 LiquidCrystal_I2C lcd_1602_27(0x27, 16, 2);
 LiquidCrystal_I2C lcd_1602_3f(0x3F, 16, 2);
 LiquidCrystal_I2C lcd_2004_27(0x27, 20, 4);
@@ -426,17 +433,23 @@ void debug_out(const String& text, const int level, const bool linebreak) {
 /* display values                                                *
 /*****************************************************************/
 void display_debug(const String& text1, const String& text2) {
+	debug_out(F("output debug text to displays..."), DEBUG_MIN_INFO, 1);
+	debug_out(text1 + "\n" + text2, DEBUG_MAX_INFO, 1);
 	if (has_display) {
-		debug_out(F("output debug text to display..."), DEBUG_MIN_INFO, 1);
-		debug_out(text1 + "\n" + text2, DEBUG_MAX_INFO, 1);
-//		display.resetDisplay();
 		display.clear();
 		display.displayOn();
-		display.setFont(Roboto_Mono_9);
 		display.setTextAlignment(TEXT_ALIGN_LEFT);
 		display.drawString(0, 12, text1);
 		display.drawString(0, 24, text2);
 		display.display();
+	}
+	if (has_sh1106) {
+		display_sh1106.clear();
+		display_sh1106.displayOn();
+		display_sh1106.setTextAlignment(TEXT_ALIGN_LEFT);
+		display_sh1106.drawString(0, 12, text1);
+		display_sh1106.drawString(0, 24, text2);
+		display_sh1106.display();
 	}
 	if (has_lcd1602) {
 		lcd_1602_3f.clear();
@@ -507,6 +520,38 @@ String Value2Json(const String& type, const String& value) {
 	String s = F("{\"value_type\":\"{t}\",\"value\":\"{v}\"},");
 	s.replace("{t}", type);
 	s.replace("{v}", value);
+	return s;
+}
+
+/*****************************************************************
+/* convert string value to json string                           *
+/*****************************************************************/
+String Var2Json(const String& name, const String& value) {
+	String s = F("\"{n}\":\"{v}\",");
+	String tmp = value;
+	tmp.replace("\\", "\\\\"); tmp.replace("\"", "\\\"");
+	s.replace("{n}", name);
+	s.replace("{v}", tmp);
+	return s;
+}
+
+/*****************************************************************
+/* convert boolean value to json string                          *
+/*****************************************************************/
+String Var2Json(const String& name, const bool value) {
+	String s = F("\"{n}\":\"{v}\",");
+	s.replace("{n}", name);
+	s.replace("{v}", (value ? "true" : "false"));
+	return s;
+}
+
+/*****************************************************************
+/* convert boolean value to json string                          *
+/*****************************************************************/
+String Var2Json(const String& name, const int value) {
+	String s = F("\"{n}\":\"{v}\",");
+	s.replace("{n}", name);
+	s.replace("{v}", String(value));
 	return s;
 }
 
@@ -789,6 +834,7 @@ void copyExtDef() {
 	setDef(auto_update, AUTO_UPDATE);
 	setDef(use_beta, USE_BETA);
 	setDef(has_display, HAS_DISPLAY);
+	setDef(has_sh1106, HAS_SH1106);
 	setDef(has_lcd1602, HAS_LCD1602);
 	setDef(has_lcd1602_27, HAS_LCD1602_27);
 	setDef(has_lcd2004_27, HAS_LCD2004_27);
@@ -878,6 +924,7 @@ void readConfig() {
 					setFromJSON(auto_update);
 					setFromJSON(use_beta);
 					setFromJSON(has_display);
+					setFromJSON(has_sh1106);
 					setFromJSON(has_lcd1602);
 					setFromJSON(has_lcd1602_27);
 					setFromJSON(has_lcd2004_27);
@@ -927,9 +974,10 @@ void writeConfig() {
 	String tmp = "";
 	debug_out(F("saving config..."), DEBUG_MIN_INFO, 1);
 
-#define copyToJSON_Bool(varname) json_string +="\""+String(#varname)+"\":"+(varname ? "true":"false")+",";
-#define copyToJSON_Int(varname) json_string +="\""+String(#varname)+"\":"+String(varname)+",";
-#define copyToJSON_String(varname) tmp = String(varname); tmp.replace("\"","\\\""); json_string +="\""+String(#varname)+"\":\""+tmp+"\",";
+//define copyToJSON_Bool(varname) json_string +="\""+String(#varname)+"\":"+(varname ? "true":"false")+",";
+#define copyToJSON_Bool(varname) json_string += Var2Json(String(#varname),varname);
+#define copyToJSON_Int(varname) json_string += Var2Json(String(#varname),varname);
+#define copyToJSON_String(varname) json_string += Var2Json(String(#varname),String(varname));
 	copyToJSON_String(current_lang);
 	copyToJSON_String(SOFTWARE_VERSION);
 	copyToJSON_String(wlanssid);
@@ -959,6 +1007,7 @@ void writeConfig() {
 	copyToJSON_Bool(auto_update);
 	copyToJSON_Bool(use_beta);
 	copyToJSON_Bool(has_display);
+	copyToJSON_Bool(has_sh1106);
 	copyToJSON_Bool(has_lcd1602);
 	copyToJSON_Bool(has_lcd1602_27);
 	copyToJSON_Bool(has_lcd2004_27);
@@ -1044,7 +1093,7 @@ String make_footer() {
 String form_input(const String& name, const String& info, const String& value, const int length) {
 	String s = F("<tr><td>{i} </td><td style='width:90%;'><input type='text' name='{n}' id='{n}' placeholder='{i}' value='{v}' maxlength='{l}'/></td></tr>");
 	String t_value = value;
-	t_value.replace("'", "\\'");
+	t_value.replace("'", "&#39;");
 	s.replace("{i}", info);
 	s.replace("{n}", name);
 	s.replace("{v}", t_value);
@@ -1339,6 +1388,7 @@ void webserver_config() {
 		page_content += form_checkbox("auto_update", FPSTR(INTL_AUTO_UPDATE), auto_update);
 		page_content += form_checkbox("use_beta", FPSTR(INTL_USE_BETA), use_beta);
 		page_content += form_checkbox("has_display", FPSTR(INTL_DISPLAY), has_display);
+		page_content += form_checkbox("has_sh1106", FPSTR(INTL_SH1106), has_sh1106);
 		page_content += form_checkbox("has_lcd1602_27", FPSTR(INTL_LCD1602_27), has_lcd1602_27);
 		page_content += form_checkbox("has_lcd1602", FPSTR(INTL_LCD1602_3F), has_lcd1602);
 		page_content += form_checkbox("has_lcd2004_27", FPSTR(INTL_LCD2004_27), has_lcd2004_27);
@@ -1413,6 +1463,7 @@ void webserver_config() {
 		readBoolParam(auto_update);
 		readBoolParam(use_beta);
 		readBoolParam(has_display);
+		readBoolParam(has_sh1106);
 		readBoolParam(has_lcd1602);
 		readBoolParam(has_lcd1602_27);
 		readBoolParam(has_lcd2004_27);
@@ -1461,6 +1512,7 @@ void webserver_config() {
 		page_content += line_from_value(FPSTR(INTL_AUTO_UPDATE), String(auto_update));
 		page_content += line_from_value(FPSTR(INTL_USE_BETA), String(use_beta));
 		page_content += line_from_value(FPSTR(INTL_DISPLAY), String(has_display));
+		page_content += line_from_value(FPSTR(INTL_SH1106), String(has_sh1106));
 		page_content += line_from_value(FPSTR(INTL_LCD1602_27), String(has_lcd1602_27));
 		page_content += line_from_value(FPSTR(INTL_LCD1602_3F), String(has_lcd1602));
 		page_content += line_from_value(FPSTR(INTL_LCD2004_27), String(has_lcd2004_27));
@@ -1837,11 +1889,6 @@ void webserver_images() {
 		if (server.arg("name") == F("luftdaten_logo")) {
 			debug_out(F("output luftdaten.info logo..."), DEBUG_MIN_INFO, 1);
 			server.send(200, FPSTR(TXT_CONTENT_TYPE_IMAGE_SVG), FPSTR(LUFTDATEN_INFO_LOGO_SVG));
-//            server.send_P(200, TXT_CONTENT_TYPE_IMAGE_PNG, LUFTDATEN_INFO_LOGO_SVG_PNG, LUFTDATEN_INFO_LOGO_SVG_PNG_len);
-//        } else if (server.arg("name") == F("cfg_logo")) {
-//            debug_out(F("output codefor.de logo..."), DEBUG_MIN_INFO, 1);
-//            server.send(200, FPSTR(TXT_CONTENT_TYPE_IMAGE_SVG), FPSTR(CFG_LOGO_SVG));
-//            server.send_P(200, TXT_CONTENT_TYPE_IMAGE_PNG, CFG_LOGO_PNG, CFG_LOGO_PNG_len);
 		} else {
 			webserver_not_found();
 		}
@@ -3294,10 +3341,8 @@ void display_values() {
 			}
 		}
 		if (has_display) {
-			display.resetDisplay();
 			display.clear();
 			display.displayOn();
-			display.setFont(Roboto_Mono_9);
 			display.setTextAlignment(TEXT_ALIGN_CENTER);
 			display.drawString(64, 1, display_header);
 			display.setTextAlignment(TEXT_ALIGN_LEFT);
@@ -3307,6 +3352,19 @@ void display_values() {
 			display.setTextAlignment(TEXT_ALIGN_CENTER);
 			display.drawString(64, 52, display_footer);
 			display.display();
+		}
+		if (has_sh1106) {
+			display_sh1106.clear();
+			display_sh1106.displayOn();
+			display_sh1106.setTextAlignment(TEXT_ALIGN_CENTER);
+			display_sh1106.drawString(64, 1, display_header);
+			display_sh1106.setTextAlignment(TEXT_ALIGN_LEFT);
+			display_sh1106.drawString(0, 16, display_lines[0]);
+			display_sh1106.drawString(0, 28, display_lines[1]);
+			display_sh1106.drawString(0, 40, display_lines[2]);
+			display_sh1106.setTextAlignment(TEXT_ALIGN_CENTER);
+			display_sh1106.drawString(64, 52, display_footer);
+			display_sh1106.display();
 		}
 		if (has_lcd2004_27) {
 			display_header = String((next_display_count % screen_count) + 1) + "/" + String(screen_count) + " " + display_header;
@@ -3377,7 +3435,9 @@ void display_values() {
 /*****************************************************************/
 void init_display() {
 	display.init();
-	display.resetDisplay();
+	display.setFont(Roboto_Mono_9);
+	display_sh1106.init();
+	display_sh1106.setFont(Roboto_Mono_9);
 }
 
 /*****************************************************************

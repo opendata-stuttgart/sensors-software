@@ -156,6 +156,9 @@
 // OLED Display SSD1306 angeschlossen?
 #define HAS_DISPLAY 0
 
+// OLED Display SH1106 angeschlossen?
+#define HAS_SH1106 0
+
 // LCD Display LCD1602 angeschlossen?
 #define HAS_LCD1602 0
 
