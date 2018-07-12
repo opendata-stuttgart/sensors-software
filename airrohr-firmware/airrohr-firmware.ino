@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#define INTL_BG
+#define INTL_DE
 
 /************************************************************************
 /*                                                                      *
@@ -96,7 +96,7 @@
  * Globale Variablen verwenden 48752 Bytes (59%) des dynamischen Speichers, 33168 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
 /************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-104-B4"
+#define SOFTWARE_VERSION "NRZ-2018-104-B5"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -1148,19 +1148,6 @@ String form_select_lang() {
 	while (s.indexOf("{s_") != -1) {
 		s.remove(s.indexOf("{s_"), 6);
 	}
-	/*	s.replace(F("{s_DE}"), "");
-		s.replace(F("{s_BG}"), "");
-		s.replace(F("{s_CZ}"), "");
-		s.replace(F("{s_EN}"), "");
-		s.replace(F("{s_ES}"), "");
-		s.replace(F("{s_FR}"), "");
-		s.replace(F("{s_IT}"), "");
-		s.replace(F("{s_LU}"), "");
-		s.replace(F("{s_NL}"), "");
-		s.replace(F("{s_PL}"), "");
-		s.replace(F("{s_PT}"), "");
-		s.replace(F("{s_RU}"), "");
-		s.replace(F("{s_SE}"), ""); */
 	return s;
 }
 
