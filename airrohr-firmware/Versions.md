@@ -1,3 +1,6 @@
+NRZ-2018-104-B5
+* unneeded source code removed
+
 NRZ-2018-104-B4
 * freeing some RAM and flash memory after adding SH1106 OLED
 
