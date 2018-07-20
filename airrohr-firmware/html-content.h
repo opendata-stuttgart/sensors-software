@@ -11,6 +11,17 @@ const char DBG_TXT_PRESSURE[] PROGMEM = "Pressure: ";
 const char DBG_TXT_START_READING[] PROGMEM = "Start reading ";
 const char DBG_TXT_END_READING[] PROGMEM = "End reading ";
 
+const char SENSORS_SDS011[] PROGMEM = "SDS011";
+const char SENSORS_PPD42NS[] PROGMEM = "PPD42NS";
+const char SENSORS_PMSx003[] PROGMEM = "PMSx003";
+const char SENSORS_HPM[] PROGMEM = "Honeywell PM";
+const char SENSORS_DHT22[] PROGMEM = "DHT22";
+const char SENSORS_DS18B20[] PROGMEM = "DS18B20";
+const char SENSORS_HTU21D[] PROGMEM = "HTU21D";
+const char SENSORS_BMP180[] PROGMEM = "BMP180";
+const char SENSORS_BMP280[] PROGMEM = "BMP280";
+const char SENSORS_BME280[] PROGMEM = "BME280";
+
 const uint8_t start_SDS_cmd[] PROGMEM = {0xAA, 0xB4, 0x06, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x06, 0xAB};
 const uint8_t start_SDS_cmd_len = 19;
 const uint8_t stop_SDS_cmd[] PROGMEM = {0xAA, 0xB4, 0x06, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x05, 0xAB};

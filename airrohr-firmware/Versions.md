@@ -1,3 +1,8 @@
+NRZ-2018-104-B6
+* changed string constants to defines
+* removed unneeded string conversions
+* more strings moved to flash
+
 NRZ-2018-104-B5
 * unneeded source code removed
 
