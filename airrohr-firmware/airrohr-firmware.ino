@@ -91,12 +91,12 @@
  * Der Sketch verwendet 459607 Bytes (44%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
  * Globale Variablen verwenden 48736 Bytes (59%) des dynamischen Speichers, 33184 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
  * 
- * Der Sketch verwendet 458367 Bytes (43%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
+ * Der Sketch verwendet 458447 Bytes (43%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
  * Globale Variablen verwenden 48608 Bytes (59%) des dynamischen Speichers, 33312 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
  * 
 /************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-104-B6"
+#define SOFTWARE_VERSION "NRZ-2018-104-B8"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -115,7 +115,7 @@
 #include <LiquidCrystal_I2C.h>
 #include <base64.h>
 #include <ArduinoJson.h>
-#include <DHT.h>
+#include "DHT.h"
 #include <Adafruit_HTU21DF.h>
 #include <Adafruit_BMP085.h>
 #include <Adafruit_BMP280.h>
@@ -936,7 +936,7 @@ void readConfig() {
 					setFromJSON(sending_intervall_ms);
 					setFromJSON(time_for_wifi_config);
 					strcpyFromJSON(senseboxid);
-					if (strcmp(senseboxid, "00112233445566778899aabb")) {
+					if (strcmp(senseboxid, "00112233445566778899aabb") == 0) {
 						strcpy(senseboxid, "");
 						send2sensemap = 0;
 					}

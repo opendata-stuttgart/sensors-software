@@ -1,3 +1,9 @@
+NRZ-2018-104-B8
+* switched to actual version of DHT library as local copy with changes for ESP8266 timing and pins
+
+NRZ-2018-104-B7
+* wrong comparison for default opensensemap box id
+
 NRZ-2018-104-B6
 * changed string constants to defines
 * removed unneeded string conversions
