@@ -1,3 +1,6 @@
+NRZ-2018-104-B10
+* one definition per interface (I2C, one wire, serial sensors, serial gps)
+
 NRZ-2018-104-B9
 * added missing '/' in path for API Madavi.de
 

@@ -47,24 +47,42 @@
 #define USER_INFLUX ""
 #define PWD_INFLUX ""
 
+// define pins for I2C
+#define I2C_PIN_SCL D4
+#define I2C_PIN_SDA D3
+
+// define pin for one wire sensors
+#if defined(ESP8266)
+#define ONEWIRE_PIN D7
+#endif
+#if defined(ARDUINO_SAMD_ZERO)
+#define ONEWIRE_PIN D7
+#endif
+
+// define serial interface pins for particle sensors
+// Serial confusion: These definitions are based on SoftSerial
+// TX (transmitting) pin on one side goes to RX (receiving) pin on other side
+// SoftSerial RX PIN is D1 and goes to SDS TX
+// SoftSerial TX PIN is D2 and goes to SDS RX
+#if defined(ESP8266)
+#define PM_SERIAL_RX D1
+#define PM_SERIAL_TX D2
+#endif
+
+// define serial interface pins for GPS modules
+#if defined(ESP8266)
+#define GPS_SERIAL_RX D5
+#define GPS_SERIAL_TX D6
+#endif
+
 // DHT22, temperature, humidity
 #define DHT_READ 1
 #define DHT_TYPE DHT22
 #define DHT_API_PIN 7
-#if defined(ESP8266)
-#define DHT_PIN D7
-#endif
-#if defined(ARDUINO_SAMD_ZERO)
-#define DHT_PIN D9
-#endif
 
 // HTU21D, temperature, humidity
 #define HTU21D_READ 0
 #define HTU21D_API_PIN 7
-#if defined(ESP8266)
-#define HTU21D_PIN_SCL D4
-#define HTU21D_PIN_SDA D3
-#endif
 
 // PPD42NS, der günstigere der beiden Feinstaubsensoren
 #define PPD_READ 0
@@ -77,14 +95,6 @@
 // SDS011, der etwas teuerere Feinstaubsensor
 #define SDS_READ 1
 #define SDS_API_PIN 1
-#if defined(ESP8266)
-// Serial confusion: These definitions are based on SoftSerial
-// TX (transmitting) pin on one side goes to RX (receiving) pin on other side
-// SoftSerial RX PIN is D1 and goes to SDS TX
-// SoftSerial TX PIN is D2 and goes to SDS RX
-#define SDS_PIN_RX D1
-#define SDS_PIN_TX D2
-#endif
 
 // PMS3003
 #define PMS24_READ 0
@@ -94,58 +104,31 @@
 
 // all Plantower (PMS) sensors
 #define PMS_API_PIN 1
-#if defined(ESP8266)
-#define PMS_PIN_RX D1
-#define PMS_PIN_TX D2
-#endif
 
 // Honeywell PM sensor
 #define HPM_READ 0
 #define HPM_API_PIN 1
-#if defined(ESP8266)
-#define HPM_PIN_RX D1
-#define HPM_PIN_TX D2
-#endif
 
 // BMP180, temperature, pressure
 #define BMP_READ 0
 #define BMP_API_PIN 3
-#if defined(ESP8266)
-#define BMP_PIN_SCL D4
-#define BMP_PIN_SDA D3
-#endif
 
 // BMP280, temperature, pressure
 #define BMP280_READ 0
 #define BMP280_API_PIN 3
-#if defined(ESP8266)
-#define BMP280_PIN_SCL D4
-#define BMP280_PIN_SDA D3
-#endif
 
 // BME280, temperature, humidity, pressure
 #define BME280_READ 0
 #define BME280_API_PIN 11
-#if defined(ESP8266)
-#define BME280_PIN_SCL D4
-#define BME280_PIN_SDA D3
-#endif
 
 // DS18B20, temperature
 #define DS18B20_READ 0
 #define DS18B20_API_PIN 13
-#if defined(ESP8266)
-#define DS18B20_PIN D7
-#endif
 
 
 // GPS, bevorzugt Neo-6M
 #define GPS_READ 0
 #define GPS_API_PIN 9
-#if defined(ESP8266)
-#define GPS_PIN_RX D5
-#define GPS_PIN_TX D6
-#endif
 
 // automatic firmware updates
 #define AUTO_UPDATE 1

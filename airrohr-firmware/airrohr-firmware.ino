@@ -90,13 +90,13 @@
  * 06.07.2017
  * Der Sketch verwendet 459607 Bytes (44%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
  * Globale Variablen verwenden 48736 Bytes (59%) des dynamischen Speichers, 33184 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
- * 
+ *
  * Der Sketch verwendet 458447 Bytes (43%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
  * Globale Variablen verwenden 48608 Bytes (59%) des dynamischen Speichers, 33312 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
- * 
+ *
 /************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-104-B9"
+#define SOFTWARE_VERSION "NRZ-2018-104-B10"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -244,8 +244,8 @@ int TimeZone = 1;
 /*****************************************************************
 /* Display definitions                                           *
 /*****************************************************************/
-SSD1306 display(0x3c, D3, D4);
-SH1106 display_sh1106(0x3c, D3, D4);
+SSD1306 display(0x3c, I2C_PIN_SDA, I2C_PIN_SCL);
+SH1106 display_sh1106(0x3c, I2C_PIN_SDA, I2C_PIN_SCL);
 LiquidCrystal_I2C lcd_1602_27(0x27, 16, 2);
 LiquidCrystal_I2C lcd_1602_3f(0x3F, 16, 2);
 LiquidCrystal_I2C lcd_2004_27(0x27, 20, 4);
@@ -253,13 +253,13 @@ LiquidCrystal_I2C lcd_2004_27(0x27, 20, 4);
 /*****************************************************************
 /* SDS011 declarations                                           *
 /*****************************************************************/
-SoftwareSerial serialSDS(SDS_PIN_RX, SDS_PIN_TX, false, 128);
-SoftwareSerial serialGPS(GPS_PIN_RX, GPS_PIN_TX, false, 512);
+SoftwareSerial serialSDS(PM_SERIAL_RX, PM_SERIAL_TX, false, 128);
+SoftwareSerial serialGPS(GPS_SERIAL_RX, GPS_SERIAL_TX, false, 512);
 
 /*****************************************************************
 /* DHT declaration                                               *
 /*****************************************************************/
-DHT dht(DHT_PIN, DHT_TYPE);
+DHT dht(ONEWIRE_PIN, DHT_TYPE);
 
 /*****************************************************************
 /* HTU21D declaration                                            *
@@ -284,7 +284,7 @@ Adafruit_BME280 bme280;
 /*****************************************************************
 /* DS18B20 declaration                                            *
 /*****************************************************************/
-OneWire oneWire(DS18B20_PIN);
+OneWire oneWire(ONEWIRE_PIN);
 DallasTemperature ds18b20(&oneWire);
 
 /*****************************************************************
@@ -1785,7 +1785,7 @@ void webserver_data_json() {
 	debug_out(F("output data json..."), DEBUG_MIN_INFO, 1);
 	if (first_cycle) {
 		s1 = F(data_first_part);
-		s1.replace("{v}",SOFTWARE_VERSION);
+		s1.replace("{v}", SOFTWARE_VERSION);
 		s1 += "]}";
 		age = sending_intervall_ms - (act_milli - starttime);
 		if ((age > sending_intervall_ms) || (age < 0)) {
@@ -2158,7 +2158,7 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 /*****************************************************************/
 void sendLuftdaten(const String& data, const int pin, const char* host, const int httpPort, const char* url, const char* replace_str) {
 	String data_4_dusti = F(data_first_part);
-	data_4_dusti.replace("{v}",SOFTWARE_VERSION);
+	data_4_dusti.replace("{v}", SOFTWARE_VERSION);
 	data_4_dusti += data;
 	data_4_dusti.remove(data_4_dusti.length() - 1);
 	data_4_dusti.replace(replace_str, "");
@@ -3471,7 +3471,7 @@ bool initBME280(char addr) {
 void setup() {
 	Serial.begin(9600);					// Output to Serial at 9600 baud
 #if defined(ESP8266)
-	Wire.begin(D3, D4);
+	Wire.begin(I2C_PIN_SDA, I2C_PIN_SCL);
 	esp_chipid = String(ESP.getChipId());
 #endif
 #if defined(ARDUINO_SAMD_ZERO)
@@ -3751,7 +3751,7 @@ void loop() {
 	if (send_now) {
 		debug_out(F("Creating data string:"), DEBUG_MIN_INFO, 1);
 		data = F(data_first_part);
-		data.replace("{v}",SOFTWARE_VERSION);
+		data.replace("{v}", SOFTWARE_VERSION);
 		data_sample_times  = Value2Json(F("samples"), String(sample_count));
 		data_sample_times += Value2Json(F("min_micro"), String(min_micro));
 		data_sample_times += Value2Json(F("max_micro"), String(max_micro));
