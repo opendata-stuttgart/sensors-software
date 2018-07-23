@@ -1,3 +1,6 @@
+NRZ-2018-104-B9
+* added missing '/' in path for API Madavi.de
+
 NRZ-2018-104-B8
 * switched to actual version of DHT library as local copy with changes for ESP8266 timing and pins
 
