@@ -1,3 +1,7 @@
+NRZ-2018-104-B11
+* wrong comparison in influx config
+* combining pm sensor functions (start, stop, continuous mode)
+
 NRZ-2018-104-B10
 * one definition per interface (I2C, one wire, serial sensors, serial gps)
 

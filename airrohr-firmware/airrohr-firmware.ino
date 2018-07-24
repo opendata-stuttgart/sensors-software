@@ -96,7 +96,7 @@
  *
 /************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-104-B10"
+#define SOFTWARE_VERSION "NRZ-2018-104-B11"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -559,78 +559,57 @@ String Var2Json(const String& name, const int value) {
 	return s;
 }
 
+
 /*****************************************************************
-/* start SDS011 sensor                                           *
+/* send SDS011 command (start, stop, continuous mode, version    *
 /*****************************************************************/
-void start_SDS() {
-	uint8_t * buf = new uint8_t[start_SDS_cmd_len];
+void SDS_cmd(const uint8_t cmd) {
+	uint8_t * buf = new uint8_t[SDS_cmd_len];
 	if (buf) {
-		memcpy_P(buf, start_SDS_cmd, start_SDS_cmd_len);
-		serialSDS.write(buf, start_SDS_cmd_len);
-		is_SDS_running = true;
+		switch (cmd) {
+		case (1):
+					memcpy_P(buf, start_SDS_cmd, SDS_cmd_len);
+					is_SDS_running = true;
+					break;
+		case (2):
+					memcpy_P(buf, stop_SDS_cmd, SDS_cmd_len);
+					is_SDS_running = false;
+					break;
+		case (3):
+					memcpy_P(buf, continuous_mode_SDS_cmd, SDS_cmd_len);
+					is_SDS_running = true;
+					break;
+		case (4):
+					memcpy_P(buf, version_SDS_cmd, SDS_cmd_len);
+					is_SDS_running = true;
+					break;
+		}
+		serialSDS.write(buf, SDS_cmd_len);
 	}
 	free(buf);
 }
 
 /*****************************************************************
-/* stop SDS011 sensor                                            *
+/* send Plantower PMS sensor command start, stop, cont. mode     *
 /*****************************************************************/
-void stop_SDS() {
-	uint8_t * buf = new uint8_t[stop_SDS_cmd_len];
+void PMS_cmd(const uint8_t cmd) {
+	uint8_t * buf = new uint8_t[PMS_cmd_len];
 	if (buf) {
-		memcpy_P(buf, stop_SDS_cmd, stop_SDS_cmd_len);
-		serialSDS.write(buf, stop_SDS_cmd_len);
-		is_SDS_running = false;
-	}
-	free(buf);
-}
-
-/*****************************************************************
-/* set continuous mode SDS011 sensor                             *
-/*****************************************************************/
-void continuous_mode_SDS() {
-	uint8_t * buf = new uint8_t[continuous_mode_SDS_cmd_len];
-	if (buf) {
-		memcpy_P(buf, continuous_mode_SDS_cmd, continuous_mode_SDS_cmd_len);
-		serialSDS.write(buf, continuous_mode_SDS_cmd_len);
-	}
-	free(buf);
-}
-
-/*****************************************************************
-/* start Plantower PMS sensor                                    *
-/*****************************************************************/
-void start_PMS() {
-	uint8_t * buf = new uint8_t[start_PMS_cmd_len];
-	if (buf) {
-		memcpy_P(buf, start_PMS_cmd, start_PMS_cmd_len);
-		serialSDS.write(buf, start_PMS_cmd_len);
-		is_PMS_running = true;
-	}
-	free(buf);
-}
-
-/*****************************************************************
-/* stop Plantower PMS sensor                                     *
-/*****************************************************************/
-void stop_PMS() {
-	uint8_t * buf = new uint8_t[stop_PMS_cmd_len];
-	if (buf) {
-		memcpy_P(buf, stop_PMS_cmd, stop_PMS_cmd_len);
-		serialSDS.write(buf, stop_PMS_cmd_len);
-		is_PMS_running = false;
-	}
-	free(buf);
-}
-
-/*****************************************************************
-/* continuous mode Plantower PMS sensor                          *
-/*****************************************************************/
-void continuous_mode_PMS() {
-	uint8_t * buf = new uint8_t[continuous_mode_PMS_cmd_len];
-	if (buf) {
-		memcpy_P(buf, continuous_mode_PMS_cmd, continuous_mode_PMS_cmd_len);
-		serialSDS.write(buf, continuous_mode_PMS_cmd_len);
+		switch (cmd) {
+		case (1):
+					memcpy_P(buf, start_PMS_cmd, PMS_cmd_len);
+					is_PMS_running = true;
+					break;
+		case (2):
+					memcpy_P(buf, stop_PMS_cmd, PMS_cmd_len);
+					is_PMS_running = false;
+					break;
+		case (3):
+					memcpy_P(buf, continuous_mode_PMS_cmd, PMS_cmd_len);
+					is_PMS_running = true;
+					break;
+		}
+		serialSDS.write(buf, PMS_cmd_len);
 	}
 	free(buf);
 }
@@ -638,38 +617,24 @@ void continuous_mode_PMS() {
 /*****************************************************************
 /* start Honeywell PMS sensor                                    *
 /*****************************************************************/
-void start_HPM() {
-	uint8_t * buf = new uint8_t[start_HPM_cmd_len];
+void HPM_cmd(const uint8_t cmd) {
+	uint8_t * buf = new uint8_t[HPM_cmd_len];
 	if (buf) {
-		memcpy_P(buf, start_HPM_cmd, start_HPM_cmd_len);
-		serialSDS.write(buf, start_HPM_cmd_len);
-		is_PMS_running = true;
-	}
-	free(buf);
-}
-
-/*****************************************************************
-/* stop Honeywell PMS sensor                                     *
-/*****************************************************************/
-void stop_HPM() {
-	uint8_t * buf = new uint8_t[stop_HPM_cmd_len];
-	if (buf) {
-		memcpy_P(buf, stop_HPM_cmd, stop_HPM_cmd_len);
-		serialSDS.write(buf, stop_HPM_cmd_len);
-		is_PMS_running = false;
-	}
-	free(buf);
-}
-
-/*****************************************************************
-/* continuous mode Honeywell PMS sensor                          *
-/*****************************************************************/
-void continuous_mode_HPM() {
-	uint8_t * buf = new uint8_t[continuous_mode_HPM_cmd_len];
-	if (buf) {
-		memcpy_P(buf, continuous_mode_HPM_cmd, continuous_mode_HPM_cmd_len);
-		serialSDS.write(buf, continuous_mode_HPM_cmd_len);
-		is_PMS_running = false;
+		switch (cmd) {
+		case (1):
+					memcpy_P(buf, start_HPM_cmd, HPM_cmd_len);
+					is_PMS_running = true;
+					break;
+		case (2):
+					memcpy_P(buf, stop_HPM_cmd, HPM_cmd_len);
+					is_PMS_running = false;
+					break;
+		case (3):
+					memcpy_P(buf, continuous_mode_HPM_cmd, HPM_cmd_len);
+					is_PMS_running = true;
+					break;
+		}
+		serialSDS.write(buf, HPM_cmd_len);
 	}
 	free(buf);
 }
@@ -678,7 +643,6 @@ void continuous_mode_HPM() {
 /* read SDS011 sensor serial and firmware date                   *
 /*****************************************************************/
 String SDS_version_date() {
-	uint8_t * buf = new uint8_t[version_SDS_cmd_len];
 	String s = "";
 	char buffer;
 	int value;
@@ -691,15 +655,11 @@ String SDS_version_date() {
 
 	debug_out(F("Start reading SDS011 version date"), DEBUG_MED_INFO, 1);
 
-	start_SDS();
+	SDS_cmd(SDS_START);
 
 	delay(100);
 
-	if (buf) {
-		memcpy_P(buf, version_SDS_cmd, version_SDS_cmd_len);
-		serialSDS.write(buf, version_SDS_cmd_len);
-	}
-	free(buf);
+	SDS_cmd(SDS_VERSION_DATE);
 
 	delay(500);
 
@@ -952,7 +912,7 @@ void readConfig() {
 					setFromJSON(port_influx);
 					strcpyFromJSON(user_influx);
 					strcpyFromJSON(pwd_influx);
-					if (strcmp(host_influx, "api.luftdaten.info")) {
+					if (strcmp(host_influx, "api.luftdaten.info") == 0) {
 						strcpy(host_influx, "");
 						send2influx = 0;
 					}
@@ -2485,11 +2445,11 @@ String sensorSDS() {
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_SDS011), DEBUG_MED_INFO, 1);
 	if ((act_milli - starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
 		if (is_SDS_running) {
-			stop_SDS();
+			SDS_cmd(SDS_STOP);
 		}
 	} else {
 		if (! is_SDS_running) {
-			start_SDS();
+			SDS_cmd(SDS_START);
 		}
 
 		while (serialSDS.available() > 0) {
@@ -2597,7 +2557,7 @@ String sensorSDS() {
 		sds_pm25_max = 0;
 		sds_pm25_min = 20000;
 		if ((sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms)) && (! will_check_for_update)) {
-			stop_SDS();
+			SDS_cmd(SDS_STOP);
 		}
 	}
 
@@ -2625,11 +2585,11 @@ String sensorPMS(int msg_len) {
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_PMSx003), DEBUG_MED_INFO, 1);
 	if ((act_milli - starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
 		if (is_PMS_running) {
-			stop_PMS();
+			PMS_cmd(PMS_STOP);
 		}
 	} else {
 		if (! is_PMS_running) {
-			start_PMS();
+			PMS_cmd(PMS_START);
 		}
 
 		while (serialSDS.available() > 0) {
@@ -2774,7 +2734,7 @@ String sensorPMS(int msg_len) {
 		pms_pm25_max = 0;
 		pms_pm25_min = 20000;
 		if ((sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms)) && (! will_check_for_update)) {
-			stop_PMS();
+			PMS_cmd(PMS_STOP);
 		}
 	}
 
@@ -2801,11 +2761,11 @@ String sensorHPM() {
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_HPM), DEBUG_MED_INFO, 1);
 	if ((act_milli - starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
 		if (is_HPM_running) {
-			stop_HPM();
+			HPM_cmd(HPM_STOP);
 		}
 	} else {
 		if (! is_HPM_running) {
-			start_HPM();
+			HPM_cmd(HPM_START);
 		}
 
 		while (serialSDS.available() > 0) {
@@ -2916,7 +2876,7 @@ String sensorHPM() {
 		hpm_pm25_max = 0;
 		hpm_pm25_min = 20000;
 		if ((sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms)) && (! will_check_for_update)) {
-			stop_HPM();
+			HPM_cmd(HPM_STOP);
 		}
 	}
 
@@ -3504,12 +3464,12 @@ void setup() {
 	}
 	if (sds_read) {
 		debug_out(F("Read SDS..."), DEBUG_MIN_INFO, 1);
-		start_SDS();
+		SDS_cmd(SDS_START);
 		delay(100);
-		continuous_mode_SDS();
+		SDS_cmd(SDS_CONTINUOUS_MODE);
 		delay(100);
 		debug_out(F("Stopping SDS011..."), DEBUG_MIN_INFO, 1);
-		stop_SDS();
+		SDS_cmd(SDS_STOP);
 	}
 	if (pms24_read) {
 		debug_out(F("Read PMS3003..."), DEBUG_MIN_INFO, 1);
@@ -3519,12 +3479,12 @@ void setup() {
 	}
 	if (hpm_read) {
 		debug_out(F("Read HPM..."), DEBUG_MIN_INFO, 1);
-		start_HPM();
+		HPM_cmd(HPM_START);
 		delay(100);
-		continuous_mode_HPM();
+		HPM_cmd(HPM_CONTINUOUS_MODE);
 		delay(100);
 		debug_out(F("Stopping HPM..."), DEBUG_MIN_INFO, 1);
-		stop_HPM();
+		HPM_cmd(HPM_STOP);
 	}
 	if (dht_read) {
 		dht.begin();                                        // Start DHT
@@ -3598,12 +3558,12 @@ void setup() {
 		debug_out(F("Show on LCD 2004 (0x27)..."), DEBUG_MIN_INFO, 1);
 	}
 	if (pms24_read || pms32_read) {
-		start_PMS();
+		PMS_cmd(PMS_START);
 		delay(100);
-		continuous_mode_PMS();
+		PMS_cmd(PMS_CONTINUOUS_MODE);
 		delay(100);
 		debug_out(F("Stopping PMS..."), DEBUG_MIN_INFO, 1);
-		stop_PMS();
+		PMS_cmd(PMS_STOP);
 	}
 
 	if (MDNS.begin(server_name.c_str())) {
@@ -3884,7 +3844,6 @@ void loop() {
 		if (send2madavi) {
 			debug_out(F("## Sending to madavi.de: "), DEBUG_MIN_INFO, 1);
 			start_send = millis();
-//			sendData(data, 0, host_madavi, httpPort_madavi, url_madavi, "", FPSTR(TXT_CONTENT_TYPE_JSON));
 			sendData(data, 0, HOST_MADAVI, PORT_MADAVI, URL_MADAVI, "", FPSTR(TXT_CONTENT_TYPE_JSON));
 			sum_send_time += millis() - start_send;
 		}
