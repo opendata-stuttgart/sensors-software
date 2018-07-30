@@ -1,3 +1,8 @@
+NRZ-2018-104-B12
+* config page didn't load before the first measurement
+  seems it was a memory problem
+  removing some unneeded html reduced size to 9,5kByte, page is loading
+
 NRZ-2018-104-B11
 * wrong comparison in influx config
 * combining pm sensor functions (start, stop, continuous mode)

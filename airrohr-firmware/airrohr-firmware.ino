@@ -91,12 +91,12 @@
  * Der Sketch verwendet 459607 Bytes (44%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
  * Globale Variablen verwenden 48736 Bytes (59%) des dynamischen Speichers, 33184 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
  *
- * Der Sketch verwendet 458447 Bytes (43%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
+ * Der Sketch verwendet 458287 Bytes (43%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
  * Globale Variablen verwenden 48608 Bytes (59%) des dynamischen Speichers, 33312 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
  *
 /************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-104-B11"
+#define SOFTWARE_VERSION "NRZ-2018-104-B12"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -568,21 +568,21 @@ void SDS_cmd(const uint8_t cmd) {
 	if (buf) {
 		switch (cmd) {
 		case (1):
-					memcpy_P(buf, start_SDS_cmd, SDS_cmd_len);
-					is_SDS_running = true;
-					break;
+			memcpy_P(buf, start_SDS_cmd, SDS_cmd_len);
+			is_SDS_running = true;
+			break;
 		case (2):
-					memcpy_P(buf, stop_SDS_cmd, SDS_cmd_len);
-					is_SDS_running = false;
-					break;
+			memcpy_P(buf, stop_SDS_cmd, SDS_cmd_len);
+			is_SDS_running = false;
+			break;
 		case (3):
-					memcpy_P(buf, continuous_mode_SDS_cmd, SDS_cmd_len);
-					is_SDS_running = true;
-					break;
+			memcpy_P(buf, continuous_mode_SDS_cmd, SDS_cmd_len);
+			is_SDS_running = true;
+			break;
 		case (4):
-					memcpy_P(buf, version_SDS_cmd, SDS_cmd_len);
-					is_SDS_running = true;
-					break;
+			memcpy_P(buf, version_SDS_cmd, SDS_cmd_len);
+			is_SDS_running = true;
+			break;
 		}
 		serialSDS.write(buf, SDS_cmd_len);
 	}
@@ -597,17 +597,17 @@ void PMS_cmd(const uint8_t cmd) {
 	if (buf) {
 		switch (cmd) {
 		case (1):
-					memcpy_P(buf, start_PMS_cmd, PMS_cmd_len);
-					is_PMS_running = true;
-					break;
+			memcpy_P(buf, start_PMS_cmd, PMS_cmd_len);
+			is_PMS_running = true;
+			break;
 		case (2):
-					memcpy_P(buf, stop_PMS_cmd, PMS_cmd_len);
-					is_PMS_running = false;
-					break;
+			memcpy_P(buf, stop_PMS_cmd, PMS_cmd_len);
+			is_PMS_running = false;
+			break;
 		case (3):
-					memcpy_P(buf, continuous_mode_PMS_cmd, PMS_cmd_len);
-					is_PMS_running = true;
-					break;
+			memcpy_P(buf, continuous_mode_PMS_cmd, PMS_cmd_len);
+			is_PMS_running = true;
+			break;
 		}
 		serialSDS.write(buf, PMS_cmd_len);
 	}
@@ -622,17 +622,17 @@ void HPM_cmd(const uint8_t cmd) {
 	if (buf) {
 		switch (cmd) {
 		case (1):
-					memcpy_P(buf, start_HPM_cmd, HPM_cmd_len);
-					is_PMS_running = true;
-					break;
+			memcpy_P(buf, start_HPM_cmd, HPM_cmd_len);
+			is_PMS_running = true;
+			break;
 		case (2):
-					memcpy_P(buf, stop_HPM_cmd, HPM_cmd_len);
-					is_PMS_running = false;
-					break;
+			memcpy_P(buf, stop_HPM_cmd, HPM_cmd_len);
+			is_PMS_running = false;
+			break;
 		case (3):
-					memcpy_P(buf, continuous_mode_HPM_cmd, HPM_cmd_len);
-					is_PMS_running = true;
-					break;
+			memcpy_P(buf, continuous_mode_HPM_cmd, HPM_cmd_len);
+			is_PMS_running = true;
+			break;
 		}
 		serialSDS.write(buf, HPM_cmd_len);
 	}
@@ -1065,11 +1065,11 @@ String form_input(const String& name, const String& info, const String& value, c
 }
 
 String form_password(const String& name, const String& info, const String& value, const int length) {
+	String s = F("<tr><td>{i} </td><td style='width:90%;'><input type='password' name='{n}' id='{n}' placeholder='{i}' value='{v}' maxlength='{l}'/></td></tr>");
 	String password = "";
 	for (int i = 0; i < value.length(); i++) {
 		password += "*";
 	}
-	String s = F("<tr><td>{i} </td><td style='width:90%;'><input type='password' name='{n}' id='{n}' placeholder='{i}' value='{v}' maxlength='{l}'/></td></tr>");
 	s.replace("{i}", info);
 	s.replace("{n}", name);
 	s.replace("{v}", password);
@@ -1078,7 +1078,7 @@ String form_password(const String& name, const String& info, const String& value
 }
 
 String form_checkbox(const String& name, const String& info, const bool checked) {
-	String s = F("<label for='{n}'><input type='checkbox' name='{n}' value='1' id='{n}' {c}/><input type='hidden' name='{n}' value='0' /> {i}</label><br/>");
+	String s = F("<label for='{n}'><input type='checkbox' name='{n}' value='1' id='{n}' {c}/> {i}</label><br/>");
 	if (checked) {
 		s.replace("{c}", F(" checked='checked'"));
 	} else {
@@ -1252,7 +1252,7 @@ void webserver_config() {
 		page_content += FPSTR(WEB_CONFIG_SCRIPT);
 	}
 	if (server.method() == HTTP_GET) {
-		page_content += F("<form method='POST' action='/config' style='width:100%;'><b>");
+		page_content += F("<form method='POST' action='/config' style='width:100%;'>\n<b>");
 		page_content += FPSTR(INTL_WLAN_DATEN);
 		page_content += F("</b><br/>");
 		debug_out(F("output config page 1"), DEBUG_MIN_INFO, 1);
@@ -1265,10 +1265,10 @@ void webserver_config() {
 		page_content += form_input("wlanssid", FPSTR(INTL_FS_WIFI_NAME), wlanssid, 64);
 		page_content += form_password("wlanpwd", FPSTR(INTL_PASSWORT), wlanpwd, 64);
 		page_content += form_submit(FPSTR(INTL_SPEICHERN));
-		page_content += F("</table><br/><hr/><b>");
+		page_content += F("</table><br/><hr/>\n<b>");
 
 		page_content += FPSTR(INTL_AB_HIER_NUR_ANDERN);
-		page_content += F("</b><br/><br/><b>");
+		page_content += F("</b><br/><br/>\n<b>");
 
 		page_content += FPSTR(INTL_BASICAUTH);
 		page_content += F("</b><br/>");
@@ -1278,7 +1278,7 @@ void webserver_config() {
 		page_content += form_checkbox("www_basicauth_enabled", FPSTR(INTL_BASICAUTH), www_basicauth_enabled);
 		page_content += form_submit(FPSTR(INTL_SPEICHERN));
 
-		page_content += F("</table><br/><b>");
+		page_content += F("</table><br/>\n<b>");
 		page_content += FPSTR(INTL_FS_WIFI);
 		page_content += F("</b><br/>");
 		page_content += FPSTR(INTL_FS_WIFI_BESCHREIBUNG);
@@ -1288,10 +1288,11 @@ void webserver_config() {
 		page_content += form_password("fs_pwd", FPSTR(INTL_PASSWORT), fs_pwd, 64);
 		page_content += form_submit(FPSTR(INTL_SPEICHERN));
 
-		page_content += F("</table><br/><b>APIs</b><br/>");
+		page_content += F("</table><br/>\n<b>APIs</b><br/>");
 		page_content += form_checkbox("send2dusti", F("API Luftdaten.info"), send2dusti);
 		page_content += form_checkbox("send2madavi", F("API Madavi.de"), send2madavi);
-		page_content += F("<br/><b>");
+		page_content += F("<br/>\n<b>");
+
 		page_content += FPSTR(INTL_SENSOREN);
 		page_content += F("</b><br/>");
 		page_content += form_checkbox("sds_read", FPSTR(INTL_SDS011), sds_read);
@@ -1306,7 +1307,8 @@ void webserver_config() {
 		page_content += form_checkbox_sensor("bme280_read", FPSTR(INTL_BME280), bme280_read);
 		page_content += form_checkbox_sensor("ds18b20_read", FPSTR(INTL_DS18B20), ds18b20_read);
 		page_content += form_checkbox("gps_read", FPSTR(INTL_NEO6M), gps_read);
-		page_content += F("<br/><b>");
+		page_content += F("<br/>\n<b>");
+
 		page_content += FPSTR(INTL_WEITERE_EINSTELLUNGEN);
 		page_content += F("</b><br/>");
 		page_content += form_checkbox("auto_update", FPSTR(INTL_AUTO_UPDATE), auto_update);
@@ -1321,7 +1323,8 @@ void webserver_config() {
 		page_content += form_input("debug", FPSTR(INTL_DEBUG_LEVEL), String(debug), 5);
 		page_content += form_input("sending_intervall_ms", FPSTR(INTL_MESSINTERVALL), String(sending_intervall_ms / 1000), 5);
 		page_content += form_input("time_for_wifi_config", FPSTR(INTL_DAUER_ROUTERMODUS), String(time_for_wifi_config / 1000), 5);
-		page_content += F("</table><br/><b>");
+		page_content += F("</table><br/>\n<b>");
+
 		page_content += FPSTR(INTL_WEITERE_APIS);
 		page_content += F("</b><br/><br/>");
 		page_content += form_checkbox("send2sensemap", tmpl(FPSTR(INTL_SENDEN_AN), F("OpenSenseMap")), send2sensemap);
@@ -1352,7 +1355,7 @@ void webserver_config() {
 	} else {
 
 #define readCharParam(param) if (server.hasArg(#param)){ server.arg(#param).toCharArray(param, sizeof(param)); }
-#define readBoolParam(param) if (server.hasArg(#param)){ param = server.arg(#param) == "1"; }
+#define readBoolParam(param) param = false; if (server.hasArg(#param)){ param = server.arg(#param) == "1"; }
 #define readIntParam(param)  if (server.hasArg(#param)){ int val = server.arg(#param).toInt(); if (val != 0){ param = val; }}
 #define readTimeParam(param)  if (server.hasArg(#param)){ int val = server.arg(#param).toInt(); if (val != 0){ param = val*1000; }}
 #define readPasswdParam(param) if (server.hasArg(#param)){ i = 0; masked_pwd = ""; for (i=0;i<server.arg(#param).length();i++) masked_pwd += "*"; if (masked_pwd != server.arg(#param) || server.arg(#param) == "") { server.arg(#param).toCharArray(param, sizeof(param)); } }
@@ -3931,5 +3934,5 @@ void loop() {
 		create_basic_auth_strings();
 	}
 	yield();
-//	Serial.println(ESP.getFreeHeap(),DEC);
+//	if (sample_count % 500 == 0) { Serial.println(ESP.getFreeHeap(),DEC); }
 }
