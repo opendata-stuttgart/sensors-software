@@ -1,3 +1,7 @@
+NRZ-2018-105
+online since 2018-08-07
+* same as NRZ-2018-104-B12
+
 NRZ-2018-104-B12
 * config page didn't load before the first measurement
   seems it was a memory problem
