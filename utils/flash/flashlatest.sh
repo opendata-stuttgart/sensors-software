@@ -40,7 +40,7 @@ fi
 
 
 if [ ! -f "$outappendfile" ] ; then
-	echo "nodemcuID	sensorname	hexchipID	MAC	revision:serial	email	lat	lon	locationaddress	sensorID1	sensorname1	sensorID2	sensorname2" >> "$outappendfile"
+	echo "nodemcuID	sensorname	hexchipID	MAC	revision:serial	email	lat	lon	locationaddress	sensorID1	sensorname1	sensorID2	sensorname2" |tee -a "$outappendfile"
 fi
 
 # get info
@@ -54,9 +54,9 @@ lat="LAT"
 lon="LON"
 echo ""
 
-read -p "ask more infos? [Y/n]" ans
+read -p "ask more infos? [y/N]" ans
 
-if [ "$ans" != "n" ] ; then
+if [ "$ans" == "y" ] ; then
 	#examplestr="V0-000"
 	#read -p "PM sensor revision (on back/flat side top left corner)? [default: $examplestr]" ans
 	#if [ -n "$ans" ] ; then
@@ -98,7 +98,7 @@ echo -e "$info" | tee -a "$outappendfile"
 
 read -p "patch Freifunk to XXXXXXXX? [y/N] " ans
 
-binfile="latest.bin"
+binfile="latest_en.bin"
 wget -c "https://www.madavi.de/sensor/update/data/$binfile"
 
 if [ "$ans" == "y" ] 
