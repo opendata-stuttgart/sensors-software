@@ -1,4 +1,56 @@
+NRZ-2018-105
+online since 2018-08-07
+* same as NRZ-2018-104-B12
+
+NRZ-2018-104-B12
+* config page didn't load before the first measurement
+  seems it was a memory problem
+  removing some unneeded html reduced size to 9,5kByte, page is loading
+
+NRZ-2018-104-B11
+* wrong comparison in influx config
+* combining pm sensor functions (start, stop, continuous mode)
+
+NRZ-2018-104-B10
+* one definition per interface (I2C, one wire, serial sensors, serial gps)
+
+NRZ-2018-104-B9
+* added missing '/' in path for API Madavi.de
+
+NRZ-2018-104-B8
+* switched to actual version of DHT library as local copy with changes for ESP8266 timing and pins
+
+NRZ-2018-104-B7
+* wrong comparison for default opensensemap box id
+
+NRZ-2018-104-B6
+* changed string constants to defines
+* removed unneeded string conversions
+* more strings moved to flash
+
+NRZ-2018-104-B5
+* unneeded source code removed
+
+NRZ-2018-104-B4
+* freeing some RAM and flash memory after adding SH1106 OLED
+
+NRZ-2018-104-B3
+* handling of special chars in config json and config page (i.e ', ", \)
+* added support for OLED displays with SH1106 chipset
+* some space optimisations
+
+NRZ-2018-104-B2
+* sending signal strength to InfluxDB
+* optimizations in reading PM sensors 
+* disable sending data to OpenSenseMap with 'default' BoxID
+* disable sending data to InfluxDB at Luftdaten.info (only used internally)
+* character ' in text input fields (i.e. wifi SSID) should be displayed correctly
+
+NRZ-2018-104-B1
+* double quote in config strings (i.e. passwords) should work now
+
 NRZ-2018-103
+online since 2018-06-02
 * same as NRZ-2018-102-B2
 
 NRZ-2018-102-B2

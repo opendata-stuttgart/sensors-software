@@ -1,3 +1,13 @@
+/*
+ *	airRohr firmware
+ *	Copyright (C) 2016-2018  Code for Stuttgart a.o.
+ * 
+ *  Swedish translations
+ * 
+ *	Texts should be as short as possible
+ *	We only have 512 kB for the entire firmware
+ */
+
 const char INTL_LANG[] = "SE";
 const char INTL_FEINSTAUBSENSOR[] PROGMEM = "Partikelsensor";
 const char INTL_KONFIGURATION[] PROGMEM = "Inställningar";
@@ -28,7 +38,8 @@ const char INTL_FS_WIFI_NAME[] PROGMEM = "Sensorns WLAN namn";
 const char INTL_WEITERE_EINSTELLUNGEN[] PROGMEM ="Avancerade inställningar";
 const char INTL_AUTO_UPDATE[] PROGMEM = "Automatisk uppdatering";
 const char INTL_USE_BETA[] PROGMEM = "Använd beta-versioner";
-const char INTL_DISPLAY[] PROGMEM = "Display";
+const char INTL_DISPLAY[] PROGMEM = "OLED SSD1306";
+const char INTL_SH1106[] PROGMEM = "OLED SH1106";
 const char INTL_LCD1602_27[] PROGMEM = "LCD 1602 (I2C: 0x27)";
 const char INTL_LCD1602_3F[] PROGMEM = "LCD 1602 (I2C: 0x3F)";
 const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";

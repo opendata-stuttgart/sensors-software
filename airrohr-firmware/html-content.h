@@ -11,26 +11,35 @@ const char DBG_TXT_PRESSURE[] PROGMEM = "Pressure: ";
 const char DBG_TXT_START_READING[] PROGMEM = "Start reading ";
 const char DBG_TXT_END_READING[] PROGMEM = "End reading ";
 
+const char SENSORS_SDS011[] PROGMEM = "SDS011";
+const char SENSORS_PPD42NS[] PROGMEM = "PPD42NS";
+const char SENSORS_PMSx003[] PROGMEM = "PMSx003";
+const char SENSORS_HPM[] PROGMEM = "Honeywell PM";
+const char SENSORS_DHT22[] PROGMEM = "DHT22";
+const char SENSORS_DS18B20[] PROGMEM = "DS18B20";
+const char SENSORS_HTU21D[] PROGMEM = "HTU21D";
+const char SENSORS_BMP180[] PROGMEM = "BMP180";
+const char SENSORS_BMP280[] PROGMEM = "BMP280";
+const char SENSORS_BME280[] PROGMEM = "BME280";
+
+// SDS011 commands
 const uint8_t start_SDS_cmd[] PROGMEM = {0xAA, 0xB4, 0x06, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x06, 0xAB};
-const uint8_t start_SDS_cmd_len = 19;
 const uint8_t stop_SDS_cmd[] PROGMEM = {0xAA, 0xB4, 0x06, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x05, 0xAB};
-const uint8_t stop_SDS_cmd_len = 19;
 const uint8_t continuous_mode_SDS_cmd[] PROGMEM = {0xAA, 0xB4, 0x08, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x07, 0xAB};
-const uint8_t continuous_mode_SDS_cmd_len = 19;
 const uint8_t version_SDS_cmd[] PROGMEM = {0xAA, 0xB4, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x05, 0xAB};
-const uint8_t version_SDS_cmd_len = 19;
+const uint8_t SDS_cmd_len = 19;
+
+// PMSx003 commands
 const uint8_t start_PMS_cmd[] PROGMEM = { 0x42, 0x4D, 0xE4, 0x00, 0x01, 0x01, 0x74 };
-const uint8_t start_PMS_cmd_len = 7;
 const uint8_t stop_PMS_cmd[] PROGMEM = { 0x42, 0x4D, 0xE4, 0x00, 0x00, 0x01, 0x73 };
-const uint8_t stop_PMS_cmd_len = 7;
 const uint8_t continuous_mode_PMS_cmd[] PROGMEM = { 0x42, 0x4D, 0xE1, 0x00, 0x01, 0x01, 0x71 };
-const uint8_t continuous_mode_PMS_cmd_len = 7;
+const uint8_t PMS_cmd_len = 7;
+
+// Honeywell PMS commands
 const uint8_t start_HPM_cmd[] PROGMEM = { 0x68, 0x01, 0x01, 0x96 };
-const uint8_t start_HPM_cmd_len = 4;
 const uint8_t stop_HPM_cmd[] PROGMEM = { 0x68, 0x01, 0x02, 0x95 };
-const uint8_t stop_HPM_cmd_len = 4;
 const uint8_t continuous_mode_HPM_cmd[] PROGMEM = { 0x68, 0x01, 0x40, 0x57 };
-const uint8_t continuous_mode_HPM_cmd_len = 4;
+const uint8_t HPM_cmd_len = 4;
 
 const char WEB_PAGE_HEADER[] PROGMEM = "<html>\
 <head>\
