@@ -96,7 +96,7 @@
  *
 /************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-105"
+#define SOFTWARE_VERSION "NRZ-2018-107"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -3218,7 +3218,7 @@ void display_values() {
 	}
 	screens[screen_count++] = 4;	// Wifi info
 	screens[screen_count++] = 5;	// chipID, firmware and count of measurements
-	if (has_display || has_lcd2004_27) {
+	if (has_display || has_sh1106 || has_lcd2004_27) {
 		switch (screens[next_display_count % screen_count]) {
 		case (1):
 			display_header = pm25_sensor;
@@ -3548,17 +3548,14 @@ void setup() {
 	if (auto_update) {
 		debug_out(F("Auto-Update active..."), DEBUG_MIN_INFO, 1);
 	}
-	if (has_display) {
+	if (has_display || has_sh1106) {
 		debug_out(F("Show on OLED..."), DEBUG_MIN_INFO, 1);
 	}
-	if (has_lcd1602_27) {
-		debug_out(F("Show on LCD 1602 (0x27)..."), DEBUG_MIN_INFO, 1);
-	}
-	if (has_lcd1602) {
-		debug_out(F("Show on LCD 1602 (0x3F)..."), DEBUG_MIN_INFO, 1);
+	if (has_lcd1602 || has_lcd1602_27) {
+		debug_out(F("Show on LCD 1602 ..."), DEBUG_MIN_INFO, 1);
 	}
 	if (has_lcd2004_27) {
-		debug_out(F("Show on LCD 2004 (0x27)..."), DEBUG_MIN_INFO, 1);
+		debug_out(F("Show on LCD 2004 ..."), DEBUG_MIN_INFO, 1);
 	}
 	if (pms24_read || pms32_read) {
 		PMS_cmd(PMS_START);
@@ -3707,7 +3704,7 @@ void loop() {
 		starttime_GPS = act_milli;
 	}
 
-	if ((has_display || has_lcd1602 || has_lcd1602_27) && (act_milli > next_display_millis)) {
+	if ((has_display || has_sh1106 || has_lcd2004_27 || has_lcd1602 || has_lcd1602_27) && (act_milli > next_display_millis)) {
 		display_values();
 	}
 

@@ -1,3 +1,11 @@
+NRZ-2018-107
+online since 2018-08-09
+* same as NRZ-2018-106-B1
+
+NRZ-2018-106-B1
+* OLED SH1106 only showing text if SSD1306 if enabled
+* LCD2004 only showing text if LCS1602 is enabled
+
 NRZ-2018-105
 online since 2018-08-07
 * same as NRZ-2018-104-B12
