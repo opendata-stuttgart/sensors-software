@@ -96,7 +96,7 @@
  *
 /************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-107"
+#define SOFTWARE_VERSION "NRZ-2018-108-B1"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -2343,8 +2343,8 @@ String sensorBMP280() {
 		debug_out(Float2String((double)p / 100) + " hPa", DEBUG_MIN_INFO, 1);
 		last_value_BMP280_T = t;
 		last_value_BMP280_P = (double)p;
-		s += Value2Json(F("BMP_pressure"), Float2String(last_value_BMP280_P));
-		s += Value2Json(F("BMP_temperature"), Float2String(last_value_BMP280_T));
+		s += Value2Json(F("BMP280_pressure"), Float2String(last_value_BMP280_P));
+		s += Value2Json(F("BMP280_temperature"), Float2String(last_value_BMP280_T));
 	}
 	debug_out(F("----"), DEBUG_MIN_INFO, 1);
 
