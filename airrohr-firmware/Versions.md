@@ -1,3 +1,10 @@
+NRZ-2018-109
+online since 2018-09-04
+* same as NRZ-2018-108-B1
+
+NRZ-2018-108-B1
+* wrong string in BMP280 function
+
 NRZ-2018-107
 online since 2018-08-09
 * same as NRZ-2018-106-B1
