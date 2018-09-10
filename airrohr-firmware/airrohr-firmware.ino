@@ -651,7 +651,6 @@ String SDS_version_date() {
 	String device_id = "";
 	int checksum_is;
 	int checksum_ok = 0;
-	int position = 0;
 
 	debug_out(F("Start reading SDS011 version date"), DEBUG_MED_INFO, 1);
 
@@ -1865,7 +1864,6 @@ void setup_webserver() {
 /* WifiConfig                                                    *
 /*****************************************************************/
 void wifiConfig() {
-	const char *softAP_password = "";
 	const byte DNS_PORT = 53;
 	int retry_count = 0;
 	DNSServer dnsServer;
@@ -2446,7 +2444,6 @@ String sensorSDS() {
 	int pm25_serial = 0;
 	int checksum_is;
 	int checksum_ok = 0;
-	int position = 0;
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_SDS011), DEBUG_MED_INFO, 1);
 	if ((act_milli - starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
@@ -2586,7 +2583,6 @@ String sensorPMS(int msg_len) {
 	int checksum_is;
 	int checksum_should;
 	int checksum_ok = 0;
-	int position = 0;
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_PMSx003), DEBUG_MED_INFO, 1);
 	if ((act_milli - starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
@@ -2762,7 +2758,6 @@ String sensorHPM() {
 	int checksum_is;
 	int checksum_should;
 	int checksum_ok = 0;
-	int position = 0;
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_HPM), DEBUG_MED_INFO, 1);
 	if ((act_milli - starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
