@@ -1,3 +1,6 @@
+NRZ-2018-110-B2
+* changed deprecated ArduinoJSON function calls
+
 NRZ-2018-110-B1
 * setting wifi mode to AP only in config mode
 

@@ -96,7 +96,7 @@
  *
 /************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-110-B1"
+#define SOFTWARE_VERSION "NRZ-2018-110-B2"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -1796,9 +1796,9 @@ void webserver_prometheus_endpoint() {
 	JsonObject& json2data = jsonBuffer.parseObject(last_data_string);
 	if (json2data.success()) {
 		for (int i = 0; i < json2data["sensordatavalues"].size() - 1; i++) {
-			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value_type"].as<char*>());
+			tmp_str = json2data["sensordatavalues"][i]["value_type"].as<char*>();
 			data_4_prometheus += tmp_str + "{" + id + "} ";
-			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value"].as<char*>());
+			tmp_str = json2data["sensordatavalues"][i]["value"].as<char*>();
 			data_4_prometheus += tmp_str + "\n";
 		}
 		data_4_prometheus += F("last_sample_age_ms{");
@@ -2161,9 +2161,9 @@ String create_influxdb_string(const String& data) {
 		data_4_influxdb += F("feinstaub,node=esp8266-");
 		data_4_influxdb += esp_chipid + " ";
 		for (int i = 0; i < json2data["sensordatavalues"].size(); i++) {
-			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value_type"].as<char*>());
+			tmp_str = json2data["sensordatavalues"][i]["value_type"].as<char*>();
 			data_4_influxdb += tmp_str + "=";
-			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value"].as<char*>());
+			tmp_str = json2data["sensordatavalues"][i]["value"].as<char*>();
 			data_4_influxdb += tmp_str;
 			if (i < (json2data["sensordatavalues"].size() - 1)) {
 				data_4_influxdb += ",";
@@ -2191,9 +2191,9 @@ void send_csv(const String& data) {
 		headline = F("Timestamp_ms;");
 		valueline = String(act_milli) + ";";
 		for (int i = 0; i < json2data["sensordatavalues"].size(); i++) {
-			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value_type"].as<char*>());
+			tmp_str = json2data["sensordatavalues"][i]["value_type"].as<char*>();
 			headline += tmp_str + ";";
-			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value"].as<char*>());
+			tmp_str = json2data["sensordatavalues"][i]["value"].as<char*>();
 			valueline += tmp_str + ";";
 		}
 		if (first_csv_line) {
