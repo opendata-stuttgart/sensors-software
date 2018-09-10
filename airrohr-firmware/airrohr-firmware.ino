@@ -96,7 +96,7 @@
  *
 /************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-109"
+#define SOFTWARE_VERSION "NRZ-2018-110-B1"
 
 /*****************************************************************
 /* Includes                                                      *
@@ -1346,6 +1346,7 @@ void webserver_config() {
 		page_content += form_input("port_influx", FPSTR(INTL_PORT), String(port_influx), 30);
 		page_content += form_input("user_influx", FPSTR(INTL_BENUTZER), user_influx, 50);
 		page_content += form_password("pwd_influx", FPSTR(INTL_PASSWORT), pwd_influx, 50);
+
 		page_content += form_submit(FPSTR(INTL_SPEICHERN));
 		page_content += F("</table><br/>");
 		page_content += F("<br/></form>");
@@ -1879,6 +1880,8 @@ void wifiConfig() {
 
 	wificonfig_loop = true;
 
+	WiFi.disconnect(true);
+	WiFi.mode(WIFI_AP);
 	WiFi.softAPConfig(apIP, apIP, netMsk);
 	WiFi.softAP(fs_ssid, fs_pwd);
 	debug_out(String(WLANPWD), DEBUG_MIN_INFO, 1);
@@ -1903,9 +1906,9 @@ void wifiConfig() {
 		yield();
 	}
 
+	WiFi.disconnect(true);
 	WiFi.softAPdisconnect(true);
 	WiFi.mode(WIFI_STA);
-	WiFi.disconnect();
 
 	dnsServer.stop();
 

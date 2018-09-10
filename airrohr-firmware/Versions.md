@@ -1,3 +1,6 @@
+NRZ-2018-110-B1
+* setting wifi mode to AP only in config mode
+
 NRZ-2018-109
 online since 2018-09-04
 * same as NRZ-2018-108-B1
