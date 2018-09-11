@@ -1,3 +1,6 @@
+NRZ-2018-110-B3
+* cosmetic changes to get rid of some compiler warnings
+
 NRZ-2018-110-B2
 * changed deprecated ArduinoJSON function calls
 

@@ -2,90 +2,90 @@
 #define INTL_DE
 
 /************************************************************************
-/*                                                                      *
-/*  This source code needs to be compiled for the board                 *
-/*  NodeMCU 1.0 (ESP-12E Module)                                        *
-/*                                                                      *
-/************************************************************************
-/*                                                                      *
-/*    airRohr firmware                                                  *
-/*    Copyright (C) 2016-2018  Code for Stuttgart a.o.                  *
-/*                                                                      *
-/* This program is free software: you can redistribute it and/or modify *
-/* it under the terms of the GNU General Public License as published by *
-/* the Free Software Foundation, either version 3 of the License, or    *
-/* (at your option) any later version.                                  *
-/*                                                                      *
-/* This program is distributed in the hope that it will be useful,      *
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
-/* GNU General Public License for more details.                         *
-/*                                                                      *
-/* You should have received a copy of the GNU General Public License    *
-/* along with this program. If not, see <http://www.gnu.org/licenses/>. *
-/*                                                                      *
-/************************************************************************
-/* OK LAB Particulate Matter Sensor                                     *
-/*      - nodemcu-LoLin board                                           *
-/*      - Nova SDS0111                                                  *
-/*  ﻿http://inovafitness.com/en/Laser-PM2-5-Sensor-SDS011-35.html        *
-/*                                                                      *
-/* Wiring Instruction:                                                  *
-/*      - SDS011 Pin 1  (TX)   -> Pin D1 / GPIO5                        *
-/*      - SDS011 Pin 2  (RX)   -> Pin D2 / GPIO4                        *
-/*      - SDS011 Pin 3  (GND)  -> GND                                   *
-/*      - SDS011 Pin 4  (2.5m) -> unused                                *
-/*      - SDS011 Pin 5  (5V)   -> VU                                    *
-/*      - SDS011 Pin 6  (1m)   -> unused                                *
-/*                                                                      *
-/************************************************************************
-/*                                                                      *
-/* Alternative                                                          *
-/*      - nodemcu-LoLin board                                           *
-/*      - Shinyei PPD42NS                                               *
-/*      http://www.sca-shinyei.com/pdf/PPD42NS.pdf                      *
-/*                                                                      *
-/* Wiring Instruction:                                                  *
-/*      Pin 2 of dust sensor PM2.5 -> Digital 6 (PWM)                   *
-/*      Pin 3 of dust sensor       -> +5V                               *
-/*      Pin 4 of dust sensor PM1   -> Digital 3 (PMW)                   *
-/*                                                                      *
-/*      - PPD42NS Pin 1 (grey or green)  => GND                         *
-/*      - PPD42NS Pin 2 (green or white)) => Pin D5 /GPIO14             *
-/*        counts particles PM25                                         *
-/*      - PPD42NS Pin 3 (black or yellow) => Vin                        *
-/*      - PPD42NS Pin 4 (white or black) => Pin D6 / GPIO12             *
-/*        counts particles PM10                                         *
-/*      - PPD42NS Pin 5 (red)   => unused                               *
-/*                                                                      *
-/************************************************************************
-/* Extension: DHT22 (AM2303)                                            *
-/*  ﻿http://www.aosong.com/en/products/details.asp?id=117                *
-/*                                                                      *
-/* DHT22 Wiring Instruction                                             *
-/* (left to right, front is perforated side):                           *
-/*      - DHT22 Pin 1 (VDD)     -> Pin 3V3 (3.3V)                       *
-/*      - DHT22 Pin 2 (DATA)    -> Pin D7 (GPIO13)                      *
-/*      - DHT22 Pin 3 (NULL)    -> unused                               *
-/*      - DHT22 Pin 4 (GND)     -> Pin GND                              *
-/*                                                                      *
-/************************************************************************
-/* Extensions connected via I2C:                                        *
-/* HTU21D (https://www.sparkfun.com/products/13763),                    *
-/* BMP180, BMP280, BME280, OLED Display with SSD1306 (128x64 px)        *
-/*                                                                      *
-/* Wiring Instruction                                                   *
-/* (see labels on display or sensor board)                              *
-/*      VCC       ->     Pin 3V3                                        *
-/*      GND       ->     Pin GND                                        *
-/*      SCL       ->     Pin D4 (GPIO2)                                 *
-/*      SDA       ->     Pin D3 (GPIO0)                                 *
-/*                                                                      *
-/************************************************************************
-/*                                                                      *
-/* Please check Readme.md for other sensors and hardware                *
-/*                                                                      *
-/************************************************************************
+ *                                                                      *
+ *  This source code needs to be compiled for the board                 *
+ *  NodeMCU 1.0 (ESP-12E Module)                                        *
+ *                                                                      *
+ ************************************************************************
+ *                                                                      *
+ *    airRohr firmware                                                  *
+ *    Copyright (C) 2016-2018  Code for Stuttgart a.o.                  *
+ *                                                                      *
+ * This program is free software: you can redistribute it and/or modify *
+ * it under the terms of the GNU General Public License as published by *
+ * the Free Software Foundation, either version 3 of the License, or    *
+ * (at your option) any later version.                                  *
+ *                                                                      *
+ * This program is distributed in the hope that it will be useful,      *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+ * GNU General Public License for more details.                         *
+ *                                                                      *
+ * You should have received a copy of the GNU General Public License    *
+ * along with this program. If not, see <http://www.gnu.org/licenses/>. *
+ *                                                                      *
+ ************************************************************************
+ * OK LAB Particulate Matter Sensor                                     *
+ *      - nodemcu-LoLin board                                           *
+ *      - Nova SDS0111                                                  *
+ *  ﻿http://inovafitness.com/en/Laser-PM2-5-Sensor-SDS011-35.html        *
+ *                                                                      *
+ * Wiring Instruction:                                                  *
+ *      - SDS011 Pin 1  (TX)   -> Pin D1 / GPIO5                        *
+ *      - SDS011 Pin 2  (RX)   -> Pin D2 / GPIO4                        *
+ *      - SDS011 Pin 3  (GND)  -> GND                                   *
+ *      - SDS011 Pin 4  (2.5m) -> unused                                *
+ *      - SDS011 Pin 5  (5V)   -> VU                                    *
+ *      - SDS011 Pin 6  (1m)   -> unused                                *
+ *                                                                      *
+ ************************************************************************
+ *                                                                      *
+ * Alternative                                                          *
+ *      - nodemcu-LoLin board                                           *
+ *      - Shinyei PPD42NS                                               *
+ *      http://www.sca-shinyei.com/pdf/PPD42NS.pdf                      *
+ *                                                                      *
+ * Wiring Instruction:                                                  *
+ *      Pin 2 of dust sensor PM2.5 -> Digital 6 (PWM)                   *
+ *      Pin 3 of dust sensor       -> +5V                               *
+ *      Pin 4 of dust sensor PM1   -> Digital 3 (PMW)                   *
+ *                                                                      *
+ *      - PPD42NS Pin 1 (grey or green)  => GND                         *
+ *      - PPD42NS Pin 2 (green or white)) => Pin D5 /GPIO14             *
+ *        counts particles PM25                                         *
+ *      - PPD42NS Pin 3 (black or yellow) => Vin                        *
+ *      - PPD42NS Pin 4 (white or black) => Pin D6 / GPIO12             *
+ *        counts particles PM10                                         *
+ *      - PPD42NS Pin 5 (red)   => unused                               *
+ *                                                                      *
+ ************************************************************************
+ * Extension: DHT22 (AM2303)                                            *
+ *  ﻿http://www.aosong.com/en/products/details.asp?id=117                *
+ *                                                                      *
+ * DHT22 Wiring Instruction                                             *
+ * (left to right, front is perforated side):                           *
+ *      - DHT22 Pin 1 (VDD)     -> Pin 3V3 (3.3V)                       *
+ *      - DHT22 Pin 2 (DATA)    -> Pin D7 (GPIO13)                      *
+ *      - DHT22 Pin 3 (NULL)    -> unused                               *
+ *      - DHT22 Pin 4 (GND)     -> Pin GND                              *
+ *                                                                      *
+ ************************************************************************
+ * Extensions connected via I2C:                                        *
+ * HTU21D (https://www.sparkfun.com/products/13763),                    *
+ * BMP180, BMP280, BME280, OLED Display with SSD1306 (128x64 px)        *
+ *                                                                      *
+ * Wiring Instruction                                                   *
+ * (see labels on display or sensor board)                              *
+ *      VCC       ->     Pin 3V3                                        *
+ *      GND       ->     Pin GND                                        *
+ *      SCL       ->     Pin D4 (GPIO2)                                 *
+ *      SDA       ->     Pin D3 (GPIO0)                                 *
+ *                                                                      *
+ ************************************************************************
+ *                                                                      *
+ * Please check Readme.md for other sensors and hardware                *
+ *                                                                      *
+ ************************************************************************
  *
  * 06.07.2017
  * Der Sketch verwendet 459607 Bytes (44%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
@@ -94,13 +94,13 @@
  * Der Sketch verwendet 458287 Bytes (43%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
  * Globale Variablen verwenden 48608 Bytes (59%) des dynamischen Speichers, 33312 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
  *
-/************************************************************************/
+ ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-110-B2"
+#define SOFTWARE_VERSION "NRZ-2018-110-B3"
 
 /*****************************************************************
-/* Includes                                                      *
-/*****************************************************************/
+ * Includes                                                      *
+ *****************************************************************/
 #include <FS.h>                     // must be first
 #include <ESP8266WiFi.h>
 #include <DNSServer.h>
@@ -155,8 +155,8 @@
 #include "html-content.h"
 
 /*****************************************************************
-/* Variables with defaults                                       *
-/*****************************************************************/
+ * Variables with defaults                                       *
+ *****************************************************************/
 char wlanssid[35] = "Freifunk-disabled";
 char wlanpwd[65] = "";
 char current_lang[3] = "DE";
@@ -242,8 +242,8 @@ ESP8266WebServer server(80);
 int TimeZone = 1;
 
 /*****************************************************************
-/* Display definitions                                           *
-/*****************************************************************/
+ * Display definitions                                           *
+ *****************************************************************/
 SSD1306 display(0x3c, I2C_PIN_SDA, I2C_PIN_SCL);
 SH1106 display_sh1106(0x3c, I2C_PIN_SDA, I2C_PIN_SCL);
 LiquidCrystal_I2C lcd_1602_27(0x27, 16, 2);
@@ -251,51 +251,51 @@ LiquidCrystal_I2C lcd_1602_3f(0x3F, 16, 2);
 LiquidCrystal_I2C lcd_2004_27(0x27, 20, 4);
 
 /*****************************************************************
-/* SDS011 declarations                                           *
-/*****************************************************************/
+ * SDS011 declarations                                           *
+ *****************************************************************/
 SoftwareSerial serialSDS(PM_SERIAL_RX, PM_SERIAL_TX, false, 128);
 SoftwareSerial serialGPS(GPS_SERIAL_RX, GPS_SERIAL_TX, false, 512);
 
 /*****************************************************************
-/* DHT declaration                                               *
-/*****************************************************************/
+ * DHT declaration                                               *
+ *****************************************************************/
 DHT dht(ONEWIRE_PIN, DHT_TYPE);
 
 /*****************************************************************
-/* HTU21D declaration                                            *
-/*****************************************************************/
+ * HTU21D declaration                                            *
+ *****************************************************************/
 Adafruit_HTU21DF htu21d;
 
 /*****************************************************************
-/* BMP declaration                                               *
-/*****************************************************************/
+ * BMP declaration                                               *
+ *****************************************************************/
 Adafruit_BMP085 bmp;
 
 /*****************************************************************
-/* BMP280 declaration                                               *
-/*****************************************************************/
+ * BMP280 declaration                                               *
+ *****************************************************************/
 Adafruit_BMP280 bmp280;
 
 /*****************************************************************
-/* BME280 declaration                                            *
-/*****************************************************************/
+ * BME280 declaration                                            *
+ *****************************************************************/
 Adafruit_BME280 bme280;
 
 /*****************************************************************
-/* DS18B20 declaration                                            *
-/*****************************************************************/
+ * DS18B20 declaration                                            *
+ *****************************************************************/
 OneWire oneWire(ONEWIRE_PIN);
 DallasTemperature ds18b20(&oneWire);
 
 /*****************************************************************
-/* GPS declaration                                               *
-/*****************************************************************/
+ * GPS declaration                                               *
+ *****************************************************************/
 TinyGPSPlus gps;
 
 /*****************************************************************
-/* Variable Definitions for PPD24NS                              *
-/* P1 for PM10 & P2 for PM25                                     *
-/*****************************************************************/
+ * Variable Definitions for PPD24NS                              *
+ * P1 for PM10 & P2 for PM25                                     *
+ *****************************************************************/
 
 unsigned long durationP1;
 unsigned long durationP2;
@@ -414,15 +414,15 @@ bool first_csv_line = 1;
 
 bool first_cycle = 1;
 
-long count_sends = 0;
-long next_display_millis = 0;
-long next_display_count = 0;
+unsigned long count_sends = 0;
+unsigned long next_display_millis = 0;
+unsigned long next_display_count = 0;
 
 #define data_first_part "{\"software_version\": \"{v}\", \"sensordatavalues\":["
 
 /*****************************************************************
-/* Debug output                                                  *
-/*****************************************************************/
+ * Debug output                                                  *
+ *****************************************************************/
 void debug_out(const String& text, const int level, const bool linebreak) {
 	if (level <= debug) {
 		if (linebreak) {
@@ -434,8 +434,8 @@ void debug_out(const String& text, const int level, const bool linebreak) {
 }
 
 /*****************************************************************
-/* display values                                                *
-/*****************************************************************/
+ * display values                                                *
+ *****************************************************************/
 void display_debug(const String& text1, const String& text2) {
 	debug_out(F("output debug text to displays..."), DEBUG_MIN_INFO, 1);
 	debug_out(text1 + "\n" + text2, DEBUG_MAX_INFO, 1);
@@ -479,8 +479,8 @@ void display_debug(const String& text1, const String& text2) {
 }
 
 /*****************************************************************
-/* IPAddress to String                                           *
-/*****************************************************************/
+ * IPAddress to String                                           *
+ *****************************************************************/
 String IPAddress2String(const IPAddress& ipaddress) {
 	char myIpString[24];
 	sprintf(myIpString, "%d.%d.%d.%d", ipaddress[0], ipaddress[1], ipaddress[2], ipaddress[3]);
@@ -488,9 +488,9 @@ String IPAddress2String(const IPAddress& ipaddress) {
 }
 
 /*****************************************************************
-/* check display values, return '-' if undefined                 *
-/*****************************************************************/
-String check_display_value(double value, double undef, int len, int str_len) {
+ * check display values, return '-' if undefined                 *
+ *****************************************************************/
+String check_display_value(double value, double undef, uint8_t len, uint8_t str_len) {
 	String s = (value != undef ? Float2String(value, len) : "-");
 	while (s.length() < str_len) {
 		s = " " + s;
@@ -499,14 +499,14 @@ String check_display_value(double value, double undef, int len, int str_len) {
 }
 
 /*****************************************************************
-/* convert float to string with a                                *
-/* precision of two decimal places                               *
-/*****************************************************************/
+ * convert float to string with a                                *
+ * precision of two decimal places                               *
+ *****************************************************************/
 String Float2String(const double value) {
 	return Float2String(value, 2);
 }
 
-String Float2String(const double value, unsigned int digits) {
+String Float2String(const double value, uint8_t digits) {
 	// Convert a float to String with two decimals.
 	char temp[15];
 	String s;
@@ -518,8 +518,8 @@ String Float2String(const double value, unsigned int digits) {
 }
 
 /*****************************************************************
-/* convert value to json string                                  *
-/*****************************************************************/
+ * convert value to json string                                  *
+ *****************************************************************/
 String Value2Json(const String& type, const String& value) {
 	String s = F("{\"value_type\":\"{t}\",\"value\":\"{v}\"},");
 	s.replace("{t}", type);
@@ -528,8 +528,8 @@ String Value2Json(const String& type, const String& value) {
 }
 
 /*****************************************************************
-/* convert string value to json string                           *
-/*****************************************************************/
+ * convert string value to json string                           *
+ *****************************************************************/
 String Var2Json(const String& name, const String& value) {
 	String s = F("\"{n}\":\"{v}\",");
 	String tmp = value;
@@ -540,8 +540,8 @@ String Var2Json(const String& name, const String& value) {
 }
 
 /*****************************************************************
-/* convert boolean value to json string                          *
-/*****************************************************************/
+ * convert boolean value to json string                          *
+ *****************************************************************/
 String Var2Json(const String& name, const bool value) {
 	String s = F("\"{n}\":\"{v}\",");
 	s.replace("{n}", name);
@@ -550,8 +550,8 @@ String Var2Json(const String& name, const bool value) {
 }
 
 /*****************************************************************
-/* convert boolean value to json string                          *
-/*****************************************************************/
+ * convert boolean value to json string                          *
+ *****************************************************************/
 String Var2Json(const String& name, const int value) {
 	String s = F("\"{n}\":\"{v}\",");
 	s.replace("{n}", name);
@@ -561,8 +561,8 @@ String Var2Json(const String& name, const int value) {
 
 
 /*****************************************************************
-/* send SDS011 command (start, stop, continuous mode, version    *
-/*****************************************************************/
+ * send SDS011 command (start, stop, continuous mode, version    *
+ *****************************************************************/
 void SDS_cmd(const uint8_t cmd) {
 	uint8_t * buf = new uint8_t[SDS_cmd_len];
 	if (buf) {
@@ -590,8 +590,8 @@ void SDS_cmd(const uint8_t cmd) {
 }
 
 /*****************************************************************
-/* send Plantower PMS sensor command start, stop, cont. mode     *
-/*****************************************************************/
+ * send Plantower PMS sensor command start, stop, cont. mode     *
+ *****************************************************************/
 void PMS_cmd(const uint8_t cmd) {
 	uint8_t * buf = new uint8_t[PMS_cmd_len];
 	if (buf) {
@@ -615,8 +615,8 @@ void PMS_cmd(const uint8_t cmd) {
 }
 
 /*****************************************************************
-/* start Honeywell PMS sensor                                    *
-/*****************************************************************/
+ * start Honeywell PMS sensor                                    *
+ *****************************************************************/
 void HPM_cmd(const uint8_t cmd) {
 	uint8_t * buf = new uint8_t[HPM_cmd_len];
 	if (buf) {
@@ -640,8 +640,8 @@ void HPM_cmd(const uint8_t cmd) {
 }
 
 /*****************************************************************
-/* read SDS011 sensor serial and firmware date                   *
-/*****************************************************************/
+ * read SDS011 sensor serial and firmware date                   *
+ *****************************************************************/
 String SDS_version_date() {
 	String s = "";
 	char buffer;
@@ -649,7 +649,7 @@ String SDS_version_date() {
 	int len = 0;
 	String version_date = "";
 	String device_id = "";
-	int checksum_is;
+	int checksum_is = 0;
 	int checksum_ok = 0;
 
 	debug_out(F("Start reading SDS011 version date"), DEBUG_MED_INFO, 1);
@@ -746,8 +746,8 @@ String SDS_version_date() {
 }
 
 /*****************************************************************
-/* disable unneeded NMEA sentences, TinyGPS++ needs GGA, RMC     *
-/*****************************************************************/
+ * disable unneeded NMEA sentences, TinyGPS++ needs GGA, RMC     *
+ *****************************************************************/
 void disable_unneeded_nmea() {
 	serialGPS.println(F("$PUBX,40,GLL,0,0,0,0*5C"));       // Geographic position, latitude / longitude
 //	serialGPS.println(F("$PUBX,40,GGA,0,0,0,0*5A"));       // Global Positioning System Fix Data
@@ -758,8 +758,8 @@ void disable_unneeded_nmea() {
 }
 
 /*****************************************************************
-/* copy config from ext_def                                      *
-/*****************************************************************/
+ * copy config from ext_def                                      *
+ *****************************************************************/
 void copyExtDef() {
 
 #define strcpyDef(var, def) if (def != NULL) { strcpy(var, def); }
@@ -825,8 +825,8 @@ void copyExtDef() {
 }
 
 /*****************************************************************
-/* read config from spiffs                                       *
-/*****************************************************************/
+ * read config from spiffs                                       *
+ *****************************************************************/
 void readConfig() {
 	String json_string = "";
 	debug_out(F("mounting FS..."), DEBUG_MIN_INFO, 1);
@@ -930,8 +930,8 @@ void readConfig() {
 }
 
 /*****************************************************************
-/* write config to spiffs                                        *
-/*****************************************************************/
+ * write config to spiffs                                        *
+ *****************************************************************/
 void writeConfig() {
 	String json_string = "{";
 	String tmp = "";
@@ -1012,8 +1012,8 @@ void writeConfig() {
 }
 
 /*****************************************************************
-/* Base64 encode user:password                                   *
-/*****************************************************************/
+ * Base64 encode user:password                                   *
+ *****************************************************************/
 void create_basic_auth_strings() {
 	basic_auth_custom = "";
 	if (strcmp(user_custom, "") != 0 || strcmp(pwd_custom, "") != 0) {
@@ -1026,8 +1026,8 @@ void create_basic_auth_strings() {
 }
 
 /*****************************************************************
-/* html helper functions                                         *
-/*****************************************************************/
+ * html helper functions                                         *
+ *****************************************************************/
 
 String make_header(const String& title) {
 	String s = FPSTR(WEB_PAGE_HEADER);
@@ -1066,7 +1066,7 @@ String form_input(const String& name, const String& info, const String& value, c
 String form_password(const String& name, const String& info, const String& value, const int length) {
 	String s = F("<tr><td>{i} </td><td style='width:90%;'><input type='password' name='{n}' id='{n}' placeholder='{i}' value='{v}' maxlength='{l}'/></td></tr>");
 	String password = "";
-	for (int i = 0; i < value.length(); i++) {
+	for (uint8_t i = 0; i < value.length(); i++) {
 		password += "*";
 	}
 	s.replace("{i}", info);
@@ -1198,10 +1198,10 @@ String add_sensor_type(const String& sensor_text) {
 }
 
 /*****************************************************************
-/* Webserver request auth: prompt for BasicAuth
+ * Webserver request auth: prompt for BasicAuth
  *
  * -Provide BasicAuth for all page contexts except /values and images
-/*****************************************************************/
+ *****************************************************************/
 void webserver_request_auth() {
 	debug_out(F("validate request auth..."), DEBUG_MIN_INFO, 1);
 	if (www_basicauth_enabled) {
@@ -1212,8 +1212,8 @@ void webserver_request_auth() {
 }
 
 /*****************************************************************
-/* Webserver root: show all options                              *
-/*****************************************************************/
+ * Webserver root: show all options                              *
+ *****************************************************************/
 void webserver_root() {
 	if (WiFi.status() != WL_CONNECTED) {
 		server.sendHeader(F("Location"), F("http://192.168.4.1/config"));
@@ -1236,14 +1236,13 @@ void webserver_root() {
 }
 
 /*****************************************************************
-/* Webserver config: show config page                            *
-/*****************************************************************/
+ * Webserver config: show config page                            *
+ *****************************************************************/
 void webserver_config() {
 	webserver_request_auth();
 
 	String page_content = make_header(FPSTR(INTL_KONFIGURATION));
 	String masked_pwd = "";
-	int i = 0;
 	last_page_load = millis();
 
 	debug_out(F("output config page ..."), DEBUG_MIN_INFO, 1);
@@ -1358,7 +1357,7 @@ void webserver_config() {
 #define readBoolParam(param) param = false; if (server.hasArg(#param)){ param = server.arg(#param) == "1"; }
 #define readIntParam(param)  if (server.hasArg(#param)){ int val = server.arg(#param).toInt(); if (val != 0){ param = val; }}
 #define readTimeParam(param)  if (server.hasArg(#param)){ int val = server.arg(#param).toInt(); if (val != 0){ param = val*1000; }}
-#define readPasswdParam(param) if (server.hasArg(#param)){ i = 0; masked_pwd = ""; for (i=0;i<server.arg(#param).length();i++) masked_pwd += "*"; if (masked_pwd != server.arg(#param) || server.arg(#param) == "") { server.arg(#param).toCharArray(param, sizeof(param)); } }
+#define readPasswdParam(param) if (server.hasArg(#param)){ masked_pwd = ""; for (uint8_t i=0;i<server.arg(#param).length();i++) masked_pwd += "*"; if (masked_pwd != server.arg(#param) || server.arg(#param) == "") { server.arg(#param).toCharArray(param, sizeof(param)); } }
 
 		if (server.hasArg("wlanssid") && server.arg("wlanssid") != "") {
 			readCharParam(wlanssid);
@@ -1476,8 +1475,8 @@ void webserver_config() {
 }
 
 /*****************************************************************
-/* Webserver wifi: show available wifi networks                  *
-/*****************************************************************/
+ * Webserver wifi: show available wifi networks                  *
+ *****************************************************************/
 void webserver_wifi() {
 	WiFi.disconnect();
 	debug_out(F("scan for wifi networks..."), DEBUG_MIN_INFO, 1);
@@ -1533,8 +1532,8 @@ void webserver_wifi() {
 }
 
 /*****************************************************************
-/* Webserver root: show latest values                            *
-/*****************************************************************/
+ * Webserver root: show latest values                            *
+ *****************************************************************/
 void webserver_values() {
 	if (WiFi.status() != WL_CONNECTED) {
 		server.sendHeader(F("Location"), F("http://192.168.4.1/config"));
@@ -1642,8 +1641,8 @@ void webserver_values() {
 }
 
 /*****************************************************************
-/* Webserver set debug level                                     *
-/*****************************************************************/
+ * Webserver set debug level                                     *
+ *****************************************************************/
 void webserver_debug_level() {
 	webserver_request_auth();
 
@@ -1685,8 +1684,8 @@ void webserver_debug_level() {
 }
 
 /*****************************************************************
-/* Webserver remove config                                       *
-/*****************************************************************/
+ * Webserver remove config                                       *
+ *****************************************************************/
 void webserver_removeConfig() {
 	webserver_request_auth();
 
@@ -1718,8 +1717,8 @@ void webserver_removeConfig() {
 }
 
 /*****************************************************************
-/* Webserver reset NodeMCU                                       *
-/*****************************************************************/
+ * Webserver reset NodeMCU                                       *
+ *****************************************************************/
 void webserver_reset() {
 	webserver_request_auth();
 
@@ -1740,8 +1739,8 @@ void webserver_reset() {
 }
 
 /*****************************************************************
-/* Webserver data.json                                           *
-/*****************************************************************/
+ * Webserver data.json                                           *
+ *****************************************************************/
 void webserver_data_json() {
 	String s1 = "";
 	unsigned long age = 0;
@@ -1776,8 +1775,8 @@ void webserver_data_json() {
 }
 
 /*****************************************************************
-/* Webserver prometheus metrics endpoint                         *
-/*****************************************************************/
+ * Webserver prometheus metrics endpoint                         *
+ *****************************************************************/
 void webserver_prometheus_endpoint() {
 	debug_out(F("output prometheus endpoint..."), DEBUG_MIN_INFO, 1);
 	String tmp_str;
@@ -1794,7 +1793,7 @@ void webserver_prometheus_endpoint() {
 	StaticJsonBuffer<2000> jsonBuffer;
 	JsonObject& json2data = jsonBuffer.parseObject(last_data_string);
 	if (json2data.success()) {
-		for (int i = 0; i < json2data["sensordatavalues"].size() - 1; i++) {
+		for (uint8_t i = 0; i < json2data["sensordatavalues"].size() - 1; i++) {
 			tmp_str = json2data["sensordatavalues"][i]["value_type"].as<char*>();
 			data_4_prometheus += tmp_str + "{" + id + "} ";
 			tmp_str = json2data["sensordatavalues"][i]["value"].as<char*>();
@@ -1810,8 +1809,8 @@ void webserver_prometheus_endpoint() {
 }
 
 /*****************************************************************
-/* Webserver Images                                              *
-/*****************************************************************/
+ * Webserver Images                                              *
+ *****************************************************************/
 void webserver_images() {
 	if (server.hasArg("name")) {
 		if (server.arg("name") == F("luftdaten_logo")) {
@@ -1826,8 +1825,8 @@ void webserver_images() {
 }
 
 /*****************************************************************
-/* Webserver page not found                                      *
-/*****************************************************************/
+ * Webserver page not found                                      *
+ *****************************************************************/
 void webserver_not_found() {
 	last_page_load = millis();
 	debug_out(F("output not found page..."), DEBUG_MIN_INFO, 1);
@@ -1835,8 +1834,8 @@ void webserver_not_found() {
 }
 
 /*****************************************************************
-/* Webserver setup                                               *
-/*****************************************************************/
+ * Webserver setup                                               *
+ *****************************************************************/
 void setup_webserver() {
 	server_name  = F("Feinstaubsensor-");
 	server_name += esp_chipid;
@@ -1861,8 +1860,8 @@ void setup_webserver() {
 }
 
 /*****************************************************************
-/* WifiConfig                                                    *
-/*****************************************************************/
+ * WifiConfig                                                    *
+ *****************************************************************/
 void wifiConfig() {
 	const byte DNS_PORT = 53;
 	int retry_count = 0;
@@ -1968,8 +1967,8 @@ void wifiConfig() {
 }
 
 /*****************************************************************
-/* WiFi auto connecting script                                   *
-/*****************************************************************/
+ * WiFi auto connecting script                                   *
+ *****************************************************************/
 void connectWifi() {
 	int retry_count = 0;
 	String s1 = String(fs_ssid);
@@ -2009,8 +2008,8 @@ void connectWifi() {
 }
 
 /*****************************************************************
-/* send data to rest api                                         *
-/*****************************************************************/
+ * send data to rest api                                         *
+ *****************************************************************/
 void sendData(const String& data, const int pin, const char* host, const int httpPort, const char* url, const char* basic_auth_string, const String& contentType) {
 
 	debug_out(F("Start connecting to "), DEBUG_MIN_INFO, 0);
@@ -2023,7 +2022,7 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 	request_head += String(host) + "\r\n";
 	request_head += F("Content-Type: ");
 	request_head += contentType + "\r\n";
-	if (basic_auth_string != "") {
+	if (strlen(basic_auth_string) != 0) {
 		request_head += F("Authorization: Basic ");
 		request_head += String(basic_auth_string) + "\r\n";
 	}
@@ -2118,8 +2117,8 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 }
 
 /*****************************************************************
-/* send single sensor data to luftdaten.info api                 *
-/*****************************************************************/
+ * send single sensor data to luftdaten.info api                 *
+ *****************************************************************/
 void sendLuftdaten(const String& data, const int pin, const char* host, const int httpPort, const char* url, const char* replace_str) {
 	String data_4_dusti = F(data_first_part);
 	data_4_dusti.replace("{v}", SOFTWARE_VERSION);
@@ -2135,19 +2134,19 @@ void sendLuftdaten(const String& data, const int pin, const char* host, const in
 }
 
 /*****************************************************************
-/* send data to LoRa gateway                                     *
-/*****************************************************************/
+ * send data to LoRa gateway                                     *
+ *****************************************************************/
 void send_lora(const String& data) {
 }
 
 /*****************************************************************
-/* send data to mqtt api                                         *
-/*****************************************************************/
+ * send data to mqtt api                                         *
+ *****************************************************************/
 // rejected (see issue #33)
 
 /*****************************************************************
-/* send data to influxdb                                         *
-/*****************************************************************/
+ * send data to influxdb                                         *
+ *****************************************************************/
 String create_influxdb_string(const String& data) {
 	String tmp_str;
 	String data_4_influxdb = "";
@@ -2158,15 +2157,16 @@ String create_influxdb_string(const String& data) {
 	if (json2data.success()) {
 		data_4_influxdb += F("feinstaub,node=esp8266-");
 		data_4_influxdb += esp_chipid + " ";
-		for (int i = 0; i < json2data["sensordatavalues"].size(); i++) {
+		for (uint8_t i = 0; i < json2data["sensordatavalues"].size(); i++) {
 			tmp_str = json2data["sensordatavalues"][i]["value_type"].as<char*>();
 			data_4_influxdb += tmp_str + "=";
 			tmp_str = json2data["sensordatavalues"][i]["value"].as<char*>();
-			data_4_influxdb += tmp_str;
-			if (i < (json2data["sensordatavalues"].size() - 1)) {
-				data_4_influxdb += ",";
-			}
+			data_4_influxdb += tmp_str + ",";
 		}
+		if ((unsigned)(data_4_influxdb.lastIndexOf(',') + 1) == data_4_influxdb.length()) {
+			data_4_influxdb.remove(data_4_influxdb.length() - 1);
+		}
+
 		data_4_influxdb += "\n";
 	} else {
 		debug_out(F("Data read failed"), DEBUG_ERROR, 1);
@@ -2175,8 +2175,8 @@ String create_influxdb_string(const String& data) {
 }
 
 /*****************************************************************
-/* send data as csv to serial out                                *
-/*****************************************************************/
+ * send data as csv to serial out                                *
+ *****************************************************************/
 void send_csv(const String& data) {
 	String tmp_str;
 	String headline;
@@ -2188,7 +2188,7 @@ void send_csv(const String& data) {
 	if (json2data.success()) {
 		headline = F("Timestamp_ms;");
 		valueline = String(act_milli) + ";";
-		for (int i = 0; i < json2data["sensordatavalues"].size(); i++) {
+		for (uint8_t i = 0; i < json2data["sensordatavalues"].size(); i++) {
 			tmp_str = json2data["sensordatavalues"][i]["value_type"].as<char*>();
 			headline += tmp_str + ";";
 			tmp_str = json2data["sensordatavalues"][i]["value"].as<char*>();
@@ -2211,8 +2211,8 @@ void send_csv(const String& data) {
 }
 
 /*****************************************************************
-/* read DHT22 sensor values                                      *
-/*****************************************************************/
+ * read DHT22 sensor values                                      *
+ *****************************************************************/
 String sensorDHT() {
 	String s = "";
 	int i = 0;
@@ -2255,8 +2255,8 @@ String sensorDHT() {
 }
 
 /*****************************************************************
-/* read HTU21D sensor values                                     *
-/*****************************************************************/
+ * read HTU21D sensor values                                     *
+ *****************************************************************/
 String sensorHTU21D() {
 	String s = "";
 	double t;
@@ -2289,8 +2289,8 @@ String sensorHTU21D() {
 }
 
 /*****************************************************************
-/* read BMP180 sensor values                                     *
-/*****************************************************************/
+ * read BMP180 sensor values                                     *
+ *****************************************************************/
 String sensorBMP() {
 	String s = "";
 	int p;
@@ -2322,8 +2322,8 @@ String sensorBMP() {
 }
 
 /*****************************************************************
-/* read BMP280 sensor values                                     *
-/*****************************************************************/
+ * read BMP280 sensor values                                     *
+ *****************************************************************/
 String sensorBMP280() {
 	String s = "";
 	int p;
@@ -2355,8 +2355,8 @@ String sensorBMP280() {
 }
 
 /*****************************************************************
-/* read BME280 sensor values                                     *
-/*****************************************************************/
+ * read BME280 sensor values                                     *
+ *****************************************************************/
 String sensorBME280() {
 	String s = "";
 	double t;
@@ -2397,8 +2397,8 @@ String sensorBME280() {
 }
 
 /*****************************************************************
-/* read DS18B20 sensor values                                    *
-/*****************************************************************/
+ * read DS18B20 sensor values                                    *
+ *****************************************************************/
 String sensorDS18B20() {
 	String s = "";
 	int i = 0;
@@ -2433,8 +2433,8 @@ String sensorDS18B20() {
 }
 
 /*****************************************************************
-/* read SDS011 sensor values                                     *
-/*****************************************************************/
+ * read SDS011 sensor values                                     *
+ *****************************************************************/
 String sensorSDS() {
 	String s = "";
 	char buffer;
@@ -2442,7 +2442,7 @@ String sensorSDS() {
 	int len = 0;
 	int pm10_serial = 0;
 	int pm25_serial = 0;
-	int checksum_is;
+	int checksum_is = 0;
 	int checksum_ok = 0;
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_SDS011), DEBUG_MED_INFO, 1);
@@ -2570,8 +2570,8 @@ String sensorSDS() {
 }
 
 /*****************************************************************
-/* read Plantronic PM sensor sensor values                       *
-/*****************************************************************/
+ * read Plantronic PM sensor sensor values                       *
+ *****************************************************************/
 String sensorPMS(int msg_len) {
 	String s = "";
 	char buffer;
@@ -2580,8 +2580,8 @@ String sensorPMS(int msg_len) {
 	int pm1_serial = 0;
 	int pm10_serial = 0;
 	int pm25_serial = 0;
-	int checksum_is;
-	int checksum_should;
+	int checksum_is = 0;
+	int checksum_should = 0;
 	int checksum_ok = 0;
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_PMSx003), DEBUG_MED_INFO, 1);
@@ -2746,8 +2746,8 @@ String sensorPMS(int msg_len) {
 }
 
 /*****************************************************************
-/* read Honeywell PM sensor sensor values                       *
-/*****************************************************************/
+ * read Honeywell PM sensor sensor values                        *
+ *****************************************************************/
 String sensorHPM() {
 	String s = "";
 	char buffer;
@@ -2755,8 +2755,8 @@ String sensorHPM() {
 	int len = 0;
 	int pm10_serial = 0;
 	int pm25_serial = 0;
-	int checksum_is;
-	int checksum_should;
+	int checksum_is = 0;
+	int checksum_should = 0;
 	int checksum_ok = 0;
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_HPM), DEBUG_MED_INFO, 1);
@@ -2887,8 +2887,8 @@ String sensorHPM() {
 }
 
 /*****************************************************************
-/* read PPD42NS sensor values                                    *
-/*****************************************************************/
+ * read PPD42NS sensor values                                    *
+ *****************************************************************/
 String sensorPPD() {
 	boolean valP1 = HIGH;
 	boolean valP2 = HIGH;
@@ -2972,8 +2972,8 @@ String sensorPPD() {
 }
 
 /*****************************************************************
-/* read GPS sensor values                                        *
-/*****************************************************************/
+ * read GPS sensor values                                        *
+ *****************************************************************/
 String sensorGPS() {
 	String s = "";
 	String gps_lat = "";
@@ -3071,8 +3071,8 @@ String sensorGPS() {
 }
 
 /*****************************************************************
-/* AutoUpdate                                                    *
-/*****************************************************************/
+ * AutoUpdate                                                    *
+ *****************************************************************/
 void autoUpdate() {
 #if defined(ESP8266)
 	const char* update_host = UPDATE_HOST;
@@ -3114,8 +3114,8 @@ void autoUpdate() {
 }
 
 /*****************************************************************
-/* display values                                                *
-/*****************************************************************/
+ * display values                                                *
+ *****************************************************************/
 void display_values() {
 	double t_value = -128.0;
 	double h_value = -1.0;
@@ -3263,7 +3263,7 @@ void display_values() {
 			display_lines[2] = "Measurements: " + String(count_sends);
 			break;
 		}
-		for (int i = 0; i < screen_count; i++) {
+		for (uint8_t i = 0; i < screen_count; i++) {
 			if (i != (next_display_count % screen_count)) {
 				display_footer += " . ";
 			} else {
@@ -3361,8 +3361,8 @@ void display_values() {
 }
 
 /*****************************************************************
-/* Init OLED display                                             *
-/*****************************************************************/
+ * Init OLED display                                             *
+ *****************************************************************/
 void init_display() {
 	display.init();
 	display.setFont(Roboto_Mono_9);
@@ -3371,8 +3371,8 @@ void init_display() {
 }
 
 /*****************************************************************
-/* Init LCD display                                              *
-/*****************************************************************/
+ * Init LCD display                                              *
+ *****************************************************************/
 void init_lcd() {
 	if (has_lcd1602_27) {
 		lcd_1602_27.init();
@@ -3389,8 +3389,8 @@ void init_lcd() {
 }
 
 /*****************************************************************
-/* Init BMP280                                                   *
-/*****************************************************************/
+ * Init BMP280                                                   *
+ *****************************************************************/
 bool initBMP280(char addr) {
 	debug_out(F("Trying BMP280 sensor on "), DEBUG_MIN_INFO, 0);
 	debug_out(String(addr, HEX), DEBUG_MIN_INFO, 0);
@@ -3405,8 +3405,8 @@ bool initBMP280(char addr) {
 }
 
 /*****************************************************************
-/* Init BME280                                                   *
-/*****************************************************************/
+ * Init BME280                                                   *
+ *****************************************************************/
 bool initBME280(char addr) {
 	debug_out(F("Trying BME280 sensor on "), DEBUG_MIN_INFO, 0);
 	debug_out(String(addr, HEX), DEBUG_MIN_INFO, 0);
@@ -3427,8 +3427,8 @@ bool initBME280(char addr) {
 }
 
 /*****************************************************************
-/* The Setup                                                     *
-/*****************************************************************/
+ * The Setup                                                     *
+ *****************************************************************/
 void setup() {
 	Serial.begin(9600);					// Output to Serial at 9600 baud
 #if defined(ESP8266)
@@ -3581,8 +3581,8 @@ void setup() {
 }
 
 /*****************************************************************
-/* And action                                                    *
-/*****************************************************************/
+ * And action                                                    *
+ *****************************************************************/
 void loop() {
 	String data = "";
 	String tmp_str;
@@ -3828,7 +3828,7 @@ void loop() {
 		data_sample_times += Value2Json("signal", signal_strength);
 		data += data_sample_times;
 
-		if (data.lastIndexOf(',') == (data.length() - 1)) {
+		if ((unsigned)(data.lastIndexOf(',')+1) == data.length()) {
 			data.remove(data.length() - 1);
 		}
 		data += "]}";
@@ -3846,7 +3846,7 @@ void loop() {
 			sum_send_time += millis() - start_send;
 		}
 
-		if (send2sensemap && (senseboxid != SENSEBOXID)) {
+		if (send2sensemap && (strcmp(senseboxid,SENSEBOXID) != 0)) {
 			debug_out(F("## Sending to opensensemap: "), DEBUG_MIN_INFO, 1);
 			start_send = millis();
 			sensemap_path = url_sensemap;
