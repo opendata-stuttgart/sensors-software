@@ -96,7 +96,7 @@
  *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-110-B3"
+#define SOFTWARE_VERSION "NRZ-2018-110-B4"
 
 /*****************************************************************
  * Includes                                                      *
@@ -417,6 +417,18 @@ bool first_cycle = 1;
 unsigned long count_sends = 0;
 unsigned long next_display_millis = 0;
 unsigned long next_display_count = 0;
+
+struct struct_wifiInfo {
+	char ssid[35];
+	uint8_t encryptionType;
+	int32_t RSSI;
+	int32_t channel;
+	bool isHidden;
+};
+uint8_t size_wifiInfo = 35 + sizeof(uint8_t) + sizeof(int32_t) + sizeof(uint8_t) + sizeof(bool);
+
+struct struct_wifiInfo *wifiInfo;
+uint8_t count_wifiInfo;
 
 #define data_first_part "{\"software_version\": \"{v}\", \"sensordatavalues\":["
 
@@ -1349,7 +1361,7 @@ void webserver_config() {
 		page_content += F("</table><br/>");
 		page_content += F("<br/></form>");
 		if (WiFi.status() != WL_CONNECTED) {  // scan for wlan ssids
-			page_content += F("<script>window.setTimeout(load_wifi_list,3000);</script>");
+			page_content += F("<script>window.setTimeout(load_wifi_list,1000);</script>");
 		}
 	} else {
 
@@ -1478,53 +1490,50 @@ void webserver_config() {
  * Webserver wifi: show available wifi networks                  *
  *****************************************************************/
 void webserver_wifi() {
-	WiFi.disconnect();
-	debug_out(F("scan for wifi networks..."), DEBUG_MIN_INFO, 1);
-	int n = WiFi.scanNetworks();
 	debug_out(F("wifi networks found: "), DEBUG_MIN_INFO, 0);
-	debug_out(String(n), DEBUG_MIN_INFO, 1);
+	debug_out(String(count_wifiInfo), DEBUG_MIN_INFO, 1);
 	String page_content = "";
-	if (n == 0) {
+	if (count_wifiInfo == 0) {
 		page_content += F("<br/>");
 		page_content += FPSTR(INTL_KEINE_NETZWERKE);
 		page_content += F("<br/>");
 	} else {
 		page_content += FPSTR(INTL_NETZWERKE_GEFUNDEN);
-		page_content += String(n);
+		page_content += String(count_wifiInfo);
 		page_content += F("<br/>");
-		int indices[n];
+		int indices[count_wifiInfo];
 		debug_out(F("output config page 2"), DEBUG_MIN_INFO, 1);
-		for (int i = 0; i < n; i++) {
+		for (int i = 0; i < count_wifiInfo; i++) {
 			indices[i] = i;
 		}
-		for (int i = 0; i < n; i++) {
-			for (int j = i + 1; j < n; j++) {
-				if (WiFi.RSSI(indices[j]) > WiFi.RSSI(indices[i])) {
+		for (int i = 0; i < count_wifiInfo; i++) {
+			for (int j = i + 1; j < count_wifiInfo; j++) {
+				if (wifiInfo[indices[j]].RSSI > wifiInfo[indices[i]].RSSI) {
 					std::swap(indices[i], indices[j]);
 				}
 			}
 		}
 		String cssid;
 		debug_out(F("output config page 3"), DEBUG_MIN_INFO, 1);
-		for (int i = 0; i < n; i++) {
+		for (int i = 0; i < count_wifiInfo; i++) {
 			if (indices[i] == -1) {
 				continue;
 			}
-			cssid = WiFi.SSID(indices[i]);
-			for (int j = i + 1; j < n; j++) {
-				if (cssid == WiFi.SSID(indices[j])) {
+			cssid = wifiInfo[indices[i]].ssid;
+			for (int j = i + 1; j < count_wifiInfo; j++) {
+				if (cssid == wifiInfo[indices[j]].ssid) {
 					indices[j] = -1; // set dup aps to index -1
 				}
 			}
 		}
 		page_content += F("<br/><table>");
 		//if(n > 30) n=30;
-		for (int i = 0; i < n; ++i) {
+		for (int i = 0; i < count_wifiInfo; ++i) {
 			if (indices[i] == -1) {
 				continue;
 			}
 			// Print SSID and RSSI for each network found
-			page_content += wlan_ssid_to_table_row(WiFi.SSID(indices[i]), ((WiFi.encryptionType(indices[i]) == ENC_TYPE_NONE) ? " " : "*"), WiFi.RSSI(indices[i]));
+			page_content += wlan_ssid_to_table_row(wifiInfo[indices[i]].ssid, ((wifiInfo[indices[i]].encryptionType == ENC_TYPE_NONE) ? " " : "*"), wifiInfo[indices[i]].RSSI);
 		}
 		page_content += F("</table><br/><br/>");
 	}
@@ -1865,6 +1874,10 @@ void setup_webserver() {
 void wifiConfig() {
 	const byte DNS_PORT = 53;
 	int retry_count = 0;
+	String SSID;
+	uint8_t* BSSID;
+	int channels_rssi[14];
+	uint8_t AP_channel = 1;
 	DNSServer dnsServer;
 	IPAddress apIP(192, 168, 4, 1);
 	IPAddress netMsk(255, 255, 255, 0);
@@ -1878,9 +1891,30 @@ void wifiConfig() {
 	wificonfig_loop = true;
 
 	WiFi.disconnect(true);
+	debug_out(F("scan for wifi networks..."), DEBUG_MIN_INFO, 1);
+	count_wifiInfo = WiFi.scanNetworks(false, true);
+	wifiInfo = (struct_wifiInfo *) malloc(count_wifiInfo * 100);
+	for (int i = 0; i < 14; i++) {
+		channels_rssi[i] = -100;
+	}
+	for (int i = 0; i < count_wifiInfo; i++) {
+		WiFi.getNetworkInfo(i, SSID, wifiInfo[i].encryptionType, wifiInfo[i].RSSI, BSSID, wifiInfo[i].channel, wifiInfo[i].isHidden);
+		SSID.toCharArray(wifiInfo[i].ssid, 35);
+		if (wifiInfo[i].RSSI > channels_rssi[wifiInfo[i].channel]) {
+			channels_rssi[wifiInfo[i].channel] = wifiInfo[i].RSSI;
+		}
+	}
+	if ((channels_rssi[1] < channels_rssi[6]) && (channels_rssi[1] < channels_rssi[11])) {
+		AP_channel = 1;
+	} else if ((channels_rssi[6] < channels_rssi[1]) && (channels_rssi[6] < channels_rssi[11])) {
+		AP_channel = 6;
+	} else {
+		AP_channel = 11;
+	}
+	
 	WiFi.mode(WIFI_AP);
 	WiFi.softAPConfig(apIP, apIP, netMsk);
-	WiFi.softAP(fs_ssid, fs_pwd);
+	WiFi.softAP(fs_ssid, fs_pwd, AP_channel);
 	debug_out(String(WLANPWD), DEBUG_MIN_INFO, 1);
 
 	dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
@@ -1906,6 +1940,8 @@ void wifiConfig() {
 	WiFi.disconnect(true);
 	WiFi.softAPdisconnect(true);
 	WiFi.mode(WIFI_STA);
+
+	free(wifiInfo);
 
 	dnsServer.stop();
 

@@ -1,3 +1,7 @@
+NRZ-2018-110-B4
+* scan for wifi networks before going to config mode to avoid wifi mode changes
+* select channel with lowest signal for AP mode
+
 NRZ-2018-110-B3
 * cosmetic changes to get rid of some compiler warnings
 
