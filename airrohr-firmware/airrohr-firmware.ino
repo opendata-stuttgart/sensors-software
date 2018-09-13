@@ -96,7 +96,7 @@
  *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-110-B4"
+#define SOFTWARE_VERSION "NRZ-2018-110-B5"
 
 /*****************************************************************
  * Includes                                                      *
@@ -1839,7 +1839,12 @@ void webserver_images() {
 void webserver_not_found() {
 	last_page_load = millis();
 	debug_out(F("output not found page..."), DEBUG_MIN_INFO, 1);
-	server.send(404, FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN), F("Not found."));
+	if (WiFi.status() != WL_CONNECTED) {
+		server.sendHeader(F("Location"), F("http://192.168.4.1/config"));
+		server.send(302, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), "");
+	} else {
+		server.send(404, FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN), F("Not found."));
+	}
 }
 
 /*****************************************************************
@@ -1872,8 +1877,6 @@ void setup_webserver() {
  * WifiConfig                                                    *
  *****************************************************************/
 void wifiConfig() {
-	const byte DNS_PORT = 53;
-	int retry_count = 0;
 	String SSID;
 	uint8_t* BSSID;
 	int channels_rssi[14];
@@ -1918,7 +1921,7 @@ void wifiConfig() {
 	debug_out(String(WLANPWD), DEBUG_MIN_INFO, 1);
 
 	dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
-	dnsServer.start(DNS_PORT, "*", apIP);
+	dnsServer.start(53, "*", apIP);							// 53 is port for DNS server
 
 	// 10 minutes timeout for wifi config
 	last_page_load = millis();
@@ -1951,13 +1954,6 @@ void wifiConfig() {
 	debug_out(wlanssid, DEBUG_MIN_INFO, 1);
 
 	WiFi.begin(wlanssid, wlanpwd);
-
-	while ((WiFi.status() != WL_CONNECTED) && (retry_count < 20)) {
-		delay(500);
-		debug_out(".", DEBUG_MIN_INFO, 0);
-		retry_count++;
-	}
-	debug_out("", DEBUG_MIN_INFO, 1);
 
 	debug_out(F("---- Result Webconfig ----"), DEBUG_MIN_INFO, 1);
 	debug_out(F("WLANSSID: "), DEBUG_MIN_INFO, 0);
@@ -2011,6 +2007,8 @@ void connectWifi() {
 	String s2 = String(fs_ssid);
 	debug_out(String(WiFi.status()), DEBUG_MIN_INFO, 1);
 	WiFi.disconnect();
+	WiFi.setOutputPower(20.5);
+	WiFi.setPhyMode(WIFI_PHY_MODE_11G);
 	WiFi.mode(WIFI_STA);
 	WiFi.begin(wlanssid, wlanpwd); // Start WiFI
 
@@ -2028,7 +2026,7 @@ void connectWifi() {
 		s2 = s2.substring(16);
 		display_debug(s1, s2);
 		wifiConfig();
-		if (WiFi.status() != WL_CONNECTED) {
+		if ((WiFi.status() != WL_CONNECTED) && (! restart_needed)) {
 			retry_count = 0;
 			while ((WiFi.status() != WL_CONNECTED) && (retry_count < 20) && !restart_needed) {
 				delay(500);
@@ -2038,7 +2036,6 @@ void connectWifi() {
 			debug_out("", DEBUG_MIN_INFO, 1);
 		}
 	}
-	WiFi.softAPdisconnect(true);
 	debug_out(F("WiFi connected\nIP address: "), DEBUG_MIN_INFO, 0);
 	debug_out(IPAddress2String(WiFi.localIP()), DEBUG_MIN_INFO, 1);
 }

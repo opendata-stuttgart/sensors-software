@@ -1,4 +1,9 @@
 NRZ-2018-110-B4
+* captive portal should work with iOS devices also
+* setting PHY layer 802.11g and max. signal strength just to be sure
+* removing some unneeded wifi connects after wifi config
+
+NRZ-2018-110-B4
 * scan for wifi networks before going to config mode to avoid wifi mode changes
 * select channel with lowest signal for AP mode
 
