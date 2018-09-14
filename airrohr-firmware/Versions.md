@@ -1,4 +1,9 @@
-NRZ-2018-110-B4
+NRZ-2018-110-B6
+* shorter config page in AP mode
+* removing 'save' buttons except the last on config page
+* deleting password for AP mode (for WPA/WPA2) wasn't possible
+
+NRZ-2018-110-B5
 * captive portal should work with iOS devices also
 * setting PHY layer 802.11g and max. signal strength just to be sure
 * removing some unneeded wifi connects after wifi config
