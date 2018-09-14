@@ -1510,7 +1510,7 @@ void webserver_wifi() {
 		page_content += FPSTR(INTL_NETZWERKE_GEFUNDEN);
 		page_content += String(count_wifiInfo);
 		page_content += F("<br/>");
-		int indices[count_wifiInfo];
+		int* indices= new int[count_wifiInfo];
 		debug_out(F("output config page 2"), DEBUG_MIN_INFO, 1);
 		for (int i = 0; i < count_wifiInfo; i++) {
 			indices[i] = i;
@@ -1545,6 +1545,7 @@ void webserver_wifi() {
 			page_content += wlan_ssid_to_table_row(wifiInfo[indices[i]].ssid, ((wifiInfo[indices[i]].encryptionType == ENC_TYPE_NONE) ? " " : "*"), wifiInfo[indices[i]].RSSI);
 		}
 		page_content += F("</table><br/><br/>");
+		delete[] indices;
 	}
 	server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
 }
