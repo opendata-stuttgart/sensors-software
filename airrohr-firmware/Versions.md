@@ -1,3 +1,6 @@
+NRZ-2018-110-B8
+* changing back to previous version of Captive portal for iOS
+
 NRZ-2018-110-B7
 * adding SSL switch for API server (Luftdaten.info, Madavi.de, OpenSenseMap)
 * changes added to avoid message "Initialize indices array with constant value" in some IDEs

@@ -96,7 +96,7 @@
  *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-110-B7"
+#define SOFTWARE_VERSION "NRZ-2018-110-B8"
 
 /*****************************************************************
  * Includes                                                      *
@@ -1867,7 +1867,7 @@ void webserver_images() {
 void webserver_not_found() {
 	last_page_load = millis();
 	debug_out(F("output not found page..."), DEBUG_MIN_INFO, 1);
-	if ((WiFi.status() != WL_CONNECTED) && (server.header(F("User-Agent")).indexOf(F("CaptiveNetworkSupport")) != -1)) {
+	if (WiFi.status() != WL_CONNECTED) {
 		server.sendHeader(F("Location"), F("http://192.168.4.1/config"));
 		server.send(302, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), "");
 	} else {
