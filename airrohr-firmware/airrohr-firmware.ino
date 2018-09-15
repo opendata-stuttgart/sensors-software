@@ -96,7 +96,7 @@
  *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-110-B6"
+#define SOFTWARE_VERSION "NRZ-2018-110-B7"
 
 /*****************************************************************
  * Includes                                                      *
@@ -205,13 +205,12 @@ long int sample_count = 0;
 #define HOST_MADAVI "api-rrd.madavi.de"
 #define URL_MADAVI "/data.php"
 #define PORT_MADAVI 443
+bool ssl_madavi = true;
 
-/*const char* host_dusti = "api.luftdaten.info";
-const char* url_dusti = "/v1/push-sensor-data/";
-int httpPort_dusti = 443; */
 #define HOST_DUSTI "api.luftdaten.info"
 #define URL_DUSTI "/v1/push-sensor-data/"
 #define PORT_DUSTI 443
+bool ssl_dusti = true;
 
 // IMPORTANT: NO MORE CHANGES TO VARIABLE NAMES NEEDED FOR EXTERNAL APIS
 
@@ -802,7 +801,9 @@ void copyExtDef() {
 	setDef(ds18b20_read, DS18B20_READ);
 	setDef(gps_read, GPS_READ);
 	setDef(send2dusti, SEND2DUSTI);
+	setDef(ssl_dusti, SSL_DUSTI);
 	setDef(send2madavi, SEND2MADAVI);
+	setDef(ssl_madavi, SSL_MADAVI);
 	setDef(send2sensemap, SEND2SENSEMAP)
 	setDef(send2lora, SEND2LORA);
 	setDef(send2csv, SEND2CSV);
@@ -892,7 +893,9 @@ void readConfig() {
 					setFromJSON(ds18b20_read);
 					setFromJSON(gps_read);
 					setFromJSON(send2dusti);
+					setFromJSON(ssl_dusti);
 					setFromJSON(send2madavi);
+					setFromJSON(ssl_madavi);
 					setFromJSON(send2sensemap);
 					setFromJSON(send2lora);
 					setFromJSON(send2csv);
@@ -974,7 +977,9 @@ void writeConfig() {
 	copyToJSON_Bool(ds18b20_read);
 	copyToJSON_Bool(gps_read);
 	copyToJSON_Bool(send2dusti);
+	copyToJSON_Bool(ssl_dusti);
 	copyToJSON_Bool(send2madavi);
+	copyToJSON_Bool(ssl_madavi);
 	copyToJSON_Bool(send2sensemap);
 	copyToJSON_Bool(send2lora);
 	copyToJSON_Bool(send2csv);
@@ -1088,7 +1093,7 @@ String form_password(const String& name, const String& info, const String& value
 	return s;
 }
 
-String form_checkbox(const String& name, const String& info, const bool checked) {
+String form_checkbox(const String& name, const String& info, const bool checked, const bool linebreak = true) {
 	String s = F("<label for='{n}'><input type='checkbox' name='{n}' value='1' id='{n}' {c}/> {i}</label><br/>");
 	if (checked) {
 		s.replace("{c}", F(" checked='checked'"));
@@ -1097,6 +1102,9 @@ String form_checkbox(const String& name, const String& info, const bool checked)
 	};
 	s.replace("{i}", info);
 	s.replace("{n}", name);
+	if (! linebreak) {
+		s.replace("<br/>", "");
+	}
 	return s;
 }
 
@@ -1297,9 +1305,14 @@ void webserver_config() {
 			page_content += form_password("fs_pwd", FPSTR(INTL_PASSWORT), fs_pwd, 64);
 
 			page_content += F("</table><br/>\n<b>APIs</b><br/>");
-			page_content += form_checkbox("send2dusti", F("API Luftdaten.info"), send2dusti);
-			page_content += form_checkbox("send2madavi", F("API Madavi.de"), send2madavi);
-			page_content += F("<br/>\n<b>");
+			page_content += form_checkbox("send2dusti", F("API Luftdaten.info"), send2dusti, false);
+			page_content += F("&nbsp;&nbsp;(");
+			page_content += form_checkbox("ssl_dusti", F("HTTPS"), ssl_dusti, false);
+			page_content += F(")<br/>");
+			page_content += form_checkbox("send2madavi", F("API Madavi.de"), send2madavi, false);
+			page_content += F("&nbsp;&nbsp;(");
+			page_content += form_checkbox("ssl_madavi", F("HTTPS"), ssl_madavi, false);
+			page_content += F(")<br/><br/>\n<b>");
 
 			page_content += FPSTR(INTL_SENSOREN);
 			page_content += F("</b><br/>");
@@ -1389,7 +1402,9 @@ void webserver_config() {
 				readPasswdParam(fs_pwd);
 			}
 			readBoolParam(send2dusti);
+			readBoolParam(ssl_dusti);
 			readBoolParam(send2madavi);
+			readBoolParam(ssl_madavi);
 			readBoolParam(send2sensemap);
 			readBoolParam(dht_read);
 			readBoolParam(htu21d_read);
@@ -1492,6 +1507,9 @@ void webserver_config() {
 		}
 	}
 	page_content += make_footer();
+	server.sendHeader(F("Cache-Control"), F("no-cache, no-store, must-revalidate"));
+	server.sendHeader(F("Pragma"), F("no-cache"));
+	server.sendHeader(F("Expires"), F("0"));
 	server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
 }
 
@@ -1510,7 +1528,7 @@ void webserver_wifi() {
 		page_content += FPSTR(INTL_NETZWERKE_GEFUNDEN);
 		page_content += String(count_wifiInfo);
 		page_content += F("<br/>");
-		int* indices= new int[count_wifiInfo];
+		int* indices = new int[count_wifiInfo];
 		debug_out(F("output config page 2"), DEBUG_MIN_INFO, 1);
 		for (int i = 0; i < count_wifiInfo; i++) {
 			indices[i] = i;
@@ -1849,7 +1867,7 @@ void webserver_images() {
 void webserver_not_found() {
 	last_page_load = millis();
 	debug_out(F("output not found page..."), DEBUG_MIN_INFO, 1);
-	if (WiFi.status() != WL_CONNECTED) {
+	if ((WiFi.status() != WL_CONNECTED) && (server.header(F("User-Agent")).indexOf(F("CaptiveNetworkSupport")) != -1)) {
 		server.sendHeader(F("Location"), F("http://192.168.4.1/config"));
 		server.send(302, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), "");
 	} else {
@@ -1924,7 +1942,7 @@ void wifiConfig() {
 	} else {
 		AP_channel = 11;
 	}
-	
+
 	WiFi.mode(WIFI_AP);
 	WiFi.softAPConfig(apIP, apIP, netMsk);
 	WiFi.softAP(fs_ssid, fs_pwd, AP_channel);
@@ -3771,7 +3789,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (PPD42NS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_PPD, PPD_API_PIN, HOST_DUSTI, PORT_DUSTI, URL_DUSTI, "PPD_");
+				sendLuftdaten(result_PPD, PPD_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "PPD_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3780,7 +3798,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (SDS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_SDS, SDS_API_PIN, HOST_DUSTI, PORT_DUSTI, URL_DUSTI, "SDS_");
+				sendLuftdaten(result_SDS, SDS_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "SDS_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3789,7 +3807,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (PMS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_PMS, PMS_API_PIN, HOST_DUSTI, PORT_DUSTI, URL_DUSTI, "PMS_");
+				sendLuftdaten(result_PMS, PMS_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "PMS_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3798,7 +3816,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (HPM): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_HPM, HPM_API_PIN, HOST_DUSTI, PORT_DUSTI, URL_DUSTI, "HPM_");
+				sendLuftdaten(result_HPM, HPM_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "HPM_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3807,7 +3825,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (DHT): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_DHT, DHT_API_PIN, HOST_DUSTI, PORT_DUSTI, URL_DUSTI, "DHT_");
+				sendLuftdaten(result_DHT, DHT_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "DHT_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3816,7 +3834,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (HTU21D): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_HTU21D, HTU21D_API_PIN, HOST_DUSTI, PORT_DUSTI, URL_DUSTI, "HTU21D_");
+				sendLuftdaten(result_HTU21D, HTU21D_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "HTU21D_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3825,7 +3843,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (BMP): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_BMP, BMP_API_PIN, HOST_DUSTI, PORT_DUSTI, URL_DUSTI, "BMP_");
+				sendLuftdaten(result_BMP, BMP_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "BMP_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3834,7 +3852,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (BMP280): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_BMP280, BMP280_API_PIN, HOST_DUSTI, PORT_DUSTI, URL_DUSTI, "BMP280_");
+				sendLuftdaten(result_BMP280, BMP280_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "BMP280_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3843,7 +3861,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (BME280): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_BME280, BME280_API_PIN, HOST_DUSTI, PORT_DUSTI, URL_DUSTI, "BME280_");
+				sendLuftdaten(result_BME280, BME280_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "BME280_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3853,7 +3871,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (DS18B20): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_DS18B20, DS18B20_API_PIN, HOST_DUSTI, PORT_DUSTI, URL_DUSTI, "DS18B20_");
+				sendLuftdaten(result_DS18B20, DS18B20_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "DS18B20_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3863,7 +3881,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (GPS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_GPS, GPS_API_PIN, HOST_DUSTI, PORT_DUSTI, URL_DUSTI, "GPS_");
+				sendLuftdaten(result_GPS, GPS_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "GPS_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3871,7 +3889,7 @@ void loop() {
 		data_sample_times += Value2Json("signal", signal_strength);
 		data += data_sample_times;
 
-		if ((unsigned)(data.lastIndexOf(',')+1) == data.length()) {
+		if ((unsigned)(data.lastIndexOf(',') + 1) == data.length()) {
 			data.remove(data.length() - 1);
 		}
 		data += "]}";
@@ -3885,11 +3903,11 @@ void loop() {
 		if (send2madavi) {
 			debug_out(F("## Sending to madavi.de: "), DEBUG_MIN_INFO, 1);
 			start_send = millis();
-			sendData(data, 0, HOST_MADAVI, PORT_MADAVI, URL_MADAVI, "", FPSTR(TXT_CONTENT_TYPE_JSON));
+			sendData(data, 0, HOST_MADAVI, (ssl_madavi ? 443 : 80), URL_MADAVI, "", FPSTR(TXT_CONTENT_TYPE_JSON));
 			sum_send_time += millis() - start_send;
 		}
 
-		if (send2sensemap && (strcmp(senseboxid,SENSEBOXID) != 0)) {
+		if (send2sensemap && (strcmp(senseboxid, SENSEBOXID) != 0)) {
 			debug_out(F("## Sending to opensensemap: "), DEBUG_MIN_INFO, 1);
 			start_send = millis();
 			sensemap_path = url_sensemap;

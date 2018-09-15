@@ -1,3 +1,9 @@
+NRZ-2018-110-B7
+* adding SSL switch for API server (Luftdaten.info, Madavi.de, OpenSenseMap)
+* changes added to avoid message "Initialize indices array with constant value" in some IDEs
+* disable caching of config page, just in case that the client has received a blank page before
+* modified Captive portal for iOS devices
+
 NRZ-2018-110-B6
 * shorter config page in AP mode
 * removing 'save' buttons except the last on config page

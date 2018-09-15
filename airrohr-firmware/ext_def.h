@@ -20,7 +20,6 @@
 #define SEND2MADAVI 1
 #define SSL_MADAVI 1
 #define SEND2SENSEMAP 0
-#define SSL_SENSEMAP 1
 #define SEND2MQTT 0
 #define SEND2INFLUX 0
 #define SEND2LORA 0
