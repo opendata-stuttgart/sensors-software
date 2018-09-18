@@ -87,7 +87,7 @@
  *                                                                      *
  ************************************************************************
  *
- * 06.07.2017
+ * 06.07.2018
  * Der Sketch verwendet 459607 Bytes (44%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
  * Globale Variablen verwenden 48736 Bytes (59%) des dynamischen Speichers, 33184 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
  *
@@ -96,7 +96,7 @@
  *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-110-B8"
+#define SOFTWARE_VERSION "NRZ-2018-110-B9"
 
 /*****************************************************************
  * Includes                                                      *
@@ -1556,7 +1556,7 @@ void webserver_wifi() {
 		page_content += F("<br/><table>");
 		//if(n > 30) n=30;
 		for (int i = 0; i < count_wifiInfo; ++i) {
-			if (indices[i] == -1) {
+			if (indices[i] == -1 || wifiInfo[i].isHidden) {
 				continue;
 			}
 			// Print SSID and RSSI for each network found
@@ -1868,8 +1868,12 @@ void webserver_not_found() {
 	last_page_load = millis();
 	debug_out(F("output not found page..."), DEBUG_MIN_INFO, 1);
 	if (WiFi.status() != WL_CONNECTED) {
-		server.sendHeader(F("Location"), F("http://192.168.4.1/config"));
-		server.send(302, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), "");
+		if ((server.uri().indexOf(F("success.html")) != -1) || (server.uri().indexOf(F("detect.html")) != -1)) {
+			server.send(200,FPSTR(TXT_CONTENT_TYPE_TEXT_HTML),FPSTR(WEB_IOS_REDIRECT));
+		} else {
+			server.sendHeader(F("Location"), F("http://192.168.4.1/config"));
+			server.send(302, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), "");
+		}
 	} else {
 		server.send(404, FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN), F("Not found."));
 	}
@@ -2039,6 +2043,12 @@ void connectWifi() {
 	WiFi.setPhyMode(WIFI_PHY_MODE_11G);
 	WiFi.mode(WIFI_STA);
 	WiFi.begin(wlanssid, wlanpwd); // Start WiFI
+
+	debug_out(F("Length password "), DEBUG_MIN_INFO, 0);
+	debug_out(String(strlen(wlanpwd)), DEBUG_MIN_INFO, 1);
+
+	debug_out(F("Content password "), DEBUG_MIN_INFO, 0);
+	debug_out(wlanpwd, DEBUG_MIN_INFO, 1);
 
 	debug_out(F("Connecting to "), DEBUG_MIN_INFO, 0);
 	debug_out(wlanssid, DEBUG_MIN_INFO, 1);

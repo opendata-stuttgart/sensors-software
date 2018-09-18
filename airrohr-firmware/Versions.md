@@ -1,3 +1,7 @@
+NRZ-2018-110-B9
+* removing hidden SSIDs from wifi list
+* another change for Captive portal support for iOS devices
+
 NRZ-2018-110-B8
 * changing back to previous version of Captive portal for iOS
 
