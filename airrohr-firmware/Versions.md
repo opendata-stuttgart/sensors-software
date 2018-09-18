@@ -1,3 +1,6 @@
+NRZ-2018-110-B10
+removing debug output of wifi password
+
 NRZ-2018-110-B9
 * removing hidden SSIDs from wifi list
 * another change for Captive portal support for iOS devices
