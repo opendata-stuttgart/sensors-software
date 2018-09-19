@@ -2,105 +2,105 @@
 #define INTL_DE
 
 /************************************************************************
-/*                                                                      *
-/*  This source code needs to be compiled for the board                 *
-/*  NodeMCU 1.0 (ESP-12E Module)                                        *
-/*                                                                      *
-/************************************************************************
-/*                                                                      *
-/*    airRohr firmware                                                  *
-/*    Copyright (C) 2016-2018  Code for Stuttgart a.o.                  *
-/*                                                                      *
-/* This program is free software: you can redistribute it and/or modify *
-/* it under the terms of the GNU General Public License as published by *
-/* the Free Software Foundation, either version 3 of the License, or    *
-/* (at your option) any later version.                                  *
-/*                                                                      *
-/* This program is distributed in the hope that it will be useful,      *
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
-/* GNU General Public License for more details.                         *
-/*                                                                      *
-/* You should have received a copy of the GNU General Public License    *
-/* along with this program. If not, see <http://www.gnu.org/licenses/>. *
-/*                                                                      *
-/************************************************************************
-/* OK LAB Particulate Matter Sensor                                     *
-/*      - nodemcu-LoLin board                                           *
-/*      - Nova SDS0111                                                  *
-/*  ﻿http://inovafitness.com/en/Laser-PM2-5-Sensor-SDS011-35.html        *
-/*                                                                      *
-/* Wiring Instruction:                                                  *
-/*      - SDS011 Pin 1  (TX)   -> Pin D1 / GPIO5                        *
-/*      - SDS011 Pin 2  (RX)   -> Pin D2 / GPIO4                        *
-/*      - SDS011 Pin 3  (GND)  -> GND                                   *
-/*      - SDS011 Pin 4  (2.5m) -> unused                                *
-/*      - SDS011 Pin 5  (5V)   -> VU                                    *
-/*      - SDS011 Pin 6  (1m)   -> unused                                *
-/*                                                                      *
-/************************************************************************
-/*                                                                      *
-/* Alternative                                                          *
-/*      - nodemcu-LoLin board                                           *
-/*      - Shinyei PPD42NS                                               *
-/*      http://www.sca-shinyei.com/pdf/PPD42NS.pdf                      *
-/*                                                                      *
-/* Wiring Instruction:                                                  *
-/*      Pin 2 of dust sensor PM2.5 -> Digital 6 (PWM)                   *
-/*      Pin 3 of dust sensor       -> +5V                               *
-/*      Pin 4 of dust sensor PM1   -> Digital 3 (PMW)                   *
-/*                                                                      *
-/*      - PPD42NS Pin 1 (grey or green)  => GND                         *
-/*      - PPD42NS Pin 2 (green or white)) => Pin D5 /GPIO14             *
-/*        counts particles PM25                                         *
-/*      - PPD42NS Pin 3 (black or yellow) => Vin                        *
-/*      - PPD42NS Pin 4 (white or black) => Pin D6 / GPIO12             *
-/*        counts particles PM10                                         *
-/*      - PPD42NS Pin 5 (red)   => unused                               *
-/*                                                                      *
-/************************************************************************
-/* Extension: DHT22 (AM2303)                                            *
-/*  ﻿http://www.aosong.com/en/products/details.asp?id=117                *
-/*                                                                      *
-/* DHT22 Wiring Instruction                                             *
-/* (left to right, front is perforated side):                           *
-/*      - DHT22 Pin 1 (VDD)     -> Pin 3V3 (3.3V)                       *
-/*      - DHT22 Pin 2 (DATA)    -> Pin D7 (GPIO13)                      *
-/*      - DHT22 Pin 3 (NULL)    -> unused                               *
-/*      - DHT22 Pin 4 (GND)     -> Pin GND                              *
-/*                                                                      *
-/************************************************************************
-/* Extensions connected via I2C:                                        *
-/* HTU21D (https://www.sparkfun.com/products/13763),                    *
-/* BMP180, BMP280, BME280, OLED Display with SSD1306 (128x64 px)        *
-/*                                                                      *
-/* Wiring Instruction                                                   *
-/* (see labels on display or sensor board)                              *
-/*      VCC       ->     Pin 3V3                                        *
-/*      GND       ->     Pin GND                                        *
-/*      SCL       ->     Pin D4 (GPIO2)                                 *
-/*      SDA       ->     Pin D3 (GPIO0)                                 *
-/*                                                                      *
-/************************************************************************
-/*                                                                      *
-/* Please check Readme.md for other sensors and hardware                *
-/*                                                                      *
-/************************************************************************
+ *                                                                      *
+ *  This source code needs to be compiled for the board                 *
+ *  NodeMCU 1.0 (ESP-12E Module)                                        *
+ *                                                                      *
+ ************************************************************************
+ *                                                                      *
+ *    airRohr firmware                                                  *
+ *    Copyright (C) 2016-2018  Code for Stuttgart a.o.                  *
+ *                                                                      *
+ * This program is free software: you can redistribute it and/or modify *
+ * it under the terms of the GNU General Public License as published by *
+ * the Free Software Foundation, either version 3 of the License, or    *
+ * (at your option) any later version.                                  *
+ *                                                                      *
+ * This program is distributed in the hope that it will be useful,      *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+ * GNU General Public License for more details.                         *
+ *                                                                      *
+ * You should have received a copy of the GNU General Public License    *
+ * along with this program. If not, see <http://www.gnu.org/licenses/>. *
+ *                                                                      *
+ ************************************************************************
+ * OK LAB Particulate Matter Sensor                                     *
+ *      - nodemcu-LoLin board                                           *
+ *      - Nova SDS0111                                                  *
+ *  ﻿http://inovafitness.com/en/Laser-PM2-5-Sensor-SDS011-35.html        *
+ *                                                                      *
+ * Wiring Instruction:                                                  *
+ *      - SDS011 Pin 1  (TX)   -> Pin D1 / GPIO5                        *
+ *      - SDS011 Pin 2  (RX)   -> Pin D2 / GPIO4                        *
+ *      - SDS011 Pin 3  (GND)  -> GND                                   *
+ *      - SDS011 Pin 4  (2.5m) -> unused                                *
+ *      - SDS011 Pin 5  (5V)   -> VU                                    *
+ *      - SDS011 Pin 6  (1m)   -> unused                                *
+ *                                                                      *
+ ************************************************************************
+ *                                                                      *
+ * Alternative                                                          *
+ *      - nodemcu-LoLin board                                           *
+ *      - Shinyei PPD42NS                                               *
+ *      http://www.sca-shinyei.com/pdf/PPD42NS.pdf                      *
+ *                                                                      *
+ * Wiring Instruction:                                                  *
+ *      Pin 2 of dust sensor PM2.5 -> Digital 6 (PWM)                   *
+ *      Pin 3 of dust sensor       -> +5V                               *
+ *      Pin 4 of dust sensor PM1   -> Digital 3 (PMW)                   *
+ *                                                                      *
+ *      - PPD42NS Pin 1 (grey or green)  => GND                         *
+ *      - PPD42NS Pin 2 (green or white)) => Pin D5 /GPIO14             *
+ *        counts particles PM25                                         *
+ *      - PPD42NS Pin 3 (black or yellow) => Vin                        *
+ *      - PPD42NS Pin 4 (white or black) => Pin D6 / GPIO12             *
+ *        counts particles PM10                                         *
+ *      - PPD42NS Pin 5 (red)   => unused                               *
+ *                                                                      *
+ ************************************************************************
+ * Extension: DHT22 (AM2303)                                            *
+ *  ﻿http://www.aosong.com/en/products/details.asp?id=117                *
+ *                                                                      *
+ * DHT22 Wiring Instruction                                             *
+ * (left to right, front is perforated side):                           *
+ *      - DHT22 Pin 1 (VDD)     -> Pin 3V3 (3.3V)                       *
+ *      - DHT22 Pin 2 (DATA)    -> Pin D7 (GPIO13)                      *
+ *      - DHT22 Pin 3 (NULL)    -> unused                               *
+ *      - DHT22 Pin 4 (GND)     -> Pin GND                              *
+ *                                                                      *
+ ************************************************************************
+ * Extensions connected via I2C:                                        *
+ * HTU21D (https://www.sparkfun.com/products/13763),                    *
+ * BMP180, BMP280, BME280, OLED Display with SSD1306 (128x64 px)        *
+ *                                                                      *
+ * Wiring Instruction                                                   *
+ * (see labels on display or sensor board)                              *
+ *      VCC       ->     Pin 3V3                                        *
+ *      GND       ->     Pin GND                                        *
+ *      SCL       ->     Pin D4 (GPIO2)                                 *
+ *      SDA       ->     Pin D3 (GPIO0)                                 *
+ *                                                                      *
+ ************************************************************************
+ *                                                                      *
+ * Please check Readme.md for other sensors and hardware                *
+ *                                                                      *
+ ************************************************************************
  *
- * 06.07.2017
+ * 06.07.2018
  * Der Sketch verwendet 459607 Bytes (44%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
  * Globale Variablen verwenden 48736 Bytes (59%) des dynamischen Speichers, 33184 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
  *
  * Der Sketch verwendet 458287 Bytes (43%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
  * Globale Variablen verwenden 48608 Bytes (59%) des dynamischen Speichers, 33312 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
  *
-/************************************************************************/
+ ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-109"
+#define SOFTWARE_VERSION "NRZ-2018-111"
 
 /*****************************************************************
-/* Includes                                                      *
-/*****************************************************************/
+ * Includes                                                      *
+ *****************************************************************/
 #include <FS.h>                     // must be first
 #include <ESP8266WiFi.h>
 #include <DNSServer.h>
@@ -115,7 +115,7 @@
 #include <LiquidCrystal_I2C.h>
 #include <base64.h>
 #include <ArduinoJson.h>
-#include "DHT.h"
+#include "./DHT.h"
 #include <Adafruit_HTU21DF.h>
 #include <Adafruit_BMP085.h>
 #include <Adafruit_BMP280.h>
@@ -155,8 +155,8 @@
 #include "html-content.h"
 
 /*****************************************************************
-/* Variables with defaults                                       *
-/*****************************************************************/
+ * Variables with defaults                                       *
+ *****************************************************************/
 char wlanssid[35] = "Freifunk-disabled";
 char wlanpwd[65] = "";
 char current_lang[3] = "DE";
@@ -187,6 +187,7 @@ bool gps_read = 0;
 bool send2dusti = 1;
 bool send2madavi = 1;
 bool send2sensemap = 0;
+bool send2fsapp = 0;
 bool send2custom = 0;
 bool send2lora = 1;
 bool send2influx = 0;
@@ -205,13 +206,12 @@ long int sample_count = 0;
 #define HOST_MADAVI "api-rrd.madavi.de"
 #define URL_MADAVI "/data.php"
 #define PORT_MADAVI 443
+bool ssl_madavi = true;
 
-/*const char* host_dusti = "api.luftdaten.info";
-const char* url_dusti = "/v1/push-sensor-data/";
-int httpPort_dusti = 443; */
 #define HOST_DUSTI "api.luftdaten.info"
 #define URL_DUSTI "/v1/push-sensor-data/"
 #define PORT_DUSTI 443
+bool ssl_dusti = true;
 
 // IMPORTANT: NO MORE CHANGES TO VARIABLE NAMES NEEDED FOR EXTERNAL APIS
 
@@ -219,6 +219,10 @@ const char* host_sensemap = "ingress.opensensemap.org";
 String url_sensemap = "/boxes/BOXID/data?luftdaten=1";
 const int httpPort_sensemap = 443;
 char senseboxid[30] = "";
+
+const char* host_fsapp = "www.h2801469.stratoserver.net";
+String url_fsapp = "/data.php";
+const int httpPort_fsapp = 80;
 
 char host_influx[100] = "influx server";
 char url_influx[100] = "/write?db=luftdaten";
@@ -242,8 +246,8 @@ ESP8266WebServer server(80);
 int TimeZone = 1;
 
 /*****************************************************************
-/* Display definitions                                           *
-/*****************************************************************/
+ * Display definitions                                           *
+ *****************************************************************/
 SSD1306 display(0x3c, I2C_PIN_SDA, I2C_PIN_SCL);
 SH1106 display_sh1106(0x3c, I2C_PIN_SDA, I2C_PIN_SCL);
 LiquidCrystal_I2C lcd_1602_27(0x27, 16, 2);
@@ -251,51 +255,51 @@ LiquidCrystal_I2C lcd_1602_3f(0x3F, 16, 2);
 LiquidCrystal_I2C lcd_2004_27(0x27, 20, 4);
 
 /*****************************************************************
-/* SDS011 declarations                                           *
-/*****************************************************************/
+ * SDS011 declarations                                           *
+ *****************************************************************/
 SoftwareSerial serialSDS(PM_SERIAL_RX, PM_SERIAL_TX, false, 128);
 SoftwareSerial serialGPS(GPS_SERIAL_RX, GPS_SERIAL_TX, false, 512);
 
 /*****************************************************************
-/* DHT declaration                                               *
-/*****************************************************************/
+ * DHT declaration                                               *
+ *****************************************************************/
 DHT dht(ONEWIRE_PIN, DHT_TYPE);
 
 /*****************************************************************
-/* HTU21D declaration                                            *
-/*****************************************************************/
+ * HTU21D declaration                                            *
+ *****************************************************************/
 Adafruit_HTU21DF htu21d;
 
 /*****************************************************************
-/* BMP declaration                                               *
-/*****************************************************************/
+ * BMP declaration                                               *
+ *****************************************************************/
 Adafruit_BMP085 bmp;
 
 /*****************************************************************
-/* BMP280 declaration                                               *
-/*****************************************************************/
+ * BMP280 declaration                                               *
+ *****************************************************************/
 Adafruit_BMP280 bmp280;
 
 /*****************************************************************
-/* BME280 declaration                                            *
-/*****************************************************************/
+ * BME280 declaration                                            *
+ *****************************************************************/
 Adafruit_BME280 bme280;
 
 /*****************************************************************
-/* DS18B20 declaration                                            *
-/*****************************************************************/
+ * DS18B20 declaration                                            *
+ *****************************************************************/
 OneWire oneWire(ONEWIRE_PIN);
 DallasTemperature ds18b20(&oneWire);
 
 /*****************************************************************
-/* GPS declaration                                               *
-/*****************************************************************/
+ * GPS declaration                                               *
+ *****************************************************************/
 TinyGPSPlus gps;
 
 /*****************************************************************
-/* Variable Definitions for PPD24NS                              *
-/* P1 for PM10 & P2 for PM25                                     *
-/*****************************************************************/
+ * Variable Definitions for PPD24NS                              *
+ * P1 for PM10 & P2 for PM25                                     *
+ *****************************************************************/
 
 unsigned long durationP1;
 unsigned long durationP2;
@@ -414,15 +418,27 @@ bool first_csv_line = 1;
 
 bool first_cycle = 1;
 
-long count_sends = 0;
-long next_display_millis = 0;
-long next_display_count = 0;
+unsigned long count_sends = 0;
+unsigned long next_display_millis = 0;
+unsigned long next_display_count = 0;
+
+struct struct_wifiInfo {
+	char ssid[35];
+	uint8_t encryptionType;
+	int32_t RSSI;
+	int32_t channel;
+	bool isHidden;
+};
+uint8_t size_wifiInfo = 35 + sizeof(uint8_t) + sizeof(int32_t) + sizeof(uint8_t) + sizeof(bool);
+
+struct struct_wifiInfo *wifiInfo;
+uint8_t count_wifiInfo;
 
 #define data_first_part "{\"software_version\": \"{v}\", \"sensordatavalues\":["
 
 /*****************************************************************
-/* Debug output                                                  *
-/*****************************************************************/
+ * Debug output                                                  *
+ *****************************************************************/
 void debug_out(const String& text, const int level, const bool linebreak) {
 	if (level <= debug) {
 		if (linebreak) {
@@ -434,8 +450,8 @@ void debug_out(const String& text, const int level, const bool linebreak) {
 }
 
 /*****************************************************************
-/* display values                                                *
-/*****************************************************************/
+ * display values                                                *
+ *****************************************************************/
 void display_debug(const String& text1, const String& text2) {
 	debug_out(F("output debug text to displays..."), DEBUG_MIN_INFO, 1);
 	debug_out(text1 + "\n" + text2, DEBUG_MAX_INFO, 1);
@@ -479,8 +495,8 @@ void display_debug(const String& text1, const String& text2) {
 }
 
 /*****************************************************************
-/* IPAddress to String                                           *
-/*****************************************************************/
+ * IPAddress to String                                           *
+ *****************************************************************/
 String IPAddress2String(const IPAddress& ipaddress) {
 	char myIpString[24];
 	sprintf(myIpString, "%d.%d.%d.%d", ipaddress[0], ipaddress[1], ipaddress[2], ipaddress[3]);
@@ -488,9 +504,9 @@ String IPAddress2String(const IPAddress& ipaddress) {
 }
 
 /*****************************************************************
-/* check display values, return '-' if undefined                 *
-/*****************************************************************/
-String check_display_value(double value, double undef, int len, int str_len) {
+ * check display values, return '-' if undefined                 *
+ *****************************************************************/
+String check_display_value(double value, double undef, uint8_t len, uint8_t str_len) {
 	String s = (value != undef ? Float2String(value, len) : "-");
 	while (s.length() < str_len) {
 		s = " " + s;
@@ -499,14 +515,14 @@ String check_display_value(double value, double undef, int len, int str_len) {
 }
 
 /*****************************************************************
-/* convert float to string with a                                *
-/* precision of two decimal places                               *
-/*****************************************************************/
+ * convert float to string with a                                *
+ * precision of two decimal places                               *
+ *****************************************************************/
 String Float2String(const double value) {
 	return Float2String(value, 2);
 }
 
-String Float2String(const double value, unsigned int digits) {
+String Float2String(const double value, uint8_t digits) {
 	// Convert a float to String with two decimals.
 	char temp[15];
 	String s;
@@ -518,8 +534,8 @@ String Float2String(const double value, unsigned int digits) {
 }
 
 /*****************************************************************
-/* convert value to json string                                  *
-/*****************************************************************/
+ * convert value to json string                                  *
+ *****************************************************************/
 String Value2Json(const String& type, const String& value) {
 	String s = F("{\"value_type\":\"{t}\",\"value\":\"{v}\"},");
 	s.replace("{t}", type);
@@ -528,8 +544,8 @@ String Value2Json(const String& type, const String& value) {
 }
 
 /*****************************************************************
-/* convert string value to json string                           *
-/*****************************************************************/
+ * convert string value to json string                           *
+ *****************************************************************/
 String Var2Json(const String& name, const String& value) {
 	String s = F("\"{n}\":\"{v}\",");
 	String tmp = value;
@@ -540,8 +556,8 @@ String Var2Json(const String& name, const String& value) {
 }
 
 /*****************************************************************
-/* convert boolean value to json string                          *
-/*****************************************************************/
+ * convert boolean value to json string                          *
+ *****************************************************************/
 String Var2Json(const String& name, const bool value) {
 	String s = F("\"{n}\":\"{v}\",");
 	s.replace("{n}", name);
@@ -550,8 +566,8 @@ String Var2Json(const String& name, const bool value) {
 }
 
 /*****************************************************************
-/* convert boolean value to json string                          *
-/*****************************************************************/
+ * convert boolean value to json string                          *
+ *****************************************************************/
 String Var2Json(const String& name, const int value) {
 	String s = F("\"{n}\":\"{v}\",");
 	s.replace("{n}", name);
@@ -561,8 +577,8 @@ String Var2Json(const String& name, const int value) {
 
 
 /*****************************************************************
-/* send SDS011 command (start, stop, continuous mode, version    *
-/*****************************************************************/
+ * send SDS011 command (start, stop, continuous mode, version    *
+ *****************************************************************/
 void SDS_cmd(const uint8_t cmd) {
 	uint8_t * buf = new uint8_t[SDS_cmd_len];
 	if (buf) {
@@ -590,8 +606,8 @@ void SDS_cmd(const uint8_t cmd) {
 }
 
 /*****************************************************************
-/* send Plantower PMS sensor command start, stop, cont. mode     *
-/*****************************************************************/
+ * send Plantower PMS sensor command start, stop, cont. mode     *
+ *****************************************************************/
 void PMS_cmd(const uint8_t cmd) {
 	uint8_t * buf = new uint8_t[PMS_cmd_len];
 	if (buf) {
@@ -615,8 +631,8 @@ void PMS_cmd(const uint8_t cmd) {
 }
 
 /*****************************************************************
-/* start Honeywell PMS sensor                                    *
-/*****************************************************************/
+ * start Honeywell PMS sensor                                    *
+ *****************************************************************/
 void HPM_cmd(const uint8_t cmd) {
 	uint8_t * buf = new uint8_t[HPM_cmd_len];
 	if (buf) {
@@ -640,8 +656,8 @@ void HPM_cmd(const uint8_t cmd) {
 }
 
 /*****************************************************************
-/* read SDS011 sensor serial and firmware date                   *
-/*****************************************************************/
+ * read SDS011 sensor serial and firmware date                   *
+ *****************************************************************/
 String SDS_version_date() {
 	String s = "";
 	char buffer;
@@ -649,9 +665,8 @@ String SDS_version_date() {
 	int len = 0;
 	String version_date = "";
 	String device_id = "";
-	int checksum_is;
+	int checksum_is = 0;
 	int checksum_ok = 0;
-	int position = 0;
 
 	debug_out(F("Start reading SDS011 version date"), DEBUG_MED_INFO, 1);
 
@@ -747,8 +762,8 @@ String SDS_version_date() {
 }
 
 /*****************************************************************
-/* disable unneeded NMEA sentences, TinyGPS++ needs GGA, RMC     *
-/*****************************************************************/
+ * disable unneeded NMEA sentences, TinyGPS++ needs GGA, RMC     *
+ *****************************************************************/
 void disable_unneeded_nmea() {
 	serialGPS.println(F("$PUBX,40,GLL,0,0,0,0*5C"));       // Geographic position, latitude / longitude
 //	serialGPS.println(F("$PUBX,40,GGA,0,0,0,0*5A"));       // Global Positioning System Fix Data
@@ -759,8 +774,8 @@ void disable_unneeded_nmea() {
 }
 
 /*****************************************************************
-/* copy config from ext_def                                      *
-/*****************************************************************/
+ * copy config from ext_def                                      *
+ *****************************************************************/
 void copyExtDef() {
 
 #define strcpyDef(var, def) if (def != NULL) { strcpy(var, def); }
@@ -791,8 +806,11 @@ void copyExtDef() {
 	setDef(ds18b20_read, DS18B20_READ);
 	setDef(gps_read, GPS_READ);
 	setDef(send2dusti, SEND2DUSTI);
+	setDef(ssl_dusti, SSL_DUSTI);
 	setDef(send2madavi, SEND2MADAVI);
+	setDef(ssl_madavi, SSL_MADAVI);
 	setDef(send2sensemap, SEND2SENSEMAP)
+	setDef(send2fsapp, SEND2FSAPP)
 	setDef(send2lora, SEND2LORA);
 	setDef(send2csv, SEND2CSV);
 	setDef(auto_update, AUTO_UPDATE);
@@ -826,8 +844,8 @@ void copyExtDef() {
 }
 
 /*****************************************************************
-/* read config from spiffs                                       *
-/*****************************************************************/
+ * read config from spiffs                                       *
+ *****************************************************************/
 void readConfig() {
 	String json_string = "";
 	debug_out(F("mounting FS..."), DEBUG_MIN_INFO, 1);
@@ -881,8 +899,11 @@ void readConfig() {
 					setFromJSON(ds18b20_read);
 					setFromJSON(gps_read);
 					setFromJSON(send2dusti);
+					setFromJSON(ssl_dusti);
 					setFromJSON(send2madavi);
+					setFromJSON(ssl_madavi);
 					setFromJSON(send2sensemap);
+					setFromJSON(send2fsapp);
 					setFromJSON(send2lora);
 					setFromJSON(send2csv);
 					setFromJSON(auto_update);
@@ -931,8 +952,8 @@ void readConfig() {
 }
 
 /*****************************************************************
-/* write config to spiffs                                        *
-/*****************************************************************/
+ * write config to spiffs                                        *
+ *****************************************************************/
 void writeConfig() {
 	String json_string = "{";
 	String tmp = "";
@@ -963,8 +984,11 @@ void writeConfig() {
 	copyToJSON_Bool(ds18b20_read);
 	copyToJSON_Bool(gps_read);
 	copyToJSON_Bool(send2dusti);
+	copyToJSON_Bool(ssl_dusti);
 	copyToJSON_Bool(send2madavi);
+	copyToJSON_Bool(ssl_madavi);
 	copyToJSON_Bool(send2sensemap);
+	copyToJSON_Bool(send2fsapp);
 	copyToJSON_Bool(send2lora);
 	copyToJSON_Bool(send2csv);
 	copyToJSON_Bool(auto_update);
@@ -1013,8 +1037,8 @@ void writeConfig() {
 }
 
 /*****************************************************************
-/* Base64 encode user:password                                   *
-/*****************************************************************/
+ * Base64 encode user:password                                   *
+ *****************************************************************/
 void create_basic_auth_strings() {
 	basic_auth_custom = "";
 	if (strcmp(user_custom, "") != 0 || strcmp(pwd_custom, "") != 0) {
@@ -1027,8 +1051,8 @@ void create_basic_auth_strings() {
 }
 
 /*****************************************************************
-/* html helper functions                                         *
-/*****************************************************************/
+ * html helper functions                                         *
+ *****************************************************************/
 
 String make_header(const String& title) {
 	String s = FPSTR(WEB_PAGE_HEADER);
@@ -1067,7 +1091,7 @@ String form_input(const String& name, const String& info, const String& value, c
 String form_password(const String& name, const String& info, const String& value, const int length) {
 	String s = F("<tr><td>{i} </td><td style='width:90%;'><input type='password' name='{n}' id='{n}' placeholder='{i}' value='{v}' maxlength='{l}'/></td></tr>");
 	String password = "";
-	for (int i = 0; i < value.length(); i++) {
+	for (uint8_t i = 0; i < value.length(); i++) {
 		password += "*";
 	}
 	s.replace("{i}", info);
@@ -1077,7 +1101,7 @@ String form_password(const String& name, const String& info, const String& value
 	return s;
 }
 
-String form_checkbox(const String& name, const String& info, const bool checked) {
+String form_checkbox(const String& name, const String& info, const bool checked, const bool linebreak = true) {
 	String s = F("<label for='{n}'><input type='checkbox' name='{n}' value='1' id='{n}' {c}/> {i}</label><br/>");
 	if (checked) {
 		s.replace("{c}", F(" checked='checked'"));
@@ -1086,6 +1110,9 @@ String form_checkbox(const String& name, const String& info, const bool checked)
 	};
 	s.replace("{i}", info);
 	s.replace("{n}", name);
+	if (! linebreak) {
+		s.replace("<br/>", "");
+	}
 	return s;
 }
 
@@ -1199,10 +1226,10 @@ String add_sensor_type(const String& sensor_text) {
 }
 
 /*****************************************************************
-/* Webserver request auth: prompt for BasicAuth
+ * Webserver request auth: prompt for BasicAuth
  *
  * -Provide BasicAuth for all page contexts except /values and images
-/*****************************************************************/
+ *****************************************************************/
 void webserver_request_auth() {
 	debug_out(F("validate request auth..."), DEBUG_MIN_INFO, 1);
 	if (www_basicauth_enabled) {
@@ -1213,8 +1240,8 @@ void webserver_request_auth() {
 }
 
 /*****************************************************************
-/* Webserver root: show all options                              *
-/*****************************************************************/
+ * Webserver root: show all options                              *
+ *****************************************************************/
 void webserver_root() {
 	if (WiFi.status() != WL_CONNECTED) {
 		server.sendHeader(F("Location"), F("http://192.168.4.1/config"));
@@ -1237,18 +1264,17 @@ void webserver_root() {
 }
 
 /*****************************************************************
-/* Webserver config: show config page                            *
-/*****************************************************************/
+ * Webserver config: show config page                            *
+ *****************************************************************/
 void webserver_config() {
 	webserver_request_auth();
 
 	String page_content = make_header(FPSTR(INTL_KONFIGURATION));
 	String masked_pwd = "";
-	int i = 0;
 	last_page_load = millis();
 
 	debug_out(F("output config page ..."), DEBUG_MIN_INFO, 1);
-	if (WiFi.status() != WL_CONNECTED) {  // scan for wlan ssids
+	if (wificonfig_loop) {  // scan for wlan ssids
 		page_content += FPSTR(WEB_CONFIG_SCRIPT);
 	}
 	if (server.method() == HTTP_GET) {
@@ -1256,7 +1282,7 @@ void webserver_config() {
 		page_content += FPSTR(INTL_WLAN_DATEN);
 		page_content += F("</b><br/>");
 		debug_out(F("output config page 1"), DEBUG_MIN_INFO, 1);
-		if (WiFi.status() != WL_CONNECTED) {  // scan for wlan ssids
+		if (wificonfig_loop) {  // scan for wlan ssids
 			page_content += F("<div id='wifilist'>");
 			page_content += FPSTR(INTL_WLAN_LISTE);
 			page_content += F("</div><br/>");
@@ -1264,50 +1290,54 @@ void webserver_config() {
 		page_content += F("<table>");
 		page_content += form_input("wlanssid", FPSTR(INTL_FS_WIFI_NAME), wlanssid, 64);
 		page_content += form_password("wlanpwd", FPSTR(INTL_PASSWORT), wlanpwd, 64);
-		page_content += form_submit(FPSTR(INTL_SPEICHERN));
 		page_content += F("</table><br/><hr/>\n<b>");
 
 		page_content += FPSTR(INTL_AB_HIER_NUR_ANDERN);
 		page_content += F("</b><br/><br/>\n<b>");
 
-		page_content += FPSTR(INTL_BASICAUTH);
-		page_content += F("</b><br/>");
-		page_content += F("<table>");
-		page_content += form_input("www_username", FPSTR(INTL_BENUTZER), www_username, 64);
-		page_content += form_password("www_password", FPSTR(INTL_PASSWORT), www_password, 64);
-		page_content += form_checkbox("www_basicauth_enabled", FPSTR(INTL_BASICAUTH), www_basicauth_enabled);
-		page_content += form_submit(FPSTR(INTL_SPEICHERN));
+		if (! wificonfig_loop) {
+			page_content += FPSTR(INTL_BASICAUTH);
+			page_content += F("</b><br/>");
+			page_content += F("<table>");
+			page_content += form_input("www_username", FPSTR(INTL_BENUTZER), www_username, 64);
+			page_content += form_password("www_password", FPSTR(INTL_PASSWORT), www_password, 64);
+			page_content += form_checkbox("www_basicauth_enabled", FPSTR(INTL_BASICAUTH), www_basicauth_enabled);
 
-		page_content += F("</table><br/>\n<b>");
-		page_content += FPSTR(INTL_FS_WIFI);
-		page_content += F("</b><br/>");
-		page_content += FPSTR(INTL_FS_WIFI_BESCHREIBUNG);
-		page_content += F("<br/>");
-		page_content += F("<table>");
-		page_content += form_input("fs_ssid", FPSTR(INTL_FS_WIFI_NAME), fs_ssid, 64);
-		page_content += form_password("fs_pwd", FPSTR(INTL_PASSWORT), fs_pwd, 64);
-		page_content += form_submit(FPSTR(INTL_SPEICHERN));
+			page_content += F("</table><br/>\n<b>");
+			page_content += FPSTR(INTL_FS_WIFI);
+			page_content += F("</b><br/>");
+			page_content += FPSTR(INTL_FS_WIFI_BESCHREIBUNG);
+			page_content += F("<br/>");
+			page_content += F("<table>");
+			page_content += form_input("fs_ssid", FPSTR(INTL_FS_WIFI_NAME), fs_ssid, 64);
+			page_content += form_password("fs_pwd", FPSTR(INTL_PASSWORT), fs_pwd, 64);
 
-		page_content += F("</table><br/>\n<b>APIs</b><br/>");
-		page_content += form_checkbox("send2dusti", F("API Luftdaten.info"), send2dusti);
-		page_content += form_checkbox("send2madavi", F("API Madavi.de"), send2madavi);
-		page_content += F("<br/>\n<b>");
+			page_content += F("</table><br/>\n<b>APIs</b><br/>");
+			page_content += form_checkbox("send2dusti", F("API Luftdaten.info"), send2dusti, false);
+			page_content += F("&nbsp;&nbsp;(");
+			page_content += form_checkbox("ssl_dusti", F("HTTPS"), ssl_dusti, false);
+			page_content += F(")<br/>");
+			page_content += form_checkbox("send2madavi", F("API Madavi.de"), send2madavi, false);
+			page_content += F("&nbsp;&nbsp;(");
+			page_content += form_checkbox("ssl_madavi", F("HTTPS"), ssl_madavi, false);
+			page_content += F(")<br/><br/>\n<b>");
 
-		page_content += FPSTR(INTL_SENSOREN);
-		page_content += F("</b><br/>");
-		page_content += form_checkbox("sds_read", FPSTR(INTL_SDS011), sds_read);
-		page_content += form_checkbox("pms32_read", FPSTR(INTL_PMS32), pms32_read);
-		page_content += form_checkbox("pms24_read", FPSTR(INTL_PMS24), pms24_read);
-		page_content += form_checkbox("hpm_read", FPSTR(INTL_HPM), hpm_read);
-		page_content += form_checkbox("ppd_read", FPSTR(INTL_PPD42NS), ppd_read);
-		page_content += form_checkbox_sensor("dht_read", FPSTR(INTL_DHT22), dht_read);
-		page_content += form_checkbox_sensor("htu21d_read", FPSTR(INTL_HTU21D), htu21d_read);
-		page_content += form_checkbox_sensor("bmp_read", FPSTR(INTL_BMP180), bmp_read);
-		page_content += form_checkbox_sensor("bmp280_read", FPSTR(INTL_BMP280), bmp280_read);
-		page_content += form_checkbox_sensor("bme280_read", FPSTR(INTL_BME280), bme280_read);
-		page_content += form_checkbox_sensor("ds18b20_read", FPSTR(INTL_DS18B20), ds18b20_read);
-		page_content += form_checkbox("gps_read", FPSTR(INTL_NEO6M), gps_read);
-		page_content += F("<br/>\n<b>");
+			page_content += FPSTR(INTL_SENSOREN);
+			page_content += F("</b><br/>");
+			page_content += form_checkbox("sds_read", FPSTR(INTL_SDS011), sds_read);
+			page_content += form_checkbox("pms32_read", FPSTR(INTL_PMS32), pms32_read);
+			page_content += form_checkbox("pms24_read", FPSTR(INTL_PMS24), pms24_read);
+			page_content += form_checkbox("hpm_read", FPSTR(INTL_HPM), hpm_read);
+			page_content += form_checkbox("ppd_read", FPSTR(INTL_PPD42NS), ppd_read);
+			page_content += form_checkbox_sensor("dht_read", FPSTR(INTL_DHT22), dht_read);
+			page_content += form_checkbox_sensor("htu21d_read", FPSTR(INTL_HTU21D), htu21d_read);
+			page_content += form_checkbox_sensor("bmp_read", FPSTR(INTL_BMP180), bmp_read);
+			page_content += form_checkbox_sensor("bmp280_read", FPSTR(INTL_BMP280), bmp280_read);
+			page_content += form_checkbox_sensor("bme280_read", FPSTR(INTL_BME280), bme280_read);
+			page_content += form_checkbox_sensor("ds18b20_read", FPSTR(INTL_DS18B20), ds18b20_read);
+			page_content += form_checkbox("gps_read", FPSTR(INTL_NEO6M), gps_read);
+			page_content += F("<br/>\n<b>");
+		}
 
 		page_content += FPSTR(INTL_WEITERE_EINSTELLUNGEN);
 		page_content += F("</b><br/>");
@@ -1318,39 +1348,47 @@ void webserver_config() {
 		page_content += form_checkbox("has_lcd1602_27", FPSTR(INTL_LCD1602_27), has_lcd1602_27);
 		page_content += form_checkbox("has_lcd1602", FPSTR(INTL_LCD1602_3F), has_lcd1602);
 		page_content += form_checkbox("has_lcd2004_27", FPSTR(INTL_LCD2004_27), has_lcd2004_27);
-		page_content += F("<table>");
-		page_content += form_select_lang();
-		page_content += form_input("debug", FPSTR(INTL_DEBUG_LEVEL), String(debug), 5);
-		page_content += form_input("sending_intervall_ms", FPSTR(INTL_MESSINTERVALL), String(sending_intervall_ms / 1000), 5);
-		page_content += form_input("time_for_wifi_config", FPSTR(INTL_DAUER_ROUTERMODUS), String(time_for_wifi_config / 1000), 5);
-		page_content += F("</table><br/>\n<b>");
 
-		page_content += FPSTR(INTL_WEITERE_APIS);
-		page_content += F("</b><br/><br/>");
-		page_content += form_checkbox("send2sensemap", tmpl(FPSTR(INTL_SENDEN_AN), F("OpenSenseMap")), send2sensemap);
-		page_content += F("<table>");
-		page_content += form_input("senseboxid", "senseBox-ID: ", senseboxid, 50);
-		page_content += F("</table><br/>");
-		page_content += form_checkbox("send2custom", FPSTR(INTL_AN_EIGENE_API_SENDEN), send2custom);
-		page_content += F("<table>");
-		page_content += form_input("host_custom", FPSTR(INTL_SERVER), host_custom, 50);
-		page_content += form_input("url_custom", FPSTR(INTL_PFAD), url_custom, 50);
-		page_content += form_input("port_custom", FPSTR(INTL_PORT), String(port_custom), 30);
-		page_content += form_input("user_custom", FPSTR(INTL_BENUTZER), user_custom, 50);
-		page_content += form_password("pwd_custom", FPSTR(INTL_PASSWORT), pwd_custom, 50);
-		page_content += F("</table><br/>");
-		page_content += form_checkbox("send2influx", tmpl(FPSTR(INTL_SENDEN_AN), F("InfluxDB")), send2influx);
-		page_content += F("<table>");
-		page_content += form_input("host_influx", FPSTR(INTL_SERVER), host_influx, 50);
-		page_content += form_input("url_influx", FPSTR(INTL_PFAD), url_influx, 50);
-		page_content += form_input("port_influx", FPSTR(INTL_PORT), String(port_influx), 30);
-		page_content += form_input("user_influx", FPSTR(INTL_BENUTZER), user_influx, 50);
-		page_content += form_password("pwd_influx", FPSTR(INTL_PASSWORT), pwd_influx, 50);
-		page_content += form_submit(FPSTR(INTL_SPEICHERN));
-		page_content += F("</table><br/>");
-		page_content += F("<br/></form>");
-		if (WiFi.status() != WL_CONNECTED) {  // scan for wlan ssids
-			page_content += F("<script>window.setTimeout(load_wifi_list,3000);</script>");
+		if (! wificonfig_loop) {
+			page_content += F("<table>");
+			page_content += form_select_lang();
+			page_content += form_input("debug", FPSTR(INTL_DEBUG_LEVEL), String(debug), 5);
+			page_content += form_input("sending_intervall_ms", FPSTR(INTL_MESSINTERVALL), String(sending_intervall_ms / 1000), 5);
+			page_content += form_input("time_for_wifi_config", FPSTR(INTL_DAUER_ROUTERMODUS), String(time_for_wifi_config / 1000), 5);
+			page_content += F("</table><br/>\n<b>");
+
+			page_content += FPSTR(INTL_WEITERE_APIS);
+			page_content += F("</b><br/><br/>");
+			page_content += form_checkbox("send2fsapp", tmpl(FPSTR(INTL_SENDEN_AN), F("Feinstaub-App")), send2fsapp);
+			page_content += F("<br/>");
+			page_content += form_checkbox("send2sensemap", tmpl(FPSTR(INTL_SENDEN_AN), F("OpenSenseMap")), send2sensemap);
+			page_content += F("<table>");
+			page_content += form_input("senseboxid", "senseBox-ID: ", senseboxid, 50);
+			page_content += F("</table><br/>");
+			page_content += form_checkbox("send2custom", FPSTR(INTL_AN_EIGENE_API_SENDEN), send2custom);
+			page_content += F("<table>");
+			page_content += form_input("host_custom", FPSTR(INTL_SERVER), host_custom, 50);
+			page_content += form_input("url_custom", FPSTR(INTL_PFAD), url_custom, 50);
+			page_content += form_input("port_custom", FPSTR(INTL_PORT), String(port_custom), 30);
+			page_content += form_input("user_custom", FPSTR(INTL_BENUTZER), user_custom, 50);
+			page_content += form_password("pwd_custom", FPSTR(INTL_PASSWORT), pwd_custom, 50);
+			page_content += F("</table><br/>");
+			page_content += form_checkbox("send2influx", tmpl(FPSTR(INTL_SENDEN_AN), F("InfluxDB")), send2influx);
+			page_content += F("<table>");
+			page_content += form_input("host_influx", FPSTR(INTL_SERVER), host_influx, 50);
+			page_content += form_input("url_influx", FPSTR(INTL_PFAD), url_influx, 50);
+			page_content += form_input("port_influx", FPSTR(INTL_PORT), String(port_influx), 30);
+			page_content += form_input("user_influx", FPSTR(INTL_BENUTZER), user_influx, 50);
+			page_content += form_password("pwd_influx", FPSTR(INTL_PASSWORT), pwd_influx, 50);
+			page_content += form_submit(FPSTR(INTL_SPEICHERN));
+			page_content += F("</table><br/>");
+			page_content += F("<br/></form>");
+		}
+		if (wificonfig_loop) {  // scan for wlan ssids
+			page_content += F("<table>");
+			page_content += form_submit(FPSTR(INTL_SPEICHERN));
+			page_content += F("</table><br/>");
+			page_content += F("<script>window.setTimeout(load_wifi_list,1000);</script>");
 		}
 	} else {
 
@@ -1358,35 +1396,62 @@ void webserver_config() {
 #define readBoolParam(param) param = false; if (server.hasArg(#param)){ param = server.arg(#param) == "1"; }
 #define readIntParam(param)  if (server.hasArg(#param)){ int val = server.arg(#param).toInt(); if (val != 0){ param = val; }}
 #define readTimeParam(param)  if (server.hasArg(#param)){ int val = server.arg(#param).toInt(); if (val != 0){ param = val*1000; }}
-#define readPasswdParam(param) if (server.hasArg(#param)){ i = 0; masked_pwd = ""; for (i=0;i<server.arg(#param).length();i++) masked_pwd += "*"; if (masked_pwd != server.arg(#param) || server.arg(#param) == "") { server.arg(#param).toCharArray(param, sizeof(param)); } }
+#define readPasswdParam(param) if (server.hasArg(#param)){ masked_pwd = ""; for (uint8_t i=0;i<server.arg(#param).length();i++) masked_pwd += "*"; if (masked_pwd != server.arg(#param) || server.arg(#param) == "") { server.arg(#param).toCharArray(param, sizeof(param)); } }
 
 		if (server.hasArg("wlanssid") && server.arg("wlanssid") != "") {
 			readCharParam(wlanssid);
 			readPasswdParam(wlanpwd);
 		}
-		readCharParam(current_lang);
-		readCharParam(www_username);
-		readPasswdParam(www_password);
-		readBoolParam(www_basicauth_enabled);
-		readCharParam(fs_ssid);
-		if (server.hasArg("fs_pwd") && (server.arg("fs_pwd").length() > 7)) {
-			readPasswdParam(fs_pwd);
+		if (! wificonfig_loop) {
+			readCharParam(current_lang);
+			readCharParam(www_username);
+			readPasswdParam(www_password);
+			readBoolParam(www_basicauth_enabled);
+			readCharParam(fs_ssid);
+			if (server.hasArg("fs_pwd") && ((server.arg("fs_pwd").length() > 7) || (server.arg("fs_pwd").length() == 0))) {
+				readPasswdParam(fs_pwd);
+			}
+			readBoolParam(send2dusti);
+			readBoolParam(ssl_dusti);
+			readBoolParam(send2madavi);
+			readBoolParam(ssl_madavi);
+			readBoolParam(send2sensemap);
+			readBoolParam(send2fsapp);
+			readBoolParam(dht_read);
+			readBoolParam(htu21d_read);
+			readBoolParam(sds_read);
+			readBoolParam(pms24_read);
+			readBoolParam(pms32_read);
+			readBoolParam(hpm_read);
+			readBoolParam(ppd_read);
+			readBoolParam(bmp_read);
+			readBoolParam(bmp280_read);
+			readBoolParam(bme280_read);
+			readBoolParam(ds18b20_read);
+			readBoolParam(gps_read);
+
+			readIntParam(debug);
+			readTimeParam(sending_intervall_ms);
+			readTimeParam(time_for_wifi_config);
+
+			readCharParam(senseboxid);
+
+			readBoolParam(send2custom);
+			readCharParam(host_custom);
+			readCharParam(url_custom);
+			readIntParam(port_custom);
+			readCharParam(user_custom);
+			readPasswdParam(pwd_custom);
+
+			readBoolParam(send2influx);
+			readCharParam(host_influx);
+			readCharParam(url_influx);
+			readIntParam(port_influx);
+			readCharParam(user_influx);
+			readPasswdParam(pwd_influx);
+
 		}
-		readBoolParam(send2dusti);
-		readBoolParam(send2madavi);
-		readBoolParam(send2sensemap);
-		readBoolParam(dht_read);
-		readBoolParam(htu21d_read);
-		readBoolParam(sds_read);
-		readBoolParam(pms24_read);
-		readBoolParam(pms32_read);
-		readBoolParam(hpm_read);
-		readBoolParam(ppd_read);
-		readBoolParam(bmp_read);
-		readBoolParam(bmp280_read);
-		readBoolParam(bme280_read);
-		readBoolParam(ds18b20_read);
-		readBoolParam(gps_read);
+
 		readBoolParam(auto_update);
 		readBoolParam(use_beta);
 		readBoolParam(has_display);
@@ -1394,25 +1459,6 @@ void webserver_config() {
 		readBoolParam(has_lcd1602);
 		readBoolParam(has_lcd1602_27);
 		readBoolParam(has_lcd2004_27);
-		readIntParam(debug);
-		readTimeParam(sending_intervall_ms);
-		readTimeParam(time_for_wifi_config);
-
-		readCharParam(senseboxid);
-
-		readBoolParam(send2custom);
-		readCharParam(host_custom);
-		readCharParam(url_custom);
-		readIntParam(port_custom);
-		readCharParam(user_custom);
-		readPasswdParam(pwd_custom);
-
-		readBoolParam(send2influx);
-		readCharParam(host_influx);
-		readCharParam(url_influx);
-		readIntParam(port_influx);
-		readCharParam(user_influx);
-		readPasswdParam(pwd_influx);
 
 #undef readCharParam
 #undef readBoolParam
@@ -1472,69 +1518,70 @@ void webserver_config() {
 		}
 	}
 	page_content += make_footer();
+	server.sendHeader(F("Cache-Control"), F("no-cache, no-store, must-revalidate"));
+	server.sendHeader(F("Pragma"), F("no-cache"));
+	server.sendHeader(F("Expires"), F("0"));
 	server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
 }
 
 /*****************************************************************
-/* Webserver wifi: show available wifi networks                  *
-/*****************************************************************/
+ * Webserver wifi: show available wifi networks                  *
+ *****************************************************************/
 void webserver_wifi() {
-	WiFi.disconnect();
-	debug_out(F("scan for wifi networks..."), DEBUG_MIN_INFO, 1);
-	int n = WiFi.scanNetworks();
 	debug_out(F("wifi networks found: "), DEBUG_MIN_INFO, 0);
-	debug_out(String(n), DEBUG_MIN_INFO, 1);
+	debug_out(String(count_wifiInfo), DEBUG_MIN_INFO, 1);
 	String page_content = "";
-	if (n == 0) {
+	if (count_wifiInfo == 0) {
 		page_content += F("<br/>");
 		page_content += FPSTR(INTL_KEINE_NETZWERKE);
 		page_content += F("<br/>");
 	} else {
 		page_content += FPSTR(INTL_NETZWERKE_GEFUNDEN);
-		page_content += String(n);
+		page_content += String(count_wifiInfo);
 		page_content += F("<br/>");
-		int indices[n];
+		int* indices = new int[count_wifiInfo];
 		debug_out(F("output config page 2"), DEBUG_MIN_INFO, 1);
-		for (int i = 0; i < n; i++) {
+		for (int i = 0; i < count_wifiInfo; i++) {
 			indices[i] = i;
 		}
-		for (int i = 0; i < n; i++) {
-			for (int j = i + 1; j < n; j++) {
-				if (WiFi.RSSI(indices[j]) > WiFi.RSSI(indices[i])) {
+		for (int i = 0; i < count_wifiInfo; i++) {
+			for (int j = i + 1; j < count_wifiInfo; j++) {
+				if (wifiInfo[indices[j]].RSSI > wifiInfo[indices[i]].RSSI) {
 					std::swap(indices[i], indices[j]);
 				}
 			}
 		}
 		String cssid;
 		debug_out(F("output config page 3"), DEBUG_MIN_INFO, 1);
-		for (int i = 0; i < n; i++) {
+		for (int i = 0; i < count_wifiInfo; i++) {
 			if (indices[i] == -1) {
 				continue;
 			}
-			cssid = WiFi.SSID(indices[i]);
-			for (int j = i + 1; j < n; j++) {
-				if (cssid == WiFi.SSID(indices[j])) {
+			cssid = wifiInfo[indices[i]].ssid;
+			for (int j = i + 1; j < count_wifiInfo; j++) {
+				if (cssid == wifiInfo[indices[j]].ssid) {
 					indices[j] = -1; // set dup aps to index -1
 				}
 			}
 		}
 		page_content += F("<br/><table>");
 		//if(n > 30) n=30;
-		for (int i = 0; i < n; ++i) {
-			if (indices[i] == -1) {
+		for (int i = 0; i < count_wifiInfo; ++i) {
+			if (indices[i] == -1 || wifiInfo[indices[i]].isHidden) {
 				continue;
 			}
 			// Print SSID and RSSI for each network found
-			page_content += wlan_ssid_to_table_row(WiFi.SSID(indices[i]), ((WiFi.encryptionType(indices[i]) == ENC_TYPE_NONE) ? " " : "*"), WiFi.RSSI(indices[i]));
+			page_content += wlan_ssid_to_table_row(wifiInfo[indices[i]].ssid, ((wifiInfo[indices[i]].encryptionType == ENC_TYPE_NONE) ? " " : "*"), wifiInfo[indices[i]].RSSI);
 		}
 		page_content += F("</table><br/><br/>");
+		delete[] indices;
 	}
 	server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
 }
 
 /*****************************************************************
-/* Webserver root: show latest values                            *
-/*****************************************************************/
+ * Webserver root: show latest values                            *
+ *****************************************************************/
 void webserver_values() {
 	if (WiFi.status() != WL_CONNECTED) {
 		server.sendHeader(F("Location"), F("http://192.168.4.1/config"));
@@ -1642,8 +1689,8 @@ void webserver_values() {
 }
 
 /*****************************************************************
-/* Webserver set debug level                                     *
-/*****************************************************************/
+ * Webserver set debug level                                     *
+ *****************************************************************/
 void webserver_debug_level() {
 	webserver_request_auth();
 
@@ -1685,8 +1732,8 @@ void webserver_debug_level() {
 }
 
 /*****************************************************************
-/* Webserver remove config                                       *
-/*****************************************************************/
+ * Webserver remove config                                       *
+ *****************************************************************/
 void webserver_removeConfig() {
 	webserver_request_auth();
 
@@ -1718,8 +1765,8 @@ void webserver_removeConfig() {
 }
 
 /*****************************************************************
-/* Webserver reset NodeMCU                                       *
-/*****************************************************************/
+ * Webserver reset NodeMCU                                       *
+ *****************************************************************/
 void webserver_reset() {
 	webserver_request_auth();
 
@@ -1740,8 +1787,8 @@ void webserver_reset() {
 }
 
 /*****************************************************************
-/* Webserver data.json                                           *
-/*****************************************************************/
+ * Webserver data.json                                           *
+ *****************************************************************/
 void webserver_data_json() {
 	String s1 = "";
 	unsigned long age = 0;
@@ -1776,8 +1823,8 @@ void webserver_data_json() {
 }
 
 /*****************************************************************
-/* Webserver prometheus metrics endpoint                         *
-/*****************************************************************/
+ * Webserver prometheus metrics endpoint                         *
+ *****************************************************************/
 void webserver_prometheus_endpoint() {
 	debug_out(F("output prometheus endpoint..."), DEBUG_MIN_INFO, 1);
 	String tmp_str;
@@ -1794,10 +1841,10 @@ void webserver_prometheus_endpoint() {
 	StaticJsonBuffer<2000> jsonBuffer;
 	JsonObject& json2data = jsonBuffer.parseObject(last_data_string);
 	if (json2data.success()) {
-		for (int i = 0; i < json2data["sensordatavalues"].size() - 1; i++) {
-			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value_type"].as<char*>());
+		for (uint8_t i = 0; i < json2data["sensordatavalues"].size() - 1; i++) {
+			tmp_str = json2data["sensordatavalues"][i]["value_type"].as<char*>();
 			data_4_prometheus += tmp_str + "{" + id + "} ";
-			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value"].as<char*>());
+			tmp_str = json2data["sensordatavalues"][i]["value"].as<char*>();
 			data_4_prometheus += tmp_str + "\n";
 		}
 		data_4_prometheus += F("last_sample_age_ms{");
@@ -1810,8 +1857,8 @@ void webserver_prometheus_endpoint() {
 }
 
 /*****************************************************************
-/* Webserver Images                                              *
-/*****************************************************************/
+ * Webserver Images                                              *
+ *****************************************************************/
 void webserver_images() {
 	if (server.hasArg("name")) {
 		if (server.arg("name") == F("luftdaten_logo")) {
@@ -1826,17 +1873,26 @@ void webserver_images() {
 }
 
 /*****************************************************************
-/* Webserver page not found                                      *
-/*****************************************************************/
+ * Webserver page not found                                      *
+ *****************************************************************/
 void webserver_not_found() {
 	last_page_load = millis();
 	debug_out(F("output not found page..."), DEBUG_MIN_INFO, 1);
-	server.send(404, FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN), F("Not found."));
+	if (WiFi.status() != WL_CONNECTED) {
+		if ((server.uri().indexOf(F("success.html")) != -1) || (server.uri().indexOf(F("detect.html")) != -1)) {
+			server.send(200,FPSTR(TXT_CONTENT_TYPE_TEXT_HTML),FPSTR(WEB_IOS_REDIRECT));
+		} else {
+			server.sendHeader(F("Location"), F("http://192.168.4.1/config"));
+			server.send(302, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), "");
+		}
+	} else {
+		server.send(404, FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN), F("Not found."));
+	}
 }
 
 /*****************************************************************
-/* Webserver setup                                               *
-/*****************************************************************/
+ * Webserver setup                                               *
+ *****************************************************************/
 void setup_webserver() {
 	server_name  = F("Feinstaubsensor-");
 	server_name += esp_chipid;
@@ -1861,12 +1917,13 @@ void setup_webserver() {
 }
 
 /*****************************************************************
-/* WifiConfig                                                    *
-/*****************************************************************/
+ * WifiConfig                                                    *
+ *****************************************************************/
 void wifiConfig() {
-	const char *softAP_password = "";
-	const byte DNS_PORT = 53;
-	int retry_count = 0;
+	String SSID;
+	uint8_t* BSSID;
+	int channels_rssi[14];
+	uint8_t AP_channel = 1;
 	DNSServer dnsServer;
 	IPAddress apIP(192, 168, 4, 1);
 	IPAddress netMsk(255, 255, 255, 0);
@@ -1879,12 +1936,35 @@ void wifiConfig() {
 
 	wificonfig_loop = true;
 
+	WiFi.disconnect(true);
+	debug_out(F("scan for wifi networks..."), DEBUG_MIN_INFO, 1);
+	count_wifiInfo = WiFi.scanNetworks(false, true);
+	wifiInfo = (struct_wifiInfo *) malloc(count_wifiInfo * 100);
+	for (int i = 0; i < 14; i++) {
+		channels_rssi[i] = -100;
+	}
+	for (int i = 0; i < count_wifiInfo; i++) {
+		WiFi.getNetworkInfo(i, SSID, wifiInfo[i].encryptionType, wifiInfo[i].RSSI, BSSID, wifiInfo[i].channel, wifiInfo[i].isHidden);
+		SSID.toCharArray(wifiInfo[i].ssid, 35);
+		if (wifiInfo[i].RSSI > channels_rssi[wifiInfo[i].channel]) {
+			channels_rssi[wifiInfo[i].channel] = wifiInfo[i].RSSI;
+		}
+	}
+	if ((channels_rssi[1] < channels_rssi[6]) && (channels_rssi[1] < channels_rssi[11])) {
+		AP_channel = 1;
+	} else if ((channels_rssi[6] < channels_rssi[1]) && (channels_rssi[6] < channels_rssi[11])) {
+		AP_channel = 6;
+	} else {
+		AP_channel = 11;
+	}
+
+	WiFi.mode(WIFI_AP);
 	WiFi.softAPConfig(apIP, apIP, netMsk);
-	WiFi.softAP(fs_ssid, fs_pwd);
+	WiFi.softAP(fs_ssid, fs_pwd, AP_channel);
 	debug_out(String(WLANPWD), DEBUG_MIN_INFO, 1);
 
 	dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
-	dnsServer.start(DNS_PORT, "*", apIP);
+	dnsServer.start(53, "*", apIP);							// 53 is port for DNS server
 
 	// 10 minutes timeout for wifi config
 	last_page_load = millis();
@@ -1903,9 +1983,11 @@ void wifiConfig() {
 		yield();
 	}
 
+	WiFi.disconnect(true);
 	WiFi.softAPdisconnect(true);
 	WiFi.mode(WIFI_STA);
-	WiFi.disconnect();
+
+	free(wifiInfo);
 
 	dnsServer.stop();
 
@@ -1915,13 +1997,6 @@ void wifiConfig() {
 	debug_out(wlanssid, DEBUG_MIN_INFO, 1);
 
 	WiFi.begin(wlanssid, wlanpwd);
-
-	while ((WiFi.status() != WL_CONNECTED) && (retry_count < 20)) {
-		delay(500);
-		debug_out(".", DEBUG_MIN_INFO, 0);
-		retry_count++;
-	}
-	debug_out("", DEBUG_MIN_INFO, 1);
 
 	debug_out(F("---- Result Webconfig ----"), DEBUG_MIN_INFO, 1);
 	debug_out(F("WLANSSID: "), DEBUG_MIN_INFO, 0);
@@ -1967,14 +2042,16 @@ void wifiConfig() {
 }
 
 /*****************************************************************
-/* WiFi auto connecting script                                   *
-/*****************************************************************/
+ * WiFi auto connecting script                                   *
+ *****************************************************************/
 void connectWifi() {
 	int retry_count = 0;
 	String s1 = String(fs_ssid);
 	String s2 = String(fs_ssid);
 	debug_out(String(WiFi.status()), DEBUG_MIN_INFO, 1);
 	WiFi.disconnect();
+	WiFi.setOutputPower(20.5);
+	WiFi.setPhyMode(WIFI_PHY_MODE_11G);
 	WiFi.mode(WIFI_STA);
 	WiFi.begin(wlanssid, wlanpwd); // Start WiFI
 
@@ -1992,7 +2069,7 @@ void connectWifi() {
 		s2 = s2.substring(16);
 		display_debug(s1, s2);
 		wifiConfig();
-		if (WiFi.status() != WL_CONNECTED) {
+		if ((WiFi.status() != WL_CONNECTED) && (! restart_needed)) {
 			retry_count = 0;
 			while ((WiFi.status() != WL_CONNECTED) && (retry_count < 20) && !restart_needed) {
 				delay(500);
@@ -2002,14 +2079,13 @@ void connectWifi() {
 			debug_out("", DEBUG_MIN_INFO, 1);
 		}
 	}
-	WiFi.softAPdisconnect(true);
 	debug_out(F("WiFi connected\nIP address: "), DEBUG_MIN_INFO, 0);
 	debug_out(IPAddress2String(WiFi.localIP()), DEBUG_MIN_INFO, 1);
 }
 
 /*****************************************************************
-/* send data to rest api                                         *
-/*****************************************************************/
+ * send data to rest api                                         *
+ *****************************************************************/
 void sendData(const String& data, const int pin, const char* host, const int httpPort, const char* url, const char* basic_auth_string, const String& contentType) {
 
 	debug_out(F("Start connecting to "), DEBUG_MIN_INFO, 0);
@@ -2022,7 +2098,7 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 	request_head += String(host) + "\r\n";
 	request_head += F("Content-Type: ");
 	request_head += contentType + "\r\n";
-	if (basic_auth_string != "") {
+	if (strlen(basic_auth_string) != 0) {
 		request_head += F("Authorization: Basic ");
 		request_head += String(basic_auth_string) + "\r\n";
 	}
@@ -2117,8 +2193,8 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 }
 
 /*****************************************************************
-/* send single sensor data to luftdaten.info api                 *
-/*****************************************************************/
+ * send single sensor data to luftdaten.info api                 *
+ *****************************************************************/
 void sendLuftdaten(const String& data, const int pin, const char* host, const int httpPort, const char* url, const char* replace_str) {
 	String data_4_dusti = F(data_first_part);
 	data_4_dusti.replace("{v}", SOFTWARE_VERSION);
@@ -2134,19 +2210,19 @@ void sendLuftdaten(const String& data, const int pin, const char* host, const in
 }
 
 /*****************************************************************
-/* send data to LoRa gateway                                     *
-/*****************************************************************/
+ * send data to LoRa gateway                                     *
+ *****************************************************************/
 void send_lora(const String& data) {
 }
 
 /*****************************************************************
-/* send data to mqtt api                                         *
-/*****************************************************************/
+ * send data to mqtt api                                         *
+ *****************************************************************/
 // rejected (see issue #33)
 
 /*****************************************************************
-/* send data to influxdb                                         *
-/*****************************************************************/
+ * send data to influxdb                                         *
+ *****************************************************************/
 String create_influxdb_string(const String& data) {
 	String tmp_str;
 	String data_4_influxdb = "";
@@ -2157,15 +2233,16 @@ String create_influxdb_string(const String& data) {
 	if (json2data.success()) {
 		data_4_influxdb += F("feinstaub,node=esp8266-");
 		data_4_influxdb += esp_chipid + " ";
-		for (int i = 0; i < json2data["sensordatavalues"].size(); i++) {
-			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value_type"].as<char*>());
+		for (uint8_t i = 0; i < json2data["sensordatavalues"].size(); i++) {
+			tmp_str = json2data["sensordatavalues"][i]["value_type"].as<char*>();
 			data_4_influxdb += tmp_str + "=";
-			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value"].as<char*>());
-			data_4_influxdb += tmp_str;
-			if (i < (json2data["sensordatavalues"].size() - 1)) {
-				data_4_influxdb += ",";
-			}
+			tmp_str = json2data["sensordatavalues"][i]["value"].as<char*>();
+			data_4_influxdb += tmp_str + ",";
 		}
+		if ((unsigned)(data_4_influxdb.lastIndexOf(',') + 1) == data_4_influxdb.length()) {
+			data_4_influxdb.remove(data_4_influxdb.length() - 1);
+		}
+
 		data_4_influxdb += "\n";
 	} else {
 		debug_out(F("Data read failed"), DEBUG_ERROR, 1);
@@ -2174,8 +2251,8 @@ String create_influxdb_string(const String& data) {
 }
 
 /*****************************************************************
-/* send data as csv to serial out                                *
-/*****************************************************************/
+ * send data as csv to serial out                                *
+ *****************************************************************/
 void send_csv(const String& data) {
 	String tmp_str;
 	String headline;
@@ -2187,10 +2264,10 @@ void send_csv(const String& data) {
 	if (json2data.success()) {
 		headline = F("Timestamp_ms;");
 		valueline = String(act_milli) + ";";
-		for (int i = 0; i < json2data["sensordatavalues"].size(); i++) {
-			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value_type"].as<char*>());
+		for (uint8_t i = 0; i < json2data["sensordatavalues"].size(); i++) {
+			tmp_str = json2data["sensordatavalues"][i]["value_type"].as<char*>();
 			headline += tmp_str + ";";
-			tmp_str = jsonBuffer.strdup(json2data["sensordatavalues"][i]["value"].as<char*>());
+			tmp_str = json2data["sensordatavalues"][i]["value"].as<char*>();
 			valueline += tmp_str + ";";
 		}
 		if (first_csv_line) {
@@ -2210,8 +2287,8 @@ void send_csv(const String& data) {
 }
 
 /*****************************************************************
-/* read DHT22 sensor values                                      *
-/*****************************************************************/
+ * read DHT22 sensor values                                      *
+ *****************************************************************/
 String sensorDHT() {
 	String s = "";
 	int i = 0;
@@ -2254,8 +2331,8 @@ String sensorDHT() {
 }
 
 /*****************************************************************
-/* read HTU21D sensor values                                     *
-/*****************************************************************/
+ * read HTU21D sensor values                                     *
+ *****************************************************************/
 String sensorHTU21D() {
 	String s = "";
 	double t;
@@ -2288,8 +2365,8 @@ String sensorHTU21D() {
 }
 
 /*****************************************************************
-/* read BMP180 sensor values                                     *
-/*****************************************************************/
+ * read BMP180 sensor values                                     *
+ *****************************************************************/
 String sensorBMP() {
 	String s = "";
 	int p;
@@ -2321,8 +2398,8 @@ String sensorBMP() {
 }
 
 /*****************************************************************
-/* read BMP280 sensor values                                     *
-/*****************************************************************/
+ * read BMP280 sensor values                                     *
+ *****************************************************************/
 String sensorBMP280() {
 	String s = "";
 	int p;
@@ -2354,8 +2431,8 @@ String sensorBMP280() {
 }
 
 /*****************************************************************
-/* read BME280 sensor values                                     *
-/*****************************************************************/
+ * read BME280 sensor values                                     *
+ *****************************************************************/
 String sensorBME280() {
 	String s = "";
 	double t;
@@ -2396,8 +2473,8 @@ String sensorBME280() {
 }
 
 /*****************************************************************
-/* read DS18B20 sensor values                                    *
-/*****************************************************************/
+ * read DS18B20 sensor values                                    *
+ *****************************************************************/
 String sensorDS18B20() {
 	String s = "";
 	int i = 0;
@@ -2432,8 +2509,8 @@ String sensorDS18B20() {
 }
 
 /*****************************************************************
-/* read SDS011 sensor values                                     *
-/*****************************************************************/
+ * read SDS011 sensor values                                     *
+ *****************************************************************/
 String sensorSDS() {
 	String s = "";
 	char buffer;
@@ -2441,9 +2518,8 @@ String sensorSDS() {
 	int len = 0;
 	int pm10_serial = 0;
 	int pm25_serial = 0;
-	int checksum_is;
+	int checksum_is = 0;
 	int checksum_ok = 0;
-	int position = 0;
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_SDS011), DEBUG_MED_INFO, 1);
 	if ((act_milli - starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
@@ -2570,8 +2646,8 @@ String sensorSDS() {
 }
 
 /*****************************************************************
-/* read Plantronic PM sensor sensor values                       *
-/*****************************************************************/
+ * read Plantronic PM sensor sensor values                       *
+ *****************************************************************/
 String sensorPMS(int msg_len) {
 	String s = "";
 	char buffer;
@@ -2580,10 +2656,9 @@ String sensorPMS(int msg_len) {
 	int pm1_serial = 0;
 	int pm10_serial = 0;
 	int pm25_serial = 0;
-	int checksum_is;
-	int checksum_should;
+	int checksum_is = 0;
+	int checksum_should = 0;
 	int checksum_ok = 0;
-	int position = 0;
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_PMSx003), DEBUG_MED_INFO, 1);
 	if ((act_milli - starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
@@ -2747,8 +2822,8 @@ String sensorPMS(int msg_len) {
 }
 
 /*****************************************************************
-/* read Honeywell PM sensor sensor values                       *
-/*****************************************************************/
+ * read Honeywell PM sensor sensor values                        *
+ *****************************************************************/
 String sensorHPM() {
 	String s = "";
 	char buffer;
@@ -2756,10 +2831,9 @@ String sensorHPM() {
 	int len = 0;
 	int pm10_serial = 0;
 	int pm25_serial = 0;
-	int checksum_is;
-	int checksum_should;
+	int checksum_is = 0;
+	int checksum_should = 0;
 	int checksum_ok = 0;
-	int position = 0;
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_HPM), DEBUG_MED_INFO, 1);
 	if ((act_milli - starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
@@ -2889,8 +2963,8 @@ String sensorHPM() {
 }
 
 /*****************************************************************
-/* read PPD42NS sensor values                                    *
-/*****************************************************************/
+ * read PPD42NS sensor values                                    *
+ *****************************************************************/
 String sensorPPD() {
 	boolean valP1 = HIGH;
 	boolean valP2 = HIGH;
@@ -2974,8 +3048,8 @@ String sensorPPD() {
 }
 
 /*****************************************************************
-/* read GPS sensor values                                        *
-/*****************************************************************/
+ * read GPS sensor values                                        *
+ *****************************************************************/
 String sensorGPS() {
 	String s = "";
 	String gps_lat = "";
@@ -3073,8 +3147,8 @@ String sensorGPS() {
 }
 
 /*****************************************************************
-/* AutoUpdate                                                    *
-/*****************************************************************/
+ * AutoUpdate                                                    *
+ *****************************************************************/
 void autoUpdate() {
 #if defined(ESP8266)
 	const char* update_host = UPDATE_HOST;
@@ -3116,8 +3190,8 @@ void autoUpdate() {
 }
 
 /*****************************************************************
-/* display values                                                *
-/*****************************************************************/
+ * display values                                                *
+ *****************************************************************/
 void display_values() {
 	double t_value = -128.0;
 	double h_value = -1.0;
@@ -3265,7 +3339,7 @@ void display_values() {
 			display_lines[2] = "Measurements: " + String(count_sends);
 			break;
 		}
-		for (int i = 0; i < screen_count; i++) {
+		for (uint8_t i = 0; i < screen_count; i++) {
 			if (i != (next_display_count % screen_count)) {
 				display_footer += " . ";
 			} else {
@@ -3363,8 +3437,8 @@ void display_values() {
 }
 
 /*****************************************************************
-/* Init OLED display                                             *
-/*****************************************************************/
+ * Init OLED display                                             *
+ *****************************************************************/
 void init_display() {
 	display.init();
 	display.setFont(Roboto_Mono_9);
@@ -3373,8 +3447,8 @@ void init_display() {
 }
 
 /*****************************************************************
-/* Init LCD display                                              *
-/*****************************************************************/
+ * Init LCD display                                              *
+ *****************************************************************/
 void init_lcd() {
 	if (has_lcd1602_27) {
 		lcd_1602_27.init();
@@ -3391,8 +3465,8 @@ void init_lcd() {
 }
 
 /*****************************************************************
-/* Init BMP280                                                   *
-/*****************************************************************/
+ * Init BMP280                                                   *
+ *****************************************************************/
 bool initBMP280(char addr) {
 	debug_out(F("Trying BMP280 sensor on "), DEBUG_MIN_INFO, 0);
 	debug_out(String(addr, HEX), DEBUG_MIN_INFO, 0);
@@ -3407,8 +3481,8 @@ bool initBMP280(char addr) {
 }
 
 /*****************************************************************
-/* Init BME280                                                   *
-/*****************************************************************/
+ * Init BME280                                                   *
+ *****************************************************************/
 bool initBME280(char addr) {
 	debug_out(F("Trying BME280 sensor on "), DEBUG_MIN_INFO, 0);
 	debug_out(String(addr, HEX), DEBUG_MIN_INFO, 0);
@@ -3429,8 +3503,8 @@ bool initBME280(char addr) {
 }
 
 /*****************************************************************
-/* The Setup                                                     *
-/*****************************************************************/
+ * The Setup                                                     *
+ *****************************************************************/
 void setup() {
 	Serial.begin(9600);					// Output to Serial at 9600 baud
 #if defined(ESP8266)
@@ -3583,8 +3657,8 @@ void setup() {
 }
 
 /*****************************************************************
-/* And action                                                    *
-/*****************************************************************/
+ * And action                                                    *
+ *****************************************************************/
 void loop() {
 	String data = "";
 	String tmp_str;
@@ -3730,7 +3804,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (PPD42NS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_PPD, PPD_API_PIN, HOST_DUSTI, PORT_DUSTI, URL_DUSTI, "PPD_");
+				sendLuftdaten(result_PPD, PPD_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "PPD_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3739,7 +3813,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (SDS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_SDS, SDS_API_PIN, HOST_DUSTI, PORT_DUSTI, URL_DUSTI, "SDS_");
+				sendLuftdaten(result_SDS, SDS_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "SDS_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3748,7 +3822,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (PMS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_PMS, PMS_API_PIN, HOST_DUSTI, PORT_DUSTI, URL_DUSTI, "PMS_");
+				sendLuftdaten(result_PMS, PMS_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "PMS_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3757,7 +3831,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (HPM): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_HPM, HPM_API_PIN, HOST_DUSTI, PORT_DUSTI, URL_DUSTI, "HPM_");
+				sendLuftdaten(result_HPM, HPM_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "HPM_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3766,7 +3840,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (DHT): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_DHT, DHT_API_PIN, HOST_DUSTI, PORT_DUSTI, URL_DUSTI, "DHT_");
+				sendLuftdaten(result_DHT, DHT_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "DHT_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3775,7 +3849,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (HTU21D): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_HTU21D, HTU21D_API_PIN, HOST_DUSTI, PORT_DUSTI, URL_DUSTI, "HTU21D_");
+				sendLuftdaten(result_HTU21D, HTU21D_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "HTU21D_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3784,7 +3858,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (BMP): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_BMP, BMP_API_PIN, HOST_DUSTI, PORT_DUSTI, URL_DUSTI, "BMP_");
+				sendLuftdaten(result_BMP, BMP_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "BMP_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3793,7 +3867,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (BMP280): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_BMP280, BMP280_API_PIN, HOST_DUSTI, PORT_DUSTI, URL_DUSTI, "BMP280_");
+				sendLuftdaten(result_BMP280, BMP280_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "BMP280_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3802,7 +3876,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (BME280): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_BME280, BME280_API_PIN, HOST_DUSTI, PORT_DUSTI, URL_DUSTI, "BME280_");
+				sendLuftdaten(result_BME280, BME280_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "BME280_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3812,7 +3886,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (DS18B20): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_DS18B20, DS18B20_API_PIN, HOST_DUSTI, PORT_DUSTI, URL_DUSTI, "DS18B20_");
+				sendLuftdaten(result_DS18B20, DS18B20_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "DS18B20_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3822,7 +3896,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (GPS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_GPS, GPS_API_PIN, HOST_DUSTI, PORT_DUSTI, URL_DUSTI, "GPS_");
+				sendLuftdaten(result_GPS, GPS_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "GPS_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3830,7 +3904,7 @@ void loop() {
 		data_sample_times += Value2Json("signal", signal_strength);
 		data += data_sample_times;
 
-		if (data.lastIndexOf(',') == (data.length() - 1)) {
+		if ((unsigned)(data.lastIndexOf(',') + 1) == data.length()) {
 			data.remove(data.length() - 1);
 		}
 		data += "]}";
@@ -3844,16 +3918,23 @@ void loop() {
 		if (send2madavi) {
 			debug_out(F("## Sending to madavi.de: "), DEBUG_MIN_INFO, 1);
 			start_send = millis();
-			sendData(data, 0, HOST_MADAVI, PORT_MADAVI, URL_MADAVI, "", FPSTR(TXT_CONTENT_TYPE_JSON));
+			sendData(data, 0, HOST_MADAVI, (ssl_madavi ? 443 : 80), URL_MADAVI, "", FPSTR(TXT_CONTENT_TYPE_JSON));
 			sum_send_time += millis() - start_send;
 		}
 
-		if (send2sensemap && (senseboxid != SENSEBOXID)) {
+		if (send2sensemap && (strcmp(senseboxid, SENSEBOXID) != 0)) {
 			debug_out(F("## Sending to opensensemap: "), DEBUG_MIN_INFO, 1);
 			start_send = millis();
 			sensemap_path = url_sensemap;
 			sensemap_path.replace("BOXID", senseboxid);
 			sendData(data, 0, host_sensemap, httpPort_sensemap, sensemap_path.c_str(), "", FPSTR(TXT_CONTENT_TYPE_JSON));
+			sum_send_time += millis() - start_send;
+		}
+
+		if (send2fsapp) {
+			debug_out(F("## Sending to Server FS App: "), DEBUG_MIN_INFO, 1);
+			start_send = millis();
+			sendData(data, 0, host_fsapp, httpPort_fsapp, url_fsapp.c_str(), "", FPSTR(TXT_CONTENT_TYPE_JSON));
 			sum_send_time += millis() - start_send;
 		}
 

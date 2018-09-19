@@ -96,6 +96,12 @@ const char WEB_RESET_CONTENT[] PROGMEM = "<h3>{t}</h3>\
 <table><tr><td><form method='POST' action'/reset'><input type='submit' class='submit_green' name='submit' value='{b}'/></form></td><td><a href='/'>{c}</a></td></tr></table>\
 ";
 
+const char WEB_IOS_REDIRECT[] PROGMEM = "<html><body>Redirecting...\
+<script type=\"text/javascript\">\
+window.location = \"http://192.168.4.1/config\";\
+</script>\
+</body></html>";
+
 // Created by http://oleddisplay.squix.ch/ Consider a donation
 // In case of problems make sure that you are using the font file with the correct version!
 const uint8_t Roboto_Mono_9[] PROGMEM = {

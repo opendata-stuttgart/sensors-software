@@ -16,8 +16,11 @@
 
 // Wohin gehen die Daten?
 #define SEND2DUSTI 1
+#define SSL_DUSTI 1
 #define SEND2MADAVI 1
+#define SSL_MADAVI 1
 #define SEND2SENSEMAP 0
+#define SEND2FSAPP 0
 #define SEND2MQTT 0
 #define SEND2INFLUX 0
 #define SEND2LORA 0

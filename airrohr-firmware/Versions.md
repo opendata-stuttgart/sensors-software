@@ -1,3 +1,50 @@
+NRZ-2018-111
+online since 2018-09-20
+* same as NRZ-2018-110-B11
+
+NRZ-2018-110-B11
+* config for sending data to "Feinstaub App" server
+* corrected removing hidden SSIDs from wifi list
+
+NRZ-2018-110-B10
+removing debug output of wifi password
+
+NRZ-2018-110-B9
+* removing hidden SSIDs from wifi list
+* another change for Captive portal support for iOS devices
+
+NRZ-2018-110-B8
+* changing back to previous version of Captive portal for iOS
+
+NRZ-2018-110-B7
+* adding SSL switch for API server (Luftdaten.info, Madavi.de, OpenSenseMap)
+* changes added to avoid message "Initialize indices array with constant value" in some IDEs
+* disable caching of config page, just in case that the client has received a blank page before
+* modified Captive portal for iOS devices
+
+NRZ-2018-110-B6
+* shorter config page in AP mode
+* removing 'save' buttons except the last on config page
+* deleting password for AP mode (for WPA/WPA2) wasn't possible
+
+NRZ-2018-110-B5
+* captive portal should work with iOS devices also
+* setting PHY layer 802.11g and max. signal strength just to be sure
+* removing some unneeded wifi connects after wifi config
+
+NRZ-2018-110-B4
+* scan for wifi networks before going to config mode to avoid wifi mode changes
+* select channel with lowest signal for AP mode
+
+NRZ-2018-110-B3
+* cosmetic changes to get rid of some compiler warnings
+
+NRZ-2018-110-B2
+* changed deprecated ArduinoJSON function calls
+
+NRZ-2018-110-B1
+* setting wifi mode to AP only in config mode
+
 NRZ-2018-109
 online since 2018-09-04
 * same as NRZ-2018-108-B1
