@@ -1,3 +1,7 @@
+NRZ-2018-111
+online since 2018-09-20
+* same as NRZ-2018-110-B11
+
 NRZ-2018-110-B11
 * config for sending data to "Feinstaub App" server
 * corrected removing hidden SSIDs from wifi list
