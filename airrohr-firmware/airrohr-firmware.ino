@@ -1567,7 +1567,7 @@ void webserver_wifi() {
 		page_content += F("<br/><table>");
 		//if(n > 30) n=30;
 		for (int i = 0; i < count_wifiInfo; ++i) {
-			if (indices[i] == -1 || wifiInfo[undices[i]].isHidden) {
+			if (indices[i] == -1 || wifiInfo[indices[i]].isHidden) {
 				continue;
 			}
 			// Print SSID and RSSI for each network found
