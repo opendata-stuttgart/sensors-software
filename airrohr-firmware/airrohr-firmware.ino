@@ -96,7 +96,7 @@
  *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-110-B10"
+#define SOFTWARE_VERSION "NRZ-2018-110-B11"
 
 /*****************************************************************
  * Includes                                                      *
@@ -187,6 +187,7 @@ bool gps_read = 0;
 bool send2dusti = 1;
 bool send2madavi = 1;
 bool send2sensemap = 0;
+bool send2fsapp = 0;
 bool send2custom = 0;
 bool send2lora = 1;
 bool send2influx = 0;
@@ -218,6 +219,10 @@ const char* host_sensemap = "ingress.opensensemap.org";
 String url_sensemap = "/boxes/BOXID/data?luftdaten=1";
 const int httpPort_sensemap = 443;
 char senseboxid[30] = "";
+
+const char* host_fsapp = "www.h2801469.stratoserver.net";
+String url_fsapp = "/data.php";
+const int httpPort_fsapp = 80;
 
 char host_influx[100] = "influx server";
 char url_influx[100] = "/write?db=luftdaten";
@@ -805,6 +810,7 @@ void copyExtDef() {
 	setDef(send2madavi, SEND2MADAVI);
 	setDef(ssl_madavi, SSL_MADAVI);
 	setDef(send2sensemap, SEND2SENSEMAP)
+	setDef(send2fsapp, SEND2FSAPP)
 	setDef(send2lora, SEND2LORA);
 	setDef(send2csv, SEND2CSV);
 	setDef(auto_update, AUTO_UPDATE);
@@ -897,6 +903,7 @@ void readConfig() {
 					setFromJSON(send2madavi);
 					setFromJSON(ssl_madavi);
 					setFromJSON(send2sensemap);
+					setFromJSON(send2fsapp);
 					setFromJSON(send2lora);
 					setFromJSON(send2csv);
 					setFromJSON(auto_update);
@@ -981,6 +988,7 @@ void writeConfig() {
 	copyToJSON_Bool(send2madavi);
 	copyToJSON_Bool(ssl_madavi);
 	copyToJSON_Bool(send2sensemap);
+	copyToJSON_Bool(send2fsapp);
 	copyToJSON_Bool(send2lora);
 	copyToJSON_Bool(send2csv);
 	copyToJSON_Bool(auto_update);
@@ -1351,6 +1359,8 @@ void webserver_config() {
 
 			page_content += FPSTR(INTL_WEITERE_APIS);
 			page_content += F("</b><br/><br/>");
+			page_content += form_checkbox("send2fsapp", tmpl(FPSTR(INTL_SENDEN_AN), F("Feinstaub-App")), send2fsapp);
+			page_content += F("<br/>");
 			page_content += form_checkbox("send2sensemap", tmpl(FPSTR(INTL_SENDEN_AN), F("OpenSenseMap")), send2sensemap);
 			page_content += F("<table>");
 			page_content += form_input("senseboxid", "senseBox-ID: ", senseboxid, 50);
@@ -1406,6 +1416,7 @@ void webserver_config() {
 			readBoolParam(send2madavi);
 			readBoolParam(ssl_madavi);
 			readBoolParam(send2sensemap);
+			readBoolParam(send2fsapp);
 			readBoolParam(dht_read);
 			readBoolParam(htu21d_read);
 			readBoolParam(sds_read);
@@ -3917,6 +3928,13 @@ void loop() {
 			sensemap_path = url_sensemap;
 			sensemap_path.replace("BOXID", senseboxid);
 			sendData(data, 0, host_sensemap, httpPort_sensemap, sensemap_path.c_str(), "", FPSTR(TXT_CONTENT_TYPE_JSON));
+			sum_send_time += millis() - start_send;
+		}
+
+		if (send2fsapp) {
+			debug_out(F("## Sending to Server FS App: "), DEBUG_MIN_INFO, 1);
+			start_send = millis();
+			sendData(data, 0, host_fsapp, httpPort_fsapp, url_fsapp.c_str(), "", FPSTR(TXT_CONTENT_TYPE_JSON));
 			sum_send_time += millis() - start_send;
 		}
 
