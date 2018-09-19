@@ -1,5 +1,6 @@
 NRZ-2018-110-B11
 * config for sending data to "Feinstaub App" server
+* corrected removing hidden SSIDs from wifi list
 
 NRZ-2018-110-B10
 removing debug output of wifi password
