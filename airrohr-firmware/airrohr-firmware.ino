@@ -1660,8 +1660,17 @@ void webserver_values() {
 			page_content += table_row_from_value(FPSTR(SENSORS_BME280), FPSTR(INTL_LUFTDRUCK),  check_display_value(last_value_BME280_P / 100.0, (-1 / 100.0), 2, 0), unit_P);
 		}
 		if (ds18b20_read) {
+			const int iNumSensors = ds18b20.getDS18Count();
 			page_content += empty_row;
-			page_content += table_row_from_value(FPSTR(SENSORS_DS18B20), FPSTR(INTL_TEMPERATUR), check_display_value(last_value_DS18B20_T, -128, 1, 0), unit_T);
+			for ( int iIdx = 0; iIdx < iNumSensors; ++iIdx)
+			{
+				uint8_t devAddr[8];
+				char szNameBuf[8];
+				ds18b20.getAddress(devAddr, iIdx);
+				snprintf( szNameBuf, 8, "-%02X%02X", devAddr[2], devAddr[1]);
+				double tempValue = ds18b20.getTempCByIndex(iIdx);
+				page_content += table_row_from_value(String(FPSTR(SENSORS_DS18B20)) + String(szNameBuf), FPSTR(INTL_TEMPERATUR), check_display_value( tempValue, -128, 1, 0), unit_T);
+			}
 		}
 		if (gps_read) {
 			page_content += empty_row;
@@ -2477,31 +2486,40 @@ String sensorBME280() {
  *****************************************************************/
 String sensorDS18B20() {
 	String s = "";
-	int i = 0;
 	double t;
+	uint8_t devAddr[8];
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_DS18B20), DEBUG_MED_INFO, 1);
+	debug_out(String("Sensor Resolution: ") + String(ds18b20.getResolution()), DEBUG_MED_INFO, 1);
 
 	last_value_DS18B20_T = -128;
 
-	//it's very unlikely (-127: impossible) to get these temperatures in reality. Most times this means that the sensor is currently faulty
-	//try 5 times to read the sensor, otherwise fail
-	do {
-		ds18b20.requestTemperatures();
-		//for now, we want to read only the first sensor
-		t = ds18b20.getTempCByIndex(0);
-		i++;
-		debug_out(F("DS18B20 trying...."), DEBUG_MIN_INFO, 0);
-		debug_out(String(i), DEBUG_MIN_INFO, 1);
-	} while(i < 5 && (isnan(t) || t == 85.0 || t == (-127.0)));
+	uint8_t u8DeviceCount = ds18b20.getDS18Count();
+	debug_out(String("# sensors: ") + String(u8DeviceCount), DEBUG_MED_INFO, 1);
 
-	if(i == 5) {
-		debug_out(F("DS18B20 couldn't be read."), DEBUG_ERROR, 1);
-	} else {
-		debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO, 0);
-		debug_out(Float2String(t) + " C", DEBUG_MIN_INFO, 1);
-		last_value_DS18B20_T = t;
-		s += Value2Json(F("DS18B20_temperature"), Float2String(last_value_DS18B20_T));
+  // Start temperature measurements
+  ds18b20.requestTemperatures();
+
+	for (uint8_t u8Idx = 0; u8Idx < u8DeviceCount; ++u8Idx)
+	{
+		t = ds18b20.getTempCByIndex(u8Idx);
+		bool bValid = ds18b20.getAddress(devAddr, u8Idx);
+		if (bValid)
+		{
+			char szTmp[32];
+			snprintf( szTmp, 64, "DS18B20_%02X%02X_temperature", devAddr[2], devAddr[1]);
+			last_value_DS18B20_T = t;
+			s += Value2Json(String(szTmp), Float2String(last_value_DS18B20_T));
+		}
+		else
+		{
+			debug_out(String("Invalid index provided!!!!!!!"), DEBUG_MIN_INFO, 1);
+		}
+
+		// getTempCByIndex might need some time, especially when high resolution is selected.
+		// Give the runtime a chance to do something in the meantime, otherwise the watchdog may barf.
+		yield();
 	}
+
 	debug_out(F("----"), DEBUG_MIN_INFO, 1);
 	debug_out(String(FPSTR(DBG_TXT_END_READING)) + FPSTR(SENSORS_DS18B20), DEBUG_MED_INFO, 1);
 
