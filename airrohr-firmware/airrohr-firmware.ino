@@ -429,7 +429,6 @@ struct struct_wifiInfo {
 	int32_t channel;
 	bool isHidden;
 };
-uint8_t size_wifiInfo = 35 + sizeof(uint8_t) + sizeof(int32_t) + sizeof(uint8_t) + sizeof(bool);
 
 struct struct_wifiInfo *wifiInfo;
 uint8_t count_wifiInfo;
