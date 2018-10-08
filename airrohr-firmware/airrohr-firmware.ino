@@ -243,7 +243,6 @@ String basic_auth_custom = "";
 #define UPDATE_PORT 80
 
 ESP8266WebServer server(80);
-int TimeZone = 1;
 
 /*****************************************************************
  * Display definitions                                           *
