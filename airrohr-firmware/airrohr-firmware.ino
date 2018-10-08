@@ -583,19 +583,19 @@ String Var2Json(const String& name, const int value) {
 void SDS_cmd(const uint8_t cmd) {
 	uint8_t buf[SDS_cmd_len];
 	switch (cmd) {
-	case (1):
+	case SDS_START:
 		memcpy_P(buf, start_SDS_cmd, SDS_cmd_len);
 		is_SDS_running = true;
 		break;
-	case (2):
+	case SDS_STOP:
 		memcpy_P(buf, stop_SDS_cmd, SDS_cmd_len);
 		is_SDS_running = false;
 		break;
-	case (3):
+	case SDS_CONTINUOUS_MODE:
 		memcpy_P(buf, continuous_mode_SDS_cmd, SDS_cmd_len);
 		is_SDS_running = true;
 		break;
-	case (4):
+	case SDS_VERSION_DATE:
 		memcpy_P(buf, version_SDS_cmd, SDS_cmd_len);
 		is_SDS_running = true;
 		break;
@@ -609,15 +609,15 @@ void SDS_cmd(const uint8_t cmd) {
 void PMS_cmd(const uint8_t cmd) {
 	uint8_t buf[PMS_cmd_len];
 	switch (cmd) {
-	case (1):
+	case PMS_START:
 		memcpy_P(buf, start_PMS_cmd, PMS_cmd_len);
 		is_PMS_running = true;
 		break;
-	case (2):
+	case PMS_STOP:
 		memcpy_P(buf, stop_PMS_cmd, PMS_cmd_len);
 		is_PMS_running = false;
 		break;
-	case (3):
+	case PMS_CONTINUOUS_MODE:
 		memcpy_P(buf, continuous_mode_PMS_cmd, PMS_cmd_len);
 		is_PMS_running = true;
 		break;
