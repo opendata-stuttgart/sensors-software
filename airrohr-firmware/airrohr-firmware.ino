@@ -1180,15 +1180,20 @@ String table_row_from_value(const String& sensor, const String& param, const Str
 	return s;
 }
 
-String wlan_ssid_to_table_row(const String& ssid, const String& encryption, const long rssi) {
-	long rssi_temp = rssi;
-	if (rssi_temp > -50) {
-		rssi_temp = -50;
+static int32_t calcWiFiSignalQuality(int32_t rssi)
+{
+	if (rssi > -50) {
+		rssi = -50;
 	}
-	if (rssi_temp < -100) {
-		rssi_temp = -100;
+	if (rssi < -100) {
+		rssi = -100;
 	}
-	int quality = (rssi_temp + 100) * 2;
+	return (rssi + 100) * 2;
+}
+
+String wlan_ssid_to_table_row(const String& ssid, const String& encryption, int32_t rssi) {
+	
+	const int quality = calcWiFiSignalQuality(rssi);
 	String s = F("<tr><td><a href='#wlanpwd' onclick='setSSID(this)' style='background:none;color:blue;padding:5px;display:inline;'>{n}</a>&nbsp;{e}</a></td><td style='width:80%;vertical-align:middle;'>{v}%</td></tr>");
 	s.replace("{n}", ssid);
 	s.replace("{e}", encryption);
@@ -1595,14 +1600,8 @@ void webserver_values() {
 		const String unit_P = "hPa";
 		String empty_row = F("<tr><td colspan='3'>&nbsp;</td></tr>");
 		last_page_load = millis();
-		long signal_strength = WiFi.RSSI();
-		if (signal_strength > -50) {
-			signal_strength = -50;
-		}
-		if (signal_strength < -100) {
-			signal_strength = -100;
-		}
-		int signal_quality = (signal_strength + 100) * 2;
+
+		const int signal_quality = calcWiFiSignalQuality(WiFi.RSSI());
 		debug_out(F("output values to web page..."), DEBUG_MIN_INFO, 1);
 		if (first_cycle) {
 			page_content += F("<b style='color:red'>");
@@ -1674,7 +1673,7 @@ void webserver_values() {
 		}
 
 		page_content += empty_row;
-		page_content += table_row_from_value("WiFi", FPSTR(INTL_SIGNAL),  String(signal_strength), "dBm");
+		page_content += table_row_from_value("WiFi", FPSTR(INTL_SIGNAL),  String(WiFi.RSSI()), "dBm");
 		page_content += table_row_from_value("WiFi", FPSTR(INTL_QUALITAT), String(signal_quality), "%");
 
 		page_content += empty_row;
@@ -3220,7 +3219,6 @@ void display_values() {
 	int screen_count = 0;
 	int screens[5];
 	int line_count = 0;
-	int signal = 0;
 	debug_out(F("output values to display..."), DEBUG_MIN_INFO, 1);
 	if (ppd_read) {
 		pm10_value = last_value_PPD_P1;
@@ -3330,14 +3328,10 @@ void display_values() {
 			display_lines[2] = "Alt: " + check_display_value(alt_value, -1000.0, 2, 10);
 			break;
 		case (4):
-			signal = WiFi.RSSI();
-			if (signal > -50) { signal = -50; }
-			if (signal < -100) { signal = -100; }
-			signal = (signal + 100) * 2;
 			display_header = F("Wifi info");
 			display_lines[0] = "IP: " + IPAddress2String(WiFi.localIP());
 			display_lines[1] = "SSID:" + WiFi.SSID();
-			display_lines[2] = "Signal: " + String(signal) + "%";
+			display_lines[2] = "Signal: " + String(calcWiFiSignalQuality(WiFi.RSSI())) + "%";
 			break;
 		case (5):
 			display_header = F("Device Info");
