@@ -631,15 +631,15 @@ void PMS_cmd(const uint8_t cmd) {
 void HPM_cmd(const uint8_t cmd) {
 	uint8_t buf[HPM_cmd_len];
 	switch (cmd) {
-	case (1):
+	case HPM_START:
 		memcpy_P(buf, start_HPM_cmd, HPM_cmd_len);
 		is_PMS_running = true;
 		break;
-	case (2):
+	case HPM_STOP:
 		memcpy_P(buf, stop_HPM_cmd, HPM_cmd_len);
 		is_PMS_running = false;
 		break;
-	case (3):
+	case HPM_CONTINUOUS_MODE:
 		memcpy_P(buf, continuous_mode_HPM_cmd, HPM_cmd_len);
 		is_PMS_running = true;
 		break;
