@@ -96,7 +96,7 @@
  *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-111"
+#define SOFTWARE_VERSION "NRZ-2018-112-B1"
 
 /*****************************************************************
  * Includes                                                      *
@@ -123,6 +123,7 @@
 #include <DallasTemperature.h>
 #include <TinyGPS++.h>
 #include <Ticker.h>
+#include <time.h>
 
 #if defined(INTL_BG)
 #include "intl_bg.h"
@@ -2051,7 +2052,7 @@ void connectWifi() {
 	debug_out(String(WiFi.status()), DEBUG_MIN_INFO, 1);
 	WiFi.disconnect();
 	WiFi.setOutputPower(20.5);
-	WiFi.setPhyMode(WIFI_PHY_MODE_11G);
+	WiFi.setPhyMode(WIFI_PHY_MODE_11N);
 	WiFi.mode(WIFI_STA);
 	WiFi.begin(wlanssid, wlanpwd); // Start WiFI
 
@@ -2124,30 +2125,36 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 			return;
 		}
 
-//		if (client_s.verifyCertChain(host)) {
-//			debug_out(F("Server certificate verified"), DEBUG_MIN_INFO,1);
-//		} else {
-//			debug_out(F("ERROR: certificate verification failed!"),DEBUG_MIN_INFO,1);
-//			return;
-//		}
+		bool res = client_s.setCACert_P(dst_root_ca_x3_bin_crt, dst_root_ca_x3_bin_crt_len);
+		if (!res) {
+			debug_out(F("Failed to load root CA cert!"),DEBUG_ERROR,1);
+		}
 
-		debug_out(F("Requesting URL: "), DEBUG_MIN_INFO, 0);
-		debug_out(url, DEBUG_MIN_INFO, 1);
-		debug_out(esp_chipid, DEBUG_MIN_INFO, 1);
-		debug_out(data, DEBUG_MIN_INFO, 1);
+		if (client_s.verifyCertChain(host)) {
+			debug_out(F("Server cert verified"), DEBUG_MIN_INFO,1);
 
-		// send request to the server
+			debug_out(F("Requesting URL: "), DEBUG_MIN_INFO, 0);
+			debug_out(url, DEBUG_MIN_INFO, 1);
+			debug_out(esp_chipid, DEBUG_MIN_INFO, 1);
+			debug_out(data, DEBUG_MIN_INFO, 1);
 
-		client_s.print(request_head);
+			// send request to the server
 
-		client_s.println(data);
+			client_s.print(request_head);
 
-		delay(10);
+			client_s.println(data);
 
-		// Read reply from server and print them
-		while(client_s.available()) {
-			char c = client_s.read();
-			debug_out(String(c), DEBUG_MAX_INFO, 0);
+			delay(10);
+
+			// Read reply from server and print them
+			while(client_s.available()) {
+				char c = client_s.read();
+				debug_out(String(c), DEBUG_MAX_INFO, 0);
+			}
+
+		} else {
+			debug_out(F("ERROR: cert verification failed!"),DEBUG_ERROR,1);
+			return;
 		}
 
 		debug_out(F("\nclosing connection\n----\n\n"), DEBUG_MIN_INFO, 1);
@@ -3526,6 +3533,15 @@ void setup() {
 		writeConfig();
 		delay(500);
 		ESP.restart();
+	}
+
+	debug_out(F("Setting time using SNTP"), DEBUG_MIN_INFO,1);
+	configTime(8 * 3600, 0, "pool.ntp.org", "time.nist.gov");
+	time_t now = time(nullptr);
+	while (now < 8 * 3600 * 2) {
+		delay(500);
+		Serial.print(".");
+		now = time(nullptr);
 	}
 
 	autoUpdate();

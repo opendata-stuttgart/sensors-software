@@ -1,3 +1,8 @@
+NRZ-2018-112-B1
+* setting PHY layer to 802.11n in station mode
+* switching to Arduino EXP8266 library 2.4.2 (see README.md)
+* added cert validation for API requests (Letsencrypt only at the moment)
+
 NRZ-2018-111
 online since 2018-09-20
 * same as NRZ-2018-110-B11

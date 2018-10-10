@@ -1,9 +1,9 @@
-# Version für Sensoren PPD42NS, SDS011, DHT22, BMP180 und NEO-6M.
+# Version für Sensoren PPD42NS, SDS011, DHT22, BMP180, NEO-6M und weitere (siehe Konfigurationsseite)
 
 Features:
 * gleichzeitiger Betrieb mehrerer Sensoren
 * Konfiguration über WLAN (Sensor als Access Point) möglich
-* Unterstützung von OLED-Displays mit SSD1306
+* Unterstützung von OLED-Displays mit SSD1306, SH1106 und LCD1602, LCD2004
 * Auswahl der API(s), an welche die Daten gesendet werden, inklusive der Möglichkeit, die Daten als CSV über USB auszugeben
 * nutzbar mit ESP8266 (NodeMCU und kompatible Boards)
 
@@ -43,8 +43,8 @@ Die Daten können als CSV via USB ausgegeben werden. Dafür sollte sowohl in ext
 
 ## Benötigte Software (in Klammern getestete Version und die Art der Lizenz):
 
-* [Arduino IDE](https://www.arduino.cc/en/Main/Software)  (Version 1.8.5) (GNU Lesser General Public License v2.1)
-* [ESP8266 für Arduino](http://arduino.esp8266.com/stable/package_esp8266com_index.json) (IMPORTANT: Version 2.3.0)
+* [Arduino IDE](https://www.arduino.cc/en/Main/Software)  (Version 1.8.7) (GNU Lesser General Public License v2.1)
+* [ESP8266 für Arduino](http://arduino.esp8266.com/stable/package_esp8266com_index.json) (Version 2.4.2)
 
 
 ### Einstellungen Arduino IDE
@@ -52,11 +52,16 @@ Die Daten können als CSV via USB ausgegeben werden. Dafür sollte sowohl in ext
 * Board: NodeMCU 1.0 (ESP-12E Module)
 * CPU Frequency: 80MHz
 * Flash Size: 4M (3M SPIFFS)
-Ab "ESP für Arduino 2.4":
+Ab "ESP für Arduino 2.4.2":
 * Debug Port: Disabled
 * Debug Level: NoAssert-NDEBUG
-* lwIP Variant: v1.4 Higher Bandwidth (Prebuild)
+* lwIP Variant: v2.0 Lower memory
+* VTables. Flash
 * Erase Flash: Only Sketch
+* in der Datei platform.txt die Zeile
+  'build.float=-u _printf_float -u _scanf_float'
+  ändern in
+  'build.float='
 
 ### Verwendete Bibliotheken (für ESP8266):
 
@@ -71,13 +76,12 @@ In ESP8266 für Arduino IDE enthalten:
 * DNSServer (GNU Lesser Public License >=2.1)
 
 Installierbar über Arduino IDE (Menü Sketch -> Bibliothek einbinden -> Bibliotheken verwalten, in Klammern die getestete Version und die Art der Lizenz):
-* [ArduinoJson](https://github.com/bblanchon/ArduinoJson) (5.13.1) (MIT)
+* [ArduinoJson](https://github.com/bblanchon/ArduinoJson) (5.13.2) (MIT)
 * [Adafruit Unified Sensor](https://github.com/adafruit/Adafruit_Sensor) (1.0.2) (Apache)
 * [Adafruit BMP085 library](https://github.com/adafruit/Adafruit-BMP085-Library) (1.0.0) (BSD)
 * [Adafruit BMP280 library](https://github.com/adafruit/Adafruit_BMP280_Library) (1.0.2) (BSD)
 * [Adafruit BME280 library](https://github.com/adafruit/Adafruit_BME280_Library) (1.0.7) (BSD)
 * [DallasTemperature](https://github.com/milesburton/Arduino-Temperature-Control-Library) (3.8.0)
-* [DHT sensor library](https://github.com/adafruit/DHT-sensor-library) (1.1.1) (MIT)
 * [ESP8266 and ESP32 Oled driver for SSD1306 display](https://github.com/squix78/esp8266-oled-ssd1306) (4.0.0) (MIT)
 * [OneWire](www.pjrc.com/teensy/td_libs_OneWire.html) (2.3.4)
 * [LiquidCrystal I2C](https://github.com/marcoschwartz/LiquidCrystal_I2C) (1.1.2)
@@ -95,6 +99,7 @@ Bis Version NRZ-2016-15:
 Ich hoffe, alle Bibliotheken erwischt zu haben. Falls beim Kompilieren eine Bibliothek fehlt, bitte als [Issue](https://github.com/opendata-stuttgart/sensors-software/issues/) melden. Ich trage dann die Infos nach.
 
 ACHTUNG: Die DHT sensor library hat ab Version 1.2 ein Problem auf den ESP8266. Daher unbedingt max. Version 1.1.1 benutzen
+Um Probleme zu vermeiden, haben wir die letzte funktionierende Version als lokale Kopie eingebunden.
 
 ## Anschluss der Sensoren
 
