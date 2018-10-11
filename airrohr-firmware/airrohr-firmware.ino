@@ -91,12 +91,16 @@
  * Der Sketch verwendet 459607 Bytes (44%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
  * Globale Variablen verwenden 48736 Bytes (59%) des dynamischen Speichers, 33184 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
  *
- * Der Sketch verwendet 458287 Bytes (43%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
- * Globale Variablen verwenden 48608 Bytes (59%) des dynamischen Speichers, 33312 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
+ * first version with esp8266 lib 2.4.2
+ * Der Sketch verwendet 491364 Bytes (47%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
+ * Globale Variablen verwenden 37172 Bytes (45%) des dynamischen Speichers, 44748 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
  *
+ * Der Sketch verwendet 491300 Bytes (47%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
+ * Globale Variablen verwenden 37172 Bytes (45%) des dynamischen Speichers, 44748 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
+ * 
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-112-B1"
+#define SOFTWARE_VERSION "NRZ-2018-112-B2"
 
 /*****************************************************************
  * Includes                                                      *
@@ -583,19 +587,19 @@ String Var2Json(const String& name, const int value) {
 void SDS_cmd(const uint8_t cmd) {
 	uint8_t buf[SDS_cmd_len];
 	switch (cmd) {
-	case SDS_START:
+	case PM_SENSOR_START:
 		memcpy_P(buf, start_SDS_cmd, SDS_cmd_len);
 		is_SDS_running = true;
 		break;
-	case SDS_STOP:
+	case PM_SENSOR_STOP:
 		memcpy_P(buf, stop_SDS_cmd, SDS_cmd_len);
 		is_SDS_running = false;
 		break;
-	case SDS_CONTINUOUS_MODE:
+	case PM_SENSOR_CONTINUOUS_MODE:
 		memcpy_P(buf, continuous_mode_SDS_cmd, SDS_cmd_len);
 		is_SDS_running = true;
 		break;
-	case SDS_VERSION_DATE:
+	case PM_SENSOR_VERSION_DATE:
 		memcpy_P(buf, version_SDS_cmd, SDS_cmd_len);
 		is_SDS_running = true;
 		break;
@@ -609,15 +613,15 @@ void SDS_cmd(const uint8_t cmd) {
 void PMS_cmd(const uint8_t cmd) {
 	uint8_t buf[PMS_cmd_len];
 	switch (cmd) {
-	case PMS_START:
+	case PM_SENSOR_START:
 		memcpy_P(buf, start_PMS_cmd, PMS_cmd_len);
 		is_PMS_running = true;
 		break;
-	case PMS_STOP:
+	case PM_SENSOR_STOP:
 		memcpy_P(buf, stop_PMS_cmd, PMS_cmd_len);
 		is_PMS_running = false;
 		break;
-	case PMS_CONTINUOUS_MODE:
+	case PM_SENSOR_CONTINUOUS_MODE:
 		memcpy_P(buf, continuous_mode_PMS_cmd, PMS_cmd_len);
 		is_PMS_running = true;
 		break;
@@ -631,15 +635,15 @@ void PMS_cmd(const uint8_t cmd) {
 void HPM_cmd(const uint8_t cmd) {
 	uint8_t buf[HPM_cmd_len];
 	switch (cmd) {
-	case HPM_START:
+	case PM_SENSOR_START:
 		memcpy_P(buf, start_HPM_cmd, HPM_cmd_len);
 		is_PMS_running = true;
 		break;
-	case HPM_STOP:
+	case PM_SENSOR_STOP:
 		memcpy_P(buf, stop_HPM_cmd, HPM_cmd_len);
 		is_PMS_running = false;
 		break;
-	case HPM_CONTINUOUS_MODE:
+	case PM_SENSOR_CONTINUOUS_MODE:
 		memcpy_P(buf, continuous_mode_HPM_cmd, HPM_cmd_len);
 		is_PMS_running = true;
 		break;
@@ -662,11 +666,11 @@ String SDS_version_date() {
 
 	debug_out(F("Start reading SDS011 version date"), DEBUG_MED_INFO, 1);
 
-	SDS_cmd(SDS_START);
+	SDS_cmd(PM_SENSOR_START);
 
 	delay(100);
 
-	SDS_cmd(SDS_VERSION_DATE);
+	SDS_cmd(PM_SENSOR_VERSION_DATE);
 
 	delay(500);
 
@@ -780,7 +784,7 @@ void copyExtDef() {
 	strcpyDef(www_password, WWW_PASSWORD);
 	strcpyDef(fs_ssid, FS_SSID);
 	strcpyDef(fs_pwd, FS_PWD);
-	if (strcmp(fs_ssid, "") == 0) {
+	if (fs_ssid[0] == '\0') {
 		strcpy(fs_ssid, "Feinstaubsensor-");
 		strcat(fs_ssid, esp_chipid.c_str());
 	}
@@ -1033,11 +1037,11 @@ void writeConfig() {
  *****************************************************************/
 void create_basic_auth_strings() {
 	basic_auth_custom = "";
-	if (strcmp(user_custom, "") != 0 || strcmp(pwd_custom, "") != 0) {
+	if (user_custom[0] != '\0' || pwd_custom[0] != '\0') {
 		basic_auth_custom = base64::encode(String(user_custom) + ":" + String(pwd_custom));
 	}
 	basic_auth_influx = "";
-	if (strcmp(user_influx, "") != 0 || strcmp(pwd_influx, "") != 0) {
+	if (user_influx[0] != '\0' || pwd_influx[0] != '\0') {
 		basic_auth_influx = base64::encode(String(user_influx) + ":" + String(pwd_influx));
 	}
 }
@@ -1171,8 +1175,7 @@ String table_row_from_value(const String& sensor, const String& param, const Str
 	return s;
 }
 
-static int32_t calcWiFiSignalQuality(int32_t rssi)
-{
+static int32_t calcWiFiSignalQuality(int32_t rssi) {
 	if (rssi > -50) {
 		rssi = -50;
 	}
@@ -2521,11 +2524,11 @@ String sensorSDS() {
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_SDS011), DEBUG_MED_INFO, 1);
 	if ((act_milli - starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
 		if (is_SDS_running) {
-			SDS_cmd(SDS_STOP);
+			SDS_cmd(PM_SENSOR_STOP);
 		}
 	} else {
 		if (! is_SDS_running) {
-			SDS_cmd(SDS_START);
+			SDS_cmd(PM_SENSOR_START);
 		}
 
 		while (serialSDS.available() > 0) {
@@ -2633,7 +2636,7 @@ String sensorSDS() {
 		sds_pm25_max = 0;
 		sds_pm25_min = 20000;
 		if ((sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms)) && (! will_check_for_update)) {
-			SDS_cmd(SDS_STOP);
+			SDS_cmd(PM_SENSOR_STOP);
 		}
 	}
 
@@ -2660,11 +2663,11 @@ String sensorPMS(int msg_len) {
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_PMSx003), DEBUG_MED_INFO, 1);
 	if ((act_milli - starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
 		if (is_PMS_running) {
-			PMS_cmd(PMS_STOP);
+			PMS_cmd(PM_SENSOR_STOP);
 		}
 	} else {
 		if (! is_PMS_running) {
-			PMS_cmd(PMS_START);
+			PMS_cmd(PM_SENSOR_START);
 		}
 
 		while (serialSDS.available() > 0) {
@@ -2809,7 +2812,7 @@ String sensorPMS(int msg_len) {
 		pms_pm25_max = 0;
 		pms_pm25_min = 20000;
 		if ((sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms)) && (! will_check_for_update)) {
-			PMS_cmd(PMS_STOP);
+			PMS_cmd(PM_SENSOR_STOP);
 		}
 	}
 
@@ -2835,11 +2838,11 @@ String sensorHPM() {
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_HPM), DEBUG_MED_INFO, 1);
 	if ((act_milli - starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
 		if (is_HPM_running) {
-			HPM_cmd(HPM_STOP);
+			HPM_cmd(PM_SENSOR_STOP);
 		}
 	} else {
 		if (! is_HPM_running) {
-			HPM_cmd(HPM_START);
+			HPM_cmd(PM_SENSOR_START);
 		}
 
 		while (serialSDS.available() > 0) {
@@ -2950,7 +2953,7 @@ String sensorHPM() {
 		hpm_pm25_max = 0;
 		hpm_pm25_min = 20000;
 		if ((sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms)) && (! will_check_for_update)) {
-			HPM_cmd(HPM_STOP);
+			HPM_cmd(PM_SENSOR_STOP);
 		}
 	}
 
@@ -3542,12 +3545,12 @@ void setup() {
 	}
 	if (sds_read) {
 		debug_out(F("Read SDS..."), DEBUG_MIN_INFO, 1);
-		SDS_cmd(SDS_START);
+		SDS_cmd(PM_SENSOR_START);
 		delay(100);
-		SDS_cmd(SDS_CONTINUOUS_MODE);
+		SDS_cmd(PM_SENSOR_CONTINUOUS_MODE);
 		delay(100);
 		debug_out(F("Stopping SDS011..."), DEBUG_MIN_INFO, 1);
-		SDS_cmd(SDS_STOP);
+		SDS_cmd(PM_SENSOR_STOP);
 	}
 	if (pms24_read) {
 		debug_out(F("Read PMS3003..."), DEBUG_MIN_INFO, 1);
@@ -3557,12 +3560,12 @@ void setup() {
 	}
 	if (hpm_read) {
 		debug_out(F("Read HPM..."), DEBUG_MIN_INFO, 1);
-		HPM_cmd(HPM_START);
+		HPM_cmd(PM_SENSOR_START);
 		delay(100);
-		HPM_cmd(HPM_CONTINUOUS_MODE);
+		HPM_cmd(PM_SENSOR_CONTINUOUS_MODE);
 		delay(100);
 		debug_out(F("Stopping HPM..."), DEBUG_MIN_INFO, 1);
-		HPM_cmd(HPM_STOP);
+		HPM_cmd(PM_SENSOR_STOP);
 	}
 	if (dht_read) {
 		dht.begin();                                        // Start DHT
@@ -3633,12 +3636,12 @@ void setup() {
 		debug_out(F("Show on LCD 2004 ..."), DEBUG_MIN_INFO, 1);
 	}
 	if (pms24_read || pms32_read) {
-		PMS_cmd(PMS_START);
+		PMS_cmd(PM_SENSOR_START);
 		delay(100);
-		PMS_cmd(PMS_CONTINUOUS_MODE);
+		PMS_cmd(PM_SENSOR_CONTINUOUS_MODE);
 		delay(100);
 		debug_out(F("Stopping PMS..."), DEBUG_MIN_INFO, 1);
-		PMS_cmd(PMS_STOP);
+		PMS_cmd(PM_SENSOR_STOP);
 	}
 
 	if (MDNS.begin(server_name.c_str())) {
@@ -3923,7 +3926,7 @@ void loop() {
 			sum_send_time += millis() - start_send;
 		}
 
-		if (send2sensemap && (strcmp(senseboxid, SENSEBOXID) != 0)) {
+		if (send2sensemap && (senseboxid[0] != '\0')) {
 			debug_out(F("## Sending to opensensemap: "), DEBUG_MIN_INFO, 1);
 			start_send = millis();
 			sensemap_path = url_sensemap;

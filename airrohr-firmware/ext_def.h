@@ -164,21 +164,11 @@
 #define DEBUG_MED_INFO 4
 #define DEBUG_MAX_INFO 5
 
-// Definition SDS011 sensor 'commands'
-#define SDS_START 1
-#define SDS_STOP 2
-#define SDS_CONTINUOUS_MODE 3
-#define SDS_VERSION_DATE 4
-
-// Definition PMSx003 sensor 'commands'
-#define PMS_START 1
-#define PMS_STOP 2
-#define PMS_CONTINUOUS_MODE 3
-
-// Definition Honeywell PM sensor 'commands'
-#define HPM_START 1
-#define HPM_STOP 2
-#define HPM_CONTINUOUS_MODE 3
+// Definition PM sensor 'commands'
+#define PM_SENSOR_START 1
+#define PM_SENSOR_STOP 2
+#define PM_SENSOR_CONTINUOUS_MODE 3
+#define PM_SENSOR_VERSION_DATE 4
 
 // Definition GPIOs for Zero based Arduino Feather M0 LoRaWAN
 #if defined(ARDUINO_SAMD_ZERO) && defined(SERIAL_PORT_USBVIRTUAL)
