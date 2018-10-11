@@ -3800,12 +3800,13 @@ void loop() {
 		server.handleClient();
 		yield();
 		server.stop();
+		const int HTTP_PORT_DUSTI = (ssl_dusti ? 443 : 80);
 		if (ppd_read) {
 			data += result_PPD;
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (PPD42NS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_PPD, PPD_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "PPD_");
+				sendLuftdaten(result_PPD, PPD_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "PPD_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3814,7 +3815,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (SDS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_SDS, SDS_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "SDS_");
+				sendLuftdaten(result_SDS, SDS_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "SDS_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3823,7 +3824,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (PMS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_PMS, PMS_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "PMS_");
+				sendLuftdaten(result_PMS, PMS_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "PMS_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3832,7 +3833,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (HPM): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_HPM, HPM_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "HPM_");
+				sendLuftdaten(result_HPM, HPM_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "HPM_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3841,7 +3842,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (DHT): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_DHT, DHT_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "DHT_");
+				sendLuftdaten(result_DHT, DHT_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "DHT_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3850,7 +3851,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (HTU21D): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_HTU21D, HTU21D_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "HTU21D_");
+				sendLuftdaten(result_HTU21D, HTU21D_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "HTU21D_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3859,7 +3860,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (BMP): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_BMP, BMP_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "BMP_");
+				sendLuftdaten(result_BMP, BMP_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "BMP_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3868,7 +3869,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (BMP280): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_BMP280, BMP280_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "BMP280_");
+				sendLuftdaten(result_BMP280, BMP280_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "BMP280_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3877,7 +3878,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (BME280): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_BME280, BME280_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "BME280_");
+				sendLuftdaten(result_BME280, BME280_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "BME280_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3887,7 +3888,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (DS18B20): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_DS18B20, DS18B20_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "DS18B20_");
+				sendLuftdaten(result_DS18B20, DS18B20_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "DS18B20_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3897,7 +3898,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (GPS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_GPS, GPS_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "GPS_");
+				sendLuftdaten(result_GPS, GPS_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "GPS_");
 				sum_send_time += millis() - start_send;
 			}
 		}
