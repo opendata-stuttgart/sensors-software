@@ -1689,36 +1689,38 @@ void webserver_debug_level() {
 	webserver_request_auth();
 
 	String page_content = make_header(FPSTR(INTL_DEBUG_LEVEL));
-	String message_string = F("<h3>{v1} {v2}.</h3>");
 	last_page_load = millis();
 	debug_out(F("output change debug level page..."), DEBUG_MIN_INFO, 1);
 
 	if (server.hasArg("lvl")) {
-		switch (server.arg("lvl").toInt()) {
-		case (0):
-			debug = 0;
-			page_content += tmpl(message_string, FPSTR(INTL_SETZE_DEBUG_AUF), FPSTR(INTL_NONE));
-			break;
-		case (1):
-			debug = 1;
-			page_content += tmpl(message_string, FPSTR(INTL_SETZE_DEBUG_AUF), FPSTR(INTL_ERROR));
-			break;
-		case (2):
-			debug = 2;
-			page_content += tmpl(message_string, FPSTR(INTL_SETZE_DEBUG_AUF), FPSTR(INTL_WARNING));
-			break;
-		case (3):
-			debug = 3;
-			page_content += tmpl(message_string, FPSTR(INTL_SETZE_DEBUG_AUF), FPSTR(INTL_MIN_INFO));
-			break;
-		case (4):
-			debug = 4;
-			page_content += tmpl(message_string, FPSTR(INTL_SETZE_DEBUG_AUF), FPSTR(INTL_MED_INFO));
-			break;
-		case (5):
-			debug = 5;
-			page_content += tmpl(message_string, FPSTR(INTL_SETZE_DEBUG_AUF), FPSTR(INTL_MAX_INFO));
-			break;
+		const int lvl = server.arg("lvl").toInt();
+		if (lvl >= 0 && lvl <= 5) {
+			debug = lvl;
+			page_content += F("<h3>");
+			page_content += FPSTR(INTL_SETZE_DEBUG_AUF);
+			page_content += F(" ");
+
+			switch (lvl) {
+			case 0:
+				page_content += FPSTR(INTL_NONE);
+				break;
+			case 1:
+				page_content += FPSTR(INTL_ERROR);
+				break;
+			case 2:
+				page_content += FPSTR(INTL_WARNING);
+				break;
+			case 3:
+				page_content += FPSTR(INTL_MIN_INFO);
+				break;
+			case 4:
+				page_content += FPSTR(INTL_MED_INFO);
+				break;
+			case 5:
+				page_content += FPSTR(INTL_MAX_INFO);
+				break;
+			}
+			page_content += F(".</h3>");
 		}
 	}
 	page_content += make_footer();
