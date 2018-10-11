@@ -2104,87 +2104,60 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 	request_head += String(data.length(), DEC) + "\r\n";
 	request_head += F("Connection: close\r\n\r\n");
 
-	// Use WiFiClient class to create TCP connections
+	const auto doConnect = [=](WiFiClient *client) -> bool {
+		client->setNoDelay(true);
+		client->setTimeout(20000);
 
-	if (httpPort == 443) {
-
-		WiFiClientSecure client_s;
-
-		client_s.setNoDelay(true);
-		client_s.setTimeout(20000);
-
-		if (!client_s.connect(host, httpPort)) {
+		if (!client->connect(host, httpPort)) {
 			debug_out(F("connection failed"), DEBUG_ERROR, 1);
-			return;
+			return false;
 		}
+		return true;
+	};
 
-		bool res = client_s.setCACert_P(dst_root_ca_x3_bin_crt, dst_root_ca_x3_bin_crt_len);
-		if (!res) {
-			debug_out(F("Failed to load root CA cert!"),DEBUG_ERROR,1);
-		}
-
-		if (client_s.verifyCertChain(host)) {
-			debug_out(F("Server cert verified"), DEBUG_MIN_INFO,1);
-
-			debug_out(F("Requesting URL: "), DEBUG_MIN_INFO, 0);
-			debug_out(url, DEBUG_MIN_INFO, 1);
-			debug_out(esp_chipid, DEBUG_MIN_INFO, 1);
-			debug_out(data, DEBUG_MIN_INFO, 1);
-
-			// send request to the server
-
-			client_s.print(request_head);
-
-			client_s.println(data);
-
-			delay(10);
-
-			// Read reply from server and print them
-			while(client_s.available()) {
-				char c = client_s.read();
-				debug_out(String(c), DEBUG_MAX_INFO, 0);
-			}
-
-		} else {
-			debug_out(F("ERROR: cert verification failed!"),DEBUG_ERROR,1);
-			return;
-		}
-
-		debug_out(F("\nclosing connection\n----\n\n"), DEBUG_MIN_INFO, 1);
-
-	} else {
-
-		WiFiClient client;
-
-		client.setNoDelay(true);
-		client.setTimeout(20000);
-
-		if (!client.connect(host, httpPort)) {
-			debug_out(F("connection failed"), DEBUG_ERROR, 1);
-			return;
-		}
-
+	const auto doRequest = [=](WiFiClient *client) {
 		debug_out(F("Requesting URL: "), DEBUG_MIN_INFO, 0);
 		debug_out(url, DEBUG_MIN_INFO, 1);
 		debug_out(esp_chipid, DEBUG_MIN_INFO, 1);
 		debug_out(data, DEBUG_MIN_INFO, 1);
 
-		client.print(request_head);
+		// send request to the server
+		client->print(request_head);
 
-		client.println(data);
+		client->println(data);
 
 		delay(10);
 
 		// Read reply from server and print them
-		while(client.available()) {
-			char c = client.read();
+		while(client->available()) {
+			char c = client->read();
 			debug_out(String(c), DEBUG_MAX_INFO, 0);
 		}
 
 		debug_out(F("\nclosing connection\n----\n\n"), DEBUG_MIN_INFO, 1);
+	};
 
+	// Use WiFiClient class to create TCP connections
+	if (httpPort == 443) {
+		WiFiClientSecure client_s;
+		if (doConnect(&client_s)) {
+			if (client_s.setCACert_P(dst_root_ca_x3_bin_crt, dst_root_ca_x3_bin_crt_len)) {
+				if (client_s.verifyCertChain(host)) {
+					debug_out(F("Server cert verified"), DEBUG_MIN_INFO, 1);
+					doRequest(&client_s);
+				} else {
+					debug_out(F("ERROR: cert verification failed!"), DEBUG_ERROR, 1);
+				}
+			} else {
+				debug_out(F("Failed to load root CA cert!"), DEBUG_ERROR, 1);
+			}
+		}
+	} else {
+		WiFiClient client;
+		if (doConnect(&client)) {
+			doRequest(&client);
+		}
 	}
-
 	debug_out(F("End connecting to "), DEBUG_MIN_INFO, 0);
 	debug_out(host, DEBUG_MIN_INFO, 1);
 
@@ -3803,12 +3776,13 @@ void loop() {
 		server.handleClient();
 		yield();
 		server.stop();
+		const int HTTP_PORT_DUSTI = (ssl_dusti ? 443 : 80);
 		if (ppd_read) {
 			data += result_PPD;
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (PPD42NS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_PPD, PPD_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "PPD_");
+				sendLuftdaten(result_PPD, PPD_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "PPD_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3817,7 +3791,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (SDS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_SDS, SDS_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "SDS_");
+				sendLuftdaten(result_SDS, SDS_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "SDS_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3826,7 +3800,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (PMS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_PMS, PMS_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "PMS_");
+				sendLuftdaten(result_PMS, PMS_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "PMS_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3835,7 +3809,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (HPM): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_HPM, HPM_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "HPM_");
+				sendLuftdaten(result_HPM, HPM_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "HPM_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3844,7 +3818,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (DHT): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_DHT, DHT_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "DHT_");
+				sendLuftdaten(result_DHT, DHT_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "DHT_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3853,7 +3827,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (HTU21D): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_HTU21D, HTU21D_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "HTU21D_");
+				sendLuftdaten(result_HTU21D, HTU21D_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "HTU21D_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3862,7 +3836,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (BMP): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_BMP, BMP_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "BMP_");
+				sendLuftdaten(result_BMP, BMP_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "BMP_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3871,7 +3845,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (BMP280): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_BMP280, BMP280_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "BMP280_");
+				sendLuftdaten(result_BMP280, BMP280_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "BMP280_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3880,7 +3854,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (BME280): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_BME280, BME280_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "BME280_");
+				sendLuftdaten(result_BME280, BME280_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "BME280_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3890,7 +3864,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (DS18B20): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_DS18B20, DS18B20_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "DS18B20_");
+				sendLuftdaten(result_DS18B20, DS18B20_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "DS18B20_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3900,7 +3874,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (GPS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_GPS, GPS_API_PIN, HOST_DUSTI, (ssl_dusti ? 443 : 80), URL_DUSTI, "GPS_");
+				sendLuftdaten(result_GPS, GPS_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "GPS_");
 				sum_send_time += millis() - start_send;
 			}
 		}
