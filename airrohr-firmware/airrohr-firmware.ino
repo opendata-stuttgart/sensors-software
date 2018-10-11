@@ -2040,8 +2040,6 @@ void wifiConfig() {
  *****************************************************************/
 void connectWifi() {
 	int retry_count = 0;
-	String s1 = String(fs_ssid);
-	String s2 = String(fs_ssid);
 	debug_out(String(WiFi.status()), DEBUG_MIN_INFO, 1);
 	WiFi.disconnect();
 	WiFi.setOutputPower(20.5);
@@ -2059,9 +2057,8 @@ void connectWifi() {
 	}
 	debug_out("", DEBUG_MIN_INFO, 1);
 	if (WiFi.status() != WL_CONNECTED) {
-		s1 = s1.substring(0, 16);
-		s2 = s2.substring(16);
-		display_debug(s1, s2);
+		String fss = String(fs_ssid);
+		display_debug(fss.substring(0, 16), fss.substring(16));
 		wifiConfig();
 		if ((WiFi.status() != WL_CONNECTED) && (! restart_needed)) {
 			retry_count = 0;
