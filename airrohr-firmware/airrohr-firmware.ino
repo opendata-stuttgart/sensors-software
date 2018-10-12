@@ -2037,11 +2037,23 @@ void wifiConfig() {
 	restart_needed = true;
 }
 
+static void waitForWifiToConnect(int maxRetries, bool *additionalAbortCondition = nullptr) {
+	int retryCount = 0;
+	while ((WiFi.status() != WL_CONNECTED) && (retryCount <  maxRetries)) {
+		if (additionalAbortCondition != nullptr && *additionalAbortCondition)
+		{
+			break;
+		}
+		delay(500);
+		debug_out(".", DEBUG_MIN_INFO, 0);
+		++retryCount;
+	}
+}
+
 /*****************************************************************
  * WiFi auto connecting script                                   *
  *****************************************************************/
 void connectWifi() {
-	int retry_count = 0;
 	debug_out(String(WiFi.status()), DEBUG_MIN_INFO, 1);
 	WiFi.disconnect();
 	WiFi.setOutputPower(20.5);
@@ -2052,23 +2064,14 @@ void connectWifi() {
 	debug_out(F("Connecting to "), DEBUG_MIN_INFO, 0);
 	debug_out(wlanssid, DEBUG_MIN_INFO, 1);
 
-	while ((WiFi.status() != WL_CONNECTED) && (retry_count < 40)) {
-		delay(500);
-		debug_out(".", DEBUG_MIN_INFO, 0);
-		retry_count++;
-	}
+	waitForWifiToConnect(40);
 	debug_out("", DEBUG_MIN_INFO, 1);
 	if (WiFi.status() != WL_CONNECTED) {
 		String fss = String(fs_ssid);
 		display_debug(fss.substring(0, 16), fss.substring(16));
 		wifiConfig();
 		if ((WiFi.status() != WL_CONNECTED) && (! restart_needed)) {
-			retry_count = 0;
-			while ((WiFi.status() != WL_CONNECTED) && (retry_count < 20) && !restart_needed) {
-				delay(500);
-				debug_out(".", DEBUG_MIN_INFO, 0);
-				retry_count++;
-			}
+			waitForWifiToConnect(20, &restart_needed);
 			debug_out("", DEBUG_MIN_INFO, 1);
 		}
 	}
@@ -3961,14 +3964,9 @@ void loop() {
 
 
 		if (WiFi.status() != WL_CONNECTED) {                // reconnect if connection lost
-			int retry_count = 0;
 			debug_out(F("Connection lost, reconnecting "), DEBUG_MIN_INFO, 0);
 			WiFi.reconnect();
-			while ((WiFi.status() != WL_CONNECTED) && (retry_count < 20)) {
-				delay(500);
-				debug_out(".", DEBUG_MIN_INFO, 0);
-				retry_count++;
-			}
+			waitForWifiToConnect(20);
 			debug_out("", DEBUG_MIN_INFO, 1);
 		}
 
