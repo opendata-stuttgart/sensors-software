@@ -1239,13 +1239,18 @@ void webserver_request_auth() {
 	}
 }
 
+static void sendHttpRedirect(ESP8266WebServer &httpServer)
+{
+	httpServer.sendHeader(F("Location"), F("http://192.168.4.1/config"));
+	httpServer.send(302, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), "");
+}
+
 /*****************************************************************
  * Webserver root: show all options                              *
  *****************************************************************/
 void webserver_root() {
 	if (WiFi.status() != WL_CONNECTED) {
-		server.sendHeader(F("Location"), F("http://192.168.4.1/config"));
-		server.send(302, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), "");
+		sendHttpRedirect(server);
 	} else {
 		webserver_request_auth();
 
@@ -1584,8 +1589,7 @@ void webserver_wifi() {
  *****************************************************************/
 void webserver_values() {
 	if (WiFi.status() != WL_CONNECTED) {
-		server.sendHeader(F("Location"), F("http://192.168.4.1/config"));
-		server.send(302, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), "");
+		sendHttpRedirect(server);
 	} else {
 		String page_content = make_header(FPSTR(INTL_AKTUELLE_WERTE));
 		const String unit_PM = "µg/m³";
@@ -1878,8 +1882,7 @@ void webserver_not_found() {
 		if ((server.uri().indexOf(F("success.html")) != -1) || (server.uri().indexOf(F("detect.html")) != -1)) {
 			server.send(200,FPSTR(TXT_CONTENT_TYPE_TEXT_HTML),FPSTR(WEB_IOS_REDIRECT));
 		} else {
-			server.sendHeader(F("Location"), F("http://192.168.4.1/config"));
-			server.send(302, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), "");
+			sendHttpRedirect(server);
 		}
 	} else {
 		server.send(404, FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN), F("Not found."));
