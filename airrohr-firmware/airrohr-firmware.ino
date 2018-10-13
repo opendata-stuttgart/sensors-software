@@ -952,7 +952,6 @@ void readConfig() {
  *****************************************************************/
 void writeConfig() {
 	String json_string = "{";
-	String tmp = "";
 	debug_out(F("saving config..."), DEBUG_MIN_INFO, 1);
 
 #define copyToJSON_Bool(varname) json_string += Var2Json(#varname,varname);
@@ -1020,16 +1019,15 @@ void writeConfig() {
 
 	debug_out(json_string, DEBUG_MIN_INFO, 1);
 	File configFile = SPIFFS.open("/config.json", "w");
-	if (!configFile) {
+	if (configFile) {
+		configFile.print(json_string);
+		debug_out(F("Config written: "), DEBUG_MIN_INFO, 0);
+		debug_out(json_string, DEBUG_MIN_INFO, 1);
+		configFile.close();
+		config_needs_write = false;
+	} else {
 		debug_out(F("failed to open config file for writing"), DEBUG_ERROR, 1);
 	}
-
-	configFile.print(json_string);
-	debug_out(F("Config written: "), DEBUG_MIN_INFO, 0);
-	debug_out(json_string, DEBUG_MIN_INFO, 1);
-	configFile.close();
-	config_needs_write = false;
-	//end save
 }
 
 /*****************************************************************
@@ -1544,7 +1542,7 @@ void webserver_wifi() {
 		page_content += FPSTR(INTL_NETZWERKE_GEFUNDEN);
 		page_content += String(count_wifiInfo);
 		page_content += F("<br/>");
-		int* indices = new int[count_wifiInfo];
+		std::unique_ptr<int[]> indices(new int[count_wifiInfo]);
 		debug_out(F("output config page 2"), DEBUG_MIN_INFO, 1);
 		for (int i = 0; i < count_wifiInfo; i++) {
 			indices[i] = i;
@@ -1579,7 +1577,6 @@ void webserver_wifi() {
 			page_content += wlan_ssid_to_table_row(wifiInfo[indices[i]].ssid, ((wifiInfo[indices[i]].encryptionType == ENC_TYPE_NONE) ? " " : "*"), wifiInfo[indices[i]].RSSI);
 		}
 		page_content += F("</table><br/><br/>");
-		delete[] indices;
 	}
 	server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
 }
