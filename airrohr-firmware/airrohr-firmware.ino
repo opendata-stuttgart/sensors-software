@@ -1239,13 +1239,18 @@ void webserver_request_auth() {
 	}
 }
 
+static void sendHttpRedirect(ESP8266WebServer &httpServer)
+{
+	httpServer.sendHeader(F("Location"), F("http://192.168.4.1/config"));
+	httpServer.send(302, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), "");
+}
+
 /*****************************************************************
  * Webserver root: show all options                              *
  *****************************************************************/
 void webserver_root() {
 	if (WiFi.status() != WL_CONNECTED) {
-		server.sendHeader(F("Location"), F("http://192.168.4.1/config"));
-		server.send(302, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), "");
+		sendHttpRedirect(server);
 	} else {
 		webserver_request_auth();
 
@@ -1584,8 +1589,7 @@ void webserver_wifi() {
  *****************************************************************/
 void webserver_values() {
 	if (WiFi.status() != WL_CONNECTED) {
-		server.sendHeader(F("Location"), F("http://192.168.4.1/config"));
-		server.send(302, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), "");
+		sendHttpRedirect(server);
 	} else {
 		String page_content = make_header(FPSTR(INTL_AKTUELLE_WERTE));
 		const String unit_PM = "µg/m³";
@@ -1689,36 +1693,38 @@ void webserver_debug_level() {
 	webserver_request_auth();
 
 	String page_content = make_header(FPSTR(INTL_DEBUG_LEVEL));
-	String message_string = F("<h3>{v1} {v2}.</h3>");
 	last_page_load = millis();
 	debug_out(F("output change debug level page..."), DEBUG_MIN_INFO, 1);
 
 	if (server.hasArg("lvl")) {
-		switch (server.arg("lvl").toInt()) {
-		case (0):
-			debug = 0;
-			page_content += tmpl(message_string, FPSTR(INTL_SETZE_DEBUG_AUF), FPSTR(INTL_NONE));
-			break;
-		case (1):
-			debug = 1;
-			page_content += tmpl(message_string, FPSTR(INTL_SETZE_DEBUG_AUF), FPSTR(INTL_ERROR));
-			break;
-		case (2):
-			debug = 2;
-			page_content += tmpl(message_string, FPSTR(INTL_SETZE_DEBUG_AUF), FPSTR(INTL_WARNING));
-			break;
-		case (3):
-			debug = 3;
-			page_content += tmpl(message_string, FPSTR(INTL_SETZE_DEBUG_AUF), FPSTR(INTL_MIN_INFO));
-			break;
-		case (4):
-			debug = 4;
-			page_content += tmpl(message_string, FPSTR(INTL_SETZE_DEBUG_AUF), FPSTR(INTL_MED_INFO));
-			break;
-		case (5):
-			debug = 5;
-			page_content += tmpl(message_string, FPSTR(INTL_SETZE_DEBUG_AUF), FPSTR(INTL_MAX_INFO));
-			break;
+		const int lvl = server.arg("lvl").toInt();
+		if (lvl >= 0 && lvl <= 5) {
+			debug = lvl;
+			page_content += F("<h3>");
+			page_content += FPSTR(INTL_SETZE_DEBUG_AUF);
+			page_content += F(" ");
+
+			switch (lvl) {
+			case 0:
+				page_content += FPSTR(INTL_NONE);
+				break;
+			case 1:
+				page_content += FPSTR(INTL_ERROR);
+				break;
+			case 2:
+				page_content += FPSTR(INTL_WARNING);
+				break;
+			case 3:
+				page_content += FPSTR(INTL_MIN_INFO);
+				break;
+			case 4:
+				page_content += FPSTR(INTL_MED_INFO);
+				break;
+			case 5:
+				page_content += FPSTR(INTL_MAX_INFO);
+				break;
+			}
+			page_content += F(".</h3>");
 		}
 	}
 	page_content += make_footer();
@@ -1876,8 +1882,7 @@ void webserver_not_found() {
 		if ((server.uri().indexOf(F("success.html")) != -1) || (server.uri().indexOf(F("detect.html")) != -1)) {
 			server.send(200,FPSTR(TXT_CONTENT_TYPE_TEXT_HTML),FPSTR(WEB_IOS_REDIRECT));
 		} else {
-			server.sendHeader(F("Location"), F("http://192.168.4.1/config"));
-			server.send(302, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), "");
+			sendHttpRedirect(server);
 		}
 	} else {
 		server.send(404, FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN), F("Not found."));
@@ -2035,13 +2040,23 @@ void wifiConfig() {
 	restart_needed = true;
 }
 
+static void waitForWifiToConnect(int maxRetries, bool *additionalAbortCondition = nullptr) {
+	int retryCount = 0;
+	while ((WiFi.status() != WL_CONNECTED) && (retryCount <  maxRetries)) {
+		if (additionalAbortCondition != nullptr && *additionalAbortCondition)
+		{
+			break;
+		}
+		delay(500);
+		debug_out(".", DEBUG_MIN_INFO, 0);
+		++retryCount;
+	}
+}
+
 /*****************************************************************
  * WiFi auto connecting script                                   *
  *****************************************************************/
 void connectWifi() {
-	int retry_count = 0;
-	String s1 = String(fs_ssid);
-	String s2 = String(fs_ssid);
 	debug_out(String(WiFi.status()), DEBUG_MIN_INFO, 1);
 	WiFi.disconnect();
 	WiFi.setOutputPower(20.5);
@@ -2052,24 +2067,14 @@ void connectWifi() {
 	debug_out(F("Connecting to "), DEBUG_MIN_INFO, 0);
 	debug_out(wlanssid, DEBUG_MIN_INFO, 1);
 
-	while ((WiFi.status() != WL_CONNECTED) && (retry_count < 40)) {
-		delay(500);
-		debug_out(".", DEBUG_MIN_INFO, 0);
-		retry_count++;
-	}
+	waitForWifiToConnect(40);
 	debug_out("", DEBUG_MIN_INFO, 1);
 	if (WiFi.status() != WL_CONNECTED) {
-		s1 = s1.substring(0, 16);
-		s2 = s2.substring(16);
-		display_debug(s1, s2);
+		String fss = String(fs_ssid);
+		display_debug(fss.substring(0, 16), fss.substring(16));
 		wifiConfig();
 		if ((WiFi.status() != WL_CONNECTED) && (! restart_needed)) {
-			retry_count = 0;
-			while ((WiFi.status() != WL_CONNECTED) && (retry_count < 20) && !restart_needed) {
-				delay(500);
-				debug_out(".", DEBUG_MIN_INFO, 0);
-				retry_count++;
-			}
+			waitForWifiToConnect(20, &restart_needed);
 			debug_out("", DEBUG_MIN_INFO, 1);
 		}
 	}
@@ -3962,14 +3967,9 @@ void loop() {
 
 
 		if (WiFi.status() != WL_CONNECTED) {                // reconnect if connection lost
-			int retry_count = 0;
 			debug_out(F("Connection lost, reconnecting "), DEBUG_MIN_INFO, 0);
 			WiFi.reconnect();
-			while ((WiFi.status() != WL_CONNECTED) && (retry_count < 20)) {
-				delay(500);
-				debug_out(".", DEBUG_MIN_INFO, 0);
-				retry_count++;
-			}
+			waitForWifiToConnect(20);
 			debug_out("", DEBUG_MIN_INFO, 1);
 		}
 
