@@ -2264,22 +2264,20 @@ void send_csv(const String& data) {
 /*****************************************************************
  * read DHT22 sensor values                                      *
  *****************************************************************/
-String sensorDHT() {
-	String s = "";
-	int i = 0;
-	double h;
-	double t;
+static String sensorDHT() {
+	String s;
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + "DHT11/22", DEBUG_MED_INFO, 1);
 
 	// Check if valid number if non NaN (not a number) will be send.
-
 	last_value_DHT_T = -128;
 	last_value_DHT_H = -1;
 
-	while ((i++ < 5) && (s == "")) {
-		h = dht.readHumidity(); //Read Humidity
-		t = dht.readTemperature(); //Read Temperature
+	int count = 0;
+	const int MAX_ATTEMPTS = 5;
+	while ((count++ < MAX_ATTEMPTS) && (s == "")) {
+		auto h = dht.readHumidity(); //Read Humidity
+		auto t = dht.readTemperature(); //Read Temperature
 		if (isnan(t) || isnan(h)) {
 			delay(100);
 			h = dht.readHumidity(); //Read Humidity
