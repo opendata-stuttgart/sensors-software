@@ -2264,22 +2264,20 @@ void send_csv(const String& data) {
 /*****************************************************************
  * read DHT22 sensor values                                      *
  *****************************************************************/
-String sensorDHT() {
-	String s = "";
-	int i = 0;
-	double h;
-	double t;
+static String sensorDHT() {
+	String s;
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + "DHT11/22", DEBUG_MED_INFO, 1);
 
 	// Check if valid number if non NaN (not a number) will be send.
-
 	last_value_DHT_T = -128;
 	last_value_DHT_H = -1;
 
-	while ((i++ < 5) && (s == "")) {
-		h = dht.readHumidity(); //Read Humidity
-		t = dht.readTemperature(); //Read Temperature
+	int count = 0;
+	const int MAX_ATTEMPTS = 5;
+	while ((count++ < MAX_ATTEMPTS) && (s == "")) {
+		auto h = dht.readHumidity(); //Read Humidity
+		auto t = dht.readTemperature(); //Read Temperature
 		if (isnan(t) || isnan(h)) {
 			delay(100);
 			h = dht.readHumidity(); //Read Humidity
@@ -2308,19 +2306,16 @@ String sensorDHT() {
 /*****************************************************************
  * read HTU21D sensor values                                     *
  *****************************************************************/
-String sensorHTU21D() {
-	String s = "";
-	double t;
-	double h;
+static String sensorHTU21D() {
+	String s;
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_HTU21D), DEBUG_MED_INFO, 1);
 
-	last_value_HTU21D_T = -128;
-	last_value_HTU21D_H = -1;
-
-	t = htu21d.readTemperature();
-	h = htu21d.readHumidity();
+	const auto t = htu21d.readTemperature();
+	const auto h = htu21d.readHumidity();
 	if (isnan(t) || isnan(h)) {
+		last_value_HTU21D_T = -128.0;
+		last_value_HTU21D_H = -1.0;
 		debug_out(F("HTU21D couldn't be read"), DEBUG_ERROR, 1);
 	} else {
 		debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO, 0);
@@ -2342,26 +2337,24 @@ String sensorHTU21D() {
 /*****************************************************************
  * read BMP180 sensor values                                     *
  *****************************************************************/
-String sensorBMP() {
-	String s = "";
-	int p;
-	double t;
+static String sensorBMP() {
+	String s;
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_BMP180), DEBUG_MED_INFO, 1);
 
-	p = bmp.readPressure();
-	t = bmp.readTemperature();
-	last_value_BMP_T = -128;
-	last_value_BMP_P = -1;
+	const auto p = bmp.readPressure();
+	const auto t = bmp.readTemperature();
 	if (isnan(p) || isnan(t)) {
+		last_value_BMP_T = -128.0;
+		last_value_BMP_P = -1.0;
 		debug_out(F("BMP180 couldn't be read"), DEBUG_ERROR, 1);
 	} else {
 		debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO, 0);
 		debug_out(String(t) + " C", DEBUG_MIN_INFO, 1);
 		debug_out(FPSTR(DBG_TXT_PRESSURE), DEBUG_MIN_INFO, 0);
-		debug_out(Float2String((double)p / 100) + " hPa", DEBUG_MIN_INFO, 1);
+		debug_out(Float2String(p / 100) + " hPa", DEBUG_MIN_INFO, 1);
 		last_value_BMP_T = t;
-		last_value_BMP_P = (double)p;
+		last_value_BMP_P = p;
 		s += Value2Json(F("BMP_pressure"), Float2String(last_value_BMP_P));
 		s += Value2Json(F("BMP_temperature"), Float2String(last_value_BMP_T));
 	}
@@ -2375,26 +2368,24 @@ String sensorBMP() {
 /*****************************************************************
  * read BMP280 sensor values                                     *
  *****************************************************************/
-String sensorBMP280() {
-	String s = "";
-	int p;
-	double t;
+static String sensorBMP280() {
+	String s;
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_BMP280), DEBUG_MED_INFO, 1);
 
-	p = bmp280.readPressure();
-	t = bmp280.readTemperature();
-	last_value_BMP280_T = -128;
-	last_value_BMP280_P = -1;
+	const auto p = bmp280.readPressure();
+	const auto t = bmp280.readTemperature();
 	if (isnan(p) || isnan(t)) {
+		last_value_BMP280_T = -128.0;
+		last_value_BMP280_P = -1.0;
 		debug_out(F("BMP280 couldn't be read"), DEBUG_ERROR, 1);
 	} else {
 		debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO, 0);
 		debug_out(String(t) + " C", DEBUG_MIN_INFO, 1);
 		debug_out(FPSTR(DBG_TXT_PRESSURE), DEBUG_MIN_INFO, 0);
-		debug_out(Float2String((double)p / 100) + " hPa", DEBUG_MIN_INFO, 1);
+		debug_out(Float2String(p / 100) + " hPa", DEBUG_MIN_INFO, 1);
 		last_value_BMP280_T = t;
-		last_value_BMP280_P = (double)p;
+		last_value_BMP280_P = p;
 		s += Value2Json(F("BMP280_pressure"), Float2String(last_value_BMP280_P));
 		s += Value2Json(F("BMP280_temperature"), Float2String(last_value_BMP280_T));
 	}
@@ -2408,23 +2399,19 @@ String sensorBMP280() {
 /*****************************************************************
  * read BME280 sensor values                                     *
  *****************************************************************/
-String sensorBME280() {
-	String s = "";
-	double t;
-	double h;
-	double p;
+static String sensorBME280() {
+	String s;
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_BME280), DEBUG_MED_INFO, 1);
 
 	bme280.takeForcedMeasurement();
-
-	t = bme280.readTemperature();
-	h = bme280.readHumidity();
-	p = bme280.readPressure();
-	last_value_BME280_T = -128;
-	last_value_BME280_H = -1;
-	last_value_BME280_P = -1;
+	const auto t = bme280.readTemperature();
+	const auto h = bme280.readHumidity();
+	const auto p = bme280.readPressure();
 	if (isnan(t) || isnan(h) || isnan(p)) {
+		last_value_BME280_T = -128.0;
+		last_value_BME280_H = -1.0;
+		last_value_BME280_P = -1.0;
 		debug_out(F("BME280 couldn't be read"), DEBUG_ERROR, 1);
 	} else {
 		debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO, 0);
@@ -2450,26 +2437,26 @@ String sensorBME280() {
 /*****************************************************************
  * read DS18B20 sensor values                                    *
  *****************************************************************/
-String sensorDS18B20() {
-	String s = "";
-	int i = 0;
+static String sensorDS18B20() {
 	double t;
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_DS18B20), DEBUG_MED_INFO, 1);
 
-	last_value_DS18B20_T = -128;
-
 	//it's very unlikely (-127: impossible) to get these temperatures in reality. Most times this means that the sensor is currently faulty
 	//try 5 times to read the sensor, otherwise fail
+	const int MAX_ATTEMPTS = 5;
+	int count = 0;
 	do {
 		ds18b20.requestTemperatures();
 		//for now, we want to read only the first sensor
 		t = ds18b20.getTempCByIndex(0);
-		i++;
+		++count;
 		debug_out(F("DS18B20 trying...."), DEBUG_MIN_INFO, 0);
-		debug_out(String(i), DEBUG_MIN_INFO, 1);
-	} while(i < 5 && (isnan(t) || t == 85.0 || t == (-127.0)));
+		debug_out(String(count), DEBUG_MIN_INFO, 1);
+	} while (count < MAX_ATTEMPTS && (isnan(t) || t >= 85.0 || t <= (-127.0)));
 
-	if(i == 5) {
+	String s;
+	if (count == MAX_ATTEMPTS) {
+		last_value_DS18B20_T = -128.0;
 		debug_out(F("DS18B20 couldn't be read."), DEBUG_ERROR, 1);
 	} else {
 		debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO, 0);
