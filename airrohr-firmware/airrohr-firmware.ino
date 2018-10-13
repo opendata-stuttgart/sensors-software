@@ -1019,16 +1019,15 @@ void writeConfig() {
 
 	debug_out(json_string, DEBUG_MIN_INFO, 1);
 	File configFile = SPIFFS.open("/config.json", "w");
-	if (!configFile) {
+	if (configFile) {
+		configFile.print(json_string);
+		debug_out(F("Config written: "), DEBUG_MIN_INFO, 0);
+		debug_out(json_string, DEBUG_MIN_INFO, 1);
+		configFile.close();
+		config_needs_write = false;
+	} else {
 		debug_out(F("failed to open config file for writing"), DEBUG_ERROR, 1);
 	}
-
-	configFile.print(json_string);
-	debug_out(F("Config written: "), DEBUG_MIN_INFO, 0);
-	debug_out(json_string, DEBUG_MIN_INFO, 1);
-	configFile.close();
-	config_needs_write = false;
-	//end save
 }
 
 /*****************************************************************
