@@ -2342,26 +2342,24 @@ String sensorHTU21D() {
 /*****************************************************************
  * read BMP180 sensor values                                     *
  *****************************************************************/
-String sensorBMP() {
-	String s = "";
-	int p;
-	double t;
+static String sensorBMP() {
+	String s;
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_BMP180), DEBUG_MED_INFO, 1);
 
-	p = bmp.readPressure();
-	t = bmp.readTemperature();
-	last_value_BMP_T = -128;
-	last_value_BMP_P = -1;
+	const auto p = bmp.readPressure();
+	const auto t = bmp.readTemperature();
 	if (isnan(p) || isnan(t)) {
+		last_value_BMP_T = -128.0;
+		last_value_BMP_P = -1.0;
 		debug_out(F("BMP180 couldn't be read"), DEBUG_ERROR, 1);
 	} else {
 		debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO, 0);
 		debug_out(String(t) + " C", DEBUG_MIN_INFO, 1);
 		debug_out(FPSTR(DBG_TXT_PRESSURE), DEBUG_MIN_INFO, 0);
-		debug_out(Float2String((double)p / 100) + " hPa", DEBUG_MIN_INFO, 1);
+		debug_out(Float2String(p / 100) + " hPa", DEBUG_MIN_INFO, 1);
 		last_value_BMP_T = t;
-		last_value_BMP_P = (double)p;
+		last_value_BMP_P = p;
 		s += Value2Json(F("BMP_pressure"), Float2String(last_value_BMP_P));
 		s += Value2Json(F("BMP_temperature"), Float2String(last_value_BMP_T));
 	}
@@ -2375,26 +2373,24 @@ String sensorBMP() {
 /*****************************************************************
  * read BMP280 sensor values                                     *
  *****************************************************************/
-String sensorBMP280() {
-	String s = "";
-	int p;
-	double t;
+static String sensorBMP280() {
+	String s;
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_BMP280), DEBUG_MED_INFO, 1);
 
-	p = bmp280.readPressure();
-	t = bmp280.readTemperature();
-	last_value_BMP280_T = -128;
-	last_value_BMP280_P = -1;
+	const auto p = bmp280.readPressure();
+	const auto t = bmp280.readTemperature();
 	if (isnan(p) || isnan(t)) {
+		last_value_BMP280_T = -128.0;
+		last_value_BMP280_P = -1.0;
 		debug_out(F("BMP280 couldn't be read"), DEBUG_ERROR, 1);
 	} else {
 		debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO, 0);
 		debug_out(String(t) + " C", DEBUG_MIN_INFO, 1);
 		debug_out(FPSTR(DBG_TXT_PRESSURE), DEBUG_MIN_INFO, 0);
-		debug_out(Float2String((double)p / 100) + " hPa", DEBUG_MIN_INFO, 1);
+		debug_out(Float2String(p / 100) + " hPa", DEBUG_MIN_INFO, 1);
 		last_value_BMP280_T = t;
-		last_value_BMP280_P = (double)p;
+		last_value_BMP280_P = p;
 		s += Value2Json(F("BMP280_pressure"), Float2String(last_value_BMP280_P));
 		s += Value2Json(F("BMP280_temperature"), Float2String(last_value_BMP280_T));
 	}
@@ -2408,23 +2404,19 @@ String sensorBMP280() {
 /*****************************************************************
  * read BME280 sensor values                                     *
  *****************************************************************/
-String sensorBME280() {
-	String s = "";
-	double t;
-	double h;
-	double p;
+static String sensorBME280() {
+	String s;
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_BME280), DEBUG_MED_INFO, 1);
 
 	bme280.takeForcedMeasurement();
-
-	t = bme280.readTemperature();
-	h = bme280.readHumidity();
-	p = bme280.readPressure();
-	last_value_BME280_T = -128;
-	last_value_BME280_H = -1;
-	last_value_BME280_P = -1;
+	const auto t = bme280.readTemperature();
+	const auto h = bme280.readHumidity();
+	const auto p = bme280.readPressure();
 	if (isnan(t) || isnan(h) || isnan(p)) {
+		last_value_BME280_T = -128.0;
+		last_value_BME280_H = -1.0;
+		last_value_BME280_P = -1.0;
 		debug_out(F("BME280 couldn't be read"), DEBUG_ERROR, 1);
 	} else {
 		debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO, 0);
