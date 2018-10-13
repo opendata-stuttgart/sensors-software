@@ -2439,26 +2439,26 @@ static String sensorBME280() {
 /*****************************************************************
  * read DS18B20 sensor values                                    *
  *****************************************************************/
-String sensorDS18B20() {
-	String s = "";
-	int i = 0;
+static String sensorDS18B20() {
 	double t;
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_DS18B20), DEBUG_MED_INFO, 1);
 
-	last_value_DS18B20_T = -128;
-
 	//it's very unlikely (-127: impossible) to get these temperatures in reality. Most times this means that the sensor is currently faulty
 	//try 5 times to read the sensor, otherwise fail
+	const int MAX_ATTEMPTS = 5;
+	int count = 0;
 	do {
 		ds18b20.requestTemperatures();
 		//for now, we want to read only the first sensor
 		t = ds18b20.getTempCByIndex(0);
-		i++;
+		++count;
 		debug_out(F("DS18B20 trying...."), DEBUG_MIN_INFO, 0);
-		debug_out(String(i), DEBUG_MIN_INFO, 1);
-	} while(i < 5 && (isnan(t) || t == 85.0 || t == (-127.0)));
+		debug_out(String(count), DEBUG_MIN_INFO, 1);
+	} while (count < MAX_ATTEMPTS && (isnan(t) || t >= 85.0 || t <= (-127.0)));
 
-	if(i == 5) {
+	String s;
+	if (count == MAX_ATTEMPTS) {
+		last_value_DS18B20_T = -128.0;
 		debug_out(F("DS18B20 couldn't be read."), DEBUG_ERROR, 1);
 	} else {
 		debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO, 0);
