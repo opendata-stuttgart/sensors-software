@@ -2308,19 +2308,16 @@ String sensorDHT() {
 /*****************************************************************
  * read HTU21D sensor values                                     *
  *****************************************************************/
-String sensorHTU21D() {
-	String s = "";
-	double t;
-	double h;
+static String sensorHTU21D() {
+	String s;
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_HTU21D), DEBUG_MED_INFO, 1);
 
-	last_value_HTU21D_T = -128;
-	last_value_HTU21D_H = -1;
-
-	t = htu21d.readTemperature();
-	h = htu21d.readHumidity();
+	const auto t = htu21d.readTemperature();
+	const auto h = htu21d.readHumidity();
 	if (isnan(t) || isnan(h)) {
+		last_value_HTU21D_T = -128.0;
+		last_value_HTU21D_H = -1.0;
 		debug_out(F("HTU21D couldn't be read"), DEBUG_ERROR, 1);
 	} else {
 		debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO, 0);
