@@ -952,7 +952,6 @@ void readConfig() {
  *****************************************************************/
 void writeConfig() {
 	String json_string = "{";
-	String tmp = "";
 	debug_out(F("saving config..."), DEBUG_MIN_INFO, 1);
 
 #define copyToJSON_Bool(varname) json_string += Var2Json(#varname,varname);
