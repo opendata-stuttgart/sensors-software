@@ -99,13 +99,8 @@
 #define SDS_READ 1
 #define SDS_API_PIN 1
 
-// PMS3003
-#define PMS24_READ 0
-
-// PMS1003, PMS5003, PMS6003, PMS7003
-#define PMS32_READ 0
-
-// all Plantower (PMS) sensors
+// PMS1003, PMS300, 3PMS5003, PMS6003, PMS7003
+#define PMS_READ 0
 #define PMS_API_PIN 1
 
 // Honeywell PM sensor

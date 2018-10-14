@@ -1,5 +1,6 @@
 NRZ-2018-112-B2
 * merged pull requests (fmeerkoetter) typedef, duplicate code in function
+* same read function for all Plantower sensors
 
 NRZ-2018-112-B1
 * setting PHY layer to 802.11n in station mode

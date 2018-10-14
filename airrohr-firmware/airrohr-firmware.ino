@@ -95,9 +95,9 @@
  * Der Sketch verwendet 491364 Bytes (47%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
  * Globale Variablen verwenden 37172 Bytes (45%) des dynamischen Speichers, 44748 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
  *
- * Der Sketch verwendet 491300 Bytes (47%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
- * Globale Variablen verwenden 37172 Bytes (45%) des dynamischen Speichers, 44748 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
- * 
+ * Der Sketch verwendet 489876 Bytes (46%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
+ * Globale Variablen verwenden 37164 Bytes (45%) des dynamischen Speichers, 44756 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
+
  ************************************************************************/
 // increment on change
 #define SOFTWARE_VERSION "NRZ-2018-112-B2"
@@ -178,8 +178,7 @@ bool dht_read = 1;
 bool htu21d_read = 0;
 bool ppd_read = 0;
 bool sds_read = 1;
-bool pms24_read = 0;
-bool pms32_read = 0;
+bool pms_read = 0;
 bool hpm_read = 0;
 bool bmp_read = 0;
 bool bmp_init_failed = 0;
@@ -351,7 +350,6 @@ unsigned long time_for_wifi_config = 600000;
 
 unsigned long last_update_attempt;
 const unsigned long pause_between_update_attempts = 86400000;
-bool will_check_for_update = false;
 
 int sds_pm10_sum = 0;
 int sds_pm25_sum = 0;
@@ -793,8 +791,7 @@ void copyExtDef() {
 	setDef(htu21d_read, HTU21D_READ);
 	setDef(ppd_read, PPD_READ);
 	setDef(sds_read, SDS_READ);
-	setDef(pms24_read, PMS24_READ);
-	setDef(pms32_read, PMS32_READ);
+	setDef(pms_read, PMS_READ);
 	setDef(hpm_read, HPM_READ);
 	setDef(bmp_read, BMP_READ);
 	setDef(bmp280_read, BMP280_READ);
@@ -845,6 +842,8 @@ void copyExtDef() {
 void readConfig() {
 	String json_string = "";
 	debug_out(F("mounting FS..."), DEBUG_MIN_INFO, 1);
+	bool pms24_read = 0;
+	bool pms32_read = 0;
 
 	if (SPIFFS.begin()) {
 		debug_out(F("mounted file system..."), DEBUG_MIN_INFO, 1);
@@ -886,6 +885,7 @@ void readConfig() {
 					setFromJSON(htu21d_read);
 					setFromJSON(ppd_read);
 					setFromJSON(sds_read);
+					setFromJSON(pms_read);
 					setFromJSON(pms24_read);
 					setFromJSON(pms32_read);
 					setFromJSON(hpm_read);
@@ -933,6 +933,11 @@ void readConfig() {
 						strcpy(host_influx, "");
 						send2influx = 0;
 					}
+					configFile.close();
+					if (pms24_read || pms32_read) {
+						pms_read = 1;
+						writeConfig();
+					}
 #undef setFromJSON
 #undef strcpyFromJSON
 				} else {
@@ -970,8 +975,7 @@ void writeConfig() {
 	copyToJSON_Bool(htu21d_read);
 	copyToJSON_Bool(ppd_read);
 	copyToJSON_Bool(sds_read);
-	copyToJSON_Bool(pms24_read);
-	copyToJSON_Bool(pms32_read);
+	copyToJSON_Bool(pms_read);
 	copyToJSON_Bool(hpm_read);
 	copyToJSON_Bool(bmp_read);
 	copyToJSON_Bool(bmp280_read);
@@ -1184,7 +1188,6 @@ static int32_t calcWiFiSignalQuality(int32_t rssi) {
 }
 
 String wlan_ssid_to_table_row(const String& ssid, const String& encryption, int32_t rssi) {
-	
 	const int quality = calcWiFiSignalQuality(rssi);
 	String s = F("<tr><td><a href='#wlanpwd' onclick='setSSID(this)' style='background:none;color:blue;padding:5px;display:inline;'>{n}</a>&nbsp;{e}</a></td><td style='width:80%;vertical-align:middle;'>{v}%</td></tr>");
 	s.replace("{n}", ssid);
@@ -1196,7 +1199,7 @@ String wlan_ssid_to_table_row(const String& ssid, const String& encryption, int3
 String warning_first_cycle() {
 	String s = FPSTR(INTL_ERSTER_MESSZYKLUS);
 	unsigned long time_to_first = sending_intervall_ms - (act_milli - starttime);
-	if ((time_to_first > sending_intervall_ms) || (time_to_first < 0)) {
+	if (time_to_first > sending_intervall_ms) {
 		time_to_first = 0;
 	}
 	s.replace("{v}", String((long)((time_to_first + 500) / 1000)));
@@ -1206,7 +1209,7 @@ String warning_first_cycle() {
 String age_last_values() {
 	String s = "<b>";
 	unsigned long time_since_last = act_milli - starttime;
-	if ((time_since_last > sending_intervall_ms) || (time_since_last < 0)) {
+	if (time_since_last > sending_intervall_ms) {
 		time_since_last = 0;
 	}
 	s += String((long)((time_since_last + 500) / 1000));
@@ -1217,6 +1220,7 @@ String age_last_values() {
 
 String add_sensor_type(const String& sensor_text) {
 	String s = sensor_text;
+	s.replace("{pm}", FPSTR(INTL_FEINSTAUB));
 	s.replace("{t}", FPSTR(INTL_TEMPERATUR));
 	s.replace("{h}", FPSTR(INTL_LUFTFEUCHTE));
 	s.replace("{p}", FPSTR(INTL_LUFTDRUCK));
@@ -1237,8 +1241,7 @@ void webserver_request_auth() {
 	}
 }
 
-static void sendHttpRedirect(ESP8266WebServer &httpServer)
-{
+static void sendHttpRedirect(ESP8266WebServer &httpServer) {
 	httpServer.sendHeader(F("Location"), F("http://192.168.4.1/config"));
 	httpServer.send(302, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), "");
 }
@@ -1327,11 +1330,10 @@ void webserver_config() {
 
 			page_content += FPSTR(INTL_SENSOREN);
 			page_content += F("</b><br/>");
-			page_content += form_checkbox("sds_read", FPSTR(INTL_SDS011), sds_read);
-			page_content += form_checkbox("pms32_read", FPSTR(INTL_PMS32), pms32_read);
-			page_content += form_checkbox("pms24_read", FPSTR(INTL_PMS24), pms24_read);
-			page_content += form_checkbox("hpm_read", FPSTR(INTL_HPM), hpm_read);
-			page_content += form_checkbox("ppd_read", FPSTR(INTL_PPD42NS), ppd_read);
+			page_content += form_checkbox_sensor("sds_read", FPSTR(INTL_SDS011), sds_read);
+			page_content += form_checkbox_sensor("pms_read", FPSTR(INTL_PMS), pms_read);
+			page_content += form_checkbox_sensor("hpm_read", FPSTR(INTL_HPM), hpm_read);
+			page_content += form_checkbox_sensor("ppd_read", FPSTR(INTL_PPD42NS), ppd_read);
 			page_content += form_checkbox_sensor("dht_read", FPSTR(INTL_DHT22), dht_read);
 			page_content += form_checkbox_sensor("htu21d_read", FPSTR(INTL_HTU21D), htu21d_read);
 			page_content += form_checkbox_sensor("bmp_read", FPSTR(INTL_BMP180), bmp_read);
@@ -1423,8 +1425,7 @@ void webserver_config() {
 			readBoolParam(dht_read);
 			readBoolParam(htu21d_read);
 			readBoolParam(sds_read);
-			readBoolParam(pms24_read);
-			readBoolParam(pms32_read);
+			readBoolParam(pms_read);
 			readBoolParam(hpm_read);
 			readBoolParam(ppd_read);
 			readBoolParam(bmp_read);
@@ -1476,8 +1477,7 @@ void webserver_config() {
 		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "DHT"), String(dht_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "HTU21D"), String(htu21d_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "SDS"), String(sds_read));
-		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), F("PMS1003, PMS5003, PMS6003, PMS7003")), String(pms32_read));
-		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "PMS3003"), String(pms24_read));
+		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), F("PMS(1,3,5,6,7)003")), String(pms_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "HPM"), String(hpm_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "PPD"), String(ppd_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "BMP180"), String(bmp_read));
@@ -1617,7 +1617,7 @@ void webserver_values() {
 			page_content += table_row_from_value(FPSTR(SENSORS_SDS011), "PM2.5", check_display_value(last_value_SDS_P2, -1, 1, 0), unit_PM);
 			page_content += table_row_from_value(FPSTR(SENSORS_SDS011), "PM10", check_display_value(last_value_SDS_P1, -1, 1, 0), unit_PM);
 		}
-		if (pms24_read || pms32_read) {
+		if (pms_read) {
 			page_content += empty_row;
 			page_content += table_row_from_value(FPSTR(SENSORS_PMSx003), "PM1", check_display_value(last_value_PMS_P0, -1, 1, 0), unit_PM);
 			page_content += table_row_from_value(FPSTR(SENSORS_PMSx003), "PM2.5", check_display_value(last_value_PMS_P2, -1, 1, 0), unit_PM);
@@ -1795,7 +1795,7 @@ void webserver_data_json() {
 		s1.replace("{v}", SOFTWARE_VERSION);
 		s1 += "]}";
 		age = sending_intervall_ms - (act_milli - starttime);
-		if ((age > sending_intervall_ms) || (age < 0)) {
+		if (age > sending_intervall_ms) {
 			age = 0;
 		}
 		age = 0 - age;
@@ -1804,7 +1804,7 @@ void webserver_data_json() {
 		debug_out(F("last data: "), DEBUG_MIN_INFO, 0);
 		debug_out(s1, DEBUG_MIN_INFO, 1);
 		age = act_milli - starttime;
-		if ((age > sending_intervall_ms) || (age < 0)) {
+		if (age > sending_intervall_ms) {
 			age = 0;
 		}
 	}
@@ -1877,7 +1877,7 @@ void webserver_not_found() {
 	debug_out(F("output not found page..."), DEBUG_MIN_INFO, 1);
 	if (WiFi.status() != WL_CONNECTED) {
 		if ((server.uri().indexOf(F("success.html")) != -1) || (server.uri().indexOf(F("detect.html")) != -1)) {
-			server.send(200,FPSTR(TXT_CONTENT_TYPE_TEXT_HTML),FPSTR(WEB_IOS_REDIRECT));
+			server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), FPSTR(WEB_IOS_REDIRECT));
 		} else {
 			sendHttpRedirect(server);
 		}
@@ -2002,10 +2002,8 @@ void wifiConfig() {
 	debug_out(String(ppd_read), DEBUG_MIN_INFO, 1);
 	debug_out(F("SDS: "), DEBUG_MIN_INFO, 0);
 	debug_out(String(sds_read), DEBUG_MIN_INFO, 1);
-	debug_out(F("PMS24: "), DEBUG_MIN_INFO, 0);
-	debug_out(String(pms24_read), DEBUG_MIN_INFO, 1);
-	debug_out(F("PMS32: "), DEBUG_MIN_INFO, 0);
-	debug_out(String(pms32_read), DEBUG_MIN_INFO, 1);
+	debug_out(F("PMS: "), DEBUG_MIN_INFO, 0);
+	debug_out(String(pms_read), DEBUG_MIN_INFO, 1);
 	debug_out(F("HPM: "), DEBUG_MIN_INFO, 0);
 	debug_out(String(hpm_read), DEBUG_MIN_INFO, 1);
 	debug_out(F("DHT: "), DEBUG_MIN_INFO, 0);
@@ -2040,8 +2038,7 @@ void wifiConfig() {
 static void waitForWifiToConnect(int maxRetries, bool *additionalAbortCondition = nullptr) {
 	int retryCount = 0;
 	while ((WiFi.status() != WL_CONNECTED) && (retryCount <  maxRetries)) {
-		if (additionalAbortCondition != nullptr && *additionalAbortCondition)
-		{
+		if (additionalAbortCondition != nullptr && *additionalAbortCondition) {
 			break;
 		}
 		delay(500);
@@ -2106,7 +2103,7 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 	request_head += String(data.length(), DEC) + "\r\n";
 	request_head += F("Connection: close\r\n\r\n");
 
-	const auto doConnect = [=](WiFiClient *client) -> bool {
+	const auto doConnect = [ = ](WiFiClient * client) -> bool {
 		client->setNoDelay(true);
 		client->setTimeout(20000);
 
@@ -2117,7 +2114,7 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 		return true;
 	};
 
-	const auto doRequest = [=](WiFiClient *client) {
+	const auto doRequest = [ = ](WiFiClient * client) {
 		debug_out(F("Requesting URL: "), DEBUG_MIN_INFO, 0);
 		debug_out(url, DEBUG_MIN_INFO, 1);
 		debug_out(esp_chipid, DEBUG_MIN_INFO, 1);
@@ -2187,8 +2184,8 @@ void sendLuftdaten(const String& data, const int pin, const char* host, const in
 /*****************************************************************
  * send data to LoRa gateway                                     *
  *****************************************************************/
-void send_lora(const String& data) {
-}
+// void send_lora(const String& data) {
+// }
 
 /*****************************************************************
  * send data to mqtt api                                         *
@@ -2597,7 +2594,7 @@ String sensorSDS() {
 		sds_pm10_min = 20000;
 		sds_pm25_max = 0;
 		sds_pm25_min = 20000;
-		if ((sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms)) && (! will_check_for_update)) {
+		if ((sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms))) {
 			SDS_cmd(PM_SENSOR_STOP);
 		}
 	}
@@ -2610,7 +2607,7 @@ String sensorSDS() {
 /*****************************************************************
  * read Plantronic PM sensor sensor values                       *
  *****************************************************************/
-String sensorPMS(int msg_len) {
+String sensorPMS() {
 	String s = "";
 	char buffer;
 	int value;
@@ -2621,6 +2618,7 @@ String sensorPMS(int msg_len) {
 	int checksum_is = 0;
 	int checksum_should = 0;
 	int checksum_ok = 0;
+	int frame_len = 24;				// min. frame length
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_PMSx003), DEBUG_MED_INFO, 1);
 	if ((act_milli - starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
@@ -2651,6 +2649,9 @@ String sensorPMS(int msg_len) {
 			case (2):
 				checksum_is = value;
 				break;
+			case (3):
+				frame_len = value + 4;
+				break;
 			case (10):
 				pm1_serial += ( value << 8);
 				break;
@@ -2670,12 +2671,12 @@ String sensorPMS(int msg_len) {
 				pm10_serial += value;
 				break;
 			case (22):
-				if (msg_len == 24) {
+				if (frame_len == 24) {
 					checksum_should = ( value << 8 );
 				};
 				break;
 			case (23):
-				if (msg_len == 24) {
+				if (frame_len == 24) {
 					checksum_should += value;
 				};
 				break;
@@ -2686,9 +2687,9 @@ String sensorPMS(int msg_len) {
 				checksum_should += value;
 				break;
 			}
-			if ((len > 2) && (len < (msg_len - 2))) { checksum_is += value; }
+			if ((len > 2) && (len < (frame_len - 2))) { checksum_is += value; }
 			len++;
-			if (len == msg_len) {
+			if (len == frame_len) {
 				debug_out(F("Checksum is: "), DEBUG_MED_INFO, 0);
 				debug_out(String(checksum_is + 143), DEBUG_MED_INFO, 0);
 				debug_out(F(" - should: "), DEBUG_MED_INFO, 0);
@@ -2773,7 +2774,7 @@ String sensorPMS(int msg_len) {
 		pms_pm10_min = 20000;
 		pms_pm25_max = 0;
 		pms_pm25_min = 20000;
-		if ((sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms)) && (! will_check_for_update)) {
+		if (sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms)) {
 			PMS_cmd(PM_SENSOR_STOP);
 		}
 	}
@@ -2914,7 +2915,7 @@ String sensorHPM() {
 		hpm_pm10_min = 20000;
 		hpm_pm25_max = 0;
 		hpm_pm25_min = 20000;
-		if ((sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms)) && (! will_check_for_update)) {
+		if (sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms)) {
 			HPM_cmd(PM_SENSOR_STOP);
 		}
 	}
@@ -3147,7 +3148,6 @@ void autoUpdate() {
 			break;
 		}
 	}
-	will_check_for_update = false;
 #endif
 }
 
@@ -3182,7 +3182,7 @@ void display_values() {
 		pm25_value = last_value_PPD_P2;
 		pm25_sensor = FPSTR(SENSORS_PPD42NS);
 	}
-	if (pms24_read || pms32_read) {
+	if (pms_read) {
 		pm10_value = last_value_PMS_P1;
 		pm10_sensor = FPSTR(SENSORS_PMSx003);
 		pm25_value = last_value_PMS_P2;
@@ -3242,7 +3242,7 @@ void display_values() {
 		alt_value = last_value_GPS_alt;
 		gps_sensor = "NEO6M";
 	}
-	if (ppd_read || pms24_read || pms32_read || hpm_read || sds_read) {
+	if (ppd_read || pms_read || hpm_read || sds_read) {
 		screens[screen_count++] = 1;
 	}
 	if (dht_read || ds18b20_read || htu21d_read || bmp_read || bmp280_read || bme280_read) {
@@ -3485,7 +3485,7 @@ void setup() {
 		ESP.restart();
 	}
 
-	debug_out(F("Setting time using SNTP"), DEBUG_MIN_INFO,1);
+	debug_out(F("Setting time using SNTP"), DEBUG_MIN_INFO, 1);
 	configTime(8 * 3600, 0, "pool.ntp.org", "time.nist.gov");
 	time_t now = time(nullptr);
 	while (now < 8 * 3600 * 2) {
@@ -3514,11 +3514,14 @@ void setup() {
 		debug_out(F("Stopping SDS011..."), DEBUG_MIN_INFO, 1);
 		SDS_cmd(PM_SENSOR_STOP);
 	}
-	if (pms24_read) {
-		debug_out(F("Read PMS3003..."), DEBUG_MIN_INFO, 1);
-	}
-	if (pms32_read) {
-		debug_out(F("Read PMS(1,5,6,7)003..."), DEBUG_MIN_INFO, 1);
+	if (pms_read) {
+		debug_out(F("Read PMS(1,3,5,6,7)003..."), DEBUG_MIN_INFO, 1);
+		PMS_cmd(PM_SENSOR_START);
+		delay(100);
+		PMS_cmd(PM_SENSOR_CONTINUOUS_MODE);
+		delay(100);
+		debug_out(F("Stopping PMS..."), DEBUG_MIN_INFO, 1);
+		PMS_cmd(PM_SENSOR_STOP);
 	}
 	if (hpm_read) {
 		debug_out(F("Read HPM..."), DEBUG_MIN_INFO, 1);
@@ -3596,14 +3599,6 @@ void setup() {
 	}
 	if (has_lcd2004_27) {
 		debug_out(F("Show on LCD 2004 ..."), DEBUG_MIN_INFO, 1);
-	}
-	if (pms24_read || pms32_read) {
-		PMS_cmd(PM_SENSOR_START);
-		delay(100);
-		PMS_cmd(PM_SENSOR_CONTINUOUS_MODE);
-		delay(100);
-		debug_out(F("Stopping PMS..."), DEBUG_MIN_INFO, 1);
-		PMS_cmd(PM_SENSOR_STOP);
 	}
 
 	if (MDNS.begin(server_name.c_str())) {
@@ -3685,15 +3680,9 @@ void loop() {
 			starttime_SDS = act_milli;
 		}
 
-		if (pms24_read) {
-			debug_out(F("Call sensorPMS(24)"), DEBUG_MAX_INFO, 1);
-			result_PMS = sensorPMS(24);
-			starttime_SDS = act_milli;
-		}
-
-		if (pms32_read) {
-			debug_out(F("Call sensorPMS(32)"), DEBUG_MAX_INFO, 1);
-			result_PMS = sensorPMS(32);
+		if (pms_read) {
+			debug_out(F("Call sensorPMS"), DEBUG_MAX_INFO, 1);
+			result_PMS = sensorPMS();
 			starttime_SDS = act_milli;
 		}
 
@@ -3784,7 +3773,7 @@ void loop() {
 				sum_send_time += millis() - start_send;
 			}
 		}
-		if (pms24_read || pms32_read) {
+		if (pms_read) {
 			data += result_PMS;
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (PMS): "), DEBUG_MIN_INFO, 1);
@@ -3878,10 +3867,6 @@ void loop() {
 
 		//sending to api(s)
 
-		if ((act_milli - last_update_attempt) > pause_between_update_attempts) {
-			will_check_for_update = true;
-		}
-
 		if (send2madavi) {
 			debug_out(F("## Sending to madavi.de: "), DEBUG_MIN_INFO, 1);
 			start_send = millis();
@@ -3913,11 +3898,11 @@ void loop() {
 			sum_send_time += millis() - start_send;
 		}
 
-		if (send2lora) {
-			debug_out(F("## Sending to LoRa gateway: "), DEBUG_MIN_INFO, 1);
-			send_lora(data);
-		}
-
+		/*		if (send2lora) {
+					debug_out(F("## Sending to LoRa gateway: "), DEBUG_MIN_INFO, 1);
+					send_lora(data);
+				}
+		*/
 		if (send2csv) {
 			debug_out(F("## Sending as csv: "), DEBUG_MIN_INFO, 1);
 			send_csv(data);
@@ -3935,10 +3920,12 @@ void loop() {
 
 		server.begin();
 
+		//forced restart after 4 weeks
 		if ((act_milli - last_update_attempt) > (28 * pause_between_update_attempts)) {
 			ESP.restart();
 		}
 
+		// check for updates (default once per day)
 		if ((act_milli - last_update_attempt) > pause_between_update_attempts) {
 			autoUpdate();
 		}
@@ -3946,11 +3933,13 @@ void loop() {
 		if (! send_failed) {
 			sending_time = (4 * sending_time + sum_send_time) / 5;
 		}
+
 		debug_out(F("Time for sending data (ms): "), DEBUG_MIN_INFO, 0);
 		debug_out(String(sending_time), DEBUG_MIN_INFO, 1);
 
 
-		if (WiFi.status() != WL_CONNECTED) {                // reconnect if connection lost
+		// reconnect to WiFi if disconnected
+		if (WiFi.status() != WL_CONNECTED) {
 			debug_out(F("Connection lost, reconnecting "), DEBUG_MIN_INFO, 0);
 			WiFi.reconnect();
 			waitForWifiToConnect(20);
