@@ -1294,7 +1294,7 @@ void webserver_config() {
 			page_content += F("</div><br/>");
 		}
 		page_content += F("<table>");
-		page_content += form_input("wlanssid", FPSTR(INTL_FS_WIFI_NAME), wlanssid, 64);
+		page_content += form_input("wlanssid", FPSTR(INTL_FS_WIFI_NAME), wlanssid, 32);
 		page_content += form_password("wlanpwd", FPSTR(INTL_PASSWORT), wlanpwd, 64);
 		page_content += F("</table><br/><hr/>\n<b>");
 
