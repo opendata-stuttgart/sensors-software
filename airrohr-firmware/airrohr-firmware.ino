@@ -3613,8 +3613,8 @@ void setup() {
 
 	starttime = millis();                                   // store the start time
 	uptime = starttime;
-	starttime_SDS = millis();
-	next_display_millis = millis() + 5000;
+	starttime_SDS = starttime;
+	next_display_millis = starttime + 5000;
 }
 
 /*****************************************************************
