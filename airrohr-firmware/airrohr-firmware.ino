@@ -1935,7 +1935,7 @@ void wifiConfig() {
 	WiFi.disconnect(true);
 	debug_out(F("scan for wifi networks..."), DEBUG_MIN_INFO, 1);
 	count_wifiInfo = WiFi.scanNetworks(false, true);
-	wifiInfo = (struct_wifiInfo *) malloc(count_wifiInfo * sizeof(struct_wifiInfo));
+	wifiInfo = new struct_wifiInfo[count_wifiInfo];
 	for (int i = 0; i < 14; i++) {
 		channels_rssi[i] = -100;
 	}
@@ -1983,7 +1983,7 @@ void wifiConfig() {
 	WiFi.softAPdisconnect(true);
 	WiFi.mode(WIFI_STA);
 
-	free(wifiInfo);
+	delete []wifiInfo;
 
 	dnsServer.stop();
 
