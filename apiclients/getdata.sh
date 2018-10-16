@@ -4,8 +4,8 @@
 source config.sh
 
 #tmpdir="$(mktemp -d --tmpdir dusti.sensordata.XXXX)"
-tmpdir="$(mktemp -d dusti.sensordata.$(date -I).XXXX)"
-echo $tmpdir
+tmpdir="$(mktemp -d dusti.sensordata."$(date -I)".XXXX)"
+echo "$tmpdir"
 
 pushd "$tmpdir"
 for sensorid in $SENSOR_IDS
@@ -24,7 +24,7 @@ do
 	fi
 	count=$(grep -o '"count":[0-9]*,' "tmp.json" | grep -o '[0-9]*')
 	# pages are count/10+1
-	npages=$(($count/10+1))
+	npages=$((count/10+1))
 	rm "tmp.json"
 
 	for page in $(seq -w 1 $npages)
@@ -38,4 +38,4 @@ do
 	popd
 done
 
-echo results in $tmpdir
+echo results in "$tmpdir"
