@@ -1539,9 +1539,6 @@ void webserver_wifi() {
 		page_content += FPSTR(INTL_KEINE_NETZWERKE);
 		page_content += F("<br/>");
 	} else {
-		page_content += FPSTR(INTL_NETZWERKE_GEFUNDEN);
-		page_content += String(count_wifiInfo);
-		page_content += F("<br/>");
 		std::unique_ptr<int[]> indices(new int[count_wifiInfo]);
 		debug_out(F("output config page 2"), DEBUG_MIN_INFO, 1);
 		for (int i = 0; i < count_wifiInfo; i++) {
@@ -1556,6 +1553,7 @@ void webserver_wifi() {
 		}
 		String cssid;
 		debug_out(F("output config page 3"), DEBUG_MIN_INFO, 1);
+		int duplicateSsids = 0;
 		for (int i = 0; i < count_wifiInfo; i++) {
 			if (indices[i] == -1) {
 				continue;
@@ -1564,9 +1562,14 @@ void webserver_wifi() {
 			for (int j = i + 1; j < count_wifiInfo; j++) {
 				if (cssid == wifiInfo[indices[j]].ssid) {
 					indices[j] = -1; // set dup aps to index -1
+					++duplicateSsids;
 				}
 			}
 		}
+
+		page_content += FPSTR(INTL_NETZWERKE_GEFUNDEN);
+		page_content += String(count_wifiInfo - duplicateSsids);
+		page_content += F("<br/>");
 		page_content += F("<br/><table>");
 		//if(n > 30) n=30;
 		for (int i = 0; i < count_wifiInfo; ++i) {
