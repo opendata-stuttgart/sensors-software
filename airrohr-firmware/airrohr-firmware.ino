@@ -1294,7 +1294,7 @@ void webserver_config() {
 			page_content += F("</div><br/>");
 		}
 		page_content += F("<table>");
-		page_content += form_input("wlanssid", FPSTR(INTL_FS_WIFI_NAME), wlanssid, 64);
+		page_content += form_input("wlanssid", FPSTR(INTL_FS_WIFI_NAME), wlanssid, 32);
 		page_content += form_password("wlanpwd", FPSTR(INTL_PASSWORT), wlanpwd, 64);
 		page_content += F("</table><br/><hr/>\n<b>");
 
@@ -1539,9 +1539,6 @@ void webserver_wifi() {
 		page_content += FPSTR(INTL_KEINE_NETZWERKE);
 		page_content += F("<br/>");
 	} else {
-		page_content += FPSTR(INTL_NETZWERKE_GEFUNDEN);
-		page_content += String(count_wifiInfo);
-		page_content += F("<br/>");
 		std::unique_ptr<int[]> indices(new int[count_wifiInfo]);
 		debug_out(F("output config page 2"), DEBUG_MIN_INFO, 1);
 		for (int i = 0; i < count_wifiInfo; i++) {
@@ -1556,6 +1553,7 @@ void webserver_wifi() {
 		}
 		String cssid;
 		debug_out(F("output config page 3"), DEBUG_MIN_INFO, 1);
+		int duplicateSsids = 0;
 		for (int i = 0; i < count_wifiInfo; i++) {
 			if (indices[i] == -1) {
 				continue;
@@ -1564,9 +1562,14 @@ void webserver_wifi() {
 			for (int j = i + 1; j < count_wifiInfo; j++) {
 				if (cssid == wifiInfo[indices[j]].ssid) {
 					indices[j] = -1; // set dup aps to index -1
+					++duplicateSsids;
 				}
 			}
 		}
+
+		page_content += FPSTR(INTL_NETZWERKE_GEFUNDEN);
+		page_content += String(count_wifiInfo - duplicateSsids);
+		page_content += F("<br/>");
 		page_content += F("<br/><table>");
 		//if(n > 30) n=30;
 		for (int i = 0; i < count_wifiInfo; ++i) {
@@ -1935,7 +1938,7 @@ void wifiConfig() {
 	WiFi.disconnect(true);
 	debug_out(F("scan for wifi networks..."), DEBUG_MIN_INFO, 1);
 	count_wifiInfo = WiFi.scanNetworks(false, true);
-	wifiInfo = (struct_wifiInfo *) malloc(count_wifiInfo * 100);
+	wifiInfo = new struct_wifiInfo[count_wifiInfo];
 	for (int i = 0; i < 14; i++) {
 		channels_rssi[i] = -100;
 	}
@@ -1983,7 +1986,7 @@ void wifiConfig() {
 	WiFi.softAPdisconnect(true);
 	WiFi.mode(WIFI_STA);
 
-	free(wifiInfo);
+	delete []wifiInfo;
 
 	dnsServer.stop();
 
