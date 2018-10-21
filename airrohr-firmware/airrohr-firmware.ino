@@ -100,7 +100,7 @@
 
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-112-B2"
+#define SOFTWARE_VERSION "NRZ-2018-112-B3"
 
 /*****************************************************************
  * Includes                                                      *
@@ -2082,7 +2082,7 @@ void connectWifi() {
 /*****************************************************************
  * send data to rest api                                         *
  *****************************************************************/
-void sendData(const String& data, const int pin, const char* host, const int httpPort, const char* url, const char* basic_auth_string, const String& contentType) {
+void sendData(const String& data, const int pin, const char* host, const int httpPort, const char* url, const bool verify, const char* basic_auth_string, const String& contentType) {
 
 	debug_out(F("Start connecting to "), DEBUG_MIN_INFO, 0);
 	debug_out(host, DEBUG_MIN_INFO, 1);
@@ -2143,15 +2143,19 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 	if (httpPort == 443) {
 		WiFiClientSecure client_s;
 		if (doConnect(&client_s)) {
-			if (client_s.setCACert_P(dst_root_ca_x3_bin_crt, dst_root_ca_x3_bin_crt_len)) {
-				if (client_s.verifyCertChain(host)) {
-					debug_out(F("Server cert verified"), DEBUG_MIN_INFO, 1);
-					doRequest(&client_s);
+			if (verify) {
+				if (client_s.setCACert_P(dst_root_ca_x3_bin_crt, dst_root_ca_x3_bin_crt_len)) {
+					if (client_s.verifyCertChain(host)) {
+						debug_out(F("Server cert verified"), DEBUG_MIN_INFO, 1);
+						doRequest(&client_s);
+					} else {
+						debug_out(F("ERROR: cert verification failed!"), DEBUG_ERROR, 1);
+					}
 				} else {
-					debug_out(F("ERROR: cert verification failed!"), DEBUG_ERROR, 1);
+					debug_out(F("Failed to load root CA cert!"), DEBUG_ERROR, 1);
 				}
 			} else {
-				debug_out(F("Failed to load root CA cert!"), DEBUG_ERROR, 1);
+				doRequest(&client_s);
 			}
 		}
 	} else {
@@ -2170,7 +2174,7 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 /*****************************************************************
  * send single sensor data to luftdaten.info api                 *
  *****************************************************************/
-void sendLuftdaten(const String& data, const int pin, const char* host, const int httpPort, const char* url, const char* replace_str) {
+void sendLuftdaten(const String& data, const int pin, const char* host, const int httpPort, const char* url, const bool verify, const char* replace_str) {
 	String data_4_dusti = F(data_first_part);
 	data_4_dusti.replace("{v}", SOFTWARE_VERSION);
 	data_4_dusti += data;
@@ -2178,7 +2182,7 @@ void sendLuftdaten(const String& data, const int pin, const char* host, const in
 	data_4_dusti.replace(replace_str, "");
 	data_4_dusti += "]}";
 	if (data != "") {
-		sendData(data_4_dusti, pin, host, httpPort, url, "", FPSTR(TXT_CONTENT_TYPE_JSON));
+		sendData(data_4_dusti, pin, host, httpPort, url, verify, "", FPSTR(TXT_CONTENT_TYPE_JSON));
 	} else {
 		debug_out(F("No data sent..."), DEBUG_MIN_INFO, 1);
 	}
@@ -3763,7 +3767,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (PPD42NS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_PPD, PPD_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "PPD_");
+				sendLuftdaten(result_PPD, PPD_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "PPD_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3772,7 +3776,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (SDS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_SDS, SDS_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "SDS_");
+				sendLuftdaten(result_SDS, SDS_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "SDS_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3781,7 +3785,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (PMS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_PMS, PMS_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "PMS_");
+				sendLuftdaten(result_PMS, PMS_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "PMS_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3790,7 +3794,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (HPM): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_HPM, HPM_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "HPM_");
+				sendLuftdaten(result_HPM, HPM_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "HPM_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3799,7 +3803,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (DHT): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_DHT, DHT_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "DHT_");
+				sendLuftdaten(result_DHT, DHT_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "DHT_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3808,7 +3812,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (HTU21D): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_HTU21D, HTU21D_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "HTU21D_");
+				sendLuftdaten(result_HTU21D, HTU21D_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "HTU21D_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3817,7 +3821,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (BMP): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_BMP, BMP_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "BMP_");
+				sendLuftdaten(result_BMP, BMP_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "BMP_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3826,7 +3830,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (BMP280): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_BMP280, BMP280_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "BMP280_");
+				sendLuftdaten(result_BMP280, BMP280_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "BMP280_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3835,7 +3839,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (BME280): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_BME280, BME280_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "BME280_");
+				sendLuftdaten(result_BME280, BME280_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "BME280_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3845,7 +3849,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (DS18B20): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_DS18B20, DS18B20_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "DS18B20_");
+				sendLuftdaten(result_DS18B20, DS18B20_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "DS18B20_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3855,7 +3859,7 @@ void loop() {
 			if (send2dusti) {
 				debug_out(F("## Sending to luftdaten.info (GPS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_GPS, GPS_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, "GPS_");
+				sendLuftdaten(result_GPS, GPS_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "GPS_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3873,7 +3877,7 @@ void loop() {
 		if (send2madavi) {
 			debug_out(F("## Sending to madavi.de: "), DEBUG_MIN_INFO, 1);
 			start_send = millis();
-			sendData(data, 0, HOST_MADAVI, (ssl_madavi ? 443 : 80), URL_MADAVI, "", FPSTR(TXT_CONTENT_TYPE_JSON));
+			sendData(data, 0, HOST_MADAVI, (ssl_madavi ? 443 : 80), URL_MADAVI, true, "", FPSTR(TXT_CONTENT_TYPE_JSON));
 			sum_send_time += millis() - start_send;
 		}
 
@@ -3882,14 +3886,14 @@ void loop() {
 			start_send = millis();
 			sensemap_path = url_sensemap;
 			sensemap_path.replace("BOXID", senseboxid);
-			sendData(data, 0, host_sensemap, httpPort_sensemap, sensemap_path.c_str(), "", FPSTR(TXT_CONTENT_TYPE_JSON));
+			sendData(data, 0, host_sensemap, httpPort_sensemap, sensemap_path.c_str(), false, "", FPSTR(TXT_CONTENT_TYPE_JSON));
 			sum_send_time += millis() - start_send;
 		}
 
 		if (send2fsapp) {
 			debug_out(F("## Sending to Server FS App: "), DEBUG_MIN_INFO, 1);
 			start_send = millis();
-			sendData(data, 0, host_fsapp, httpPort_fsapp, url_fsapp.c_str(), "", FPSTR(TXT_CONTENT_TYPE_JSON));
+			sendData(data, 0, host_fsapp, httpPort_fsapp, url_fsapp.c_str(), false, "", FPSTR(TXT_CONTENT_TYPE_JSON));
 			sum_send_time += millis() - start_send;
 		}
 
@@ -3897,7 +3901,7 @@ void loop() {
 			debug_out(F("## Sending to custom influx db: "), DEBUG_MIN_INFO, 1);
 			start_send = millis();
 			data_4_influxdb = create_influxdb_string(data);
-			sendData(data_4_influxdb, 0, host_influx, port_influx, url_influx, basic_auth_influx.c_str(), FPSTR(TXT_CONTENT_TYPE_INFLUXDB));
+			sendData(data_4_influxdb, 0, host_influx, port_influx, url_influx, false, basic_auth_influx.c_str(), FPSTR(TXT_CONTENT_TYPE_INFLUXDB));
 			sum_send_time += millis() - start_send;
 		}
 
@@ -3917,7 +3921,7 @@ void loop() {
 			data_4_custom = "{\"esp8266id\": \"" + String(esp_chipid) + "\", " + data_4_custom;
 			debug_out(F("## Sending to custom api: "), DEBUG_MIN_INFO, 1);
 			start_send = millis();
-			sendData(data_4_custom, 0, host_custom, port_custom, url_custom, basic_auth_custom.c_str(), FPSTR(TXT_CONTENT_TYPE_JSON));
+			sendData(data_4_custom, 0, host_custom, port_custom, url_custom, false, basic_auth_custom.c_str(), FPSTR(TXT_CONTENT_TYPE_JSON));
 			sum_send_time += millis() - start_send;
 		}
 

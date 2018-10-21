@@ -1,3 +1,7 @@
+NRZ-2018-112-B3
+* verify certificates for HTTPS connections to Luftdaten.info and Madavi.de API
+  (works only with Let's Encrypt certs)
+
 NRZ-2018-112-B2
 * merged pull requests (fmeerkoetter) typedef, duplicate code in function
 * same read function for all Plantower sensors
