@@ -1293,7 +1293,7 @@ void webserver_config() {
 			page_content += FPSTR(INTL_WLAN_LISTE);
 			page_content += F("</div><br/>");
 		}
-		page_content += F("<table>");
+		page_content += TABLE_TAG_OPEN;
 		page_content += form_input("wlanssid", FPSTR(INTL_FS_WIFI_NAME), wlanssid, 32);
 		page_content += form_password("wlanpwd", FPSTR(INTL_PASSWORT), wlanpwd, 64);
 		page_content += F("</table><br/><hr/>\n<b>");
@@ -1304,7 +1304,7 @@ void webserver_config() {
 		if (! wificonfig_loop) {
 			page_content += FPSTR(INTL_BASICAUTH);
 			page_content += F("</b><br/>");
-			page_content += F("<table>");
+			page_content += TABLE_TAG_OPEN;
 			page_content += form_input("www_username", FPSTR(INTL_BENUTZER), www_username, 64);
 			page_content += form_password("www_password", FPSTR(INTL_PASSWORT), www_password, 64);
 			page_content += form_checkbox("www_basicauth_enabled", FPSTR(INTL_BASICAUTH), www_basicauth_enabled);
@@ -1314,7 +1314,7 @@ void webserver_config() {
 			page_content += F("</b><br/>");
 			page_content += FPSTR(INTL_FS_WIFI_BESCHREIBUNG);
 			page_content += BR_TAG;
-			page_content += F("<table>");
+			page_content += TABLE_TAG_OPEN;
 			page_content += form_input("fs_ssid", FPSTR(INTL_FS_WIFI_NAME), fs_ssid, 64);
 			page_content += form_password("fs_pwd", FPSTR(INTL_PASSWORT), fs_pwd, 64);
 
@@ -1355,7 +1355,7 @@ void webserver_config() {
 		page_content += form_checkbox("has_lcd2004_27", FPSTR(INTL_LCD2004_27), has_lcd2004_27);
 
 		if (! wificonfig_loop) {
-			page_content += F("<table>");
+			page_content += TABLE_TAG_OPEN;
 			page_content += form_select_lang();
 			page_content += form_input("debug", FPSTR(INTL_DEBUG_LEVEL), String(debug), 5);
 			page_content += form_input("sending_intervall_ms", FPSTR(INTL_MESSINTERVALL), String(sending_intervall_ms / 1000), 5);
@@ -1367,11 +1367,11 @@ void webserver_config() {
 			page_content += form_checkbox("send2fsapp", tmpl(FPSTR(INTL_SENDEN_AN), F("Feinstaub-App")), send2fsapp);
 			page_content += BR_TAG;
 			page_content += form_checkbox("send2sensemap", tmpl(FPSTR(INTL_SENDEN_AN), F("OpenSenseMap")), send2sensemap);
-			page_content += F("<table>");
+			page_content += TABLE_TAG_OPEN;
 			page_content += form_input("senseboxid", "senseBox-ID: ", senseboxid, 50);
 			page_content += F("</table><br/>");
 			page_content += form_checkbox("send2custom", FPSTR(INTL_AN_EIGENE_API_SENDEN), send2custom);
-			page_content += F("<table>");
+			page_content += TABLE_TAG_OPEN;
 			page_content += form_input("host_custom", FPSTR(INTL_SERVER), host_custom, 50);
 			page_content += form_input("url_custom", FPSTR(INTL_PFAD), url_custom, 50);
 			page_content += form_input("port_custom", FPSTR(INTL_PORT), String(port_custom), 30);
@@ -1379,7 +1379,7 @@ void webserver_config() {
 			page_content += form_password("pwd_custom", FPSTR(INTL_PASSWORT), pwd_custom, 50);
 			page_content += F("</table><br/>");
 			page_content += form_checkbox("send2influx", tmpl(FPSTR(INTL_SENDEN_AN), F("InfluxDB")), send2influx);
-			page_content += F("<table>");
+			page_content += TABLE_TAG_OPEN;
 			page_content += form_input("host_influx", FPSTR(INTL_SERVER), host_influx, 50);
 			page_content += form_input("url_influx", FPSTR(INTL_PFAD), url_influx, 50);
 			page_content += form_input("port_influx", FPSTR(INTL_PORT), String(port_influx), 30);
@@ -1390,7 +1390,7 @@ void webserver_config() {
 			page_content += F("<br/></form>");
 		}
 		if (wificonfig_loop) {  // scan for wlan ssids
-			page_content += F("<table>");
+			page_content += TABLE_TAG_OPEN;
 			page_content += form_submit(FPSTR(INTL_SPEICHERN));
 			page_content += F("</table><br/>");
 			page_content += F("<script>window.setTimeout(load_wifi_list,1000);</script>");

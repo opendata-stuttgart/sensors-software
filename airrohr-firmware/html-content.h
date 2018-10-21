@@ -63,6 +63,7 @@ input[type='submit']{border-radius:5px;font-size:medium;padding:5px;}\
 <small>ID: {id}<br/>MAC: {mac}<br/>{fwt}: {fw}</small></div><div class='content'><h4>{h} {n} {t}</h4>";
 
 const char BR_TAG[] PROGMEM = "<br/>";
+const char TABLE_TAG_OPEN[] PROGMEM = "<table>";
 
 const char WEB_PAGE_FOOTER[] PROGMEM = "<br/><br/><a href='/' style='display:inline;'>{t}</a><br/><br/><br/>\
 <a href='http://codefor.de/stuttgart/' target='_blank' style='display:inline;background:none;color:black;'>&copy; Open Knowledge Lab Stuttgart a.o. (Code for Germany)</a>\
