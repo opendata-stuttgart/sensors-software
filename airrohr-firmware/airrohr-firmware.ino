@@ -1313,7 +1313,7 @@ void webserver_config() {
 			page_content += FPSTR(INTL_FS_WIFI);
 			page_content += F("</b><br/>");
 			page_content += FPSTR(INTL_FS_WIFI_BESCHREIBUNG);
-			page_content += F("<br/>");
+			page_content += BR_TAG;
 			page_content += F("<table>");
 			page_content += form_input("fs_ssid", FPSTR(INTL_FS_WIFI_NAME), fs_ssid, 64);
 			page_content += form_password("fs_pwd", FPSTR(INTL_PASSWORT), fs_pwd, 64);
@@ -1365,7 +1365,7 @@ void webserver_config() {
 			page_content += FPSTR(INTL_WEITERE_APIS);
 			page_content += F("</b><br/><br/>");
 			page_content += form_checkbox("send2fsapp", tmpl(FPSTR(INTL_SENDEN_AN), F("Feinstaub-App")), send2fsapp);
-			page_content += F("<br/>");
+			page_content += BR_TAG;
 			page_content += form_checkbox("send2sensemap", tmpl(FPSTR(INTL_SENDEN_AN), F("OpenSenseMap")), send2sensemap);
 			page_content += F("<table>");
 			page_content += form_input("senseboxid", "senseBox-ID: ", senseboxid, 50);
@@ -1535,9 +1535,9 @@ void webserver_wifi() {
 	debug_out(String(count_wifiInfo), DEBUG_MIN_INFO, 1);
 	String page_content = "";
 	if (count_wifiInfo == 0) {
-		page_content += F("<br/>");
+		page_content += BR_TAG;
 		page_content += FPSTR(INTL_KEINE_NETZWERKE);
-		page_content += F("<br/>");
+		page_content += BR_TAG;
 	} else {
 		std::unique_ptr<int[]> indices(new int[count_wifiInfo]);
 		debug_out(F("output config page 2"), DEBUG_MIN_INFO, 1);
@@ -1569,7 +1569,7 @@ void webserver_wifi() {
 
 		page_content += FPSTR(INTL_NETZWERKE_GEFUNDEN);
 		page_content += String(count_wifiInfo - duplicateSsids);
-		page_content += F("<br/>");
+		page_content += BR_TAG;
 		page_content += F("<br/><table>");
 		//if(n > 30) n=30;
 		for (int i = 0; i < count_wifiInfo; ++i) {
