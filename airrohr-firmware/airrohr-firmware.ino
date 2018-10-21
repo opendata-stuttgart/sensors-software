@@ -1293,7 +1293,7 @@ void webserver_config() {
 			page_content += FPSTR(INTL_WLAN_LISTE);
 			page_content += F("</div><br/>");
 		}
-		page_content += F("<table>");
+		page_content += TABLE_TAG_OPEN;
 		page_content += form_input("wlanssid", FPSTR(INTL_FS_WIFI_NAME), wlanssid, 32);
 		page_content += form_password("wlanpwd", FPSTR(INTL_PASSWORT), wlanpwd, 64);
 		page_content += F("</table><br/><hr/>\n<b>");
@@ -1304,7 +1304,7 @@ void webserver_config() {
 		if (! wificonfig_loop) {
 			page_content += FPSTR(INTL_BASICAUTH);
 			page_content += F("</b><br/>");
-			page_content += F("<table>");
+			page_content += TABLE_TAG_OPEN;
 			page_content += form_input("www_username", FPSTR(INTL_BENUTZER), www_username, 64);
 			page_content += form_password("www_password", FPSTR(INTL_PASSWORT), www_password, 64);
 			page_content += form_checkbox("www_basicauth_enabled", FPSTR(INTL_BASICAUTH), www_basicauth_enabled);
@@ -1313,8 +1313,8 @@ void webserver_config() {
 			page_content += FPSTR(INTL_FS_WIFI);
 			page_content += F("</b><br/>");
 			page_content += FPSTR(INTL_FS_WIFI_BESCHREIBUNG);
-			page_content += F("<br/>");
-			page_content += F("<table>");
+			page_content += BR_TAG;
+			page_content += TABLE_TAG_OPEN;
 			page_content += form_input("fs_ssid", FPSTR(INTL_FS_WIFI_NAME), fs_ssid, 64);
 			page_content += form_password("fs_pwd", FPSTR(INTL_PASSWORT), fs_pwd, 64);
 
@@ -1355,7 +1355,7 @@ void webserver_config() {
 		page_content += form_checkbox("has_lcd2004_27", FPSTR(INTL_LCD2004_27), has_lcd2004_27);
 
 		if (! wificonfig_loop) {
-			page_content += F("<table>");
+			page_content += TABLE_TAG_OPEN;
 			page_content += form_select_lang();
 			page_content += form_input("debug", FPSTR(INTL_DEBUG_LEVEL), String(debug), 5);
 			page_content += form_input("sending_intervall_ms", FPSTR(INTL_MESSINTERVALL), String(sending_intervall_ms / 1000), 5);
@@ -1365,13 +1365,13 @@ void webserver_config() {
 			page_content += FPSTR(INTL_WEITERE_APIS);
 			page_content += F("</b><br/><br/>");
 			page_content += form_checkbox("send2fsapp", tmpl(FPSTR(INTL_SENDEN_AN), F("Feinstaub-App")), send2fsapp);
-			page_content += F("<br/>");
+			page_content += BR_TAG;
 			page_content += form_checkbox("send2sensemap", tmpl(FPSTR(INTL_SENDEN_AN), F("OpenSenseMap")), send2sensemap);
-			page_content += F("<table>");
+			page_content += TABLE_TAG_OPEN;
 			page_content += form_input("senseboxid", "senseBox-ID: ", senseboxid, 50);
 			page_content += F("</table><br/>");
 			page_content += form_checkbox("send2custom", FPSTR(INTL_AN_EIGENE_API_SENDEN), send2custom);
-			page_content += F("<table>");
+			page_content += TABLE_TAG_OPEN;
 			page_content += form_input("host_custom", FPSTR(INTL_SERVER), host_custom, 50);
 			page_content += form_input("url_custom", FPSTR(INTL_PFAD), url_custom, 50);
 			page_content += form_input("port_custom", FPSTR(INTL_PORT), String(port_custom), 30);
@@ -1379,7 +1379,7 @@ void webserver_config() {
 			page_content += form_password("pwd_custom", FPSTR(INTL_PASSWORT), pwd_custom, 50);
 			page_content += F("</table><br/>");
 			page_content += form_checkbox("send2influx", tmpl(FPSTR(INTL_SENDEN_AN), F("InfluxDB")), send2influx);
-			page_content += F("<table>");
+			page_content += TABLE_TAG_OPEN;
 			page_content += form_input("host_influx", FPSTR(INTL_SERVER), host_influx, 50);
 			page_content += form_input("url_influx", FPSTR(INTL_PFAD), url_influx, 50);
 			page_content += form_input("port_influx", FPSTR(INTL_PORT), String(port_influx), 30);
@@ -1390,7 +1390,7 @@ void webserver_config() {
 			page_content += F("<br/></form>");
 		}
 		if (wificonfig_loop) {  // scan for wlan ssids
-			page_content += F("<table>");
+			page_content += TABLE_TAG_OPEN;
 			page_content += form_submit(FPSTR(INTL_SPEICHERN));
 			page_content += F("</table><br/>");
 			page_content += F("<script>window.setTimeout(load_wifi_list,1000);</script>");
@@ -1535,9 +1535,9 @@ void webserver_wifi() {
 	debug_out(String(count_wifiInfo), DEBUG_MIN_INFO, 1);
 	String page_content = "";
 	if (count_wifiInfo == 0) {
-		page_content += F("<br/>");
+		page_content += BR_TAG;
 		page_content += FPSTR(INTL_KEINE_NETZWERKE);
-		page_content += F("<br/>");
+		page_content += BR_TAG;
 	} else {
 		std::unique_ptr<int[]> indices(new int[count_wifiInfo]);
 		debug_out(F("output config page 2"), DEBUG_MIN_INFO, 1);
@@ -1569,7 +1569,7 @@ void webserver_wifi() {
 
 		page_content += FPSTR(INTL_NETZWERKE_GEFUNDEN);
 		page_content += String(count_wifiInfo - duplicateSsids);
-		page_content += F("<br/>");
+		page_content += BR_TAG;
 		page_content += F("<br/><table>");
 		//if(n > 30) n=30;
 		for (int i = 0; i < count_wifiInfo; ++i) {
@@ -1915,18 +1915,30 @@ void setup_webserver() {
 	server.begin();
 }
 
+static int selectChannelForAp(struct_wifiInfo *info, int count)
+{
+	std::array<int, 14> channels_rssi;
+	std::fill(channels_rssi.begin(), channels_rssi.end(), -100);
+
+	for (int i = 0; i < count; i++) {
+		if (info[i].RSSI > channels_rssi[info[i].channel]) {
+			channels_rssi[info[i].channel] = info[i].RSSI;
+		}
+	}
+
+	if ((channels_rssi[1] < channels_rssi[6]) && (channels_rssi[1] < channels_rssi[11])) {
+		return 1;
+	} else if ((channels_rssi[6] < channels_rssi[1]) && (channels_rssi[6] < channels_rssi[11])) {
+		return 6;
+	} else {
+		return 11;
+	}
+}
+
 /*****************************************************************
  * WifiConfig                                                    *
  *****************************************************************/
 void wifiConfig() {
-	String SSID;
-	uint8_t* BSSID;
-	int channels_rssi[14];
-	uint8_t AP_channel = 1;
-	DNSServer dnsServer;
-	IPAddress apIP(192, 168, 4, 1);
-	IPAddress netMsk(255, 255, 255, 0);
-
 	debug_out(F("Starting WiFiManager"), DEBUG_MIN_INFO, 1);
 	debug_out(F("AP ID: "), DEBUG_MIN_INFO, 0);
 	debug_out(fs_ssid, DEBUG_MIN_INFO, 1);
@@ -1939,29 +1951,20 @@ void wifiConfig() {
 	debug_out(F("scan for wifi networks..."), DEBUG_MIN_INFO, 1);
 	count_wifiInfo = WiFi.scanNetworks(false, true);
 	wifiInfo = new struct_wifiInfo[count_wifiInfo];
-	for (int i = 0; i < 14; i++) {
-		channels_rssi[i] = -100;
-	}
 	for (int i = 0; i < count_wifiInfo; i++) {
+		uint8_t* BSSID;
+		String SSID;
 		WiFi.getNetworkInfo(i, SSID, wifiInfo[i].encryptionType, wifiInfo[i].RSSI, BSSID, wifiInfo[i].channel, wifiInfo[i].isHidden);
 		SSID.toCharArray(wifiInfo[i].ssid, 35);
-		if (wifiInfo[i].RSSI > channels_rssi[wifiInfo[i].channel]) {
-			channels_rssi[wifiInfo[i].channel] = wifiInfo[i].RSSI;
-		}
-	}
-	if ((channels_rssi[1] < channels_rssi[6]) && (channels_rssi[1] < channels_rssi[11])) {
-		AP_channel = 1;
-	} else if ((channels_rssi[6] < channels_rssi[1]) && (channels_rssi[6] < channels_rssi[11])) {
-		AP_channel = 6;
-	} else {
-		AP_channel = 11;
 	}
 
 	WiFi.mode(WIFI_AP);
-	WiFi.softAPConfig(apIP, apIP, netMsk);
-	WiFi.softAP(fs_ssid, fs_pwd, AP_channel);
+	const IPAddress apIP(192, 168, 4, 1);
+	WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
+	WiFi.softAP(fs_ssid, fs_pwd, selectChannelForAp(wifiInfo, count_wifiInfo));
 	debug_out(String(WLANPWD), DEBUG_MIN_INFO, 1);
 
+	DNSServer dnsServer;
 	dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
 	dnsServer.start(53, "*", apIP);							// 53 is port for DNS server
 
