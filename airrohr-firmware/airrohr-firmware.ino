@@ -1939,12 +1939,6 @@ static int selectChannelForAp(struct_wifiInfo *info, int count)
  * WifiConfig                                                    *
  *****************************************************************/
 void wifiConfig() {
-	String SSID;
-	uint8_t* BSSID;
-	DNSServer dnsServer;
-	IPAddress apIP(192, 168, 4, 1);
-	IPAddress netMsk(255, 255, 255, 0);
-
 	debug_out(F("Starting WiFiManager"), DEBUG_MIN_INFO, 1);
 	debug_out(F("AP ID: "), DEBUG_MIN_INFO, 0);
 	debug_out(fs_ssid, DEBUG_MIN_INFO, 1);
@@ -1958,15 +1952,19 @@ void wifiConfig() {
 	count_wifiInfo = WiFi.scanNetworks(false, true);
 	wifiInfo = new struct_wifiInfo[count_wifiInfo];
 	for (int i = 0; i < count_wifiInfo; i++) {
+		uint8_t* BSSID;
+		String SSID;
 		WiFi.getNetworkInfo(i, SSID, wifiInfo[i].encryptionType, wifiInfo[i].RSSI, BSSID, wifiInfo[i].channel, wifiInfo[i].isHidden);
 		SSID.toCharArray(wifiInfo[i].ssid, 35);
 	}
 
 	WiFi.mode(WIFI_AP);
-	WiFi.softAPConfig(apIP, apIP, netMsk);
+	const IPAddress apIP(192, 168, 4, 1);
+	WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
 	WiFi.softAP(fs_ssid, fs_pwd, selectChannelForAp(wifiInfo, count_wifiInfo));
 	debug_out(String(WLANPWD), DEBUG_MIN_INFO, 1);
 
+	DNSServer dnsServer;
 	dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
 	dnsServer.start(53, "*", apIP);							// 53 is port for DNS server
 
