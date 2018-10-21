@@ -1915,14 +1915,32 @@ void setup_webserver() {
 	server.begin();
 }
 
+static int selectChannelForAp(struct_wifiInfo *info, int count)
+{
+	std::array<int, 14> channels_rssi;
+	std::fill(channels_rssi.begin(), channels_rssi.end(), -100);
+
+	for (int i = 0; i < count; i++) {
+		if (info[i].RSSI > channels_rssi[info[i].channel]) {
+			channels_rssi[info[i].channel] = info[i].RSSI;
+		}
+	}
+
+	if ((channels_rssi[1] < channels_rssi[6]) && (channels_rssi[1] < channels_rssi[11])) {
+		return 1;
+	} else if ((channels_rssi[6] < channels_rssi[1]) && (channels_rssi[6] < channels_rssi[11])) {
+		return 6;
+	} else {
+		return 11;
+	}
+}
+
 /*****************************************************************
  * WifiConfig                                                    *
  *****************************************************************/
 void wifiConfig() {
 	String SSID;
 	uint8_t* BSSID;
-	int channels_rssi[14];
-	uint8_t AP_channel = 1;
 	DNSServer dnsServer;
 	IPAddress apIP(192, 168, 4, 1);
 	IPAddress netMsk(255, 255, 255, 0);
@@ -1939,27 +1957,14 @@ void wifiConfig() {
 	debug_out(F("scan for wifi networks..."), DEBUG_MIN_INFO, 1);
 	count_wifiInfo = WiFi.scanNetworks(false, true);
 	wifiInfo = new struct_wifiInfo[count_wifiInfo];
-	for (int i = 0; i < 14; i++) {
-		channels_rssi[i] = -100;
-	}
 	for (int i = 0; i < count_wifiInfo; i++) {
 		WiFi.getNetworkInfo(i, SSID, wifiInfo[i].encryptionType, wifiInfo[i].RSSI, BSSID, wifiInfo[i].channel, wifiInfo[i].isHidden);
 		SSID.toCharArray(wifiInfo[i].ssid, 35);
-		if (wifiInfo[i].RSSI > channels_rssi[wifiInfo[i].channel]) {
-			channels_rssi[wifiInfo[i].channel] = wifiInfo[i].RSSI;
-		}
-	}
-	if ((channels_rssi[1] < channels_rssi[6]) && (channels_rssi[1] < channels_rssi[11])) {
-		AP_channel = 1;
-	} else if ((channels_rssi[6] < channels_rssi[1]) && (channels_rssi[6] < channels_rssi[11])) {
-		AP_channel = 6;
-	} else {
-		AP_channel = 11;
 	}
 
 	WiFi.mode(WIFI_AP);
 	WiFi.softAPConfig(apIP, apIP, netMsk);
-	WiFi.softAP(fs_ssid, fs_pwd, AP_channel);
+	WiFi.softAP(fs_ssid, fs_pwd, selectChannelForAp(wifiInfo, count_wifiInfo));
 	debug_out(String(WLANPWD), DEBUG_MIN_INFO, 1);
 
 	dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
