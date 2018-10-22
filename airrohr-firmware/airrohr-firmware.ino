@@ -3631,14 +3631,6 @@ void setup() {
  * And action                                                    *
  *****************************************************************/
 void loop() {
-	String data = "";
-	String tmp_str;
-	String data_4_influxdb = "";
-	String data_4_custom = "";
-	String data_sample_times = "";
-
-	String sensemap_path = "";
-
 	String result_PPD = "";
 	String result_SDS = "";
 	String result_PMS = "";
@@ -3650,7 +3642,6 @@ void loop() {
 	String result_BME280 = "";
 	String result_DS18B20 = "";
 	String result_GPS = "";
-	String signal_strength = "";
 
 	unsigned long sum_send_time = 0;
 	unsigned long start_send;
@@ -3749,13 +3740,13 @@ void loop() {
 
 	if (send_now) {
 		debug_out(F("Creating data string:"), DEBUG_MIN_INFO, 1);
-		data = F(data_first_part);
+		String data = F(data_first_part);
 		data.replace("{v}", SOFTWARE_VERSION);
-		data_sample_times  = Value2Json(F("samples"), String(sample_count));
+		String data_sample_times  = Value2Json(F("samples"), String(sample_count));
 		data_sample_times += Value2Json(F("min_micro"), String(min_micro));
 		data_sample_times += Value2Json(F("max_micro"), String(max_micro));
 
-		signal_strength = String(WiFi.RSSI());
+		String signal_strength = String(WiFi.RSSI());
 		debug_out(F("WLAN signal strength: "), DEBUG_MIN_INFO, 0);
 		debug_out(signal_strength, DEBUG_MIN_INFO, 0);
 		debug_out(F(" dBm"), DEBUG_MIN_INFO, 1);
@@ -3887,7 +3878,7 @@ void loop() {
 		if (send2sensemap && (senseboxid[0] != '\0')) {
 			debug_out(F("## Sending to opensensemap: "), DEBUG_MIN_INFO, 1);
 			start_send = millis();
-			sensemap_path = url_sensemap;
+			String sensemap_path = url_sensemap;
 			sensemap_path.replace("BOXID", senseboxid);
 			sendData(data, 0, host_sensemap, httpPort_sensemap, sensemap_path.c_str(), false, "", FPSTR(TXT_CONTENT_TYPE_JSON));
 			sum_send_time += millis() - start_send;
@@ -3903,7 +3894,7 @@ void loop() {
 		if (send2influx) {
 			debug_out(F("## Sending to custom influx db: "), DEBUG_MIN_INFO, 1);
 			start_send = millis();
-			data_4_influxdb = create_influxdb_string(data);
+			const String data_4_influxdb = create_influxdb_string(data);
 			sendData(data_4_influxdb, 0, host_influx, port_influx, url_influx, false, basic_auth_influx.c_str(), FPSTR(TXT_CONTENT_TYPE_INFLUXDB));
 			sum_send_time += millis() - start_send;
 		}
@@ -3919,7 +3910,7 @@ void loop() {
 		}
 
 		if (send2custom) {
-			data_4_custom = data;
+			String data_4_custom = data;
 			data_4_custom.remove(0, 1);
 			data_4_custom = "{\"esp8266id\": \"" + String(esp_chipid) + "\", " + data_4_custom;
 			debug_out(F("## Sending to custom api: "), DEBUG_MIN_INFO, 1);
