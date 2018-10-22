@@ -10,6 +10,15 @@ const char DBG_TXT_HUMIDITY[] PROGMEM = "Humidity: ";
 const char DBG_TXT_PRESSURE[] PROGMEM = "Pressure: ";
 const char DBG_TXT_START_READING[] PROGMEM = "Start reading ";
 const char DBG_TXT_END_READING[] PROGMEM = "End reading ";
+const char DBG_TXT_CHECKSUM_IS[] PROGMEM = "Checksum is: ";
+const char DBG_TXT_CHECKSUM_SHOULD[] PROGMEM = "Checksum should: ";
+const char DBG_TXT_DATA_READ_FAILED[] PROGMEM = "Data read failed";
+const char DBG_TXT_COULDNT_BE_READ[] PROGMEM = " couldn't be read";
+const char DBG_TXT_UPDATE[] PROGMEM = "[update] ";
+const char DBG_TXT_UPDATE_FAILED[] PROGMEM = "Update failed.";
+const char DBG_TXT_UPDATE_NO_UPDATE[] PROGMEM = "No update.";
+const char DBG_TXT_UPDATE_OK[] PROGMEM = "Update ok.";
+const char DBG_TXT_SENDING_TO_LUFTDATEN[] PROGMEM = "## Sending to Luftdaten.info ";
 
 const char SENSORS_SDS011[] PROGMEM = "SDS011";
 const char SENSORS_PPD42NS[] PROGMEM = "PPD42NS";
@@ -64,6 +73,8 @@ input[type='submit']{border-radius:5px;font-size:medium;padding:5px;}\
 
 const char BR_TAG[] PROGMEM = "<br/>";
 const char TABLE_TAG_OPEN[] PROGMEM = "<table>";
+const char TABLE_TAG_CLOSE_BR[] PROGMEM = "</table>";
+const char EMPTY_ROW[] PROGMEM = "<tr><td colspan='3'>&nbsp;</td></tr>";
 
 const char WEB_PAGE_FOOTER[] PROGMEM = "<br/><br/><a href='/' style='display:inline;'>{t}</a><br/><br/><br/>\
 <a href='http://codefor.de/stuttgart/' target='_blank' style='display:inline;background:none;color:black;'>&copy; Open Knowledge Lab Stuttgart a.o. (Code for Germany)</a>\

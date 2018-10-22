@@ -95,9 +95,9 @@
  * Der Sketch verwendet 491364 Bytes (47%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
  * Globale Variablen verwenden 37172 Bytes (45%) des dynamischen Speichers, 44748 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
  *
- * Der Sketch verwendet 489876 Bytes (46%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
+ * Der Sketch verwendet 489604 Bytes (46%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
  * Globale Variablen verwenden 37164 Bytes (45%) des dynamischen Speichers, 44756 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
-
+ * 
  ************************************************************************/
 // increment on change
 #define SOFTWARE_VERSION "NRZ-2018-112-B3"
@@ -717,9 +717,9 @@ String SDS_version_date() {
 			device_id += String(value, HEX);
 			break;
 		case (8):
-			debug_out(F("Checksum is: "), DEBUG_MED_INFO, 0);
+			debug_out(FPSTR(DBG_TXT_CHECKSUM_IS), DEBUG_MED_INFO, 0);
 			debug_out(String(checksum_is % 256), DEBUG_MED_INFO, 0);
-			debug_out(F(" - should: "), DEBUG_MED_INFO, 0);
+			debug_out(FPSTR(DBG_TXT_CHECKSUM_SHOULD), DEBUG_MED_INFO, 0);
 			debug_out(String(value), DEBUG_MED_INFO, 1);
 			if (value == (checksum_is % 256)) {
 				checksum_ok = 1;
@@ -1293,7 +1293,7 @@ void webserver_config() {
 			page_content += FPSTR(INTL_WLAN_LISTE);
 			page_content += F("</div><br/>");
 		}
-		page_content += TABLE_TAG_OPEN;
+		page_content += FPSTR(TABLE_TAG_OPEN);
 		page_content += form_input("wlanssid", FPSTR(INTL_FS_WIFI_NAME), wlanssid, 32);
 		page_content += form_password("wlanpwd", FPSTR(INTL_PASSWORT), wlanpwd, 64);
 		page_content += F("</table><br/><hr/>\n<b>");
@@ -1304,7 +1304,7 @@ void webserver_config() {
 		if (! wificonfig_loop) {
 			page_content += FPSTR(INTL_BASICAUTH);
 			page_content += F("</b><br/>");
-			page_content += TABLE_TAG_OPEN;
+			page_content += FPSTR(TABLE_TAG_OPEN);
 			page_content += form_input("www_username", FPSTR(INTL_BENUTZER), www_username, 64);
 			page_content += form_password("www_password", FPSTR(INTL_PASSWORT), www_password, 64);
 			page_content += form_checkbox("www_basicauth_enabled", FPSTR(INTL_BASICAUTH), www_basicauth_enabled);
@@ -1313,12 +1313,13 @@ void webserver_config() {
 			page_content += FPSTR(INTL_FS_WIFI);
 			page_content += F("</b><br/>");
 			page_content += FPSTR(INTL_FS_WIFI_BESCHREIBUNG);
-			page_content += BR_TAG;
-			page_content += TABLE_TAG_OPEN;
+			page_content += FPSTR(BR_TAG);
+			page_content += FPSTR(TABLE_TAG_OPEN);
 			page_content += form_input("fs_ssid", FPSTR(INTL_FS_WIFI_NAME), fs_ssid, 64);
 			page_content += form_password("fs_pwd", FPSTR(INTL_PASSWORT), fs_pwd, 64);
 
-			page_content += F("</table><br/>\n<b>APIs</b><br/>");
+			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+			page_content += F("\n<b>APIs</b><br/>");
 			page_content += form_checkbox("send2dusti", F("API Luftdaten.info"), send2dusti, false);
 			page_content += F("&nbsp;&nbsp;(");
 			page_content += form_checkbox("ssl_dusti", F("HTTPS"), ssl_dusti, false);
@@ -1355,44 +1356,45 @@ void webserver_config() {
 		page_content += form_checkbox("has_lcd2004_27", FPSTR(INTL_LCD2004_27), has_lcd2004_27);
 
 		if (! wificonfig_loop) {
-			page_content += TABLE_TAG_OPEN;
+			page_content += FPSTR(TABLE_TAG_OPEN);
 			page_content += form_select_lang();
 			page_content += form_input("debug", FPSTR(INTL_DEBUG_LEVEL), String(debug), 5);
 			page_content += form_input("sending_intervall_ms", FPSTR(INTL_MESSINTERVALL), String(sending_intervall_ms / 1000), 5);
 			page_content += form_input("time_for_wifi_config", FPSTR(INTL_DAUER_ROUTERMODUS), String(time_for_wifi_config / 1000), 5);
-			page_content += F("</table><br/>\n<b>");
+			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+			page_content += F("\n<b>");
 
 			page_content += FPSTR(INTL_WEITERE_APIS);
 			page_content += F("</b><br/><br/>");
 			page_content += form_checkbox("send2fsapp", tmpl(FPSTR(INTL_SENDEN_AN), F("Feinstaub-App")), send2fsapp);
-			page_content += BR_TAG;
+			page_content += FPSTR(BR_TAG);
 			page_content += form_checkbox("send2sensemap", tmpl(FPSTR(INTL_SENDEN_AN), F("OpenSenseMap")), send2sensemap);
-			page_content += TABLE_TAG_OPEN;
+			page_content += FPSTR(TABLE_TAG_OPEN);
 			page_content += form_input("senseboxid", "senseBox-ID: ", senseboxid, 50);
-			page_content += F("</table><br/>");
+			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 			page_content += form_checkbox("send2custom", FPSTR(INTL_AN_EIGENE_API_SENDEN), send2custom);
-			page_content += TABLE_TAG_OPEN;
+			page_content += FPSTR(TABLE_TAG_OPEN);
 			page_content += form_input("host_custom", FPSTR(INTL_SERVER), host_custom, 50);
 			page_content += form_input("url_custom", FPSTR(INTL_PFAD), url_custom, 50);
 			page_content += form_input("port_custom", FPSTR(INTL_PORT), String(port_custom), 30);
 			page_content += form_input("user_custom", FPSTR(INTL_BENUTZER), user_custom, 50);
 			page_content += form_password("pwd_custom", FPSTR(INTL_PASSWORT), pwd_custom, 50);
-			page_content += F("</table><br/>");
+			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 			page_content += form_checkbox("send2influx", tmpl(FPSTR(INTL_SENDEN_AN), F("InfluxDB")), send2influx);
-			page_content += TABLE_TAG_OPEN;
+			page_content += FPSTR(TABLE_TAG_OPEN);
 			page_content += form_input("host_influx", FPSTR(INTL_SERVER), host_influx, 50);
 			page_content += form_input("url_influx", FPSTR(INTL_PFAD), url_influx, 50);
 			page_content += form_input("port_influx", FPSTR(INTL_PORT), String(port_influx), 30);
 			page_content += form_input("user_influx", FPSTR(INTL_BENUTZER), user_influx, 50);
 			page_content += form_password("pwd_influx", FPSTR(INTL_PASSWORT), pwd_influx, 50);
 			page_content += form_submit(FPSTR(INTL_SPEICHERN));
-			page_content += F("</table><br/>");
+			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 			page_content += F("<br/></form>");
 		}
 		if (wificonfig_loop) {  // scan for wlan ssids
-			page_content += TABLE_TAG_OPEN;
+			page_content += FPSTR(TABLE_TAG_OPEN);
 			page_content += form_submit(FPSTR(INTL_SPEICHERN));
-			page_content += F("</table><br/>");
+			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 			page_content += F("<script>window.setTimeout(load_wifi_list,1000);</script>");
 		}
 	} else {
@@ -1596,7 +1598,6 @@ void webserver_values() {
 		const String unit_T = "°C";
 		const String unit_H = "%";
 		const String unit_P = "hPa";
-		String empty_row = F("<tr><td colspan='3'>&nbsp;</td></tr>");
 		last_page_load = millis();
 
 		const int signal_quality = calcWiFiSignalQuality(WiFi.RSSI());
@@ -1611,58 +1612,58 @@ void webserver_values() {
 		page_content += F("<table cellspacing='0' border='1' cellpadding='5'>");
 		page_content += tmpl(F("<tr><th>{v1}</th><th>{v2}</th><th>{v3}</th>"), FPSTR(INTL_SENSOR), FPSTR(INTL_PARAMETER), FPSTR(INTL_WERT));
 		if (ppd_read) {
-			page_content += empty_row;
+			page_content += FPSTR(EMPTY_ROW);
 			page_content += table_row_from_value(FPSTR(SENSORS_PPD42NS), "PM1",  check_display_value(last_value_PPD_P1, -1, 1, 0), FPSTR(INTL_PARTIKEL_LITER));
 			page_content += table_row_from_value(FPSTR(SENSORS_PPD42NS), "PM2.5", check_display_value(last_value_PPD_P2, -1, 1, 0), FPSTR(INTL_PARTIKEL_LITER));
 		}
 		if (sds_read) {
-			page_content += empty_row;
+			page_content += FPSTR(EMPTY_ROW);
 			page_content += table_row_from_value(FPSTR(SENSORS_SDS011), "PM2.5", check_display_value(last_value_SDS_P2, -1, 1, 0), unit_PM);
 			page_content += table_row_from_value(FPSTR(SENSORS_SDS011), "PM10", check_display_value(last_value_SDS_P1, -1, 1, 0), unit_PM);
 		}
 		if (pms_read) {
-			page_content += empty_row;
+			page_content += FPSTR(EMPTY_ROW);
 			page_content += table_row_from_value(FPSTR(SENSORS_PMSx003), "PM1", check_display_value(last_value_PMS_P0, -1, 1, 0), unit_PM);
 			page_content += table_row_from_value(FPSTR(SENSORS_PMSx003), "PM2.5", check_display_value(last_value_PMS_P2, -1, 1, 0), unit_PM);
 			page_content += table_row_from_value(FPSTR(SENSORS_PMSx003), "PM10", check_display_value(last_value_PMS_P1, -1, 1, 0), unit_PM);
 		}
 		if (hpm_read) {
-			page_content += empty_row;
+			page_content += FPSTR(EMPTY_ROW);
 			page_content += table_row_from_value(FPSTR(SENSORS_HPM), "PM2.5", check_display_value(last_value_HPM_P2, -1, 1, 0), unit_PM);
 			page_content += table_row_from_value(FPSTR(SENSORS_HPM), "PM10", check_display_value(last_value_HPM_P1, -1, 1, 0), unit_PM);
 		}
 		if (dht_read) {
-			page_content += empty_row;
+			page_content += FPSTR(EMPTY_ROW);
 			page_content += table_row_from_value(FPSTR(SENSORS_DHT22), FPSTR(INTL_TEMPERATUR), check_display_value(last_value_DHT_T, -128, 1, 0), unit_T);
 			page_content += table_row_from_value(FPSTR(SENSORS_DHT22), FPSTR(INTL_LUFTFEUCHTE), check_display_value(last_value_DHT_H, -1, 1, 0), unit_H);
 		}
 		if (htu21d_read) {
-			page_content += empty_row;
+			page_content += FPSTR(EMPTY_ROW);
 			page_content += table_row_from_value(FPSTR(SENSORS_HTU21D), FPSTR(INTL_TEMPERATUR), check_display_value(last_value_HTU21D_T, -128, 1, 0), unit_T);
 			page_content += table_row_from_value(FPSTR(SENSORS_HTU21D), FPSTR(INTL_LUFTFEUCHTE), check_display_value(last_value_HTU21D_H, -1, 1, 0), unit_H);
 		}
 		if (bmp_read) {
-			page_content += empty_row;
+			page_content += FPSTR(EMPTY_ROW);
 			page_content += table_row_from_value(FPSTR(SENSORS_BMP180), FPSTR(INTL_TEMPERATUR), check_display_value(last_value_BMP_T, -128, 1, 0), unit_T);
 			page_content += table_row_from_value(FPSTR(SENSORS_BMP180), FPSTR(INTL_LUFTDRUCK), check_display_value(last_value_BMP_P / 100.0, (-1 / 100.0), 2, 0), unit_P);
 		}
 		if (bmp280_read) {
-			page_content += empty_row;
+			page_content += FPSTR(EMPTY_ROW);
 			page_content += table_row_from_value(FPSTR(SENSORS_BMP280), FPSTR(INTL_TEMPERATUR), check_display_value(last_value_BMP280_T, -128, 1, 0), unit_T);
 			page_content += table_row_from_value(FPSTR(SENSORS_BMP280), FPSTR(INTL_LUFTDRUCK), check_display_value(last_value_BMP280_P / 100.0, (-1 / 100.0), 2, 0), unit_P);
 		}
 		if (bme280_read) {
-			page_content += empty_row;
+			page_content += FPSTR(EMPTY_ROW);
 			page_content += table_row_from_value(FPSTR(SENSORS_BME280), FPSTR(INTL_TEMPERATUR), check_display_value(last_value_BME280_T, -128, 1, 0), unit_T);
 			page_content += table_row_from_value(FPSTR(SENSORS_BME280), FPSTR(INTL_LUFTFEUCHTE), check_display_value(last_value_BME280_H, -1, 1, 0), unit_H);
 			page_content += table_row_from_value(FPSTR(SENSORS_BME280), FPSTR(INTL_LUFTDRUCK),  check_display_value(last_value_BME280_P / 100.0, (-1 / 100.0), 2, 0), unit_P);
 		}
 		if (ds18b20_read) {
-			page_content += empty_row;
+			page_content += FPSTR(EMPTY_ROW);
 			page_content += table_row_from_value(FPSTR(SENSORS_DS18B20), FPSTR(INTL_TEMPERATUR), check_display_value(last_value_DS18B20_T, -128, 1, 0), unit_T);
 		}
 		if (gps_read) {
-			page_content += empty_row;
+			page_content += FPSTR(EMPTY_ROW);
 			page_content += table_row_from_value("GPS", FPSTR(INTL_LATITUDE), check_display_value(last_value_GPS_lat, -200.0, 6, 0), "°");
 			page_content += table_row_from_value("GPS", FPSTR(INTL_LONGITUDE), check_display_value(last_value_GPS_lon, -200.0, 6, 0), "°");
 			page_content += table_row_from_value("GPS", FPSTR(INTL_ALTITUDE),  check_display_value(last_value_GPS_alt, -1000.0, 2, 0), "m");
@@ -1670,17 +1671,17 @@ void webserver_values() {
 			page_content += table_row_from_value("GPS", FPSTR(INTL_TIME), last_value_GPS_time, "");
 		}
 
-		page_content += empty_row;
+		page_content += FPSTR(EMPTY_ROW);
 		page_content += table_row_from_value("WiFi", FPSTR(INTL_SIGNAL),  String(WiFi.RSSI()), "dBm");
 		page_content += table_row_from_value("WiFi", FPSTR(INTL_QUALITAT), String(signal_quality), "%");
 
-		page_content += empty_row;
+		page_content += FPSTR(EMPTY_ROW);
 		page_content += F("<tr><td colspan='2'>");
 		page_content += FPSTR(INTL_ANZAHL_MESSUNGEN);
 		page_content += F("</td><td class='r'>");
 		page_content += String(count_sends);
 		page_content += F("</td></tr>");
-		page_content += F("</table>");
+		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 		page_content += make_footer();
 		server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
 	}
@@ -1850,7 +1851,7 @@ void webserver_prometheus_endpoint() {
 		data_4_prometheus += F("last_sample_age_ms{");
 		data_4_prometheus += id + "} " + String(act_milli - starttime) + "\n";
 	} else {
-		debug_out(F("Data read failed"), DEBUG_ERROR, 1);
+		debug_out(FPSTR(DBG_TXT_DATA_READ_FAILED), DEBUG_ERROR, 1);
 	}
 	debug_out(data_4_prometheus, DEBUG_MED_INFO, 1);
 	server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN), data_4_prometheus);
@@ -1915,8 +1916,7 @@ void setup_webserver() {
 	server.begin();
 }
 
-static int selectChannelForAp(struct_wifiInfo *info, int count)
-{
+static int selectChannelForAp(struct struct_wifiInfo *info, int count) {
 	std::array<int, 14> channels_rssi;
 	std::fill(channels_rssi.begin(), channels_rssi.end(), -100);
 
@@ -2227,7 +2227,7 @@ String create_influxdb_string(const String& data) {
 
 		data_4_influxdb += "\n";
 	} else {
-		debug_out(F("Data read failed"), DEBUG_ERROR, 1);
+		debug_out(FPSTR(DBG_TXT_DATA_READ_FAILED), DEBUG_ERROR, 1);
 	}
 	return data_4_influxdb;
 }
@@ -2264,7 +2264,7 @@ void send_csv(const String& data) {
 		}
 		Serial.println(valueline);
 	} else {
-		debug_out(F("Data read failed"), DEBUG_ERROR, 1);
+		debug_out(FPSTR(DBG_TXT_DATA_READ_FAILED), DEBUG_ERROR, 1);
 	}
 }
 
@@ -2291,7 +2291,7 @@ static String sensorDHT() {
 			t = dht.readTemperature(false); //Read Temperature
 		}
 		if (isnan(t) || isnan(h)) {
-			debug_out(F("DHT22 couldn't be read"), DEBUG_ERROR, 1);
+			debug_out(String(FPSTR(SENSORS_DHT22)) + FPSTR(DBG_TXT_COULDNT_BE_READ), DEBUG_ERROR, 1);
 		} else {
 			debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO, 0);
 			debug_out(String(t) + char(223) + "C", DEBUG_MIN_INFO, 1);
@@ -2323,7 +2323,7 @@ static String sensorHTU21D() {
 	if (isnan(t) || isnan(h)) {
 		last_value_HTU21D_T = -128.0;
 		last_value_HTU21D_H = -1.0;
-		debug_out(F("HTU21D couldn't be read"), DEBUG_ERROR, 1);
+		debug_out(String(FPSTR(SENSORS_HTU21D)) + FPSTR(DBG_TXT_COULDNT_BE_READ), DEBUG_ERROR, 1);
 	} else {
 		debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO, 0);
 		debug_out(Float2String(t) + " C", DEBUG_MIN_INFO, 1);
@@ -2354,7 +2354,7 @@ static String sensorBMP() {
 	if (isnan(p) || isnan(t)) {
 		last_value_BMP_T = -128.0;
 		last_value_BMP_P = -1.0;
-		debug_out(F("BMP180 couldn't be read"), DEBUG_ERROR, 1);
+		debug_out(String(FPSTR(SENSORS_BMP180)) + FPSTR(DBG_TXT_COULDNT_BE_READ), DEBUG_ERROR, 1);
 	} else {
 		debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO, 0);
 		debug_out(String(t) + " C", DEBUG_MIN_INFO, 1);
@@ -2385,7 +2385,7 @@ static String sensorBMP280() {
 	if (isnan(p) || isnan(t)) {
 		last_value_BMP280_T = -128.0;
 		last_value_BMP280_P = -1.0;
-		debug_out(F("BMP280 couldn't be read"), DEBUG_ERROR, 1);
+		debug_out(String(FPSTR(SENSORS_BMP280)) + FPSTR(DBG_TXT_COULDNT_BE_READ), DEBUG_ERROR, 1);
 	} else {
 		debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO, 0);
 		debug_out(String(t) + " C", DEBUG_MIN_INFO, 1);
@@ -2419,7 +2419,7 @@ static String sensorBME280() {
 		last_value_BME280_T = -128.0;
 		last_value_BME280_H = -1.0;
 		last_value_BME280_P = -1.0;
-		debug_out(F("BME280 couldn't be read"), DEBUG_ERROR, 1);
+		debug_out(String(FPSTR(SENSORS_BME280)) + FPSTR(DBG_TXT_COULDNT_BE_READ), DEBUG_ERROR, 1);
 	} else {
 		debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO, 0);
 		debug_out(Float2String(t) + " C", DEBUG_MIN_INFO, 1);
@@ -2464,7 +2464,7 @@ static String sensorDS18B20() {
 	String s;
 	if (count == MAX_ATTEMPTS) {
 		last_value_DS18B20_T = -128.0;
-		debug_out(F("DS18B20 couldn't be read."), DEBUG_ERROR, 1);
+		debug_out(String(FPSTR(SENSORS_DS18B20)) + FPSTR(DBG_TXT_COULDNT_BE_READ), DEBUG_ERROR, 1);
 	} else {
 		debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO, 0);
 		debug_out(Float2String(t) + " C", DEBUG_MIN_INFO, 1);
@@ -2530,9 +2530,9 @@ String sensorSDS() {
 				pm10_serial += (value << 8);
 				break;
 			case (8):
-				debug_out(F("Checksum is: "), DEBUG_MED_INFO, 0);
+				debug_out(FPSTR(DBG_TXT_CHECKSUM_IS), DEBUG_MED_INFO, 0);
 				debug_out(String(checksum_is % 256), DEBUG_MED_INFO, 0);
-				debug_out(F(" - should: "), DEBUG_MED_INFO, 0);
+				debug_out(FPSTR(DBG_TXT_CHECKSUM_SHOULD), DEBUG_MED_INFO, 0);
 				debug_out(String(value), DEBUG_MED_INFO, 1);
 				if (value == (checksum_is % 256)) {
 					checksum_ok = 1;
@@ -2700,9 +2700,9 @@ String sensorPMS() {
 			if ((len > 2) && (len < (frame_len - 2))) { checksum_is += value; }
 			len++;
 			if (len == frame_len) {
-				debug_out(F("Checksum is: "), DEBUG_MED_INFO, 0);
+				debug_out(FPSTR(DBG_TXT_CHECKSUM_IS), DEBUG_MED_INFO, 0);
 				debug_out(String(checksum_is + 143), DEBUG_MED_INFO, 0);
-				debug_out(F(" - should: "), DEBUG_MED_INFO, 0);
+				debug_out(FPSTR(DBG_TXT_CHECKSUM_SHOULD), DEBUG_MED_INFO, 0);
 				debug_out(String(checksum_should), DEBUG_MED_INFO, 1);
 				if (checksum_should == (checksum_is + 143)) {
 					checksum_ok = 1;
@@ -2859,9 +2859,9 @@ String sensorHPM() {
 			if (len > 2 && len < 30) { checksum_is += value; }
 			len++;
 			if (len == 32) {
-				debug_out(F("Checksum is: "), DEBUG_MED_INFO, 0);
+				debug_out(FPSTR(DBG_TXT_CHECKSUM_IS), DEBUG_MED_INFO, 0);
 				debug_out(String(checksum_is + 143), DEBUG_MED_INFO, 0);
-				debug_out(F(" - should: "), DEBUG_MED_INFO, 0);
+				debug_out(FPSTR(DBG_TXT_CHECKSUM_SHOULD), DEBUG_MED_INFO, 0);
 				debug_out(String(checksum_should), DEBUG_MED_INFO, 1);
 				if (checksum_should == (checksum_is + 143)) {
 					checksum_ok = 1;
@@ -3145,16 +3145,16 @@ void autoUpdate() {
 		HTTPUpdateResult ret = ESPhttpUpdate.update(update_host, update_port, update_url, SOFTWARE_VERSION + String(" ") + esp_chipid + String(" ") + SDS_version + String(" ") + String(current_lang) + String(" ") + String(INTL_LANG) + String(" ") + String(use_beta ? "BETA" : ""));
 		switch(ret) {
 		case HTTP_UPDATE_FAILED:
-			debug_out(F("[update] Update failed."), DEBUG_ERROR, 0);
+			debug_out(String(FPSTR(DBG_TXT_UPDATE)) + FPSTR(DBG_TXT_UPDATE_FAILED), DEBUG_ERROR, 0);
 			debug_out(ESPhttpUpdate.getLastErrorString().c_str(), DEBUG_ERROR, 1);
-			display_debug(F("Update failed."), "");
+			display_debug(FPSTR(DBG_TXT_UPDATE),FPSTR(DBG_TXT_UPDATE_FAILED));
 			break;
 		case HTTP_UPDATE_NO_UPDATES:
-			debug_out(F("[update] No Update."), DEBUG_MIN_INFO, 1);
-			display_debug(F("No update found."), "");
+			debug_out(String(FPSTR(DBG_TXT_UPDATE)) + FPSTR(DBG_TXT_UPDATE_NO_UPDATE), DEBUG_MIN_INFO, 1);
+			display_debug(FPSTR(DBG_TXT_UPDATE), FPSTR(DBG_TXT_UPDATE_NO_UPDATE));
 			break;
 		case HTTP_UPDATE_OK:
-			debug_out(F("[update] Update ok."), DEBUG_MIN_INFO, 1); // may not called we reboot the ESP
+			debug_out(String(FPSTR(DBG_TXT_UPDATE)) + FPSTR(DBG_TXT_UPDATE_OK), DEBUG_MIN_INFO, 1); // may not called we reboot the ESP
 			break;
 		}
 	}
@@ -3768,7 +3768,7 @@ void loop() {
 		if (ppd_read) {
 			data += result_PPD;
 			if (send2dusti) {
-				debug_out(F("## Sending to luftdaten.info (PPD42NS): "), DEBUG_MIN_INFO, 1);
+				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(PPD42NS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
 				sendLuftdaten(result_PPD, PPD_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "PPD_");
 				sum_send_time += millis() - start_send;
@@ -3777,7 +3777,7 @@ void loop() {
 		if (sds_read) {
 			data += result_SDS;
 			if (send2dusti) {
-				debug_out(F("## Sending to luftdaten.info (SDS): "), DEBUG_MIN_INFO, 1);
+				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(SDS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
 				sendLuftdaten(result_SDS, SDS_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "SDS_");
 				sum_send_time += millis() - start_send;
@@ -3786,7 +3786,7 @@ void loop() {
 		if (pms_read) {
 			data += result_PMS;
 			if (send2dusti) {
-				debug_out(F("## Sending to luftdaten.info (PMS): "), DEBUG_MIN_INFO, 1);
+				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(PMS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
 				sendLuftdaten(result_PMS, PMS_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "PMS_");
 				sum_send_time += millis() - start_send;
@@ -3795,7 +3795,7 @@ void loop() {
 		if (hpm_read) {
 			data += result_HPM;
 			if (send2dusti) {
-				debug_out(F("## Sending to luftdaten.info (HPM): "), DEBUG_MIN_INFO, 1);
+				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(HPM): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
 				sendLuftdaten(result_HPM, HPM_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "HPM_");
 				sum_send_time += millis() - start_send;
@@ -3804,7 +3804,7 @@ void loop() {
 		if (dht_read) {
 			data += result_DHT;
 			if (send2dusti) {
-				debug_out(F("## Sending to luftdaten.info (DHT): "), DEBUG_MIN_INFO, 1);
+				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(DHT): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
 				sendLuftdaten(result_DHT, DHT_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "DHT_");
 				sum_send_time += millis() - start_send;
@@ -3813,7 +3813,7 @@ void loop() {
 		if (htu21d_read) {
 			data += result_HTU21D;
 			if (send2dusti) {
-				debug_out(F("## Sending to luftdaten.info (HTU21D): "), DEBUG_MIN_INFO, 1);
+				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(HTU21D): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
 				sendLuftdaten(result_HTU21D, HTU21D_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "HTU21D_");
 				sum_send_time += millis() - start_send;
@@ -3822,7 +3822,7 @@ void loop() {
 		if (bmp_read && (! bmp_init_failed)) {
 			data += result_BMP;
 			if (send2dusti) {
-				debug_out(F("## Sending to luftdaten.info (BMP): "), DEBUG_MIN_INFO, 1);
+				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(BMP): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
 				sendLuftdaten(result_BMP, BMP_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "BMP_");
 				sum_send_time += millis() - start_send;
@@ -3831,7 +3831,7 @@ void loop() {
 		if (bmp280_read && (! bmp280_init_failed)) {
 			data += result_BMP280;
 			if (send2dusti) {
-				debug_out(F("## Sending to luftdaten.info (BMP280): "), DEBUG_MIN_INFO, 1);
+				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(BMP280): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
 				sendLuftdaten(result_BMP280, BMP280_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "BMP280_");
 				sum_send_time += millis() - start_send;
@@ -3840,7 +3840,7 @@ void loop() {
 		if (bme280_read && (! bme280_init_failed)) {
 			data += result_BME280;
 			if (send2dusti) {
-				debug_out(F("## Sending to luftdaten.info (BME280): "), DEBUG_MIN_INFO, 1);
+				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(BME280): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
 				sendLuftdaten(result_BME280, BME280_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "BME280_");
 				sum_send_time += millis() - start_send;
@@ -3850,7 +3850,7 @@ void loop() {
 		if (ds18b20_read) {
 			data += result_DS18B20;
 			if (send2dusti) {
-				debug_out(F("## Sending to luftdaten.info (DS18B20): "), DEBUG_MIN_INFO, 1);
+				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(DS18B20): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
 				sendLuftdaten(result_DS18B20, DS18B20_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "DS18B20_");
 				sum_send_time += millis() - start_send;
@@ -3860,7 +3860,7 @@ void loop() {
 		if (gps_read) {
 			data += result_GPS;
 			if (send2dusti) {
-				debug_out(F("## Sending to luftdaten.info (GPS): "), DEBUG_MIN_INFO, 1);
+				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(GPS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
 				sendLuftdaten(result_GPS, GPS_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "GPS_");
 				sum_send_time += millis() - start_send;
