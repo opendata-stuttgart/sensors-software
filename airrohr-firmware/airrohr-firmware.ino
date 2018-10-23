@@ -2210,7 +2210,6 @@ void sendLuftdaten(const String& data, const int pin, const char* host, const in
  * send data to influxdb                                         *
  *****************************************************************/
 String create_influxdb_string(const String& data) {
-	String tmp_str;
 	String data_4_influxdb = "";
 	debug_out(F("Parse JSON for influx DB"), DEBUG_MIN_INFO, 1);
 	debug_out(data, DEBUG_MIN_INFO, 1);
@@ -2220,7 +2219,7 @@ String create_influxdb_string(const String& data) {
 		data_4_influxdb += F("feinstaub,node=esp8266-");
 		data_4_influxdb += esp_chipid + " ";
 		for (uint8_t i = 0; i < json2data["sensordatavalues"].size(); i++) {
-			tmp_str = json2data["sensordatavalues"][i]["value_type"].as<char*>();
+			String tmp_str = json2data["sensordatavalues"][i]["value_type"].as<char*>();
 			data_4_influxdb += tmp_str + "=";
 			tmp_str = json2data["sensordatavalues"][i]["value"].as<char*>();
 			data_4_influxdb += tmp_str + ",";
@@ -2240,18 +2239,15 @@ String create_influxdb_string(const String& data) {
  * send data as csv to serial out                                *
  *****************************************************************/
 void send_csv(const String& data) {
-	String tmp_str;
-	String headline;
-	String valueline;
 	StaticJsonBuffer<1000> jsonBuffer;
 	JsonObject& json2data = jsonBuffer.parseObject(data);
 	debug_out(F("CSV Output"), DEBUG_MIN_INFO, 1);
 	debug_out(data, DEBUG_MIN_INFO, 1);
 	if (json2data.success()) {
-		headline = F("Timestamp_ms;");
-		valueline = String(act_milli) + ";";
+		String headline = F("Timestamp_ms;");
+		String valueline = String(act_milli) + ";";
 		for (uint8_t i = 0; i < json2data["sensordatavalues"].size(); i++) {
-			tmp_str = json2data["sensordatavalues"][i]["value_type"].as<char*>();
+			String tmp_str = json2data["sensordatavalues"][i]["value_type"].as<char*>();
 			headline += tmp_str + ";";
 			tmp_str = json2data["sensordatavalues"][i]["value"].as<char*>();
 			valueline += tmp_str + ";";
