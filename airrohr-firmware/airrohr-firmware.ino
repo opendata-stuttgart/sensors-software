@@ -417,9 +417,9 @@ bool restart_needed = false;
 
 bool config_needs_write = false;
 
-bool first_csv_line = 1;
+bool first_csv_line = true;
 
-bool first_cycle = 1;
+bool first_cycle = true;
 
 unsigned long count_sends = 0;
 unsigned long next_display_millis = 0;
@@ -2292,7 +2292,7 @@ void send_csv(const String& data) {
 				headline.remove(headline.length() - 1);
 			}
 			Serial.println(headline);
-			first_csv_line = 0;
+			first_csv_line = false;
 		}
 		if (valueline.length() > 0) {
 			valueline.remove(valueline.length() - 1);
