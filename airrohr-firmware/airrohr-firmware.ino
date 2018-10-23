@@ -1832,7 +1832,6 @@ void webserver_data_json() {
  *****************************************************************/
 void webserver_prometheus_endpoint() {
 	debug_out(F("output prometheus endpoint..."), DEBUG_MIN_INFO, 1);
-	String tmp_str;
 	String data_4_prometheus = F("software_version{version=\"{ver}\",{id}} 1\nuptime_ms{{id}} {up}\nsending_intervall_ms{{id}} {si}\nnumber_of_measurements{{id}} {cs}\n");
 	String id = F("node=\"esp8266-");
 	id += esp_chipid + "\"";
@@ -1847,7 +1846,7 @@ void webserver_prometheus_endpoint() {
 	JsonObject& json2data = jsonBuffer.parseObject(last_data_string);
 	if (json2data.success()) {
 		for (uint8_t i = 0; i < json2data["sensordatavalues"].size() - 1; i++) {
-			tmp_str = json2data["sensordatavalues"][i]["value_type"].as<char*>();
+			String tmp_str = json2data["sensordatavalues"][i]["value_type"].as<char*>();
 			data_4_prometheus += tmp_str + "{" + id + "} ";
 			tmp_str = json2data["sensordatavalues"][i]["value"].as<char*>();
 			data_4_prometheus += tmp_str + "\n";
@@ -1898,7 +1897,7 @@ void webserver_not_found() {
  * Webserver setup                                               *
  *****************************************************************/
 void setup_webserver() {
-	server_name  = F("Feinstaubsensor-");
+	server_name = F("Feinstaubsensor-");
 	server_name += esp_chipid;
 
 	server.on("/", webserver_root);
