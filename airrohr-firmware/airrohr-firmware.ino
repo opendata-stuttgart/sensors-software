@@ -1401,11 +1401,42 @@ void webserver_config() {
 		}
 	} else {
 
-#define readCharParam(param) if (server.hasArg(#param)){ server.arg(#param).toCharArray(param, sizeof(param)); }
-#define readBoolParam(param) param = false; if (server.hasArg(#param)){ param = server.arg(#param) == "1"; }
-#define readIntParam(param)  if (server.hasArg(#param)){ int val = server.arg(#param).toInt(); if (val != 0){ param = val; }}
-#define readTimeParam(param)  if (server.hasArg(#param)){ int val = server.arg(#param).toInt(); if (val != 0){ param = val*1000; }}
-#define readPasswdParam(param) if (server.hasArg(#param)){ masked_pwd = ""; for (uint8_t i=0;i<server.arg(#param).length();i++) masked_pwd += "*"; if (masked_pwd != server.arg(#param) || server.arg(#param) == "") { server.arg(#param).toCharArray(param, sizeof(param)); } }
+#define readCharParam(param) \
+	if (server.hasArg(#param)){ \
+		server.arg(#param).toCharArray(param, sizeof(param)); \
+	}
+
+#define readBoolParam(param) \
+	param = false; \
+	if (server.hasArg(#param)){ \
+		param = server.arg(#param) == "1";\
+	}
+
+#define readIntParam(param) \
+	if (server.hasArg(#param)){ \
+		int val = server.arg(#param).toInt(); \
+		if (val != 0){ \
+			param = val; \
+		} \
+	}
+
+#define readTimeParam(param) \
+	if (server.hasArg(#param)){ \
+		int val = server.arg(#param).toInt(); \
+		if (val != 0){ \
+			param = val*1000; \
+		} \
+	}
+
+#define readPasswdParam(param) \
+	if (server.hasArg(#param)){ \
+		masked_pwd = ""; \
+		for (uint8_t i=0;i<server.arg(#param).length();i++) \
+			masked_pwd += "*"; \
+		if (masked_pwd != server.arg(#param) || server.arg(#param) == "") {\
+			server.arg(#param).toCharArray(param, sizeof(param)); \
+		}\
+	}
 
 		if (server.hasArg("wlanssid") && server.arg("wlanssid") != "") {
 			readCharParam(wlanssid);
