@@ -3031,9 +3031,6 @@ String sensorGPS() {
 	String s = "";
 	String gps_lat = "";
 	String gps_lon = "";
-	String gps_alt = "";
-	String gps_date = "";
-	String gps_time = "";
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + "GPS", DEBUG_MED_INFO, 1);
 
@@ -3051,13 +3048,13 @@ String sensorGPS() {
 			}
 			if (gps.altitude.isValid()) {
 				last_value_GPS_alt = gps.altitude.meters();
-				gps_alt = Float2String(last_value_GPS_lat, 2);
+				String gps_alt = Float2String(last_value_GPS_lat, 2);
 			} else {
 				last_value_GPS_alt = -1000;
 				debug_out(F("Altitude INVALID"), DEBUG_MAX_INFO, 1);
 			}
 			if (gps.date.isValid()) {
-				gps_date = "";
+				String gps_date = "";
 				if (gps.date.month() < 10) {
 					gps_date += "0";
 				}
@@ -3074,7 +3071,7 @@ String sensorGPS() {
 				debug_out(F("Date INVALID"), DEBUG_MAX_INFO, 1);
 			}
 			if (gps.time.isValid()) {
-				gps_time = "";
+				String gps_time = "";
 				if (gps.time.hour() < 10) {
 					gps_time += "0";
 				}
