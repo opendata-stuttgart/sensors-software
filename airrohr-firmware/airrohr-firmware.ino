@@ -2943,10 +2943,6 @@ String sensorHPM() {
  * read PPD42NS sensor values                                    *
  *****************************************************************/
 String sensorPPD() {
-	boolean valP1 = HIGH;
-	boolean valP2 = HIGH;
-	double ratio = 0;
-	double concentration = 0;
 	String s = "";
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_PPD42NS), DEBUG_MED_INFO, 1);
@@ -2954,8 +2950,8 @@ String sensorPPD() {
 	if ((act_milli - starttime) <= sampletime_ms) {
 
 		// Read pins connected to ppd42ns
-		valP1 = digitalRead(PPD_PIN_PM1);
-		valP2 = digitalRead(PPD_PIN_PM2);
+		boolean valP1 = digitalRead(PPD_PIN_PM1);
+		boolean valP2 = digitalRead(PPD_PIN_PM2);
 
 		if(valP1 == LOW && trigP1 == false) {
 			trigP1 = true;
@@ -2984,8 +2980,8 @@ String sensorPPD() {
 	if (send_now) {
 		last_value_PPD_P1 = -1;
 		last_value_PPD_P2 = -1;
-		ratio = lowpulseoccupancyP1 / (sampletime_ms * 10.0);					// int percentage 0 to 100
-		concentration = (1.1 * pow(ratio, 3) - 3.8 * pow(ratio, 2) + 520 * ratio + 0.62);	// spec sheet curve
+		double ratio = lowpulseoccupancyP1 / (sampletime_ms * 10.0);					// int percentage 0 to 100
+		double concentration = (1.1 * pow(ratio, 3) - 3.8 * pow(ratio, 2) + 520 * ratio + 0.62);	// spec sheet curve
 		// Begin printing
 		debug_out(F("LPO P10    : "), DEBUG_MIN_INFO, 0);
 		debug_out(String(lowpulseoccupancyP1), DEBUG_MIN_INFO, 1);
