@@ -578,7 +578,6 @@ String Var2Json(const String& name, const int value) {
 	return s;
 }
 
-
 /*****************************************************************
  * send SDS011 command (start, stop, continuous mode, version    *
  *****************************************************************/
@@ -662,7 +661,7 @@ String SDS_version_date() {
 	int checksum_is = 0;
 	int checksum_ok = 0;
 
-	debug_out(F("Start reading SDS011 version date"), DEBUG_MED_INFO, 1);
+	debug_out(String(FPSTR(DBG_TXT_END_READING)) + F("SDS011 version date"), DEBUG_MED_INFO, 1);
 
 	SDS_cmd(PM_SENSOR_START);
 
@@ -750,7 +749,7 @@ String SDS_version_date() {
 		yield();
 	}
 
-	debug_out(F("End reading SDS011 version date"), DEBUG_MED_INFO, 1);
+	debug_out(String(FPSTR(DBG_TXT_END_READING)) + F("SDS011 version date"), DEBUG_MED_INFO, 1);
 
 	return s;
 }
@@ -1189,7 +1188,7 @@ static int32_t calcWiFiSignalQuality(int32_t rssi) {
 
 String wlan_ssid_to_table_row(const String& ssid, const String& encryption, int32_t rssi) {
 	const int quality = calcWiFiSignalQuality(rssi);
-	String s = F("<tr><td><a href='#wlanpwd' onclick='setSSID(this)' style='background:none;color:blue;padding:5px;display:inline;'>{n}</a>&nbsp;{e}</a></td><td style='width:80%;vertical-align:middle;'>{v}%</td></tr>");
+	String s = F("<tr><td><a href='#wlanpwd' onclick='setSSID(this)' class='wifi'>{n}</a>&nbsp;{e}</a></td><td style='width:80%;vertical-align:middle;'>{v}%</td></tr>");
 	s.replace("{n}", ssid);
 	s.replace("{e}", encryption);
 	s.replace("{v}", String(quality));
@@ -1296,7 +1295,8 @@ void webserver_config() {
 		page_content += FPSTR(TABLE_TAG_OPEN);
 		page_content += form_input("wlanssid", FPSTR(INTL_FS_WIFI_NAME), wlanssid, 32);
 		page_content += form_password("wlanpwd", FPSTR(INTL_PASSWORT), wlanpwd, 64);
-		page_content += F("</table><br/><hr/>\n<b>");
+		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+		page_content += F("<hr/>\n<b>");
 
 		page_content += FPSTR(INTL_AB_HIER_NUR_ANDERN);
 		page_content += F("</b><br/><br/>\n<b>");
@@ -1309,7 +1309,8 @@ void webserver_config() {
 			page_content += form_password("www_password", FPSTR(INTL_PASSWORT), www_password, 64);
 			page_content += form_checkbox("www_basicauth_enabled", FPSTR(INTL_BASICAUTH), www_basicauth_enabled);
 
-			page_content += F("</table><br/>\n<b>");
+			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+			page_content += F("\n<b>");
 			page_content += FPSTR(INTL_FS_WIFI);
 			page_content += F("</b><br/>");
 			page_content += FPSTR(INTL_FS_WIFI_BESCHREIBUNG);
@@ -1395,6 +1396,7 @@ void webserver_config() {
 			page_content += FPSTR(TABLE_TAG_OPEN);
 			page_content += form_submit(FPSTR(INTL_SPEICHERN));
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+			page_content += F("<br/></form>");
 			page_content += F("<script>window.setTimeout(load_wifi_list,1000);</script>");
 		}
 	} else {
@@ -1571,8 +1573,9 @@ void webserver_wifi() {
 
 		page_content += FPSTR(INTL_NETZWERKE_GEFUNDEN);
 		page_content += String(count_wifiInfo - duplicateSsids);
-		page_content += BR_TAG;
-		page_content += F("<br/><table>");
+		page_content += FPSTR(BR_TAG);
+		page_content += FPSTR(BR_TAG);
+		page_content += FPSTR(TABLE_TAG_OPEN);
 		//if(n > 30) n=30;
 		for (int i = 0; i < count_wifiInfo; ++i) {
 			if (indices[i] == -1 || wifiInfo[indices[i]].isHidden) {
@@ -1581,7 +1584,8 @@ void webserver_wifi() {
 			// Print SSID and RSSI for each network found
 			page_content += wlan_ssid_to_table_row(wifiInfo[indices[i]].ssid, ((wifiInfo[indices[i]].encryptionType == ENC_TYPE_NONE) ? " " : "*"), wifiInfo[indices[i]].RSSI);
 		}
-		page_content += F("</table><br/><br/>");
+		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+		page_content += FPSTR(BR_TAG);
 	}
 	server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
 }
@@ -3670,25 +3674,25 @@ void loop() {
 	last_micro = act_micro;
 
 	if (ppd_read) {
-		debug_out(F("Call sensorPPD"), DEBUG_MAX_INFO, 1);
+		debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "PPD", DEBUG_MAX_INFO, 1);
 		result_PPD = sensorPPD();
 	}
 
 	if (((act_milli - starttime_SDS) > sampletime_SDS_ms) || ((act_milli - starttime) > sending_intervall_ms)) {
 		if (sds_read) {
-			debug_out(F("Call sensorSDS"), DEBUG_MAX_INFO, 1);
+			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "SDS", DEBUG_MAX_INFO, 1);
 			result_SDS = sensorSDS();
 			starttime_SDS = act_milli;
 		}
 
 		if (pms_read) {
-			debug_out(F("Call sensorPMS"), DEBUG_MAX_INFO, 1);
+			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "PMS", DEBUG_MAX_INFO, 1);
 			result_PMS = sensorPMS();
 			starttime_SDS = act_milli;
 		}
 
 		if (hpm_read) {
-			debug_out(F("Call sensorHPM"), DEBUG_MAX_INFO, 1);
+			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "HPM", DEBUG_MAX_INFO, 1);
 			result_HPM = sensorHPM();
 			starttime_SDS = act_milli;
 		}
@@ -3698,38 +3702,38 @@ void loop() {
 
 	if (send_now) {
 		if (dht_read) {
-			debug_out(F("Call sensorDHT"), DEBUG_MAX_INFO, 1);
+			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "DHT", DEBUG_MAX_INFO, 1);
 			result_DHT = sensorDHT();                       // getting temperature and humidity (optional)
 		}
 
 		if (htu21d_read) {
-			debug_out(F("Call sensorHTU21D"), DEBUG_MAX_INFO, 1);
+			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "HTU21D", DEBUG_MAX_INFO, 1);
 			result_HTU21D = sensorHTU21D();                 // getting temperature and humidity (optional)
 		}
 
 		if (bmp_read && (! bmp_init_failed)) {
-			debug_out(F("Call sensorBMP"), DEBUG_MAX_INFO, 1);
+			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "BMP", DEBUG_MAX_INFO, 1);
 			result_BMP = sensorBMP();                       // getting temperature and pressure (optional)
 		}
 
 		if (bmp280_read && (! bmp280_init_failed)) {
-			debug_out(F("Call sensorBMP280"), DEBUG_MAX_INFO, 1);
+			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "BMP280", DEBUG_MAX_INFO, 1);
 			result_BMP280 = sensorBMP280();                 // getting temperature, humidity and pressure (optional)
 		}
 
 		if (bme280_read && (! bme280_init_failed)) {
-			debug_out(F("Call sensorBME280"), DEBUG_MAX_INFO, 1);
+			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "BME280", DEBUG_MAX_INFO, 1);
 			result_BME280 = sensorBME280();                 // getting temperature, humidity and pressure (optional)
 		}
 
 		if (ds18b20_read) {
-			debug_out(F("Call sensorDS18B20"), DEBUG_MAX_INFO, 1);
+			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "DS18B20", DEBUG_MAX_INFO, 1);
 			result_DS18B20 = sensorDS18B20();               // getting temperature (optional)
 		}
 	}
 
 	if (gps_read && (((act_milli - starttime_GPS) > sampletime_GPS_ms) || ((act_milli - starttime) > sending_intervall_ms))) {
-		debug_out(F("Call sensorGPS"), DEBUG_MAX_INFO, 1);
+		debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "GPS", DEBUG_MAX_INFO, 1);
 		result_GPS = sensorGPS();                           // getting GPS coordinates
 		starttime_GPS = act_milli;
 	}

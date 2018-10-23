@@ -19,6 +19,7 @@ const char DBG_TXT_UPDATE_FAILED[] PROGMEM = "Update failed.";
 const char DBG_TXT_UPDATE_NO_UPDATE[] PROGMEM = "No update.";
 const char DBG_TXT_UPDATE_OK[] PROGMEM = "Update ok.";
 const char DBG_TXT_SENDING_TO_LUFTDATEN[] PROGMEM = "## Sending to Luftdaten.info ";
+const char DBG_TXT_CALL_SENSOR[] PROGMEM = "Call sensor";
 
 const char SENSORS_SDS011[] PROGMEM = "SDS011";
 const char SENSORS_PPD42NS[] PROGMEM = "PPD42NS";
@@ -60,10 +61,11 @@ body{font-family:Arial;margin:0}\
 .r{text-align:right}\
 td{vertical-align:top;}\
 a{text-decoration:none;padding:10px;background:#38b5ad;color:white;display:block;width:auto;border-radius:5px;}\
+.wifi{background:none;color:blue;padding:5px;display:inline;}\
 input[type='text']{width:100%;}\
 input[type='password']{width:100%;}\
 input[type='submit']{border-radius:5px;font-size:medium;padding:5px;}\
-.submit_green{padding:9px !important;width:100%;border-style:none;background:#38b5ad;color:white;text-align:left;}\
+.s_green{padding:9px !important;width:100%;border-style:none;background:#38b5ad;color:white;text-align:left;}\
 </style>\
 </head><body>\
 <div style='min-height:120px;background-color:#38b5ad;margin-bottom:20px'>\
@@ -103,11 +105,11 @@ function load_wifi_list(){var x=new XMLHttpRequest();x.open('GET','/wifi');x.onl
 </script>";
 
 const char WEB_REMOVE_CONFIG_CONTENT[] PROGMEM = "<h3>{t}</h3>\
-<table><tr><td><form method='POST' action='/removeConfig'><input type='submit' class='submit_green' name='submit' value='{b}'/></form></td><td><a href='/'>{c}</a></td></tr></table>\
+<table><tr><td><form method='POST' action='/removeConfig'><input type='submit' class='s_green' name='submit' value='{b}'/></form></td><td><a href='/'>{c}</a></td></tr></table>\
 ";
 
 const char WEB_RESET_CONTENT[] PROGMEM = "<h3>{t}</h3>\
-<table><tr><td><form method='POST' action'/reset'><input type='submit' class='submit_green' name='submit' value='{b}'/></form></td><td><a href='/'>{c}</a></td></tr></table>\
+<table><tr><td><form method='POST' action'/reset'><input type='submit' class='s_green' name='submit' value='{b}'/></form></td><td><a href='/'>{c}</a></td></tr></table>\
 ";
 
 const char WEB_IOS_REDIRECT[] PROGMEM = "<html><body>Redirecting...\
