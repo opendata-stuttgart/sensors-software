@@ -3177,7 +3177,9 @@ void autoUpdate() {
 		//SDS_version = "999";
 		display_debug(F("Looking for"), F("OTA update"));
 		last_update_attempt = millis();
-		HTTPUpdateResult ret = ESPhttpUpdate.update(update_host, update_port, update_url, SOFTWARE_VERSION + String(" ") + esp_chipid + String(" ") + SDS_version + String(" ") + String(current_lang) + String(" ") + String(INTL_LANG) + String(" ") + String(use_beta ? "BETA" : ""));
+		const HTTPUpdateResult ret = ESPhttpUpdate.update(update_host, update_port, update_url,
+			SOFTWARE_VERSION + String(" ") + esp_chipid + String(" ") + SDS_version + String(" ") +
+			String(current_lang) + String(" ") + String(INTL_LANG) + String(" ") + String(use_beta ? "BETA" : ""));
 		switch(ret) {
 		case HTTP_UPDATE_FAILED:
 			debug_out(String(FPSTR(DBG_TXT_UPDATE)) + FPSTR(DBG_TXT_UPDATE_FAILED), DEBUG_ERROR, 0);
