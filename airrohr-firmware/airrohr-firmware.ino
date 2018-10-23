@@ -852,7 +852,7 @@ void readConfig() {
 			File configFile = SPIFFS.open("/config.json", "r");
 			if (configFile) {
 				debug_out(F("opened config file..."), DEBUG_MIN_INFO, 1);
-				size_t size = configFile.size();
+				const size_t size = configFile.size();
 				// Allocate a buffer to store contents of the file.
 				std::unique_ptr<char[]> buf(new char[size]);
 
