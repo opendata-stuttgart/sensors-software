@@ -68,6 +68,7 @@ const char INTL_LOSCHEN[] PROGMEM = "Ta bort";
 const char INTL_ABBRECHEN[] PROGMEM = "Avbryt";
 const char INTL_SENSOR_WIRKLICH_NEU_STARTEN[] PROGMEM = "Config.json kunde inte hittas";
 const char INTL_NEU_STARTEN[] PROGMEM = "Starta om";
+const char INTL_SPEICHERN_UND_NEU_STARTEN[] PROGMEM = "";
 const char INTL_FIRMWARE[] PROGMEM = "Firmware";
 const char INTL_SETZE_DEBUG_AUF[] PROGMEM = "Ställa in debug-läge";
 const char INTL_NONE[] PROGMEM = "none";

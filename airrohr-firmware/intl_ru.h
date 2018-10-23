@@ -68,6 +68,7 @@ const char INTL_LOSCHEN[] PROGMEM = "Удалить";
 const char INTL_ABBRECHEN[] PROGMEM = "Отменить";
 const char INTL_SENSOR_WIRKLICH_NEU_STARTEN[] PROGMEM = "Действительно перезапустить датчик";
 const char INTL_NEU_STARTEN[] PROGMEM = "Перезапустить";
+const char INTL_SPEICHERN_UND_NEU_STARTEN[] PROGMEM = "";
 const char INTL_FIRMWARE[] PROGMEM = "Прошивки";
 const char INTL_SETZE_DEBUG_AUF[] PROGMEM = "Установка отладки";
 const char INTL_NONE[] PROGMEM = "none";

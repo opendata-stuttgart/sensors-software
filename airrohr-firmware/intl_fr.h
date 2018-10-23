@@ -68,6 +68,7 @@ const char INTL_LOSCHEN[] PROGMEM = "Effacer";
 const char INTL_ABBRECHEN[] PROGMEM = "Annuler";
 const char INTL_SENSOR_WIRKLICH_NEU_STARTEN[] PROGMEM = "Voulez-vous vraiment redémarrer le capteur?";
 const char INTL_NEU_STARTEN[] PROGMEM = "Redémarrer";
+const char INTL_SPEICHERN_UND_NEU_STARTEN[] PROGMEM = "";
 const char INTL_FIRMWARE[] PROGMEM = "Version du firmware";
 const char INTL_SETZE_DEBUG_AUF[] PROGMEM = "Paramètres de débogage";
 const char INTL_NONE[] PROGMEM = "sans";

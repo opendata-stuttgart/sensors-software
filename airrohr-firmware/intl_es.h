@@ -68,6 +68,7 @@ const char INTL_LOSCHEN[] PROGMEM = "Borrar";
 const char INTL_ABBRECHEN[] PROGMEM = "Cancelar";
 const char INTL_SENSOR_WIRKLICH_NEU_STARTEN[] PROGMEM = "Estas seguro que quieres reiniciar el sensor?";
 const char INTL_NEU_STARTEN[] PROGMEM = "Reiniciar";
+const char INTL_SPEICHERN_UND_NEU_STARTEN[] PROGMEM = "";
 const char INTL_FIRMWARE[] PROGMEM = "Versión del Firmware";
 const char INTL_SETZE_DEBUG_AUF[] PROGMEM = "Ajustar Debug a ";
 const char INTL_NONE[] PROGMEM = "off";

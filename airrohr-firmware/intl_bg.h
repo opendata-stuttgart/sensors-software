@@ -68,6 +68,7 @@ const char INTL_LOSCHEN[] PROGMEM = "Изтрий";
 const char INTL_ABBRECHEN[] PROGMEM = "Отказ";
 const char INTL_SENSOR_WIRKLICH_NEU_STARTEN[] PROGMEM = "Наистина ли искате да рестартирате сензора?";
 const char INTL_NEU_STARTEN[] PROGMEM = "Рестарт";
+const char INTL_SPEICHERN_UND_NEU_STARTEN[] PROGMEM = "";
 const char INTL_FIRMWARE[] PROGMEM = "Софтуер версия";
 const char INTL_SETZE_DEBUG_AUF[] PROGMEM = "Настройки дебъгването на";
 const char INTL_NONE[] PROGMEM = "изключено";

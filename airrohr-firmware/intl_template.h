@@ -68,6 +68,7 @@ const char INTL_LOSCHEN[] PROGMEM = "";
 const char INTL_ABBRECHEN[] PROGMEM = "";
 const char INTL_SENSOR_WIRKLICH_NEU_STARTEN[] PROGMEM = "";
 const char INTL_NEU_STARTEN[] PROGMEM = "";
+const char INTL_SPEICHERN_UND_NEU_STARTEN[] PROGMEM = "";
 const char INTL_FIRMWARE[] PROGMEM = "";
 const char INTL_SETZE_DEBUG_AUF[] PROGMEM = "";
 const char INTL_NONE[] PROGMEM = "";

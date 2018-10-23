@@ -68,6 +68,7 @@ const char INTL_LOSCHEN[] PROGMEM = "Läschen";
 const char INTL_ABBRECHEN[] PROGMEM = "Ofbriechen";
 const char INTL_SENSOR_WIRKLICH_NEU_STARTEN[] PROGMEM = "Sensor wierklech nei starten?";
 const char INTL_NEU_STARTEN[] PROGMEM = "Nei starten";
+const char INTL_SPEICHERN_UND_NEU_STARTEN[] PROGMEM = "";
 const char INTL_FIRMWARE[] PROGMEM = "Firmware";
 const char INTL_SETZE_DEBUG_AUF[] PROGMEM = "Debug setzen op";
 const char INTL_NONE[] PROGMEM = "keng";

@@ -68,6 +68,7 @@ const char INTL_LOSCHEN[] PROGMEM = "Smazat";
 const char INTL_ABBRECHEN[] PROGMEM = "Zrušit";
 const char INTL_SENSOR_WIRKLICH_NEU_STARTEN[] PROGMEM = "Opravdu restartovat senzor";
 const char INTL_NEU_STARTEN[] PROGMEM = "Restartovat";
+const char INTL_SPEICHERN_UND_NEU_STARTEN[] PROGMEM = "";
 const char INTL_FIRMWARE[] PROGMEM = "Firmware verze";
 const char INTL_SETZE_DEBUG_AUF[] PROGMEM = "Ladìní nastaveno na";
 const char INTL_NONE[] PROGMEM = "žádný";
