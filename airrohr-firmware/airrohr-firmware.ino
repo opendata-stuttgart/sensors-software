@@ -417,9 +417,9 @@ bool restart_needed = false;
 
 bool config_needs_write = false;
 
-bool first_csv_line = 1;
+bool first_csv_line = true;
 
-bool first_cycle = 1;
+bool first_cycle = true;
 
 unsigned long count_sends = 0;
 unsigned long next_display_millis = 0;
@@ -852,7 +852,7 @@ void readConfig() {
 			File configFile = SPIFFS.open("/config.json", "r");
 			if (configFile) {
 				debug_out(F("opened config file..."), DEBUG_MIN_INFO, 1);
-				size_t size = configFile.size();
+				const size_t size = configFile.size();
 				// Allocate a buffer to store contents of the file.
 				std::unique_ptr<char[]> buf(new char[size]);
 
@@ -1401,11 +1401,42 @@ void webserver_config() {
 		}
 	} else {
 
-#define readCharParam(param) if (server.hasArg(#param)){ server.arg(#param).toCharArray(param, sizeof(param)); }
-#define readBoolParam(param) param = false; if (server.hasArg(#param)){ param = server.arg(#param) == "1"; }
-#define readIntParam(param)  if (server.hasArg(#param)){ int val = server.arg(#param).toInt(); if (val != 0){ param = val; }}
-#define readTimeParam(param)  if (server.hasArg(#param)){ int val = server.arg(#param).toInt(); if (val != 0){ param = val*1000; }}
-#define readPasswdParam(param) if (server.hasArg(#param)){ masked_pwd = ""; for (uint8_t i=0;i<server.arg(#param).length();i++) masked_pwd += "*"; if (masked_pwd != server.arg(#param) || server.arg(#param) == "") { server.arg(#param).toCharArray(param, sizeof(param)); } }
+#define readCharParam(param) \
+	if (server.hasArg(#param)){ \
+		server.arg(#param).toCharArray(param, sizeof(param)); \
+	}
+
+#define readBoolParam(param) \
+	param = false; \
+	if (server.hasArg(#param)){ \
+		param = server.arg(#param) == "1";\
+	}
+
+#define readIntParam(param) \
+	if (server.hasArg(#param)){ \
+		int val = server.arg(#param).toInt(); \
+		if (val != 0){ \
+			param = val; \
+		} \
+	}
+
+#define readTimeParam(param) \
+	if (server.hasArg(#param)){ \
+		int val = server.arg(#param).toInt(); \
+		if (val != 0){ \
+			param = val*1000; \
+		} \
+	}
+
+#define readPasswdParam(param) \
+	if (server.hasArg(#param)){ \
+		masked_pwd = ""; \
+		for (uint8_t i=0;i<server.arg(#param).length();i++) \
+			masked_pwd += "*"; \
+		if (masked_pwd != server.arg(#param) || server.arg(#param) == "") {\
+			server.arg(#param).toCharArray(param, sizeof(param)); \
+		}\
+	}
 
 		if (server.hasArg("wlanssid") && server.arg("wlanssid") != "") {
 			readCharParam(wlanssid);
@@ -2256,7 +2287,7 @@ void send_csv(const String& data) {
 				headline.remove(headline.length() - 1);
 			}
 			Serial.println(headline);
-			first_csv_line = 0;
+			first_csv_line = false;
 		}
 		if (valueline.length() > 0) {
 			valueline.remove(valueline.length() - 1);
@@ -3134,7 +3165,9 @@ void autoUpdate() {
 		//SDS_version = "999";
 		display_debug(F("Looking for"), F("OTA update"));
 		last_update_attempt = millis();
-		HTTPUpdateResult ret = ESPhttpUpdate.update(update_host, update_port, update_url, SOFTWARE_VERSION + String(" ") + esp_chipid + String(" ") + SDS_version + String(" ") + String(current_lang) + String(" ") + String(INTL_LANG) + String(" ") + String(use_beta ? "BETA" : ""));
+		const HTTPUpdateResult ret = ESPhttpUpdate.update(update_host, update_port, update_url,
+			SOFTWARE_VERSION + String(" ") + esp_chipid + String(" ") + SDS_version + String(" ") +
+			String(current_lang) + String(" ") + String(INTL_LANG) + String(" ") + String(use_beta ? "BETA" : ""));
 		switch(ret) {
 		case HTTP_UPDATE_FAILED:
 			debug_out(String(FPSTR(DBG_TXT_UPDATE)) + FPSTR(DBG_TXT_UPDATE_FAILED), DEBUG_ERROR, 0);
