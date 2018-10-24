@@ -2031,7 +2031,7 @@ void wifiConfig() {
 	debug_out(String(send2madavi), DEBUG_MIN_INFO, 1);
 	debug_out(F("CSV: "), DEBUG_MIN_INFO, 0);
 	debug_out(String(send2csv), DEBUG_MIN_INFO, 1);
-	debug_out(F("----"), DEBUG_MIN_INFO, 1);
+	debug_out("----", DEBUG_MIN_INFO, 1);
 	debug_out(F("Autoupdate: "), DEBUG_MIN_INFO, 0);
 	debug_out(String(auto_update), DEBUG_MIN_INFO, 1);
 	debug_out(F("Display: "), DEBUG_MIN_INFO, 0);
@@ -2307,7 +2307,7 @@ static String sensorDHT() {
 			s += Value2Json(F("humidity"), Float2String(last_value_DHT_H));
 		}
 	}
-	debug_out(F("----"), DEBUG_MIN_INFO, 1);
+	debug_out("----", DEBUG_MIN_INFO, 1);
 
 	debug_out(String(FPSTR(DBG_TXT_END_READING)) + "DHT11/22", DEBUG_MED_INFO, 1);
 
@@ -2338,7 +2338,7 @@ static String sensorHTU21D() {
 		s += Value2Json(F("HTU21D_temperature"), Float2String(last_value_HTU21D_T));
 		s += Value2Json(F("HTU21D_humidity"), Float2String(last_value_HTU21D_H));
 	}
-	debug_out(F("----"), DEBUG_MIN_INFO, 1);
+	debug_out("----", DEBUG_MIN_INFO, 1);
 
 	debug_out(String(FPSTR(DBG_TXT_END_READING)) + FPSTR(SENSORS_HTU21D), DEBUG_MED_INFO, 1);
 
@@ -2369,7 +2369,7 @@ static String sensorBMP() {
 		s += Value2Json(F("BMP_pressure"), Float2String(last_value_BMP_P));
 		s += Value2Json(F("BMP_temperature"), Float2String(last_value_BMP_T));
 	}
-	debug_out(F("----"), DEBUG_MIN_INFO, 1);
+	debug_out("----", DEBUG_MIN_INFO, 1);
 
 	debug_out(String(FPSTR(DBG_TXT_END_READING)) + FPSTR(SENSORS_BMP180), DEBUG_MED_INFO, 1);
 
@@ -2400,7 +2400,7 @@ static String sensorBMP280() {
 		s += Value2Json(F("BMP280_pressure"), Float2String(last_value_BMP280_P));
 		s += Value2Json(F("BMP280_temperature"), Float2String(last_value_BMP280_T));
 	}
-	debug_out(F("----"), DEBUG_MIN_INFO, 1);
+	debug_out("----", DEBUG_MIN_INFO, 1);
 
 	debug_out(String(FPSTR(DBG_TXT_END_READING)) + FPSTR(SENSORS_BMP280), DEBUG_MED_INFO, 1);
 
@@ -2438,7 +2438,7 @@ static String sensorBME280() {
 		s += Value2Json(F("BME280_humidity"), Float2String(last_value_BME280_H));
 		s += Value2Json(F("BME280_pressure"), Float2String(last_value_BME280_P));
 	}
-	debug_out(F("----"), DEBUG_MIN_INFO, 1);
+	debug_out("----", DEBUG_MIN_INFO, 1);
 
 	debug_out(String(FPSTR(DBG_TXT_END_READING)) + FPSTR(SENSORS_BME280), DEBUG_MED_INFO, 1);
 
@@ -2475,7 +2475,7 @@ static String sensorDS18B20() {
 		last_value_DS18B20_T = t;
 		s += Value2Json(F("DS18B20_temperature"), Float2String(last_value_DS18B20_T));
 	}
-	debug_out(F("----"), DEBUG_MIN_INFO, 1);
+	debug_out("----", DEBUG_MIN_INFO, 1);
 	debug_out(String(FPSTR(DBG_TXT_END_READING)) + FPSTR(SENSORS_DS18B20), DEBUG_MED_INFO, 1);
 
 	return s;
@@ -3016,7 +3016,7 @@ String sensorPPD() {
 		s += Value2Json("ratioP2", Float2String(ratio));
 		s += Value2Json("P2", Float2String(last_value_PPD_P2));
 
-		debug_out(F("----"), DEBUG_MIN_INFO, 1);
+		debug_out("----", DEBUG_MIN_INFO, 1);
 	}
 
 	debug_out(String(FPSTR(DBG_TXT_END_READING)) + FPSTR(SENSORS_PPD42NS), DEBUG_MED_INFO, 1);
@@ -3753,8 +3753,8 @@ void loop() {
 		String signal_strength = String(WiFi.RSSI());
 		debug_out(F("WLAN signal strength: "), DEBUG_MIN_INFO, 0);
 		debug_out(signal_strength, DEBUG_MIN_INFO, 0);
-		debug_out(F(" dBm"), DEBUG_MIN_INFO, 1);
-		debug_out(F("----"), DEBUG_MIN_INFO, 1);
+		debug_out(" dBm", DEBUG_MIN_INFO, 1);
+		debug_out("----", DEBUG_MIN_INFO, 1);
 
 		server.handleClient();
 		yield();
@@ -3873,14 +3873,14 @@ void loop() {
 		//sending to api(s)
 
 		if (send2madavi) {
-			debug_out(F("## Sending to madavi.de: "), DEBUG_MIN_INFO, 1);
+			debug_out(String(FPSTR(DBG_TXT_SENDING_TO)) + F("madavi.de: "), DEBUG_MIN_INFO, 1);
 			start_send = millis();
 			sendData(data, 0, HOST_MADAVI, (ssl_madavi ? 443 : 80), URL_MADAVI, true, "", FPSTR(TXT_CONTENT_TYPE_JSON));
 			sum_send_time += millis() - start_send;
 		}
 
 		if (send2sensemap && (senseboxid[0] != '\0')) {
-			debug_out(F("## Sending to opensensemap: "), DEBUG_MIN_INFO, 1);
+			debug_out(String(FPSTR(DBG_TXT_SENDING_TO)) + F("opensensemap: "), DEBUG_MIN_INFO, 1);
 			start_send = millis();
 			String sensemap_path = url_sensemap;
 			sensemap_path.replace("BOXID", senseboxid);
@@ -3889,14 +3889,14 @@ void loop() {
 		}
 
 		if (send2fsapp) {
-			debug_out(F("## Sending to Server FS App: "), DEBUG_MIN_INFO, 1);
+			debug_out(String(FPSTR(DBG_TXT_SENDING_TO)) + F("Server FS App: "), DEBUG_MIN_INFO, 1);
 			start_send = millis();
 			sendData(data, 0, host_fsapp, httpPort_fsapp, url_fsapp.c_str(), false, "", FPSTR(TXT_CONTENT_TYPE_JSON));
 			sum_send_time += millis() - start_send;
 		}
 
 		if (send2influx) {
-			debug_out(F("## Sending to custom influx db: "), DEBUG_MIN_INFO, 1);
+			debug_out(String(FPSTR(DBG_TXT_SENDING_TO)) + F("custom influx db: "), DEBUG_MIN_INFO, 1);
 			start_send = millis();
 			const String data_4_influxdb = create_influxdb_string(data);
 			sendData(data_4_influxdb, 0, host_influx, port_influx, url_influx, false, basic_auth_influx.c_str(), FPSTR(TXT_CONTENT_TYPE_INFLUXDB));
@@ -3917,7 +3917,7 @@ void loop() {
 			String data_4_custom = data;
 			data_4_custom.remove(0, 1);
 			data_4_custom = "{\"esp8266id\": \"" + String(esp_chipid) + "\", " + data_4_custom;
-			debug_out(F("## Sending to custom api: "), DEBUG_MIN_INFO, 1);
+			debug_out(String(FPSTR(DBG_TXT_SENDING_TO)) + F("custom api: "), DEBUG_MIN_INFO, 1);
 			start_send = millis();
 			sendData(data_4_custom, 0, host_custom, port_custom, url_custom, false, basic_auth_custom.c_str(), FPSTR(TXT_CONTENT_TYPE_JSON));
 			sum_send_time += millis() - start_send;

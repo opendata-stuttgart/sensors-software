@@ -18,6 +18,7 @@ const char DBG_TXT_UPDATE[] PROGMEM = "[update] ";
 const char DBG_TXT_UPDATE_FAILED[] PROGMEM = "Update failed.";
 const char DBG_TXT_UPDATE_NO_UPDATE[] PROGMEM = "No update.";
 const char DBG_TXT_UPDATE_OK[] PROGMEM = "Update ok.";
+const char DBG_TXT_SENDING_TO[] PROGMEM = "## Sending to ";
 const char DBG_TXT_SENDING_TO_LUFTDATEN[] PROGMEM = "## Sending to Luftdaten.info ";
 const char DBG_TXT_CALL_SENSOR[] PROGMEM = "Call sensor";
 
