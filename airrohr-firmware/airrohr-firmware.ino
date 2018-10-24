@@ -1832,7 +1832,6 @@ void webserver_data_json() {
  *****************************************************************/
 void webserver_prometheus_endpoint() {
 	debug_out(F("output prometheus endpoint..."), DEBUG_MIN_INFO, 1);
-	String tmp_str;
 	String data_4_prometheus = F("software_version{version=\"{ver}\",{id}} 1\nuptime_ms{{id}} {up}\nsending_intervall_ms{{id}} {si}\nnumber_of_measurements{{id}} {cs}\n");
 	String id = F("node=\"esp8266-");
 	id += esp_chipid + "\"";
@@ -1847,7 +1846,7 @@ void webserver_prometheus_endpoint() {
 	JsonObject& json2data = jsonBuffer.parseObject(last_data_string);
 	if (json2data.success()) {
 		for (uint8_t i = 0; i < json2data["sensordatavalues"].size() - 1; i++) {
-			tmp_str = json2data["sensordatavalues"][i]["value_type"].as<char*>();
+			String tmp_str = json2data["sensordatavalues"][i]["value_type"].as<char*>();
 			data_4_prometheus += tmp_str + "{" + id + "} ";
 			tmp_str = json2data["sensordatavalues"][i]["value"].as<char*>();
 			data_4_prometheus += tmp_str + "\n";
@@ -1898,7 +1897,7 @@ void webserver_not_found() {
  * Webserver setup                                               *
  *****************************************************************/
 void setup_webserver() {
-	server_name  = F("Feinstaubsensor-");
+	server_name = F("Feinstaubsensor-");
 	server_name += esp_chipid;
 
 	server.on("/", webserver_root);
@@ -2210,7 +2209,6 @@ void sendLuftdaten(const String& data, const int pin, const char* host, const in
  * send data to influxdb                                         *
  *****************************************************************/
 String create_influxdb_string(const String& data) {
-	String tmp_str;
 	String data_4_influxdb = "";
 	debug_out(F("Parse JSON for influx DB"), DEBUG_MIN_INFO, 1);
 	debug_out(data, DEBUG_MIN_INFO, 1);
@@ -2220,7 +2218,7 @@ String create_influxdb_string(const String& data) {
 		data_4_influxdb += F("feinstaub,node=esp8266-");
 		data_4_influxdb += esp_chipid + " ";
 		for (uint8_t i = 0; i < json2data["sensordatavalues"].size(); i++) {
-			tmp_str = json2data["sensordatavalues"][i]["value_type"].as<char*>();
+			String tmp_str = json2data["sensordatavalues"][i]["value_type"].as<char*>();
 			data_4_influxdb += tmp_str + "=";
 			tmp_str = json2data["sensordatavalues"][i]["value"].as<char*>();
 			data_4_influxdb += tmp_str + ",";
@@ -2240,18 +2238,15 @@ String create_influxdb_string(const String& data) {
  * send data as csv to serial out                                *
  *****************************************************************/
 void send_csv(const String& data) {
-	String tmp_str;
-	String headline;
-	String valueline;
 	StaticJsonBuffer<1000> jsonBuffer;
 	JsonObject& json2data = jsonBuffer.parseObject(data);
 	debug_out(F("CSV Output"), DEBUG_MIN_INFO, 1);
 	debug_out(data, DEBUG_MIN_INFO, 1);
 	if (json2data.success()) {
-		headline = F("Timestamp_ms;");
-		valueline = String(act_milli) + ";";
+		String headline = F("Timestamp_ms;");
+		String valueline = String(act_milli) + ";";
 		for (uint8_t i = 0; i < json2data["sensordatavalues"].size(); i++) {
-			tmp_str = json2data["sensordatavalues"][i]["value_type"].as<char*>();
+			String tmp_str = json2data["sensordatavalues"][i]["value_type"].as<char*>();
 			headline += tmp_str + ";";
 			tmp_str = json2data["sensordatavalues"][i]["value"].as<char*>();
 			valueline += tmp_str + ";";
@@ -2943,10 +2938,6 @@ String sensorHPM() {
  * read PPD42NS sensor values                                    *
  *****************************************************************/
 String sensorPPD() {
-	boolean valP1 = HIGH;
-	boolean valP2 = HIGH;
-	double ratio = 0;
-	double concentration = 0;
 	String s = "";
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_PPD42NS), DEBUG_MED_INFO, 1);
@@ -2954,8 +2945,8 @@ String sensorPPD() {
 	if ((act_milli - starttime) <= sampletime_ms) {
 
 		// Read pins connected to ppd42ns
-		valP1 = digitalRead(PPD_PIN_PM1);
-		valP2 = digitalRead(PPD_PIN_PM2);
+		boolean valP1 = digitalRead(PPD_PIN_PM1);
+		boolean valP2 = digitalRead(PPD_PIN_PM2);
 
 		if(valP1 == LOW && trigP1 == false) {
 			trigP1 = true;
@@ -2984,8 +2975,8 @@ String sensorPPD() {
 	if (send_now) {
 		last_value_PPD_P1 = -1;
 		last_value_PPD_P2 = -1;
-		ratio = lowpulseoccupancyP1 / (sampletime_ms * 10.0);					// int percentage 0 to 100
-		concentration = (1.1 * pow(ratio, 3) - 3.8 * pow(ratio, 2) + 520 * ratio + 0.62);	// spec sheet curve
+		double ratio = lowpulseoccupancyP1 / (sampletime_ms * 10.0);					// int percentage 0 to 100
+		double concentration = (1.1 * pow(ratio, 3) - 3.8 * pow(ratio, 2) + 520 * ratio + 0.62);	// spec sheet curve
 		// Begin printing
 		debug_out(F("LPO P10    : "), DEBUG_MIN_INFO, 0);
 		debug_out(String(lowpulseoccupancyP1), DEBUG_MIN_INFO, 1);
@@ -3031,9 +3022,6 @@ String sensorGPS() {
 	String s = "";
 	String gps_lat = "";
 	String gps_lon = "";
-	String gps_alt = "";
-	String gps_date = "";
-	String gps_time = "";
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + "GPS", DEBUG_MED_INFO, 1);
 
@@ -3051,13 +3039,13 @@ String sensorGPS() {
 			}
 			if (gps.altitude.isValid()) {
 				last_value_GPS_alt = gps.altitude.meters();
-				gps_alt = Float2String(last_value_GPS_lat, 2);
+				String gps_alt = Float2String(last_value_GPS_lat, 2);
 			} else {
 				last_value_GPS_alt = -1000;
 				debug_out(F("Altitude INVALID"), DEBUG_MAX_INFO, 1);
 			}
 			if (gps.date.isValid()) {
-				gps_date = "";
+				String gps_date = "";
 				if (gps.date.month() < 10) {
 					gps_date += "0";
 				}
@@ -3074,7 +3062,7 @@ String sensorGPS() {
 				debug_out(F("Date INVALID"), DEBUG_MAX_INFO, 1);
 			}
 			if (gps.time.isValid()) {
-				gps_time = "";
+				String gps_time = "";
 				if (gps.time.hour() < 10) {
 					gps_time += "0";
 				}
