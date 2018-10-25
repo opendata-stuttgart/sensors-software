@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#define INTL_DE
+#define INTL_LU
 
 /************************************************************************
  *                                                                      *
@@ -519,7 +519,7 @@ String check_display_value(double value, double undef, uint8_t len, uint8_t str_
 
 /*****************************************************************
  * convert float to string with a                                *
- * precision of two decimal places                               *
+ * precision of two (or a given number of) decimal places        *
  *****************************************************************/
 String Float2String(const double value) {
 	return Float2String(value, 2);
@@ -661,7 +661,7 @@ String SDS_version_date() {
 	int checksum_is = 0;
 	int checksum_ok = 0;
 
-	debug_out(String(FPSTR(DBG_TXT_END_READING)) + F("SDS011 version date"), DEBUG_MED_INFO, 1);
+	debug_out(String(FPSTR(DBG_TXT_END_READING)) + FPSTR(DBG_TXT_SDS011_VERSION_DATE), DEBUG_MED_INFO, 1);
 
 	SDS_cmd(PM_SENSOR_START);
 
@@ -749,7 +749,7 @@ String SDS_version_date() {
 		yield();
 	}
 
-	debug_out(String(FPSTR(DBG_TXT_END_READING)) + F("SDS011 version date"), DEBUG_MED_INFO, 1);
+	debug_out(String(FPSTR(DBG_TXT_END_READING)) + FPSTR(DBG_TXT_SDS011_VERSION_DATE), DEBUG_MED_INFO, 1);
 
 	return s;
 }
@@ -1161,7 +1161,7 @@ String tmpl(const String& patt, const String& value1, const String& value2, cons
 }
 
 String line_from_value(const String& name, const String& value) {
-	String s = F("<br>{n}: {v}");
+	String s = F("<br/>{n}: {v}");
 	s.replace("{n}", name);
 	s.replace("{v}", value);
 	return s;
@@ -3723,32 +3723,32 @@ void loop() {
 
 	if (send_now) {
 		if (dht_read) {
-			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "DHT", DEBUG_MAX_INFO, 1);
+			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + FPSTR(SENSORS_DHT22), DEBUG_MAX_INFO, 1);
 			result_DHT = sensorDHT();                       // getting temperature and humidity (optional)
 		}
 
 		if (htu21d_read) {
-			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "HTU21D", DEBUG_MAX_INFO, 1);
+			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + FPSTR(SENSORS_HTU21D), DEBUG_MAX_INFO, 1);
 			result_HTU21D = sensorHTU21D();                 // getting temperature and humidity (optional)
 		}
 
 		if (bmp_read && (! bmp_init_failed)) {
-			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "BMP", DEBUG_MAX_INFO, 1);
+			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + FPSTR(SENSORS_BMP180), DEBUG_MAX_INFO, 1);
 			result_BMP = sensorBMP();                       // getting temperature and pressure (optional)
 		}
 
 		if (bmp280_read && (! bmp280_init_failed)) {
-			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "BMP280", DEBUG_MAX_INFO, 1);
+			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + FPSTR(SENSORS_BMP280), DEBUG_MAX_INFO, 1);
 			result_BMP280 = sensorBMP280();                 // getting temperature, humidity and pressure (optional)
 		}
 
 		if (bme280_read && (! bme280_init_failed)) {
-			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "BME280", DEBUG_MAX_INFO, 1);
+			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + FPSTR(SENSORS_BME280), DEBUG_MAX_INFO, 1);
 			result_BME280 = sensorBME280();                 // getting temperature, humidity and pressure (optional)
 		}
 
 		if (ds18b20_read) {
-			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "DS18B20", DEBUG_MAX_INFO, 1);
+			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + FPSTR(SENSORS_DS18B20), DEBUG_MAX_INFO, 1);
 			result_DS18B20 = sensorDS18B20();               // getting temperature (optional)
 		}
 	}

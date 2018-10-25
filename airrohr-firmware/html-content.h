@@ -21,6 +21,7 @@ const char DBG_TXT_UPDATE_OK[] PROGMEM = "Update ok.";
 const char DBG_TXT_SENDING_TO[] PROGMEM = "## Sending to ";
 const char DBG_TXT_SENDING_TO_LUFTDATEN[] PROGMEM = "## Sending to Luftdaten.info ";
 const char DBG_TXT_CALL_SENSOR[] PROGMEM = "Call sensor";
+const char DBG_TXT_SDS011_VERSION_DATE[] PROGMEM = "SDS011 version date";
 
 const char SENSORS_SDS011[] PROGMEM = "SDS011";
 const char SENSORS_PPD42NS[] PROGMEM = "PPD42NS";
