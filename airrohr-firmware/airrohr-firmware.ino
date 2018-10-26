@@ -436,6 +436,7 @@ struct struct_wifiInfo *wifiInfo;
 uint8_t count_wifiInfo;
 
 #define data_first_part "{\"software_version\": \"{v}\", \"sensordatavalues\":["
+
 enum class PmSensorCmd {
 	Start,
 	Stop,
@@ -679,15 +680,15 @@ static void HPM_cmd(PmSensorCmd cmd) {
 	switch (cmd) {
 	case PmSensorCmd::Start:
 		memcpy_P(buf, start_cmd, cmd_len);
-		is_PMS_running = true;
+		is_HPM_running = true;
 		break;
 	case PmSensorCmd::Stop:
 		memcpy_P(buf, stop_cmd, cmd_len);
-		is_PMS_running = false;
+		is_HPM_running = false;
 		break;
 	case PmSensorCmd::ContinuousMode:
 		memcpy_P(buf, continuous_mode_cmd, cmd_len);
-		is_PMS_running = true;
+		is_HPM_running = true;
 		break;
 	}
 	serialSDS.write(buf, cmd_len);
