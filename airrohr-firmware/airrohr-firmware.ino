@@ -576,74 +576,115 @@ String Var2Json(const String& name, const int value) {
 	return s;
 }
 
+template<typename T, std::size_t N>
+constexpr std::size_t array_num_elements(const T(&)[N]) {
+	return N;
+}
+
 /*****************************************************************
  * send SDS011 command (start, stop, continuous mode, version    *
  *****************************************************************/
 void SDS_cmd(const uint8_t cmd) {
-	uint8_t buf[SDS_cmd_len];
+	static constexpr uint8_t start_cmd[] PROGMEM = {
+		0xAA, 0xB4, 0x06, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x06, 0xAB
+	};
+	static constexpr uint8_t stop_cmd[] PROGMEM = {
+		0xAA, 0xB4, 0x06, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x05, 0xAB
+	};
+	static constexpr uint8_t continuous_mode_cmd[] PROGMEM = {
+		0xAA, 0xB4, 0x08, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x07, 0xAB
+	};
+	static constexpr uint8_t version_cmd[] PROGMEM = {
+		0xAA, 0xB4, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x05, 0xAB
+	};
+	constexpr uint8_t cmd_len = array_num_elements(start_cmd);
+
+	uint8_t buf[cmd_len];
 	switch (cmd) {
 	case PM_SENSOR_START:
-		memcpy_P(buf, start_SDS_cmd, SDS_cmd_len);
+		memcpy_P(buf, start_cmd, cmd_len);
 		is_SDS_running = true;
 		break;
 	case PM_SENSOR_STOP:
-		memcpy_P(buf, stop_SDS_cmd, SDS_cmd_len);
+		memcpy_P(buf, stop_cmd, cmd_len);
 		is_SDS_running = false;
 		break;
 	case PM_SENSOR_CONTINUOUS_MODE:
-		memcpy_P(buf, continuous_mode_SDS_cmd, SDS_cmd_len);
+		memcpy_P(buf, continuous_mode_cmd, cmd_len);
 		is_SDS_running = true;
 		break;
 	case PM_SENSOR_VERSION_DATE:
-		memcpy_P(buf, version_SDS_cmd, SDS_cmd_len);
+		memcpy_P(buf, version_cmd, cmd_len);
 		is_SDS_running = true;
 		break;
 	}
-	serialSDS.write(buf, SDS_cmd_len);
+	serialSDS.write(buf, cmd_len);
 }
 
 /*****************************************************************
  * send Plantower PMS sensor command start, stop, cont. mode     *
  *****************************************************************/
 void PMS_cmd(const uint8_t cmd) {
-	uint8_t buf[PMS_cmd_len];
+	static constexpr uint8_t start_cmd[] PROGMEM = {
+		0x42, 0x4D, 0xE4, 0x00, 0x01, 0x01, 0x74
+	};
+	static constexpr uint8_t stop_cmd[] PROGMEM = {
+		0x42, 0x4D, 0xE4, 0x00, 0x00, 0x01, 0x73
+	};
+	static constexpr uint8_t continuous_mode_cmd[] PROGMEM = {
+		0x42, 0x4D, 0xE1, 0x00, 0x01, 0x01, 0x71
+	};
+	constexpr uint8_t cmd_len = array_num_elements(start_cmd);
+
+	uint8_t buf[cmd_len];
 	switch (cmd) {
 	case PM_SENSOR_START:
-		memcpy_P(buf, start_PMS_cmd, PMS_cmd_len);
+		memcpy_P(buf, start_cmd, cmd_len);
 		is_PMS_running = true;
 		break;
 	case PM_SENSOR_STOP:
-		memcpy_P(buf, stop_PMS_cmd, PMS_cmd_len);
+		memcpy_P(buf, stop_cmd, cmd_len);
 		is_PMS_running = false;
 		break;
 	case PM_SENSOR_CONTINUOUS_MODE:
-		memcpy_P(buf, continuous_mode_PMS_cmd, PMS_cmd_len);
+		memcpy_P(buf, continuous_mode_cmd, cmd_len);
 		is_PMS_running = true;
 		break;
 	}
-	serialSDS.write(buf, PMS_cmd_len);
+	serialSDS.write(buf, cmd_len);
 }
 
 /*****************************************************************
  * start Honeywell PMS sensor                                    *
  *****************************************************************/
 void HPM_cmd(const uint8_t cmd) {
-	uint8_t buf[HPM_cmd_len];
+	static constexpr uint8_t start_cmd[] PROGMEM = {
+		0x68, 0x01, 0x01, 0x96
+	};
+	static constexpr uint8_t stop_cmd[] PROGMEM = {
+		0x68, 0x01, 0x02, 0x95
+	};
+	static constexpr uint8_t continuous_mode_cmd[] PROGMEM = {
+		0x68, 0x01, 0x40, 0x57
+	};
+	constexpr uint8_t cmd_len = array_num_elements(start_cmd);
+
+	uint8_t buf[cmd_len];
 	switch (cmd) {
 	case PM_SENSOR_START:
-		memcpy_P(buf, start_HPM_cmd, HPM_cmd_len);
+		memcpy_P(buf, start_cmd, cmd_len);
 		is_PMS_running = true;
 		break;
 	case PM_SENSOR_STOP:
-		memcpy_P(buf, stop_HPM_cmd, HPM_cmd_len);
+		memcpy_P(buf, stop_cmd, cmd_len);
 		is_PMS_running = false;
 		break;
 	case PM_SENSOR_CONTINUOUS_MODE:
-		memcpy_P(buf, continuous_mode_HPM_cmd, HPM_cmd_len);
+		memcpy_P(buf, continuous_mode_cmd, cmd_len);
 		is_PMS_running = true;
 		break;
 	}
-	serialSDS.write(buf, HPM_cmd_len);
+	serialSDS.write(buf, cmd_len);
 }
 
 /*****************************************************************
