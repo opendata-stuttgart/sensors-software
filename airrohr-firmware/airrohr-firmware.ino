@@ -662,7 +662,7 @@ static void PMS_cmd(PmSensorCmd cmd) {
 }
 
 /*****************************************************************
- * start Honeywell PMS sensor                                    *
+ * send Honeywell PMS sensor command start, stop, cont. mode     *
  *****************************************************************/
 static void HPM_cmd(PmSensorCmd cmd) {
 	static constexpr uint8_t start_cmd[] PROGMEM = {
