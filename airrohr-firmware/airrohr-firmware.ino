@@ -126,7 +126,6 @@
 #include <Adafruit_BME280.h>
 #include <DallasTemperature.h>
 #include <TinyGPS++.h>
-#include <Ticker.h>
 #include <time.h>
 
 #if defined(INTL_BG)
