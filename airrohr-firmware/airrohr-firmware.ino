@@ -3588,27 +3588,27 @@ void setup() {
 	}
 	if (sds_read) {
 		debug_out(F("Read SDS..."), DEBUG_MIN_INFO, 1);
-		is_SDS_running = SDS_cmd(PmSensorCmd::Start);
+		SDS_cmd(PmSensorCmd::Start);
 		delay(100);
-		is_SDS_running = SDS_cmd(PmSensorCmd::ContinuousMode);
+		SDS_cmd(PmSensorCmd::ContinuousMode);
 		delay(100);
 		debug_out(F("Stopping SDS011..."), DEBUG_MIN_INFO, 1);
 		is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
 	}
 	if (pms_read) {
 		debug_out(F("Read PMS(1,3,5,6,7)003..."), DEBUG_MIN_INFO, 1);
-		is_PMS_running = PMS_cmd(PmSensorCmd::Start);
+		PMS_cmd(PmSensorCmd::Start);
 		delay(100);
-		is_PMS_running = PMS_cmd(PmSensorCmd::ContinuousMode);
+		PMS_cmd(PmSensorCmd::ContinuousMode);
 		delay(100);
 		debug_out(F("Stopping PMS..."), DEBUG_MIN_INFO, 1);
 		is_PMS_running = PMS_cmd(PmSensorCmd::Stop);
 	}
 	if (hpm_read) {
 		debug_out(F("Read HPM..."), DEBUG_MIN_INFO, 1);
-		is_HPM_running = HPM_cmd(PmSensorCmd::Start);
+		HPM_cmd(PmSensorCmd::Start);
 		delay(100);
-		is_HPM_running = HPM_cmd(PmSensorCmd::ContinuousMode);
+		HPM_cmd(PmSensorCmd::ContinuousMode);
 		delay(100);
 		debug_out(F("Stopping HPM..."), DEBUG_MIN_INFO, 1);
 		is_HPM_running = HPM_cmd(PmSensorCmd::Stop);
