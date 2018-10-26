@@ -159,12 +159,6 @@
 #define DEBUG_MED_INFO 4
 #define DEBUG_MAX_INFO 5
 
-// Definition PM sensor 'commands'
-#define PM_SENSOR_START 1
-#define PM_SENSOR_STOP 2
-#define PM_SENSOR_CONTINUOUS_MODE 3
-#define PM_SENSOR_VERSION_DATE 4
-
 // Definition GPIOs for Zero based Arduino Feather M0 LoRaWAN
 #if defined(ARDUINO_SAMD_ZERO) && defined(SERIAL_PORT_USBVIRTUAL)
 // Required for Serial on Zero based boards
