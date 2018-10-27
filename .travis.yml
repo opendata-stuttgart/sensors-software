@@ -9,7 +9,7 @@ cache:
         - "~/.platformio"
 
 env:
-    - PLATFORMIO_CI_SRC=airrohr-firmware/airrohr-firmware.ino
+    - PLATFORMIO_CI_SRC=airrohr-firmware/
 
 install:
     - pip install -U platformio
