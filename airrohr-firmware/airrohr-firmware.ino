@@ -348,8 +348,10 @@ bool send_failed = false;
 
 unsigned long time_for_wifi_config = 600000;
 
+const unsigned long ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
+const unsigned long PAUSE_BETWEEN_UPDATE_ATTEMPTS_MS = ONE_DAY_IN_MS;        // check for firmware updates once a day
+const unsigned long DURATION_BEFORE_FORCED_RESTART_MS = ONE_DAY_IN_MS * 28;  // force a reboot every ~4 weeks
 unsigned long last_update_attempt;
-const unsigned long pause_between_update_attempts = 86400000;
 
 int sds_pm10_sum = 0;
 int sds_pm25_sum = 0;
@@ -3652,6 +3654,13 @@ void setup() {
 	next_display_millis = starttime + 5000;
 }
 
+static void checkForceRestart()
+{
+	if ((act_milli - time_point_device_start_ms) > DURATION_BEFORE_FORCED_RESTART_MS) {
+		ESP.restart();
+	}
+}
+
 /*****************************************************************
  * And action                                                    *
  *****************************************************************/
@@ -3946,13 +3955,9 @@ void loop() {
 
 		server.begin();
 
-		//forced restart after 4 weeks
-		if ((act_milli - last_update_attempt) > (28 * pause_between_update_attempts)) {
-			ESP.restart();
-		}
+		checkForceRestart();
 
-		// check for updates (default once per day)
-		if ((act_milli - last_update_attempt) > pause_between_update_attempts) {
+		if ((act_milli - last_update_attempt) > PAUSE_BETWEEN_UPDATE_ATTEMPTS_MS) {
 			autoUpdate();
 		}
 
