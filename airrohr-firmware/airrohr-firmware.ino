@@ -527,10 +527,8 @@ String Float2String(const double value) {
 String Float2String(const double value, uint8_t digits) {
 	// Convert a float to String with two decimals.
 	char temp[15];
-	String s;
-
 	dtostrf(value, 13, digits, temp);
-	s = String(temp);
+	String s = temp;
 	s.trim();
 	return s;
 }
