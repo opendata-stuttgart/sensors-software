@@ -1,4 +1,4 @@
-anguage: python
+language: python
 python:
     - "2.7"
 
@@ -13,7 +13,6 @@ env:
 
 install:
     - pip install -U platformio
-    - platformio update
 
 script:
     - cd airrohr-firmware && platformio ci --project-conf=platformio.ini
