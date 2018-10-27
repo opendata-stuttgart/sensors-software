@@ -126,6 +126,7 @@
 #include <DallasTemperature.h>
 #include <TinyGPS++.h>
 #include <time.h>
+#include <assert.h>
 
 #if defined(INTL_BG)
 #include "intl_bg.h"
@@ -657,6 +658,9 @@ static void PMS_cmd(PmSensorCmd cmd) {
 		memcpy_P(buf, continuous_mode_cmd, cmd_len);
 		is_PMS_running = true;
 		break;
+	case PmSensorCmd::VersionDate:
+		assert(false && "not supported by this sensor");
+		break;
 	}
 	serialSDS.write(buf, cmd_len);
 }
@@ -689,6 +693,9 @@ static void HPM_cmd(PmSensorCmd cmd) {
 	case PmSensorCmd::ContinuousMode:
 		memcpy_P(buf, continuous_mode_cmd, cmd_len);
 		is_HPM_running = true;
+		break;
+	case PmSensorCmd::VersionDate:
+		assert(false && "not supported by this sensor");
 		break;
 	}
 	serialSDS.write(buf, cmd_len);
