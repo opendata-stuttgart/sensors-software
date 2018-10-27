@@ -318,7 +318,7 @@ unsigned long lowpulseoccupancyP2 = 0;
 
 bool send_now = false;
 unsigned long starttime;
-unsigned long uptime;
+unsigned long time_point_device_start_ms;
 unsigned long starttime_SDS;
 unsigned long starttime_GPS;
 unsigned long act_micro;
@@ -1870,7 +1870,7 @@ void webserver_prometheus_endpoint() {
 	debug_out(last_data_string, DEBUG_MED_INFO, 1);
 	data_4_prometheus.replace("{id}", id);
 	data_4_prometheus.replace("{ver}", SOFTWARE_VERSION);
-	data_4_prometheus.replace("{up}", String(act_milli - uptime));
+	data_4_prometheus.replace("{up}", String(act_milli - time_point_device_start_ms));
 	data_4_prometheus.replace("{si}", String(sending_intervall_ms));
 	data_4_prometheus.replace("{cs}", String(count_sends));
 	StaticJsonBuffer<2000> jsonBuffer;
@@ -3647,7 +3647,7 @@ void setup() {
 	wdt_enable(30000);// 30 sec
 
 	starttime = millis();                                   // store the start time
-	uptime = starttime;
+	time_point_device_start_ms = starttime;
 	starttime_SDS = starttime;
 	next_display_millis = starttime + 5000;
 }
