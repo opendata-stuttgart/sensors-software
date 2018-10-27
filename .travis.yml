@@ -9,10 +9,10 @@ cache:
         - "~/.platformio"
 
 env:
-    - PLATFORMIO_CI_SRC=airrohr-firmware/
+    - PLATFORMIO_CI_SRC=./
 
 install:
     - pip install -U platformio
 
 script:
-    - platformio ci --project-conf=airrohr-firmware/platformio.ini
+    - cd airrohr-firmware && platformio ci --project-conf=platformio.ini
