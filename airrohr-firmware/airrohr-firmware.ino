@@ -3947,7 +3947,7 @@ void loop() {
 
 		const unsigned long ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
 		//forced restart after 4 weeks
-		if ((act_milli - last_update_attempt) > (28 * ONE_DAY_IN_MS)) {
+		if ((act_milli - time_point_device_start_ms) > (28 * ONE_DAY_IN_MS)) {
 			ESP.restart();
 		}
 
