@@ -349,7 +349,6 @@ bool send_failed = false;
 unsigned long time_for_wifi_config = 600000;
 
 unsigned long last_update_attempt;
-const unsigned long pause_between_update_attempts = 86400000;
 
 int sds_pm10_sum = 0;
 int sds_pm25_sum = 0;
@@ -3946,13 +3945,14 @@ void loop() {
 
 		server.begin();
 
+		const unsigned long ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
 		//forced restart after 4 weeks
-		if ((act_milli - last_update_attempt) > (28 * pause_between_update_attempts)) {
+		if ((act_milli - last_update_attempt) > (28 * ONE_DAY_IN_MS)) {
 			ESP.restart();
 		}
 
 		// check for updates (default once per day)
-		if ((act_milli - last_update_attempt) > pause_between_update_attempts) {
+		if ((act_milli - last_update_attempt) > ONE_DAY_IN_MS) {
 			autoUpdate();
 		}
 
