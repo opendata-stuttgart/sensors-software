@@ -1,0 +1,19 @@
+anguage: python
+python:
+    - "2.7"
+
+# Cache PlatformIO packages using Travis CI container-based infrastructure
+sudo: false
+cache:
+    directories:
+        - "~/.platformio"
+
+env:
+    - PLATFORMIO_CI_SRC=airrohr-firmware/airrohr-firmware.ino
+
+install:
+    - pip install -U platformio
+    - platformio update
+
+script:
+    - cd airrohr-firmware && platformio ci --project-conf=platformio.ini
