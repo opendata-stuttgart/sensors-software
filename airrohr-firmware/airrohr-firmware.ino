@@ -97,10 +97,10 @@
  *
  * Der Sketch verwendet 489604 Bytes (46%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
  * Globale Variablen verwenden 37164 Bytes (45%) des dynamischen Speichers, 44756 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
- * 
+ *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-112-B3"
+#define SOFTWARE_VERSION "NRZ-2018-112-B4"
 
 /*****************************************************************
  * Includes                                                      *
@@ -1053,8 +1053,8 @@ void create_basic_auth_strings() {
 
 String make_header(const String& title) {
 	String s = FPSTR(WEB_PAGE_HEADER);
-	s.replace("{tt}", FPSTR(INTL_FEINSTAUBSENSOR));
-	s.replace("{h}", FPSTR(INTL_UBERSICHT));
+	s.replace("{tt}", FPSTR(INTL_PM_SENSOR));
+	s.replace("{h}", FPSTR(INTL_HOME));
 	if(title != " ") {
 		s.replace("{n}", F("&raquo;"));
 	} else {
@@ -1070,7 +1070,7 @@ String make_header(const String& title) {
 
 String make_footer() {
 	String s = FPSTR(WEB_PAGE_FOOTER);
-	s.replace("{t}", FPSTR(INTL_ZURUCK_ZUR_STARTSEITE));
+	s.replace("{t}", FPSTR(INTL_BACK_TO_HOME));
 	return s;
 }
 
@@ -1127,7 +1127,7 @@ String form_select_lang() {
 	String s_select = F(" selected='selected'");
 	String s = F("<tr><td>{t}</td><td><select name='current_lang'><option value='DE'{s_DE}>Deutsch (DE)</option><option value='BG'{s_BG}>Bulgarian (BG)</option><option value='CZ'{s_CZ}>Český (CZ)</option><option value='EN'{s_EN}>English (EN)</option><option value='ES'{s_ES}>Español (ES)</option><option value='FR'{s_FR}>Français (FR)</option><option value='IT'{s_IT}>Italiano (IT)</option><option value='LU'{s_LU}>Lëtzebuergesch (LU)</option><option value='NL'{s_NL}>Nederlands (NL)</option><option value='PL'{s_PL}>Polski (PL)</option><option value='PT'{s_PT}>Português (PT)</option><option value='RU'{s_RU}>Русский (RU)</option><option value='SE'{s_SE}>Svenska (SE)</option></select></td></tr>");
 
-	s.replace("{t}", FPSTR(INTL_SPRACHE));
+	s.replace("{t}", FPSTR(INTL_LANGUAGE));
 
 	s.replace("{s_" + String(current_lang) + "}", s_select);
 	while (s.indexOf("{s_") != -1) {
@@ -1196,7 +1196,7 @@ String wlan_ssid_to_table_row(const String& ssid, const String& encryption, int3
 }
 
 String warning_first_cycle() {
-	String s = FPSTR(INTL_ERSTER_MESSZYKLUS);
+	String s = FPSTR(INTL_TIME_TO_FIRST_MEASUREMENT);
 	unsigned long time_to_first = sending_intervall_ms - (act_milli - starttime);
 	if (time_to_first > sending_intervall_ms) {
 		time_to_first = 0;
@@ -1212,17 +1212,17 @@ String age_last_values() {
 		time_since_last = 0;
 	}
 	s += String((long)((time_since_last + 500) / 1000));
-	s += FPSTR(INTL_ZEIT_SEIT_LETZTER_MESSUNG);
+	s += FPSTR(INTL_TIME_SINCE_LAST_MEASUREMENT);
 	s += F("</b><br/><br/>");
 	return s;
 }
 
 String add_sensor_type(const String& sensor_text) {
 	String s = sensor_text;
-	s.replace("{pm}", FPSTR(INTL_FEINSTAUB));
-	s.replace("{t}", FPSTR(INTL_TEMPERATUR));
-	s.replace("{h}", FPSTR(INTL_LUFTFEUCHTE));
-	s.replace("{p}", FPSTR(INTL_LUFTDRUCK));
+	s.replace("{pm}", FPSTR(INTL_PARTICULATE_MATTER));
+	s.replace("{t}", FPSTR(INTL_TEMPERATURE));
+	s.replace("{h}", FPSTR(INTL_HUMIDITY));
+	s.replace("{p}", FPSTR(INTL_PRESSURE));
 	return s;
 }
 
@@ -1258,11 +1258,11 @@ void webserver_root() {
 		last_page_load = millis();
 		debug_out(F("output root page..."), DEBUG_MIN_INFO, 1);
 		page_content += FPSTR(WEB_ROOT_PAGE_CONTENT);
-		page_content.replace("{t}", FPSTR(INTL_AKTUELLE_WERTE));
-		page_content.replace(F("{map}"), FPSTR(INTL_KARTE_DER_AKTIVEN_SENSOREN));
-		page_content.replace(F("{conf}"), FPSTR(INTL_KONFIGURATION));
-		page_content.replace(F("{conf_delete}"), FPSTR(INTL_KONFIGURATION_LOSCHEN));
-		page_content.replace(F("{restart}"), FPSTR(INTL_SENSOR_NEU_STARTEN));
+		page_content.replace("{t}", FPSTR(INTL_CURRENT_DATA));
+		page_content.replace(F("{map}"), FPSTR(INTL_ACTIVE_SENSORS_MAP));
+		page_content.replace(F("{conf}"), FPSTR(INTL_CONFIGURATION));
+		page_content.replace(F("{conf_delete}"), FPSTR(INTL_CONFIGURATION_DELETE));
+		page_content.replace(F("{restart}"), FPSTR(INTL_RESTART_SENSOR));
 		page_content += make_footer();
 		server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
 	}
@@ -1274,7 +1274,7 @@ void webserver_root() {
 void webserver_config() {
 	webserver_request_auth();
 
-	String page_content = make_header(FPSTR(INTL_KONFIGURATION));
+	String page_content = make_header(FPSTR(INTL_CONFIGURATION));
 	String masked_pwd = "";
 	last_page_load = millis();
 
@@ -1284,17 +1284,17 @@ void webserver_config() {
 	}
 	if (server.method() == HTTP_GET) {
 		page_content += F("<form method='POST' action='/config' style='width:100%;'>\n<b>");
-		page_content += FPSTR(INTL_WLAN_DATEN);
+		page_content += FPSTR(INTL_WIFI_SETTINGS);
 		page_content += F("</b><br/>");
 		debug_out(F("output config page 1"), DEBUG_MIN_INFO, 1);
 		if (wificonfig_loop) {  // scan for wlan ssids
 			page_content += F("<div id='wifilist'>");
-			page_content += FPSTR(INTL_WLAN_LISTE);
+			page_content += FPSTR(INTL_WIFI_NETWORKS);
 			page_content += F("</div><br/>");
 		}
 		page_content += FPSTR(TABLE_TAG_OPEN);
 		page_content += form_input("wlanssid", FPSTR(INTL_FS_WIFI_NAME), wlanssid, 32);
-		page_content += form_password("wlanpwd", FPSTR(INTL_PASSWORT), wlanpwd, 64);
+		page_content += form_password("wlanpwd", FPSTR(INTL_PASSWORD), wlanpwd, 64);
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 		page_content += F("<hr/>\n<b>");
 
@@ -1305,19 +1305,19 @@ void webserver_config() {
 			page_content += FPSTR(INTL_BASICAUTH);
 			page_content += F("</b><br/>");
 			page_content += FPSTR(TABLE_TAG_OPEN);
-			page_content += form_input("www_username", FPSTR(INTL_BENUTZER), www_username, 64);
-			page_content += form_password("www_password", FPSTR(INTL_PASSWORT), www_password, 64);
+			page_content += form_input("www_username", FPSTR(INTL_USER), www_username, 64);
+			page_content += form_password("www_password", FPSTR(INTL_PASSWORD), www_password, 64);
 			page_content += form_checkbox("www_basicauth_enabled", FPSTR(INTL_BASICAUTH), www_basicauth_enabled);
 
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 			page_content += F("\n<b>");
 			page_content += FPSTR(INTL_FS_WIFI);
 			page_content += F("</b><br/>");
-			page_content += FPSTR(INTL_FS_WIFI_BESCHREIBUNG);
+			page_content += FPSTR(INTL_FS_WIFI_DESCRIPTION);
 			page_content += FPSTR(BR_TAG);
 			page_content += FPSTR(TABLE_TAG_OPEN);
 			page_content += form_input("fs_ssid", FPSTR(INTL_FS_WIFI_NAME), fs_ssid, 64);
-			page_content += form_password("fs_pwd", FPSTR(INTL_PASSWORT), fs_pwd, 64);
+			page_content += form_password("fs_pwd", FPSTR(INTL_PASSWORD), fs_pwd, 64);
 
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 			page_content += F("\n<b>APIs</b><br/>");
@@ -1330,7 +1330,7 @@ void webserver_config() {
 			page_content += form_checkbox("ssl_madavi", F("HTTPS"), ssl_madavi, false);
 			page_content += F(")<br/><br/>\n<b>");
 
-			page_content += FPSTR(INTL_SENSOREN);
+			page_content += FPSTR(INTL_SENSORS);
 			page_content += F("</b><br/>");
 			page_content += form_checkbox_sensor("sds_read", FPSTR(INTL_SDS011), sds_read);
 			page_content += form_checkbox_sensor("pms_read", FPSTR(INTL_PMS), pms_read);
@@ -1346,7 +1346,7 @@ void webserver_config() {
 			page_content += F("<br/>\n<b>");
 		}
 
-		page_content += FPSTR(INTL_WEITERE_EINSTELLUNGEN);
+		page_content += FPSTR(INTL_MORE_SETTINGS);
 		page_content += F("</b><br/>");
 		page_content += form_checkbox("auto_update", FPSTR(INTL_AUTO_UPDATE), auto_update);
 		page_content += form_checkbox("use_beta", FPSTR(INTL_USE_BETA), use_beta);
@@ -1360,41 +1360,41 @@ void webserver_config() {
 			page_content += FPSTR(TABLE_TAG_OPEN);
 			page_content += form_select_lang();
 			page_content += form_input("debug", FPSTR(INTL_DEBUG_LEVEL), String(debug), 5);
-			page_content += form_input("sending_intervall_ms", FPSTR(INTL_MESSINTERVALL), String(sending_intervall_ms / 1000), 5);
-			page_content += form_input("time_for_wifi_config", FPSTR(INTL_DAUER_ROUTERMODUS), String(time_for_wifi_config / 1000), 5);
+			page_content += form_input("sending_intervall_ms", FPSTR(INTL_MEASUREMENT_INTERVAL), String(sending_intervall_ms / 1000), 5);
+			page_content += form_input("time_for_wifi_config", FPSTR(INTL_MDURATION_ROUTER_MODE), String(time_for_wifi_config / 1000), 5);
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 			page_content += F("\n<b>");
 
-			page_content += FPSTR(INTL_WEITERE_APIS);
+			page_content += FPSTR(INTL_MORE_APIS);
 			page_content += F("</b><br/><br/>");
-			page_content += form_checkbox("send2fsapp", tmpl(FPSTR(INTL_SENDEN_AN), F("Feinstaub-App")), send2fsapp);
+			page_content += form_checkbox("send2fsapp", tmpl(FPSTR(INTL_SEND_TO), F("Feinstaub-App")), send2fsapp);
 			page_content += FPSTR(BR_TAG);
-			page_content += form_checkbox("send2sensemap", tmpl(FPSTR(INTL_SENDEN_AN), F("OpenSenseMap")), send2sensemap);
+			page_content += form_checkbox("send2sensemap", tmpl(FPSTR(INTL_SEND_TO), F("OpenSenseMap")), send2sensemap);
 			page_content += FPSTR(TABLE_TAG_OPEN);
 			page_content += form_input("senseboxid", "senseBox-ID: ", senseboxid, 50);
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-			page_content += form_checkbox("send2custom", FPSTR(INTL_AN_EIGENE_API_SENDEN), send2custom);
+			page_content += form_checkbox("send2custom", FPSTR(INTL_SEND_TO_OWN_API), send2custom);
 			page_content += FPSTR(TABLE_TAG_OPEN);
 			page_content += form_input("host_custom", FPSTR(INTL_SERVER), host_custom, 50);
-			page_content += form_input("url_custom", FPSTR(INTL_PFAD), url_custom, 50);
+			page_content += form_input("url_custom", FPSTR(INTL_PATH), url_custom, 50);
 			page_content += form_input("port_custom", FPSTR(INTL_PORT), String(port_custom), 30);
-			page_content += form_input("user_custom", FPSTR(INTL_BENUTZER), user_custom, 50);
-			page_content += form_password("pwd_custom", FPSTR(INTL_PASSWORT), pwd_custom, 50);
+			page_content += form_input("user_custom", FPSTR(INTL_USER), user_custom, 50);
+			page_content += form_password("pwd_custom", FPSTR(INTL_PASSWORD), pwd_custom, 50);
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-			page_content += form_checkbox("send2influx", tmpl(FPSTR(INTL_SENDEN_AN), F("InfluxDB")), send2influx);
+			page_content += form_checkbox("send2influx", tmpl(FPSTR(INTL_SEND_TO), F("InfluxDB")), send2influx);
 			page_content += FPSTR(TABLE_TAG_OPEN);
 			page_content += form_input("host_influx", FPSTR(INTL_SERVER), host_influx, 50);
-			page_content += form_input("url_influx", FPSTR(INTL_PFAD), url_influx, 50);
+			page_content += form_input("url_influx", FPSTR(INTL_PATH), url_influx, 50);
 			page_content += form_input("port_influx", FPSTR(INTL_PORT), String(port_influx), 30);
-			page_content += form_input("user_influx", FPSTR(INTL_BENUTZER), user_influx, 50);
-			page_content += form_password("pwd_influx", FPSTR(INTL_PASSWORT), pwd_influx, 50);
-			page_content += form_submit(FPSTR(INTL_SPEICHERN));
+			page_content += form_input("user_influx", FPSTR(INTL_USER), user_influx, 50);
+			page_content += form_password("pwd_influx", FPSTR(INTL_PASSWORD), pwd_influx, 50);
+			page_content += form_submit(FPSTR(INTL_SAVE));
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 			page_content += F("<br/></form>");
 		}
 		if (wificonfig_loop) {  // scan for wlan ssids
 			page_content += FPSTR(TABLE_TAG_OPEN);
-			page_content += form_submit(FPSTR(INTL_SPEICHERN));
+			page_content += form_submit(FPSTR(INTL_SAVE));
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 			page_content += F("<br/></form>");
 			page_content += F("<script>window.setTimeout(load_wifi_list,1000);</script>");
@@ -1507,19 +1507,19 @@ void webserver_config() {
 
 		config_needs_write = true;
 
-		page_content += line_from_value(tmpl(FPSTR(INTL_SENDEN_AN), F("Luftdaten.info")), String(send2dusti));
-		page_content += line_from_value(tmpl(FPSTR(INTL_SENDEN_AN), F("Madavi")), String(send2madavi));
-		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "DHT"), String(dht_read));
-		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "HTU21D"), String(htu21d_read));
-		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "SDS"), String(sds_read));
-		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), F("PMS(1,3,5,6,7)003")), String(pms_read));
-		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "HPM"), String(hpm_read));
-		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "PPD"), String(ppd_read));
-		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "BMP180"), String(bmp_read));
-		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "BMP280"), String(bmp280_read));
-		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "BME280"), String(bme280_read));
-		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "DS18B20"), String(ds18b20_read));
-		page_content += line_from_value(tmpl(FPSTR(INTL_LESE), "GPS"), String(gps_read));
+		page_content += line_from_value(tmpl(FPSTR(INTL_SEND_TO), F("Luftdaten.info")), String(send2dusti));
+		page_content += line_from_value(tmpl(FPSTR(INTL_SEND_TO), F("Madavi")), String(send2madavi));
+		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), "DHT"), String(dht_read));
+		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), "HTU21D"), String(htu21d_read));
+		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), "SDS"), String(sds_read));
+		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), F("PMS(1,3,5,6,7)003")), String(pms_read));
+		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), "HPM"), String(hpm_read));
+		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), "PPD"), String(ppd_read));
+		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), "BMP180"), String(bmp_read));
+		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), "BMP280"), String(bmp280_read));
+		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), "BME280"), String(bme280_read));
+		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), "DS18B20"), String(ds18b20_read));
+		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), "GPS"), String(gps_read));
 		page_content += line_from_value(FPSTR(INTL_AUTO_UPDATE), String(auto_update));
 		page_content += line_from_value(FPSTR(INTL_USE_BETA), String(use_beta));
 		page_content += line_from_value(FPSTR(INTL_DISPLAY), String(has_display));
@@ -1528,30 +1528,30 @@ void webserver_config() {
 		page_content += line_from_value(FPSTR(INTL_LCD1602_3F), String(has_lcd1602));
 		page_content += line_from_value(FPSTR(INTL_LCD2004_27), String(has_lcd2004_27));
 		page_content += line_from_value(FPSTR(INTL_DEBUG_LEVEL), String(debug));
-		page_content += line_from_value(FPSTR(INTL_MESSINTERVALL), String(sending_intervall_ms));
-		page_content += line_from_value(tmpl(FPSTR(INTL_SENDEN_AN), F("opensensemap")), String(send2sensemap));
+		page_content += line_from_value(FPSTR(INTL_MEASUREMENT_INTERVAL), String(sending_intervall_ms));
+		page_content += line_from_value(tmpl(FPSTR(INTL_SEND_TO), F("opensensemap")), String(send2sensemap));
 		page_content += F("<br/>senseBox-ID ");
 		page_content += senseboxid;
 		page_content += F("<br/><br/>");
-		page_content += line_from_value(FPSTR(INTL_AN_EIGENE_API_SENDEN), String(send2custom));
+		page_content += line_from_value(FPSTR(INTL_SEND_TO_OWN_API), String(send2custom));
 		page_content += line_from_value(FPSTR(INTL_SERVER), host_custom);
-		page_content += line_from_value(FPSTR(INTL_PFAD), url_custom);
+		page_content += line_from_value(FPSTR(INTL_PATH), url_custom);
 		page_content += line_from_value(FPSTR(INTL_PORT), String(port_custom));
-		page_content += line_from_value(FPSTR(INTL_BENUTZER), user_custom);
-		page_content += line_from_value(FPSTR(INTL_PASSWORT), pwd_custom);
+		page_content += line_from_value(FPSTR(INTL_USER), user_custom);
+		page_content += line_from_value(FPSTR(INTL_PASSWORD), pwd_custom);
 		page_content += F("<br/><br/>InfluxDB: ");
 		page_content += String(send2influx);
 		page_content += line_from_value(FPSTR(INTL_SERVER), host_influx);
-		page_content += line_from_value(FPSTR(INTL_PFAD), url_influx);
+		page_content += line_from_value(FPSTR(INTL_PATH), url_influx);
 		page_content += line_from_value(FPSTR(INTL_PORT), String(port_influx));
-		page_content += line_from_value(FPSTR(INTL_BENUTZER), user_influx);
-		page_content += line_from_value(FPSTR(INTL_PASSWORT), pwd_influx);
+		page_content += line_from_value(FPSTR(INTL_USER), user_influx);
+		page_content += line_from_value(FPSTR(INTL_PASSWORD), pwd_influx);
 		if (wificonfig_loop) {
 			page_content += F("<br/><br/>");
-			page_content += FPSTR(INTL_GERAT_WIRD_NEU_GESTARTET);
+			page_content += FPSTR(INTL_SENSOR_IS_REBOOTING);
 		} else {
 			page_content += F("<br/><br/><a href='/reset?confirm=yes'>");
-			page_content += FPSTR(INTL_GERAT_NEU_STARTEN);
+			page_content += FPSTR(INTL_RESTART_SENSOR);
 			page_content += F("?</a>");
 		}
 	}
@@ -1571,7 +1571,7 @@ void webserver_wifi() {
 	String page_content = "";
 	if (count_wifiInfo == 0) {
 		page_content += BR_TAG;
-		page_content += FPSTR(INTL_KEINE_NETZWERKE);
+		page_content += FPSTR(INTL_NO_NETWORKS);
 		page_content += BR_TAG;
 	} else {
 		std::unique_ptr<int[]> indices(new int[count_wifiInfo]);
@@ -1602,7 +1602,7 @@ void webserver_wifi() {
 			}
 		}
 
-		page_content += FPSTR(INTL_NETZWERKE_GEFUNDEN);
+		page_content += FPSTR(INTL_NETWORKS_FOUND);
 		page_content += String(count_wifiInfo - duplicateSsids);
 		page_content += FPSTR(BR_TAG);
 		page_content += FPSTR(BR_TAG);
@@ -1628,7 +1628,7 @@ void webserver_values() {
 	if (WiFi.status() != WL_CONNECTED) {
 		sendHttpRedirect(server);
 	} else {
-		String page_content = make_header(FPSTR(INTL_AKTUELLE_WERTE));
+		String page_content = make_header(FPSTR(INTL_CURRENT_DATA));
 		const String unit_PM = "µg/m³";
 		const String unit_T = "°C";
 		const String unit_H = "%";
@@ -1645,11 +1645,11 @@ void webserver_values() {
 			page_content += age_last_values();
 		}
 		page_content += F("<table cellspacing='0' border='1' cellpadding='5'>");
-		page_content += tmpl(F("<tr><th>{v1}</th><th>{v2}</th><th>{v3}</th>"), FPSTR(INTL_SENSOR), FPSTR(INTL_PARAMETER), FPSTR(INTL_WERT));
+		page_content += tmpl(F("<tr><th>{v1}</th><th>{v2}</th><th>{v3}</th>"), FPSTR(INTL_SENSOR), FPSTR(INTL_PARAMETER), FPSTR(INTL_VALUE));
 		if (ppd_read) {
 			page_content += FPSTR(EMPTY_ROW);
-			page_content += table_row_from_value(FPSTR(SENSORS_PPD42NS), "PM1",  check_display_value(last_value_PPD_P1, -1, 1, 0), FPSTR(INTL_PARTIKEL_LITER));
-			page_content += table_row_from_value(FPSTR(SENSORS_PPD42NS), "PM2.5", check_display_value(last_value_PPD_P2, -1, 1, 0), FPSTR(INTL_PARTIKEL_LITER));
+			page_content += table_row_from_value(FPSTR(SENSORS_PPD42NS), "PM1",  check_display_value(last_value_PPD_P1, -1, 1, 0), FPSTR(INTL_PARTICLES_PER_LITER));
+			page_content += table_row_from_value(FPSTR(SENSORS_PPD42NS), "PM2.5", check_display_value(last_value_PPD_P2, -1, 1, 0), FPSTR(INTL_PARTICLES_PER_LITER));
 		}
 		if (sds_read) {
 			page_content += FPSTR(EMPTY_ROW);
@@ -1669,33 +1669,33 @@ void webserver_values() {
 		}
 		if (dht_read) {
 			page_content += FPSTR(EMPTY_ROW);
-			page_content += table_row_from_value(FPSTR(SENSORS_DHT22), FPSTR(INTL_TEMPERATUR), check_display_value(last_value_DHT_T, -128, 1, 0), unit_T);
-			page_content += table_row_from_value(FPSTR(SENSORS_DHT22), FPSTR(INTL_LUFTFEUCHTE), check_display_value(last_value_DHT_H, -1, 1, 0), unit_H);
+			page_content += table_row_from_value(FPSTR(SENSORS_DHT22), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_DHT_T, -128, 1, 0), unit_T);
+			page_content += table_row_from_value(FPSTR(SENSORS_DHT22), FPSTR(INTL_HUMIDITY), check_display_value(last_value_DHT_H, -1, 1, 0), unit_H);
 		}
 		if (htu21d_read) {
 			page_content += FPSTR(EMPTY_ROW);
-			page_content += table_row_from_value(FPSTR(SENSORS_HTU21D), FPSTR(INTL_TEMPERATUR), check_display_value(last_value_HTU21D_T, -128, 1, 0), unit_T);
-			page_content += table_row_from_value(FPSTR(SENSORS_HTU21D), FPSTR(INTL_LUFTFEUCHTE), check_display_value(last_value_HTU21D_H, -1, 1, 0), unit_H);
+			page_content += table_row_from_value(FPSTR(SENSORS_HTU21D), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_HTU21D_T, -128, 1, 0), unit_T);
+			page_content += table_row_from_value(FPSTR(SENSORS_HTU21D), FPSTR(INTL_HUMIDITY), check_display_value(last_value_HTU21D_H, -1, 1, 0), unit_H);
 		}
 		if (bmp_read) {
 			page_content += FPSTR(EMPTY_ROW);
-			page_content += table_row_from_value(FPSTR(SENSORS_BMP180), FPSTR(INTL_TEMPERATUR), check_display_value(last_value_BMP_T, -128, 1, 0), unit_T);
-			page_content += table_row_from_value(FPSTR(SENSORS_BMP180), FPSTR(INTL_LUFTDRUCK), check_display_value(last_value_BMP_P / 100.0, (-1 / 100.0), 2, 0), unit_P);
+			page_content += table_row_from_value(FPSTR(SENSORS_BMP180), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_BMP_T, -128, 1, 0), unit_T);
+			page_content += table_row_from_value(FPSTR(SENSORS_BMP180), FPSTR(INTL_PRESSURE), check_display_value(last_value_BMP_P / 100.0, (-1 / 100.0), 2, 0), unit_P);
 		}
 		if (bmp280_read) {
 			page_content += FPSTR(EMPTY_ROW);
-			page_content += table_row_from_value(FPSTR(SENSORS_BMP280), FPSTR(INTL_TEMPERATUR), check_display_value(last_value_BMP280_T, -128, 1, 0), unit_T);
-			page_content += table_row_from_value(FPSTR(SENSORS_BMP280), FPSTR(INTL_LUFTDRUCK), check_display_value(last_value_BMP280_P / 100.0, (-1 / 100.0), 2, 0), unit_P);
+			page_content += table_row_from_value(FPSTR(SENSORS_BMP280), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_BMP280_T, -128, 1, 0), unit_T);
+			page_content += table_row_from_value(FPSTR(SENSORS_BMP280), FPSTR(INTL_PRESSURE), check_display_value(last_value_BMP280_P / 100.0, (-1 / 100.0), 2, 0), unit_P);
 		}
 		if (bme280_read) {
 			page_content += FPSTR(EMPTY_ROW);
-			page_content += table_row_from_value(FPSTR(SENSORS_BME280), FPSTR(INTL_TEMPERATUR), check_display_value(last_value_BME280_T, -128, 1, 0), unit_T);
-			page_content += table_row_from_value(FPSTR(SENSORS_BME280), FPSTR(INTL_LUFTFEUCHTE), check_display_value(last_value_BME280_H, -1, 1, 0), unit_H);
-			page_content += table_row_from_value(FPSTR(SENSORS_BME280), FPSTR(INTL_LUFTDRUCK),  check_display_value(last_value_BME280_P / 100.0, (-1 / 100.0), 2, 0), unit_P);
+			page_content += table_row_from_value(FPSTR(SENSORS_BME280), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_BME280_T, -128, 1, 0), unit_T);
+			page_content += table_row_from_value(FPSTR(SENSORS_BME280), FPSTR(INTL_HUMIDITY), check_display_value(last_value_BME280_H, -1, 1, 0), unit_H);
+			page_content += table_row_from_value(FPSTR(SENSORS_BME280), FPSTR(INTL_PRESSURE),  check_display_value(last_value_BME280_P / 100.0, (-1 / 100.0), 2, 0), unit_P);
 		}
 		if (ds18b20_read) {
 			page_content += FPSTR(EMPTY_ROW);
-			page_content += table_row_from_value(FPSTR(SENSORS_DS18B20), FPSTR(INTL_TEMPERATUR), check_display_value(last_value_DS18B20_T, -128, 1, 0), unit_T);
+			page_content += table_row_from_value(FPSTR(SENSORS_DS18B20), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_DS18B20_T, -128, 1, 0), unit_T);
 		}
 		if (gps_read) {
 			page_content += FPSTR(EMPTY_ROW);
@@ -1707,12 +1707,12 @@ void webserver_values() {
 		}
 
 		page_content += FPSTR(EMPTY_ROW);
-		page_content += table_row_from_value("WiFi", FPSTR(INTL_SIGNAL),  String(WiFi.RSSI()), "dBm");
-		page_content += table_row_from_value("WiFi", FPSTR(INTL_QUALITAT), String(signal_quality), "%");
+		page_content += table_row_from_value("WiFi", FPSTR(INTL_SIGNAL_STRENGTH),  String(WiFi.RSSI()), "dBm");
+		page_content += table_row_from_value("WiFi", FPSTR(INTL_SIGNAL_QUALITY), String(signal_quality), "%");
 
 		page_content += FPSTR(EMPTY_ROW);
 		page_content += F("<tr><td colspan='2'>");
-		page_content += FPSTR(INTL_ANZAHL_MESSUNGEN);
+		page_content += FPSTR(INTL_NUMBER_OF_MEASUREMENTS);
 		page_content += F("</td><td class='r'>");
 		page_content += String(count_sends);
 		page_content += F("</td></tr>");
@@ -1737,7 +1737,7 @@ void webserver_debug_level() {
 		if (lvl >= 0 && lvl <= 5) {
 			debug = lvl;
 			page_content += F("<h3>");
-			page_content += FPSTR(INTL_SETZE_DEBUG_AUF);
+			page_content += FPSTR(INTL_DEBUG_SETTING_TO);
 			page_content += F(" ");
 
 			switch (lvl) {
@@ -1773,27 +1773,27 @@ void webserver_debug_level() {
 void webserver_removeConfig() {
 	webserver_request_auth();
 
-	String page_content = make_header(FPSTR(INTL_CONFIG_LOSCHEN));
+	String page_content = make_header(FPSTR(INTL_DELETE_CONFIG));
 	String message_string = F("<h3>{v}.</h3>");
 	last_page_load = millis();
 	debug_out(F("output remove config page..."), DEBUG_MIN_INFO, 1);
 
 	if (server.method() == HTTP_GET) {
 		page_content += FPSTR(WEB_REMOVE_CONFIG_CONTENT);
-		page_content.replace("{t}", FPSTR(INTL_KONFIGURATION_WIRKLICH_LOSCHEN));
-		page_content.replace("{b}", FPSTR(INTL_LOSCHEN));
-		page_content.replace("{c}", FPSTR(INTL_ABBRECHEN));
+		page_content.replace("{t}", FPSTR(INTL_CONFIGURATION_REALLY_DELETE));
+		page_content.replace("{b}", FPSTR(INTL_DELETE));
+		page_content.replace("{c}", FPSTR(INTL_CANCEL));
 
 	} else {
 		if (SPIFFS.exists("/config.json")) {	//file exists
 			debug_out(F("removing config.json..."), DEBUG_MIN_INFO, 1);
 			if (SPIFFS.remove("/config.json")) {
-				page_content += tmpl(message_string, FPSTR(INTL_CONFIG_GELOSCHT));
+				page_content += tmpl(message_string, FPSTR(INTL_CONFIG_DELETED));
 			} else {
-				page_content += tmpl(message_string, FPSTR(INTL_CONFIG_KONNTE_NICHT_GELOSCHT_WERDEN));
+				page_content += tmpl(message_string, FPSTR(INTL_CONFIG_CAN_NOT_BE_DELETED));
 			}
 		} else {
-			page_content += tmpl(message_string, FPSTR(INTL_CONFIG_NICHT_GEFUNDEN));
+			page_content += tmpl(message_string, FPSTR(INTL_CONFIG_NOT_FOUND));
 		}
 	}
 	page_content += make_footer();
@@ -1806,15 +1806,15 @@ void webserver_removeConfig() {
 void webserver_reset() {
 	webserver_request_auth();
 
-	String page_content = make_header(FPSTR(INTL_SENSOR_NEU_STARTEN));
+	String page_content = make_header(FPSTR(INTL_RESTART_SENSOR));
 	last_page_load = millis();
 	debug_out(F("output reset NodeMCU page..."), DEBUG_MIN_INFO, 1);
 
 	if (server.method() == HTTP_GET) {
 		page_content += FPSTR(WEB_RESET_CONTENT);
-		page_content.replace("{t}", FPSTR(INTL_SENSOR_WIRKLICH_NEU_STARTEN));
-		page_content.replace("{b}", FPSTR(INTL_NEU_STARTEN));
-		page_content.replace("{c}", FPSTR(INTL_ABBRECHEN));
+		page_content.replace("{t}", FPSTR(INTL_REALLY_RESTART_SENSOR));
+		page_content.replace("{b}", FPSTR(INTL_RESTART));
+		page_content.replace("{c}", FPSTR(INTL_CANCEL));
 	} else {
 		ESP.restart();
 	}
@@ -3166,13 +3166,13 @@ void autoUpdate() {
 		display_debug(F("Looking for"), F("OTA update"));
 		last_update_attempt = millis();
 		const HTTPUpdateResult ret = ESPhttpUpdate.update(update_host, update_port, update_url,
-			SOFTWARE_VERSION + String(" ") + esp_chipid + String(" ") + SDS_version + String(" ") +
-			String(current_lang) + String(" ") + String(INTL_LANG) + String(" ") + String(use_beta ? "BETA" : ""));
+									 SOFTWARE_VERSION + String(" ") + esp_chipid + String(" ") + SDS_version + String(" ") +
+									 String(current_lang) + String(" ") + String(INTL_LANG) + String(" ") + String(use_beta ? "BETA" : ""));
 		switch(ret) {
 		case HTTP_UPDATE_FAILED:
 			debug_out(String(FPSTR(DBG_TXT_UPDATE)) + FPSTR(DBG_TXT_UPDATE_FAILED), DEBUG_ERROR, 0);
 			debug_out(ESPhttpUpdate.getLastErrorString().c_str(), DEBUG_ERROR, 1);
-			display_debug(FPSTR(DBG_TXT_UPDATE),FPSTR(DBG_TXT_UPDATE_FAILED));
+			display_debug(FPSTR(DBG_TXT_UPDATE), FPSTR(DBG_TXT_UPDATE_FAILED));
 			break;
 		case HTTP_UPDATE_NO_UPDATES:
 			debug_out(String(FPSTR(DBG_TXT_UPDATE)) + FPSTR(DBG_TXT_UPDATE_NO_UPDATE), DEBUG_MIN_INFO, 1);

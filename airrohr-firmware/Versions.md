@@ -1,6 +1,11 @@
 NRZ-2018-112-B3
+* changing config to restart after every change/save
+* translations (PROGMEM var names from german to english)
+
+NRZ-2018-112-B3
 * verify certificates for HTTPS connections to Luftdaten.info and Madavi.de API
   (works only with Let's Encrypt certs)
+* memory optimizations
 
 NRZ-2018-112-B2
 * merged pull requests (fmeerkoetter) typedef, duplicate code in function
