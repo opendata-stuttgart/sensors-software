@@ -1,3 +1,6 @@
+firmware master branch: [![Build Status](https://travis-ci.com/opendata-stuttgart/sensors-software.svg?branch=master)](https://travis-ci.com/opendata-stuttgart/sensors-software)  
+firmware beta branch: [![Build Status](https://travis-ci.com/opendata-stuttgart/sensors-software.svg?branch=beta)](https://travis-ci.com/opendata-stuttgart/sensors-software)  
+
 # Software for hardware prototypes
 
 ## esp8266-arduino  
