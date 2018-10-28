@@ -438,14 +438,12 @@ uint8_t size_wifiInfo = 35 + sizeof(uint8_t) + sizeof(int32_t) + sizeof(uint8_t)
 struct struct_wifiInfo *wifiInfo;
 uint8_t count_wifiInfo;
 
-#define data_first_part "{\"software_version\": \"{v}\", \"sensordatavalues\":["
+template<typename T, std::size_t N>
+constexpr std::size_t array_num_elements(const T(&)[N]) {
+  return N;
+}
 
-enum class PmSensorCmd {
-	Start,
-	Stop,
-	ContinuousMode,
-	VersionDate
-};
+#define data_first_part "{\"software_version\": \"{v}\", \"sensordatavalues\":["
 
 /*****************************************************************
  * Debug output                                                  *
@@ -586,15 +584,10 @@ String Var2Json(const String& name, const int value) {
 	return s;
 }
 
-template<typename T, std::size_t N>
-constexpr std::size_t array_num_elements(const T(&)[N]) {
-	return N;
-}
-
 /*****************************************************************
  * send SDS011 command (start, stop, continuous mode, version    *
  *****************************************************************/
-static bool SDS_cmd(PmSensorCmd cmd) {
+static bool SDS_cmd(const uint8_t cmd) {
 	static constexpr uint8_t start_cmd[] PROGMEM = {
 		0xAA, 0xB4, 0x06, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x06, 0xAB
 	};
@@ -611,27 +604,27 @@ static bool SDS_cmd(PmSensorCmd cmd) {
 
 	uint8_t buf[cmd_len];
 	switch (cmd) {
-	case PmSensorCmd::Start:
+	case PM_SENSOR_START:
 		memcpy_P(buf, start_cmd, cmd_len);
 		break;
-	case PmSensorCmd::Stop:
+	case PM_SENSOR_STOP:
 		memcpy_P(buf, stop_cmd, cmd_len);
 		break;
-	case PmSensorCmd::ContinuousMode:
+	case PM_SENSOR_CONTINUOUS_MODE:
 		memcpy_P(buf, continuous_mode_cmd, cmd_len);
 		break;
-	case PmSensorCmd::VersionDate:
+	case PM_SENSOR_VERSION_DATE:
 		memcpy_P(buf, version_cmd, cmd_len);
 		break;
 	}
 	serialSDS.write(buf, cmd_len);
-	return cmd != PmSensorCmd::Stop;
+	return cmd != PM_SENSOR_STOP;
 }
 
 /*****************************************************************
  * send Plantower PMS sensor command start, stop, cont. mode     *
  *****************************************************************/
-static bool PMS_cmd(PmSensorCmd cmd) {
+static bool PMS_cmd(const uint8_t cmd) {
 	static constexpr uint8_t start_cmd[] PROGMEM = {
 		0x42, 0x4D, 0xE4, 0x00, 0x01, 0x01, 0x74
 	};
@@ -645,27 +638,27 @@ static bool PMS_cmd(PmSensorCmd cmd) {
 
 	uint8_t buf[cmd_len];
 	switch (cmd) {
-	case PmSensorCmd::Start:
+	case PM_SENSOR_START:
 		memcpy_P(buf, start_cmd, cmd_len);
 		break;
-	case PmSensorCmd::Stop:
+	case PM_SENSOR_STOP:
 		memcpy_P(buf, stop_cmd, cmd_len);
 		break;
-	case PmSensorCmd::ContinuousMode:
+	case PM_SENSOR_CONTINUOUS_MODE:
 		memcpy_P(buf, continuous_mode_cmd, cmd_len);
 		break;
-	case PmSensorCmd::VersionDate:
+	case PM_SENSOR_VERSION_DATE:
 		assert(false && "not supported by this sensor");
 		break;
 	}
 	serialSDS.write(buf, cmd_len);
-	return cmd != PmSensorCmd::Stop;
+	return cmd != PM_SENSOR_STOP;
 }
 
 /*****************************************************************
  * send Honeywell PMS sensor command start, stop, cont. mode     *
  *****************************************************************/
-static bool HPM_cmd(PmSensorCmd cmd) {
+static bool HPM_cmd(const uint8_t cmd) {
 	static constexpr uint8_t start_cmd[] PROGMEM = {
 		0x68, 0x01, 0x01, 0x96
 	};
@@ -679,21 +672,21 @@ static bool HPM_cmd(PmSensorCmd cmd) {
 
 	uint8_t buf[cmd_len];
 	switch (cmd) {
-	case PmSensorCmd::Start:
+	case PM_SENSOR_START:
 		memcpy_P(buf, start_cmd, cmd_len);
 		break;
-	case PmSensorCmd::Stop:
+	case PM_SENSOR_STOP:
 		memcpy_P(buf, stop_cmd, cmd_len);
 		break;
-	case PmSensorCmd::ContinuousMode:
+	case PM_SENSOR_CONTINUOUS_MODE:
 		memcpy_P(buf, continuous_mode_cmd, cmd_len);
 		break;
-	case PmSensorCmd::VersionDate:
+	case PM_SENSOR_VERSION_DATE:
 		assert(false && "not supported by this sensor");
 		break;
 	}
 	serialSDS.write(buf, cmd_len);
-	return cmd != PmSensorCmd::Stop;
+	return cmd != PM_SENSOR_STOP;
 }
 
 /*****************************************************************
@@ -711,11 +704,11 @@ String SDS_version_date() {
 
 	debug_out(String(FPSTR(DBG_TXT_END_READING)) + FPSTR(DBG_TXT_SDS011_VERSION_DATE), DEBUG_MED_INFO, 1);
 
-	is_SDS_running = SDS_cmd(PmSensorCmd::Start);
+	is_SDS_running = SDS_cmd(PM_SENSOR_START);
 
 	delay(100);
 
-	is_SDS_running = SDS_cmd(PmSensorCmd::VersionDate);
+	is_SDS_running = SDS_cmd(PM_SENSOR_VERSION_DATE);
 
 	delay(500);
 
@@ -2571,11 +2564,11 @@ String sensorSDS() {
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_SDS011), DEBUG_MED_INFO, 1);
 	if ((act_milli - starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
 		if (is_SDS_running) {
-			is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
+			is_SDS_running = SDS_cmd(PM_SENSOR_STOP);
 		}
 	} else {
 		if (! is_SDS_running) {
-			is_SDS_running = SDS_cmd(PmSensorCmd::Start);
+			is_SDS_running = SDS_cmd(PM_SENSOR_START);
 		}
 
 		while (serialSDS.available() > 0) {
@@ -2683,7 +2676,7 @@ String sensorSDS() {
 		sds_pm25_max = 0;
 		sds_pm25_min = 20000;
 		if ((sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms))) {
-			is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
+			is_SDS_running = SDS_cmd(PM_SENSOR_STOP);
 		}
 	}
 
@@ -2711,11 +2704,11 @@ String sensorPMS() {
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_PMSx003), DEBUG_MED_INFO, 1);
 	if ((act_milli - starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
 		if (is_PMS_running) {
-			is_PMS_running = PMS_cmd(PmSensorCmd::Stop);
+			is_PMS_running = PMS_cmd(PM_SENSOR_STOP);
 		}
 	} else {
 		if (! is_PMS_running) {
-			is_PMS_running = PMS_cmd(PmSensorCmd::Start);
+			is_PMS_running = PMS_cmd(PM_SENSOR_START);
 		}
 
 		while (serialSDS.available() > 0) {
@@ -2863,7 +2856,7 @@ String sensorPMS() {
 		pms_pm25_max = 0;
 		pms_pm25_min = 20000;
 		if (sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms)) {
-			is_PMS_running = PMS_cmd(PmSensorCmd::Stop);
+			is_PMS_running = PMS_cmd(PM_SENSOR_STOP);
 		}
 	}
 
@@ -2889,11 +2882,11 @@ String sensorHPM() {
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_HPM), DEBUG_MED_INFO, 1);
 	if ((act_milli - starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
 		if (is_HPM_running) {
-			is_HPM_running = HPM_cmd(PmSensorCmd::Stop);
+			is_HPM_running = HPM_cmd(PM_SENSOR_STOP);
 		}
 	} else {
 		if (! is_HPM_running) {
-			is_HPM_running = HPM_cmd(PmSensorCmd::Start);
+			is_HPM_running = HPM_cmd(PM_SENSOR_START);
 		}
 
 		while (serialSDS.available() > 0) {
@@ -3004,7 +2997,7 @@ String sensorHPM() {
 		hpm_pm25_max = 0;
 		hpm_pm25_min = 20000;
 		if (sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms)) {
-			is_HPM_running = HPM_cmd(PmSensorCmd::Stop);
+			is_HPM_running = HPM_cmd(PM_SENSOR_STOP);
 		}
 	}
 
@@ -3590,30 +3583,30 @@ void setup() {
 	}
 	if (sds_read) {
 		debug_out(F("Read SDS..."), DEBUG_MIN_INFO, 1);
-		SDS_cmd(PmSensorCmd::Start);
+		SDS_cmd(PM_SENSOR_START);
 		delay(100);
-		SDS_cmd(PmSensorCmd::ContinuousMode);
+		SDS_cmd(PM_SENSOR_CONTINUOUS_MODE);
 		delay(100);
 		debug_out(F("Stopping SDS011..."), DEBUG_MIN_INFO, 1);
-		is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
+		is_SDS_running = SDS_cmd(PM_SENSOR_STOP);
 	}
 	if (pms_read) {
 		debug_out(F("Read PMS(1,3,5,6,7)003..."), DEBUG_MIN_INFO, 1);
-		PMS_cmd(PmSensorCmd::Start);
+		PMS_cmd(PM_SENSOR_START);
 		delay(100);
-		PMS_cmd(PmSensorCmd::ContinuousMode);
+		PMS_cmd(PM_SENSOR_CONTINUOUS_MODE);
 		delay(100);
 		debug_out(F("Stopping PMS..."), DEBUG_MIN_INFO, 1);
-		is_PMS_running = PMS_cmd(PmSensorCmd::Stop);
+		is_PMS_running = PMS_cmd(PM_SENSOR_STOP);
 	}
 	if (hpm_read) {
 		debug_out(F("Read HPM..."), DEBUG_MIN_INFO, 1);
-		HPM_cmd(PmSensorCmd::Start);
+		HPM_cmd(PM_SENSOR_START);
 		delay(100);
-		HPM_cmd(PmSensorCmd::ContinuousMode);
+		HPM_cmd(PM_SENSOR_CONTINUOUS_MODE);
 		delay(100);
 		debug_out(F("Stopping HPM..."), DEBUG_MIN_INFO, 1);
-		is_HPM_running = HPM_cmd(PmSensorCmd::Stop);
+		is_HPM_running = HPM_cmd(PM_SENSOR_STOP);
 	}
 	if (dht_read) {
 		dht.begin();                                        // Start DHT
