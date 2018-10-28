@@ -10,11 +10,10 @@ cache:
 
 env:
     - PLATFORMIO_CI_SRC=./
-      PLATFORMIO_EXTRA_SCRIPTS=platformio_script.py
 
 install:
     - pip install -U platformio
     - platformio update
 
 script:
-    - cd airrohr-firmware && pwd && ls -l && platformio ci --project-conf=platformio.ini
+    - cd airrohr-firmware && pwd && ls -l && platformio run && ls -l builds/
