@@ -10,7 +10,7 @@ cache:
 
 env:
     - PLATFORMIO_CI_SRC=./
-    - PLATFORMIO_EXTRA_SCRIPTS=platformio_script.py
+      PLATFORMIO_EXTRA_SCRIPTS=platformio_script.py
 
 install:
     - pip install -U platformio
