@@ -14,6 +14,7 @@ env:
 
 install:
     - pip install -U platformio
+    - platformio update
 
 script:
-    - cd airrohr-firmware && platformio ci --verbose --project-conf=platformio.ini && ls -l builds/
+    - cd airrohr-firmware && platformio ci --verbose --project-conf=platformio.ini
