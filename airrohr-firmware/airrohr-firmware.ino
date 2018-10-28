@@ -318,7 +318,7 @@ unsigned long lowpulseoccupancyP2 = 0;
 
 bool send_now = false;
 unsigned long starttime;
-unsigned long uptime;
+unsigned long time_point_device_start_ms;
 unsigned long starttime_SDS;
 unsigned long starttime_GPS;
 unsigned long act_micro;
@@ -348,8 +348,10 @@ bool send_failed = false;
 
 unsigned long time_for_wifi_config = 600000;
 
+const unsigned long ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
+const unsigned long PAUSE_BETWEEN_UPDATE_ATTEMPTS_MS = ONE_DAY_IN_MS;        // check for firmware updates once a day
+const unsigned long DURATION_BEFORE_FORCED_RESTART_MS = ONE_DAY_IN_MS * 28;  // force a reboot every ~4 weeks
 unsigned long last_update_attempt;
-const unsigned long pause_between_update_attempts = 86400000;
 
 int sds_pm10_sum = 0;
 int sds_pm25_sum = 0;
@@ -1870,7 +1872,7 @@ void webserver_prometheus_endpoint() {
 	debug_out(last_data_string, DEBUG_MED_INFO, 1);
 	data_4_prometheus.replace("{id}", id);
 	data_4_prometheus.replace("{ver}", SOFTWARE_VERSION);
-	data_4_prometheus.replace("{up}", String(act_milli - uptime));
+	data_4_prometheus.replace("{up}", String(act_milli - time_point_device_start_ms));
 	data_4_prometheus.replace("{si}", String(sending_intervall_ms));
 	data_4_prometheus.replace("{cs}", String(count_sends));
 	StaticJsonBuffer<2000> jsonBuffer;
@@ -3647,9 +3649,16 @@ void setup() {
 	wdt_enable(30000);// 30 sec
 
 	starttime = millis();                                   // store the start time
-	uptime = starttime;
+	time_point_device_start_ms = starttime;
 	starttime_SDS = starttime;
 	next_display_millis = starttime + 5000;
+}
+
+static void checkForceRestart()
+{
+	if ((act_milli - time_point_device_start_ms) > DURATION_BEFORE_FORCED_RESTART_MS) {
+		ESP.restart();
+	}
 }
 
 /*****************************************************************
@@ -3946,13 +3955,9 @@ void loop() {
 
 		server.begin();
 
-		//forced restart after 4 weeks
-		if ((act_milli - last_update_attempt) > (28 * pause_between_update_attempts)) {
-			ESP.restart();
-		}
+		checkForceRestart();
 
-		// check for updates (default once per day)
-		if ((act_milli - last_update_attempt) > pause_between_update_attempts) {
+		if ((act_milli - last_update_attempt) > PAUSE_BETWEEN_UPDATE_ATTEMPTS_MS) {
 			autoUpdate();
 		}
 
