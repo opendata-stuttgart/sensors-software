@@ -17,4 +17,4 @@ install:
     - platformio update
 
 script:
-    - cd airrohr-firmware && platformio ci --verbose --project-conf=platformio.ini
+    - cd airrohr-firmware && pwd && ls -l && platformio ci --project-conf=platformio.ini
