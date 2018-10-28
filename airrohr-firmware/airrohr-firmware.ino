@@ -245,6 +245,14 @@ String basic_auth_custom = "";
 #define UPDATE_URL "/sensor/update/firmware.php"
 #define UPDATE_PORT 80
 
+enum class PmSensorCmd
+{
+	Start,
+	Stop,
+	ContinuousMode,
+	VersionDate
+};
+
 ESP8266WebServer server(80);
 int TimeZone = 1;
 
@@ -586,7 +594,7 @@ String Var2Json(const String& name, const int value) {
 /*****************************************************************
  * send SDS011 command (start, stop, continuous mode, version    *
  *****************************************************************/
-static bool SDS_cmd(const uint8_t cmd) {
+static bool SDS_cmd(PmSensorCmd cmd) {
 	static constexpr uint8_t start_cmd[] PROGMEM = {
 		0xAA, 0xB4, 0x06, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x06, 0xAB
 	};
@@ -603,27 +611,27 @@ static bool SDS_cmd(const uint8_t cmd) {
 
 	uint8_t buf[cmd_len];
 	switch (cmd) {
-	case PM_SENSOR_START:
+	case PmSensorCmd::Start:
 		memcpy_P(buf, start_cmd, cmd_len);
 		break;
-	case PM_SENSOR_STOP:
+	case PmSensorCmd::Stop:
 		memcpy_P(buf, stop_cmd, cmd_len);
 		break;
-	case PM_SENSOR_CONTINUOUS_MODE:
+	case PmSensorCmd::ContinuousMode:
 		memcpy_P(buf, continuous_mode_cmd, cmd_len);
 		break;
-	case PM_SENSOR_VERSION_DATE:
+	case PmSensorCmd::VersionDate:
 		memcpy_P(buf, version_cmd, cmd_len);
 		break;
 	}
 	serialSDS.write(buf, cmd_len);
-	return cmd != PM_SENSOR_STOP;
+	return cmd != PmSensorCmd::Stop;
 }
 
 /*****************************************************************
  * send Plantower PMS sensor command start, stop, cont. mode     *
  *****************************************************************/
-static bool PMS_cmd(const uint8_t cmd) {
+static bool PMS_cmd(PmSensorCmd cmd) {
 	static constexpr uint8_t start_cmd[] PROGMEM = {
 		0x42, 0x4D, 0xE4, 0x00, 0x01, 0x01, 0x74
 	};
@@ -637,27 +645,27 @@ static bool PMS_cmd(const uint8_t cmd) {
 
 	uint8_t buf[cmd_len];
 	switch (cmd) {
-	case PM_SENSOR_START:
+	case PmSensorCmd::Start:
 		memcpy_P(buf, start_cmd, cmd_len);
 		break;
-	case PM_SENSOR_STOP:
+	case PmSensorCmd::Stop:
 		memcpy_P(buf, stop_cmd, cmd_len);
 		break;
-	case PM_SENSOR_CONTINUOUS_MODE:
+	case PmSensorCmd::ContinuousMode:
 		memcpy_P(buf, continuous_mode_cmd, cmd_len);
 		break;
-	case PM_SENSOR_VERSION_DATE:
+	case PmSensorCmd::VersionDate:
 		assert(false && "not supported by this sensor");
 		break;
 	}
 	serialSDS.write(buf, cmd_len);
-	return cmd != PM_SENSOR_STOP;
+	return cmd != PmSensorCmd::Stop;
 }
 
 /*****************************************************************
  * send Honeywell PMS sensor command start, stop, cont. mode     *
  *****************************************************************/
-static bool HPM_cmd(const uint8_t cmd) {
+static bool HPM_cmd(PmSensorCmd cmd) {
 	static constexpr uint8_t start_cmd[] PROGMEM = {
 		0x68, 0x01, 0x01, 0x96
 	};
@@ -671,21 +679,21 @@ static bool HPM_cmd(const uint8_t cmd) {
 
 	uint8_t buf[cmd_len];
 	switch (cmd) {
-	case PM_SENSOR_START:
+	case PmSensorCmd::Start:
 		memcpy_P(buf, start_cmd, cmd_len);
 		break;
-	case PM_SENSOR_STOP:
+	case PmSensorCmd::Stop:
 		memcpy_P(buf, stop_cmd, cmd_len);
 		break;
-	case PM_SENSOR_CONTINUOUS_MODE:
+	case PmSensorCmd::ContinuousMode:
 		memcpy_P(buf, continuous_mode_cmd, cmd_len);
 		break;
-	case PM_SENSOR_VERSION_DATE:
+	case PmSensorCmd::VersionDate:
 		assert(false && "not supported by this sensor");
 		break;
 	}
 	serialSDS.write(buf, cmd_len);
-	return cmd != PM_SENSOR_STOP;
+	return cmd != PmSensorCmd::Stop;
 }
 
 /*****************************************************************
@@ -703,11 +711,11 @@ String SDS_version_date() {
 
 	debug_out(String(FPSTR(DBG_TXT_END_READING)) + FPSTR(DBG_TXT_SDS011_VERSION_DATE), DEBUG_MED_INFO, 1);
 
-	is_SDS_running = SDS_cmd(PM_SENSOR_START);
+	is_SDS_running = SDS_cmd(PmSensorCmd::Start);
 
 	delay(100);
 
-	is_SDS_running = SDS_cmd(PM_SENSOR_VERSION_DATE);
+	is_SDS_running = SDS_cmd(PmSensorCmd::VersionDate);
 
 	delay(500);
 
@@ -2563,11 +2571,11 @@ String sensorSDS() {
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_SDS011), DEBUG_MED_INFO, 1);
 	if ((act_milli - starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
 		if (is_SDS_running) {
-			is_SDS_running = SDS_cmd(PM_SENSOR_STOP);
+			is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
 		}
 	} else {
 		if (! is_SDS_running) {
-			is_SDS_running = SDS_cmd(PM_SENSOR_START);
+			is_SDS_running = SDS_cmd(PmSensorCmd::Start);
 		}
 
 		while (serialSDS.available() > 0) {
@@ -2675,7 +2683,7 @@ String sensorSDS() {
 		sds_pm25_max = 0;
 		sds_pm25_min = 20000;
 		if ((sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms))) {
-			is_SDS_running = SDS_cmd(PM_SENSOR_STOP);
+			is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
 		}
 	}
 
@@ -2703,11 +2711,11 @@ String sensorPMS() {
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_PMSx003), DEBUG_MED_INFO, 1);
 	if ((act_milli - starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
 		if (is_PMS_running) {
-			is_PMS_running = PMS_cmd(PM_SENSOR_STOP);
+			is_PMS_running = PMS_cmd(PmSensorCmd::Stop);
 		}
 	} else {
 		if (! is_PMS_running) {
-			is_PMS_running = PMS_cmd(PM_SENSOR_START);
+			is_PMS_running = PMS_cmd(PmSensorCmd::Start);
 		}
 
 		while (serialSDS.available() > 0) {
@@ -2855,7 +2863,7 @@ String sensorPMS() {
 		pms_pm25_max = 0;
 		pms_pm25_min = 20000;
 		if (sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms)) {
-			is_PMS_running = PMS_cmd(PM_SENSOR_STOP);
+			is_PMS_running = PMS_cmd(PmSensorCmd::Stop);
 		}
 	}
 
@@ -2881,11 +2889,11 @@ String sensorHPM() {
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_HPM), DEBUG_MED_INFO, 1);
 	if ((act_milli - starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
 		if (is_HPM_running) {
-			is_HPM_running = HPM_cmd(PM_SENSOR_STOP);
+			is_HPM_running = HPM_cmd(PmSensorCmd::Stop);
 		}
 	} else {
 		if (! is_HPM_running) {
-			is_HPM_running = HPM_cmd(PM_SENSOR_START);
+			is_HPM_running = HPM_cmd(PmSensorCmd::Start);
 		}
 
 		while (serialSDS.available() > 0) {
@@ -2996,7 +3004,7 @@ String sensorHPM() {
 		hpm_pm25_max = 0;
 		hpm_pm25_min = 20000;
 		if (sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms)) {
-			is_HPM_running = HPM_cmd(PM_SENSOR_STOP);
+			is_HPM_running = HPM_cmd(PmSensorCmd::Stop);
 		}
 	}
 
@@ -3582,30 +3590,30 @@ void setup() {
 	}
 	if (sds_read) {
 		debug_out(F("Read SDS..."), DEBUG_MIN_INFO, 1);
-		SDS_cmd(PM_SENSOR_START);
+		SDS_cmd(PmSensorCmd::Start);
 		delay(100);
-		SDS_cmd(PM_SENSOR_CONTINUOUS_MODE);
+		SDS_cmd(PmSensorCmd::ContinuousMode);
 		delay(100);
 		debug_out(F("Stopping SDS011..."), DEBUG_MIN_INFO, 1);
-		is_SDS_running = SDS_cmd(PM_SENSOR_STOP);
+		is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
 	}
 	if (pms_read) {
 		debug_out(F("Read PMS(1,3,5,6,7)003..."), DEBUG_MIN_INFO, 1);
-		PMS_cmd(PM_SENSOR_START);
+		PMS_cmd(PmSensorCmd::Start);
 		delay(100);
-		PMS_cmd(PM_SENSOR_CONTINUOUS_MODE);
+		PMS_cmd(PmSensorCmd::ContinuousMode);
 		delay(100);
 		debug_out(F("Stopping PMS..."), DEBUG_MIN_INFO, 1);
-		is_PMS_running = PMS_cmd(PM_SENSOR_STOP);
+		is_PMS_running = PMS_cmd(PmSensorCmd::Stop);
 	}
 	if (hpm_read) {
 		debug_out(F("Read HPM..."), DEBUG_MIN_INFO, 1);
-		HPM_cmd(PM_SENSOR_START);
+		HPM_cmd(PmSensorCmd::Start);
 		delay(100);
-		HPM_cmd(PM_SENSOR_CONTINUOUS_MODE);
+		HPM_cmd(PmSensorCmd::ContinuousMode);
 		delay(100);
 		debug_out(F("Stopping HPM..."), DEBUG_MIN_INFO, 1);
-		is_HPM_running = HPM_cmd(PM_SENSOR_STOP);
+		is_HPM_running = HPM_cmd(PmSensorCmd::Stop);
 	}
 	if (dht_read) {
 		dht.begin();                                        // Start DHT
