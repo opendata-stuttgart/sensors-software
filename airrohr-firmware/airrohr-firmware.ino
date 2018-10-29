@@ -1236,7 +1236,15 @@ static int32_t calcWiFiSignalQuality(int32_t rssi) {
 
 String wlan_ssid_to_table_row(const String& ssid, const String& encryption, int32_t rssi) {
 	const int quality = calcWiFiSignalQuality(rssi);
-	String s = F("<tr><td><a href='#wlanpwd' onclick='setSSID(this)' class='wifi'>{n}</a>&nbsp;{e}</a></td><td style='width:80%;vertical-align:middle;'>{v}%</td></tr>");
+	String s = F(
+				"<tr>"
+					"<td>"
+						"<a href='#wlanpwd' onclick='setSSID(this)' class='wifi'>{n}</a>&nbsp;{e}</a>"
+					"</td>"
+					"<td style='width:80%;vertical-align:middle;'>"
+						"{v}%"
+					"</td>"
+				"</tr>");
 	s.replace("{n}", ssid);
 	s.replace("{e}", encryption);
 	s.replace("{v}", String(quality));
