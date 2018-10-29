@@ -1634,16 +1634,14 @@ void webserver_wifi() {
 				}
 			}
 		}
-		String cssid;
 		debug_out(F("output config page 3"), DEBUG_MIN_INFO, 1);
 		int duplicateSsids = 0;
 		for (int i = 0; i < count_wifiInfo; i++) {
 			if (indices[i] == -1) {
 				continue;
 			}
-			cssid = wifiInfo[indices[i]].ssid;
 			for (int j = i + 1; j < count_wifiInfo; j++) {
-				if (cssid == wifiInfo[indices[j]].ssid) {
+				if (strncmp(wifiInfo[indices[i]].ssid, wifiInfo[indices[j]].ssid, 35) == 0) {
 					indices[j] = -1; // set dup aps to index -1
 					++duplicateSsids;
 				}
