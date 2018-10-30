@@ -1319,13 +1319,15 @@ String add_sensor_type(const String& sensor_text) {
  *
  * -Provide BasicAuth for all page contexts except /values and images
  *****************************************************************/
-void webserver_request_auth() {
+static bool webserver_request_auth() {
 	debug_out(F("validate request auth..."), DEBUG_MIN_INFO, 1);
 	if (www_basicauth_enabled) {
 		if (!server.authenticate(www_username, www_password)) {
-			return server.requestAuthentication();
+			server.requestAuthentication();
+			return false;
 		}
 	}
+	return true;
 }
 
 static void sendHttpRedirect(ESP8266WebServer &httpServer) {
@@ -1340,7 +1342,8 @@ void webserver_root() {
 	if (WiFi.status() != WL_CONNECTED) {
 		sendHttpRedirect(server);
 	} else {
-		webserver_request_auth();
+		if (!webserver_request_auth())
+			return;
 
 		String page_content = make_header(" ");
 		last_page_load = millis();
@@ -1360,7 +1363,8 @@ void webserver_root() {
  * Webserver config: show config page                            *
  *****************************************************************/
 void webserver_config() {
-	webserver_request_auth();
+	if (!webserver_request_auth())
+		return;
 
 	String page_content = make_header(FPSTR(INTL_CONFIGURATION));
 	String masked_pwd = "";
@@ -1811,7 +1815,8 @@ void webserver_values() {
  * Webserver set debug level                                     *
  *****************************************************************/
 void webserver_debug_level() {
-	webserver_request_auth();
+	if (!webserver_request_auth())
+		return;
 
 	String page_content = make_header(FPSTR(INTL_DEBUG_LEVEL));
 	last_page_load = millis();
@@ -1856,7 +1861,8 @@ void webserver_debug_level() {
  * Webserver remove config                                       *
  *****************************************************************/
 void webserver_removeConfig() {
-	webserver_request_auth();
+	if (!webserver_request_auth())
+		return;
 
 	String page_content = make_header(FPSTR(INTL_DELETE_CONFIG));
 	String message_string = F("<h3>{v}.</h3>");
@@ -1889,7 +1895,8 @@ void webserver_removeConfig() {
  * Webserver reset NodeMCU                                       *
  *****************************************************************/
 void webserver_reset() {
-	webserver_request_auth();
+	if (!webserver_request_auth())
+		return;
 
 	String page_content = make_header(FPSTR(INTL_RESTART_SENSOR));
 	last_page_load = millis();
