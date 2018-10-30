@@ -422,9 +422,6 @@ String server_name;
 long last_page_load = millis();
 
 bool wificonfig_loop = false;
-bool restart_needed = false;
-
-bool config_needs_write = false;
 
 bool first_csv_line = true;
 
@@ -1075,7 +1072,6 @@ void writeConfig() {
 		debug_out(F("Config written: "), DEBUG_MIN_INFO, 0);
 		debug_out(json_string, DEBUG_MIN_INFO, 1);
 		configFile.close();
-		config_needs_write = false;
 	} else {
 		debug_out(F("failed to open config file for writing"), DEBUG_ERROR, 1);
 	}
@@ -1480,13 +1476,13 @@ void webserver_config() {
 			page_content += form_input("port_influx", FPSTR(INTL_PORT), String(port_influx), 30);
 			page_content += form_input("user_influx", FPSTR(INTL_USER), user_influx, 50);
 			page_content += form_password("pwd_influx", FPSTR(INTL_PASSWORD), pwd_influx, 50);
-			page_content += form_submit(FPSTR(INTL_SAVE));
+			page_content += form_submit(FPSTR(INTL_SAVE_AND_RESTART));
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 			page_content += F("<br/></form>");
 		}
 		if (wificonfig_loop) {  // scan for wlan ssids
 			page_content += FPSTR(TABLE_TAG_OPEN);
-			page_content += form_submit(FPSTR(INTL_SAVE));
+			page_content += form_submit(FPSTR(INTL_SAVE_AND_RESTART));
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 			page_content += F("<br/></form>");
 			page_content += F("<script>window.setTimeout(load_wifi_list,1000);</script>");
@@ -1494,41 +1490,41 @@ void webserver_config() {
 	} else {
 
 #define readCharParam(param) \
-	if (server.hasArg(#param)){ \
-		server.arg(#param).toCharArray(param, sizeof(param)); \
-	}
+		if (server.hasArg(#param)){ \
+			server.arg(#param).toCharArray(param, sizeof(param)); \
+		}
 
 #define readBoolParam(param) \
-	param = false; \
-	if (server.hasArg(#param)){ \
-		param = server.arg(#param) == "1";\
-	}
+		param = false; \
+		if (server.hasArg(#param)){ \
+			param = server.arg(#param) == "1";\
+		}
 
 #define readIntParam(param) \
-	if (server.hasArg(#param)){ \
-		int val = server.arg(#param).toInt(); \
-		if (val != 0){ \
-			param = val; \
-		} \
-	}
+		if (server.hasArg(#param)){ \
+			int val = server.arg(#param).toInt(); \
+			if (val != 0){ \
+				param = val; \
+			} \
+		}
 
 #define readTimeParam(param) \
-	if (server.hasArg(#param)){ \
-		int val = server.arg(#param).toInt(); \
-		if (val != 0){ \
-			param = val*1000; \
-		} \
-	}
+		if (server.hasArg(#param)){ \
+			int val = server.arg(#param).toInt(); \
+			if (val != 0){ \
+				param = val*1000; \
+			} \
+		}
 
 #define readPasswdParam(param) \
-	if (server.hasArg(#param)){ \
-		masked_pwd = ""; \
-		for (uint8_t i=0;i<server.arg(#param).length();i++) \
-			masked_pwd += "*"; \
-		if (masked_pwd != server.arg(#param) || server.arg(#param) == "") {\
-			server.arg(#param).toCharArray(param, sizeof(param)); \
-		}\
-	}
+		if (server.hasArg(#param)){ \
+			masked_pwd = ""; \
+			for (uint8_t i=0;i<server.arg(#param).length();i++) \
+				masked_pwd += "*"; \
+			if (masked_pwd != server.arg(#param) || server.arg(#param) == "") {\
+				server.arg(#param).toCharArray(param, sizeof(param)); \
+			}\
+		}
 
 		if (server.hasArg("wlanssid") && server.arg("wlanssid") != "") {
 			readCharParam(wlanssid);
@@ -1597,8 +1593,6 @@ void webserver_config() {
 #undef readTimeParam
 #undef readPasswdParam
 
-		config_needs_write = true;
-
 		page_content += line_from_value(tmpl(FPSTR(INTL_SEND_TO), F("Luftdaten.info")), String(send2dusti));
 		page_content += line_from_value(tmpl(FPSTR(INTL_SEND_TO), F("Madavi")), String(send2madavi));
 		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), "DHT"), String(dht_read));
@@ -1638,20 +1632,21 @@ void webserver_config() {
 		page_content += line_from_value(FPSTR(INTL_PORT), String(port_influx));
 		page_content += line_from_value(FPSTR(INTL_USER), user_influx);
 		page_content += line_from_value(FPSTR(INTL_PASSWORD), pwd_influx);
-		if (wificonfig_loop) {
-			page_content += F("<br/><br/>");
-			page_content += FPSTR(INTL_SENSOR_IS_REBOOTING);
-		} else {
-			page_content += F("<br/><br/><a href='/reset?confirm=yes'>");
-			page_content += FPSTR(INTL_RESTART_SENSOR);
-			page_content += F("?</a>");
-		}
+		page_content += F("<br/><br/>");
+		page_content += FPSTR(INTL_SENSOR_IS_REBOOTING);
 	}
 	page_content += make_footer();
 	server.sendHeader(F("Cache-Control"), F("no-cache, no-store, must-revalidate"));
 	server.sendHeader(F("Pragma"), F("no-cache"));
 	server.sendHeader(F("Expires"), F("0"));
 	server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
+	if (server.method() != HTTP_GET) {
+		display_debug(F("Writing config"), F("and restarting"));
+		writeConfig();
+		delay(500);
+		ESP.restart();
+	}
+
 }
 
 /*****************************************************************
@@ -2094,7 +2089,7 @@ void wifiConfig() {
 
 	// 10 minutes timeout for wifi config
 	last_page_load = millis();
-	while (((millis() - last_page_load) < time_for_wifi_config) && (! config_needs_write)) {
+	while (((millis() - last_page_load) < time_for_wifi_config)) {
 		dnsServer.processNextRequest();
 		server.handleClient();
 		wdt_reset(); // nodemcu is alive
@@ -2160,17 +2155,12 @@ void wifiConfig() {
 	debug_out(String(has_lcd1602), DEBUG_MIN_INFO, 1);
 	debug_out(F("Debug: "), DEBUG_MIN_INFO, 0);
 	debug_out(String(debug), DEBUG_MIN_INFO, 1);
-	debug_out(F("----\nRestart needed ..."), DEBUG_MIN_INFO, 1);
 	wificonfig_loop = false;
-	restart_needed = true;
 }
 
-static void waitForWifiToConnect(int maxRetries, bool *additionalAbortCondition = nullptr) {
+static void waitForWifiToConnect(int maxRetries) {
 	int retryCount = 0;
 	while ((WiFi.status() != WL_CONNECTED) && (retryCount <  maxRetries)) {
-		if (additionalAbortCondition != nullptr && *additionalAbortCondition) {
-			break;
-		}
 		delay(500);
 		debug_out(".", DEBUG_MIN_INFO, 0);
 		++retryCount;
@@ -2197,8 +2187,8 @@ void connectWifi() {
 		String fss = String(fs_ssid);
 		display_debug(fss.substring(0, 16), fss.substring(16));
 		wifiConfig();
-		if ((WiFi.status() != WL_CONNECTED) && (! restart_needed)) {
-			waitForWifiToConnect(20, &restart_needed);
+		if (WiFi.status() != WL_CONNECTED) {
+			waitForWifiToConnect(20);
 			debug_out("", DEBUG_MIN_INFO, 1);
 		}
 	}
@@ -3603,13 +3593,6 @@ void setup() {
 	setup_webserver();
 	display_debug(F("Connecting to"), String(wlanssid));
 	connectWifi();						// Start ConnectWifi
-	if (restart_needed) {
-		display_debug(F("Writing config"), F("and restarting"));
-		writeConfig();
-		delay(500);
-		ESP.restart();
-	}
-
 	debug_out(F("Setting time using SNTP"), DEBUG_MIN_INFO, 1);
 	configTime(8 * 3600, 0, "pool.ntp.org", "time.nist.gov");
 	time_t now = time(nullptr);
@@ -4075,10 +4058,6 @@ void loop() {
 		starttime = millis();                               // store the start time
 		first_cycle = false;
 		count_sends += 1;
-	}
-	if (config_needs_write) {
-		writeConfig();
-		create_basic_auth_strings();
 	}
 	yield();
 //	if (sample_count % 500 == 0) { Serial.println(ESP.getFreeHeap(),DEC); }
