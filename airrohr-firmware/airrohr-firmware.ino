@@ -1123,7 +1123,12 @@ String make_footer() {
 }
 
 String form_input(const String& name, const String& info, const String& value, const int length) {
-	String s = F("<tr><td>{i} </td><td style='width:90%;'><input type='text' name='{n}' id='{n}' placeholder='{i}' value='{v}' maxlength='{l}'/></td></tr>");
+	String s = F(	"<tr>"
+						"<td>{i} </td>"
+						"<td style='width:90%;'>"
+							"<input type='text' name='{n}' id='{n}' placeholder='{i}' value='{v}' maxlength='{l}'/>"
+						"</td>"
+					"</tr>");
 	String t_value = value;
 	t_value.replace("'", "&#39;");
 	s.replace("{i}", info);
@@ -1134,7 +1139,12 @@ String form_input(const String& name, const String& info, const String& value, c
 }
 
 String form_password(const String& name, const String& info, const String& value, const int length) {
-	String s = F("<tr><td>{i} </td><td style='width:90%;'><input type='password' name='{n}' id='{n}' placeholder='{i}' value='{v}' maxlength='{l}'/></td></tr>");
+	String s = F(	"<tr>"
+						"<td>{i} </td>"
+						"<td style='width:90%;'>"
+							"<input type='password' name='{n}' id='{n}' placeholder='{i}' value='{v}' maxlength='{l}'/>"
+						"</td>"
+					"</tr>");
 	String password = "";
 	for (uint8_t i = 0; i < value.length(); i++) {
 		password += "*";
@@ -1166,14 +1176,38 @@ String form_checkbox_sensor(const String& name, const String& info, const bool c
 }
 
 String form_submit(const String& value) {
-	String s = F("<tr><td>&nbsp;</td><td><input type='submit' name='submit' value='{v}' /></td></tr>");
+	String s = F(	"<tr>"
+						"<td>&nbsp;</td>"
+						"<td>"
+							"<input type='submit' name='submit' value='{v}' />"
+						"</td>"
+					"</tr>");
 	s.replace("{v}", value);
 	return s;
 }
 
 String form_select_lang() {
 	String s_select = F(" selected='selected'");
-	String s = F("<tr><td>{t}</td><td><select name='current_lang'><option value='DE'{s_DE}>Deutsch (DE)</option><option value='BG'{s_BG}>Bulgarian (BG)</option><option value='CZ'{s_CZ}>Český (CZ)</option><option value='EN'{s_EN}>English (EN)</option><option value='ES'{s_ES}>Español (ES)</option><option value='FR'{s_FR}>Français (FR)</option><option value='IT'{s_IT}>Italiano (IT)</option><option value='LU'{s_LU}>Lëtzebuergesch (LU)</option><option value='NL'{s_NL}>Nederlands (NL)</option><option value='PL'{s_PL}>Polski (PL)</option><option value='PT'{s_PT}>Português (PT)</option><option value='RU'{s_RU}>Русский (RU)</option><option value='SE'{s_SE}>Svenska (SE)</option></select></td></tr>");
+	String s = F(	"<tr>"
+						"<td>{t}</td>"
+						"<td>"
+							"<select name='current_lang'>"
+								"<option value='DE'{s_DE}>Deutsch (DE)</option>"
+								"<option value='BG'{s_BG}>Bulgarian (BG)</option>"
+								"<option value='CZ'{s_CZ}>Český (CZ)</option>"
+								"<option value='EN'{s_EN}>English (EN)</option>"
+								"<option value='ES'{s_ES}>Español (ES)</option>"
+								"<option value='FR'{s_FR}>Français (FR)</option>"
+								"<option value='IT'{s_IT}>Italiano (IT)</option>"
+								"<option value='LU'{s_LU}>Lëtzebuergesch (LU)</option>"
+								"<option value='NL'{s_NL}>Nederlands (NL)</option>"
+								"<option value='PL'{s_PL}>Polski (PL)</option>"
+								"<option value='PT'{s_PT}>Português (PT)</option>"
+								"<option value='RU'{s_RU}>Русский (RU)</option>"
+								"<option value='SE'{s_SE}>Svenska (SE)</option>"
+							"</select>"
+						"</td>"
+					"</tr>");
 
 	s.replace("{t}", FPSTR(INTL_LANGUAGE));
 
@@ -1216,7 +1250,11 @@ String line_from_value(const String& name, const String& value) {
 }
 
 String table_row_from_value(const String& sensor, const String& param, const String& value, const String& unit) {
-	String s = F("<tr><td>{s}</td><td>{p}</td><td class='r'>{v}&nbsp;{u}</td></tr>");
+	String s = F(	"<tr>"
+						"<td>{s}</td>"
+						"<td>{p}</td>"
+						"<td class='r'>{v}&nbsp;{u}</td>"
+					"</tr>");
 	s.replace("{s}", sensor);
 	s.replace("{p}", param);
 	s.replace("{v}", value);
@@ -1235,15 +1273,14 @@ static int32_t calcWiFiSignalQuality(int32_t rssi) {
 }
 
 String wlan_ssid_to_table_row(const String& ssid, const String& encryption, int32_t rssi) {
-	String s = F(
-				"<tr>"
-					"<td>"
-						"<a href='#wlanpwd' onclick='setSSID(this)' class='wifi'>{n}</a>&nbsp;{e}"
-					"</td>"
-					"<td style='width:80%;vertical-align:middle;'>"
-						"{v}%"
-					"</td>"
-				"</tr>");
+	String s = F(	"<tr>"
+						"<td>"
+							"<a href='#wlanpwd' onclick='setSSID(this)' class='wifi'>{n}</a>&nbsp;{e}"
+						"</td>"
+						"<td style='width:80%;vertical-align:middle;'>"
+							"{v}%"
+						"</td>"
+					"</tr>");
 	s.replace("{n}", ssid);
 	s.replace("{e}", encryption);
 	s.replace("{v}", String(calcWiFiSignalQuality(rssi)));
@@ -3705,8 +3742,7 @@ void setup() {
 	next_display_millis = starttime + 5000;
 }
 
-static void checkForceRestart()
-{
+static void checkForceRestart() {
 	if ((act_milli - time_point_device_start_ms) > DURATION_BEFORE_FORCED_RESTART_MS) {
 		ESP.restart();
 	}
