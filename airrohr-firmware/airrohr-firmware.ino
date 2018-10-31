@@ -2400,12 +2400,12 @@ static String sensorDHT() {
 	int count = 0;
 	const int MAX_ATTEMPTS = 5;
 	while ((count++ < MAX_ATTEMPTS) && (s == "")) {
-		auto h = dht.readHumidity(); //Read Humidity
-		auto t = dht.readTemperature(); //Read Temperature
+		auto h = dht.readHumidity();
+		auto t = dht.readTemperature();
 		if (isnan(t) || isnan(h)) {
 			delay(100);
-			h = dht.readHumidity(); //Read Humidity
-			t = dht.readTemperature(false); //Read Temperature
+			h = dht.readHumidity();
+			t = dht.readTemperature(false);
 		}
 		if (isnan(t) || isnan(h)) {
 			debug_out(String(FPSTR(SENSORS_DHT22)) + FPSTR(DBG_TXT_COULDNT_BE_READ), DEBUG_ERROR, 1);
