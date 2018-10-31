@@ -1214,24 +1214,21 @@ String form_select_lang() {
 	return s;
 }
 
-String tmpl(const String& patt, const String& value) {
-	String s = F("{patt}");
-	s.replace("{patt}", patt);
+static String tmpl(const String& patt, const String& value) {
+	String s = patt;
 	s.replace("{v}", value);
 	return s;
 }
 
-String tmpl(const String& patt, const String& value1, const String& value2) {
-	String s = F("{patt}");
-	s.replace("{patt}", patt);
+static String tmpl(const String& patt, const String& value1, const String& value2) {
+	String s = patt;
 	s.replace("{v1}", value1);
 	s.replace("{v2}", value2);
 	return s;
 }
 
-String tmpl(const String& patt, const String& value1, const String& value2, const String& value3) {
-	String s = F("{patt}");
-	s.replace("{patt}", patt);
+static String tmpl(const String& patt, const String& value1, const String& value2, const String& value3) {
+	String s = patt;
 	s.replace("{v1}", value1);
 	s.replace("{v2}", value2);
 	s.replace("{v3}", value3);
