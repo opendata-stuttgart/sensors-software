@@ -2411,7 +2411,7 @@ static String sensorDHT() {
 			debug_out(String(FPSTR(SENSORS_DHT22)) + FPSTR(DBG_TXT_COULDNT_BE_READ), DEBUG_ERROR, 1);
 		} else {
 			debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO, 0);
-			debug_out(String(t) + char(223) + "C", DEBUG_MIN_INFO, 1);
+			debug_out(String(t) + u8"°C", DEBUG_MIN_INFO, 1);
 			debug_out(FPSTR(DBG_TXT_HUMIDITY), DEBUG_MIN_INFO, 0);
 			debug_out(String(h) + "%", DEBUG_MIN_INFO, 1);
 			last_value_DHT_T = t;
