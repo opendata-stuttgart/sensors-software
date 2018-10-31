@@ -3509,6 +3509,7 @@ void display_values() {
  * Init OLED display                                             *
  *****************************************************************/
 void init_display() {
+	#include "oledfont.h"
 	display.init();
 	display.setFont(Roboto_Mono_9);
 	display_sh1106.init();
