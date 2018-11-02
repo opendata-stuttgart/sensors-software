@@ -3718,7 +3718,7 @@ void setup() {
 	init_lcd();
 	setup_webserver();
 	display_debug(F("Connecting to"), String(wlanssid));
-	connectWifi();						// Start ConnectWifi
+	connectWifi();
 	acquireNetworkTime();
 
 	autoUpdate();
