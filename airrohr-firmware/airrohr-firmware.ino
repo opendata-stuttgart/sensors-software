@@ -3680,6 +3680,18 @@ static void logEnabledAPIs()
 	}
 }
 
+static void acquireNetworkTime()
+{
+	debug_out(F("Setting time using SNTP"), DEBUG_MIN_INFO, 1);
+	configTime(8 * 3600, 0, "pool.ntp.org", "time.nist.gov");
+	time_t now = time(nullptr);
+	while (now < 8 * 3600 * 2) {
+		delay(500);
+		Serial.print(".");
+		now = time(nullptr);
+	}
+}
+
 /*****************************************************************
  * The Setup                                                     *
  *****************************************************************/
@@ -3699,14 +3711,7 @@ void setup() {
 	setup_webserver();
 	display_debug(F("Connecting to"), String(wlanssid));
 	connectWifi();						// Start ConnectWifi
-	debug_out(F("Setting time using SNTP"), DEBUG_MIN_INFO, 1);
-	configTime(8 * 3600, 0, "pool.ntp.org", "time.nist.gov");
-	time_t now = time(nullptr);
-	while (now < 8 * 3600 * 2) {
-		delay(500);
-		Serial.print(".");
-		now = time(nullptr);
-	}
+	acquireNetworkTime();
 
 	autoUpdate();
 	create_basic_auth_strings();
