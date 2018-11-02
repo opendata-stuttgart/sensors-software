@@ -3697,13 +3697,8 @@ static void acquireNetworkTime()
  *****************************************************************/
 void setup() {
 	Serial.begin(9600);					// Output to Serial at 9600 baud
-#if defined(ESP8266)
 	Wire.begin(I2C_PIN_SDA, I2C_PIN_SCL);
 	esp_chipid = String(ESP.getChipId());
-#endif
-#if defined(ARDUINO_SAMD_ZERO)
-	Wire.begin();
-#endif
 	copyExtDef();
 	readConfig();
 	init_display();
