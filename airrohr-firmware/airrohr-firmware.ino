@@ -3692,6 +3692,19 @@ static void acquireNetworkTime()
 	}
 }
 
+static void logEnabledDisplays()
+{
+	if (has_display || has_sh1106) {
+		debug_out(F("Show on OLED..."), DEBUG_MIN_INFO, 1);
+	}
+	if (has_lcd1602 || has_lcd1602_27) {
+		debug_out(F("Show on LCD 1602 ..."), DEBUG_MIN_INFO, 1);
+	}
+	if (has_lcd2004_27) {
+		debug_out(F("Show on LCD 2004 ..."), DEBUG_MIN_INFO, 1);
+	}
+}
+
 /*****************************************************************
  * The Setup                                                     *
  *****************************************************************/
@@ -3723,16 +3736,7 @@ void setup() {
 	}
 
 	logEnabledAPIs();
-
-	if (has_display || has_sh1106) {
-		debug_out(F("Show on OLED..."), DEBUG_MIN_INFO, 1);
-	}
-	if (has_lcd1602 || has_lcd1602_27) {
-		debug_out(F("Show on LCD 1602 ..."), DEBUG_MIN_INFO, 1);
-	}
-	if (has_lcd2004_27) {
-		debug_out(F("Show on LCD 2004 ..."), DEBUG_MIN_INFO, 1);
-	}
+	logEnabledDisplays();
 
 	if (MDNS.begin(server_name.c_str())) {
 		MDNS.addService("http", "tcp", 80);
