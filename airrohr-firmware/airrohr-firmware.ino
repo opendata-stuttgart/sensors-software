@@ -3571,6 +3571,84 @@ bool initBME280(char addr) {
 	}
 }
 
+static void powerOnTestSensors()
+{
+	if (ppd_read) {
+		pinMode(PPD_PIN_PM1, INPUT_PULLUP);                 // Listen at the designated PIN
+		pinMode(PPD_PIN_PM2, INPUT_PULLUP);                 // Listen at the designated PIN
+		debug_out(F("Read PPD..."), DEBUG_MIN_INFO, 1);
+	}
+
+	if (sds_read) {
+		debug_out(F("Read SDS..."), DEBUG_MIN_INFO, 1);
+		SDS_cmd(PmSensorCmd::Start);
+		delay(100);
+		SDS_cmd(PmSensorCmd::ContinuousMode);
+		delay(100);
+		debug_out(F("Stopping SDS011..."), DEBUG_MIN_INFO, 1);
+		is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
+	}
+
+	if (pms_read) {
+		debug_out(F("Read PMS(1,3,5,6,7)003..."), DEBUG_MIN_INFO, 1);
+		PMS_cmd(PmSensorCmd::Start);
+		delay(100);
+		PMS_cmd(PmSensorCmd::ContinuousMode);
+		delay(100);
+		debug_out(F("Stopping PMS..."), DEBUG_MIN_INFO, 1);
+		is_PMS_running = PMS_cmd(PmSensorCmd::Stop);
+	}
+
+	if (hpm_read) {
+		debug_out(F("Read HPM..."), DEBUG_MIN_INFO, 1);
+		HPM_cmd(PmSensorCmd::Start);
+		delay(100);
+		HPM_cmd(PmSensorCmd::ContinuousMode);
+		delay(100);
+		debug_out(F("Stopping HPM..."), DEBUG_MIN_INFO, 1);
+		is_HPM_running = HPM_cmd(PmSensorCmd::Stop);
+	}
+
+	if (dht_read) {
+		dht.begin();                                        // Start DHT
+		debug_out(F("Read DHT..."), DEBUG_MIN_INFO, 1);
+	}
+
+	if (htu21d_read) {
+		htu21d.begin();                                     // Start HTU21D
+		debug_out(F("Read HTU21D..."), DEBUG_MIN_INFO, 1);
+	}
+
+	if (bmp_read) {
+		debug_out(F("Read BMP..."), DEBUG_MIN_INFO, 1);
+		if (!bmp.begin()) {
+			debug_out(F("No valid BMP085 sensor, check wiring!"), DEBUG_MIN_INFO, 1);
+			bmp_init_failed = 1;
+		}
+	}
+
+	if (bmp280_read) {
+		debug_out(F("Read BMP280..."), DEBUG_MIN_INFO, 1);
+		if (!initBMP280(0x76) && !initBMP280(0x77)) {
+			debug_out(F("Check BMP280 wiring"), DEBUG_MIN_INFO, 1);
+			bmp280_init_failed = 1;
+		}
+	}
+
+	if (bme280_read) {
+		debug_out(F("Read BME280..."), DEBUG_MIN_INFO, 1);
+		if (!initBME280(0x76) && !initBME280(0x77)) {
+			debug_out(F("Check BME280 wiring"), DEBUG_MIN_INFO, 1);
+			bme280_init_failed = 1;
+		}
+	}
+
+	if (ds18b20_read) {
+		ds18b20.begin();                                    // Start DS18B20
+		debug_out(F("Read DS18B20..."), DEBUG_MIN_INFO, 1);
+	}
+}
+
 /*****************************************************************
  * The Setup                                                     *
  *****************************************************************/
@@ -3605,71 +3683,8 @@ void setup() {
 	debug_out(F("\nChipId: "), DEBUG_MIN_INFO, 0);
 	debug_out(esp_chipid, DEBUG_MIN_INFO, 1);
 
-	if (ppd_read) {
-		pinMode(PPD_PIN_PM1, INPUT_PULLUP);                 // Listen at the designated PIN
-		pinMode(PPD_PIN_PM2, INPUT_PULLUP);                 // Listen at the designated PIN
-		debug_out(F("Read PPD..."), DEBUG_MIN_INFO, 1);
-	}
-	if (sds_read) {
-		debug_out(F("Read SDS..."), DEBUG_MIN_INFO, 1);
-		SDS_cmd(PmSensorCmd::Start);
-		delay(100);
-		SDS_cmd(PmSensorCmd::ContinuousMode);
-		delay(100);
-		debug_out(F("Stopping SDS011..."), DEBUG_MIN_INFO, 1);
-		is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
-	}
-	if (pms_read) {
-		debug_out(F("Read PMS(1,3,5,6,7)003..."), DEBUG_MIN_INFO, 1);
-		PMS_cmd(PmSensorCmd::Start);
-		delay(100);
-		PMS_cmd(PmSensorCmd::ContinuousMode);
-		delay(100);
-		debug_out(F("Stopping PMS..."), DEBUG_MIN_INFO, 1);
-		is_PMS_running = PMS_cmd(PmSensorCmd::Stop);
-	}
-	if (hpm_read) {
-		debug_out(F("Read HPM..."), DEBUG_MIN_INFO, 1);
-		HPM_cmd(PmSensorCmd::Start);
-		delay(100);
-		HPM_cmd(PmSensorCmd::ContinuousMode);
-		delay(100);
-		debug_out(F("Stopping HPM..."), DEBUG_MIN_INFO, 1);
-		is_HPM_running = HPM_cmd(PmSensorCmd::Stop);
-	}
-	if (dht_read) {
-		dht.begin();                                        // Start DHT
-		debug_out(F("Read DHT..."), DEBUG_MIN_INFO, 1);
-	}
-	if (htu21d_read) {
-		htu21d.begin();                                     // Start HTU21D
-		debug_out(F("Read HTU21D..."), DEBUG_MIN_INFO, 1);
-	}
-	if (bmp_read) {
-		debug_out(F("Read BMP..."), DEBUG_MIN_INFO, 1);
-		if (!bmp.begin()) {
-			debug_out(F("No valid BMP085 sensor, check wiring!"), DEBUG_MIN_INFO, 1);
-			bmp_init_failed = 1;
-		}
-	}
-	if (bmp280_read) {
-		debug_out(F("Read BMP280..."), DEBUG_MIN_INFO, 1);
-		if (!initBMP280(0x76) && !initBMP280(0x77)) {
-			debug_out(F("Check BMP280 wiring"), DEBUG_MIN_INFO, 1);
-			bmp280_init_failed = 1;
-		}
-	}
-	if (bme280_read) {
-		debug_out(F("Read BME280..."), DEBUG_MIN_INFO, 1);
-		if (!initBME280(0x76) && !initBME280(0x77)) {
-			debug_out(F("Check BME280 wiring"), DEBUG_MIN_INFO, 1);
-			bme280_init_failed = 1;
-		}
-	}
-	if (ds18b20_read) {
-		ds18b20.begin();                                    // Start DS18B20
-		debug_out(F("Read DS18B20..."), DEBUG_MIN_INFO, 1);
-	}
+	powerOnTestSensors();
+
 	if (gps_read) {
 		serialGPS.begin(9600);
 		debug_out(F("Read GPS..."), DEBUG_MIN_INFO, 1);
