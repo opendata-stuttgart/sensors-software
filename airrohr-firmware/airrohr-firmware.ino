@@ -3649,6 +3649,37 @@ static void powerOnTestSensors()
 	}
 }
 
+static void logEnabledAPIs()
+{
+	if (send2dusti) {
+		debug_out(F("Send to luftdaten.info..."), DEBUG_MIN_INFO, 1);
+	}
+
+	if (send2madavi) {
+		debug_out(F("Send to madavi.de..."), DEBUG_MIN_INFO, 1);
+	}
+
+	if (send2lora) {
+		debug_out(F("Send to LoRa gateway..."), DEBUG_MIN_INFO, 1);
+	}
+
+	if (send2csv) {
+		debug_out(F("Send as CSV to Serial..."), DEBUG_MIN_INFO, 1);
+	}
+
+	if (send2custom) {
+		debug_out(F("Send to custom API..."), DEBUG_MIN_INFO, 1);
+	}
+
+	if (send2influx) {
+		debug_out(F("Send to custom influx DB..."), DEBUG_MIN_INFO, 1);
+	}
+
+	if (auto_update) {
+		debug_out(F("Auto-Update active..."), DEBUG_MIN_INFO, 1);
+	}
+}
+
 /*****************************************************************
  * The Setup                                                     *
  *****************************************************************/
@@ -3690,27 +3721,9 @@ void setup() {
 		debug_out(F("Read GPS..."), DEBUG_MIN_INFO, 1);
 		disable_unneeded_nmea();
 	}
-	if (send2dusti) {
-		debug_out(F("Send to luftdaten.info..."), DEBUG_MIN_INFO, 1);
-	}
-	if (send2madavi) {
-		debug_out(F("Send to madavi.de..."), DEBUG_MIN_INFO, 1);
-	}
-	if (send2lora) {
-		debug_out(F("Send to LoRa gateway..."), DEBUG_MIN_INFO, 1);
-	}
-	if (send2csv) {
-		debug_out(F("Send as CSV to Serial..."), DEBUG_MIN_INFO, 1);
-	}
-	if (send2custom) {
-		debug_out(F("Send to custom API..."), DEBUG_MIN_INFO, 1);
-	}
-	if (send2influx) {
-		debug_out(F("Send to custom influx DB..."), DEBUG_MIN_INFO, 1);
-	}
-	if (auto_update) {
-		debug_out(F("Auto-Update active..."), DEBUG_MIN_INFO, 1);
-	}
+
+	logEnabledAPIs();
+
 	if (has_display || has_sh1106) {
 		debug_out(F("Show on OLED..."), DEBUG_MIN_INFO, 1);
 	}
