@@ -3223,7 +3223,6 @@ String sensorGPS() {
  * AutoUpdate                                                    *
  *****************************************************************/
 void autoUpdate() {
-#if defined(ESP8266)
 	const char* update_host = UPDATE_HOST;
 	const char* update_url = UPDATE_URL;
 	const int update_port = UPDATE_PORT;
@@ -3260,7 +3259,6 @@ void autoUpdate() {
 			break;
 		}
 	}
-#endif
 }
 
 /*****************************************************************
