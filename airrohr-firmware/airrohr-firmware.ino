@@ -1458,7 +1458,7 @@ void webserver_config() {
 		if (! wificonfig_loop) {
 			page_content += FPSTR(TABLE_TAG_OPEN);
 			page_content += form_select_lang();
-			page_content += form_input("debug", FPSTR(INTL_DEBUG_LEVEL), String(debug), 5);
+			page_content += form_input("debug", FPSTR(INTL_DEBUG_LEVEL), String(debug), 1);
 			page_content += form_input("sending_intervall_ms", FPSTR(INTL_MEASUREMENT_INTERVAL), String(sending_intervall_ms / 1000), 5);
 			page_content += form_input("time_for_wifi_config", FPSTR(INTL_DURATION_ROUTER_MODE), String(time_for_wifi_config / 1000), 5);
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
