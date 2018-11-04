@@ -3565,45 +3565,14 @@ bool initBME280(char addr) {
 	}
 }
 
-/*****************************************************************
- * The Setup                                                     *
- *****************************************************************/
-void setup() {
-	Serial.begin(9600);					// Output to Serial at 9600 baud
-#if defined(ESP8266)
-	Wire.begin(I2C_PIN_SDA, I2C_PIN_SCL);
-	esp_chipid = String(ESP.getChipId());
-#endif
-#if defined(ARDUINO_SAMD_ZERO)
-	Wire.begin();
-#endif
-	copyExtDef();
-	readConfig();
-	init_display();
-	init_lcd();
-	setup_webserver();
-	display_debug(F("Connecting to"), String(wlanssid));
-	connectWifi();						// Start ConnectWifi
-	debug_out(F("Setting time using SNTP"), DEBUG_MIN_INFO, 1);
-	configTime(8 * 3600, 0, "pool.ntp.org", "time.nist.gov");
-	time_t now = time(nullptr);
-	while (now < 8 * 3600 * 2) {
-		delay(500);
-		Serial.print(".");
-		now = time(nullptr);
-	}
-
-	autoUpdate();
-	create_basic_auth_strings();
-	serialSDS.begin(9600);
-	debug_out(F("\nChipId: "), DEBUG_MIN_INFO, 0);
-	debug_out(esp_chipid, DEBUG_MIN_INFO, 1);
-
+static void powerOnTestSensors()
+{
 	if (ppd_read) {
 		pinMode(PPD_PIN_PM1, INPUT_PULLUP);                 // Listen at the designated PIN
 		pinMode(PPD_PIN_PM2, INPUT_PULLUP);                 // Listen at the designated PIN
 		debug_out(F("Read PPD..."), DEBUG_MIN_INFO, 1);
 	}
+
 	if (sds_read) {
 		debug_out(F("Read SDS..."), DEBUG_MIN_INFO, 1);
 		SDS_cmd(PmSensorCmd::Start);
@@ -3613,6 +3582,7 @@ void setup() {
 		debug_out(F("Stopping SDS011..."), DEBUG_MIN_INFO, 1);
 		is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
 	}
+
 	if (pms_read) {
 		debug_out(F("Read PMS(1,3,5,6,7)003..."), DEBUG_MIN_INFO, 1);
 		PMS_cmd(PmSensorCmd::Start);
@@ -3622,6 +3592,7 @@ void setup() {
 		debug_out(F("Stopping PMS..."), DEBUG_MIN_INFO, 1);
 		is_PMS_running = PMS_cmd(PmSensorCmd::Stop);
 	}
+
 	if (hpm_read) {
 		debug_out(F("Read HPM..."), DEBUG_MIN_INFO, 1);
 		HPM_cmd(PmSensorCmd::Start);
@@ -3631,14 +3602,17 @@ void setup() {
 		debug_out(F("Stopping HPM..."), DEBUG_MIN_INFO, 1);
 		is_HPM_running = HPM_cmd(PmSensorCmd::Stop);
 	}
+
 	if (dht_read) {
 		dht.begin();                                        // Start DHT
 		debug_out(F("Read DHT..."), DEBUG_MIN_INFO, 1);
 	}
+
 	if (htu21d_read) {
 		htu21d.begin();                                     // Start HTU21D
 		debug_out(F("Read HTU21D..."), DEBUG_MIN_INFO, 1);
 	}
+
 	if (bmp_read) {
 		debug_out(F("Read BMP..."), DEBUG_MIN_INFO, 1);
 		if (!bmp.begin()) {
@@ -3646,6 +3620,7 @@ void setup() {
 			bmp_init_failed = 1;
 		}
 	}
+
 	if (bmp280_read) {
 		debug_out(F("Read BMP280..."), DEBUG_MIN_INFO, 1);
 		if (!initBMP280(0x76) && !initBMP280(0x77)) {
@@ -3653,6 +3628,7 @@ void setup() {
 			bmp280_init_failed = 1;
 		}
 	}
+
 	if (bme280_read) {
 		debug_out(F("Read BME280..."), DEBUG_MIN_INFO, 1);
 		if (!initBME280(0x76) && !initBME280(0x77)) {
@@ -3660,36 +3636,58 @@ void setup() {
 			bme280_init_failed = 1;
 		}
 	}
+
 	if (ds18b20_read) {
 		ds18b20.begin();                                    // Start DS18B20
 		debug_out(F("Read DS18B20..."), DEBUG_MIN_INFO, 1);
 	}
-	if (gps_read) {
-		serialGPS.begin(9600);
-		debug_out(F("Read GPS..."), DEBUG_MIN_INFO, 1);
-		disable_unneeded_nmea();
-	}
+}
+
+static void logEnabledAPIs()
+{
 	if (send2dusti) {
 		debug_out(F("Send to luftdaten.info..."), DEBUG_MIN_INFO, 1);
 	}
+
 	if (send2madavi) {
 		debug_out(F("Send to madavi.de..."), DEBUG_MIN_INFO, 1);
 	}
+
 	if (send2lora) {
 		debug_out(F("Send to LoRa gateway..."), DEBUG_MIN_INFO, 1);
 	}
+
 	if (send2csv) {
 		debug_out(F("Send as CSV to Serial..."), DEBUG_MIN_INFO, 1);
 	}
+
 	if (send2custom) {
 		debug_out(F("Send to custom API..."), DEBUG_MIN_INFO, 1);
 	}
+
 	if (send2influx) {
 		debug_out(F("Send to custom influx DB..."), DEBUG_MIN_INFO, 1);
 	}
+
 	if (auto_update) {
 		debug_out(F("Auto-Update active..."), DEBUG_MIN_INFO, 1);
 	}
+}
+
+static void acquireNetworkTime()
+{
+	debug_out(F("Setting time using SNTP"), DEBUG_MIN_INFO, 1);
+	configTime(8 * 3600, 0, "pool.ntp.org", "time.nist.gov");
+	time_t now = time(nullptr);
+	while (now < 8 * 3600 * 2) {
+		delay(500);
+		Serial.print(".");
+		now = time(nullptr);
+	}
+}
+
+static void logEnabledDisplays()
+{
 	if (has_display || has_sh1106) {
 		debug_out(F("Show on OLED..."), DEBUG_MIN_INFO, 1);
 	}
@@ -3699,6 +3697,40 @@ void setup() {
 	if (has_lcd2004_27) {
 		debug_out(F("Show on LCD 2004 ..."), DEBUG_MIN_INFO, 1);
 	}
+}
+
+/*****************************************************************
+ * The Setup                                                     *
+ *****************************************************************/
+void setup() {
+	Serial.begin(9600);					// Output to Serial at 9600 baud
+	Wire.begin(I2C_PIN_SDA, I2C_PIN_SCL);
+	esp_chipid = String(ESP.getChipId());
+	copyExtDef();
+	readConfig();
+	init_display();
+	init_lcd();
+	setup_webserver();
+	display_debug(F("Connecting to"), String(wlanssid));
+	connectWifi();
+	acquireNetworkTime();
+
+	autoUpdate();
+	create_basic_auth_strings();
+	serialSDS.begin(9600);
+	debug_out(F("\nChipId: "), DEBUG_MIN_INFO, 0);
+	debug_out(esp_chipid, DEBUG_MIN_INFO, 1);
+
+	powerOnTestSensors();
+
+	if (gps_read) {
+		serialGPS.begin(9600);
+		debug_out(F("Read GPS..."), DEBUG_MIN_INFO, 1);
+		disable_unneeded_nmea();
+	}
+
+	logEnabledAPIs();
+	logEnabledDisplays();
 
 	if (MDNS.begin(server_name.c_str())) {
 		MDNS.addService("http", "tcp", 80);
@@ -3708,7 +3740,7 @@ void setup() {
 
 	// sometimes parallel sending data and web page will stop nodemcu, watchdogtimer set to 30 seconds
 	wdt_disable();
-	wdt_enable(30000);// 30 sec
+	wdt_enable(30000);
 
 	starttime = millis();                                   // store the start time
 	time_point_device_start_ms = starttime;
