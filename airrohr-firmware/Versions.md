@@ -1,3 +1,11 @@
+NRZ-2018-112-B5
+* more merged pull requests (fmeerkoetter), i.e. move font to own include file
+* more ca cert to own include file
+
+NRZ-2018-112-B4
+* merged pull requests (fmeerkoetter), i.e. refactoring some functions, memory optimizations
+* added translations
+
 NRZ-2018-112-B3
 * changing config to restart after every change/save
 * translations (PROGMEM var names from german to english)

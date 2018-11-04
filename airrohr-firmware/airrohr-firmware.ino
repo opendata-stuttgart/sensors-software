@@ -100,7 +100,7 @@
  *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-112-B4"
+#define SOFTWARE_VERSION "NRZ-2018-112-B5"
 
 /*****************************************************************
  * Includes                                                      *
@@ -245,8 +245,7 @@ String basic_auth_custom = "";
 #define UPDATE_URL "/sensor/update/firmware.php"
 #define UPDATE_PORT 80
 
-enum class PmSensorCmd
-{
+enum class PmSensorCmd {
 	Start,
 	Stop,
 	ContinuousMode,
@@ -445,7 +444,7 @@ uint8_t count_wifiInfo;
 
 template<typename T, std::size_t N>
 constexpr std::size_t array_num_elements(const T(&)[N]) {
-  return N;
+	return N;
 }
 
 #define data_first_part "{\"software_version\": \"{v}\", \"sensordatavalues\":["
@@ -1120,10 +1119,10 @@ String make_footer() {
 
 String form_input(const String& name, const String& info, const String& value, const int length) {
 	String s = F(	"<tr>"
-						"<td>{i} </td>"
-						"<td style='width:90%;'>"
-							"<input type='text' name='{n}' id='{n}' placeholder='{i}' value='{v}' maxlength='{l}'/>"
-						"</td>"
+					"<td>{i} </td>"
+					"<td style='width:90%;'>"
+					"<input type='text' name='{n}' id='{n}' placeholder='{i}' value='{v}' maxlength='{l}'/>"
+					"</td>"
 					"</tr>");
 	String t_value = value;
 	t_value.replace("'", "&#39;");
@@ -1136,10 +1135,10 @@ String form_input(const String& name, const String& info, const String& value, c
 
 String form_password(const String& name, const String& info, const String& value, const int length) {
 	String s = F(	"<tr>"
-						"<td>{i} </td>"
-						"<td style='width:90%;'>"
-							"<input type='password' name='{n}' id='{n}' placeholder='{i}' value='{v}' maxlength='{l}'/>"
-						"</td>"
+					"<td>{i} </td>"
+					"<td style='width:90%;'>"
+					"<input type='password' name='{n}' id='{n}' placeholder='{i}' value='{v}' maxlength='{l}'/>"
+					"</td>"
 					"</tr>");
 	String password = "";
 	for (uint8_t i = 0; i < value.length(); i++) {
@@ -1173,10 +1172,10 @@ String form_checkbox_sensor(const String& name, const String& info, const bool c
 
 String form_submit(const String& value) {
 	String s = F(	"<tr>"
-						"<td>&nbsp;</td>"
-						"<td>"
-							"<input type='submit' name='submit' value='{v}' />"
-						"</td>"
+					"<td>&nbsp;</td>"
+					"<td>"
+					"<input type='submit' name='submit' value='{v}' />"
+					"</td>"
 					"</tr>");
 	s.replace("{v}", value);
 	return s;
@@ -1185,24 +1184,24 @@ String form_submit(const String& value) {
 String form_select_lang() {
 	String s_select = F(" selected='selected'");
 	String s = F(	"<tr>"
-						"<td>{t}</td>"
-						"<td>"
-							"<select name='current_lang'>"
-								"<option value='DE'{s_DE}>Deutsch (DE)</option>"
-								"<option value='BG'{s_BG}>Bulgarian (BG)</option>"
-								"<option value='CZ'{s_CZ}>Český (CZ)</option>"
-								"<option value='EN'{s_EN}>English (EN)</option>"
-								"<option value='ES'{s_ES}>Español (ES)</option>"
-								"<option value='FR'{s_FR}>Français (FR)</option>"
-								"<option value='IT'{s_IT}>Italiano (IT)</option>"
-								"<option value='LU'{s_LU}>Lëtzebuergesch (LU)</option>"
-								"<option value='NL'{s_NL}>Nederlands (NL)</option>"
-								"<option value='PL'{s_PL}>Polski (PL)</option>"
-								"<option value='PT'{s_PT}>Português (PT)</option>"
-								"<option value='RU'{s_RU}>Русский (RU)</option>"
-								"<option value='SE'{s_SE}>Svenska (SE)</option>"
-							"</select>"
-						"</td>"
+					"<td>{t}</td>"
+					"<td>"
+					"<select name='current_lang'>"
+					"<option value='DE'{s_DE}>Deutsch (DE)</option>"
+					"<option value='BG'{s_BG}>Bulgarian (BG)</option>"
+					"<option value='CZ'{s_CZ}>Český (CZ)</option>"
+					"<option value='EN'{s_EN}>English (EN)</option>"
+					"<option value='ES'{s_ES}>Español (ES)</option>"
+					"<option value='FR'{s_FR}>Français (FR)</option>"
+					"<option value='IT'{s_IT}>Italiano (IT)</option>"
+					"<option value='LU'{s_LU}>Lëtzebuergesch (LU)</option>"
+					"<option value='NL'{s_NL}>Nederlands (NL)</option>"
+					"<option value='PL'{s_PL}>Polski (PL)</option>"
+					"<option value='PT'{s_PT}>Português (PT)</option>"
+					"<option value='RU'{s_RU}>Русский (RU)</option>"
+					"<option value='SE'{s_SE}>Svenska (SE)</option>"
+					"</select>"
+					"</td>"
 					"</tr>");
 
 	s.replace("{t}", FPSTR(INTL_LANGUAGE));
@@ -1244,9 +1243,9 @@ String line_from_value(const String& name, const String& value) {
 
 String table_row_from_value(const String& sensor, const String& param, const String& value, const String& unit) {
 	String s = F(	"<tr>"
-						"<td>{s}</td>"
-						"<td>{p}</td>"
-						"<td class='r'>{v}&nbsp;{u}</td>"
+					"<td>{s}</td>"
+					"<td>{p}</td>"
+					"<td class='r'>{v}&nbsp;{u}</td>"
 					"</tr>");
 	s.replace("{s}", sensor);
 	s.replace("{p}", param);
@@ -1267,12 +1266,12 @@ static int32_t calcWiFiSignalQuality(int32_t rssi) {
 
 String wlan_ssid_to_table_row(const String& ssid, const String& encryption, int32_t rssi) {
 	String s = F(	"<tr>"
-						"<td>"
-							"<a href='#wlanpwd' onclick='setSSID(this)' class='wifi'>{n}</a>&nbsp;{e}"
-						"</td>"
-						"<td style='width:80%;vertical-align:middle;'>"
-							"{v}%"
-						"</td>"
+					"<td>"
+					"<a href='#wlanpwd' onclick='setSSID(this)' class='wifi'>{n}</a>&nbsp;{e}"
+					"</td>"
+					"<td style='width:80%;vertical-align:middle;'>"
+					"{v}%"
+					"</td>"
 					"</tr>");
 	s.replace("{n}", ssid);
 	s.replace("{e}", encryption);
@@ -1340,7 +1339,7 @@ void webserver_root() {
 		sendHttpRedirect(server);
 	} else {
 		if (!webserver_request_auth())
-			return;
+		{ return; }
 
 		String page_content = make_header(" ");
 		last_page_load = millis();
@@ -1361,7 +1360,7 @@ void webserver_root() {
  *****************************************************************/
 void webserver_config() {
 	if (!webserver_request_auth())
-		return;
+	{ return; }
 
 	String page_content = make_header(FPSTR(INTL_CONFIGURATION));
 	String masked_pwd = "";
@@ -1813,7 +1812,7 @@ void webserver_values() {
  *****************************************************************/
 void webserver_debug_level() {
 	if (!webserver_request_auth())
-		return;
+	{ return; }
 
 	String page_content = make_header(FPSTR(INTL_DEBUG_LEVEL));
 	last_page_load = millis();
@@ -1859,7 +1858,7 @@ void webserver_debug_level() {
  *****************************************************************/
 void webserver_removeConfig() {
 	if (!webserver_request_auth())
-		return;
+	{ return; }
 
 	String page_content = make_header(FPSTR(INTL_DELETE_CONFIG));
 	String message_string = F("<h3>{v}.</h3>");
@@ -1893,7 +1892,7 @@ void webserver_removeConfig() {
  *****************************************************************/
 void webserver_reset() {
 	if (!webserver_request_auth())
-		return;
+	{ return; }
 
 	String page_content = make_header(FPSTR(INTL_RESTART_SENSOR));
 	last_page_load = millis();
@@ -2204,6 +2203,7 @@ void connectWifi() {
  * send data to rest api                                         *
  *****************************************************************/
 void sendData(const String& data, const int pin, const char* host, const int httpPort, const char* url, const bool verify, const char* basic_auth_string, const String& contentType) {
+#include "ca-root.h"
 
 	debug_out(F("Start connecting to "), DEBUG_MIN_INFO, 0);
 	debug_out(host, DEBUG_MIN_INFO, 1);
@@ -3509,7 +3509,7 @@ void display_values() {
  * Init OLED display                                             *
  *****************************************************************/
 void init_display() {
-	#include "oledfont.h"
+#include "oledfont.h"
 	display.init();
 	display.setFont(Roboto_Mono_9);
 	display_sh1106.init();
@@ -3572,8 +3572,7 @@ bool initBME280(char addr) {
 	}
 }
 
-static void powerOnTestSensors()
-{
+static void powerOnTestSensors() {
 	if (ppd_read) {
 		pinMode(PPD_PIN_PM1, INPUT_PULLUP);                 // Listen at the designated PIN
 		pinMode(PPD_PIN_PM2, INPUT_PULLUP);                 // Listen at the designated PIN
@@ -3650,8 +3649,7 @@ static void powerOnTestSensors()
 	}
 }
 
-static void logEnabledAPIs()
-{
+static void logEnabledAPIs() {
 	if (send2dusti) {
 		debug_out(F("Send to luftdaten.info..."), DEBUG_MIN_INFO, 1);
 	}
@@ -3681,8 +3679,7 @@ static void logEnabledAPIs()
 	}
 }
 
-static void acquireNetworkTime()
-{
+static void acquireNetworkTime() {
 	debug_out(F("Setting time using SNTP"), DEBUG_MIN_INFO, 1);
 	configTime(8 * 3600, 0, "pool.ntp.org", "time.nist.gov");
 	time_t now = time(nullptr);
@@ -3693,8 +3690,7 @@ static void acquireNetworkTime()
 	}
 }
 
-static void logEnabledDisplays()
-{
+static void logEnabledDisplays() {
 	if (has_display || has_sh1106) {
 		debug_out(F("Show on OLED..."), DEBUG_MIN_INFO, 1);
 	}
