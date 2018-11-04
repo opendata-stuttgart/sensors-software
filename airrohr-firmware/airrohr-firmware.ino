@@ -3222,27 +3222,21 @@ String sensorGPS() {
 /*****************************************************************
  * AutoUpdate                                                    *
  *****************************************************************/
-void autoUpdate() {
-#if defined(ESP8266)
-	const char* update_host = UPDATE_HOST;
-	const char* update_url = UPDATE_URL;
-	const int update_port = UPDATE_PORT;
-
-	String SDS_version = "";
+static void autoUpdate() {
 	if (auto_update) {
 		debug_out(F("Starting OTA update ..."), DEBUG_MIN_INFO, 1);
 		debug_out(F("NodeMCU firmware : "), DEBUG_MIN_INFO, 0);
 		debug_out(SOFTWARE_VERSION, DEBUG_MIN_INFO, 1);
-		debug_out(update_host, DEBUG_MED_INFO, 1);
-		debug_out(update_url, DEBUG_MED_INFO, 1);
+		debug_out(UPDATE_HOST, DEBUG_MED_INFO, 1);
+		debug_out(UPDATE_URL, DEBUG_MED_INFO, 1);
 
+		String SDS_version = "";
 		if (sds_read) {
 			SDS_version = SDS_version_date();
 		}
-		//SDS_version = "999";
 		display_debug(F("Looking for"), F("OTA update"));
 		last_update_attempt = millis();
-		const HTTPUpdateResult ret = ESPhttpUpdate.update(update_host, update_port, update_url,
+		const HTTPUpdateResult ret = ESPhttpUpdate.update(UPDATE_HOST, UPDATE_PORT, UPDATE_URL,
 									 SOFTWARE_VERSION + String(" ") + esp_chipid + String(" ") + SDS_version + String(" ") +
 									 String(current_lang) + String(" ") + String(INTL_LANG) + String(" ") + String(use_beta ? "BETA" : ""));
 		switch(ret) {
@@ -3260,7 +3254,6 @@ void autoUpdate() {
 			break;
 		}
 	}
-#endif
 }
 
 /*****************************************************************
