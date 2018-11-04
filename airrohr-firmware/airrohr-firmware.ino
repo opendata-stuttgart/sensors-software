@@ -1355,6 +1355,11 @@ void webserver_root() {
 	}
 }
 
+static int constexpr constexprstrlen(const char* str)
+{
+    return *str ? 1 + constexprstrlen(str + 1) : 0;
+}
+
 /*****************************************************************
  * Webserver config: show config page                            *
  *****************************************************************/
@@ -1465,7 +1470,8 @@ void webserver_config() {
 			page_content += FPSTR(TABLE_TAG_OPEN);
 			page_content += form_input("host_custom", FPSTR(INTL_SERVER), host_custom, 50);
 			page_content += form_input("url_custom", FPSTR(INTL_PATH), url_custom, 50);
-			page_content += form_input("port_custom", FPSTR(INTL_PORT), String(port_custom), 30);
+			constexpr int max_port_digits = constexprstrlen("65535");
+			page_content += form_input("port_custom", FPSTR(INTL_PORT), String(port_custom), max_port_digits);
 			page_content += form_input("user_custom", FPSTR(INTL_USER), user_custom, 50);
 			page_content += form_password("pwd_custom", FPSTR(INTL_PASSWORD), pwd_custom, 50);
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
@@ -1473,7 +1479,7 @@ void webserver_config() {
 			page_content += FPSTR(TABLE_TAG_OPEN);
 			page_content += form_input("host_influx", FPSTR(INTL_SERVER), host_influx, 50);
 			page_content += form_input("url_influx", FPSTR(INTL_PATH), url_influx, 50);
-			page_content += form_input("port_influx", FPSTR(INTL_PORT), String(port_influx), 30);
+			page_content += form_input("port_influx", FPSTR(INTL_PORT), String(port_influx), max_port_digits);
 			page_content += form_input("user_influx", FPSTR(INTL_USER), user_influx, 50);
 			page_content += form_password("pwd_influx", FPSTR(INTL_PASSWORD), pwd_influx, 50);
 			page_content += form_submit(FPSTR(INTL_SAVE_AND_RESTART));
