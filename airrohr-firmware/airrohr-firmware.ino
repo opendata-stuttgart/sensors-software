@@ -1982,14 +1982,10 @@ void webserver_prometheus_endpoint() {
 /*****************************************************************
  * Webserver Images                                              *
  *****************************************************************/
-void webserver_images() {
-	if (server.hasArg("name")) {
-		if (server.arg("name") == F("luftdaten_logo")) {
-			debug_out(F("output luftdaten.info logo..."), DEBUG_MIN_INFO, 1);
-			server.send(200, FPSTR(TXT_CONTENT_TYPE_IMAGE_SVG), FPSTR(LUFTDATEN_INFO_LOGO_SVG));
-		} else {
-			webserver_not_found();
-		}
+static void webserver_images() {
+	if (server.arg("name") == F("luftdaten_logo")) {
+		debug_out(F("output luftdaten.info logo..."), DEBUG_MIN_INFO, 1);
+		server.send(200, FPSTR(TXT_CONTENT_TYPE_IMAGE_SVG), FPSTR(LUFTDATEN_INFO_LOGO_SVG));
 	} else {
 		webserver_not_found();
 	}
