@@ -1401,7 +1401,7 @@ void webserver_config() {
 			page_content += FPSTR(INTL_FS_WIFI_DESCRIPTION);
 			page_content += FPSTR(BR_TAG);
 			page_content += FPSTR(TABLE_TAG_OPEN);
-			page_content += form_input("fs_ssid", FPSTR(INTL_FS_WIFI_NAME), fs_ssid, 64);
+			page_content += form_input("fs_ssid", FPSTR(INTL_FS_WIFI_NAME), fs_ssid, 32);
 			page_content += form_password("fs_pwd", FPSTR(INTL_PASSWORD), fs_pwd, 64);
 
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
