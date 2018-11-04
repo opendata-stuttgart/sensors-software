@@ -1636,17 +1636,18 @@ void webserver_config() {
 		page_content += FPSTR(INTL_SENSOR_IS_REBOOTING);
 	}
 	page_content += make_footer();
+
 	server.sendHeader(F("Cache-Control"), F("no-cache, no-store, must-revalidate"));
 	server.sendHeader(F("Pragma"), F("no-cache"));
 	server.sendHeader(F("Expires"), F("0"));
 	server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
-	if (server.method() != HTTP_GET) {
+
+	if (server.method() == HTTP_POST) {
 		display_debug(F("Writing config"), F("and restarting"));
 		writeConfig();
 		delay(500);
 		ESP.restart();
 	}
-
 }
 
 /*****************************************************************
