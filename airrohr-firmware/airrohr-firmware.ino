@@ -1511,9 +1511,7 @@ void webserver_config() {
 #define readTimeParam(param) \
 		if (server.hasArg(#param)){ \
 			int val = server.arg(#param).toInt(); \
-			if (val != 0){ \
-				param = val*1000; \
-			} \
+			param = val*1000; \
 		}
 
 #define readPasswdParam(param) \
