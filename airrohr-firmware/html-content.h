@@ -3,7 +3,6 @@ const char TXT_CONTENT_TYPE_INFLUXDB[] PROGMEM = "application/x-www-form-urlenco
 const char TXT_CONTENT_TYPE_TEXT_HTML[] PROGMEM = "text/html; charset=utf-8";
 const char TXT_CONTENT_TYPE_TEXT_PLAIN[] PROGMEM = "text/plain";
 const char TXT_CONTENT_TYPE_IMAGE_SVG[] PROGMEM = "image/svg+xml";
-const char TXT_CONTENT_TYPE_IMAGE_PNG[] PROGMEM = "image/png";
 
 const char DBG_TXT_TEMPERATURE[] PROGMEM = "Temperature: ";
 const char DBG_TXT_HUMIDITY[] PROGMEM = "Humidity: ";
