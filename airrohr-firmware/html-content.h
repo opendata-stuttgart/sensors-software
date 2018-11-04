@@ -34,7 +34,7 @@ const char SENSORS_BMP180[] PROGMEM = "BMP180";
 const char SENSORS_BMP280[] PROGMEM = "BMP280";
 const char SENSORS_BME280[] PROGMEM = "BME280";
 
-const char WEB_PAGE_HEADER[] PROGMEM = "<html>\
+const char WEB_PAGE_HEADER[] PROGMEM = "<!DOCTYPE html><html>\
 <head>\
 <title>{t}</title>\
 <meta name='viewport' content='width=device-width'>\
