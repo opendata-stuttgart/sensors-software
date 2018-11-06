@@ -219,12 +219,12 @@ bool ssl_dusti = true;
 // IMPORTANT: NO MORE CHANGES TO VARIABLE NAMES NEEDED FOR EXTERNAL APIS
 
 const char* host_sensemap = "ingress.opensensemap.org";
-String url_sensemap = "/boxes/BOXID/data?luftdaten=1";
+const String url_sensemap = "/boxes/BOXID/data?luftdaten=1";
 const int httpPort_sensemap = 443;
 char senseboxid[30] = "";
 
 const char* host_fsapp = "www.h2801469.stratoserver.net";
-String url_fsapp = "/data.php";
+const String url_fsapp = "/data.php";
 const int httpPort_fsapp = 80;
 
 char host_influx[100] = "influx server";
