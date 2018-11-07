@@ -447,6 +447,12 @@ constexpr std::size_t array_num_elements(const T(&)[N]) {
 	return N;
 }
 
+template<std::size_t N>
+constexpr std::size_t capacity_null_terminated_char_array(const char(&)[N]) {
+  return N - 1;
+}
+
+
 #define data_first_part "{\"software_version\": \"{v}\", \"sensordatavalues\":["
 
 /*****************************************************************
@@ -1355,6 +1361,11 @@ void webserver_root() {
 	}
 }
 
+static int constexpr constexprstrlen(const char* str)
+{
+    return *str ? 1 + constexprstrlen(str + 1) : 0;
+}
+
 /*****************************************************************
  * Webserver config: show config page                            *
  *****************************************************************/
@@ -1381,8 +1392,8 @@ void webserver_config() {
 			page_content += F("</div><br/>");
 		}
 		page_content += FPSTR(TABLE_TAG_OPEN);
-		page_content += form_input("wlanssid", FPSTR(INTL_FS_WIFI_NAME), wlanssid, 32);
-		page_content += form_password("wlanpwd", FPSTR(INTL_PASSWORD), wlanpwd, 64);
+		page_content += form_input("wlanssid", FPSTR(INTL_FS_WIFI_NAME), wlanssid, capacity_null_terminated_char_array(wlanssid));
+		page_content += form_password("wlanpwd", FPSTR(INTL_PASSWORD), wlanpwd, capacity_null_terminated_char_array(wlanpwd));
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 		page_content += F("<hr/>\n<b>");
 
@@ -1393,8 +1404,8 @@ void webserver_config() {
 			page_content += FPSTR(INTL_BASICAUTH);
 			page_content += F("</b><br/>");
 			page_content += FPSTR(TABLE_TAG_OPEN);
-			page_content += form_input("www_username", FPSTR(INTL_USER), www_username, 64);
-			page_content += form_password("www_password", FPSTR(INTL_PASSWORD), www_password, 64);
+			page_content += form_input("www_username", FPSTR(INTL_USER), www_username, capacity_null_terminated_char_array(www_username));
+			page_content += form_password("www_password", FPSTR(INTL_PASSWORD), www_password, capacity_null_terminated_char_array(www_password));
 			page_content += form_checkbox("www_basicauth_enabled", FPSTR(INTL_BASICAUTH), www_basicauth_enabled);
 
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
@@ -1404,8 +1415,8 @@ void webserver_config() {
 			page_content += FPSTR(INTL_FS_WIFI_DESCRIPTION);
 			page_content += FPSTR(BR_TAG);
 			page_content += FPSTR(TABLE_TAG_OPEN);
-			page_content += form_input("fs_ssid", FPSTR(INTL_FS_WIFI_NAME), fs_ssid, 64);
-			page_content += form_password("fs_pwd", FPSTR(INTL_PASSWORD), fs_pwd, 64);
+			page_content += form_input("fs_ssid", FPSTR(INTL_FS_WIFI_NAME), fs_ssid, capacity_null_terminated_char_array(fs_ssid));
+			page_content += form_password("fs_pwd", FPSTR(INTL_PASSWORD), fs_pwd, capacity_null_terminated_char_array(fs_pwd));
 
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 			page_content += F("\n<b>APIs</b><br/>");
@@ -1447,7 +1458,7 @@ void webserver_config() {
 		if (! wificonfig_loop) {
 			page_content += FPSTR(TABLE_TAG_OPEN);
 			page_content += form_select_lang();
-			page_content += form_input("debug", FPSTR(INTL_DEBUG_LEVEL), String(debug), 5);
+			page_content += form_input("debug", FPSTR(INTL_DEBUG_LEVEL), String(debug), 1);
 			page_content += form_input("sending_intervall_ms", FPSTR(INTL_MEASUREMENT_INTERVAL), String(sending_intervall_ms / 1000), 5);
 			page_content += form_input("time_for_wifi_config", FPSTR(INTL_DURATION_ROUTER_MODE), String(time_for_wifi_config / 1000), 5);
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
@@ -1459,23 +1470,24 @@ void webserver_config() {
 			page_content += FPSTR(BR_TAG);
 			page_content += form_checkbox("send2sensemap", tmpl(FPSTR(INTL_SEND_TO), F("OpenSenseMap")), send2sensemap);
 			page_content += FPSTR(TABLE_TAG_OPEN);
-			page_content += form_input("senseboxid", "senseBox-ID: ", senseboxid, 50);
+			page_content += form_input("senseboxid", "senseBox-ID: ", senseboxid, capacity_null_terminated_char_array(senseboxid));
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 			page_content += form_checkbox("send2custom", FPSTR(INTL_SEND_TO_OWN_API), send2custom);
 			page_content += FPSTR(TABLE_TAG_OPEN);
-			page_content += form_input("host_custom", FPSTR(INTL_SERVER), host_custom, 50);
-			page_content += form_input("url_custom", FPSTR(INTL_PATH), url_custom, 50);
-			page_content += form_input("port_custom", FPSTR(INTL_PORT), String(port_custom), 30);
-			page_content += form_input("user_custom", FPSTR(INTL_USER), user_custom, 50);
-			page_content += form_password("pwd_custom", FPSTR(INTL_PASSWORD), pwd_custom, 50);
+			page_content += form_input("host_custom", FPSTR(INTL_SERVER), host_custom, capacity_null_terminated_char_array(host_custom));
+			page_content += form_input("url_custom", FPSTR(INTL_PATH), url_custom, capacity_null_terminated_char_array(url_custom));
+			constexpr int max_port_digits = constexprstrlen("65535");
+			page_content += form_input("port_custom", FPSTR(INTL_PORT), String(port_custom), max_port_digits);
+			page_content += form_input("user_custom", FPSTR(INTL_USER), user_custom, capacity_null_terminated_char_array(user_custom));
+			page_content += form_password("pwd_custom", FPSTR(INTL_PASSWORD), pwd_custom, capacity_null_terminated_char_array(pwd_custom));
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 			page_content += form_checkbox("send2influx", tmpl(FPSTR(INTL_SEND_TO), F("InfluxDB")), send2influx);
 			page_content += FPSTR(TABLE_TAG_OPEN);
-			page_content += form_input("host_influx", FPSTR(INTL_SERVER), host_influx, 50);
-			page_content += form_input("url_influx", FPSTR(INTL_PATH), url_influx, 50);
-			page_content += form_input("port_influx", FPSTR(INTL_PORT), String(port_influx), 30);
-			page_content += form_input("user_influx", FPSTR(INTL_USER), user_influx, 50);
-			page_content += form_password("pwd_influx", FPSTR(INTL_PASSWORD), pwd_influx, 50);
+			page_content += form_input("host_influx", FPSTR(INTL_SERVER), host_influx, capacity_null_terminated_char_array(host_influx));
+			page_content += form_input("url_influx", FPSTR(INTL_PATH), url_influx, capacity_null_terminated_char_array(url_influx));
+			page_content += form_input("port_influx", FPSTR(INTL_PORT), String(port_influx), max_port_digits);
+			page_content += form_input("user_influx", FPSTR(INTL_USER), user_influx, capacity_null_terminated_char_array(user_influx));
+			page_content += form_password("pwd_influx", FPSTR(INTL_PASSWORD), pwd_influx, capacity_null_terminated_char_array(pwd_influx));
 			page_content += form_submit(FPSTR(INTL_SAVE_AND_RESTART));
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 			page_content += F("<br/></form>");
@@ -1511,9 +1523,7 @@ void webserver_config() {
 #define readTimeParam(param) \
 		if (server.hasArg(#param)){ \
 			int val = server.arg(#param).toInt(); \
-			if (val != 0){ \
-				param = val*1000; \
-			} \
+			param = val*1000; \
 		}
 
 #define readPasswdParam(param) \
@@ -1636,17 +1646,18 @@ void webserver_config() {
 		page_content += FPSTR(INTL_SENSOR_IS_REBOOTING);
 	}
 	page_content += make_footer();
+
 	server.sendHeader(F("Cache-Control"), F("no-cache, no-store, must-revalidate"));
 	server.sendHeader(F("Pragma"), F("no-cache"));
 	server.sendHeader(F("Expires"), F("0"));
 	server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
-	if (server.method() != HTTP_GET) {
+
+	if (server.method() == HTTP_POST) {
 		display_debug(F("Writing config"), F("and restarting"));
 		writeConfig();
 		delay(500);
 		ESP.restart();
 	}
-
 }
 
 /*****************************************************************
@@ -1982,14 +1993,10 @@ void webserver_prometheus_endpoint() {
 /*****************************************************************
  * Webserver Images                                              *
  *****************************************************************/
-void webserver_images() {
-	if (server.hasArg("name")) {
-		if (server.arg("name") == F("luftdaten_logo")) {
-			debug_out(F("output luftdaten.info logo..."), DEBUG_MIN_INFO, 1);
-			server.send(200, FPSTR(TXT_CONTENT_TYPE_IMAGE_SVG), FPSTR(LUFTDATEN_INFO_LOGO_SVG));
-		} else {
-			webserver_not_found();
-		}
+static void webserver_images() {
+	if (server.arg("name") == F("luftdaten_logo")) {
+		debug_out(F("output luftdaten.info logo..."), DEBUG_MIN_INFO, 1);
+		server.send(200, FPSTR(TXT_CONTENT_TYPE_IMAGE_SVG), FPSTR(LUFTDATEN_INFO_LOGO_SVG));
 	} else {
 		webserver_not_found();
 	}
