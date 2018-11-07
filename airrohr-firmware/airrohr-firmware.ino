@@ -95,12 +95,12 @@
  * Der Sketch verwendet 491364 Bytes (47%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
  * Globale Variablen verwenden 37172 Bytes (45%) des dynamischen Speichers, 44748 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
  *
- * Der Sketch verwendet 489604 Bytes (46%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
- * Globale Variablen verwenden 37164 Bytes (45%) des dynamischen Speichers, 44756 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
+ * Der Sketch verwendet 489184 Bytes (46%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
+ * Globale Variablen verwenden 37160 Bytes (45%) des dynamischen Speichers, 44760 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
  *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-112-B5"
+#define SOFTWARE_VERSION "NRZ-2018-113"
 
 /*****************************************************************
  * Includes                                                      *

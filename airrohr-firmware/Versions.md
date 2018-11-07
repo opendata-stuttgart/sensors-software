@@ -1,3 +1,7 @@
+NRZ-2018-113
+online since 2018-09-20
+* same as NRZ-2018-112-B5
+
 NRZ-2018-112-B5
 * more merged pull requests (fmeerkoetter), i.e. move font to own include file
 * more ca cert to own include file
