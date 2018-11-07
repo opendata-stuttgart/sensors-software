@@ -1321,7 +1321,7 @@ String add_sensor_type(const String& sensor_text) {
  *****************************************************************/
 static bool webserver_request_auth() {
 	debug_out(F("validate request auth..."), DEBUG_MIN_INFO, 1);
-	if (www_basicauth_enabled) {
+	if (www_basicauth_enabled && ! wificonfig_loop) {
 		if (!server.authenticate(www_username, www_password)) {
 			server.requestAuthentication();
 			return false;
