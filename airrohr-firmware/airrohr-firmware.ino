@@ -95,9 +95,9 @@
  * Der Sketch verwendet 491364 Bytes (47%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
  * Globale Variablen verwenden 37172 Bytes (45%) des dynamischen Speichers, 44748 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
  *
- * Der Sketch verwendet 489184 Bytes (46%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
+ * Der Sketch verwendet 489152 Bytes (46%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
  * Globale Variablen verwenden 37160 Bytes (45%) des dynamischen Speichers, 44760 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
- *
+ * 
  ************************************************************************/
 // increment on change
 #define SOFTWARE_VERSION "NRZ-2018-113"
@@ -442,13 +442,11 @@ uint8_t size_wifiInfo = 35 + sizeof(uint8_t) + sizeof(int32_t) + sizeof(uint8_t)
 struct struct_wifiInfo *wifiInfo;
 uint8_t count_wifiInfo;
 
-template<typename T, std::size_t N>
-constexpr std::size_t array_num_elements(const T(&)[N]) {
+template<typename T, std::size_t N> constexpr std::size_t array_num_elements(const T(&)[N]) {
 	return N;
 }
 
-template<std::size_t N>
-constexpr std::size_t capacity_null_terminated_char_array(const char(&)[N]) {
+template<typename T, std::size_t N> constexpr std::size_t capacity_null_terminated_char_array(const T(&)[N]) {
   return N - 1;
 }
 
