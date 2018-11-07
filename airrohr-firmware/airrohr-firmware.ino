@@ -226,11 +226,6 @@ namespace cfg {
 	char url_influx[100] = "/write?db=luftdaten";
 }
 
-long int sample_count = 0;
-bool bmp_init_failed = false;
-bool bmp280_init_failed = false;
-bool bme280_init_failed = false;
-
 #define HOST_MADAVI "api-rrd.madavi.de"
 #define URL_MADAVI "/data.php"
 #define PORT_MADAVI 443
@@ -241,16 +236,13 @@ bool bme280_init_failed = false;
 
 // IMPORTANT: NO MORE CHANGES TO VARIABLE NAMES NEEDED FOR EXTERNAL APIS
 
-const char* host_sensemap = "ingress.opensensemap.org";
-const String url_sensemap = "/boxes/BOXID/data?luftdaten=1";
-const int httpPort_sensemap = 443;
+#define HOST_SENSEMAP "ingress.opensensemap.org"
+#define URL_SENSEMAP "/boxes/BOXID/data?luftdaten=1"
+#define PORT_SENSEMAP 443
 
-const char* host_fsapp = "www.h2801469.stratoserver.net";
-const String url_fsapp = "/data.php";
-const int httpPort_fsapp = 80;
-
-String basic_auth_influx = "";
-String basic_auth_custom = "";
+#define HOST_FSAPP "www.h2801469.stratoserver.net"
+#define URL_FSAPP "/data.php"
+#define PORT_FSAPP 80
 
 #define UPDATE_HOST "www.madavi.de"
 #define UPDATE_URL "/sensor/update/firmware.php"
@@ -262,6 +254,14 @@ enum class PmSensorCmd {
 	ContinuousMode,
 	VersionDate
 };
+
+String basic_auth_influx = "";
+String basic_auth_custom = "";
+
+long int sample_count = 0;
+bool bmp_init_failed = false;
+bool bmp280_init_failed = false;
+bool bme280_init_failed = false;
 
 ESP8266WebServer server(80);
 int TimeZone = 1;
@@ -4030,16 +4030,16 @@ void loop() {
 		if (cfg::send2sensemap && (cfg::senseboxid[0] != '\0')) {
 			debug_out(String(FPSTR(DBG_TXT_SENDING_TO)) + F("opensensemap: "), DEBUG_MIN_INFO, 1);
 			start_send = millis();
-			String sensemap_path = url_sensemap;
+			String sensemap_path = URL_SENSEMAP;
 			sensemap_path.replace("BOXID", cfg::senseboxid);
-			sendData(data, 0, host_sensemap, httpPort_sensemap, sensemap_path.c_str(), false, "", FPSTR(TXT_CONTENT_TYPE_JSON));
+			sendData(data, 0, HOST_SENSEMAP, PORT_SENSEMAP, sensemap_path.c_str(), false, "", FPSTR(TXT_CONTENT_TYPE_JSON));
 			sum_send_time += millis() - start_send;
 		}
 
 		if (cfg::send2fsapp) {
 			debug_out(String(FPSTR(DBG_TXT_SENDING_TO)) + F("Server FS App: "), DEBUG_MIN_INFO, 1);
 			start_send = millis();
-			sendData(data, 0, host_fsapp, httpPort_fsapp, url_fsapp.c_str(), false, "", FPSTR(TXT_CONTENT_TYPE_JSON));
+			sendData(data, 0, HOST_FSAPP, PORT_FSAPP, URL_FSAPP, false, "", FPSTR(TXT_CONTENT_TYPE_JSON));
 			sum_send_time += millis() - start_send;
 		}
 
