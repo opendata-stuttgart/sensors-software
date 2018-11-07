@@ -158,87 +158,98 @@
 #include "ext_def.h"
 #include "html-content.h"
 
-/*****************************************************************
- * Variables with defaults                                       *
- *****************************************************************/
-char wlanssid[35] = "Freifunk-disabled";
-char wlanpwd[65] = "";
-char current_lang[3] = "DE";
-char www_username[65] = "admin";
-char www_password[65] = "feinstaub";
-bool www_basicauth_enabled = false;
+/******************************************************************
+ * The variables inside the cfg namespace are persistent          *
+ * configuration values. They have defaults (extdef),             *
+ * they can be changed by the user via the web interface, the     *
+ * changes are persisted to the flash and read back after reboot. *
+ * Note that the names of these variables can't be easily changed *
+ * as they are part of the json format used to persist the data.  *
+ ******************************************************************/
+namespace cfg {
+	char wlanssid[35] = "Freifunk-disabled";
+	char wlanpwd[65] = "";
 
-char fs_ssid[33] = "";
-char fs_pwd[65] = "";
+	char current_lang[3] = "DE";
+	char www_username[65] = "admin";
+	char www_password[65] = "feinstaub";
+	bool www_basicauth_enabled = false;
 
-char version_from_local_config[20] = "";
+	char fs_ssid[33] = "";
+	char fs_pwd[65] = "";
 
-bool dht_read = true;
-bool htu21d_read = false;
-bool ppd_read = false;
-bool sds_read = true;
-bool pms_read = false;
-bool hpm_read = false;
-bool bmp_read = false;
-bool bmp_init_failed = false;
-bool bmp280_read = false;
-bool bmp280_init_failed = false;
-bool bme280_read = false;
-bool bme280_init_failed = false;
-bool ds18b20_read = false;
-bool gps_read = false;
-bool send2dusti = true;
-bool send2madavi = true;
-bool send2sensemap = false;
-bool send2fsapp = false;
-bool send2custom = false;
-bool send2lora = true;
-bool send2influx = false;
-bool send2csv = false;
-bool auto_update = false;
-bool use_beta = false;
-bool has_display = false;
-bool has_sh1106 = false;
-bool has_lcd1602 = false;
-bool has_lcd1602_27 = false;
-bool has_lcd2004_27 = false;
-int  debug = 3;
+	char version_from_local_config[20] = "";
+
+	bool dht_read = true;
+	bool htu21d_read = false;
+	bool ppd_read = false;
+	bool sds_read = true;
+	bool pms_read = false;
+	bool hpm_read = false;
+	bool bmp_read = false;
+	bool bmp280_read = false;
+	bool bme280_read = false;
+	bool ds18b20_read = false;
+	bool gps_read = false;
+	bool send2dusti = true;
+	bool send2madavi = true;
+	bool send2sensemap = false;
+	bool send2fsapp = false;
+	bool send2custom = false;
+	bool send2lora = true;
+	bool send2influx = false;
+	bool send2csv = false;
+	bool auto_update = false;
+	bool use_beta = false;
+	bool has_display = false;
+	bool has_sh1106 = false;
+	bool has_lcd1602 = false;
+	bool has_lcd1602_27 = false;
+	bool has_lcd2004_27 = false;
+	int  debug = 3;
+
+	bool ssl_madavi = true;
+	bool ssl_dusti = true;
+	char senseboxid[30] = "";
+
+	int port_influx = 8086;
+	char user_influx[65] = "";
+	char pwd_influx[65] = "";
+
+	char host_custom[100] = "192.168.234.1";
+	char url_custom[100] = "/data.php";
+	int port_custom = 80;
+	char user_custom[65] = "";
+	char pwd_custom[65] = "";
+
+	char host_influx[100] = "influx server";
+	char url_influx[100] = "/write?db=luftdaten";
+}
 
 long int sample_count = 0;
+bool bmp_init_failed = false;
+bool bmp280_init_failed = false;
+bool bme280_init_failed = false;
 
 #define HOST_MADAVI "api-rrd.madavi.de"
 #define URL_MADAVI "/data.php"
 #define PORT_MADAVI 443
-bool ssl_madavi = true;
 
 #define HOST_DUSTI "api.luftdaten.info"
 #define URL_DUSTI "/v1/push-sensor-data/"
 #define PORT_DUSTI 443
-bool ssl_dusti = true;
 
 // IMPORTANT: NO MORE CHANGES TO VARIABLE NAMES NEEDED FOR EXTERNAL APIS
 
 const char* host_sensemap = "ingress.opensensemap.org";
 const String url_sensemap = "/boxes/BOXID/data?luftdaten=1";
 const int httpPort_sensemap = 443;
-char senseboxid[30] = "";
 
 const char* host_fsapp = "www.h2801469.stratoserver.net";
 const String url_fsapp = "/data.php";
 const int httpPort_fsapp = 80;
 
-char host_influx[100] = "influx server";
-char url_influx[100] = "/write?db=luftdaten";
-int port_influx = 8086;
-char user_influx[65] = "";
-char pwd_influx[65] = "";
 String basic_auth_influx = "";
-
-char host_custom[100] = "192.168.234.1";
-char url_custom[100] = "/data.php";
-int port_custom = 80;
-char user_custom[65] = "";
-char pwd_custom[65] = "";
 String basic_auth_custom = "";
 
 #define UPDATE_HOST "www.madavi.de"
@@ -456,7 +467,7 @@ const char data_first_part[] PROGMEM = "{\"software_version\": \"{v}\", \"sensor
  * Debug output                                                  *
  *****************************************************************/
 void debug_out(const String& text, const int level, const bool linebreak) {
-	if (level <= debug) {
+	if (level <= cfg::debug) {
 		if (linebreak) {
 			Serial.println(text);
 		} else {
@@ -471,7 +482,7 @@ void debug_out(const String& text, const int level, const bool linebreak) {
 void display_debug(const String& text1, const String& text2) {
 	debug_out(F("output debug text to displays..."), DEBUG_MIN_INFO, 1);
 	debug_out(text1 + "\n" + text2, DEBUG_MAX_INFO, 1);
-	if (has_display) {
+	if (cfg::has_display) {
 		display.clear();
 		display.displayOn();
 		display.setTextAlignment(TEXT_ALIGN_LEFT);
@@ -479,7 +490,7 @@ void display_debug(const String& text1, const String& text2) {
 		display.drawString(0, 24, text2);
 		display.display();
 	}
-	if (has_sh1106) {
+	if (cfg::has_sh1106) {
 		display_sh1106.clear();
 		display_sh1106.displayOn();
 		display_sh1106.setTextAlignment(TEXT_ALIGN_LEFT);
@@ -487,21 +498,21 @@ void display_debug(const String& text1, const String& text2) {
 		display_sh1106.drawString(0, 24, text2);
 		display_sh1106.display();
 	}
-	if (has_lcd1602) {
+	if (cfg::has_lcd1602) {
 		lcd_1602_3f.clear();
 		lcd_1602_3f.setCursor(0, 0);
 		lcd_1602_3f.print(text1);
 		lcd_1602_3f.setCursor(0, 1);
 		lcd_1602_3f.print(text2);
 	}
-	if (has_lcd1602_27) {
+	if (cfg::has_lcd1602_27) {
 		lcd_1602_27.clear();
 		lcd_1602_27.setCursor(0, 0);
 		lcd_1602_27.print(text1);
 		lcd_1602_27.setCursor(0, 1);
 		lcd_1602_27.print(text2);
 	}
-	if (has_lcd2004_27) {
+	if (cfg::has_lcd2004_27) {
 		lcd_2004_27.clear();
 		lcd_2004_27.setCursor(0, 0);
 		lcd_2004_27.print(text1);
@@ -817,6 +828,7 @@ void disable_unneeded_nmea() {
  * copy config from ext_def                                      *
  *****************************************************************/
 void copyExtDef() {
+	using namespace cfg;
 
 #define strcpyDef(var, def) if (def != NULL) { strcpy(var, def); }
 #define setDef(var, def)    if (def != var) { var = def; }
@@ -886,6 +898,7 @@ void copyExtDef() {
  * read config from spiffs                                       *
  *****************************************************************/
 void readConfig() {
+	using namespace cfg;
 	String json_string = "";
 	debug_out(F("mounting FS..."), DEBUG_MIN_INFO, 1);
 	bool pms24_read = 0;
@@ -1002,6 +1015,7 @@ void readConfig() {
  * write config to spiffs                                        *
  *****************************************************************/
 void writeConfig() {
+	using namespace cfg;
 	String json_string = "{";
 	debug_out(F("saving config..."), DEBUG_MIN_INFO, 1);
 
@@ -1084,12 +1098,12 @@ void writeConfig() {
  *****************************************************************/
 void create_basic_auth_strings() {
 	basic_auth_custom = "";
-	if (user_custom[0] != '\0' || pwd_custom[0] != '\0') {
-		basic_auth_custom = base64::encode(String(user_custom) + ":" + String(pwd_custom));
+	if (cfg::user_custom[0] != '\0' || cfg::pwd_custom[0] != '\0') {
+		basic_auth_custom = base64::encode(String(cfg::user_custom) + ":" + String(cfg::pwd_custom));
 	}
 	basic_auth_influx = "";
-	if (user_influx[0] != '\0' || pwd_influx[0] != '\0') {
-		basic_auth_influx = base64::encode(String(user_influx) + ":" + String(pwd_influx));
+	if (cfg::user_influx[0] != '\0' || cfg::pwd_influx[0] != '\0') {
+		basic_auth_influx = base64::encode(String(cfg::user_influx) + ":" + String(cfg::pwd_influx));
 	}
 }
 
@@ -1209,7 +1223,7 @@ String form_select_lang() {
 
 	s.replace("{t}", FPSTR(INTL_LANGUAGE));
 
-	s.replace("{s_" + String(current_lang) + "}", s_select);
+	s.replace("{s_" + String(cfg::current_lang) + "}", s_select);
 	while (s.indexOf("{s_") != -1) {
 		s.remove(s.indexOf("{s_"), 6);
 	}
@@ -1320,8 +1334,8 @@ String add_sensor_type(const String& sensor_text) {
  *****************************************************************/
 static bool webserver_request_auth() {
 	debug_out(F("validate request auth..."), DEBUG_MIN_INFO, 1);
-	if (www_basicauth_enabled && ! wificonfig_loop) {
-		if (!server.authenticate(www_username, www_password)) {
+	if (cfg::www_basicauth_enabled && ! wificonfig_loop) {
+		if (!server.authenticate(cfg::www_username, cfg::www_password)) {
 			server.requestAuthentication();
 			return false;
 		}
@@ -1378,6 +1392,8 @@ void webserver_config() {
 	if (wificonfig_loop) {  // scan for wlan ssids
 		page_content += FPSTR(WEB_CONFIG_SCRIPT);
 	}
+
+	using namespace cfg;
 	if (server.method() == HTTP_GET) {
 		page_content += F("<form method='POST' action='/config' style='width:100%;'>\n<b>");
 		page_content += FPSTR(INTL_WIFI_SETTINGS);
@@ -1739,58 +1755,58 @@ void webserver_values() {
 		}
 		page_content += F("<table cellspacing='0' border='1' cellpadding='5'>");
 		page_content += tmpl(F("<tr><th>{v1}</th><th>{v2}</th><th>{v3}</th>"), FPSTR(INTL_SENSOR), FPSTR(INTL_PARAMETER), FPSTR(INTL_VALUE));
-		if (ppd_read) {
+		if (cfg::ppd_read) {
 			page_content += FPSTR(EMPTY_ROW);
 			page_content += table_row_from_value(FPSTR(SENSORS_PPD42NS), "PM1",  check_display_value(last_value_PPD_P1, -1, 1, 0), FPSTR(INTL_PARTICLES_PER_LITER));
 			page_content += table_row_from_value(FPSTR(SENSORS_PPD42NS), "PM2.5", check_display_value(last_value_PPD_P2, -1, 1, 0), FPSTR(INTL_PARTICLES_PER_LITER));
 		}
-		if (sds_read) {
+		if (cfg::sds_read) {
 			page_content += FPSTR(EMPTY_ROW);
 			page_content += table_row_from_value(FPSTR(SENSORS_SDS011), "PM2.5", check_display_value(last_value_SDS_P2, -1, 1, 0), unit_PM);
 			page_content += table_row_from_value(FPSTR(SENSORS_SDS011), "PM10", check_display_value(last_value_SDS_P1, -1, 1, 0), unit_PM);
 		}
-		if (pms_read) {
+		if (cfg::pms_read) {
 			page_content += FPSTR(EMPTY_ROW);
 			page_content += table_row_from_value(FPSTR(SENSORS_PMSx003), "PM1", check_display_value(last_value_PMS_P0, -1, 1, 0), unit_PM);
 			page_content += table_row_from_value(FPSTR(SENSORS_PMSx003), "PM2.5", check_display_value(last_value_PMS_P2, -1, 1, 0), unit_PM);
 			page_content += table_row_from_value(FPSTR(SENSORS_PMSx003), "PM10", check_display_value(last_value_PMS_P1, -1, 1, 0), unit_PM);
 		}
-		if (hpm_read) {
+		if (cfg::hpm_read) {
 			page_content += FPSTR(EMPTY_ROW);
 			page_content += table_row_from_value(FPSTR(SENSORS_HPM), "PM2.5", check_display_value(last_value_HPM_P2, -1, 1, 0), unit_PM);
 			page_content += table_row_from_value(FPSTR(SENSORS_HPM), "PM10", check_display_value(last_value_HPM_P1, -1, 1, 0), unit_PM);
 		}
-		if (dht_read) {
+		if (cfg::dht_read) {
 			page_content += FPSTR(EMPTY_ROW);
 			page_content += table_row_from_value(FPSTR(SENSORS_DHT22), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_DHT_T, -128, 1, 0), unit_T);
 			page_content += table_row_from_value(FPSTR(SENSORS_DHT22), FPSTR(INTL_HUMIDITY), check_display_value(last_value_DHT_H, -1, 1, 0), unit_H);
 		}
-		if (htu21d_read) {
+		if (cfg::htu21d_read) {
 			page_content += FPSTR(EMPTY_ROW);
 			page_content += table_row_from_value(FPSTR(SENSORS_HTU21D), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_HTU21D_T, -128, 1, 0), unit_T);
 			page_content += table_row_from_value(FPSTR(SENSORS_HTU21D), FPSTR(INTL_HUMIDITY), check_display_value(last_value_HTU21D_H, -1, 1, 0), unit_H);
 		}
-		if (bmp_read) {
+		if (cfg::bmp_read) {
 			page_content += FPSTR(EMPTY_ROW);
 			page_content += table_row_from_value(FPSTR(SENSORS_BMP180), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_BMP_T, -128, 1, 0), unit_T);
 			page_content += table_row_from_value(FPSTR(SENSORS_BMP180), FPSTR(INTL_PRESSURE), check_display_value(last_value_BMP_P / 100.0, (-1 / 100.0), 2, 0), unit_P);
 		}
-		if (bmp280_read) {
+		if (cfg::bmp280_read) {
 			page_content += FPSTR(EMPTY_ROW);
 			page_content += table_row_from_value(FPSTR(SENSORS_BMP280), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_BMP280_T, -128, 1, 0), unit_T);
 			page_content += table_row_from_value(FPSTR(SENSORS_BMP280), FPSTR(INTL_PRESSURE), check_display_value(last_value_BMP280_P / 100.0, (-1 / 100.0), 2, 0), unit_P);
 		}
-		if (bme280_read) {
+		if (cfg::bme280_read) {
 			page_content += FPSTR(EMPTY_ROW);
 			page_content += table_row_from_value(FPSTR(SENSORS_BME280), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_BME280_T, -128, 1, 0), unit_T);
 			page_content += table_row_from_value(FPSTR(SENSORS_BME280), FPSTR(INTL_HUMIDITY), check_display_value(last_value_BME280_H, -1, 1, 0), unit_H);
 			page_content += table_row_from_value(FPSTR(SENSORS_BME280), FPSTR(INTL_PRESSURE),  check_display_value(last_value_BME280_P / 100.0, (-1 / 100.0), 2, 0), unit_P);
 		}
-		if (ds18b20_read) {
+		if (cfg::ds18b20_read) {
 			page_content += FPSTR(EMPTY_ROW);
 			page_content += table_row_from_value(FPSTR(SENSORS_DS18B20), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_DS18B20_T, -128, 1, 0), unit_T);
 		}
-		if (gps_read) {
+		if (cfg::gps_read) {
 			page_content += FPSTR(EMPTY_ROW);
 			page_content += table_row_from_value("GPS", FPSTR(INTL_LATITUDE), check_display_value(last_value_GPS_lat, -200.0, 6, 0), "°");
 			page_content += table_row_from_value("GPS", FPSTR(INTL_LONGITUDE), check_display_value(last_value_GPS_lon, -200.0, 6, 0), "°");
@@ -1829,7 +1845,7 @@ void webserver_debug_level() {
 	if (server.hasArg("lvl")) {
 		const int lvl = server.arg("lvl").toInt();
 		if (lvl >= 0 && lvl <= 5) {
-			debug = lvl;
+			cfg::debug = lvl;
 			page_content += F("<h3>");
 			page_content += FPSTR(INTL_DEBUG_SETTING_TO);
 			page_content += F(" ");
@@ -2067,9 +2083,9 @@ static int selectChannelForAp(struct struct_wifiInfo *info, int count) {
 void wifiConfig() {
 	debug_out(F("Starting WiFiManager"), DEBUG_MIN_INFO, 1);
 	debug_out(F("AP ID: "), DEBUG_MIN_INFO, 0);
-	debug_out(fs_ssid, DEBUG_MIN_INFO, 1);
+	debug_out(cfg::fs_ssid, DEBUG_MIN_INFO, 1);
 	debug_out(F("Password: "), DEBUG_MIN_INFO, 0);
-	debug_out(fs_pwd, DEBUG_MIN_INFO, 1);
+	debug_out(cfg::fs_pwd, DEBUG_MIN_INFO, 1);
 
 	wificonfig_loop = true;
 
@@ -2087,7 +2103,7 @@ void wifiConfig() {
 	WiFi.mode(WIFI_AP);
 	const IPAddress apIP(192, 168, 4, 1);
 	WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
-	WiFi.softAP(fs_ssid, fs_pwd, selectChannelForAp(wifiInfo, count_wifiInfo));
+	WiFi.softAP(cfg::fs_ssid, cfg::fs_pwd, selectChannelForAp(wifiInfo, count_wifiInfo));
 	debug_out(String(WLANPWD), DEBUG_MIN_INFO, 1);
 
 	DNSServer dnsServer;
@@ -2122,46 +2138,46 @@ void wifiConfig() {
 	delay(100);
 
 	debug_out(F("Connecting to "), DEBUG_MIN_INFO, 0);
-	debug_out(wlanssid, DEBUG_MIN_INFO, 1);
+	debug_out(cfg::wlanssid, DEBUG_MIN_INFO, 1);
 
-	WiFi.begin(wlanssid, wlanpwd);
+	WiFi.begin(cfg::wlanssid, cfg::wlanpwd);
 
 	debug_out(F("---- Result Webconfig ----"), DEBUG_MIN_INFO, 1);
 	debug_out(F("WLANSSID: "), DEBUG_MIN_INFO, 0);
-	debug_out(wlanssid, DEBUG_MIN_INFO, 1);
+	debug_out(cfg::wlanssid, DEBUG_MIN_INFO, 1);
 	debug_out(F("----\nReading ..."), DEBUG_MIN_INFO, 1);
 	debug_out(F("PPD: "), DEBUG_MIN_INFO, 0);
-	debug_out(String(ppd_read), DEBUG_MIN_INFO, 1);
+	debug_out(String(cfg::ppd_read), DEBUG_MIN_INFO, 1);
 	debug_out(F("SDS: "), DEBUG_MIN_INFO, 0);
-	debug_out(String(sds_read), DEBUG_MIN_INFO, 1);
+	debug_out(String(cfg::sds_read), DEBUG_MIN_INFO, 1);
 	debug_out(F("PMS: "), DEBUG_MIN_INFO, 0);
-	debug_out(String(pms_read), DEBUG_MIN_INFO, 1);
+	debug_out(String(cfg::pms_read), DEBUG_MIN_INFO, 1);
 	debug_out(F("HPM: "), DEBUG_MIN_INFO, 0);
-	debug_out(String(hpm_read), DEBUG_MIN_INFO, 1);
+	debug_out(String(cfg::hpm_read), DEBUG_MIN_INFO, 1);
 	debug_out(F("DHT: "), DEBUG_MIN_INFO, 0);
-	debug_out(String(dht_read), DEBUG_MIN_INFO, 1);
+	debug_out(String(cfg::dht_read), DEBUG_MIN_INFO, 1);
 	debug_out(F("DS18B20: "), DEBUG_MIN_INFO, 0);
-	debug_out(String(ds18b20_read), DEBUG_MIN_INFO, 1);
+	debug_out(String(cfg::ds18b20_read), DEBUG_MIN_INFO, 1);
 	debug_out(F("HTU21D: "), DEBUG_MIN_INFO, 0);
-	debug_out(String(htu21d_read), DEBUG_MIN_INFO, 1);
+	debug_out(String(cfg::htu21d_read), DEBUG_MIN_INFO, 1);
 	debug_out(F("BMP: "), DEBUG_MIN_INFO, 0);
-	debug_out(String(bmp_read), DEBUG_MIN_INFO, 1);
+	debug_out(String(cfg::bmp_read), DEBUG_MIN_INFO, 1);
 	debug_out(F("----\nSend to ..."), DEBUG_MIN_INFO, 1);
 	debug_out(F("Dusti: "), DEBUG_MIN_INFO, 0);
-	debug_out(String(send2dusti), DEBUG_MIN_INFO, 1);
+	debug_out(String(cfg::send2dusti), DEBUG_MIN_INFO, 1);
 	debug_out(F("Madavi: "), DEBUG_MIN_INFO, 0);
-	debug_out(String(send2madavi), DEBUG_MIN_INFO, 1);
+	debug_out(String(cfg::send2madavi), DEBUG_MIN_INFO, 1);
 	debug_out(F("CSV: "), DEBUG_MIN_INFO, 0);
-	debug_out(String(send2csv), DEBUG_MIN_INFO, 1);
+	debug_out(String(cfg::send2csv), DEBUG_MIN_INFO, 1);
 	debug_out("----", DEBUG_MIN_INFO, 1);
 	debug_out(F("Autoupdate: "), DEBUG_MIN_INFO, 0);
-	debug_out(String(auto_update), DEBUG_MIN_INFO, 1);
+	debug_out(String(cfg::auto_update), DEBUG_MIN_INFO, 1);
 	debug_out(F("Display: "), DEBUG_MIN_INFO, 0);
-	debug_out(String(has_display), DEBUG_MIN_INFO, 1);
+	debug_out(String(cfg::has_display), DEBUG_MIN_INFO, 1);
 	debug_out(F("LCD 1602: "), DEBUG_MIN_INFO, 0);
-	debug_out(String(has_lcd1602), DEBUG_MIN_INFO, 1);
+	debug_out(String(cfg::has_lcd1602), DEBUG_MIN_INFO, 1);
 	debug_out(F("Debug: "), DEBUG_MIN_INFO, 0);
-	debug_out(String(debug), DEBUG_MIN_INFO, 1);
+	debug_out(String(cfg::debug), DEBUG_MIN_INFO, 1);
 	wificonfig_loop = false;
 }
 
@@ -2183,15 +2199,15 @@ void connectWifi() {
 	WiFi.setOutputPower(20.5);
 	WiFi.setPhyMode(WIFI_PHY_MODE_11N);
 	WiFi.mode(WIFI_STA);
-	WiFi.begin(wlanssid, wlanpwd); // Start WiFI
+	WiFi.begin(cfg::wlanssid, cfg::wlanpwd); // Start WiFI
 
 	debug_out(F("Connecting to "), DEBUG_MIN_INFO, 0);
-	debug_out(wlanssid, DEBUG_MIN_INFO, 1);
+	debug_out(cfg::wlanssid, DEBUG_MIN_INFO, 1);
 
 	waitForWifiToConnect(40);
 	debug_out("", DEBUG_MIN_INFO, 1);
 	if (WiFi.status() != WL_CONNECTED) {
-		String fss = String(fs_ssid);
+		String fss = String(cfg::fs_ssid);
 		display_debug(fss.substring(0, 16), fss.substring(16));
 		wifiConfig();
 		if (WiFi.status() != WL_CONNECTED) {
@@ -3234,7 +3250,7 @@ String sensorGPS() {
  * AutoUpdate                                                    *
  *****************************************************************/
 static void autoUpdate() {
-	if (auto_update) {
+	if (cfg::auto_update) {
 		debug_out(F("Starting OTA update ..."), DEBUG_MIN_INFO, 1);
 		debug_out(F("NodeMCU firmware : "), DEBUG_MIN_INFO, 0);
 		debug_out(SOFTWARE_VERSION, DEBUG_MIN_INFO, 1);
@@ -3242,14 +3258,15 @@ static void autoUpdate() {
 		debug_out(UPDATE_URL, DEBUG_MED_INFO, 1);
 
 		String SDS_version = "";
-		if (sds_read) {
+		if (cfg::sds_read) {
 			SDS_version = SDS_version_date();
 		}
 		display_debug(F("Looking for"), F("OTA update"));
 		last_update_attempt = millis();
 		const HTTPUpdateResult ret = ESPhttpUpdate.update(UPDATE_HOST, UPDATE_PORT, UPDATE_URL,
 									 SOFTWARE_VERSION + String(" ") + esp_chipid + String(" ") + SDS_version + String(" ") +
-									 String(current_lang) + String(" ") + String(INTL_LANG) + String(" ") + String(use_beta ? "BETA" : ""));
+									 String(cfg::current_lang) + String(" ") + String(INTL_LANG) + String(" ") +
+									 String(cfg::use_beta ? "BETA" : ""));
 		switch(ret) {
 		case HTTP_UPDATE_FAILED:
 			debug_out(String(FPSTR(DBG_TXT_UPDATE)) + FPSTR(DBG_TXT_UPDATE_FAILED), DEBUG_ERROR, 0);
@@ -3292,59 +3309,59 @@ void display_values() {
 	int screens[5];
 	int line_count = 0;
 	debug_out(F("output values to display..."), DEBUG_MIN_INFO, 1);
-	if (ppd_read) {
+	if (cfg::ppd_read) {
 		pm10_value = last_value_PPD_P1;
 		pm10_sensor = FPSTR(SENSORS_PPD42NS);
 		pm25_value = last_value_PPD_P2;
 		pm25_sensor = FPSTR(SENSORS_PPD42NS);
 	}
-	if (pms_read) {
+	if (cfg::pms_read) {
 		pm10_value = last_value_PMS_P1;
 		pm10_sensor = FPSTR(SENSORS_PMSx003);
 		pm25_value = last_value_PMS_P2;
 		pm25_sensor = FPSTR(SENSORS_PMSx003);
 	}
-	if (hpm_read) {
+	if (cfg::hpm_read) {
 		pm10_value = last_value_HPM_P1;
 		pm10_sensor = FPSTR(SENSORS_HPM);
 		pm25_value = last_value_HPM_P2;
 		pm25_sensor = FPSTR(SENSORS_HPM);
 	}
-	if (sds_read) {
+	if (cfg::sds_read) {
 		pm10_value = last_value_SDS_P1;
 		pm10_sensor = FPSTR(SENSORS_SDS011);
 		pm25_value = last_value_SDS_P2;
 		pm25_sensor = FPSTR(SENSORS_SDS011);
 	}
-	if (dht_read) {
+	if (cfg::dht_read) {
 		t_value = last_value_DHT_T;
 		t_sensor = FPSTR(SENSORS_DHT22);
 		h_value = last_value_DHT_H;
 		h_sensor = FPSTR(SENSORS_DHT22);
 	}
-	if (ds18b20_read) {
+	if (cfg::ds18b20_read) {
 		t_value = last_value_DS18B20_T;
 		t_sensor = FPSTR(SENSORS_DS18B20);
 	}
-	if (htu21d_read) {
+	if (cfg::htu21d_read) {
 		t_value = last_value_HTU21D_T;
 		t_sensor = FPSTR(SENSORS_HTU21D);
 		h_value = last_value_HTU21D_H;
 		h_sensor = FPSTR(SENSORS_HTU21D);
 	}
-	if (bmp_read) {
+	if (cfg::bmp_read) {
 		t_value = last_value_BMP_T;
 		t_sensor = FPSTR(SENSORS_BMP180);
 		p_value = last_value_BMP_P;
 		p_sensor = FPSTR(SENSORS_BMP180);
 	}
-	if (bmp280_read) {
+	if (cfg::bmp280_read) {
 		t_value = last_value_BMP280_T;
 		t_sensor = FPSTR(SENSORS_BMP280);
 		p_value = last_value_BMP280_P;
 		p_sensor = FPSTR(SENSORS_BMP280);
 	}
-	if (bme280_read) {
+	if (cfg::bme280_read) {
 		t_value = last_value_BME280_T;
 		t_sensor = FPSTR(SENSORS_BME280);
 		h_value = last_value_BME280_H;
@@ -3352,24 +3369,24 @@ void display_values() {
 		p_value = last_value_BME280_P;
 		p_sensor = FPSTR(SENSORS_BME280);
 	}
-	if (gps_read) {
+	if (cfg::gps_read) {
 		lat_value = last_value_GPS_lat;
 		lon_value = last_value_GPS_lon;
 		alt_value = last_value_GPS_alt;
 		gps_sensor = "NEO6M";
 	}
-	if (ppd_read || pms_read || hpm_read || sds_read) {
+	if (cfg::ppd_read || cfg::pms_read || cfg::hpm_read || cfg::sds_read) {
 		screens[screen_count++] = 1;
 	}
-	if (dht_read || ds18b20_read || htu21d_read || bmp_read || bmp280_read || bme280_read) {
+	if (cfg::dht_read || cfg::ds18b20_read || cfg::htu21d_read || cfg::bmp_read || cfg::bmp280_read || cfg::bme280_read) {
 		screens[screen_count++] = 2;
 	}
-	if (gps_read) {
+	if (cfg::gps_read) {
 		screens[screen_count++] = 3;
 	}
 	screens[screen_count++] = 4;	// Wifi info
 	screens[screen_count++] = 5;	// chipID, firmware and count of measurements
-	if (has_display || has_sh1106 || has_lcd2004_27) {
+	if (cfg::has_display || cfg::has_sh1106 || cfg::has_lcd2004_27) {
 		switch (screens[next_display_count % screen_count]) {
 		case (1):
 			display_header = pm25_sensor;
@@ -3419,7 +3436,7 @@ void display_values() {
 				display_footer += " o ";
 			}
 		}
-		if (has_display) {
+		if (cfg::has_display) {
 			display.clear();
 			display.displayOn();
 			display.setTextAlignment(TEXT_ALIGN_CENTER);
@@ -3432,7 +3449,7 @@ void display_values() {
 			display.drawString(64, 52, display_footer);
 			display.display();
 		}
-		if (has_sh1106) {
+		if (cfg::has_sh1106) {
 			display_sh1106.clear();
 			display_sh1106.displayOn();
 			display_sh1106.setTextAlignment(TEXT_ALIGN_CENTER);
@@ -3445,7 +3462,7 @@ void display_values() {
 			display_sh1106.drawString(64, 52, display_footer);
 			display_sh1106.display();
 		}
-		if (has_lcd2004_27) {
+		if (cfg::has_lcd2004_27) {
 			display_header = String((next_display_count % screen_count) + 1) + "/" + String(screen_count) + " " + display_header;
 			display_lines[0].replace(" µg/m³", "");
 			display_lines[0].replace("°", String(char(223)));
@@ -3490,14 +3507,14 @@ void display_values() {
 		break;
 	}
 
-	if (has_lcd1602_27) {
+	if (cfg::has_lcd1602_27) {
 		lcd_1602_27.clear();
 		lcd_1602_27.setCursor(0, 0);
 		lcd_1602_27.print(display_lines[0]);
 		lcd_1602_27.setCursor(0, 1);
 		lcd_1602_27.print(display_lines[1]);
 	}
-	if (has_lcd1602) {
+	if (cfg::has_lcd1602) {
 		lcd_1602_3f.clear();
 		lcd_1602_3f.setCursor(0, 0);
 		lcd_1602_3f.print(display_lines[0]);
@@ -3524,15 +3541,15 @@ void init_display() {
  * Init LCD display                                              *
  *****************************************************************/
 void init_lcd() {
-	if (has_lcd1602_27) {
+	if (cfg::has_lcd1602_27) {
 		lcd_1602_27.init();
 		lcd_1602_27.backlight();
 	}
-	if (has_lcd1602) {
+	if (cfg::has_lcd1602) {
 		lcd_1602_3f.init();
 		lcd_1602_3f.backlight();
 	}
-	if (has_lcd2004_27) {
+	if (cfg::has_lcd2004_27) {
 		lcd_2004_27.init();
 		lcd_2004_27.backlight();
 	}
@@ -3577,13 +3594,13 @@ bool initBME280(char addr) {
 }
 
 static void powerOnTestSensors() {
-	if (ppd_read) {
+	if (cfg::ppd_read) {
 		pinMode(PPD_PIN_PM1, INPUT_PULLUP);                 // Listen at the designated PIN
 		pinMode(PPD_PIN_PM2, INPUT_PULLUP);                 // Listen at the designated PIN
 		debug_out(F("Read PPD..."), DEBUG_MIN_INFO, 1);
 	}
 
-	if (sds_read) {
+	if (cfg::sds_read) {
 		debug_out(F("Read SDS..."), DEBUG_MIN_INFO, 1);
 		SDS_cmd(PmSensorCmd::Start);
 		delay(100);
@@ -3593,7 +3610,7 @@ static void powerOnTestSensors() {
 		is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
 	}
 
-	if (pms_read) {
+	if (cfg::pms_read) {
 		debug_out(F("Read PMS(1,3,5,6,7)003..."), DEBUG_MIN_INFO, 1);
 		PMS_cmd(PmSensorCmd::Start);
 		delay(100);
@@ -3603,7 +3620,7 @@ static void powerOnTestSensors() {
 		is_PMS_running = PMS_cmd(PmSensorCmd::Stop);
 	}
 
-	if (hpm_read) {
+	if (cfg::hpm_read) {
 		debug_out(F("Read HPM..."), DEBUG_MIN_INFO, 1);
 		HPM_cmd(PmSensorCmd::Start);
 		delay(100);
@@ -3613,17 +3630,17 @@ static void powerOnTestSensors() {
 		is_HPM_running = HPM_cmd(PmSensorCmd::Stop);
 	}
 
-	if (dht_read) {
+	if (cfg::dht_read) {
 		dht.begin();                                        // Start DHT
 		debug_out(F("Read DHT..."), DEBUG_MIN_INFO, 1);
 	}
 
-	if (htu21d_read) {
+	if (cfg::htu21d_read) {
 		htu21d.begin();                                     // Start HTU21D
 		debug_out(F("Read HTU21D..."), DEBUG_MIN_INFO, 1);
 	}
 
-	if (bmp_read) {
+	if (cfg::bmp_read) {
 		debug_out(F("Read BMP..."), DEBUG_MIN_INFO, 1);
 		if (!bmp.begin()) {
 			debug_out(F("No valid BMP085 sensor, check wiring!"), DEBUG_MIN_INFO, 1);
@@ -3631,7 +3648,7 @@ static void powerOnTestSensors() {
 		}
 	}
 
-	if (bmp280_read) {
+	if (cfg::bmp280_read) {
 		debug_out(F("Read BMP280..."), DEBUG_MIN_INFO, 1);
 		if (!initBMP280(0x76) && !initBMP280(0x77)) {
 			debug_out(F("Check BMP280 wiring"), DEBUG_MIN_INFO, 1);
@@ -3639,7 +3656,7 @@ static void powerOnTestSensors() {
 		}
 	}
 
-	if (bme280_read) {
+	if (cfg::bme280_read) {
 		debug_out(F("Read BME280..."), DEBUG_MIN_INFO, 1);
 		if (!initBME280(0x76) && !initBME280(0x77)) {
 			debug_out(F("Check BME280 wiring"), DEBUG_MIN_INFO, 1);
@@ -3647,38 +3664,38 @@ static void powerOnTestSensors() {
 		}
 	}
 
-	if (ds18b20_read) {
+	if (cfg::ds18b20_read) {
 		ds18b20.begin();                                    // Start DS18B20
 		debug_out(F("Read DS18B20..."), DEBUG_MIN_INFO, 1);
 	}
 }
 
 static void logEnabledAPIs() {
-	if (send2dusti) {
+	if (cfg::send2dusti) {
 		debug_out(F("Send to luftdaten.info..."), DEBUG_MIN_INFO, 1);
 	}
 
-	if (send2madavi) {
+	if (cfg::send2madavi) {
 		debug_out(F("Send to madavi.de..."), DEBUG_MIN_INFO, 1);
 	}
 
-	if (send2lora) {
+	if (cfg::send2lora) {
 		debug_out(F("Send to LoRa gateway..."), DEBUG_MIN_INFO, 1);
 	}
 
-	if (send2csv) {
+	if (cfg::send2csv) {
 		debug_out(F("Send as CSV to Serial..."), DEBUG_MIN_INFO, 1);
 	}
 
-	if (send2custom) {
+	if (cfg::send2custom) {
 		debug_out(F("Send to custom API..."), DEBUG_MIN_INFO, 1);
 	}
 
-	if (send2influx) {
+	if (cfg::send2influx) {
 		debug_out(F("Send to custom influx DB..."), DEBUG_MIN_INFO, 1);
 	}
 
-	if (auto_update) {
+	if (cfg::auto_update) {
 		debug_out(F("Auto-Update active..."), DEBUG_MIN_INFO, 1);
 	}
 }
@@ -3695,13 +3712,13 @@ static void acquireNetworkTime() {
 }
 
 static void logEnabledDisplays() {
-	if (has_display || has_sh1106) {
+	if (cfg::has_display || cfg::has_sh1106) {
 		debug_out(F("Show on OLED..."), DEBUG_MIN_INFO, 1);
 	}
-	if (has_lcd1602 || has_lcd1602_27) {
+	if (cfg::has_lcd1602 || cfg::has_lcd1602_27) {
 		debug_out(F("Show on LCD 1602 ..."), DEBUG_MIN_INFO, 1);
 	}
-	if (has_lcd2004_27) {
+	if (cfg::has_lcd2004_27) {
 		debug_out(F("Show on LCD 2004 ..."), DEBUG_MIN_INFO, 1);
 	}
 }
@@ -3718,7 +3735,7 @@ void setup() {
 	init_display();
 	init_lcd();
 	setup_webserver();
-	display_debug(F("Connecting to"), String(wlanssid));
+	display_debug(F("Connecting to"), String(cfg::wlanssid));
 	connectWifi();
 	acquireNetworkTime();
 
@@ -3730,7 +3747,7 @@ void setup() {
 
 	powerOnTestSensors();
 
-	if (gps_read) {
+	if (cfg::gps_read) {
 		serialGPS.begin(9600);
 		debug_out(F("Read GPS..."), DEBUG_MIN_INFO, 1);
 		disable_unneeded_nmea();
@@ -3803,25 +3820,25 @@ void loop() {
 	}
 	last_micro = act_micro;
 
-	if (ppd_read) {
+	if (cfg::ppd_read) {
 		debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "PPD", DEBUG_MAX_INFO, 1);
 		result_PPD = sensorPPD();
 	}
 
 	if (((act_milli - starttime_SDS) > sampletime_SDS_ms) || ((act_milli - starttime) > sending_intervall_ms)) {
-		if (sds_read) {
+		if (cfg::sds_read) {
 			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "SDS", DEBUG_MAX_INFO, 1);
 			result_SDS = sensorSDS();
 			starttime_SDS = act_milli;
 		}
 
-		if (pms_read) {
+		if (cfg::pms_read) {
 			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "PMS", DEBUG_MAX_INFO, 1);
 			result_PMS = sensorPMS();
 			starttime_SDS = act_milli;
 		}
 
-		if (hpm_read) {
+		if (cfg::hpm_read) {
 			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "HPM", DEBUG_MAX_INFO, 1);
 			result_HPM = sensorHPM();
 			starttime_SDS = act_milli;
@@ -3831,44 +3848,45 @@ void loop() {
 	server.handleClient();
 
 	if (send_now) {
-		if (dht_read) {
+		if (cfg::dht_read) {
 			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + FPSTR(SENSORS_DHT22), DEBUG_MAX_INFO, 1);
 			result_DHT = sensorDHT();                       // getting temperature and humidity (optional)
 		}
 
-		if (htu21d_read) {
+		if (cfg::htu21d_read) {
 			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + FPSTR(SENSORS_HTU21D), DEBUG_MAX_INFO, 1);
 			result_HTU21D = sensorHTU21D();                 // getting temperature and humidity (optional)
 		}
 
-		if (bmp_read && (! bmp_init_failed)) {
+		if (cfg::bmp_read && (! bmp_init_failed)) {
 			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + FPSTR(SENSORS_BMP180), DEBUG_MAX_INFO, 1);
 			result_BMP = sensorBMP();                       // getting temperature and pressure (optional)
 		}
 
-		if (bmp280_read && (! bmp280_init_failed)) {
+		if (cfg::bmp280_read && (! bmp280_init_failed)) {
 			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + FPSTR(SENSORS_BMP280), DEBUG_MAX_INFO, 1);
 			result_BMP280 = sensorBMP280();                 // getting temperature, humidity and pressure (optional)
 		}
 
-		if (bme280_read && (! bme280_init_failed)) {
+		if (cfg::bme280_read && (! bme280_init_failed)) {
 			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + FPSTR(SENSORS_BME280), DEBUG_MAX_INFO, 1);
 			result_BME280 = sensorBME280();                 // getting temperature, humidity and pressure (optional)
 		}
 
-		if (ds18b20_read) {
+		if (cfg::ds18b20_read) {
 			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + FPSTR(SENSORS_DS18B20), DEBUG_MAX_INFO, 1);
 			result_DS18B20 = sensorDS18B20();               // getting temperature (optional)
 		}
 	}
 
-	if (gps_read && (((act_milli - starttime_GPS) > sampletime_GPS_ms) || ((act_milli - starttime) > sending_intervall_ms))) {
+	if (cfg::gps_read && (((act_milli - starttime_GPS) > sampletime_GPS_ms) || ((act_milli - starttime) > sending_intervall_ms))) {
 		debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "GPS", DEBUG_MAX_INFO, 1);
 		result_GPS = sensorGPS();                           // getting GPS coordinates
 		starttime_GPS = act_milli;
 	}
 
-	if ((has_display || has_sh1106 || has_lcd2004_27 || has_lcd1602 || has_lcd1602_27) && (act_milli > next_display_millis)) {
+	if ((cfg::has_display || cfg::has_sh1106 || cfg::has_lcd2004_27 || cfg::has_lcd1602 ||
+			cfg::has_lcd1602_27) && (act_milli > next_display_millis)) {
 		display_values();
 	}
 
@@ -3889,82 +3907,82 @@ void loop() {
 		server.handleClient();
 		yield();
 		server.stop();
-		const int HTTP_PORT_DUSTI = (ssl_dusti ? 443 : 80);
-		if (ppd_read) {
+		const int HTTP_PORT_DUSTI = (cfg::ssl_dusti ? 443 : 80);
+		if (cfg::ppd_read) {
 			data += result_PPD;
-			if (send2dusti) {
+			if (cfg::send2dusti) {
 				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(PPD42NS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
 				sendLuftdaten(result_PPD, PPD_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "PPD_");
 				sum_send_time += millis() - start_send;
 			}
 		}
-		if (sds_read) {
+		if (cfg::sds_read) {
 			data += result_SDS;
-			if (send2dusti) {
+			if (cfg::send2dusti) {
 				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(SDS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
 				sendLuftdaten(result_SDS, SDS_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "SDS_");
 				sum_send_time += millis() - start_send;
 			}
 		}
-		if (pms_read) {
+		if (cfg::pms_read) {
 			data += result_PMS;
-			if (send2dusti) {
+			if (cfg::send2dusti) {
 				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(PMS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
 				sendLuftdaten(result_PMS, PMS_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "PMS_");
 				sum_send_time += millis() - start_send;
 			}
 		}
-		if (hpm_read) {
+		if (cfg::hpm_read) {
 			data += result_HPM;
-			if (send2dusti) {
+			if (cfg::send2dusti) {
 				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(HPM): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
 				sendLuftdaten(result_HPM, HPM_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "HPM_");
 				sum_send_time += millis() - start_send;
 			}
 		}
-		if (dht_read) {
+		if (cfg::dht_read) {
 			data += result_DHT;
-			if (send2dusti) {
+			if (cfg::send2dusti) {
 				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(DHT): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
 				sendLuftdaten(result_DHT, DHT_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "DHT_");
 				sum_send_time += millis() - start_send;
 			}
 		}
-		if (htu21d_read) {
+		if (cfg::htu21d_read) {
 			data += result_HTU21D;
-			if (send2dusti) {
+			if (cfg::send2dusti) {
 				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(HTU21D): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
 				sendLuftdaten(result_HTU21D, HTU21D_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "HTU21D_");
 				sum_send_time += millis() - start_send;
 			}
 		}
-		if (bmp_read && (! bmp_init_failed)) {
+		if (cfg::bmp_read && (! bmp_init_failed)) {
 			data += result_BMP;
-			if (send2dusti) {
+			if (cfg::send2dusti) {
 				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(BMP): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
 				sendLuftdaten(result_BMP, BMP_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "BMP_");
 				sum_send_time += millis() - start_send;
 			}
 		}
-		if (bmp280_read && (! bmp280_init_failed)) {
+		if (cfg::bmp280_read && (! bmp280_init_failed)) {
 			data += result_BMP280;
-			if (send2dusti) {
+			if (cfg::send2dusti) {
 				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(BMP280): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
 				sendLuftdaten(result_BMP280, BMP280_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "BMP280_");
 				sum_send_time += millis() - start_send;
 			}
 		}
-		if (bme280_read && (! bme280_init_failed)) {
+		if (cfg::bme280_read && (! bme280_init_failed)) {
 			data += result_BME280;
-			if (send2dusti) {
+			if (cfg::send2dusti) {
 				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(BME280): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
 				sendLuftdaten(result_BME280, BME280_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "BME280_");
@@ -3972,9 +3990,9 @@ void loop() {
 			}
 		}
 
-		if (ds18b20_read) {
+		if (cfg::ds18b20_read) {
 			data += result_DS18B20;
-			if (send2dusti) {
+			if (cfg::send2dusti) {
 				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(DS18B20): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
 				sendLuftdaten(result_DS18B20, DS18B20_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "DS18B20_");
@@ -3982,9 +4000,9 @@ void loop() {
 			}
 		}
 
-		if (gps_read) {
+		if (cfg::gps_read) {
 			data += result_GPS;
-			if (send2dusti) {
+			if (cfg::send2dusti) {
 				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(GPS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
 				sendLuftdaten(result_GPS, GPS_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "GPS_");
@@ -4002,34 +4020,34 @@ void loop() {
 
 		//sending to api(s)
 
-		if (send2madavi) {
+		if (cfg::send2madavi) {
 			debug_out(String(FPSTR(DBG_TXT_SENDING_TO)) + F("madavi.de: "), DEBUG_MIN_INFO, 1);
 			start_send = millis();
-			sendData(data, 0, HOST_MADAVI, (ssl_madavi ? 443 : 80), URL_MADAVI, true, "", FPSTR(TXT_CONTENT_TYPE_JSON));
+			sendData(data, 0, HOST_MADAVI, (cfg::ssl_madavi ? 443 : 80), URL_MADAVI, true, "", FPSTR(TXT_CONTENT_TYPE_JSON));
 			sum_send_time += millis() - start_send;
 		}
 
-		if (send2sensemap && (senseboxid[0] != '\0')) {
+		if (cfg::send2sensemap && (cfg::senseboxid[0] != '\0')) {
 			debug_out(String(FPSTR(DBG_TXT_SENDING_TO)) + F("opensensemap: "), DEBUG_MIN_INFO, 1);
 			start_send = millis();
 			String sensemap_path = url_sensemap;
-			sensemap_path.replace("BOXID", senseboxid);
+			sensemap_path.replace("BOXID", cfg::senseboxid);
 			sendData(data, 0, host_sensemap, httpPort_sensemap, sensemap_path.c_str(), false, "", FPSTR(TXT_CONTENT_TYPE_JSON));
 			sum_send_time += millis() - start_send;
 		}
 
-		if (send2fsapp) {
+		if (cfg::send2fsapp) {
 			debug_out(String(FPSTR(DBG_TXT_SENDING_TO)) + F("Server FS App: "), DEBUG_MIN_INFO, 1);
 			start_send = millis();
 			sendData(data, 0, host_fsapp, httpPort_fsapp, url_fsapp.c_str(), false, "", FPSTR(TXT_CONTENT_TYPE_JSON));
 			sum_send_time += millis() - start_send;
 		}
 
-		if (send2influx) {
+		if (cfg::send2influx) {
 			debug_out(String(FPSTR(DBG_TXT_SENDING_TO)) + F("custom influx db: "), DEBUG_MIN_INFO, 1);
 			start_send = millis();
 			const String data_4_influxdb = create_influxdb_string(data);
-			sendData(data_4_influxdb, 0, host_influx, port_influx, url_influx, false, basic_auth_influx.c_str(), FPSTR(TXT_CONTENT_TYPE_INFLUXDB));
+			sendData(data_4_influxdb, 0, cfg::host_influx, cfg::port_influx, cfg::url_influx, false, basic_auth_influx.c_str(), FPSTR(TXT_CONTENT_TYPE_INFLUXDB));
 			sum_send_time += millis() - start_send;
 		}
 
@@ -4038,18 +4056,18 @@ void loop() {
 					send_lora(data);
 				}
 		*/
-		if (send2csv) {
+		if (cfg::send2csv) {
 			debug_out(F("## Sending as csv: "), DEBUG_MIN_INFO, 1);
 			send_csv(data);
 		}
 
-		if (send2custom) {
+		if (cfg::send2custom) {
 			String data_4_custom = data;
 			data_4_custom.remove(0, 1);
 			data_4_custom = "{\"esp8266id\": \"" + String(esp_chipid) + "\", " + data_4_custom;
 			debug_out(String(FPSTR(DBG_TXT_SENDING_TO)) + F("custom api: "), DEBUG_MIN_INFO, 1);
 			start_send = millis();
-			sendData(data_4_custom, 0, host_custom, port_custom, url_custom, false, basic_auth_custom.c_str(), FPSTR(TXT_CONTENT_TYPE_JSON));
+			sendData(data_4_custom, 0, cfg::host_custom, cfg::port_custom, cfg::url_custom, false, basic_auth_custom.c_str(), FPSTR(TXT_CONTENT_TYPE_JSON));
 			sum_send_time += millis() - start_send;
 		}
 
