@@ -427,8 +427,6 @@ String last_data_string = "";
 
 String esp_chipid;
 
-String server_name;
-
 long last_page_load = millis();
 
 bool wificonfig_loop = false;
@@ -2036,9 +2034,6 @@ void webserver_not_found() {
  * Webserver setup                                               *
  *****************************************************************/
 void setup_webserver() {
-	server_name = F("Feinstaubsensor-");
-	server_name += esp_chipid;
-
 	server.on("/", webserver_root);
 	server.on("/config", webserver_config);
 	server.on("/wifi", webserver_wifi);
@@ -3756,6 +3751,8 @@ void setup() {
 	logEnabledAPIs();
 	logEnabledDisplays();
 
+	String server_name = F("Feinstaubsensor-");
+	server_name += esp_chipid;
 	if (MDNS.begin(server_name.c_str())) {
 		MDNS.addService("http", "tcp", 80);
 	}
