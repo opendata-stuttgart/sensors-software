@@ -431,8 +431,6 @@ long last_page_load = millis();
 
 bool wificonfig_loop = false;
 
-bool first_csv_line = true;
-
 bool first_cycle = true;
 
 unsigned long count_sends = 0;
@@ -2380,6 +2378,7 @@ void send_csv(const String& data) {
 			tmp_str = json2data["sensordatavalues"][i]["value"].as<char*>();
 			valueline += tmp_str + ";";
 		}
+		static bool first_csv_line = true;
 		if (first_csv_line) {
 			if (headline.length() > 0) {
 				headline.remove(headline.length() - 1);
