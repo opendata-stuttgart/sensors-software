@@ -354,7 +354,7 @@ bool is_SDS_running = true;
 bool is_PMS_running = true;
 bool is_HPM_running = true;
 
-const unsigned long display_update_interval = 5000;
+const unsigned long DISPLAY_UPDATE_INTERVAL_MS = 5000;
 unsigned long display_last_update;
 
 const unsigned long sampletime_GPS_ms = 50;
@@ -3516,7 +3516,7 @@ void display_values() {
 	}
 	yield();
 	next_display_count += 1;
-	next_display_millis = millis() + 5000;
+	next_display_millis = millis() + DISPLAY_UPDATE_INTERVAL_MS;
 }
 
 /*****************************************************************
@@ -3764,7 +3764,7 @@ void setup() {
 	starttime = millis();                                   // store the start time
 	time_point_device_start_ms = starttime;
 	starttime_SDS = starttime;
-	next_display_millis = starttime + 5000;
+	next_display_millis = starttime + DISPLAY_UPDATE_INTERVAL_MS;
 }
 
 static void checkForceRestart() {
