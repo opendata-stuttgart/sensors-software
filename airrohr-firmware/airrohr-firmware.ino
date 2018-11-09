@@ -3250,10 +3250,7 @@ static void autoUpdate() {
 		debug_out(UPDATE_HOST, DEBUG_MED_INFO, 1);
 		debug_out(UPDATE_URL, DEBUG_MED_INFO, 1);
 
-		String SDS_version = "";
-		if (cfg::sds_read) {
-			SDS_version = SDS_version_date();
-		}
+		const String SDS_version = cfg::sds_read ? SDS_version_date() : "";
 		display_debug(F("Looking for"), F("OTA update"));
 		last_update_attempt = millis();
 		const HTTPUpdateResult ret = ESPhttpUpdate.update(UPDATE_HOST, UPDATE_PORT, UPDATE_URL,
