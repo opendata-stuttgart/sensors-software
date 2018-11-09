@@ -2415,7 +2415,7 @@ static String sensorDHT() {
 		if (isnan(t) || isnan(h)) {
 			delay(100);
 			h = dht.readHumidity();
-			t = dht.readTemperature(false);
+			t = dht.readTemperature(false, true);
 		}
 		if (isnan(t) || isnan(h)) {
 			debug_out(String(FPSTR(SENSORS_DHT22)) + FPSTR(DBG_TXT_COULDNT_BE_READ), DEBUG_ERROR, 1);
