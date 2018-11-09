@@ -97,7 +97,7 @@
  *
  * Der Sketch verwendet 489152 Bytes (46%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
  * Globale Variablen verwenden 37160 Bytes (45%) des dynamischen Speichers, 44760 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
- * 
+ *
  ************************************************************************/
 // increment on change
 #define SOFTWARE_VERSION "NRZ-2018-113"
@@ -447,7 +447,7 @@ template<typename T, std::size_t N> constexpr std::size_t array_num_elements(con
 }
 
 template<typename T, std::size_t N> constexpr std::size_t capacity_null_terminated_char_array(const T(&)[N]) {
-  return N - 1;
+	return N - 1;
 }
 
 const char data_first_part[] PROGMEM = "{\"software_version\": \"{v}\", \"sensordatavalues\":[";
@@ -1358,9 +1358,8 @@ void webserver_root() {
 	}
 }
 
-static int constexpr constexprstrlen(const char* str)
-{
-    return *str ? 1 + constexprstrlen(str + 1) : 0;
+static int constexpr constexprstrlen(const char* str) {
+	return *str ? 1 + constexprstrlen(str + 1) : 0;
 }
 
 /*****************************************************************
