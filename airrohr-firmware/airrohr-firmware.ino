@@ -2401,18 +2401,18 @@ static String sensorDHT() {
 	int count = 0;
 	const int MAX_ATTEMPTS = 5;
 	while ((count++ < MAX_ATTEMPTS) && (s == "")) {
-		auto h = dht.readHumidity(); //Read Humidity
-		auto t = dht.readTemperature(); //Read Temperature
+		auto h = dht.readHumidity();
+		auto t = dht.readTemperature();
 		if (isnan(t) || isnan(h)) {
 			delay(100);
-			h = dht.readHumidity(); //Read Humidity
-			t = dht.readTemperature(false); //Read Temperature
+			h = dht.readHumidity();
+			t = dht.readTemperature(false);
 		}
 		if (isnan(t) || isnan(h)) {
 			debug_out(String(FPSTR(SENSORS_DHT22)) + FPSTR(DBG_TXT_COULDNT_BE_READ), DEBUG_ERROR, 1);
 		} else {
 			debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO, 0);
-			debug_out(String(t) + char(223) + "C", DEBUG_MIN_INFO, 1);
+			debug_out(String(t) + u8"°C", DEBUG_MIN_INFO, 1);
 			debug_out(FPSTR(DBG_TXT_HUMIDITY), DEBUG_MIN_INFO, 0);
 			debug_out(String(h) + "%", DEBUG_MIN_INFO, 1);
 			last_value_DHT_T = t;
