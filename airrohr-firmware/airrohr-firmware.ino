@@ -3773,6 +3773,64 @@ static void checkForceRestart() {
 	}
 }
 
+static unsigned long sendDataToOptionalApis(const String &data)
+{
+	unsigned long start_send = 0;
+	unsigned long sum_send_time = 0;
+
+	if (cfg::send2madavi) {
+		debug_out(String(FPSTR(DBG_TXT_SENDING_TO)) + F("madavi.de: "), DEBUG_MIN_INFO, 1);
+		start_send = millis();
+		sendData(data, 0, HOST_MADAVI, (cfg::ssl_madavi ? 443 : 80), URL_MADAVI, true, "", FPSTR(TXT_CONTENT_TYPE_JSON));
+		sum_send_time += millis() - start_send;
+	}
+
+	if (cfg::send2sensemap && (cfg::senseboxid[0] != '\0')) {
+		debug_out(String(FPSTR(DBG_TXT_SENDING_TO)) + F("opensensemap: "), DEBUG_MIN_INFO, 1);
+		start_send = millis();
+		String sensemap_path = URL_SENSEMAP;
+		sensemap_path.replace("BOXID", cfg::senseboxid);
+		sendData(data, 0, HOST_SENSEMAP, PORT_SENSEMAP, sensemap_path.c_str(), false, "", FPSTR(TXT_CONTENT_TYPE_JSON));
+		sum_send_time += millis() - start_send;
+	}
+
+	if (cfg::send2fsapp) {
+		debug_out(String(FPSTR(DBG_TXT_SENDING_TO)) + F("Server FS App: "), DEBUG_MIN_INFO, 1);
+		start_send = millis();
+		sendData(data, 0, HOST_FSAPP, PORT_FSAPP, URL_FSAPP, false, "", FPSTR(TXT_CONTENT_TYPE_JSON));
+		sum_send_time += millis() - start_send;
+	}
+
+	if (cfg::send2influx) {
+		debug_out(String(FPSTR(DBG_TXT_SENDING_TO)) + F("custom influx db: "), DEBUG_MIN_INFO, 1);
+		start_send = millis();
+		const String data_4_influxdb = create_influxdb_string(data);
+		sendData(data_4_influxdb, 0, cfg::host_influx, cfg::port_influx, cfg::url_influx, false, basic_auth_influx.c_str(), FPSTR(TXT_CONTENT_TYPE_INFLUXDB));
+		sum_send_time += millis() - start_send;
+	}
+
+	/*		if (send2lora) {
+				debug_out(F("## Sending to LoRa gateway: "), DEBUG_MIN_INFO, 1);
+				send_lora(data);
+			}
+	*/
+	if (cfg::send2csv) {
+		debug_out(F("## Sending as csv: "), DEBUG_MIN_INFO, 1);
+		send_csv(data);
+	}
+
+	if (cfg::send2custom) {
+		String data_4_custom = data;
+		data_4_custom.remove(0, 1);
+		data_4_custom = "{\"esp8266id\": \"" + String(esp_chipid) + "\", " + data_4_custom;
+		debug_out(String(FPSTR(DBG_TXT_SENDING_TO)) + F("custom api: "), DEBUG_MIN_INFO, 1);
+		start_send = millis();
+		sendData(data_4_custom, 0, cfg::host_custom, cfg::port_custom, cfg::url_custom, false, basic_auth_custom.c_str(), FPSTR(TXT_CONTENT_TYPE_JSON));
+		sum_send_time += millis() - start_send;
+	}
+	return sum_send_time;
+}
+
 /*****************************************************************
  * And action                                                    *
  *****************************************************************/
@@ -4013,58 +4071,7 @@ void loop() {
 		}
 		data += "]}";
 
-		//sending to api(s)
-
-		if (cfg::send2madavi) {
-			debug_out(String(FPSTR(DBG_TXT_SENDING_TO)) + F("madavi.de: "), DEBUG_MIN_INFO, 1);
-			start_send = millis();
-			sendData(data, 0, HOST_MADAVI, (cfg::ssl_madavi ? 443 : 80), URL_MADAVI, true, "", FPSTR(TXT_CONTENT_TYPE_JSON));
-			sum_send_time += millis() - start_send;
-		}
-
-		if (cfg::send2sensemap && (cfg::senseboxid[0] != '\0')) {
-			debug_out(String(FPSTR(DBG_TXT_SENDING_TO)) + F("opensensemap: "), DEBUG_MIN_INFO, 1);
-			start_send = millis();
-			String sensemap_path = URL_SENSEMAP;
-			sensemap_path.replace("BOXID", cfg::senseboxid);
-			sendData(data, 0, HOST_SENSEMAP, PORT_SENSEMAP, sensemap_path.c_str(), false, "", FPSTR(TXT_CONTENT_TYPE_JSON));
-			sum_send_time += millis() - start_send;
-		}
-
-		if (cfg::send2fsapp) {
-			debug_out(String(FPSTR(DBG_TXT_SENDING_TO)) + F("Server FS App: "), DEBUG_MIN_INFO, 1);
-			start_send = millis();
-			sendData(data, 0, HOST_FSAPP, PORT_FSAPP, URL_FSAPP, false, "", FPSTR(TXT_CONTENT_TYPE_JSON));
-			sum_send_time += millis() - start_send;
-		}
-
-		if (cfg::send2influx) {
-			debug_out(String(FPSTR(DBG_TXT_SENDING_TO)) + F("custom influx db: "), DEBUG_MIN_INFO, 1);
-			start_send = millis();
-			const String data_4_influxdb = create_influxdb_string(data);
-			sendData(data_4_influxdb, 0, cfg::host_influx, cfg::port_influx, cfg::url_influx, false, basic_auth_influx.c_str(), FPSTR(TXT_CONTENT_TYPE_INFLUXDB));
-			sum_send_time += millis() - start_send;
-		}
-
-		/*		if (send2lora) {
-					debug_out(F("## Sending to LoRa gateway: "), DEBUG_MIN_INFO, 1);
-					send_lora(data);
-				}
-		*/
-		if (cfg::send2csv) {
-			debug_out(F("## Sending as csv: "), DEBUG_MIN_INFO, 1);
-			send_csv(data);
-		}
-
-		if (cfg::send2custom) {
-			String data_4_custom = data;
-			data_4_custom.remove(0, 1);
-			data_4_custom = "{\"esp8266id\": \"" + String(esp_chipid) + "\", " + data_4_custom;
-			debug_out(String(FPSTR(DBG_TXT_SENDING_TO)) + F("custom api: "), DEBUG_MIN_INFO, 1);
-			start_send = millis();
-			sendData(data_4_custom, 0, cfg::host_custom, cfg::port_custom, cfg::url_custom, false, basic_auth_custom.c_str(), FPSTR(TXT_CONTENT_TYPE_JSON));
-			sum_send_time += millis() - start_send;
-		}
+		sum_send_time += sendDataToOptionalApis(data);
 
 		server.begin();
 
