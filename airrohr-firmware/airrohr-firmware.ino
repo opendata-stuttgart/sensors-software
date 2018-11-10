@@ -248,6 +248,8 @@ namespace cfg {
 #define UPDATE_URL "/sensor/update/firmware.php"
 #define UPDATE_PORT 80
 
+#define JSON_BUFFER_SIZE 2000
+
 enum class PmSensorCmd {
 	Start,
 	Stop,
@@ -913,7 +915,7 @@ void readConfig() {
 				std::unique_ptr<char[]> buf(new char[size]);
 
 				configFile.readBytes(buf.get(), size);
-				StaticJsonBuffer<2000> jsonBuffer;
+				StaticJsonBuffer<JSON_BUFFER_SIZE> jsonBuffer;
 				JsonObject& json = jsonBuffer.parseObject(buf.get());
 				json.printTo(json_string);
 				debug_out(F("File content: "), DEBUG_MAX_INFO, 0);
@@ -1450,7 +1452,7 @@ void webserver_config() {
 			page_content += form_checkbox_sensor("bme280_read", FPSTR(INTL_BME280), bme280_read);
 			page_content += form_checkbox_sensor("ds18b20_read", FPSTR(INTL_DS18B20), ds18b20_read);
 			page_content += form_checkbox("gps_read", FPSTR(INTL_NEO6M), gps_read);
-			page_content += F("<br/>\n<b>");
+			page_content += F("<br/><br/>\n<b>");
 		}
 
 		page_content += FPSTR(INTL_MORE_SETTINGS);
@@ -1474,6 +1476,8 @@ void webserver_config() {
 
 			page_content += FPSTR(INTL_MORE_APIS);
 			page_content += F("</b><br/><br/>");
+			page_content += form_checkbox("send2csv", tmpl(FPSTR(INTL_SEND_TO), F("CSV")), send2csv);
+			page_content += FPSTR(BR_TAG);
 			page_content += form_checkbox("send2fsapp", tmpl(FPSTR(INTL_SEND_TO), F("Feinstaub-App")), send2fsapp);
 			page_content += FPSTR(BR_TAG);
 			page_content += form_checkbox("send2sensemap", tmpl(FPSTR(INTL_SEND_TO), F("OpenSenseMap")), send2sensemap);
@@ -1561,8 +1565,6 @@ void webserver_config() {
 			readBoolParam(ssl_dusti);
 			readBoolParam(send2madavi);
 			readBoolParam(ssl_madavi);
-			readBoolParam(send2sensemap);
-			readBoolParam(send2fsapp);
 			readBoolParam(dht_read);
 			readBoolParam(htu21d_read);
 			readBoolParam(sds_read);
@@ -1579,6 +1581,11 @@ void webserver_config() {
 			readTimeParam(sending_intervall_ms);
 			readTimeParam(time_for_wifi_config);
 
+			readBoolParam(send2csv);
+
+			readBoolParam(send2fsapp);
+
+			readBoolParam(send2sensemap);
 			readCharParam(senseboxid);
 
 			readBoolParam(send2custom);
@@ -1633,6 +1640,8 @@ void webserver_config() {
 		page_content += line_from_value(FPSTR(INTL_LCD2004_27), String(has_lcd2004_27));
 		page_content += line_from_value(FPSTR(INTL_DEBUG_LEVEL), String(debug));
 		page_content += line_from_value(FPSTR(INTL_MEASUREMENT_INTERVAL), String(sending_intervall_ms));
+		page_content += line_from_value(tmpl(FPSTR(INTL_SEND_TO), F("CSV")), String(send2csv));
+		page_content += line_from_value(tmpl(FPSTR(INTL_SEND_TO), F("Feinstaub-App")), String(send2fsapp));
 		page_content += line_from_value(tmpl(FPSTR(INTL_SEND_TO), F("opensensemap")), String(send2sensemap));
 		page_content += F("<br/>senseBox-ID ");
 		page_content += senseboxid;
@@ -1980,7 +1989,7 @@ void webserver_prometheus_endpoint() {
 	data_4_prometheus.replace("{up}", String(act_milli - time_point_device_start_ms));
 	data_4_prometheus.replace("{si}", String(sending_intervall_ms));
 	data_4_prometheus.replace("{cs}", String(count_sends));
-	StaticJsonBuffer<2000> jsonBuffer;
+	StaticJsonBuffer<JSON_BUFFER_SIZE> jsonBuffer;
 	JsonObject& json2data = jsonBuffer.parseObject(last_data_string);
 	if (json2data.success()) {
 		for (uint8_t i = 0; i < json2data["sensordatavalues"].size() - 1; i++) {
@@ -2339,7 +2348,7 @@ String create_influxdb_string(const String& data) {
 	String data_4_influxdb = "";
 	debug_out(F("Parse JSON for influx DB"), DEBUG_MIN_INFO, 1);
 	debug_out(data, DEBUG_MIN_INFO, 1);
-	StaticJsonBuffer<2000> jsonBuffer;
+	StaticJsonBuffer<JSON_BUFFER_SIZE> jsonBuffer;
 	JsonObject& json2data = jsonBuffer.parseObject(data);
 	if (json2data.success()) {
 		data_4_influxdb += F("feinstaub,node=esp8266-");
@@ -2365,7 +2374,7 @@ String create_influxdb_string(const String& data) {
  * send data as csv to serial out                                *
  *****************************************************************/
 void send_csv(const String& data) {
-	StaticJsonBuffer<1000> jsonBuffer;
+	StaticJsonBuffer<JSON_BUFFER_SIZE> jsonBuffer;
 	JsonObject& json2data = jsonBuffer.parseObject(data);
 	debug_out(F("CSV Output"), DEBUG_MIN_INFO, 1);
 	debug_out(data, DEBUG_MIN_INFO, 1);
