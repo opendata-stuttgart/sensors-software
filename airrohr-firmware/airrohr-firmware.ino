@@ -1094,11 +1094,11 @@ void writeConfig() {
  *****************************************************************/
 void create_basic_auth_strings() {
 	basic_auth_custom = "";
-	if (cfg::user_custom[0] != '\0' || cfg::pwd_custom[0] != '\0') {
+	if (cfg::user_custom[0] != '\0' && cfg::pwd_custom[0] != '\0') {
 		basic_auth_custom = base64::encode(String(cfg::user_custom) + ":" + String(cfg::pwd_custom));
 	}
 	basic_auth_influx = "";
-	if (cfg::user_influx[0] != '\0' || cfg::pwd_influx[0] != '\0') {
+	if (cfg::user_influx[0] != '\0' && cfg::pwd_influx[0] != '\0') {
 		basic_auth_influx = base64::encode(String(cfg::user_influx) + ":" + String(cfg::pwd_influx));
 	}
 }
