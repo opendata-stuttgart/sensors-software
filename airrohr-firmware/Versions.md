@@ -1,5 +1,10 @@
+NRZ-2018-114-B1
+* going back to beta
+* more code cleanup
+* reactivated sending as CSV to serial
+
 NRZ-2018-113
-online since 2018-09-20
+NOT published
 * same as NRZ-2018-112-B5
 
 NRZ-2018-112-B5
