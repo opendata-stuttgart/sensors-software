@@ -459,6 +459,8 @@ template<typename T, std::size_t N> constexpr std::size_t capacity_null_terminat
 	return N - 1;
 }
 
+#define msSince(timestamp_before) (act_milli - (timestamp_before))
+
 const char data_first_part[] PROGMEM = "{\"software_version\": \"{v}\", \"sensordatavalues\":[";
 
 /*****************************************************************
@@ -1296,7 +1298,7 @@ String wlan_ssid_to_table_row(const String& ssid, const String& encryption, int3
 
 String warning_first_cycle() {
 	String s = FPSTR(INTL_TIME_TO_FIRST_MEASUREMENT);
-	unsigned long time_to_first = sending_intervall_ms - (act_milli - starttime);
+	unsigned long time_to_first = sending_intervall_ms - msSince(starttime);
 	if (time_to_first > sending_intervall_ms) {
 		time_to_first = 0;
 	}
@@ -1306,7 +1308,7 @@ String warning_first_cycle() {
 
 String age_last_values() {
 	String s = "<b>";
-	unsigned long time_since_last = act_milli - starttime;
+	unsigned long time_since_last = msSince(starttime);
 	if (time_since_last > sending_intervall_ms) {
 		time_since_last = 0;
 	}
@@ -1934,7 +1936,7 @@ void webserver_data_json() {
 		s1 = FPSTR(data_first_part);
 		s1.replace("{v}", SOFTWARE_VERSION);
 		s1 += "]}";
-		age = sending_intervall_ms - (act_milli - starttime);
+		age = sending_intervall_ms - msSince(starttime);
 		if (age > sending_intervall_ms) {
 			age = 0;
 		}
@@ -1943,7 +1945,7 @@ void webserver_data_json() {
 		s1 = last_data_string;
 		debug_out(F("last data: "), DEBUG_MIN_INFO, 0);
 		debug_out(s1, DEBUG_MIN_INFO, 1);
-		age = act_milli - starttime;
+		age = msSince(starttime);
 		if (age > sending_intervall_ms) {
 			age = 0;
 		}
@@ -1971,7 +1973,7 @@ void webserver_prometheus_endpoint() {
 	debug_out(last_data_string, DEBUG_MED_INFO, 1);
 	data_4_prometheus.replace("{id}", id);
 	data_4_prometheus.replace("{ver}", SOFTWARE_VERSION);
-	data_4_prometheus.replace("{up}", String(act_milli - time_point_device_start_ms));
+	data_4_prometheus.replace("{up}", String(msSince(time_point_device_start_ms)));
 	data_4_prometheus.replace("{si}", String(sending_intervall_ms));
 	data_4_prometheus.replace("{cs}", String(count_sends));
 	StaticJsonBuffer<JSON_BUFFER_SIZE> jsonBuffer;
@@ -1984,7 +1986,7 @@ void webserver_prometheus_endpoint() {
 			data_4_prometheus += tmp_str + "\n";
 		}
 		data_4_prometheus += F("last_sample_age_ms{");
-		data_4_prometheus += id + "} " + String(act_milli - starttime) + "\n";
+		data_4_prometheus += id + "} " + String(msSince(starttime)) + "\n";
 	} else {
 		debug_out(FPSTR(DBG_TXT_DATA_READ_FAILED), DEBUG_ERROR, 1);
 	}
@@ -2612,7 +2614,7 @@ String sensorSDS() {
 	int checksum_ok = 0;
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_SDS011), DEBUG_MED_INFO, 1);
-	if ((act_milli - starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
+	if (msSince(starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
 		if (is_SDS_running) {
 			is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
 		}
@@ -2669,7 +2671,7 @@ String sensorSDS() {
 			}
 			if (len > 2) { checksum_is += value; }
 			len++;
-			if (len == 10 && checksum_ok == 1 && ((act_milli - starttime) > (sending_intervall_ms - reading_time_SDS_ms))) {
+			if (len == 10 && checksum_ok == 1 && (msSince(starttime) > (sending_intervall_ms - reading_time_SDS_ms))) {
 				if ((! isnan(pm10_serial)) && (! isnan(pm25_serial))) {
 					sds_pm10_sum += pm10_serial;
 					sds_pm25_sum += pm25_serial;
@@ -2752,7 +2754,7 @@ String sensorPMS() {
 	int frame_len = 24;				// min. frame length
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_PMSx003), DEBUG_MED_INFO, 1);
-	if ((act_milli - starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
+	if (msSince(starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
 		if (is_PMS_running) {
 			is_PMS_running = PMS_cmd(PmSensorCmd::Stop);
 		}
@@ -2830,7 +2832,7 @@ String sensorPMS() {
 				} else {
 					len = 0;
 				};
-				if (checksum_ok == 1 && ((act_milli - starttime) > (sending_intervall_ms - reading_time_SDS_ms))) {
+				if (checksum_ok == 1 && (msSince(starttime) > (sending_intervall_ms - reading_time_SDS_ms))) {
 					if ((! isnan(pm1_serial)) && (! isnan(pm10_serial)) && (! isnan(pm25_serial))) {
 						pms_pm1_sum += pm1_serial;
 						pms_pm10_sum += pm10_serial;
@@ -2930,7 +2932,7 @@ String sensorHPM() {
 	int checksum_ok = 0;
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_HPM), DEBUG_MED_INFO, 1);
-	if ((act_milli - starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
+	if (msSince(starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
 		if (is_HPM_running) {
 			is_HPM_running = HPM_cmd(PmSensorCmd::Stop);
 		}
@@ -2989,7 +2991,7 @@ String sensorHPM() {
 				} else {
 					len = 0;
 				};
-				if (checksum_ok == 1 && (long(act_milli - starttime) > (long(sending_intervall_ms) - long(reading_time_SDS_ms)))) {
+				if (checksum_ok == 1 && (long(msSince(starttime)) > (long(sending_intervall_ms) - long(reading_time_SDS_ms)))) {
 					if ((! isnan(pm10_serial)) && (! isnan(pm25_serial))) {
 						hpm_pm10_sum += pm10_serial;
 						hpm_pm25_sum += pm25_serial;
@@ -3064,7 +3066,7 @@ String sensorPPD() {
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_PPD42NS), DEBUG_MED_INFO, 1);
 
-	if ((act_milli - starttime) <= sampletime_ms) {
+	if (msSince(starttime) <= sampletime_ms) {
 
 		// Read pins connected to ppd42ns
 		boolean valP1 = digitalRead(PPD_PIN_PM1);
@@ -3761,7 +3763,7 @@ void setup() {
 }
 
 static void checkForceRestart() {
-	if ((act_milli - time_point_device_start_ms) > DURATION_BEFORE_FORCED_RESTART_MS) {
+	if (msSince(time_point_device_start_ms) > DURATION_BEFORE_FORCED_RESTART_MS) {
 		ESP.restart();
 	}
 }
@@ -3848,7 +3850,7 @@ void loop() {
 
 	act_micro = micros();
 	act_milli = millis();
-	send_now = (act_milli - starttime) > sending_intervall_ms;
+	send_now = msSince(starttime) > sending_intervall_ms;
 
 	sample_count++;
 
@@ -3870,7 +3872,7 @@ void loop() {
 		result_PPD = sensorPPD();
 	}
 
-	if (((act_milli - starttime_SDS) > sampletime_SDS_ms) || ((act_milli - starttime) > sending_intervall_ms)) {
+	if ((msSince(starttime_SDS) > sampletime_SDS_ms) || (msSince(starttime) > sending_intervall_ms)) {
 		if (cfg::sds_read) {
 			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "SDS", DEBUG_MAX_INFO, 1);
 			result_SDS = sensorSDS();
@@ -3924,7 +3926,7 @@ void loop() {
 		}
 	}
 
-	if (cfg::gps_read && (((act_milli - starttime_GPS) > sampletime_GPS_ms) || ((act_milli - starttime) > sending_intervall_ms))) {
+	if (cfg::gps_read && ((msSince(starttime_GPS) > sampletime_GPS_ms) || (msSince(starttime) > sending_intervall_ms))) {
 		debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "GPS", DEBUG_MAX_INFO, 1);
 		result_GPS = sensorGPS();                           // getting GPS coordinates
 		starttime_GPS = act_milli;
@@ -4069,7 +4071,7 @@ void loop() {
 
 		checkForceRestart();
 
-		if ((act_milli - last_update_attempt) > PAUSE_BETWEEN_UPDATE_ATTEMPTS_MS) {
+		if (msSince(last_update_attempt) > PAUSE_BETWEEN_UPDATE_ATTEMPTS_MS) {
 			autoUpdate();
 		}
 
