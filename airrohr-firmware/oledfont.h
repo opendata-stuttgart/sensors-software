@@ -1,8 +1,12 @@
 #pragma once
+#define OLEDDISPLAYFONTS_h
 
 // Created by http://oleddisplay.squix.ch/ Consider a donation
 // In case of problems make sure that you are using the font file with the correct version!
-static constexpr uint8_t Roboto_Mono_9[] PROGMEM = {
+
+// This is Roboto_Mono_9 replacing the default font
+
+static constexpr uint8_t ArialMT_Plain_10[] PROGMEM = {
 	0x07, // Width: 7
 	0x0C, // Height: 12
 	0x20, // First Char: 32

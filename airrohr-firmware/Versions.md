@@ -1,3 +1,7 @@
+NRZ-2018-114-B2
+* more code cleanup
+* replacing default Arial_MT font with Roboto_Mono_9
+
 NRZ-2018-114-B1
 * going back to beta
 * more code cleanup

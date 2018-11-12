@@ -3779,7 +3779,8 @@ static void checkForceRestart() {
 	}
 }
 
-static unsigned long sendDataToOptionalApis(const String &data) {
+static unsigned long sendDataToOptionalApis(const String &data)
+{
 	unsigned long start_send = 0;
 	unsigned long sum_send_time = 0;
 
