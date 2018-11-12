@@ -3110,10 +3110,15 @@ String sensorPPD() {
 	}
 	// Checking if it is time to sample
 	if (send_now) {
+		const auto calcConcentration = [](double ratio) {
+			/* spec sheet curve*/
+			return (1.1 * pow(ratio, 3) - 3.8 * pow(ratio, 2) + 520 * ratio + 0.62);
+		};
+
 		last_value_PPD_P1 = -1;
 		last_value_PPD_P2 = -1;
 		double ratio = lowpulseoccupancyP1 / (sampletime_ms * 10.0);					// int percentage 0 to 100
-		double concentration = (1.1 * pow(ratio, 3) - 3.8 * pow(ratio, 2) + 520 * ratio + 0.62);	// spec sheet curve
+		double concentration = calcConcentration(ratio);
 		// Begin printing
 		debug_out(F("LPO P10    : "), DEBUG_MIN_INFO, 0);
 		debug_out(String(lowpulseoccupancyP1), DEBUG_MIN_INFO, 1);
@@ -3129,7 +3134,7 @@ String sensorPPD() {
 		s += Value2Json("P1", Float2String(last_value_PPD_P1));
 
 		ratio = lowpulseoccupancyP2 / (sampletime_ms * 10.0);
-		concentration = (1.1 * pow(ratio, 3) - 3.8 * pow(ratio, 2) + 520 * ratio + 0.62);
+		concentration = calcConcentration(ratio);
 		// Begin printing
 		debug_out(F("LPO PM25   : "), DEBUG_MIN_INFO, 0);
 		debug_out(String(lowpulseoccupancyP2), DEBUG_MIN_INFO, 1);
@@ -3259,10 +3264,7 @@ static void autoUpdate() {
 		debug_out(UPDATE_HOST, DEBUG_MED_INFO, 1);
 		debug_out(UPDATE_URL, DEBUG_MED_INFO, 1);
 
-		String SDS_version = "";
-		if (cfg::sds_read) {
-			SDS_version = SDS_version_date();
-		}
+		const String SDS_version = cfg::sds_read ? SDS_version_date() : "";
 		display_debug(F("Looking for"), F("OTA update"));
 		last_update_attempt = millis();
 		const HTTPUpdateResult ret = ESPhttpUpdate.update(UPDATE_HOST, UPDATE_PORT, UPDATE_URL,
