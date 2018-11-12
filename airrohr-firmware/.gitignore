@@ -5,6 +5,7 @@ keywords.txt
 library.json
 TinyGPS++.cpp
 TinyGPS++.h
+*.ino.orig
 builds/*
 !builds/readme.md
 .clang_complete
