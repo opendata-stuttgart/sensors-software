@@ -1854,26 +1854,11 @@ void webserver_debug_level() {
 			page_content += FPSTR(INTL_DEBUG_SETTING_TO);
 			page_content += F(" ");
 
-			switch (lvl) {
-			case 0:
-				page_content += FPSTR(INTL_NONE);
-				break;
-			case 1:
-				page_content += FPSTR(INTL_ERROR);
-				break;
-			case 2:
-				page_content += FPSTR(INTL_WARNING);
-				break;
-			case 3:
-				page_content += FPSTR(INTL_MIN_INFO);
-				break;
-			case 4:
-				page_content += FPSTR(INTL_MED_INFO);
-				break;
-			case 5:
-				page_content += FPSTR(INTL_MAX_INFO);
-				break;
-			}
+			static constexpr std::array<const char *, 6> lvlText PROGMEM = {
+				INTL_NONE, INTL_ERROR, INTL_WARNING, INTL_MIN_INFO, INTL_MED_INFO, INTL_MAX_INFO
+			};
+
+			page_content += FPSTR(lvlText[lvl]);
 			page_content += F(".</h3>");
 		}
 	}
