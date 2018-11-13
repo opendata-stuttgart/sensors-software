@@ -225,6 +225,9 @@ namespace cfg {
 
 	char host_influx[100] = "influx server";
 	char url_influx[100] = "/write?db=luftdaten";
+
+	unsigned long time_for_wifi_config = 600000;
+	unsigned long sending_intervall_ms = 145000;
 }
 
 #define HOST_MADAVI "api-rrd.madavi.de"
@@ -351,10 +354,7 @@ bool is_SDS_running = true;
 bool is_PMS_running = true;
 bool is_HPM_running = true;
 
-unsigned long sending_intervall_ms = 145000;
 unsigned long sending_time = 0;
-
-unsigned long time_for_wifi_config = 600000;
 
 const unsigned long SAMPLETIME_MS = 30000;
 const unsigned long SAMPLETIME_SDS_MS = 1000;
@@ -1293,8 +1293,8 @@ String wlan_ssid_to_table_row(const String& ssid, const String& encryption, int3
 
 String warning_first_cycle() {
 	String s = FPSTR(INTL_TIME_TO_FIRST_MEASUREMENT);
-	unsigned long time_to_first = sending_intervall_ms - msSince(starttime);
-	if (time_to_first > sending_intervall_ms) {
+	unsigned long time_to_first = cfg::sending_intervall_ms - msSince(starttime);
+	if (time_to_first > cfg::sending_intervall_ms) {
 		time_to_first = 0;
 	}
 	s.replace("{v}", String((long)((time_to_first + 500) / 1000)));
@@ -1304,7 +1304,7 @@ String warning_first_cycle() {
 String age_last_values() {
 	String s = "<b>";
 	unsigned long time_since_last = msSince(starttime);
-	if (time_since_last > sending_intervall_ms) {
+	if (time_since_last > cfg::sending_intervall_ms) {
 		time_since_last = 0;
 	}
 	s += String((long)((time_since_last + 500) / 1000));
@@ -1931,8 +1931,8 @@ void webserver_data_json() {
 		s1 = FPSTR(data_first_part);
 		s1.replace("{v}", SOFTWARE_VERSION);
 		s1 += "]}";
-		age = sending_intervall_ms - msSince(starttime);
-		if (age > sending_intervall_ms) {
+		age = cfg::sending_intervall_ms - msSince(starttime);
+		if (age > cfg::sending_intervall_ms) {
 			age = 0;
 		}
 		age = 0 - age;
@@ -1941,7 +1941,7 @@ void webserver_data_json() {
 		debug_out(F("last data: "), DEBUG_MIN_INFO, 0);
 		debug_out(s1, DEBUG_MIN_INFO, 1);
 		age = msSince(starttime);
-		if (age > sending_intervall_ms) {
+		if (age > cfg::sending_intervall_ms) {
 			age = 0;
 		}
 	}
@@ -1969,7 +1969,7 @@ void webserver_prometheus_endpoint() {
 	data_4_prometheus.replace("{id}", id);
 	data_4_prometheus.replace("{ver}", SOFTWARE_VERSION);
 	data_4_prometheus.replace("{up}", String(msSince(time_point_device_start_ms)));
-	data_4_prometheus.replace("{si}", String(sending_intervall_ms));
+	data_4_prometheus.replace("{si}", String(cfg::sending_intervall_ms));
 	data_4_prometheus.replace("{cs}", String(count_sends));
 	StaticJsonBuffer<JSON_BUFFER_SIZE> jsonBuffer;
 	JsonObject& json2data = jsonBuffer.parseObject(last_data_string);
@@ -2095,7 +2095,7 @@ void wifiConfig() {
 
 	// 10 minutes timeout for wifi config
 	last_page_load = millis();
-	while (((millis() - last_page_load) < time_for_wifi_config)) {
+	while (((millis() - last_page_load) < cfg::time_for_wifi_config)) {
 		dnsServer.processNextRequest();
 		server.handleClient();
 		wdt_reset(); // nodemcu is alive
@@ -2609,7 +2609,7 @@ String sensorSDS() {
 	int checksum_ok = 0;
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_SDS011), DEBUG_MED_INFO, 1);
-	if (msSince(starttime) < (sending_intervall_ms - (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS))) {
+	if (msSince(starttime) < (cfg::sending_intervall_ms - (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS))) {
 		if (is_SDS_running) {
 			is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
 		}
@@ -2666,7 +2666,7 @@ String sensorSDS() {
 			}
 			if (len > 2) { checksum_is += value; }
 			len++;
-			if (len == 10 && checksum_ok == 1 && (msSince(starttime) > (sending_intervall_ms - READINGTIME_SDS_MS))) {
+			if (len == 10 && checksum_ok == 1 && (msSince(starttime) > (cfg::sending_intervall_ms - READINGTIME_SDS_MS))) {
 				if ((! isnan(pm10_serial)) && (! isnan(pm25_serial))) {
 					sds_pm10_sum += pm10_serial;
 					sds_pm25_sum += pm25_serial;
@@ -2722,7 +2722,7 @@ String sensorSDS() {
 		sds_pm10_min = 20000;
 		sds_pm25_max = 0;
 		sds_pm25_min = 20000;
-		if ((sending_intervall_ms > (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS))) {
+		if ((cfg::sending_intervall_ms > (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS))) {
 			is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
 		}
 	}
@@ -2749,7 +2749,7 @@ String sensorPMS() {
 	int frame_len = 24;				// min. frame length
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_PMSx003), DEBUG_MED_INFO, 1);
-	if (msSince(starttime) < (sending_intervall_ms - (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS))) {
+	if (msSince(starttime) < (cfg::sending_intervall_ms - (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS))) {
 		if (is_PMS_running) {
 			is_PMS_running = PMS_cmd(PmSensorCmd::Stop);
 		}
@@ -2827,7 +2827,7 @@ String sensorPMS() {
 				} else {
 					len = 0;
 				};
-				if (checksum_ok == 1 && (msSince(starttime) > (sending_intervall_ms - READINGTIME_SDS_MS))) {
+				if (checksum_ok == 1 && (msSince(starttime) > (cfg::sending_intervall_ms - READINGTIME_SDS_MS))) {
 					if ((! isnan(pm1_serial)) && (! isnan(pm10_serial)) && (! isnan(pm25_serial))) {
 						pms_pm1_sum += pm1_serial;
 						pms_pm10_sum += pm10_serial;
@@ -2902,7 +2902,7 @@ String sensorPMS() {
 		pms_pm10_min = 20000;
 		pms_pm25_max = 0;
 		pms_pm25_min = 20000;
-		if (sending_intervall_ms > (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS)) {
+		if (cfg::sending_intervall_ms > (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS)) {
 			is_PMS_running = PMS_cmd(PmSensorCmd::Stop);
 		}
 	}
@@ -2927,7 +2927,7 @@ String sensorHPM() {
 	int checksum_ok = 0;
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_HPM), DEBUG_MED_INFO, 1);
-	if (msSince(starttime) < (sending_intervall_ms - (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS))) {
+	if (msSince(starttime) < (cfg::sending_intervall_ms - (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS))) {
 		if (is_HPM_running) {
 			is_HPM_running = HPM_cmd(PmSensorCmd::Stop);
 		}
@@ -2986,7 +2986,7 @@ String sensorHPM() {
 				} else {
 					len = 0;
 				};
-				if (checksum_ok == 1 && (long(msSince(starttime)) > (long(sending_intervall_ms) - long(READINGTIME_SDS_MS)))) {
+				if (checksum_ok == 1 && (long(msSince(starttime)) > (long(cfg::sending_intervall_ms) - long(READINGTIME_SDS_MS)))) {
 					if ((! isnan(pm10_serial)) && (! isnan(pm25_serial))) {
 						hpm_pm10_sum += pm10_serial;
 						hpm_pm25_sum += pm25_serial;
@@ -3043,7 +3043,7 @@ String sensorHPM() {
 		hpm_pm10_min = 20000;
 		hpm_pm25_max = 0;
 		hpm_pm25_min = 20000;
-		if (sending_intervall_ms > (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS)) {
+		if (cfg::sending_intervall_ms > (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS)) {
 			is_HPM_running = HPM_cmd(PmSensorCmd::Stop);
 		}
 	}
@@ -3841,7 +3841,7 @@ void loop() {
 
 	act_micro = micros();
 	act_milli = millis();
-	send_now = msSince(starttime) > sending_intervall_ms;
+	send_now = msSince(starttime) > cfg::sending_intervall_ms;
 
 	sample_count++;
 
