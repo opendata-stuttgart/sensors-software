@@ -160,6 +160,19 @@
 #include "html-content.h"
 
 /******************************************************************
+ * Constants                                                      *
+ ******************************************************************/
+const unsigned long SAMPLETIME_MS = 30000;
+const unsigned long SAMPLETIME_SDS_MS = 1000;
+const unsigned long WARMUPTIME_SDS_MS = 15000;
+const unsigned long READINGTIME_SDS_MS = 5000;
+const unsigned long SAMPLETIME_GPS_MS = 50;
+const unsigned long DISPLAY_UPDATE_INTERVAL_MS = 5000;
+const unsigned long ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
+const unsigned long PAUSE_BETWEEN_UPDATE_ATTEMPTS_MS = ONE_DAY_IN_MS;        // check for firmware updates once a day
+const unsigned long DURATION_BEFORE_FORCED_RESTART_MS = ONE_DAY_IN_MS * 28;  // force a reboot every ~4 weeks
+
+/******************************************************************
  * The variables inside the cfg namespace are persistent          *
  * configuration values. They have defaults (extdef),             *
  * they can be changed by the user via the web interface, the     *
@@ -355,17 +368,6 @@ bool is_PMS_running = true;
 bool is_HPM_running = true;
 
 unsigned long sending_time = 0;
-
-const unsigned long SAMPLETIME_MS = 30000;
-const unsigned long SAMPLETIME_SDS_MS = 1000;
-const unsigned long WARMUPTIME_SDS_MS = 15000;
-const unsigned long READINGTIME_SDS_MS = 5000;
-const unsigned long SAMPLETIME_GPS_MS = 50;
-const unsigned long DISPLAY_UPDATE_INTERVAL_MS = 5000;
-const unsigned long ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
-const unsigned long PAUSE_BETWEEN_UPDATE_ATTEMPTS_MS = ONE_DAY_IN_MS;        // check for firmware updates once a day
-const unsigned long DURATION_BEFORE_FORCED_RESTART_MS = ONE_DAY_IN_MS * 28;  // force a reboot every ~4 weeks
-
 unsigned long last_update_attempt;
 
 int sds_pm10_sum = 0;
