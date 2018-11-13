@@ -347,29 +347,27 @@ unsigned long last_micro = 0;
 unsigned long min_micro = 1000000000;
 unsigned long max_micro = 0;
 
-const unsigned long sampletime_ms = 30000;
-
-const unsigned long sampletime_SDS_ms = 1000;
-const unsigned long warmup_time_SDS_ms = 15000;
-const unsigned long reading_time_SDS_ms = 5000;
-// const unsigned long reading_time_SDS_ms = 60000;
 bool is_SDS_running = true;
 bool is_PMS_running = true;
 bool is_HPM_running = true;
 
-const unsigned long DISPLAY_UPDATE_INTERVAL_MS = 5000;
 unsigned long display_last_update;
-
-const unsigned long sampletime_GPS_ms = 50;
 
 unsigned long sending_intervall_ms = 145000;
 unsigned long sending_time = 0;
 
 unsigned long time_for_wifi_config = 600000;
 
+const unsigned long SAMPLETIME_MS = 30000;
+const unsigned long SAMPLETIME_SDS_MS = 1000;
+const unsigned long WARMUPTIME_SDS_MS = 15000;
+const unsigned long READINGTIME_SDS_MS = 5000;
+const unsigned long SAMPLETIME_GPS_MS = 50;
+const unsigned long DISPLAY_UPDATE_INTERVAL_MS = 5000;
 const unsigned long ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
 const unsigned long PAUSE_BETWEEN_UPDATE_ATTEMPTS_MS = ONE_DAY_IN_MS;        // check for firmware updates once a day
 const unsigned long DURATION_BEFORE_FORCED_RESTART_MS = ONE_DAY_IN_MS * 28;  // force a reboot every ~4 weeks
+
 unsigned long last_update_attempt;
 
 int sds_pm10_sum = 0;
@@ -2613,7 +2611,7 @@ String sensorSDS() {
 	int checksum_ok = 0;
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_SDS011), DEBUG_MED_INFO, 1);
-	if (msSince(starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
+	if (msSince(starttime) < (sending_intervall_ms - (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS))) {
 		if (is_SDS_running) {
 			is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
 		}
@@ -2670,7 +2668,7 @@ String sensorSDS() {
 			}
 			if (len > 2) { checksum_is += value; }
 			len++;
-			if (len == 10 && checksum_ok == 1 && (msSince(starttime) > (sending_intervall_ms - reading_time_SDS_ms))) {
+			if (len == 10 && checksum_ok == 1 && (msSince(starttime) > (sending_intervall_ms - READINGTIME_SDS_MS))) {
 				if ((! isnan(pm10_serial)) && (! isnan(pm25_serial))) {
 					sds_pm10_sum += pm10_serial;
 					sds_pm25_sum += pm25_serial;
@@ -2726,7 +2724,7 @@ String sensorSDS() {
 		sds_pm10_min = 20000;
 		sds_pm25_max = 0;
 		sds_pm25_min = 20000;
-		if ((sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms))) {
+		if ((sending_intervall_ms > (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS))) {
 			is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
 		}
 	}
@@ -2753,7 +2751,7 @@ String sensorPMS() {
 	int frame_len = 24;				// min. frame length
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_PMSx003), DEBUG_MED_INFO, 1);
-	if (msSince(starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
+	if (msSince(starttime) < (sending_intervall_ms - (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS))) {
 		if (is_PMS_running) {
 			is_PMS_running = PMS_cmd(PmSensorCmd::Stop);
 		}
@@ -2831,7 +2829,7 @@ String sensorPMS() {
 				} else {
 					len = 0;
 				};
-				if (checksum_ok == 1 && (msSince(starttime) > (sending_intervall_ms - reading_time_SDS_ms))) {
+				if (checksum_ok == 1 && (msSince(starttime) > (sending_intervall_ms - READINGTIME_SDS_MS))) {
 					if ((! isnan(pm1_serial)) && (! isnan(pm10_serial)) && (! isnan(pm25_serial))) {
 						pms_pm1_sum += pm1_serial;
 						pms_pm10_sum += pm10_serial;
@@ -2906,7 +2904,7 @@ String sensorPMS() {
 		pms_pm10_min = 20000;
 		pms_pm25_max = 0;
 		pms_pm25_min = 20000;
-		if (sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms)) {
+		if (sending_intervall_ms > (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS)) {
 			is_PMS_running = PMS_cmd(PmSensorCmd::Stop);
 		}
 	}
@@ -2931,7 +2929,7 @@ String sensorHPM() {
 	int checksum_ok = 0;
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_HPM), DEBUG_MED_INFO, 1);
-	if (msSince(starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
+	if (msSince(starttime) < (sending_intervall_ms - (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS))) {
 		if (is_HPM_running) {
 			is_HPM_running = HPM_cmd(PmSensorCmd::Stop);
 		}
@@ -2990,7 +2988,7 @@ String sensorHPM() {
 				} else {
 					len = 0;
 				};
-				if (checksum_ok == 1 && (long(msSince(starttime)) > (long(sending_intervall_ms) - long(reading_time_SDS_ms)))) {
+				if (checksum_ok == 1 && (long(msSince(starttime)) > (long(sending_intervall_ms) - long(READINGTIME_SDS_MS)))) {
 					if ((! isnan(pm10_serial)) && (! isnan(pm25_serial))) {
 						hpm_pm10_sum += pm10_serial;
 						hpm_pm25_sum += pm25_serial;
@@ -3047,7 +3045,7 @@ String sensorHPM() {
 		hpm_pm10_min = 20000;
 		hpm_pm25_max = 0;
 		hpm_pm25_min = 20000;
-		if (sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms)) {
+		if (sending_intervall_ms > (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS)) {
 			is_HPM_running = HPM_cmd(PmSensorCmd::Stop);
 		}
 	}
@@ -3065,7 +3063,7 @@ String sensorPPD() {
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_PPD42NS), DEBUG_MED_INFO, 1);
 
-	if (msSince(starttime) <= sampletime_ms) {
+	if (msSince(starttime) <= SAMPLETIME_MS) {
 
 		// Read pins connected to ppd42ns
 		boolean valP1 = digitalRead(PPD_PIN_PM1);
@@ -3103,7 +3101,7 @@ String sensorPPD() {
 
 		last_value_PPD_P1 = -1;
 		last_value_PPD_P2 = -1;
-		double ratio = lowpulseoccupancyP1 / (sampletime_ms * 10.0);					// int percentage 0 to 100
+		double ratio = lowpulseoccupancyP1 / (SAMPLETIME_MS * 10.0);					// int percentage 0 to 100
 		double concentration = calcConcentration(ratio);
 		// Begin printing
 		debug_out(F("LPO P10    : "), DEBUG_MIN_INFO, 0);
@@ -3119,7 +3117,7 @@ String sensorPPD() {
 		s += Value2Json("ratioP1", Float2String(ratio));
 		s += Value2Json("P1", Float2String(last_value_PPD_P1));
 
-		ratio = lowpulseoccupancyP2 / (sampletime_ms * 10.0);
+		ratio = lowpulseoccupancyP2 / (SAMPLETIME_MS * 10.0);
 		concentration = calcConcentration(ratio);
 		// Begin printing
 		debug_out(F("LPO PM25   : "), DEBUG_MIN_INFO, 0);
@@ -3867,7 +3865,7 @@ void loop() {
 		result_PPD = sensorPPD();
 	}
 
-	if ((msSince(starttime_SDS) > sampletime_SDS_ms) || send_now) {
+	if ((msSince(starttime_SDS) > SAMPLETIME_SDS_MS) || send_now) {
 		if (cfg::sds_read) {
 			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "SDS", DEBUG_MAX_INFO, 1);
 			result_SDS = sensorSDS();
@@ -3921,7 +3919,7 @@ void loop() {
 		}
 	}
 
-	if (cfg::gps_read && ((msSince(starttime_GPS) > sampletime_GPS_ms) || send_now)) {
+	if (cfg::gps_read && ((msSince(starttime_GPS) > SAMPLETIME_GPS_MS) || send_now)) {
 		debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "GPS", DEBUG_MAX_INFO, 1);
 		result_GPS = sensorGPS();                           // getting GPS coordinates
 		starttime_GPS = act_milli;
