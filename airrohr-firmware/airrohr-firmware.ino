@@ -28,7 +28,7 @@
  * OK LAB Particulate Matter Sensor                                     *
  *      - nodemcu-LoLin board                                           *
  *      - Nova SDS0111                                                  *
- *  ﻿http://inovafitness.com/en/Laser-PM2-5-Sensor-SDS011-35.html        *
+ *  http://inovafitness.com/en/Laser-PM2-5-Sensor-SDS011-35.html        *
  *                                                                      *
  * Wiring Instruction:                                                  *
  *      - SDS011 Pin 1  (TX)   -> Pin D1 / GPIO5                        *
@@ -60,7 +60,7 @@
  *                                                                      *
  ************************************************************************
  * Extension: DHT22 (AM2303)                                            *
- *  ﻿http://www.aosong.com/en/products/details.asp?id=117                *
+ *  http://www.aosong.com/en/products/details.asp?id=117                *
  *                                                                      *
  * DHT22 Wiring Instruction                                             *
  * (left to right, front is perforated side):                           *
