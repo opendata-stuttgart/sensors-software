@@ -3870,7 +3870,7 @@ void loop() {
 		result_PPD = sensorPPD();
 	}
 
-	if ((msSince(starttime_SDS) > sampletime_SDS_ms) || (msSince(starttime) > sending_intervall_ms)) {
+	if ((msSince(starttime_SDS) > sampletime_SDS_ms) || send_now) {
 		if (cfg::sds_read) {
 			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "SDS", DEBUG_MAX_INFO, 1);
 			result_SDS = sensorSDS();
@@ -3924,7 +3924,7 @@ void loop() {
 		}
 	}
 
-	if (cfg::gps_read && ((msSince(starttime_GPS) > sampletime_GPS_ms) || (msSince(starttime) > sending_intervall_ms))) {
+	if (cfg::gps_read && ((msSince(starttime_GPS) > sampletime_GPS_ms) || send_now)) {
 		debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "GPS", DEBUG_MAX_INFO, 1);
 		result_GPS = sensorGPS();                           // getting GPS coordinates
 		starttime_GPS = act_milli;
