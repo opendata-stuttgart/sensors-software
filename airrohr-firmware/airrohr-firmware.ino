@@ -351,8 +351,6 @@ bool is_SDS_running = true;
 bool is_PMS_running = true;
 bool is_HPM_running = true;
 
-unsigned long display_last_update;
-
 unsigned long sending_intervall_ms = 145000;
 unsigned long sending_time = 0;
 
