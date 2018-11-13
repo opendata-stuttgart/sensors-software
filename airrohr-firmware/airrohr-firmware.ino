@@ -3844,8 +3844,6 @@ void loop() {
 	unsigned long sum_send_time = 0;
 	unsigned long start_send;
 
-	unsigned long diff_micro;
-
 	send_failed = false;
 
 	act_micro = micros();
@@ -3857,7 +3855,7 @@ void loop() {
 	wdt_reset(); // nodemcu is alive
 
 	if (last_micro != 0) {
-		diff_micro = act_micro - last_micro;
+		unsigned long diff_micro = act_micro - last_micro;
 		if (max_micro < diff_micro) {
 			max_micro = diff_micro;
 		}
