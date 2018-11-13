@@ -364,7 +364,6 @@ const unsigned long sampletime_GPS_ms = 50;
 
 unsigned long sending_intervall_ms = 145000;
 unsigned long sending_time = 0;
-bool send_failed = false;
 
 unsigned long time_for_wifi_config = 600000;
 
@@ -3844,8 +3843,6 @@ void loop() {
 	unsigned long sum_send_time = 0;
 	unsigned long start_send;
 
-	send_failed = false;
-
 	act_micro = micros();
 	act_milli = millis();
 	send_now = msSince(starttime) > sending_intervall_ms;
@@ -4073,10 +4070,7 @@ void loop() {
 			autoUpdate();
 		}
 
-		if (! send_failed) {
-			sending_time = (4 * sending_time + sum_send_time) / 5;
-		}
-
+		sending_time = (4 * sending_time + sum_send_time) / 5;
 		debug_out(F("Time for sending data (ms): "), DEBUG_MIN_INFO, 0);
 		debug_out(String(sending_time), DEBUG_MIN_INFO, 1);
 
