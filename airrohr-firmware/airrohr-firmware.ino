@@ -28,7 +28,7 @@
  * OK LAB Particulate Matter Sensor                                     *
  *      - nodemcu-LoLin board                                           *
  *      - Nova SDS0111                                                  *
- *  ﻿http://inovafitness.com/en/Laser-PM2-5-Sensor-SDS011-35.html        *
+ *  http://inovafitness.com/en/Laser-PM2-5-Sensor-SDS011-35.html        *
  *                                                                      *
  * Wiring Instruction:                                                  *
  *      - SDS011 Pin 1  (TX)   -> Pin D1 / GPIO5                        *
@@ -60,7 +60,7 @@
  *                                                                      *
  ************************************************************************
  * Extension: DHT22 (AM2303)                                            *
- *  ﻿http://www.aosong.com/en/products/details.asp?id=117                *
+ *  http://www.aosong.com/en/products/details.asp?id=117                *
  *                                                                      *
  * DHT22 Wiring Instruction                                             *
  * (left to right, front is perforated side):                           *
@@ -160,6 +160,19 @@
 #include "html-content.h"
 
 /******************************************************************
+ * Constants                                                      *
+ ******************************************************************/
+const unsigned long SAMPLETIME_MS = 30000;
+const unsigned long SAMPLETIME_SDS_MS = 1000;
+const unsigned long WARMUPTIME_SDS_MS = 15000;
+const unsigned long READINGTIME_SDS_MS = 5000;
+const unsigned long SAMPLETIME_GPS_MS = 50;
+const unsigned long DISPLAY_UPDATE_INTERVAL_MS = 5000;
+const unsigned long ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
+const unsigned long PAUSE_BETWEEN_UPDATE_ATTEMPTS_MS = ONE_DAY_IN_MS;        // check for firmware updates once a day
+const unsigned long DURATION_BEFORE_FORCED_RESTART_MS = ONE_DAY_IN_MS * 28;  // force a reboot every ~4 weeks
+
+/******************************************************************
  * The variables inside the cfg namespace are persistent          *
  * configuration values. They have defaults (extdef),             *
  * they can be changed by the user via the web interface, the     *
@@ -225,6 +238,9 @@ namespace cfg {
 
 	char host_influx[100] = "influx server";
 	char url_influx[100] = "/write?db=luftdaten";
+
+	unsigned long time_for_wifi_config = 600000;
+	unsigned long sending_intervall_ms = 145000;
 }
 
 #define HOST_MADAVI "api-rrd.madavi.de"
@@ -347,30 +363,11 @@ unsigned long last_micro = 0;
 unsigned long min_micro = 1000000000;
 unsigned long max_micro = 0;
 
-const unsigned long sampletime_ms = 30000;
-
-const unsigned long sampletime_SDS_ms = 1000;
-const unsigned long warmup_time_SDS_ms = 15000;
-const unsigned long reading_time_SDS_ms = 5000;
-// const unsigned long reading_time_SDS_ms = 60000;
 bool is_SDS_running = true;
 bool is_PMS_running = true;
 bool is_HPM_running = true;
 
-const unsigned long DISPLAY_UPDATE_INTERVAL_MS = 5000;
-unsigned long display_last_update;
-
-const unsigned long sampletime_GPS_ms = 50;
-
-unsigned long sending_intervall_ms = 145000;
 unsigned long sending_time = 0;
-bool send_failed = false;
-
-unsigned long time_for_wifi_config = 600000;
-
-const unsigned long ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
-const unsigned long PAUSE_BETWEEN_UPDATE_ATTEMPTS_MS = ONE_DAY_IN_MS;        // check for firmware updates once a day
-const unsigned long DURATION_BEFORE_FORCED_RESTART_MS = ONE_DAY_IN_MS * 28;  // force a reboot every ~4 weeks
 unsigned long last_update_attempt;
 
 int sds_pm10_sum = 0;
@@ -1298,8 +1295,8 @@ String wlan_ssid_to_table_row(const String& ssid, const String& encryption, int3
 
 String warning_first_cycle() {
 	String s = FPSTR(INTL_TIME_TO_FIRST_MEASUREMENT);
-	unsigned long time_to_first = sending_intervall_ms - msSince(starttime);
-	if (time_to_first > sending_intervall_ms) {
+	unsigned long time_to_first = cfg::sending_intervall_ms - msSince(starttime);
+	if (time_to_first > cfg::sending_intervall_ms) {
 		time_to_first = 0;
 	}
 	s.replace("{v}", String((long)((time_to_first + 500) / 1000)));
@@ -1309,7 +1306,7 @@ String warning_first_cycle() {
 String age_last_values() {
 	String s = "<b>";
 	unsigned long time_since_last = msSince(starttime);
-	if (time_since_last > sending_intervall_ms) {
+	if (time_since_last > cfg::sending_intervall_ms) {
 		time_since_last = 0;
 	}
 	s += String((long)((time_since_last + 500) / 1000));
@@ -1936,8 +1933,8 @@ void webserver_data_json() {
 		s1 = FPSTR(data_first_part);
 		s1.replace("{v}", SOFTWARE_VERSION);
 		s1 += "]}";
-		age = sending_intervall_ms - msSince(starttime);
-		if (age > sending_intervall_ms) {
+		age = cfg::sending_intervall_ms - msSince(starttime);
+		if (age > cfg::sending_intervall_ms) {
 			age = 0;
 		}
 		age = 0 - age;
@@ -1946,7 +1943,7 @@ void webserver_data_json() {
 		debug_out(F("last data: "), DEBUG_MIN_INFO, 0);
 		debug_out(s1, DEBUG_MIN_INFO, 1);
 		age = msSince(starttime);
-		if (age > sending_intervall_ms) {
+		if (age > cfg::sending_intervall_ms) {
 			age = 0;
 		}
 	}
@@ -1974,7 +1971,7 @@ void webserver_prometheus_endpoint() {
 	data_4_prometheus.replace("{id}", id);
 	data_4_prometheus.replace("{ver}", SOFTWARE_VERSION);
 	data_4_prometheus.replace("{up}", String(msSince(time_point_device_start_ms)));
-	data_4_prometheus.replace("{si}", String(sending_intervall_ms));
+	data_4_prometheus.replace("{si}", String(cfg::sending_intervall_ms));
 	data_4_prometheus.replace("{cs}", String(count_sends));
 	StaticJsonBuffer<JSON_BUFFER_SIZE> jsonBuffer;
 	JsonObject& json2data = jsonBuffer.parseObject(last_data_string);
@@ -2100,7 +2097,7 @@ void wifiConfig() {
 
 	// 10 minutes timeout for wifi config
 	last_page_load = millis();
-	while (((millis() - last_page_load) < time_for_wifi_config)) {
+	while (((millis() - last_page_load) < cfg::time_for_wifi_config)) {
 		dnsServer.processNextRequest();
 		server.handleClient();
 		wdt_reset(); // nodemcu is alive
@@ -2614,7 +2611,7 @@ String sensorSDS() {
 	int checksum_ok = 0;
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_SDS011), DEBUG_MED_INFO, 1);
-	if (msSince(starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
+	if (msSince(starttime) < (cfg::sending_intervall_ms - (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS))) {
 		if (is_SDS_running) {
 			is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
 		}
@@ -2671,7 +2668,7 @@ String sensorSDS() {
 			}
 			if (len > 2) { checksum_is += value; }
 			len++;
-			if (len == 10 && checksum_ok == 1 && (msSince(starttime) > (sending_intervall_ms - reading_time_SDS_ms))) {
+			if (len == 10 && checksum_ok == 1 && (msSince(starttime) > (cfg::sending_intervall_ms - READINGTIME_SDS_MS))) {
 				if ((! isnan(pm10_serial)) && (! isnan(pm25_serial))) {
 					sds_pm10_sum += pm10_serial;
 					sds_pm25_sum += pm25_serial;
@@ -2727,7 +2724,7 @@ String sensorSDS() {
 		sds_pm10_min = 20000;
 		sds_pm25_max = 0;
 		sds_pm25_min = 20000;
-		if ((sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms))) {
+		if ((cfg::sending_intervall_ms > (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS))) {
 			is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
 		}
 	}
@@ -2754,7 +2751,7 @@ String sensorPMS() {
 	int frame_len = 24;				// min. frame length
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_PMSx003), DEBUG_MED_INFO, 1);
-	if (msSince(starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
+	if (msSince(starttime) < (cfg::sending_intervall_ms - (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS))) {
 		if (is_PMS_running) {
 			is_PMS_running = PMS_cmd(PmSensorCmd::Stop);
 		}
@@ -2832,7 +2829,7 @@ String sensorPMS() {
 				} else {
 					len = 0;
 				};
-				if (checksum_ok == 1 && (msSince(starttime) > (sending_intervall_ms - reading_time_SDS_ms))) {
+				if (checksum_ok == 1 && (msSince(starttime) > (cfg::sending_intervall_ms - READINGTIME_SDS_MS))) {
 					if ((! isnan(pm1_serial)) && (! isnan(pm10_serial)) && (! isnan(pm25_serial))) {
 						pms_pm1_sum += pm1_serial;
 						pms_pm10_sum += pm10_serial;
@@ -2907,7 +2904,7 @@ String sensorPMS() {
 		pms_pm10_min = 20000;
 		pms_pm25_max = 0;
 		pms_pm25_min = 20000;
-		if (sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms)) {
+		if (cfg::sending_intervall_ms > (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS)) {
 			is_PMS_running = PMS_cmd(PmSensorCmd::Stop);
 		}
 	}
@@ -2932,7 +2929,7 @@ String sensorHPM() {
 	int checksum_ok = 0;
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_HPM), DEBUG_MED_INFO, 1);
-	if (msSince(starttime) < (sending_intervall_ms - (warmup_time_SDS_ms + reading_time_SDS_ms))) {
+	if (msSince(starttime) < (cfg::sending_intervall_ms - (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS))) {
 		if (is_HPM_running) {
 			is_HPM_running = HPM_cmd(PmSensorCmd::Stop);
 		}
@@ -2991,7 +2988,7 @@ String sensorHPM() {
 				} else {
 					len = 0;
 				};
-				if (checksum_ok == 1 && (long(msSince(starttime)) > (long(sending_intervall_ms) - long(reading_time_SDS_ms)))) {
+				if (checksum_ok == 1 && (long(msSince(starttime)) > (long(cfg::sending_intervall_ms) - long(READINGTIME_SDS_MS)))) {
 					if ((! isnan(pm10_serial)) && (! isnan(pm25_serial))) {
 						hpm_pm10_sum += pm10_serial;
 						hpm_pm25_sum += pm25_serial;
@@ -3048,7 +3045,7 @@ String sensorHPM() {
 		hpm_pm10_min = 20000;
 		hpm_pm25_max = 0;
 		hpm_pm25_min = 20000;
-		if (sending_intervall_ms > (warmup_time_SDS_ms + reading_time_SDS_ms)) {
+		if (cfg::sending_intervall_ms > (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS)) {
 			is_HPM_running = HPM_cmd(PmSensorCmd::Stop);
 		}
 	}
@@ -3066,7 +3063,7 @@ String sensorPPD() {
 
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_PPD42NS), DEBUG_MED_INFO, 1);
 
-	if (msSince(starttime) <= sampletime_ms) {
+	if (msSince(starttime) <= SAMPLETIME_MS) {
 
 		// Read pins connected to ppd42ns
 		boolean valP1 = digitalRead(PPD_PIN_PM1);
@@ -3104,7 +3101,7 @@ String sensorPPD() {
 
 		last_value_PPD_P1 = -1;
 		last_value_PPD_P2 = -1;
-		double ratio = lowpulseoccupancyP1 / (sampletime_ms * 10.0);					// int percentage 0 to 100
+		double ratio = lowpulseoccupancyP1 / (SAMPLETIME_MS * 10.0);					// int percentage 0 to 100
 		double concentration = calcConcentration(ratio);
 		// Begin printing
 		debug_out(F("LPO P10    : "), DEBUG_MIN_INFO, 0);
@@ -3120,7 +3117,7 @@ String sensorPPD() {
 		s += Value2Json("ratioP1", Float2String(ratio));
 		s += Value2Json("P1", Float2String(last_value_PPD_P1));
 
-		ratio = lowpulseoccupancyP2 / (sampletime_ms * 10.0);
+		ratio = lowpulseoccupancyP2 / (SAMPLETIME_MS * 10.0);
 		concentration = calcConcentration(ratio);
 		// Begin printing
 		debug_out(F("LPO PM25   : "), DEBUG_MIN_INFO, 0);
@@ -3844,20 +3841,16 @@ void loop() {
 	unsigned long sum_send_time = 0;
 	unsigned long start_send;
 
-	unsigned long diff_micro;
-
-	send_failed = false;
-
 	act_micro = micros();
 	act_milli = millis();
-	send_now = msSince(starttime) > sending_intervall_ms;
+	send_now = msSince(starttime) > cfg::sending_intervall_ms;
 
 	sample_count++;
 
 	wdt_reset(); // nodemcu is alive
 
 	if (last_micro != 0) {
-		diff_micro = act_micro - last_micro;
+		unsigned long diff_micro = act_micro - last_micro;
 		if (max_micro < diff_micro) {
 			max_micro = diff_micro;
 		}
@@ -3872,7 +3865,7 @@ void loop() {
 		result_PPD = sensorPPD();
 	}
 
-	if ((msSince(starttime_SDS) > sampletime_SDS_ms) || (msSince(starttime) > sending_intervall_ms)) {
+	if ((msSince(starttime_SDS) > SAMPLETIME_SDS_MS) || send_now) {
 		if (cfg::sds_read) {
 			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "SDS", DEBUG_MAX_INFO, 1);
 			result_SDS = sensorSDS();
@@ -3926,7 +3919,7 @@ void loop() {
 		}
 	}
 
-	if (cfg::gps_read && ((msSince(starttime_GPS) > sampletime_GPS_ms) || (msSince(starttime) > sending_intervall_ms))) {
+	if (cfg::gps_read && ((msSince(starttime_GPS) > SAMPLETIME_GPS_MS) || send_now)) {
 		debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "GPS", DEBUG_MAX_INFO, 1);
 		result_GPS = sensorGPS();                           // getting GPS coordinates
 		starttime_GPS = act_milli;
@@ -4075,10 +4068,7 @@ void loop() {
 			autoUpdate();
 		}
 
-		if (! send_failed) {
-			sending_time = (4 * sending_time + sum_send_time) / 5;
-		}
-
+		sending_time = (4 * sending_time + sum_send_time) / 5;
 		debug_out(F("Time for sending data (ms): "), DEBUG_MIN_INFO, 0);
 		debug_out(String(sending_time), DEBUG_MIN_INFO, 1);
 
