@@ -174,73 +174,82 @@ const unsigned long DURATION_BEFORE_FORCED_RESTART_MS = ONE_DAY_IN_MS * 28;  // 
 
 /******************************************************************
  * The variables inside the cfg namespace are persistent          *
- * configuration values. They have defaults (extdef),             *
- * they can be changed by the user via the web interface, the     *
+ * configuration values. They have defaults which can be          *
+ * configured at compile-time via the ext_def.h file              *
+ * They can be changed by the user via the web interface, the     *
  * changes are persisted to the flash and read back after reboot. *
  * Note that the names of these variables can't be easily changed *
  * as they are part of the json format used to persist the data.  *
  ******************************************************************/
 namespace cfg {
-	char wlanssid[35] = "Freifunk-disabled";
-	char wlanpwd[65] = "";
+	char wlanssid[35] = WLANSSID;
+	char wlanpwd[65] = WLANPWD;
 
 	char current_lang[3] = "DE";
-	char www_username[65] = "admin";
-	char www_password[65] = "feinstaub";
-	bool www_basicauth_enabled = false;
+	char www_username[65] = WWW_USERNAME;
+	char www_password[65] = WWW_PASSWORD;
+	bool www_basicauth_enabled = WWW_BASICAUTH_ENABLED;
 
-	char fs_ssid[33] = "";
-	char fs_pwd[65] = "";
+	char fs_ssid[33] = FS_SSID;
+	char fs_pwd[65] = FS_PWD;
 
 	char version_from_local_config[20] = "";
 
-	bool dht_read = true;
-	bool htu21d_read = false;
-	bool ppd_read = false;
-	bool sds_read = true;
-	bool pms_read = false;
-	bool hpm_read = false;
-	bool bmp_read = false;
-	bool bmp280_read = false;
-	bool bme280_read = false;
-	bool ds18b20_read = false;
-	bool gps_read = false;
-	bool send2dusti = true;
-	bool send2madavi = true;
-	bool send2sensemap = false;
-	bool send2fsapp = false;
-	bool send2custom = false;
-	bool send2lora = true;
-	bool send2influx = false;
-	bool send2csv = false;
-	bool auto_update = false;
-	bool use_beta = false;
-	bool has_display = false;
-	bool has_sh1106 = false;
-	bool has_lcd1602 = false;
-	bool has_lcd1602_27 = false;
-	bool has_lcd2004_27 = false;
-	int  debug = 3;
+	bool dht_read = DHT_READ;
+	bool htu21d_read = HTU21D_READ;
+	bool ppd_read = PPD_READ;
+	bool sds_read = SDS_READ;
+	bool pms_read = PMS_READ;
+	bool hpm_read = HPM_READ;
+	bool bmp_read = BMP_READ;
+	bool bmp280_read = BMP280_READ;
+	bool bme280_read = BME280_READ;
+	bool ds18b20_read = DS18B20_READ;
+	bool gps_read = GPS_READ;
+	bool send2dusti = SEND2DUSTI;
+	bool send2madavi = SEND2MADAVI;
+	bool send2sensemap = SEND2SENSEMAP;
+	bool send2fsapp = SEND2FSAPP;
+	bool send2custom = SEND2CUSTOM;
+	bool send2lora = SEND2LORA;
+	bool send2influx = SEND2INFLUX;
+	bool send2csv = SEND2CSV;
+	bool auto_update = AUTO_UPDATE;
+	bool use_beta = USE_BETA;
+	bool has_display = HAS_DISPLAY;
+	bool has_sh1106 = HAS_SH1106;
+	bool has_lcd1602 = HAS_LCD1602;
+	bool has_lcd1602_27 = HAS_LCD1602_27;
+	bool has_lcd2004_27 = HAS_LCD2004_27;
+	int  debug = DEBUG;
 
-	bool ssl_madavi = true;
-	bool ssl_dusti = true;
-	char senseboxid[30] = "";
+	bool ssl_madavi = SSL_MADAVI;
+	bool ssl_dusti = SSL_DUSTI;
+	char senseboxid[30] = SENSEBOXID;
 
-	int port_influx = 8086;
-	char user_influx[65] = "";
-	char pwd_influx[65] = "";
+	int port_influx = PORT_INFLUX;
+	char user_influx[65] = USER_INFLUX;
+	char pwd_influx[65] = PWD_INFLUX;
 
-	char host_custom[100] = "192.168.234.1";
-	char url_custom[100] = "/data.php";
-	int port_custom = 80;
-	char user_custom[65] = "";
-	char pwd_custom[65] = "";
+	char host_custom[100] = HOST_CUSTOM;
+	char url_custom[100] = URL_CUSTOM;
+	int port_custom = PORT_CUSTOM;
+	char user_custom[65] = USER_CUSTOM;
+	char pwd_custom[65] = PWD_CUSTOM;
 
-	char host_influx[100] = "influx server";
-	char url_influx[100] = "/write?db=luftdaten";
+	char host_influx[100] = HOST_INFLUX;
+	char url_influx[100] = URL_INFLUX;
 
 	unsigned long time_for_wifi_config = 600000;
 	unsigned long sending_intervall_ms = 145000;
+
+	void initNonTrivials(const char* id) {
+		strcpy(cfg::current_lang, CURRENT_LANG);
+		if (fs_ssid[0] == '\0') {
+			strcpy(fs_ssid, "Feinstaubsensor-");
+			strcat(fs_ssid, id);
+		}
+	}
 }
 
 #define HOST_MADAVI "api-rrd.madavi.de"
@@ -819,76 +828,6 @@ void disable_unneeded_nmea() {
 //	serialGPS.println(F("$PUBX,40,RMC,0,0,0,0*47"));       // Recommended minimum specific GPS/Transit data
 	serialGPS.println(F("$PUBX,40,GSV,0,0,0,0*59"));       // GNSS satellites in view
 	serialGPS.println(F("$PUBX,40,VTG,0,0,0,0*5E"));       // Track made good and ground speed
-}
-
-/*****************************************************************
- * copy config from ext_def                                      *
- *****************************************************************/
-void copyExtDef() {
-	using namespace cfg;
-
-#define strcpyDef(var, def) if (def != NULL) { strcpy(var, def); }
-#define setDef(var, def)    if (def != var) { var = def; }
-
-	strcpyDef(current_lang, CURRENT_LANG);
-	strcpyDef(wlanssid, WLANSSID);
-	strcpyDef(wlanpwd, WLANPWD);
-	strcpyDef(www_username, WWW_USERNAME);
-	strcpyDef(www_password, WWW_PASSWORD);
-	strcpyDef(fs_ssid, FS_SSID);
-	strcpyDef(fs_pwd, FS_PWD);
-	if (fs_ssid[0] == '\0') {
-		strcpy(fs_ssid, "Feinstaubsensor-");
-		strcat(fs_ssid, esp_chipid.c_str());
-	}
-	setDef(www_basicauth_enabled, WWW_BASICAUTH_ENABLED);
-	setDef(dht_read, DHT_READ);
-	setDef(htu21d_read, HTU21D_READ);
-	setDef(ppd_read, PPD_READ);
-	setDef(sds_read, SDS_READ);
-	setDef(pms_read, PMS_READ);
-	setDef(hpm_read, HPM_READ);
-	setDef(bmp_read, BMP_READ);
-	setDef(bmp280_read, BMP280_READ);
-	setDef(bme280_read, BME280_READ);
-	setDef(ds18b20_read, DS18B20_READ);
-	setDef(gps_read, GPS_READ);
-	setDef(send2dusti, SEND2DUSTI);
-	setDef(ssl_dusti, SSL_DUSTI);
-	setDef(send2madavi, SEND2MADAVI);
-	setDef(ssl_madavi, SSL_MADAVI);
-	setDef(send2sensemap, SEND2SENSEMAP)
-	setDef(send2fsapp, SEND2FSAPP)
-	setDef(send2lora, SEND2LORA);
-	setDef(send2csv, SEND2CSV);
-	setDef(auto_update, AUTO_UPDATE);
-	setDef(use_beta, USE_BETA);
-	setDef(has_display, HAS_DISPLAY);
-	setDef(has_sh1106, HAS_SH1106);
-	setDef(has_lcd1602, HAS_LCD1602);
-	setDef(has_lcd1602_27, HAS_LCD1602_27);
-	setDef(has_lcd2004_27, HAS_LCD2004_27);
-
-	setDef(debug, DEBUG);
-
-	strcpyDef(senseboxid, SENSEBOXID);
-
-	setDef(send2custom, SEND2CUSTOM);
-	strcpyDef(host_custom, HOST_CUSTOM);
-	strcpyDef(url_custom, URL_CUSTOM);
-	setDef(port_custom, PORT_CUSTOM);
-	strcpyDef(user_custom, USER_CUSTOM);
-	strcpyDef(pwd_custom, PWD_CUSTOM);
-
-	setDef(send2influx, SEND2INFLUX);
-	strcpyDef(host_influx, HOST_INFLUX);
-	strcpyDef(url_influx, URL_INFLUX);
-	setDef(port_influx, PORT_INFLUX);
-	strcpyDef(user_influx, USER_INFLUX);
-	strcpyDef(pwd_influx, PWD_INFLUX);
-
-#undef strcpyDef
-#undef setDef
 }
 
 /*****************************************************************
@@ -3714,9 +3653,11 @@ static void logEnabledDisplays() {
 void setup() {
 	Serial.begin(9600);					// Output to Serial at 9600 baud
 	Wire.begin(I2C_PIN_SDA, I2C_PIN_SCL);
+
 	esp_chipid = String(ESP.getChipId());
-	copyExtDef();
+	cfg::initNonTrivials(esp_chipid.c_str());
 	readConfig();
+
 	init_display();
 	init_lcd();
 	setup_webserver();
