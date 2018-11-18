@@ -1,3 +1,7 @@
+NRZ-2018-115
+online since 2018-11-19
+* same as NRZ-2018-114-B2
+
 NRZ-2018-114-B2
 * more code cleanup
 * replacing default Arial_MT font with Roboto_Mono_9
