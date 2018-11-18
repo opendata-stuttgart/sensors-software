@@ -1,3 +1,46 @@
+NRZ-2018-115
+online since 2018-11-19
+* same as NRZ-2018-114-B2
+
+NRZ-2018-114-B2
+* more code cleanup
+* replacing default Arial_MT font with Roboto_Mono_9
+
+NRZ-2018-114-B1
+* going back to beta
+* more code cleanup
+* reactivated sending as CSV to serial
+
+NRZ-2018-113
+NOT published
+* same as NRZ-2018-112-B5
+
+NRZ-2018-112-B5
+* more merged pull requests (fmeerkoetter), i.e. move font to own include file
+* more ca cert to own include file
+
+NRZ-2018-112-B4
+* merged pull requests (fmeerkoetter), i.e. refactoring some functions, memory optimizations
+* added translations
+
+NRZ-2018-112-B3
+* changing config to restart after every change/save
+* translations (PROGMEM var names from german to english)
+
+NRZ-2018-112-B3
+* verify certificates for HTTPS connections to Luftdaten.info and Madavi.de API
+  (works only with Let's Encrypt certs)
+* memory optimizations
+
+NRZ-2018-112-B2
+* merged pull requests (fmeerkoetter) typedef, duplicate code in function
+* same read function for all Plantower sensors
+
+NRZ-2018-112-B1
+* setting PHY layer to 802.11n in station mode
+* switching to Arduino EXP8266 library 2.4.2 (see README.md)
+* added cert validation for API requests (Letsencrypt only at the moment)
+
 NRZ-2018-111
 online since 2018-09-20
 * same as NRZ-2018-110-B11

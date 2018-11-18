@@ -99,13 +99,8 @@
 #define SDS_READ 1
 #define SDS_API_PIN 1
 
-// PMS3003
-#define PMS24_READ 0
-
-// PMS1003, PMS5003, PMS6003, PMS7003
-#define PMS32_READ 0
-
-// all Plantower (PMS) sensors
+// PMS1003, PMS300, 3PMS5003, PMS6003, PMS7003
+#define PMS_READ 0
 #define PMS_API_PIN 1
 
 // Honeywell PM sensor
@@ -163,22 +158,6 @@
 #define DEBUG_MIN_INFO 3
 #define DEBUG_MED_INFO 4
 #define DEBUG_MAX_INFO 5
-
-// Definition SDS011 sensor 'commands'
-#define SDS_START 1
-#define SDS_STOP 2
-#define SDS_CONTINUOUS_MODE 3
-#define SDS_VERSION_DATE 4
-
-// Definition PMSx003 sensor 'commands'
-#define PMS_START 1
-#define PMS_STOP 2
-#define PMS_CONTINUOUS_MODE 3
-
-// Definition Honeywell PM sensor 'commands'
-#define HPM_START 1
-#define HPM_STOP 2
-#define HPM_CONTINUOUS_MODE 3
 
 // Definition GPIOs for Zero based Arduino Feather M0 LoRaWAN
 #if defined(ARDUINO_SAMD_ZERO) && defined(SERIAL_PORT_USBVIRTUAL)
