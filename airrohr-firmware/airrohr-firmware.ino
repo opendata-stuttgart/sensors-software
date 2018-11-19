@@ -100,7 +100,7 @@
  *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-116-B1"
+#define SOFTWARE_VERSION "NRZ-2018-117"
 
 /*****************************************************************
  * Includes                                                      *
@@ -2147,7 +2147,7 @@ void connectWifi() {
  * send data to rest api                                         *
  *****************************************************************/
 void sendData(const String& data, const int pin, const char* host, const int httpPort, const char* url, const bool verify, const char* basic_auth_string, const String& contentType) {
-#include "ca-root.h"
+//#include "ca-root.h"
 
 	debug_out(F("Start connecting to "), DEBUG_MIN_INFO, 0);
 	debug_out(host, DEBUG_MIN_INFO, 1);

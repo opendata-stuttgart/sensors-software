@@ -1,3 +1,7 @@
+NRZ-2018-117
+online since 2018-11-19
+* same as NRZ-2018-116-B1
+
 NRZ-2018-116-B1
 * disabling cert verification, seems to need too long, blocking server resources
 
