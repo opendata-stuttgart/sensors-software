@@ -100,7 +100,7 @@
  *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-115"
+#define SOFTWARE_VERSION "NRZ-2018-116-B1"
 
 /*****************************************************************
  * Includes                                                      *
@@ -2208,20 +2208,20 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 	if (httpPort == 443) {
 		WiFiClientSecure client_s;
 		if (doConnect(&client_s)) {
-			if (verify) {
-				if (client_s.setCACert_P(dst_root_ca_x3_bin_crt, dst_root_ca_x3_bin_crt_len)) {
-					if (client_s.verifyCertChain(host)) {
-						debug_out(F("Server cert verified"), DEBUG_MIN_INFO, 1);
-						doRequest(&client_s);
-					} else {
-						debug_out(F("ERROR: cert verification failed!"), DEBUG_ERROR, 1);
-					}
-				} else {
-					debug_out(F("Failed to load root CA cert!"), DEBUG_ERROR, 1);
-				}
-			} else {
+//			if (verify) {
+//				if (client_s.setCACert_P(dst_root_ca_x3_bin_crt, dst_root_ca_x3_bin_crt_len)) {
+//					if (client_s.verifyCertChain(host)) {
+//						debug_out(F("Server cert verified"), DEBUG_MIN_INFO, 1);
+//						doRequest(&client_s);
+//					} else {
+//						debug_out(F("ERROR: cert verification failed!"), DEBUG_ERROR, 1);
+//					}
+//				} else {
+//					debug_out(F("Failed to load root CA cert!"), DEBUG_ERROR, 1);
+//				}
+//			} else {
 				doRequest(&client_s);
-			}
+//			}
 		}
 	} else {
 		WiFiClient client;
