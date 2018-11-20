@@ -2193,7 +2193,13 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 
 		client->println(data);
 
-		delay(10);
+		// wait for response
+		int retries = 5;
+		while (client->connected() && !client->available()) {
+			delay(10);
+			if (!--retries)
+				break;
+		}
 
 		// Read reply from server and print them
 		while(client->available()) {
