@@ -3211,6 +3211,14 @@ static void autoUpdate() {
 	}
 }
 
+static String displayGenerateFooter(unsigned int screen_count) {
+	String display_footer;
+	for (unsigned int i = 0; i < screen_count; ++i) {
+		display_footer += (i != (next_display_count % screen_count)) ? " . " : " o ";
+	}
+	return display_footer;
+}
+
 /*****************************************************************
  * display values                                                *
  *****************************************************************/
@@ -3231,7 +3239,6 @@ void display_values() {
 	String gps_sensor = "";
 	String display_header = "";
 	String display_lines[3] = { "", "", ""};
-	String display_footer = "";
 	int screen_count = 0;
 	int screens[5];
 	int line_count = 0;
@@ -3356,13 +3363,7 @@ void display_values() {
 			display_lines[2] = "Measurements: " + String(count_sends);
 			break;
 		}
-		for (uint8_t i = 0; i < screen_count; i++) {
-			if (i != (next_display_count % screen_count)) {
-				display_footer += " . ";
-			} else {
-				display_footer += " o ";
-			}
-		}
+
 		if (cfg::has_display) {
 			display.clear();
 			display.displayOn();
@@ -3373,7 +3374,7 @@ void display_values() {
 			display.drawString(0, 28, display_lines[1]);
 			display.drawString(0, 40, display_lines[2]);
 			display.setTextAlignment(TEXT_ALIGN_CENTER);
-			display.drawString(64, 52, display_footer);
+			display.drawString(64, 52, displayGenerateFooter(screen_count));
 			display.display();
 		}
 		if (cfg::has_sh1106) {
@@ -3386,7 +3387,7 @@ void display_values() {
 			display_sh1106.drawString(0, 28, display_lines[1]);
 			display_sh1106.drawString(0, 40, display_lines[2]);
 			display_sh1106.setTextAlignment(TEXT_ALIGN_CENTER);
-			display_sh1106.drawString(64, 52, display_footer);
+			display_sh1106.drawString(64, 52, displayGenerateFooter(screen_count));
 			display_sh1106.display();
 		}
 		if (cfg::has_lcd2004_27) {
