@@ -162,6 +162,7 @@
 /******************************************************************
  * Constants                                                      *
  ******************************************************************/
+const unsigned int WLAN_SSID_LEN = 35;         // the correct size would be 32 + 1, 35 is a workaround for issues reported from the field
 const unsigned long SAMPLETIME_MS = 30000;
 const unsigned long SAMPLETIME_SDS_MS = 1000;
 const unsigned long WARMUPTIME_SDS_MS = 15000;
@@ -182,7 +183,7 @@ const unsigned long DURATION_BEFORE_FORCED_RESTART_MS = ONE_DAY_IN_MS * 28;  // 
  * as they are part of the json format used to persist the data.  *
  ******************************************************************/
 namespace cfg {
-	char wlanssid[35] = WLANSSID;
+	char wlanssid[WLAN_SSID_LEN] = WLANSSID;
 	char wlanpwd[65] = WLANPWD;
 
 	char current_lang[3] = "DE";
@@ -190,7 +191,7 @@ namespace cfg {
 	char www_password[65] = WWW_PASSWORD;
 	bool www_basicauth_enabled = WWW_BASICAUTH_ENABLED;
 
-	char fs_ssid[33] = FS_SSID;
+	char fs_ssid[WLAN_SSID_LEN] = FS_SSID;
 	char fs_pwd[65] = FS_PWD;
 
 	char version_from_local_config[20] = "";
@@ -447,7 +448,7 @@ unsigned long next_display_millis = 0;
 unsigned long next_display_count = 0;
 
 struct struct_wifiInfo {
-	char ssid[35];
+	char ssid[WLAN_SSID_LEN];
 	uint8_t encryptionType;
 	int32_t RSSI;
 	int32_t channel;
@@ -1646,7 +1647,7 @@ void webserver_wifi() {
 				continue;
 			}
 			for (int j = i + 1; j < count_wifiInfo; j++) {
-				if (strncmp(wifiInfo[indices[i]].ssid, wifiInfo[indices[j]].ssid, 35) == 0) {
+				if (strncmp(wifiInfo[indices[i]].ssid, wifiInfo[indices[j]].ssid, WLAN_SSID_LEN) == 0) {
 					indices[j] = -1; // set dup aps to index -1
 					++duplicateSsids;
 				}
@@ -2021,7 +2022,7 @@ void wifiConfig() {
 		uint8_t* BSSID;
 		String SSID;
 		WiFi.getNetworkInfo(i, SSID, wifiInfo[i].encryptionType, wifiInfo[i].RSSI, BSSID, wifiInfo[i].channel, wifiInfo[i].isHidden);
-		SSID.toCharArray(wifiInfo[i].ssid, 35);
+		SSID.toCharArray(wifiInfo[i].ssid, WLAN_SSID_LEN);
 	}
 
 	WiFi.mode(WIFI_AP);
