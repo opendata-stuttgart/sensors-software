@@ -100,7 +100,7 @@
  *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-118-B1"
+#define SOFTWARE_VERSION "NRZ-2018-120-B1"
 
 /*****************************************************************
  * Includes                                                      *
@@ -111,7 +111,8 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include <ESP8266httpUpdate.h>
-#include <WiFiClientSecure.h>
+//#include <WiFiClientSecure.h>
+//#include <WiFiClientSecureBearSSL.h>
 #include <SoftwareSerial.h>
 #include "oledfont.h"				// avoids including the default Arial font, needs to be included before SSD1306.h
 #include <SSD1306.h>
@@ -254,11 +255,11 @@ namespace cfg {
 
 #define HOST_MADAVI "api-rrd.madavi.de"
 #define URL_MADAVI "/data.php"
-#define PORT_MADAVI 443
+#define PORT_MADAVI 80
 
 #define HOST_DUSTI "api.luftdaten.info"
 #define URL_DUSTI "/v1/push-sensor-data/"
-#define PORT_DUSTI 443
+#define PORT_DUSTI 80
 
 // IMPORTANT: NO MORE CHANGES TO VARIABLE NAMES NEEDED FOR EXTERNAL APIS
 
@@ -2194,9 +2195,10 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 		client->println(data);
 
 		// wait for response
-		int retries = 10;
+		int retries = 20;
 		while (client->connected() && !client->available()) {
-			delay(10);
+			delay(100);
+			wdt_reset();
 			if (!--retries)
 				break;
 		}
@@ -2206,7 +2208,7 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 			char c = client->read();
 			debug_out(String(c), DEBUG_MAX_INFO, 0);
 		}
-
+		client->stop();
 		debug_out(F("\nclosing connection\n----\n\n"), DEBUG_MIN_INFO, 1);
 	};
 
@@ -2229,6 +2231,17 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 				doRequest(&client_s);
 			}
 		}
+		
+/*		BearSSL::WiFiClientSecure client_s;
+		if (verify) {
+			BearSSLX509List cert(dst_root_ca_x3);
+			client_s.setTrustAnchors(&cert);
+		} else {
+			client_s.setInsecure();
+		}
+		if (doConnect(&client_s)) {
+			doRequest(&client_s);
+		} */
 	} else {
 		WiFiClient client;
 		if (doConnect(&client)) {
@@ -4037,6 +4050,7 @@ void loop() {
 		last_micro = 0;
 		min_micro = 1000000000;
 		max_micro = 0;
+		sum_send_time = 0;
 		starttime = millis();                               // store the start time
 		first_cycle = false;
 		count_sends += 1;

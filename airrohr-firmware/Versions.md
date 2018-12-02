@@ -1,3 +1,7 @@
+NRZ-2018-120-B1
+* added first parts for change to BearSSL
+* changed SSL as default to non-SSL
+
 NRZ-2018-117
 online since 2018-11-19
 * same as NRZ-2018-116-B1
