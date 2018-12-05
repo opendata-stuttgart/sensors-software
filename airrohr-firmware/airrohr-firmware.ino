@@ -100,7 +100,7 @@
  *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-120-B1"
+#define SOFTWARE_VERSION "NRZ-2018-121C"
 
 /*****************************************************************
  * Includes                                                      *
@@ -114,7 +114,7 @@
 //#include <WiFiClientSecure.h>
 //#include <WiFiClientSecureBearSSL.h>
 #include <SoftwareSerial.h>
-#include "oledfont.h"				// avoids including the default Arial font, needs to be included before SSD1306.h
+#include "./oledfont.h"				// avoids including the default Arial font, needs to be included before SSD1306.h
 #include <SSD1306.h>
 #include <SH1106.h>
 #include <LiquidCrystal_I2C.h>
@@ -442,6 +442,8 @@ long last_page_load = millis();
 bool wificonfig_loop = false;
 
 bool first_cycle = true;
+
+bool got_ntp = false;
 
 unsigned long count_sends = 0;
 unsigned long next_display_millis = 0;
@@ -2148,7 +2150,7 @@ void connectWifi() {
  * send data to rest api                                         *
  *****************************************************************/
 void sendData(const String& data, const int pin, const char* host, const int httpPort, const char* url, const bool verify, const char* basic_auth_string, const String& contentType) {
-#include "ca-root.h"
+//#include "ca-root.h"
 
 	debug_out(F("Start connecting to "), DEBUG_MIN_INFO, 0);
 	debug_out(host, DEBUG_MIN_INFO, 1);
@@ -2216,6 +2218,11 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 	if (httpPort == 443) {
 		WiFiClientSecure client_s;
 		if (doConnect(&client_s)) {
+			doRequest(&client_s);
+		}
+
+/*		WiFiClientSecure client_s;
+		if (doConnect(&client_s)) {
 			if (verify) {
 				if (client_s.setCACert_P(dst_root_ca_x3_bin_crt, dst_root_ca_x3_bin_crt_len)) {
 					if (client_s.verifyCertChain(host)) {
@@ -2230,7 +2237,7 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 			} else {
 				doRequest(&client_s);
 			}
-		}
+		} */
 		
 /*		BearSSL::WiFiClientSecure client_s;
 		if (verify) {
@@ -3644,7 +3651,8 @@ static void logEnabledAPIs() {
 	}
 }
 
-static void acquireNetworkTime() {
+static bool acquireNetworkTime() {
+	int retryCount = 0;
 	debug_out(F("Setting time using SNTP"), DEBUG_MIN_INFO, 1);
 	configTime(8 * 3600, 0, "pool.ntp.org", "time.nist.gov");
 	time_t now = time(nullptr);
@@ -3652,7 +3660,9 @@ static void acquireNetworkTime() {
 		delay(500);
 		Serial.print(".");
 		now = time(nullptr);
+		if (retryCount++ > 30) return false;
 	}
+	return true;
 }
 
 static void logEnabledDisplays() {
@@ -3683,7 +3693,9 @@ void setup() {
 	setup_webserver();
 	display_debug(F("Connecting to"), String(cfg::wlanssid));
 	connectWifi();
-	acquireNetworkTime();
+	got_ntp = acquireNetworkTime();
+	debug_out(F("NTP time "), DEBUG_MIN_INFO, 0);
+	debug_out(String(got_ntp?"":"not ")+F("received"), DEBUG_MIN_INFO, 1);
 
 	autoUpdate();
 	create_basic_auth_strings();
