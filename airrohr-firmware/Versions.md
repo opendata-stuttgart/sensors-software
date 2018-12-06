@@ -1,3 +1,24 @@
+NRZ-2018-121B
+online since 2018-12-03
+* added danish translation
+* limit SNTP retries to 15 seconds
+
+NRZ-2018-121B
+online since 2018-12-03
+* back to Arduino esp8266 lib 2.3
+
+NRZ-2018-121A
+online since 2018-12-03
+* disabled cert verify
+
+NRZ-2018-121
+online since 2018-12-02
+* same as NRZ-2018-121
+
+NRZ-2018-120-B1
+* added first parts for change to BearSSL
+* changed SSL as default to non-SSL
+
 NRZ-2018-117
 online since 2018-11-19
 * same as NRZ-2018-116-B1
@@ -24,7 +45,7 @@ NOT published
 
 NRZ-2018-112-B5
 * more merged pull requests (fmeerkoetter), i.e. move font to own include file
-* more ca cert to own include file
+* move ca cert to own include file
 
 NRZ-2018-112-B4
 * merged pull requests (fmeerkoetter), i.e. refactoring some functions, memory optimizations

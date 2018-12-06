@@ -100,7 +100,7 @@
  *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-117"
+#define SOFTWARE_VERSION "NRZ-2018-121C"
 
 /*****************************************************************
  * Includes                                                      *
@@ -111,9 +111,10 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include <ESP8266httpUpdate.h>
-#include <WiFiClientSecure.h>
+//#include <WiFiClientSecure.h>
+//#include <WiFiClientSecureBearSSL.h>
 #include <SoftwareSerial.h>
-#include "oledfont.h"				// avoids including the default Arial font, needs to be included before SSD1306.h
+#include "./oledfont.h"				// avoids including the default Arial font, needs to be included before SSD1306.h
 #include <SSD1306.h>
 #include <SH1106.h>
 #include <LiquidCrystal_I2C.h>
@@ -254,11 +255,11 @@ namespace cfg {
 
 #define HOST_MADAVI "api-rrd.madavi.de"
 #define URL_MADAVI "/data.php"
-#define PORT_MADAVI 443
+#define PORT_MADAVI 80
 
 #define HOST_DUSTI "api.luftdaten.info"
 #define URL_DUSTI "/v1/push-sensor-data/"
-#define PORT_DUSTI 443
+#define PORT_DUSTI 80
 
 // IMPORTANT: NO MORE CHANGES TO VARIABLE NAMES NEEDED FOR EXTERNAL APIS
 
@@ -441,6 +442,8 @@ long last_page_load = millis();
 bool wificonfig_loop = false;
 
 bool first_cycle = true;
+
+bool got_ntp = false;
 
 unsigned long count_sends = 0;
 unsigned long next_display_millis = 0;
@@ -2194,9 +2197,10 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 		client->println(data);
 
 		// wait for response
-		int retries = 5;
+		int retries = 20;
 		while (client->connected() && !client->available()) {
-			delay(10);
+			delay(100);
+			wdt_reset();
 			if (!--retries)
 				break;
 		}
@@ -2206,7 +2210,7 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 			char c = client->read();
 			debug_out(String(c), DEBUG_MAX_INFO, 0);
 		}
-
+		client->stop();
 		debug_out(F("\nclosing connection\n----\n\n"), DEBUG_MIN_INFO, 1);
 	};
 
@@ -2214,21 +2218,37 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 	if (httpPort == 443) {
 		WiFiClientSecure client_s;
 		if (doConnect(&client_s)) {
-//			if (verify) {
-//				if (client_s.setCACert_P(dst_root_ca_x3_bin_crt, dst_root_ca_x3_bin_crt_len)) {
-//					if (client_s.verifyCertChain(host)) {
-//						debug_out(F("Server cert verified"), DEBUG_MIN_INFO, 1);
-//						doRequest(&client_s);
-//					} else {
-//						debug_out(F("ERROR: cert verification failed!"), DEBUG_ERROR, 1);
-//					}
-//				} else {
-//					debug_out(F("Failed to load root CA cert!"), DEBUG_ERROR, 1);
-//				}
-//			} else {
-				doRequest(&client_s);
-//			}
+			doRequest(&client_s);
 		}
+
+/*		WiFiClientSecure client_s;
+		if (doConnect(&client_s)) {
+			if (verify) {
+				if (client_s.setCACert_P(dst_root_ca_x3_bin_crt, dst_root_ca_x3_bin_crt_len)) {
+					if (client_s.verifyCertChain(host)) {
+						debug_out(F("Server cert verified"), DEBUG_MIN_INFO, 1);
+						doRequest(&client_s);
+					} else {
+						debug_out(F("ERROR: cert verification failed!"), DEBUG_ERROR, 1);
+					}
+				} else {
+					debug_out(F("Failed to load root CA cert!"), DEBUG_ERROR, 1);
+				}
+			} else {
+				doRequest(&client_s);
+			}
+		} */
+		
+/*		BearSSL::WiFiClientSecure client_s;
+		if (verify) {
+			BearSSLX509List cert(dst_root_ca_x3);
+			client_s.setTrustAnchors(&cert);
+		} else {
+			client_s.setInsecure();
+		}
+		if (doConnect(&client_s)) {
+			doRequest(&client_s);
+		} */
 	} else {
 		WiFiClient client;
 		if (doConnect(&client)) {
@@ -3217,6 +3237,14 @@ static void autoUpdate() {
 	}
 }
 
+static String displayGenerateFooter(unsigned int screen_count) {
+	String display_footer;
+	for (unsigned int i = 0; i < screen_count; ++i) {
+		display_footer += (i != (next_display_count % screen_count)) ? " . " : " o ";
+	}
+	return display_footer;
+}
+
 /*****************************************************************
  * display values                                                *
  *****************************************************************/
@@ -3237,7 +3265,6 @@ void display_values() {
 	String gps_sensor = "";
 	String display_header = "";
 	String display_lines[3] = { "", "", ""};
-	String display_footer = "";
 	int screen_count = 0;
 	int screens[5];
 	int line_count = 0;
@@ -3362,13 +3389,7 @@ void display_values() {
 			display_lines[2] = "Measurements: " + String(count_sends);
 			break;
 		}
-		for (uint8_t i = 0; i < screen_count; i++) {
-			if (i != (next_display_count % screen_count)) {
-				display_footer += " . ";
-			} else {
-				display_footer += " o ";
-			}
-		}
+
 		if (cfg::has_display) {
 			display.clear();
 			display.displayOn();
@@ -3379,7 +3400,7 @@ void display_values() {
 			display.drawString(0, 28, display_lines[1]);
 			display.drawString(0, 40, display_lines[2]);
 			display.setTextAlignment(TEXT_ALIGN_CENTER);
-			display.drawString(64, 52, display_footer);
+			display.drawString(64, 52, displayGenerateFooter(screen_count));
 			display.display();
 		}
 		if (cfg::has_sh1106) {
@@ -3392,7 +3413,7 @@ void display_values() {
 			display_sh1106.drawString(0, 28, display_lines[1]);
 			display_sh1106.drawString(0, 40, display_lines[2]);
 			display_sh1106.setTextAlignment(TEXT_ALIGN_CENTER);
-			display_sh1106.drawString(64, 52, display_footer);
+			display_sh1106.drawString(64, 52, displayGenerateFooter(screen_count));
 			display_sh1106.display();
 		}
 		if (cfg::has_lcd2004_27) {
@@ -3630,7 +3651,8 @@ static void logEnabledAPIs() {
 	}
 }
 
-static void acquireNetworkTime() {
+static bool acquireNetworkTime() {
+	int retryCount = 0;
 	debug_out(F("Setting time using SNTP"), DEBUG_MIN_INFO, 1);
 	configTime(8 * 3600, 0, "pool.ntp.org", "time.nist.gov");
 	time_t now = time(nullptr);
@@ -3638,7 +3660,9 @@ static void acquireNetworkTime() {
 		delay(500);
 		Serial.print(".");
 		now = time(nullptr);
+		if (retryCount++ > 30) return false;
 	}
+	return true;
 }
 
 static void logEnabledDisplays() {
@@ -3669,7 +3693,9 @@ void setup() {
 	setup_webserver();
 	display_debug(F("Connecting to"), String(cfg::wlanssid));
 	connectWifi();
-	acquireNetworkTime();
+	got_ntp = acquireNetworkTime();
+	debug_out(F("NTP time "), DEBUG_MIN_INFO, 0);
+	debug_out(String(got_ntp?"":"not ")+F("received"), DEBUG_MIN_INFO, 1);
 
 	autoUpdate();
 	create_basic_auth_strings();
@@ -4036,6 +4062,7 @@ void loop() {
 		last_micro = 0;
 		min_micro = 1000000000;
 		max_micro = 0;
+		sum_send_time = 0;
 		starttime = millis();                               // store the start time
 		first_cycle = false;
 		count_sends += 1;
