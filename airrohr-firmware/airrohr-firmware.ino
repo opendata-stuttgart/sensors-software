@@ -100,7 +100,7 @@
  *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-121C"
+#define SOFTWARE_VERSION "NRZ-2018-122-B1"
 
 /*****************************************************************
  * Includes                                                      *
@@ -528,15 +528,6 @@ void display_debug(const String& text1, const String& text2) {
 		lcd_2004_27.setCursor(0, 1);
 		lcd_2004_27.print(text2);
 	}
-}
-
-/*****************************************************************
- * IPAddress to String                                           *
- *****************************************************************/
-String IPAddress2String(const IPAddress& ipaddress) {
-	char myIpString[24];
-	sprintf(myIpString, "%d.%d.%d.%d", ipaddress[0], ipaddress[1], ipaddress[2], ipaddress[3]);
-	return String(myIpString);
 }
 
 /*****************************************************************
@@ -1981,7 +1972,8 @@ void setup_webserver() {
 	server.onNotFound(webserver_not_found);
 
 	debug_out(F("Starting Webserver... "), DEBUG_MIN_INFO, 0);
-	debug_out(IPAddress2String(WiFi.localIP()), DEBUG_MIN_INFO, 1);
+//	debug_out(IPAddress2String(WiFi.localIP()), DEBUG_MIN_INFO, 1);
+	debug_out(WiFi.localIP().toString(), DEBUG_MIN_INFO, 1);
 	server.begin();
 }
 
@@ -2143,7 +2135,7 @@ void connectWifi() {
 		}
 	}
 	debug_out(F("WiFi connected\nIP address: "), DEBUG_MIN_INFO, 0);
-	debug_out(IPAddress2String(WiFi.localIP()), DEBUG_MIN_INFO, 1);
+	debug_out(WiFi.localIP().toString(), DEBUG_MIN_INFO, 1);
 }
 
 /*****************************************************************
@@ -3378,7 +3370,7 @@ void display_values() {
 			break;
 		case (4):
 			display_header = F("Wifi info");
-			display_lines[0] = "IP: " + IPAddress2String(WiFi.localIP());
+			display_lines[0] = "IP: " + WiFi.localIP().toString();
 			display_lines[1] = "SSID:" + WiFi.SSID();
 			display_lines[2] = "Signal: " + String(calcWiFiSignalQuality(WiFi.RSSI())) + "%";
 			break;
@@ -3452,7 +3444,7 @@ void display_values() {
 		display_lines[1] = "Lon: " + check_display_value(lon_value, -200.0, 6, 11);
 		break;
 	case (4):
-		display_lines[0] = IPAddress2String(WiFi.localIP());
+		display_lines[0] = WiFi.localIP().toString();
 		display_lines[1] = WiFi.SSID();
 		break;
 	case (5):
@@ -3654,15 +3646,27 @@ static void logEnabledAPIs() {
 static bool acquireNetworkTime() {
 	int retryCount = 0;
 	debug_out(F("Setting time using SNTP"), DEBUG_MIN_INFO, 1);
-	configTime(8 * 3600, 0, "pool.ntp.org", "time.nist.gov");
 	time_t now = time(nullptr);
-	while (now < 8 * 3600 * 2) {
+	debug_out(F("NTP.org:"),DEBUG_MIN_INFO,1);
+	configTime(0, 0, "pool.ntp.org");
+	while (retryCount++ < 20) {
+		// later than 2000/01/01:00:00:00
+		if (now > 946759003) return true;
 		delay(500);
-		Serial.print(".");
+		debug_out(".",DEBUG_MIN_INFO,0);
 		now = time(nullptr);
-		if (retryCount++ > 30) return false;
 	}
-	return true;
+	debug_out(F("\nrouter/gateway:"),DEBUG_MIN_INFO,1);
+	retryCount = 0;
+	configTime(0, 0, WiFi.gatewayIP().toString().c_str());
+	while (retryCount++ < 20) {
+		// later than 2000/01/01:00:00:00
+		if (now > 946759003) return true;
+		delay(500);
+		debug_out(".",DEBUG_MIN_INFO,0);
+		now = time(nullptr);
+	}
+	return false;
 }
 
 static void logEnabledDisplays() {
@@ -3694,7 +3698,7 @@ void setup() {
 	display_debug(F("Connecting to"), String(cfg::wlanssid));
 	connectWifi();
 	got_ntp = acquireNetworkTime();
-	debug_out(F("NTP time "), DEBUG_MIN_INFO, 0);
+	debug_out(F("\nNTP time "), DEBUG_MIN_INFO, 0);
 	debug_out(String(got_ntp?"":"not ")+F("received"), DEBUG_MIN_INFO, 1);
 
 	autoUpdate();

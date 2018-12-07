@@ -1,3 +1,7 @@
+NRZ-2018-122-B1
+* try NTP server given by dhcp first
+* try router/gateway as NTP server as third
+
 NRZ-2018-121B
 online since 2018-12-03
 * added danish translation
