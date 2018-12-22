@@ -128,6 +128,7 @@
 #include <DallasTemperature.h>
 #include <TinyGPS++.h>
 #include <time.h>
+#include <coredecls.h>
 #include <assert.h>
 
 #if defined(INTL_BG)
@@ -442,6 +443,8 @@ long last_page_load = millis();
 bool wificonfig_loop = false;
 
 bool first_cycle = true;
+
+bool sntp_time_is_set = false;
 
 bool got_ntp = false;
 
@@ -2200,7 +2203,7 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 		// Read reply from server and print them
 		while(client->available()) {
 			char c = client->read();
-			debug_out(String(c), DEBUG_MAX_INFO, 0);
+			debug_out(String(c), DEBUG_MIN_INFO, 0);
 		}
 		client->stop();
 		debug_out(F("\nclosing connection\n----\n\n"), DEBUG_MIN_INFO, 1);
@@ -2229,8 +2232,8 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 			} else {
 				doRequest(&client_s);
 			}
-		} */
-		
+		}
+*/
 /*		BearSSL::WiFiClientSecure client_s;
 		if (verify) {
 			BearSSLX509List cert(dst_root_ca_x3);
@@ -2240,7 +2243,8 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 		}
 		if (doConnect(&client_s)) {
 			doRequest(&client_s);
-		} */
+		}
+*/
 	} else {
 		WiFiClient client;
 		if (doConnect(&client)) {
@@ -3614,59 +3618,35 @@ static void powerOnTestSensors() {
 }
 
 static void logEnabledAPIs() {
+	debug_out(F("Send to :"), DEBUG_MIN_INFO, 1);
 	if (cfg::send2dusti) {
-		debug_out(F("Send to luftdaten.info..."), DEBUG_MIN_INFO, 1);
+		debug_out(F("luftdaten.info"), DEBUG_MIN_INFO, 1);
 	}
 
 	if (cfg::send2madavi) {
-		debug_out(F("Send to madavi.de..."), DEBUG_MIN_INFO, 1);
+		debug_out(F("Madavi.de"), DEBUG_MIN_INFO, 1);
 	}
 
 	if (cfg::send2lora) {
-		debug_out(F("Send to LoRa gateway..."), DEBUG_MIN_INFO, 1);
+		debug_out(F("LoRa gateway"), DEBUG_MIN_INFO, 1);
 	}
 
 	if (cfg::send2csv) {
-		debug_out(F("Send as CSV to Serial..."), DEBUG_MIN_INFO, 1);
+		debug_out(F("Serial as CSV"), DEBUG_MIN_INFO, 1);
 	}
 
 	if (cfg::send2custom) {
-		debug_out(F("Send to custom API..."), DEBUG_MIN_INFO, 1);
+		debug_out(F("custom API"), DEBUG_MIN_INFO, 1);
 	}
 
 	if (cfg::send2influx) {
-		debug_out(F("Send to custom influx DB..."), DEBUG_MIN_INFO, 1);
+		debug_out(F("custom influx DB"), DEBUG_MIN_INFO, 1);
 	}
-
+	debug_out("", DEBUG_MIN_INFO, 1);
 	if (cfg::auto_update) {
 		debug_out(F("Auto-Update active..."), DEBUG_MIN_INFO, 1);
+		debug_out("", DEBUG_MIN_INFO, 1);
 	}
-}
-
-static bool acquireNetworkTime() {
-	int retryCount = 0;
-	debug_out(F("Setting time using SNTP"), DEBUG_MIN_INFO, 1);
-	time_t now = time(nullptr);
-	debug_out(F("NTP.org:"),DEBUG_MIN_INFO,1);
-	configTime(0, 0, "pool.ntp.org");
-	while (retryCount++ < 20) {
-		// later than 2000/01/01:00:00:00
-		if (now > 946759003) return true;
-		delay(500);
-		debug_out(".",DEBUG_MIN_INFO,0);
-		now = time(nullptr);
-	}
-	debug_out(F("\nrouter/gateway:"),DEBUG_MIN_INFO,1);
-	retryCount = 0;
-	configTime(0, 0, WiFi.gatewayIP().toString().c_str());
-	while (retryCount++ < 20) {
-		// later than 2000/01/01:00:00:00
-		if (now > 946759003) return true;
-		delay(500);
-		debug_out(".",DEBUG_MIN_INFO,0);
-		now = time(nullptr);
-	}
-	return false;
 }
 
 static void logEnabledDisplays() {
@@ -3679,6 +3659,44 @@ static void logEnabledDisplays() {
 	if (cfg::has_lcd2004_27) {
 		debug_out(F("Show on LCD 2004 ..."), DEBUG_MIN_INFO, 1);
 	}
+}
+
+void time_is_set (void) {
+	sntp_time_is_set = true;
+}
+
+static bool acquireNetworkTime() {
+	int retryCount = 0;
+	debug_out(F("Setting time using SNTP"), DEBUG_MIN_INFO, 1);
+	time_t now = time(nullptr);
+	debug_out(ctime(&now), DEBUG_MIN_INFO, 1);
+	debug_out(F("NTP.org:"),DEBUG_MIN_INFO,1);
+	settimeofday_cb(time_is_set);
+	configTime(8 * 3600, 0, "pool.ntp.org");
+	while (retryCount++ < 20) {
+		// later than 2000/01/01:00:00:00
+		if (sntp_time_is_set) {
+			now = time(nullptr);
+			debug_out(ctime(&now), DEBUG_MIN_INFO, 1);
+			return true;
+		}
+		delay(500);
+		debug_out(".",DEBUG_MIN_INFO,0);
+	}
+	debug_out(F("\nrouter/gateway:"),DEBUG_MIN_INFO,1);
+	retryCount = 0;
+	configTime(0, 0, WiFi.gatewayIP().toString().c_str());
+	while (retryCount++ < 20) {
+		// later than 2000/01/01:00:00:00
+		if (sntp_time_is_set) {
+			now = time(nullptr);
+			debug_out(ctime(&now), DEBUG_MIN_INFO, 1);
+			return true;
+		}
+		delay(500);
+		debug_out(".",DEBUG_MIN_INFO,0);
+	}
+	return false;
 }
 
 /*****************************************************************
@@ -3700,7 +3718,6 @@ void setup() {
 	got_ntp = acquireNetworkTime();
 	debug_out(F("\nNTP time "), DEBUG_MIN_INFO, 0);
 	debug_out(String(got_ntp?"":"not ")+F("received"), DEBUG_MIN_INFO, 1);
-
 	autoUpdate();
 	create_basic_auth_strings();
 	serialSDS.begin(9600);
