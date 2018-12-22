@@ -1,3 +1,7 @@
+NRZ-2018-123
+online since 2018-12-23
+* same as NRZ-2018-122-B1
+
 NRZ-2018-122-B1
 * try NTP server given by dhcp first
 * try router/gateway as NTP server as third
