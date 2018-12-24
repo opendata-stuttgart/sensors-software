@@ -1,3 +1,22 @@
+NRZ-2018-123
+online since 2018-12-23
+* set CPUFreqency to 160MHz (for faster TLS handling)
+
+NRZ-2018-123
+online since 2018-12-23
+* same as NRZ-2018-122-B1
+
+NRZ-2018-122-B1
+* try NTP server given by dhcp first
+* try router/gateway as NTP server as third
+* handle ntp time setting
+* turkish translation added
+* compile with Arduino esp8266 lib 2.4.2
+
+NRZ-2018-121C
+online since 2018-12-03
+* disable HTTPS as default
+
 NRZ-2018-121B
 online since 2018-12-03
 * added danish translation

@@ -74,7 +74,7 @@ unsigned char dst_root_ca_x3_bin_crt[] = {
 
 unsigned int dst_root_ca_x3_bin_crt_len = 846;
 
-/*
+
 static const char dst_root_ca_x3[] PROGMEM = R"EOF(
 -----BEGIN CERTIFICATE-----
 MIIDSjCCAjKgAwIBAgIQRK+wgNajJ7qJMDmGLvhAazANBgkqhkiG9w0BAQUFADA/
@@ -97,4 +97,3 @@ JDGFoqgCWjBH4d1QB7wCCZAA62RjYJsWvIjJEubSfZGL+T0yjWW06XyxV3bqxbYo
 Ob8VZRzI9neWagqNdwvYkQsEjgfbKbYK7p2CNTUQ
 -----END CERTIFICATE-----
 )EOF";
-*/
