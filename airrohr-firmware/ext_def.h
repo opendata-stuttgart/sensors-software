@@ -123,6 +123,10 @@
 #define DS18B20_READ 0
 #define DS18B20_API_PIN 13
 
+// interrupt for precipitation measurement
+#define PRECIP_READ 0
+#define PRECIP_MM_PER_PULSE 0.3
+#define PRECIP_IRQ_PIN D8
 
 // GPS, bevorzugt Neo-6M
 #define GPS_READ 0

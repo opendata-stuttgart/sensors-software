@@ -207,6 +207,8 @@ namespace cfg {
 	bool bmp280_read = BMP280_READ;
 	bool bme280_read = BME280_READ;
 	bool ds18b20_read = DS18B20_READ;
+	bool precip_read = PRECIP_READ;
+	double precip_mm_per_pulse = PRECIP_MM_PER_PULSE;
 	bool gps_read = GPS_READ;
 	bool send2dusti = SEND2DUSTI;
 	bool send2madavi = SEND2MADAVI;
@@ -374,6 +376,9 @@ unsigned long last_micro = 0;
 unsigned long min_micro = 1000000000;
 unsigned long max_micro = 0;
 
+#define PRECIP_DEBOUNCE_MS 5
+unsigned long precip_last_irq;
+
 bool is_SDS_running = true;
 bool is_PMS_running = true;
 bool is_HPM_running = true;
@@ -429,6 +434,7 @@ double last_value_BME280_T = -128.0;
 double last_value_BME280_H = -1.0;
 double last_value_BME280_P = -1.0;
 double last_value_DS18B20_T = -1.0;
+unsigned int precip_pulse_counter = 0;
 double last_value_GPS_lat = -200.0;
 double last_value_GPS_lon = -200.0;
 double last_value_GPS_alt = -1000.0;
@@ -601,6 +607,16 @@ String Var2Json(const String& name, const int value) {
 	String s = F("\"{n}\":\"{v}\",");
 	s.replace("{n}", name);
 	s.replace("{v}", String(value));
+	return s;
+}
+
+/*****************************************************************
+ * convert double value to json string                           *
+ *****************************************************************/
+String Var2Json(const String& name, const double value) {
+	String s = F("\"{n}\":\"{v}\",");
+	s.replace("{n}", name);
+	s.replace("{v}", Float2String(value));
 	return s;
 }
 
@@ -885,6 +901,8 @@ void readConfig() {
 					setFromJSON(bmp280_read);
 					setFromJSON(bme280_read);
 					setFromJSON(ds18b20_read);
+					setFromJSON(precip_read);
+					setFromJSON(precip_mm_per_pulse);
 					setFromJSON(gps_read);
 					setFromJSON(send2dusti);
 					setFromJSON(ssl_dusti);
@@ -954,6 +972,7 @@ void writeConfig() {
 
 #define copyToJSON_Bool(varname) json_string += Var2Json(#varname,varname);
 #define copyToJSON_Int(varname) json_string += Var2Json(#varname,varname);
+#define copyToJSON_Float(varname) json_string += Var2Json(#varname,varname);
 #define copyToJSON_String(varname) json_string += Var2Json(#varname,String(varname));
 	copyToJSON_String(current_lang);
 	copyToJSON_String(SOFTWARE_VERSION);
@@ -974,6 +993,8 @@ void writeConfig() {
 	copyToJSON_Bool(bmp280_read);
 	copyToJSON_Bool(bme280_read);
 	copyToJSON_Bool(ds18b20_read);
+	copyToJSON_Bool(precip_read);
+	copyToJSON_Float(precip_mm_per_pulse);
 	copyToJSON_Bool(gps_read);
 	copyToJSON_Bool(send2dusti);
 	copyToJSON_Bool(ssl_dusti);
@@ -1386,6 +1407,8 @@ void webserver_config() {
 			page_content += form_checkbox_sensor("bmp280_read", FPSTR(INTL_BMP280), bmp280_read);
 			page_content += form_checkbox_sensor("bme280_read", FPSTR(INTL_BME280), bme280_read);
 			page_content += form_checkbox_sensor("ds18b20_read", FPSTR(INTL_DS18B20), ds18b20_read);
+			page_content += form_checkbox_sensor("precip_read", FPSTR(INTL_PRECIP), precip_read);
+			page_content += form_input("precip_mm_per_pulse", FPSTR(INTL_PRECIP_MM_PER_PULSE), Float2String(precip_mm_per_pulse), 1);
 			page_content += form_checkbox("gps_read", FPSTR(INTL_NEO6M), gps_read);
 			page_content += F("<br/><br/>\n<b>");
 		}
@@ -1467,6 +1490,14 @@ void webserver_config() {
 			} \
 		}
 
+#define readFloatParam(param) \
+		if (server.hasArg(#param)){ \
+			double val = server.arg(#param).toFloat(); \
+			if (val != 0){ \
+				param = val; \
+			} \
+		}
+
 #define readTimeParam(param) \
 		if (server.hasArg(#param)){ \
 			int val = server.arg(#param).toInt(); \
@@ -1510,6 +1541,8 @@ void webserver_config() {
 			readBoolParam(bmp280_read);
 			readBoolParam(bme280_read);
 			readBoolParam(ds18b20_read);
+			readBoolParam(precip_read);
+			readFloatParam(precip_mm_per_pulse);
 			readBoolParam(gps_read);
 
 			readIntParam(debug);
@@ -1565,6 +1598,7 @@ void webserver_config() {
 		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), "BMP280"), String(bmp280_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), "BME280"), String(bme280_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), "DS18B20"), String(ds18b20_read));
+		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), "PRECIP"), String(precip_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), "GPS"), String(gps_read));
 		page_content += line_from_value(FPSTR(INTL_AUTO_UPDATE), String(auto_update));
 		page_content += line_from_value(FPSTR(INTL_USE_BETA), String(use_beta));
@@ -1744,6 +1778,10 @@ void webserver_values() {
 		if (cfg::ds18b20_read) {
 			page_content += FPSTR(EMPTY_ROW);
 			page_content += table_row_from_value(FPSTR(SENSORS_DS18B20), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_DS18B20_T, -128, 1, 0), unit_T);
+		}
+		if (cfg::precip_read) {
+			page_content += FPSTR(EMPTY_ROW);
+			page_content += table_row_from_value(FPSTR(SENSORS_PRECIP), FPSTR(INTL_PRECIP), Float2String(precip_pulse_counter * cfg::precip_mm_per_pulse), "mm");
 		}
 		if (cfg::gps_read) {
 			page_content += FPSTR(EMPTY_ROW);
@@ -2080,6 +2118,8 @@ void wifiConfig() {
 	debug_out(String(cfg::dht_read), DEBUG_MIN_INFO, 1);
 	debug_out(F("DS18B20: "), DEBUG_MIN_INFO, 0);
 	debug_out(String(cfg::ds18b20_read), DEBUG_MIN_INFO, 1);
+	debug_out(F("PRECIP: "), DEBUG_MIN_INFO, 0);
+	debug_out(String(cfg::precip_read), DEBUG_MIN_INFO, 1);
 	debug_out(F("HTU21D: "), DEBUG_MIN_INFO, 0);
 	debug_out(String(cfg::htu21d_read), DEBUG_MIN_INFO, 1);
 	debug_out(F("BMP: "), DEBUG_MIN_INFO, 0);
@@ -3540,6 +3580,16 @@ bool initBME280(char addr) {
 	}
 }
 
+void handlePrecipIRQ(void)
+{
+	unsigned long now = millis();
+
+	if (now < precip_last_irq + PRECIP_DEBOUNCE_MS)
+		return;
+	precip_last_irq = now;
+	precip_pulse_counter++;
+}
+
 static void powerOnTestSensors() {
 	if (cfg::ppd_read) {
 		pinMode(PPD_PIN_PM1, INPUT_PULLUP);                 // Listen at the designated PIN
@@ -3614,6 +3664,12 @@ static void powerOnTestSensors() {
 	if (cfg::ds18b20_read) {
 		ds18b20.begin();                                    // Start DS18B20
 		debug_out(F("Read DS18B20..."), DEBUG_MIN_INFO, 1);
+	}
+
+	if (cfg::precip_read) {
+		pinMode(PRECIP_IRQ_PIN, INPUT);
+		attachInterrupt(digitalPinToInterrupt(PRECIP_IRQ_PIN), handlePrecipIRQ, RISING);
+		precip_last_irq = millis() - PRECIP_DEBOUNCE_MS;
 	}
 }
 
@@ -3831,6 +3887,7 @@ void loop() {
 	String result_BME280 = "";
 	String result_DS18B20 = "";
 	String result_GPS = "";
+	String result_precip = "";
 
 	unsigned long sum_send_time = 0;
 	unsigned long start_send;
@@ -3910,6 +3967,17 @@ void loop() {
 		if (cfg::ds18b20_read) {
 			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + FPSTR(SENSORS_DS18B20), DEBUG_MAX_INFO, 1);
 			result_DS18B20 = sensorDS18B20();               // getting temperature (optional)
+		}
+
+		if (cfg::precip_read) {
+			unsigned long precip;
+
+			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + FPSTR(SENSORS_PRECIP), DEBUG_MAX_INFO, 1);
+			noInterrupts();
+			precip = precip_pulse_counter;
+			precip_pulse_counter = 0;
+			interrupts();
+			result_precip = Value2Json("precip", Float2String(precip * cfg::precip_mm_per_pulse));
 		}
 	}
 
@@ -4042,6 +4110,10 @@ void loop() {
 				sendLuftdaten(result_GPS, GPS_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "GPS_");
 				sum_send_time += millis() - start_send;
 			}
+		}
+
+		if (cfg::precip_read) {
+			data += result_precip;
 		}
 
 		data_sample_times += Value2Json("signal", signal_strength);
