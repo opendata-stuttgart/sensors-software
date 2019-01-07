@@ -34,6 +34,7 @@ const char INTL_BASICAUTH[] PROGMEM = "Autorizzazione";
 const char INTL_FS_WIFI[] PROGMEM = "";
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "";
+const char INTL_FS_WIFI_HOSTNAME[] PROGMEM = "hostname";
 const char INTL_MORE_SETTINGS[] PROGMEM ="Altre configurazioni";
 const char INTL_AUTO_UPDATE[] PROGMEM = "Aggiornamento automatico firmware";
 const char INTL_USE_BETA[] PROGMEM = "";

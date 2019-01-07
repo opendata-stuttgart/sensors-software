@@ -4,6 +4,7 @@
 // Wifi config
 #define WLANSSID "Freifunk-disabled"
 #define WLANPWD ""
+#define WLANHOSTNAME ""
 
 // BasicAuth config
 #define WWW_USERNAME "admin"

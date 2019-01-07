@@ -186,6 +186,7 @@ const unsigned long DURATION_BEFORE_FORCED_RESTART_MS = ONE_DAY_IN_MS * 28;  // 
 namespace cfg {
 	char wlanssid[35] = WLANSSID;
 	char wlanpwd[65] = WLANPWD;
+	char wlanhostname[17] = WLANHOSTNAME;
 
 	char current_lang[3] = "DE";
 	char www_username[65] = WWW_USERNAME;
@@ -868,6 +869,7 @@ void readConfig() {
 					strcpyFromJSON(current_lang);
 					strcpyFromJSON(wlanssid);
 					strcpyFromJSON(wlanpwd);
+					strcpyFromJSON(wlanhostname);
 					strcpyFromJSON(www_username);
 					strcpyFromJSON(www_password);
 					strcpyFromJSON(fs_ssid);
@@ -959,6 +961,7 @@ void writeConfig() {
 	copyToJSON_String(SOFTWARE_VERSION);
 	copyToJSON_String(wlanssid);
 	copyToJSON_String(wlanpwd);
+	copyToJSON_String(wlanhostname);
 	copyToJSON_String(www_username);
 	copyToJSON_String(www_password);
 	copyToJSON_String(fs_ssid);
@@ -1339,6 +1342,7 @@ void webserver_config() {
 		page_content += FPSTR(TABLE_TAG_OPEN);
 		page_content += form_input("wlanssid", FPSTR(INTL_FS_WIFI_NAME), wlanssid, capacity_null_terminated_char_array(wlanssid));
 		page_content += form_password("wlanpwd", FPSTR(INTL_PASSWORD), wlanpwd, capacity_null_terminated_char_array(wlanpwd));
+		page_content += form_input("wlanhostname", FPSTR(INTL_FS_WIFI_HOSTNAME), wlanhostname, capacity_null_terminated_char_array(wlanhostname));
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 		page_content += F("<hr/>\n<b>");
 
@@ -1486,6 +1490,7 @@ void webserver_config() {
 		if (server.hasArg("wlanssid") && server.arg("wlanssid") != "") {
 			readCharParam(wlanssid);
 			readPasswdParam(wlanpwd);
+			readCharParam(wlanhostname);
 		}
 		if (! wificonfig_loop) {
 			readCharParam(current_lang);
@@ -2121,6 +2126,13 @@ void connectWifi() {
 	WiFi.setOutputPower(20.5);
 	WiFi.setPhyMode(WIFI_PHY_MODE_11N);
 	WiFi.mode(WIFI_STA);
+	if (strlen(cfg::wlanhostname) != 0) {
+		String host_name = cfg::wlanhostname;
+		host_name.replace(" ", "-");
+		debug_out(F("Setting hostname to "), DEBUG_MIN_INFO, 0);
+		debug_out(host_name, DEBUG_MIN_INFO, 1);
+		WiFi.hostname(host_name);
+	}
 	WiFi.begin(cfg::wlanssid, cfg::wlanpwd); // Start WiFI
 
 	debug_out(F("Connecting to "), DEBUG_MIN_INFO, 0);
@@ -3703,6 +3715,8 @@ static bool acquireNetworkTime() {
  * The Setup                                                     *
  *****************************************************************/
 void setup() {
+	String server_name = "";
+
 	Serial.begin(9600);					// Output to Serial at 9600 baud
 	Wire.begin(I2C_PIN_SDA, I2C_PIN_SCL);
 
@@ -3735,8 +3749,19 @@ void setup() {
 	logEnabledAPIs();
 	logEnabledDisplays();
 
-	String server_name = F("Feinstaubsensor-");
-	server_name += esp_chipid;
+	if (strlen(cfg::wlanhostname) != 0) {
+		server_name = String(cfg::wlanhostname);
+	} else {
+		server_name = FPSTR(INTL_PM_SENSOR);
+		server_name += F("-");
+		server_name += esp_chipid;
+	}
+
+	server_name.replace(" ", "-");
+
+	debug_out(F("\nMDNS Name: "), DEBUG_MIN_INFO, 0);
+	debug_out(server_name, DEBUG_MIN_INFO, 1);
+
 	if (MDNS.begin(server_name.c_str())) {
 		MDNS.addService("http", "tcp", 80);
 	}

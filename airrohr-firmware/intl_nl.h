@@ -34,6 +34,7 @@ const char INTL_BASICAUTH[] PROGMEM = "Beperk toegang";
 const char INTL_FS_WIFI[] PROGMEM = "Instellingen voor rechtstreekse WiFi-verbinding";
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "Netwerknaam en -wachtwoord van de fijnstofsensor";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Naam (SSID)";
+const char INTL_FS_WIFI_HOSTNAME[] PROGMEM = "hostname";
 const char INTL_MORE_SETTINGS[] PROGMEM ="Meer instellingen";
 const char INTL_AUTO_UPDATE[] PROGMEM = "Firmware automatisch bijwerken";
 const char INTL_USE_BETA[] PROGMEM = "Installeer beta-firmwares";

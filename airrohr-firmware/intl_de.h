@@ -34,6 +34,7 @@ const char INTL_BASICAUTH[] PROGMEM = "BasicAuth aktivieren";
 const char INTL_FS_WIFI[] PROGMEM = "Sensor WLAN";
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "Sensor WLAN Name im Konfigurationsmodus";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Name";
+const char INTL_FS_WIFI_HOSTNAME[] PROGMEM = "Hostnamen";
 const char INTL_MORE_SETTINGS[] PROGMEM ="Weitere Einstellungen";
 const char INTL_AUTO_UPDATE[] PROGMEM = "Auto Update";
 const char INTL_USE_BETA[] PROGMEM = "Lade Beta Versionen";

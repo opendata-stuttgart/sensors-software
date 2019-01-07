@@ -34,6 +34,7 @@ const char INTL_BASICAUTH[] PROGMEM = "Активировать аутентиф
 const char INTL_FS_WIFI[] PROGMEM = "Датчик Wi-Fi";
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "Название Wi-Fi датчика в режиме конфигурации";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Имя";
+const char INTL_FS_WIFI_HOSTNAME[] PROGMEM = "имя хоста";
 const char INTL_MORE_SETTINGS[] PROGMEM ="Дополнительные настройки";
 const char INTL_AUTO_UPDATE[] PROGMEM = "Автоматическое обновление";
 const char INTL_USE_BETA[] PROGMEM = "Загрузить бета-версии";

@@ -34,6 +34,7 @@ const char INTL_BASICAUTH[] PROGMEM = "Pøihlášení (heslem)";
 const char INTL_FS_WIFI[] PROGMEM = "Wi-Fi modul";
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "Wi-Fi modul v konfiguraèním módu";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Název";
+const char INTL_FS_WIFI_HOSTNAME[] PROGMEM = "Jméno hostitele";
 const char INTL_MORE_SETTINGS[] PROGMEM = "Další nastavení";
 const char INTL_AUTO_UPDATE[] PROGMEM = "Autom. aktualizace";
 const char INTL_USE_BETA[] PROGMEM = "Nahrát betaverzi";

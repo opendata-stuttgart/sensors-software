@@ -34,6 +34,7 @@ const char INTL_BASICAUTH[] PROGMEM = "Authorization";
 const char INTL_FS_WIFI[] PROGMEM = "WiFi Sensor";
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "WiFi Sensor in configuration mode";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Name";
+const char INTL_FS_WIFI_HOSTNAME[] PROGMEM = "Hostname";
 const char INTL_MORE_SETTINGS[] PROGMEM ="More settings";
 const char INTL_AUTO_UPDATE[] PROGMEM = "Auto update firmware";
 const char INTL_USE_BETA[] PROGMEM = "Load beta firmware";

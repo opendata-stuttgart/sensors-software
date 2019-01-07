@@ -34,6 +34,7 @@ const char INTL_BASICAUTH[] PROGMEM = "Aktivera BasicAuth";
 const char INTL_FS_WIFI[] PROGMEM = "";
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Sensorns WLAN namn";
+const char INTL_FS_WIFI_HOSTNAME[] PROGMEM = "Värddatornamnet";
 const char INTL_MORE_SETTINGS[] PROGMEM ="Avancerade inställningar";
 const char INTL_AUTO_UPDATE[] PROGMEM = "Automatisk uppdatering";
 const char INTL_USE_BETA[] PROGMEM = "Använd beta-versioner";

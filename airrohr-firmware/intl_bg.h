@@ -34,6 +34,7 @@ const char INTL_BASICAUTH[] PROGMEM = "Оторизация";
 const char INTL_FS_WIFI[] PROGMEM = "WiFi сензор";
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "WiFi сензор в режим на конфигуриране";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Име";
+const char INTL_FS_WIFI_HOSTNAME[] PROGMEM = "Име на хост";
 const char INTL_MORE_SETTINGS[] PROGMEM ="Още настройки";
 const char INTL_AUTO_UPDATE[] PROGMEM = "Автоматична актуализация";
 const char INTL_USE_BETA[] PROGMEM = "Зареждане на бета актуализация";
