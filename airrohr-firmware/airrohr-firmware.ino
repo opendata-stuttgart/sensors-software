@@ -186,7 +186,7 @@ const unsigned long DURATION_BEFORE_FORCED_RESTART_MS = ONE_DAY_IN_MS * 28;  // 
 namespace cfg {
 	char wlanssid[35] = WLANSSID;
 	char wlanpwd[65] = WLANPWD;
-	char wlanhostname[17] = WLANHOSTNAME;
+	char wlanhostname[33] = WLANHOSTNAME;
 
 	char current_lang[3] = "DE";
 	char www_username[65] = WWW_USERNAME;
@@ -1049,7 +1049,13 @@ void create_basic_auth_strings() {
 
 String make_header(const String& title) {
 	String s = FPSTR(WEB_PAGE_HEADER);
-	s.replace("{tt}", FPSTR(INTL_PM_SENSOR));
+	String header_string = FPSTR(INTL_PM_SENSOR);
+	if (strlen(cfg::wlanhostname) != 0) {
+		header_string += F(" (");
+		header_string += cfg::wlanhostname;
+		header_string += F(")");
+	}
+	s.replace("{tt}", header_string);
 	s.replace("{h}", FPSTR(INTL_HOME));
 	if(title != " ") {
 		s.replace("{n}", F("&raquo;"));
@@ -3757,10 +3763,16 @@ void setup() {
 		server_name += esp_chipid;
 	}
 
+	debug_out(F("\nMDNS instance name: "), DEBUG_MIN_INFO, 0);
+	debug_out(server_name, DEBUG_MIN_INFO, 1);
+
+	MDNS.setInstanceName(server_name);
+
 	server_name.replace(" ", "-");
 
-	debug_out(F("\nMDNS Name: "), DEBUG_MIN_INFO, 0);
-	debug_out(server_name, DEBUG_MIN_INFO, 1);
+	debug_out(F("MDNS host name: "), DEBUG_MIN_INFO, 0);
+	debug_out(server_name, DEBUG_MIN_INFO, 0);
+	debug_out(F(".local\n"), DEBUG_MIN_INFO, 1);
 
 	if (MDNS.begin(server_name.c_str())) {
 		MDNS.addService("http", "tcp", 80);
