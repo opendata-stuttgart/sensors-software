@@ -14,7 +14,7 @@
 #define FS_SSID ""
 #define FS_PWD ""
 
-// Wohin gehen die Daten?
+// Where to send the data?
 #define SEND2DUSTI 1
 #define SSL_DUSTI 0
 #define SEND2MADAVI 1
@@ -36,19 +36,21 @@
 
 // IMPORTANT: NO MORE CHANGES TO VARIABLE NAMES NEEDED FOR EXTERNAL APIS
 
-// Definition eigene API
+// define own API
 #define HOST_CUSTOM "192.168.234.1"
 #define URL_CUSTOM "/data.php"
 #define PORT_CUSTOM 80
 #define USER_CUSTOM ""
 #define PWD_CUSTOM ""
 
-// Definition eigene InfluxDB
+// define own InfluxDB
 #define HOST_INFLUX "influx.server"
 #define URL_INFLUX "/write?db=luftdaten"
 #define PORT_INFLUX 8086
 #define USER_INFLUX ""
 #define PWD_INFLUX ""
+#define MEASUREMENT_NAME_INFLUX "feinstaub"
+#define SSL_INFLUX 0
 
 // define pins for I2C
 #define I2C_PIN_SCL D4
@@ -87,7 +89,7 @@
 #define HTU21D_READ 0
 #define HTU21D_API_PIN 7
 
-// PPD42NS, der günstigere der beiden Feinstaubsensoren
+// PPD42NS, the cheaper version of the particle sensor
 #define PPD_READ 0
 #define PPD_API_PIN 5
 #if defined(ARDUINO_SAMD_ZERO) || defined(ESP8266)
@@ -95,7 +97,7 @@
 #define PPD_PIN_PM2 D5
 #endif
 
-// SDS011, der etwas teuerere Feinstaubsensor
+// SDS011, the more expensive version of the particle sensor
 #define SDS_READ 1
 #define SDS_API_PIN 1
 
@@ -124,7 +126,7 @@
 #define DS18B20_API_PIN 13
 
 
-// GPS, bevorzugt Neo-6M
+// GPS, preferred Neo-6M
 #define GPS_READ 0
 #define GPS_API_PIN 9
 
@@ -134,25 +136,25 @@
 // use beta firmware
 #define USE_BETA 0
 
-// OLED Display SSD1306 angeschlossen?
+// OLED Display SSD1306 connected?
 #define HAS_DISPLAY 0
 
-// OLED Display SH1106 angeschlossen?
+// OLED Display SH1106 connected?
 #define HAS_SH1106 0
 
-// LCD Display LCD1602 angeschlossen?
+// LCD Display LCD1602 connected?
 #define HAS_LCD1602 0
 
-// LCD Display LCD1602 (0x27) angeschlossen?
+// LCD Display LCD1602 (0x27) connected?
 #define HAS_LCD1602_27 0
 
-// LCD Display LCD2004 (0x27) angeschlossen?
+// LCD Display LCD2004 (0x27) connected?
 #define HAS_LCD2004_27 0
 
-// Wieviele Informationen sollen über die serielle Schnittstelle ausgegeben werden?
+// Set debug level for serial outpur?
 #define DEBUG 3
 
-// Definition der Debuglevel
+// define debug levels
 #define DEBUG_ERROR 1
 #define DEBUG_WARNING 2
 #define DEBUG_MIN_INFO 3
