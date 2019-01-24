@@ -66,6 +66,7 @@ const char WEB_PAGE_FOOTER[] PROGMEM = "<br/><br/><a href='/' style='display:inl
 
 const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a href='/values'>{t}</a><br/>\
 <a href='https://maps.luftdaten.info/' target='_blank'>{map}</a><br/>\
+<a href='https://www.madavi.de/sensor/graph.php?sensor=esp8266-{sensorID}-{PMsensor}' target='_blank'>{graph}</a><br/>\
 <a href='/config'>{conf}</a><br/>\
 <a href='/removeConfig'>{conf_delete}</a><br/>\
 <a href='/reset'>{restart}</a><br/>\

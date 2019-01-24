@@ -534,24 +534,9 @@ void display_debug(const String& text1, const String& text2) {
 }
 
 /*****************************************************************
- * check display values, return '-' if undefined                 *
- *****************************************************************/
-String check_display_value(double value, double undef, uint8_t len, uint8_t str_len) {
-	String s = (value != undef ? Float2String(value, len) : "-");
-	while (s.length() < str_len) {
-		s = " " + s;
-	}
-	return s;
-}
-
-/*****************************************************************
  * convert float to string with a                                *
  * precision of two (or a given number of) decimal places        *
  *****************************************************************/
-String Float2String(const double value) {
-	return Float2String(value, 2);
-}
-
 String Float2String(const double value, uint8_t digits) {
 	// Convert a float to String with two decimals.
 	char temp[15];
@@ -559,6 +544,21 @@ String Float2String(const double value, uint8_t digits) {
 	dtostrf(value, 13, digits, temp);
 	String s = temp;
 	s.trim();
+	return s;
+}
+
+String Float2String(const double value) {
+	return Float2String(value, 2);
+}
+
+/*****************************************************************
+ * check display values, return '-' if undefined                 *
+ *****************************************************************/
+String check_display_value(double value, double undef, uint8_t len, uint8_t str_len) {
+	String s = (value != undef ? Float2String(value, len) : "-");
+	while (s.length() < str_len) {
+		s = " " + s;
+	}
 	return s;
 }
 
@@ -828,6 +828,88 @@ void disable_unneeded_nmea() {
 }
 
 /*****************************************************************
+ * write config to spiffs                                        *
+ *****************************************************************/
+void writeConfig() {
+	using namespace cfg;
+	String json_string = "{";
+	debug_out(F("saving config..."), DEBUG_MIN_INFO, 1);
+
+#define copyToJSON_Bool(varname) json_string += Var2Json(#varname,varname);
+#define copyToJSON_Int(varname) json_string += Var2Json(#varname,varname);
+#define copyToJSON_String(varname) json_string += Var2Json(#varname,String(varname));
+	copyToJSON_String(current_lang);
+	copyToJSON_String(SOFTWARE_VERSION);
+	copyToJSON_String(wlanssid);
+	copyToJSON_String(wlanpwd);
+	copyToJSON_String(www_username);
+	copyToJSON_String(www_password);
+	copyToJSON_String(fs_ssid);
+	copyToJSON_String(fs_pwd);
+	copyToJSON_Bool(www_basicauth_enabled);
+	copyToJSON_Bool(dht_read);
+	copyToJSON_Bool(htu21d_read);
+	copyToJSON_Bool(ppd_read);
+	copyToJSON_Bool(sds_read);
+	copyToJSON_Bool(pms_read);
+	copyToJSON_Bool(hpm_read);
+	copyToJSON_Bool(bmp_read);
+	copyToJSON_Bool(bmp280_read);
+	copyToJSON_Bool(bme280_read);
+	copyToJSON_Bool(ds18b20_read);
+	copyToJSON_Bool(gps_read);
+	copyToJSON_Bool(send2dusti);
+	copyToJSON_Bool(ssl_dusti);
+	copyToJSON_Bool(send2madavi);
+	copyToJSON_Bool(ssl_madavi);
+	copyToJSON_Bool(send2sensemap);
+	copyToJSON_Bool(send2fsapp);
+	copyToJSON_Bool(send2lora);
+	copyToJSON_Bool(send2csv);
+	copyToJSON_Bool(auto_update);
+	copyToJSON_Bool(use_beta);
+	copyToJSON_Bool(has_display);
+	copyToJSON_Bool(has_sh1106);
+	copyToJSON_Bool(has_lcd1602);
+	copyToJSON_Bool(has_lcd1602_27);
+	copyToJSON_Bool(has_lcd2004_27);
+	copyToJSON_String(debug);
+	copyToJSON_String(sending_intervall_ms);
+	copyToJSON_String(time_for_wifi_config);
+	copyToJSON_String(senseboxid);
+	copyToJSON_Bool(send2custom);
+	copyToJSON_String(host_custom);
+	copyToJSON_String(url_custom);
+	copyToJSON_Int(port_custom);
+	copyToJSON_String(user_custom);
+	copyToJSON_String(pwd_custom);
+
+	copyToJSON_Bool(send2influx);
+	copyToJSON_String(host_influx);
+	copyToJSON_String(url_influx);
+	copyToJSON_Int(port_influx);
+	copyToJSON_String(user_influx);
+	copyToJSON_String(pwd_influx);
+#undef copyToJSON_Bool
+#undef copyToJSON_Int
+#undef copyToJSON_String
+
+	json_string.remove(json_string.length() - 1);
+	json_string += "}";
+
+	debug_out(json_string, DEBUG_MIN_INFO, 1);
+	File configFile = SPIFFS.open("/config.json", "w");
+	if (configFile) {
+		configFile.print(json_string);
+		debug_out(F("Config written: "), DEBUG_MIN_INFO, 0);
+		debug_out(json_string, DEBUG_MIN_INFO, 1);
+		configFile.close();
+	} else {
+		debug_out(F("failed to open config file for writing"), DEBUG_ERROR, 1);
+	}
+}
+
+/*****************************************************************
  * read config from spiffs                                       *
  *****************************************************************/
 void readConfig() {
@@ -945,88 +1027,6 @@ void readConfig() {
 }
 
 /*****************************************************************
- * write config to spiffs                                        *
- *****************************************************************/
-void writeConfig() {
-	using namespace cfg;
-	String json_string = "{";
-	debug_out(F("saving config..."), DEBUG_MIN_INFO, 1);
-
-#define copyToJSON_Bool(varname) json_string += Var2Json(#varname,varname);
-#define copyToJSON_Int(varname) json_string += Var2Json(#varname,varname);
-#define copyToJSON_String(varname) json_string += Var2Json(#varname,String(varname));
-	copyToJSON_String(current_lang);
-	copyToJSON_String(SOFTWARE_VERSION);
-	copyToJSON_String(wlanssid);
-	copyToJSON_String(wlanpwd);
-	copyToJSON_String(www_username);
-	copyToJSON_String(www_password);
-	copyToJSON_String(fs_ssid);
-	copyToJSON_String(fs_pwd);
-	copyToJSON_Bool(www_basicauth_enabled);
-	copyToJSON_Bool(dht_read);
-	copyToJSON_Bool(htu21d_read);
-	copyToJSON_Bool(ppd_read);
-	copyToJSON_Bool(sds_read);
-	copyToJSON_Bool(pms_read);
-	copyToJSON_Bool(hpm_read);
-	copyToJSON_Bool(bmp_read);
-	copyToJSON_Bool(bmp280_read);
-	copyToJSON_Bool(bme280_read);
-	copyToJSON_Bool(ds18b20_read);
-	copyToJSON_Bool(gps_read);
-	copyToJSON_Bool(send2dusti);
-	copyToJSON_Bool(ssl_dusti);
-	copyToJSON_Bool(send2madavi);
-	copyToJSON_Bool(ssl_madavi);
-	copyToJSON_Bool(send2sensemap);
-	copyToJSON_Bool(send2fsapp);
-	copyToJSON_Bool(send2lora);
-	copyToJSON_Bool(send2csv);
-	copyToJSON_Bool(auto_update);
-	copyToJSON_Bool(use_beta);
-	copyToJSON_Bool(has_display);
-	copyToJSON_Bool(has_sh1106);
-	copyToJSON_Bool(has_lcd1602);
-	copyToJSON_Bool(has_lcd1602_27);
-	copyToJSON_Bool(has_lcd2004_27);
-	copyToJSON_String(debug);
-	copyToJSON_String(sending_intervall_ms);
-	copyToJSON_String(time_for_wifi_config);
-	copyToJSON_String(senseboxid);
-	copyToJSON_Bool(send2custom);
-	copyToJSON_String(host_custom);
-	copyToJSON_String(url_custom);
-	copyToJSON_Int(port_custom);
-	copyToJSON_String(user_custom);
-	copyToJSON_String(pwd_custom);
-
-	copyToJSON_Bool(send2influx);
-	copyToJSON_String(host_influx);
-	copyToJSON_String(url_influx);
-	copyToJSON_Int(port_influx);
-	copyToJSON_String(user_influx);
-	copyToJSON_String(pwd_influx);
-#undef copyToJSON_Bool
-#undef copyToJSON_Int
-#undef copyToJSON_String
-
-	json_string.remove(json_string.length() - 1);
-	json_string += "}";
-
-	debug_out(json_string, DEBUG_MIN_INFO, 1);
-	File configFile = SPIFFS.open("/config.json", "w");
-	if (configFile) {
-		configFile.print(json_string);
-		debug_out(F("Config written: "), DEBUG_MIN_INFO, 0);
-		debug_out(json_string, DEBUG_MIN_INFO, 1);
-		configFile.close();
-	} else {
-		debug_out(F("failed to open config file for writing"), DEBUG_ERROR, 1);
-	}
-}
-
-/*****************************************************************
  * Base64 encode user:password                                   *
  *****************************************************************/
 void create_basic_auth_strings() {
@@ -1043,6 +1043,14 @@ void create_basic_auth_strings() {
 /*****************************************************************
  * html helper functions                                         *
  *****************************************************************/
+String add_sensor_type(const String& sensor_text) {
+	String s = sensor_text;
+	s.replace("{pm}", FPSTR(INTL_PARTICULATE_MATTER));
+	s.replace("{t}", FPSTR(INTL_TEMPERATURE));
+	s.replace("{h}", FPSTR(INTL_HUMIDITY));
+	s.replace("{p}", FPSTR(INTL_PRESSURE));
+	return s;
+}
 
 String make_header(const String& title) {
 	String s = FPSTR(WEB_PAGE_HEADER);
@@ -1251,15 +1259,6 @@ String age_last_values() {
 	return s;
 }
 
-String add_sensor_type(const String& sensor_text) {
-	String s = sensor_text;
-	s.replace("{pm}", FPSTR(INTL_PARTICULATE_MATTER));
-	s.replace("{t}", FPSTR(INTL_TEMPERATURE));
-	s.replace("{h}", FPSTR(INTL_HUMIDITY));
-	s.replace("{p}", FPSTR(INTL_PRESSURE));
-	return s;
-}
-
 /*****************************************************************
  * Webserver request auth: prompt for BasicAuth
  *
@@ -1297,6 +1296,12 @@ void webserver_root() {
 		page_content += FPSTR(WEB_ROOT_PAGE_CONTENT);
 		page_content.replace("{t}", FPSTR(INTL_CURRENT_DATA));
 		page_content.replace(F("{map}"), FPSTR(INTL_ACTIVE_SENSORS_MAP));
+		page_content.replace(F("{graph}"), FPSTR(INTL_GRAPH));
+		page_content.replace(F("{sensorID}"), esp_chipid);
+		if (PPD_READ) page_content.replace(F("{PMsensor}"), F("ppd42ns")); // D5 D6
+		if (SDS_READ) page_content.replace(F("{PMsensor}"), F("sds011")); // D1 D2
+		if (PMS_READ) page_content.replace(F("{PMsensor}"), F("pms")); // D1 D2
+		if (HPM_READ) page_content.replace(F("{PMsensor}"), F("hpm")); // D1 D2
 		page_content.replace(F("{conf}"), FPSTR(INTL_CONFIGURATION));
 		page_content.replace(F("{conf_delete}"), FPSTR(INTL_CONFIGURATION_DELETE));
 		page_content.replace(F("{restart}"), FPSTR(INTL_RESTART_SENSOR));
@@ -1928,18 +1933,6 @@ void webserver_prometheus_endpoint() {
 }
 
 /*****************************************************************
- * Webserver Images                                              *
- *****************************************************************/
-static void webserver_images() {
-	if (server.arg("name") == F("luftdaten_logo")) {
-		debug_out(F("output luftdaten.info logo..."), DEBUG_MIN_INFO, 1);
-		server.send(200, FPSTR(TXT_CONTENT_TYPE_IMAGE_SVG), FPSTR(LUFTDATEN_INFO_LOGO_SVG));
-	} else {
-		webserver_not_found();
-	}
-}
-
-/*****************************************************************
  * Webserver page not found                                      *
  *****************************************************************/
 void webserver_not_found() {
@@ -1953,6 +1946,18 @@ void webserver_not_found() {
 		}
 	} else {
 		server.send(404, FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN), F("Not found."));
+	}
+}
+
+/*****************************************************************
+ * Webserver Images                                              *
+ *****************************************************************/
+static void webserver_images() {
+	if (server.arg("name") == F("luftdaten_logo")) {
+		debug_out(F("output luftdaten.info logo..."), DEBUG_MIN_INFO, 1);
+		server.send(200, FPSTR(TXT_CONTENT_TYPE_IMAGE_SVG), FPSTR(LUFTDATEN_INFO_LOGO_SVG));
+	} else {
+		webserver_not_found();
 	}
 }
 
