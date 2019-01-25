@@ -100,7 +100,7 @@
  *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-123B"
+#define SOFTWARE_VERSION "NRZ-2018-124-B1"
 
 /*****************************************************************
  * Includes                                                      *
@@ -111,8 +111,6 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include <ESP8266httpUpdate.h>
-//#include <WiFiClientSecure.h>
-//#include <WiFiClientSecureBearSSL.h>
 #include <SoftwareSerial.h>
 #include "./oledfont.h"				// avoids including the default Arial font, needs to be included before SSD1306.h
 #include <SSD1306.h>
