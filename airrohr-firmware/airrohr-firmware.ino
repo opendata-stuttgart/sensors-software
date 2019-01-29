@@ -227,18 +227,19 @@ namespace cfg {
 	bool ssl_dusti = SSL_DUSTI;
 	char senseboxid[30] = SENSEBOXID;
 
+	char host_influx[100] = HOST_INFLUX;
+	char url_influx[100] = URL_INFLUX;
 	int port_influx = PORT_INFLUX;
 	char user_influx[65] = USER_INFLUX;
 	char pwd_influx[65] = PWD_INFLUX;
+	char measurement_name_influx[100] = MEASUREMENT_NAME_INFLUX;
+	bool ssl_influx = SSL_INFLUX;
 
 	char host_custom[100] = HOST_CUSTOM;
 	char url_custom[100] = URL_CUSTOM;
 	int port_custom = PORT_CUSTOM;
 	char user_custom[65] = USER_CUSTOM;
 	char pwd_custom[65] = PWD_CUSTOM;
-
-	char host_influx[100] = HOST_INFLUX;
-	char url_influx[100] = URL_INFLUX;
 
 	unsigned long time_for_wifi_config = 600000;
 	unsigned long sending_intervall_ms = 145000;
@@ -919,6 +920,11 @@ void readConfig() {
 					setFromJSON(port_influx);
 					strcpyFromJSON(user_influx);
 					strcpyFromJSON(pwd_influx);
+					strcpyFromJSON(measurement_name_influx);
+					if (strlen(measurement_name_influx) == 0) {
+						strcpy(measurement_name_influx, MEASUREMENT_NAME_INFLUX);
+					}
+					setFromJSON(ssl_influx);
 					if (strcmp(host_influx, "api.luftdaten.info") == 0) {
 						strcpy(host_influx, "");
 						send2influx = 0;
@@ -1005,6 +1011,8 @@ void writeConfig() {
 	copyToJSON_Int(port_influx);
 	copyToJSON_String(user_influx);
 	copyToJSON_String(pwd_influx);
+	copyToJSON_String(measurement_name_influx);
+	copyToJSON_Bool(ssl_influx);
 #undef copyToJSON_Bool
 #undef copyToJSON_Int
 #undef copyToJSON_String
@@ -1316,6 +1324,7 @@ void webserver_config() {
 
 	String page_content = make_header(FPSTR(INTL_CONFIGURATION));
 	String masked_pwd = "";
+	String send_influx_data_string = "";
 	last_page_load = millis();
 
 	debug_out(F("output config page ..."), DEBUG_MIN_INFO, 1);
@@ -1426,13 +1435,20 @@ void webserver_config() {
 			page_content += form_input("user_custom", FPSTR(INTL_USER), user_custom, capacity_null_terminated_char_array(user_custom));
 			page_content += form_password("pwd_custom", FPSTR(INTL_PASSWORD), pwd_custom, capacity_null_terminated_char_array(pwd_custom));
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-			page_content += form_checkbox("send2influx", tmpl(FPSTR(INTL_SEND_TO), F("InfluxDB")), send2influx);
+
+			send_influx_data_string = F("InfluxDB");
+			send_influx_data_string += F("&nbsp;&nbsp;(");
+			send_influx_data_string += form_checkbox("ssl_influx", F("HTTPS"), ssl_influx, false);
+			send_influx_data_string += F(")");
+
+			page_content += form_checkbox("send2influx", tmpl(FPSTR(INTL_SEND_TO), send_influx_data_string), send2influx);
 			page_content += FPSTR(TABLE_TAG_OPEN);
 			page_content += form_input("host_influx", FPSTR(INTL_SERVER), host_influx, capacity_null_terminated_char_array(host_influx));
 			page_content += form_input("url_influx", FPSTR(INTL_PATH), url_influx, capacity_null_terminated_char_array(url_influx));
 			page_content += form_input("port_influx", FPSTR(INTL_PORT), String(port_influx), max_port_digits);
 			page_content += form_input("user_influx", FPSTR(INTL_USER), user_influx, capacity_null_terminated_char_array(user_influx));
 			page_content += form_password("pwd_influx", FPSTR(INTL_PASSWORD), pwd_influx, capacity_null_terminated_char_array(pwd_influx));
+			page_content += form_input("measurement_name_influx", F("Measurement"), measurement_name_influx, capacity_null_terminated_char_array(measurement_name_influx));
 			page_content += form_submit(FPSTR(INTL_SAVE_AND_RESTART));
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 			page_content += F("<br/></form>");
@@ -1534,6 +1550,8 @@ void webserver_config() {
 			readIntParam(port_influx);
 			readCharParam(user_influx);
 			readPasswdParam(pwd_influx);
+			readCharParam(measurement_name_influx);
+			readBoolParam(ssl_influx);
 
 		}
 
@@ -1592,6 +1610,8 @@ void webserver_config() {
 		page_content += line_from_value(FPSTR(INTL_PORT), String(port_influx));
 		page_content += line_from_value(FPSTR(INTL_USER), user_influx);
 		page_content += line_from_value(FPSTR(INTL_PASSWORD), pwd_influx);
+		page_content += line_from_value(F("Measurement"), measurement_name_influx);
+		page_content += line_from_value(F("SSL"), String(ssl_influx));
 		page_content += F("<br/><br/>");
 		page_content += FPSTR(INTL_SENSOR_IS_REBOOTING);
 	}
@@ -2142,11 +2162,13 @@ void connectWifi() {
 /*****************************************************************
  * send data to rest api                                         *
  *****************************************************************/
-void sendData(const String& data, const int pin, const char* host, const int httpPort, const char* url, const bool verify, const char* basic_auth_string, const String& contentType) {
+void sendData(const String& data, const int pin, const char* host, const int httpPort, const char* url, const bool use_ssl, const bool verify, const char* basic_auth_string, const String& contentType) {
 //#include "ca-root.h"
 
 	debug_out(F("Start connecting to "), DEBUG_MIN_INFO, 0);
-	debug_out(host, DEBUG_MIN_INFO, 1);
+	debug_out(host, DEBUG_MIN_INFO, 0);
+	debug_out(F(":"), DEBUG_MIN_INFO, 0);
+	debug_out(String(httpPort), DEBUG_MIN_INFO, 1);
 
 	String request_head = F("POST ");
 	request_head += String(url);
@@ -2208,7 +2230,7 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 	};
 
 	// Use WiFiClient class to create TCP connections
-	if (httpPort == 443) {
+	if (use_ssl) {
 		WiFiClientSecure client_s;
 		if (doConnect(&client_s)) {
 			doRequest(&client_s);
@@ -2259,7 +2281,7 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 /*****************************************************************
  * send single sensor data to luftdaten.info api                 *
  *****************************************************************/
-void sendLuftdaten(const String& data, const int pin, const char* host, const int httpPort, const char* url, const bool verify, const char* replace_str) {
+void sendLuftdaten(const String& data, const int pin, const char* host, const int httpPort, const char* url, const bool use_ssl, const bool verify, const char* replace_str) {
 	String data_4_dusti = FPSTR(data_first_part);
 	data_4_dusti.replace("{v}", SOFTWARE_VERSION);
 	data_4_dusti += data;
@@ -2267,7 +2289,7 @@ void sendLuftdaten(const String& data, const int pin, const char* host, const in
 	data_4_dusti.replace(replace_str, "");
 	data_4_dusti += "]}";
 	if (data != "") {
-		sendData(data_4_dusti, pin, host, httpPort, url, verify, "", FPSTR(TXT_CONTENT_TYPE_JSON));
+		sendData(data_4_dusti, pin, host, httpPort, url, use_ssl, verify, "", FPSTR(TXT_CONTENT_TYPE_JSON));
 	} else {
 		debug_out(F("No data sent..."), DEBUG_MIN_INFO, 1);
 	}
@@ -2294,7 +2316,8 @@ String create_influxdb_string(const String& data) {
 	StaticJsonBuffer<JSON_BUFFER_SIZE> jsonBuffer;
 	JsonObject& json2data = jsonBuffer.parseObject(data);
 	if (json2data.success()) {
-		data_4_influxdb += F("feinstaub,node=esp8266-");
+		data_4_influxdb += cfg::measurement_name_influx;
+		data_4_influxdb += F(",node=esp8266-");
 		data_4_influxdb += esp_chipid + " ";
 		for (uint8_t i = 0; i < json2data["sensordatavalues"].size(); i++) {
 			String tmp_str = json2data["sensordatavalues"][i]["value_type"].as<char*>();
@@ -3764,7 +3787,7 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 	if (cfg::send2madavi) {
 		debug_out(String(FPSTR(DBG_TXT_SENDING_TO)) + F("madavi.de: "), DEBUG_MIN_INFO, 1);
 		start_send = millis();
-		sendData(data, 0, HOST_MADAVI, (cfg::ssl_madavi ? 443 : 80), URL_MADAVI, true, "", FPSTR(TXT_CONTENT_TYPE_JSON));
+		sendData(data, 0, HOST_MADAVI, (cfg::ssl_madavi ? 443 : 80), URL_MADAVI, cfg::ssl_madavi, true, "", FPSTR(TXT_CONTENT_TYPE_JSON));
 		sum_send_time += millis() - start_send;
 	}
 
@@ -3773,14 +3796,14 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 		start_send = millis();
 		String sensemap_path = URL_SENSEMAP;
 		sensemap_path.replace("BOXID", cfg::senseboxid);
-		sendData(data, 0, HOST_SENSEMAP, PORT_SENSEMAP, sensemap_path.c_str(), false, "", FPSTR(TXT_CONTENT_TYPE_JSON));
+		sendData(data, 0, HOST_SENSEMAP, PORT_SENSEMAP, sensemap_path.c_str(), true, false, "", FPSTR(TXT_CONTENT_TYPE_JSON));
 		sum_send_time += millis() - start_send;
 	}
 
 	if (cfg::send2fsapp) {
 		debug_out(String(FPSTR(DBG_TXT_SENDING_TO)) + F("Server FS App: "), DEBUG_MIN_INFO, 1);
 		start_send = millis();
-		sendData(data, 0, HOST_FSAPP, PORT_FSAPP, URL_FSAPP, false, "", FPSTR(TXT_CONTENT_TYPE_JSON));
+		sendData(data, 0, HOST_FSAPP, PORT_FSAPP, URL_FSAPP, false, false, "", FPSTR(TXT_CONTENT_TYPE_JSON));
 		sum_send_time += millis() - start_send;
 	}
 
@@ -3788,7 +3811,7 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 		debug_out(String(FPSTR(DBG_TXT_SENDING_TO)) + F("custom influx db: "), DEBUG_MIN_INFO, 1);
 		start_send = millis();
 		const String data_4_influxdb = create_influxdb_string(data);
-		sendData(data_4_influxdb, 0, cfg::host_influx, cfg::port_influx, cfg::url_influx, false, basic_auth_influx.c_str(), FPSTR(TXT_CONTENT_TYPE_INFLUXDB));
+		sendData(data_4_influxdb, 0, cfg::host_influx, cfg::port_influx, cfg::url_influx, cfg::ssl_influx, false, basic_auth_influx.c_str(), FPSTR(TXT_CONTENT_TYPE_INFLUXDB));
 		sum_send_time += millis() - start_send;
 	}
 
@@ -3808,7 +3831,7 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 		data_4_custom = "{\"esp8266id\": \"" + String(esp_chipid) + "\", " + data_4_custom;
 		debug_out(String(FPSTR(DBG_TXT_SENDING_TO)) + F("custom api: "), DEBUG_MIN_INFO, 1);
 		start_send = millis();
-		sendData(data_4_custom, 0, cfg::host_custom, cfg::port_custom, cfg::url_custom, false, basic_auth_custom.c_str(), FPSTR(TXT_CONTENT_TYPE_JSON));
+		sendData(data_4_custom, 0, cfg::host_custom, cfg::port_custom, cfg::url_custom, false, false, basic_auth_custom.c_str(), FPSTR(TXT_CONTENT_TYPE_JSON));
 		sum_send_time += millis() - start_send;
 	}
 	return sum_send_time;
@@ -3945,7 +3968,7 @@ void loop() {
 			if (cfg::send2dusti) {
 				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(PPD42NS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_PPD, PPD_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "PPD_");
+				sendLuftdaten(result_PPD, PPD_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, cfg::ssl_dusti, true, "PPD_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3954,7 +3977,7 @@ void loop() {
 			if (cfg::send2dusti) {
 				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(SDS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_SDS, SDS_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "SDS_");
+				sendLuftdaten(result_SDS, SDS_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, cfg::ssl_dusti, true, "SDS_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3963,7 +3986,7 @@ void loop() {
 			if (cfg::send2dusti) {
 				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(PMS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_PMS, PMS_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "PMS_");
+				sendLuftdaten(result_PMS, PMS_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, cfg::ssl_dusti, true, "PMS_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3972,7 +3995,7 @@ void loop() {
 			if (cfg::send2dusti) {
 				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(HPM): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_HPM, HPM_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "HPM_");
+				sendLuftdaten(result_HPM, HPM_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, cfg::ssl_dusti, true, "HPM_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3981,7 +4004,7 @@ void loop() {
 			if (cfg::send2dusti) {
 				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(DHT): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_DHT, DHT_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "DHT_");
+				sendLuftdaten(result_DHT, DHT_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, cfg::ssl_dusti, true, "DHT_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3990,7 +4013,7 @@ void loop() {
 			if (cfg::send2dusti) {
 				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(HTU21D): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_HTU21D, HTU21D_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "HTU21D_");
+				sendLuftdaten(result_HTU21D, HTU21D_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, cfg::ssl_dusti, true, "HTU21D_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -3999,7 +4022,7 @@ void loop() {
 			if (cfg::send2dusti) {
 				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(BMP): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_BMP, BMP_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "BMP_");
+				sendLuftdaten(result_BMP, BMP_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, cfg::ssl_dusti, true, "BMP_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -4008,7 +4031,7 @@ void loop() {
 			if (cfg::send2dusti) {
 				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(BMP280): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_BMP280, BMP280_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "BMP280_");
+				sendLuftdaten(result_BMP280, BMP280_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, cfg::ssl_dusti, true, "BMP280_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -4017,7 +4040,7 @@ void loop() {
 			if (cfg::send2dusti) {
 				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(BME280): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_BME280, BME280_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "BME280_");
+				sendLuftdaten(result_BME280, BME280_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, cfg::ssl_dusti, true, "BME280_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -4027,7 +4050,7 @@ void loop() {
 			if (cfg::send2dusti) {
 				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(DS18B20): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_DS18B20, DS18B20_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "DS18B20_");
+				sendLuftdaten(result_DS18B20, DS18B20_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, cfg::ssl_dusti, true, "DS18B20_");
 				sum_send_time += millis() - start_send;
 			}
 		}
@@ -4037,7 +4060,7 @@ void loop() {
 			if (cfg::send2dusti) {
 				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(GPS): "), DEBUG_MIN_INFO, 1);
 				start_send = millis();
-				sendLuftdaten(result_GPS, GPS_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "GPS_");
+				sendLuftdaten(result_GPS, GPS_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, cfg::ssl_dusti, true, "GPS_");
 				sum_send_time += millis() - start_send;
 			}
 		}
