@@ -3829,11 +3829,8 @@ static unsigned long sendDataToOptionalApis(const String &data) {
     debug_out(String(FPSTR(DBG_TXT_SENDING_TO)) + F("Server aircms.online: "), DEBUG_MIN_INFO, 1);
     start_send = millis();
     unsigned long ts = millis() / 1000;
-    //String  login = esp_chipid,
-    //        token = WiFi.macAddress();
-    // Fake - only for test!
-    String  login = "4105723",
-            token = "80:7D:3A:3E:A5:FB";
+    String  login = esp_chipid,
+            token = WiFi.macAddress();
 
     // Temporal workaround for a server limitation as server can only take DS18B20 temperature data.
     String altered_data = data;
