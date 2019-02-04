@@ -21,6 +21,7 @@
 #define SSL_MADAVI 0
 #define SEND2SENSEMAP 0
 #define SEND2FSAPP 0
+#define SEND2AIRCMS 0
 #define SEND2MQTT 0
 #define SEND2INFLUX 0
 #define SEND2LORA 0

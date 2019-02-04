@@ -130,6 +130,7 @@
 #include <time.h>
 #include <coredecls.h>
 #include <assert.h>
+#include <Hash.h>
 
 #if defined(INTL_BG)
 #include "intl_bg.h"
@@ -212,6 +213,7 @@ namespace cfg {
 	bool send2madavi = SEND2MADAVI;
 	bool send2sensemap = SEND2SENSEMAP;
 	bool send2fsapp = SEND2FSAPP;
+	bool send2aircms = SEND2AIRCMS;
 	bool send2custom = SEND2CUSTOM;
 	bool send2lora = SEND2LORA;
 	bool send2influx = SEND2INFLUX;
@@ -271,6 +273,10 @@ namespace cfg {
 #define HOST_FSAPP "www.h2801469.stratoserver.net"
 #define URL_FSAPP "/data.php"
 #define PORT_FSAPP 80
+
+#define HOST_AIRCMS "doiot.ru"
+#define URL_AIRCMS "/php/sensors.php?h="
+#define PORT_AIRCMS 443
 
 #define UPDATE_HOST "www.madavi.de"
 #define UPDATE_URL "/sensor/update/firmware.php"
@@ -892,6 +898,7 @@ void readConfig() {
 					setFromJSON(ssl_madavi);
 					setFromJSON(send2sensemap);
 					setFromJSON(send2fsapp);
+          setFromJSON(send2aircms);
 					setFromJSON(send2lora);
 					setFromJSON(send2csv);
 					setFromJSON(auto_update);
@@ -981,6 +988,7 @@ void writeConfig() {
 	copyToJSON_Bool(ssl_madavi);
 	copyToJSON_Bool(send2sensemap);
 	copyToJSON_Bool(send2fsapp);
+	copyToJSON_Bool(send2aircms);
 	copyToJSON_Bool(send2lora);
 	copyToJSON_Bool(send2csv);
 	copyToJSON_Bool(auto_update);
@@ -1038,6 +1046,28 @@ void create_basic_auth_strings() {
 	if (cfg::user_influx[0] != '\0' || cfg::pwd_influx[0] != '\0') {
 		basic_auth_influx = base64::encode(String(cfg::user_influx) + ":" + String(cfg::pwd_influx));
 	}
+}
+
+/*****************************************************************
+ * aircms.online helper functions                                *
+ *****************************************************************/
+void sha1Hex(const String& s, char hash[41]) {
+  uint8_t buf[20];
+  sha1(s, &buf[0]);
+  for(int i = 0; i < 20; i++) {
+    sprintf(&hash[i*2], "%02x", buf[i]);
+  }
+  hash[40] = (char)0;
+}
+
+void hmac1(const String& secret, const String& s, char hash[41]) {
+  Serial.print("Hashing string: ");
+  Serial.println(s);
+  char buf[41];
+  sha1Hex(s, &buf[0]);
+  String str = (char*)buf;
+  Serial.println(secret + str);
+  sha1Hex(secret + str, &hash[0]);
 }
 
 /*****************************************************************
@@ -1415,6 +1445,8 @@ void webserver_config() {
 			page_content += FPSTR(BR_TAG);
 			page_content += form_checkbox("send2fsapp", tmpl(FPSTR(INTL_SEND_TO), F("Feinstaub-App")), send2fsapp);
 			page_content += FPSTR(BR_TAG);
+      page_content += form_checkbox("send2aircms", tmpl(FPSTR(INTL_SEND_TO), F("aircms.online")), send2aircms);
+      page_content += FPSTR(BR_TAG);
 			page_content += form_checkbox("send2sensemap", tmpl(FPSTR(INTL_SEND_TO), F("OpenSenseMap")), send2sensemap);
 			page_content += FPSTR(TABLE_TAG_OPEN);
 			page_content += form_input("senseboxid", "senseBox-ID: ", senseboxid, capacity_null_terminated_char_array(senseboxid));
@@ -1520,6 +1552,8 @@ void webserver_config() {
 
 			readBoolParam(send2fsapp);
 
+			readBoolParam(send2aircms);
+
 			readBoolParam(send2sensemap);
 			readCharParam(senseboxid);
 
@@ -1577,6 +1611,7 @@ void webserver_config() {
 		page_content += line_from_value(FPSTR(INTL_MEASUREMENT_INTERVAL), String(sending_intervall_ms));
 		page_content += line_from_value(tmpl(FPSTR(INTL_SEND_TO), F("CSV")), String(send2csv));
 		page_content += line_from_value(tmpl(FPSTR(INTL_SEND_TO), F("Feinstaub-App")), String(send2fsapp));
+    page_content += line_from_value(tmpl(FPSTR(INTL_SEND_TO), F("aircms.online")), String(send2aircms));
 		page_content += line_from_value(tmpl(FPSTR(INTL_SEND_TO), F("opensensemap")), String(send2sensemap));
 		page_content += F("<br/>senseBox-ID ");
 		page_content += senseboxid;
@@ -3639,6 +3674,10 @@ static void logEnabledAPIs() {
 		debug_out(F("custom API"), DEBUG_MIN_INFO, 1);
 	}
 
+  if (cfg::send2aircms) {
+    debug_out(F("aircms API"), DEBUG_MIN_INFO, 1);
+  }
+
 	if (cfg::send2influx) {
 		debug_out(F("custom influx DB"), DEBUG_MIN_INFO, 1);
 	}
@@ -3785,6 +3824,36 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 		sendData(data, 0, HOST_FSAPP, PORT_FSAPP, URL_FSAPP, false, "", FPSTR(TXT_CONTENT_TYPE_JSON));
 		sum_send_time += millis() - start_send;
 	}
+
+   if (cfg::send2aircms) {
+    debug_out(String(FPSTR(DBG_TXT_SENDING_TO)) + F("Server aircms.online: "), DEBUG_MIN_INFO, 1);
+    start_send = millis();
+    unsigned long ts = millis() / 1000;
+    //String  login = esp_chipid,
+    //        token = WiFi.macAddress();
+    // Fake - only for test!
+    String  login = "4105723",
+            token = "80:7D:3A:3E:A5:FB";
+
+    // Temporal workaround for a server limitation as server can only take DS18B20 temperature data.
+    String altered_data = data;
+    altered_data.replace("temperature","DS18B20_temperature");
+    altered_data.replace("HTU21D_temperature","DS18B20_temperature");
+    altered_data.replace("BMP_temperature","DS18B20_temperature");
+    altered_data.replace("BMP280_temperatur","DS18B20_temperature");
+    altered_data.replace("BME280_temperature","DS18B20_temperature");
+        
+    String aircms_data = "L=" + login + "&t=" + String(ts, DEC) + "&airrohr=" + altered_data;
+    char token_hash[41];
+    sha1Hex(token, &token_hash[0]);
+    char hash[41];
+    hmac1(String(token_hash), aircms_data+token, &hash[0]);
+    char char_full_url[100];
+    sprintf(char_full_url, "%s%s", URL_AIRCMS, hash);
+    
+    sendData(aircms_data, 0, HOST_AIRCMS, PORT_AIRCMS, char_full_url, false, "", FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN));
+    sum_send_time += millis() - start_send;
+  }
 
 	if (cfg::send2influx) {
 		debug_out(String(FPSTR(DBG_TXT_SENDING_TO)) + F("custom influx db: "), DEBUG_MIN_INFO, 1);
