@@ -100,7 +100,7 @@
  *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-124-B1"
+#define SOFTWARE_VERSION "NRZ-2018-124-B2"
 
 /*****************************************************************
  * Includes                                                      *
@@ -1107,7 +1107,7 @@ String form_password(const String& name, const String& info, const String& value
 	return s;
 }
 
-String form_checkbox(const String& name, const String& info, const bool checked, const bool linebreak = true) {
+String form_checkbox(const String& name, const String& info, const bool checked, const bool linebreak) {
 	String s = F("<label for='{n}'><input type='checkbox' name='{n}' value='1' id='{n}' {c}/> {i}</label><br/>");
 	if (checked) {
 		s.replace("{c}", F(" checked='checked'"));
@@ -1120,6 +1120,10 @@ String form_checkbox(const String& name, const String& info, const bool checked,
 		s.replace("<br/>", "");
 	}
 	return s;
+}
+
+String form_checkbox(const String& name, const String& info, const bool checked) {
+	return form_checkbox(name, info, checked, true);
 }
 
 String form_checkbox_sensor(const String& name, const String& info, const bool checked) {
