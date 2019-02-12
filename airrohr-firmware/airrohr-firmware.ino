@@ -1245,7 +1245,16 @@ String warning_first_cycle() {
 	if (time_to_first > cfg::sending_intervall_ms) {
 		time_to_first = 0;
 	}
-	s.replace("{v}", String((long)((time_to_first + 500) / 1000)));
+ // Dodanie odliczania do pierwszego pomiaru. Counting down to first measurement.
+ 	String countingdown = F("<span id='seconds'></span>\r\n"
+          "<script type='text/javascript'>\r\n"
+          "odl=document.getElementById('seconds')\r\n"
+          "function counting(odl,sek){ odl.innerHTML=sek; if(sek>0)setTimeout(function(){counting(odl,--sek)},1e3)}\r\n"
+          "counting(document.getElementById('seconds'),");
+          countingdown += String((long)((time_to_first + 500) / 1000));
+          countingdown += F(")\r\n"
+          "</script>\r\n");
+	s.replace("{v}", countingdown);
 	return s;
 }
 
@@ -1255,7 +1264,15 @@ String age_last_values() {
 	if (time_since_last > cfg::sending_intervall_ms) {
 		time_since_last = 0;
 	}
-	s += String((long)((time_since_last + 500) / 1000));
+ // Dodanie odliczania od ostatniego pomiaru. Counting seconds since last measurement.
+	s += F("<span id='seconds'></span>\r\n"
+          "<script type='text/javascript'>\r\n"
+          "odl=document.getElementById('seconds')\r\n"
+          "function counting(odl,sek){ odl.innerHTML=sek; if(sek>0)setTimeout(function(){counting(odl,++sek)},1e3)}\r\n"
+          "counting(document.getElementById('seconds'),");
+  	s += String((long)((time_since_last + 500) / 1000));
+  	s += F(")\r\n"
+          "</script>\r\n");
 	s += FPSTR(INTL_TIME_SINCE_LAST_MEASUREMENT);
 	s += F("</b><br/><br/>");
 	return s;
