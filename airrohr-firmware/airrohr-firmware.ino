@@ -3831,16 +3831,8 @@ static unsigned long sendDataToOptionalApis(const String &data) {
     unsigned long ts = millis() / 1000;
     String  login = esp_chipid,
             token = WiFi.macAddress();
-
-    // Temporal workaround for a server limitation as server can only take DS18B20 temperature data.
-    String altered_data = data;
-    altered_data.replace("temperature","DS18B20_temperature");
-    altered_data.replace("HTU21D_temperature","DS18B20_temperature");
-    altered_data.replace("BMP_temperature","DS18B20_temperature");
-    altered_data.replace("BMP280_temperatur","DS18B20_temperature");
-    altered_data.replace("BME280_temperature","DS18B20_temperature");
         
-    String aircms_data = "L=" + login + "&t=" + String(ts, DEC) + "&airrohr=" + altered_data;
+    String aircms_data = "L=" + login + "&t=" + String(ts, DEC) + "&airrohr=" + data;
     char token_hash[41];
     sha1Hex(token, &token_hash[0]);
     char hash[41];
