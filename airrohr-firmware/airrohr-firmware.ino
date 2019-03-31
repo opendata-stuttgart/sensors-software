@@ -248,7 +248,7 @@ namespace cfg {
 	void initNonTrivials(const char* id) {
 		strcpy(cfg::current_lang, CURRENT_LANG);
 		if (fs_ssid[0] == '\0') {
-			strcpy(fs_ssid, "Feinstaubsensor-");
+			strcpy(fs_ssid, "ESP");
 			strcat(fs_ssid, id);
 		}
 	}

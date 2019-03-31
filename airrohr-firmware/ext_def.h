@@ -12,7 +12,7 @@
 
 // Sensor Wifi config (config mode)
 #define FS_SSID ""
-#define FS_PWD ""
+#define FS_PWD "ParticulateMatter255"
 
 // Wohin gehen die Daten?
 #define SEND2DUSTI 1
