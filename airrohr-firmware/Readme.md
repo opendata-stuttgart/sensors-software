@@ -23,7 +23,7 @@ ppd42ns-wificonfig-ppd-sds-dht.spiffs.bin	-	Binary mit leerem Dateisystem, zum L
 ## WLAN Konfiguration
 siehe auch Wiki-Seite auf Github [Konfiguration der Sensoren](https://github.com/opendata-stuttgart/meta/wiki/Konfiguration-der-Sensoren)
 
-Wenn das vorgegebene WLAN nach 20 Sekunden nicht erreichbar ist, wird ein Access-Point eingerichtet, der über "Feinstaubsensor-\[Sensor-ID\]" erreichbar ist. Nach dem Verbinden zu diesem Accesspoint sollten alle Anfragen auf die Konfigurationsseite umgeleitet werden. Direkte Adresse der Seite ist http://192.168.4.1/ .
+Wenn das vorgegebene WLAN nach 20 Sekunden nicht erreichbar ist, wird ein Access-Point eingerichtet, der über "ESP-\[Sensor-ID\]" erreichbar ist. Das Passwort ist "**ParticularMatter255**". Nach dem Verbinden zu diesem Accesspoint sollten alle Anfragen auf die Konfigurationsseite umgeleitet werden. Direkte Adresse der Seite ist http://192.168.4.1/ .
 
 Konfigurierbar sind:
 * WLAN-Name und Passwort
