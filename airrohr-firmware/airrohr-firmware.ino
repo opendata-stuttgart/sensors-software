@@ -2014,48 +2014,48 @@ void wifiConfig() {
 	WiFi.disconnect(true);
 	debug_out(F("scan for wifi networks..."), DEBUG_MIN_INFO, 1);
 	count_wifiInfo = WiFi.scanNetworks(false, true);
-  {
-    std::unique_ptr<struct_wifiInfo[]> wifiInfo(new struct_wifiInfo[count_wifiInfo]);
-  	for (int i = 0; i < count_wifiInfo; i++) {
-  		uint8_t* BSSID;
-  		String SSID;
-  		WiFi.getNetworkInfo(i, SSID, wifiInfo[i].encryptionType, wifiInfo[i].RSSI, BSSID, wifiInfo[i].channel, wifiInfo[i].isHidden);
-  		SSID.toCharArray(wifiInfo[i].ssid, 35);
-  	}
-  
-  	WiFi.mode(WIFI_AP);
-  	const IPAddress apIP(192, 168, 4, 1);
-  	WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
-  	WiFi.softAP(cfg::fs_ssid, cfg::fs_pwd, selectChannelForAp(wifiInfo.get(), count_wifiInfo));
-  	debug_out(String(WLANPWD), DEBUG_MIN_INFO, 1);
-  
-  	DNSServer dnsServer;
-  	dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
-  	dnsServer.start(53, "*", apIP);							// 53 is port for DNS server
-  
-  	// 10 minutes timeout for wifi config
-  	last_page_load = millis();
-  	while (((millis() - last_page_load) < cfg::time_for_wifi_config)) {
-  		dnsServer.processNextRequest();
-  		server.handleClient();
-  		wdt_reset(); // nodemcu is alive
-  		yield();
-  	}
-  
-  	// half second to answer last requests
-  	last_page_load = millis();
-  	while ((millis() - last_page_load) < 500) {
-  		dnsServer.processNextRequest();
-  		server.handleClient();
-  		yield();
-  	}
-  
-  	WiFi.disconnect(true);
-  	WiFi.softAPdisconnect(true);
-  	WiFi.mode(WIFI_STA);
-  
-  	dnsServer.stop();
-  }
+	{
+		std::unique_ptr<struct_wifiInfo[]> wifiInfo(new struct_wifiInfo[count_wifiInfo]);
+		for (int i = 0; i < count_wifiInfo; i++) {
+			uint8_t* BSSID;
+			String SSID;
+			WiFi.getNetworkInfo(i, SSID, wifiInfo[i].encryptionType, wifiInfo[i].RSSI, BSSID, wifiInfo[i].channel, wifiInfo[i].isHidden);
+			SSID.toCharArray(wifiInfo[i].ssid, 35);
+		}
+
+		WiFi.mode(WIFI_AP);
+		const IPAddress apIP(192, 168, 4, 1);
+		WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
+		WiFi.softAP(cfg::fs_ssid, cfg::fs_pwd, selectChannelForAp(wifiInfo.get(), count_wifiInfo));
+		debug_out(String(WLANPWD), DEBUG_MIN_INFO, 1);
+
+		DNSServer dnsServer;
+		dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
+		dnsServer.start(53, "*", apIP);							// 53 is port for DNS server
+
+		// 10 minutes timeout for wifi config
+		last_page_load = millis();
+		while (((millis() - last_page_load) < cfg::time_for_wifi_config)) {
+			dnsServer.processNextRequest();
+			server.handleClient();
+			wdt_reset(); // nodemcu is alive
+			yield();
+		}
+
+		// half second to answer last requests
+		last_page_load = millis();
+		while ((millis() - last_page_load) < 500) {
+			dnsServer.processNextRequest();
+			server.handleClient();
+			yield();
+		}
+
+		WiFi.disconnect(true);
+		WiFi.softAPdisconnect(true);
+		WiFi.mode(WIFI_STA);
+
+		dnsServer.stop();
+	}
 
 	delay(100);
 
