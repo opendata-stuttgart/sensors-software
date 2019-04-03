@@ -21,6 +21,9 @@ const char DBG_TXT_SENDING_TO[] PROGMEM = "## Sending to ";
 const char DBG_TXT_SENDING_TO_LUFTDATEN[] PROGMEM = "## Sending to Luftdaten.info ";
 const char DBG_TXT_CALL_SENSOR[] PROGMEM = "Call sensor";
 const char DBG_TXT_SDS011_VERSION_DATE[] PROGMEM = "SDS011 version date";
+const char DBG_TXT_CONNECTING_TO[] PROGMEM = "Connecting to ";
+const char DBG_TXT_FOUND[] PROGMEM = " ... found";
+const char DBG_TXT_NOT_FOUND[] PROGMEM = " ... not found";
 
 const char SENSORS_SDS011[] PROGMEM = "SDS011";
 const char SENSORS_PPD42NS[] PROGMEM = "PPD42NS";
@@ -99,3 +102,18 @@ const char WEB_IOS_REDIRECT[] PROGMEM = "<html><body>Redirecting...\
 window.location = \"http://192.168.4.1/config\";\
 </script>\
 </body></html>";
+
+const char WEB_B_BR_BR[] PROGMEM = "</b><br/><br/>";
+const char WEB_B_BR[] PROGMEM = "</b><br/>";
+const char WEB_BR_BR[] PROGMEM = "<br/><br/>";
+const char WEB_BR_FORM[] PROGMEM = "<br/></form>";
+const char WEB_LF_B[] PROGMEM = "\n<b>";
+const char WEB_CSV[] PROGMEM = "CSV";
+const char WEB_FEINSTAUB_APP[] PROGMEM = "Feinstaub-App";
+const char WEB_HTTPS[] PROGMEM = "HTTPS";
+const char WEB_NBSP_NBSP[] PROGMEM = "&nbsp;&nbsp;(";
+const char WEB_REPLN_REPLV[] PROGMEM = "\"{n}\":\"{v}\",";
+const char WEB_PM1[] PROGMEM = "PM1";
+const char WEB_PM25[] = "PM2.5";
+const char WEB_PM10[] = "PM10";
+const char WEB_GPS[] = "GPS";
