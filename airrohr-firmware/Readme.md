@@ -50,7 +50,7 @@ Die Daten können als CSV via USB ausgegeben werden. Dafür sollte sowohl in ext
 ### Einstellungen Arduino IDE
 
 * Board: NodeMCU 1.0 (ESP-12E Module)
-* CPU Frequency: 80MHz
+* CPU Frequency: 160MHz
 * Flash Size: 4M (3M SPIFFS)
 Ab "ESP für Arduino 2.4.2":
 * Debug Port: Disabled

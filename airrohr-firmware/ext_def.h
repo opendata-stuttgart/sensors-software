@@ -63,6 +63,9 @@
 #if defined(ARDUINO_SAMD_ZERO)
 #define ONEWIRE_PIN D7
 #endif
+#if defined(ESP32)
+#define ONEWIRE_PIN D7
+#endif
 
 // define serial interface pins for particle sensors
 // Serial confusion: These definitions are based on SoftSerial
@@ -176,6 +179,30 @@ static const uint16_t suites[] PROGMEM = {
 #if defined(ARDUINO_SAMD_ZERO) && defined(SERIAL_PORT_USBVIRTUAL)
 // Required for Serial on Zero based boards
 #define Serial SERIAL_PORT_USBVIRTUAL
+//GPIO Pins
+#define D0 0
+#define D1 1
+#define D2 2
+#define D3 3
+#define D4 4
+#define D5 5
+#define D6 6
+#define D7 7
+#define D8 8
+#define D9 9
+#define D10 10
+#define D11 11
+#define D12 12
+// LoRa module
+#define RFM69_CS 8
+#define RFM69_RST 4
+#define RFM69_INT 3
+#define RF69_FREQ 868.0
+#define CLIENT_ADDRESS 2
+#define SERVER_ADDRESS 100
+#endif
+
+#if defined(ESP32)
 //GPIO Pins
 #define D0 0
 #define D1 1

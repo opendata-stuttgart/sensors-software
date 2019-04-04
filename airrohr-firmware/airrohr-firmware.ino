@@ -98,6 +98,14 @@
  * Der Sketch verwendet 489152 Bytes (46%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
  * Globale Variablen verwenden 37160 Bytes (45%) des dynamischen Speichers, 44760 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
  *
+ * Latest mit lib 2.5.0 und axTLS
+ * Der Sketch verwendet 510392 Bytes (48%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
+ * Globale Variablen verwenden 34716 Bytes (42%) des dynamischen Speichers, 47204 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
+ * 
+ * Latest mit lib 2.5.0 und BearSSL
+ * Der Sketch verwendet 558424 Bytes (53%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
+ * Globale Variablen verwenden 34944 Bytes (42%) des dynamischen Speichers, 46976 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
+ * 
  ************************************************************************/
 // increment on change
 #define SOFTWARE_VERSION "NRZ-2018-124-B2"
@@ -105,6 +113,7 @@
 /*****************************************************************
  * Includes                                                      *
  *****************************************************************/
+#if defined(ESP8266)
 #include <FS.h>                     // must be first
 #include <ESP8266WiFi.h>
 #include <DNSServer.h>
@@ -128,6 +137,28 @@
 #include <time.h>
 #include <coredecls.h>
 #include <assert.h>
+#endif
+
+#if defined(ESP32)
+#include <FS.h>
+#include <SPIFFS.h>
+#include <WiFi.h>
+#include <WiFiClient.h>
+#include <WebServer.h>
+#include <ESPmDNS.h>
+#include <SSD1306.h>
+#include <SH1106.h>
+#include <LiquidCrystal_I2C.h>
+#include <base64.h>
+#include <ArduinoJson.h>
+#include "./DHT.h"
+#include <Adafruit_HTU21DF.h>
+#include <Adafruit_BMP085.h>
+#include <Adafruit_BMP280.h>
+#include <Adafruit_BME280.h>
+#include <DallasTemperature.h>
+#include <TinyGPS++.h>
+#endif
 
 #if defined(INTL_BG)
 #include "intl_bg.h"
@@ -292,7 +323,13 @@ bool bmp_init_failed = false;
 bool bmp280_init_failed = false;
 bool bme280_init_failed = false;
 
+#if defined(ESP8266)
 ESP8266WebServer server(80);
+#endif
+#if defined(ESP32)
+WebServer server(80);
+#endif
+
 int TimeZone = 1;
 
 /*****************************************************************
@@ -307,8 +344,14 @@ LiquidCrystal_I2C lcd_2004_27(0x27, 20, 4);
 /*****************************************************************
  * SDS011 declarations                                           *
  *****************************************************************/
+#if defined(ESP8266)
 SoftwareSerial serialSDS(PM_SERIAL_RX, PM_SERIAL_TX, false, 128);
 SoftwareSerial serialGPS(GPS_SERIAL_RX, GPS_SERIAL_TX, false, 512);
+#endif
+#if defined(ESP32)
+HardwareSerial serialSDS(2);
+HardwareSerial serialGPS(3);
+#endif
 
 /*****************************************************************
  * DHT declaration                                               *
@@ -871,6 +914,7 @@ void readConfig() {
 					strcpyFromJSON(www_password);
 					strcpyFromJSON(fs_ssid);
 					strcpyFromJSON(fs_pwd);
+
 					setFromJSON(www_basicauth_enabled);
 					setFromJSON(dht_read);
 					setFromJSON(htu21d_read);
