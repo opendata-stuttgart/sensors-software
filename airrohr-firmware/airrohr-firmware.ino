@@ -254,26 +254,26 @@ namespace cfg {
 	}
 }
 
-const char HOST_MADAVI[] PROGMEM = "api-rrd.madavi.de";
-const char URL_MADAVI[] PROGMEM = "/data.php";
+#define HOST_MADAVI "api-rrd.madavi.de"
+#define URL_MADAVI "/data.php"
 #define PORT_MADAVI 80
 
-const char HOST_DUSTI[] PROGMEM = "api.luftdaten.info";
-const char URL_DUSTI[] PROGMEM = "/v1/push-sensor-data/";
+#define HOST_DUSTI "api.luftdaten.info"
+#define URL_DUSTI "/v1/push-sensor-data/"
 #define PORT_DUSTI 80
 
 // IMPORTANT: NO MORE CHANGES TO VARIABLE NAMES NEEDED FOR EXTERNAL APIS
 
-const char HOST_SENSEMAP[] PROGMEM = "ingress.opensensemap.org";
-const char URL_SENSEMAP[] PROGMEM = "/boxes/BOXID/data?luftdaten=1";
+#define HOST_SENSEMAP "ingress.opensensemap.org"
+#define URL_SENSEMAP "/boxes/BOXID/data?luftdaten=1"
 #define PORT_SENSEMAP 443
 
-const char HOST_FSAPP[] PROGMEM = "www.h2801469.stratoserver.net";
-const char URL_FSAPP[] PROGMEM = "/data.php";
+#define HOST_FSAPP "www.h2801469.stratoserver.net"
+#define URL_FSAPP "/data.php"
 #define PORT_FSAPP 80
 
-const char UPDATE_HOST[] PROGMEM = "www.madavi.de";
-const char UPDATE_URL[] PROGMEM = "/sensor/update/firmware.php";
+#define UPDATE_HOST "www.madavi.de"
+#define UPDATE_URL "/sensor/update/firmware.php"
 #define UPDATE_PORT 80
 
 #define JSON_BUFFER_SIZE 2000
