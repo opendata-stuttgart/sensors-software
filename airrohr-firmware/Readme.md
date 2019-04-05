@@ -50,7 +50,7 @@ Die Daten können als CSV via USB ausgegeben werden. Dafür sollte sowohl in ext
 ### Einstellungen Arduino IDE
 
 * Board: NodeMCU 1.0 (ESP-12E Module)
-* CPU Frequency: 80MHz
+* CPU Frequency: 160MHz
 * Flash Size: 4M (3M SPIFFS)
 Ab "ESP für Arduino 2.4.2":
 * Debug Port: Disabled
@@ -212,3 +212,8 @@ Diese Firmware definiert die Pins für die verschiedenenen Sensoren wie folgt:
 * BMP280 => Pin 3
 * BME280 => Pin 11
 * GPS(Neo-6M) => Pin 9
+
+
+## Translations
+For new translations copy the file intl_template.h and rename it to intl_<2-letter-code>.h, where <2-letter-code> is the ISO-3166-2 2 letter country code. This file contains all strings used for output seen by normal users. Only debug output is (or better should be) English by default.  
+Please take look at the existing translations. This should show you how it works ;-)
