@@ -1,3 +1,9 @@
+NRZ-2018-124-B2
+* redefine function overload
+
+NRZ-2018-124-B1
+* code cleanup
+
 NRZ-2018-123
 online since 2018-12-23
 * set CPUFreqency to 160MHz (for faster TLS handling)
