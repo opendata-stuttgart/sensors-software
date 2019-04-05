@@ -21,6 +21,7 @@ Before creating bug reports, please check [this list](#before-submitting-a-bug-r
 
 ### Pull requests
 
+All pull requests should be made against the Beta branch. The master branch contains the code of the actual stable version.
 
 # Roadmap and things to be done
 
