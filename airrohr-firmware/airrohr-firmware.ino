@@ -3910,7 +3910,7 @@ static unsigned long sendDataToOptionalApis(const String &data) {
     char char_full_url[100];
     sprintf(char_full_url, "%s%s", URL_AIRCMS, hash);
     
-    sendData(aircms_data, 0, HOST_AIRCMS, PORT_AIRCMS, char_full_url, false, "", FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN));
+    sendData(aircms_data, 0, HOST_AIRCMS, PORT_AIRCMS, char_full_url, false, false, "", FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN));
     sum_send_time += millis() - start_send;
   }
 
