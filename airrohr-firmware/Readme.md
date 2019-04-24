@@ -1,3 +1,6 @@
+IMPORTANT: All pull requests should be made to the beta branch. The master branch is for the actual stable version. 
+
+
 # Version für Sensoren PPD42NS, SDS011, DHT22, BMP180, NEO-6M und weitere (siehe Konfigurationsseite)
 
 Features:

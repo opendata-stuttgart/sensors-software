@@ -96,7 +96,7 @@
 // PPD42NS, the cheaper version of the particle sensor
 #define PPD_READ 0
 #define PPD_API_PIN 5
-#if defined(ARDUINO_SAMD_ZERO) || defined(ESP8266)
+#if defined(ARDUINO_SAMD_ZERO) || defined(ESP8266) || defined(ESP32)
 #define PPD_PIN_PM1 D6
 #define PPD_PIN_PM2 D5
 #endif
@@ -206,13 +206,13 @@ static const uint16_t suites[] PROGMEM = {
 #if defined(ESP32)
 //GPIO Pins
 #define D0 0
-#define D1 1
-#define D2 2
-#define D3 3
-#define D4 4
-#define D5 5
-#define D6 6
-#define D7 7
+#define D1 12   // RX Serial SDS
+#define D2 13   // TX Serial SDS
+#define D3 4		// I2C SDA
+#define D4 15   // I2C SCL
+#define D5 22   // RX GPS
+#define D6 23   // TX GPS
+#define D7 36   // OneWire
 #define D8 8
 #define D9 9
 #define D10 10
