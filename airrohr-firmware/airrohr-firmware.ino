@@ -98,24 +98,24 @@
  * Der Sketch verwendet 489152 Bytes (46%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
  * Globale Variablen verwenden 37160 Bytes (45%) des dynamischen Speichers, 44760 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
  *
- * Latest mit lib 2.5.0 und axTLS
- * Der Sketch verwendet 510392 Bytes (48%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
- * Globale Variablen verwenden 34716 Bytes (42%) des dynamischen Speichers, 47204 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
- * 
- * Latest mit lib 2.5.0 und BearSSL
- * Der Sketch verwendet 558424 Bytes (53%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
- * Globale Variablen verwenden 34944 Bytes (42%) des dynamischen Speichers, 46976 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
+ * latest mit lib 2.4.2 und axTLS
+ * Der Sketch verwendet 493024 Bytes (47%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
+ * Globale Variablen verwenden 36288 Bytes (44%) des dynamischen Speichers, 45632 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
  * 
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2018-124-B2"
+#define SOFTWARE_VERSION "NRZ-2019-124-B3"
 
 /*****************************************************************
  * Includes                                                      *
  *****************************************************************/
 #if defined(ESP8266)
 #include <FS.h>                     // must be first
+#define USING_AXTLS
 #include <ESP8266WiFi.h>
+//#include <WiFiClientSecure.h>
+#include "WiFiClientSecureAxTLS.h"
+using namespace axTLS;
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
@@ -193,6 +193,7 @@
 #else
 #include "intl_de.h"
 #endif
+#include "defines.h"
 #include "ext_def.h"
 #include "html-content.h"
 
@@ -219,16 +220,16 @@ const unsigned long DURATION_BEFORE_FORCED_RESTART_MS = ONE_DAY_IN_MS * 28;  // 
  * as they are part of the json format used to persist the data.  *
  ******************************************************************/
 namespace cfg {
-	char wlanssid[35] = WLANSSID;
-	char wlanpwd[65] = WLANPWD;
+	char wlanssid[LEN_WLANSSID] = WLANSSID;
+	char wlanpwd[LEN_WLANPWD] = WLANPWD;
 
 	char current_lang[3] = "DE";
-	char www_username[65] = WWW_USERNAME;
-	char www_password[65] = WWW_PASSWORD;
+	char www_username[LEN_WWW_USERNAME] = WWW_USERNAME;
+	char www_password[LEN_WWW_PASSWORD] = WWW_PASSWORD;
 	bool www_basicauth_enabled = WWW_BASICAUTH_ENABLED;
 
-	char fs_ssid[33] = FS_SSID;
-	char fs_pwd[65] = FS_PWD;
+	char fs_ssid[LEN_FS_SSID] = FS_SSID;
+	char fs_pwd[LEN_FS_PWD] = FS_PWD;
 
 	char version_from_local_config[20] = "";
 
@@ -263,21 +264,21 @@ namespace cfg {
 
 	bool ssl_madavi = SSL_MADAVI;
 	bool ssl_dusti = SSL_DUSTI;
-	char senseboxid[30] = SENSEBOXID;
+	char senseboxid[LEN_SENSEBOXID] = SENSEBOXID;
 
-	char host_influx[100] = HOST_INFLUX;
-	char url_influx[100] = URL_INFLUX;
+	char host_influx[LEN_HOST_INFLUX] = HOST_INFLUX;
+	char url_influx[LEN_URL_INFLUX] = URL_INFLUX;
 	int port_influx = PORT_INFLUX;
-	char user_influx[65] = USER_INFLUX;
-	char pwd_influx[65] = PWD_INFLUX;
-	char measurement_name_influx[100] = MEASUREMENT_NAME_INFLUX;
+	char user_influx[LEN_USER_INFLUX] = USER_INFLUX;
+	char pwd_influx[LEN_PWD_INFLUX] = PWD_INFLUX;
+	char measurement_name_influx[LEN_MEASUREMENT_NAME_INFLUX] = MEASUREMENT_NAME_INFLUX;
 	bool ssl_influx = SSL_INFLUX;
 
-	char host_custom[100] = HOST_CUSTOM;
-	char url_custom[100] = URL_CUSTOM;
+	char host_custom[LEN_HOST_CUSTOM] = HOST_CUSTOM;
+	char url_custom[LEN_URL_CUSTOM] = URL_CUSTOM;
 	int port_custom = PORT_CUSTOM;
-	char user_custom[65] = USER_CUSTOM;
-	char pwd_custom[65] = PWD_CUSTOM;
+	char user_custom[LEN_USER_CUSTOM] = USER_CUSTOM;
+	char pwd_custom[LEN_PWD_CUSTOM] = PWD_CUSTOM;
 
 	unsigned long time_for_wifi_config = 600000;
 	unsigned long sending_intervall_ms = 145000;
@@ -1238,29 +1239,25 @@ String form_select_lang() {
 					"<td>{t}</td>"
 					"<td>"
 					"<select name='current_lang'>"
-					"<option value='DE'{s_DE}>Deutsch (DE)</option>"
-					"<option value='BG'{s_BG}>Bulgarian (BG)</option>"
-					"<option value='CZ'{s_CZ}>Český (CZ)</option>"
-					"<option value='EN'{s_EN}>English (EN)</option>"
-					"<option value='ES'{s_ES}>Español (ES)</option>"
-					"<option value='FR'{s_FR}>Français (FR)</option>"
-					"<option value='IT'{s_IT}>Italiano (IT)</option>"
-					"<option value='LU'{s_LU}>Lëtzebuergesch (LU)</option>"
-					"<option value='NL'{s_NL}>Nederlands (NL)</option>"
-					"<option value='PL'{s_PL}>Polski (PL)</option>"
-					"<option value='PT'{s_PT}>Português (PT)</option>"
-					"<option value='RU'{s_RU}>Русский (RU)</option>"
-					"<option value='SE'{s_SE}>Svenska (SE)</option>"
+					"<option value='DE'>Deutsch (DE)</option>"
+					"<option value='BG'>Bulgarian (BG)</option>"
+					"<option value='CZ'>Český (CZ)</option>"
+					"<option value='EN'>English (EN)</option>"
+					"<option value='ES'>Español (ES)</option>"
+					"<option value='FR'>Français (FR)</option>"
+					"<option value='IT'>Italiano (IT)</option>"
+					"<option value='LU'>Lëtzebuergesch (LU)</option>"
+					"<option value='NL'>Nederlands (NL)</option>"
+					"<option value='PL'>Polski (PL)</option>"
+					"<option value='PT'>Português (PT)</option>"
+					"<option value='RU'>Русский (RU)</option>"
+					"<option value='SE'>Svenska (SE)</option>"
 					"</select>"
 					"</td>"
 					"</tr>");
 
 	s.replace("{t}", FPSTR(INTL_LANGUAGE));
-
-	s.replace("{s_" + String(cfg::current_lang) + "}", s_select);
-	while (s.indexOf("{s_") != -1) {
-		s.remove(s.indexOf("{s_"), 6);
-	}
+	s.replace("'"+String(cfg::current_lang)+"'>", "'"+String(cfg::current_lang)+"'"+s_select+">");
 	return s;
 }
 
@@ -1370,7 +1367,7 @@ static bool webserver_request_auth() {
 	debug_out(F("validate request auth..."), DEBUG_MIN_INFO, 1);
 	if (cfg::www_basicauth_enabled && ! wificonfig_loop) {
 		if (!server.authenticate(cfg::www_username, cfg::www_password)) {
-			server.requestAuthentication();
+			server.requestAuthentication(BASIC_AUTH,"Sensor Login", "Authentication failed");
 			return false;
 		}
 	}
@@ -1406,10 +1403,6 @@ void webserver_root() {
 	}
 }
 
-static int constexpr constexprstrlen(const char* str) {
-	return *str ? 1 + constexprstrlen(str + 1) : 0;
-}
-
 /*****************************************************************
  * Webserver config: show config page                            *
  *****************************************************************/
@@ -1439,10 +1432,10 @@ void webserver_config() {
 			page_content += F("</div><br/>");
 		}
 		page_content += FPSTR(TABLE_TAG_OPEN);
-		page_content += form_input("wlanssid", FPSTR(INTL_FS_WIFI_NAME), wlanssid, capacity_null_terminated_char_array(wlanssid));
-		page_content += form_password("wlanpwd", FPSTR(INTL_PASSWORD), wlanpwd, capacity_null_terminated_char_array(wlanpwd));
+		page_content += form_input("wlanssid", FPSTR(INTL_FS_WIFI_NAME), wlanssid, LEN_WLANSSID);
+		page_content += form_password("wlanpwd", FPSTR(INTL_PASSWORD), wlanpwd, LEN_WLANSSID);
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-		page_content += F("<hr/>\n<b>");
+		page_content += F("<hr/>\n<br/><b>");
 
 		page_content += FPSTR(INTL_AB_HIER_NUR_ANDERN);
 		page_content += F("</b><br/><br/>\n<b>");
@@ -1450,23 +1443,27 @@ void webserver_config() {
 		if (! wificonfig_loop) {
 			page_content += FPSTR(INTL_BASICAUTH);
 			page_content += FPSTR(WEB_B_BR);
+      page_content += form_checkbox("www_basicauth_enabled", FPSTR(INTL_BASICAUTH), www_basicauth_enabled);
 			page_content += FPSTR(TABLE_TAG_OPEN);
-			page_content += form_input("www_username", FPSTR(INTL_USER), www_username, capacity_null_terminated_char_array(www_username));
-			page_content += form_password("www_password", FPSTR(INTL_PASSWORD), www_password, capacity_null_terminated_char_array(www_password));
-			page_content += form_checkbox("www_basicauth_enabled", FPSTR(INTL_BASICAUTH), www_basicauth_enabled);
-
+      page_content += form_input("www_username", FPSTR(INTL_USER), www_username, LEN_WWW_USERNAME);
+			page_content += form_password("www_password", FPSTR(INTL_PASSWORD), www_password, LEN_WWW_PASSWORD);
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-			page_content += FPSTR(WEB_LF_B);
+
+			page_content += FPSTR(WEB_BR_LF_B);
+
 			page_content += FPSTR(INTL_FS_WIFI);
 			page_content += FPSTR(WEB_B_BR);
 			page_content += FPSTR(INTL_FS_WIFI_DESCRIPTION);
 			page_content += FPSTR(BR_TAG);
 			page_content += FPSTR(TABLE_TAG_OPEN);
-			page_content += form_input("fs_ssid", FPSTR(INTL_FS_WIFI_NAME), fs_ssid, capacity_null_terminated_char_array(fs_ssid));
-			page_content += form_password("fs_pwd", FPSTR(INTL_PASSWORD), fs_pwd, capacity_null_terminated_char_array(fs_pwd));
-
+			page_content += form_input("fs_ssid", FPSTR(INTL_FS_WIFI_NAME), fs_ssid, LEN_FS_SSID);
+			page_content += form_password("fs_pwd", FPSTR(INTL_PASSWORD), fs_pwd, LEN_FS_PWD);
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-			page_content += F("\n<b>APIs</b><br/>");
+
+      page_content += FPSTR(WEB_BR_LF_B);
+
+			page_content += F("APIs");
+      page_content += FPSTR(WEB_B_BR);
 			page_content += form_checkbox("send2dusti", F("API Luftdaten.info"), send2dusti, false);
 			page_content += FPSTR(WEB_NBSP_NBSP);
 			page_content += form_checkbox("ssl_dusti", FPSTR(WEB_HTTPS), ssl_dusti, false);
@@ -1474,9 +1471,11 @@ void webserver_config() {
 			page_content += form_checkbox("send2madavi", F("API Madavi.de"), send2madavi, false);
 			page_content += FPSTR(WEB_NBSP_NBSP);
 			page_content += form_checkbox("ssl_madavi", FPSTR(WEB_HTTPS), ssl_madavi, false);
-			page_content += F(")<br/><br/>\n<b>");
+			page_content += F(")<br/>");
 
-			page_content += FPSTR(INTL_SENSORS);
+	    page_content += FPSTR(WEB_BR_LF_B);
+
+  		page_content += FPSTR(INTL_SENSORS);
 			page_content += FPSTR(WEB_B_BR);
 			page_content += form_checkbox_sensor("sds_read", FPSTR(INTL_SDS011), sds_read);
 			page_content += form_checkbox_sensor("pms_read", FPSTR(INTL_PMS), pms_read);
@@ -1489,7 +1488,9 @@ void webserver_config() {
 			page_content += form_checkbox_sensor("bme280_read", FPSTR(INTL_BME280), bme280_read);
 			page_content += form_checkbox_sensor("ds18b20_read", FPSTR(INTL_DS18B20), ds18b20_read);
 			page_content += form_checkbox("gps_read", FPSTR(INTL_NEO6M), gps_read);
-			page_content += F("<br/><br/>\n<b>");
+
+      page_content += FPSTR(WEB_BR_LF_B);
+
 		}
 
 		page_content += FPSTR(INTL_MORE_SETTINGS);
@@ -1509,29 +1510,28 @@ void webserver_config() {
 			page_content += form_input("sending_intervall_ms", FPSTR(INTL_MEASUREMENT_INTERVAL), String(sending_intervall_ms / 1000), 5);
 			page_content += form_input("time_for_wifi_config", FPSTR(INTL_DURATION_ROUTER_MODE), String(time_for_wifi_config / 1000), 5);
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-			page_content += FPSTR(WEB_LF_B);
+			page_content += FPSTR(WEB_BR_LF_B);
 
 			page_content += FPSTR(INTL_MORE_APIS);
-			page_content += FPSTR(WEB_B_BR_BR);
+			page_content += FPSTR(WEB_B_BR);
 			page_content += form_checkbox("send2csv", tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_CSV)), send2csv);
-			page_content += FPSTR(BR_TAG);
 			page_content += form_checkbox("send2fsapp", tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_FEINSTAUB_APP)), send2fsapp);
-			page_content += FPSTR(BR_TAG);
 			page_content += form_checkbox("send2aircms", tmpl(FPSTR(INTL_SEND_TO), F("aircms.online")), send2aircms);
-			page_content += FPSTR(BR_TAG);
 			page_content += form_checkbox("send2sensemap", tmpl(FPSTR(INTL_SEND_TO), F("OpenSenseMap")), send2sensemap);
 			page_content += FPSTR(TABLE_TAG_OPEN);
-			page_content += form_input("senseboxid", "senseBox-ID: ", senseboxid, capacity_null_terminated_char_array(senseboxid));
+			page_content += form_input("senseboxid", "senseBox&nbsp;ID: ", senseboxid, LEN_SENSEBOXID);
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+      page_content += F("<br/>");
 			page_content += form_checkbox("send2custom", FPSTR(INTL_SEND_TO_OWN_API), send2custom);
 			page_content += FPSTR(TABLE_TAG_OPEN);
-			page_content += form_input("host_custom", FPSTR(INTL_SERVER), host_custom, capacity_null_terminated_char_array(host_custom));
-			page_content += form_input("url_custom", FPSTR(INTL_PATH), url_custom, capacity_null_terminated_char_array(url_custom));
-			constexpr int max_port_digits = constexprstrlen("65535");
-			page_content += form_input("port_custom", FPSTR(INTL_PORT), String(port_custom), max_port_digits);
-			page_content += form_input("user_custom", FPSTR(INTL_USER), user_custom, capacity_null_terminated_char_array(user_custom));
-			page_content += form_password("pwd_custom", FPSTR(INTL_PASSWORD), pwd_custom, capacity_null_terminated_char_array(pwd_custom));
+			page_content += form_input("host_custom", FPSTR(INTL_SERVER), host_custom, LEN_HOST_CUSTOM);
+			page_content += form_input("url_custom", FPSTR(INTL_PATH), url_custom, LEN_URL_CUSTOM);
+			page_content += form_input("port_custom", FPSTR(INTL_PORT), String(port_custom), MAX_PORT_DIGITS);
+			page_content += form_input("user_custom", FPSTR(INTL_USER), user_custom, LEN_USER_CUSTOM);
+			page_content += form_password("pwd_custom", FPSTR(INTL_PASSWORD), pwd_custom, LEN_PWD_CUSTOM);
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+
+      page_content += F("<br/>");
 
 			send_influx_data_string = F("InfluxDB");
 			send_influx_data_string += F("&nbsp;&nbsp;(");
@@ -1540,14 +1540,15 @@ void webserver_config() {
 
 			page_content += form_checkbox("send2influx", tmpl(FPSTR(INTL_SEND_TO), send_influx_data_string), send2influx);
 			page_content += FPSTR(TABLE_TAG_OPEN);
-			page_content += form_input("host_influx", FPSTR(INTL_SERVER), host_influx, capacity_null_terminated_char_array(host_influx));
-			page_content += form_input("url_influx", FPSTR(INTL_PATH), url_influx, capacity_null_terminated_char_array(url_influx));
-			page_content += form_input("port_influx", FPSTR(INTL_PORT), String(port_influx), max_port_digits);
-			page_content += form_input("user_influx", FPSTR(INTL_USER), user_influx, capacity_null_terminated_char_array(user_influx));
-			page_content += form_password("pwd_influx", FPSTR(INTL_PASSWORD), pwd_influx, capacity_null_terminated_char_array(pwd_influx));
-			page_content += form_input("measurement_name_influx", F("Measurement"), measurement_name_influx, capacity_null_terminated_char_array(measurement_name_influx));
+			page_content += form_input("host_influx", FPSTR(INTL_SERVER), host_influx, LEN_HOST_INFLUX);
+			page_content += form_input("url_influx", FPSTR(INTL_PATH), url_influx, LEN_URL_INFLUX);
+			page_content += form_input("port_influx", FPSTR(INTL_PORT), String(port_influx), MAX_PORT_DIGITS);
+			page_content += form_input("user_influx", FPSTR(INTL_USER), user_influx, LEN_USER_INFLUX);
+			page_content += form_password("pwd_influx", FPSTR(INTL_PASSWORD), pwd_influx, LEN_PWD_INFLUX);
+			page_content += form_input("measurement_name_influx", F("Measurement"), measurement_name_influx, LEN_MEASUREMENT_NAME_INFLUX);
 			page_content += form_submit(FPSTR(INTL_SAVE_AND_RESTART));
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+      page_content += F("<br/>");
 			page_content += FPSTR(WEB_BR_FORM);
 		}
 		if (wificonfig_loop) {  // scan for wlan ssids

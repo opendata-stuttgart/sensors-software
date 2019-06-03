@@ -107,6 +107,7 @@ const char WEB_B_BR_BR[] PROGMEM = "</b><br/><br/>";
 const char WEB_B_BR[] PROGMEM = "</b><br/>";
 const char WEB_BR_BR[] PROGMEM = "<br/><br/>";
 const char WEB_BR_FORM[] PROGMEM = "<br/></form>";
+const char WEB_BR_LF_B[] PROGMEM = "<br/>\n<b>";
 const char WEB_LF_B[] PROGMEM = "\n<b>";
 const char WEB_CSV[] PROGMEM = "CSV";
 const char WEB_FEINSTAUB_APP[] PROGMEM = "Feinstaub-App";
