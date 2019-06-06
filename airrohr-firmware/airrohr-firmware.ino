@@ -101,10 +101,10 @@
  * latest mit lib 2.4.2 und axTLS
  * Der Sketch verwendet 493024 Bytes (47%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
  * Globale Variablen verwenden 36288 Bytes (44%) des dynamischen Speichers, 45632 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
- * 
+ *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2019-124-B3"
+#define SOFTWARE_VERSION "NRZ-2019-124-B4"
 
 /*****************************************************************
  * Includes                                                      *
@@ -220,76 +220,77 @@ const unsigned long DURATION_BEFORE_FORCED_RESTART_MS = ONE_DAY_IN_MS * 28;  // 
  * as they are part of the json format used to persist the data.  *
  ******************************************************************/
 namespace cfg {
-	char wlanssid[LEN_WLANSSID] = WLANSSID;
-	char wlanpwd[LEN_WLANPWD] = WLANPWD;
+char wlanssid[LEN_WLANSSID] = WLANSSID;
+char wlanpwd[LEN_WLANPWD] = WLANPWD;
 
-	char current_lang[3] = "DE";
-	char www_username[LEN_WWW_USERNAME] = WWW_USERNAME;
-	char www_password[LEN_WWW_PASSWORD] = WWW_PASSWORD;
-	bool www_basicauth_enabled = WWW_BASICAUTH_ENABLED;
+char current_lang[3] = "DE";
+char www_username[LEN_WWW_USERNAME] = WWW_USERNAME;
+char www_password[LEN_WWW_PASSWORD] = WWW_PASSWORD;
+bool www_basicauth_enabled = WWW_BASICAUTH_ENABLED;
 
-	char fs_ssid[LEN_FS_SSID] = FS_SSID;
-	char fs_pwd[LEN_FS_PWD] = FS_PWD;
+char fs_ssid[LEN_FS_SSID] = FS_SSID;
+char fs_pwd[LEN_FS_PWD] = FS_PWD;
 
-	char version_from_local_config[20] = "";
+char version_from_local_config[20] = "";
 
-	bool dht_read = DHT_READ;
-	bool htu21d_read = HTU21D_READ;
-	bool ppd_read = PPD_READ;
-	bool sds_read = SDS_READ;
-	bool pms_read = PMS_READ;
-	bool hpm_read = HPM_READ;
-	bool bmp_read = BMP_READ;
-	bool bmp280_read = BMP280_READ;
-	bool bme280_read = BME280_READ;
-	bool ds18b20_read = DS18B20_READ;
-	bool gps_read = GPS_READ;
-	bool send2dusti = SEND2DUSTI;
-	bool send2madavi = SEND2MADAVI;
-	bool send2sensemap = SEND2SENSEMAP;
-	bool send2fsapp = SEND2FSAPP;
-	bool send2aircms = SEND2AIRCMS;
-	bool send2custom = SEND2CUSTOM;
-	bool send2lora = SEND2LORA;
-	bool send2influx = SEND2INFLUX;
-	bool send2csv = SEND2CSV;
-	bool auto_update = AUTO_UPDATE;
-	bool use_beta = USE_BETA;
-	bool has_display = HAS_DISPLAY;
-	bool has_sh1106 = HAS_SH1106;
-	bool has_lcd1602 = HAS_LCD1602;
-	bool has_lcd1602_27 = HAS_LCD1602_27;
-	bool has_lcd2004_27 = HAS_LCD2004_27;
-	int  debug = DEBUG;
+bool dht_read = DHT_READ;
+bool htu21d_read = HTU21D_READ;
+bool ppd_read = PPD_READ;
+bool sds_read = SDS_READ;
+bool pms_read = PMS_READ;
+bool hpm_read = HPM_READ;
+bool bmp_read = BMP_READ;
+bool bmp280_read = BMP280_READ;
+bool bme280_read = BME280_READ;
+bool ds18b20_read = DS18B20_READ;
+bool gps_read = GPS_READ;
+bool send2dusti = SEND2DUSTI;
+bool send2madavi = SEND2MADAVI;
+bool send2sensemap = SEND2SENSEMAP;
+bool send2fsapp = SEND2FSAPP;
+bool send2aircms = SEND2AIRCMS;
+bool send2custom = SEND2CUSTOM;
+bool send2lora = SEND2LORA;
+bool send2influx = SEND2INFLUX;
+bool send2csv = SEND2CSV;
+bool auto_update = AUTO_UPDATE;
+bool use_beta = USE_BETA;
+bool has_display = HAS_DISPLAY;
+bool has_sh1106 = HAS_SH1106;
+bool has_lcd1602 = HAS_LCD1602;
+bool has_lcd1602_27 = HAS_LCD1602_27;
+bool has_lcd2004_27 = HAS_LCD2004_27;
+int  debug = DEBUG;
 
-	bool ssl_madavi = SSL_MADAVI;
-	bool ssl_dusti = SSL_DUSTI;
-	char senseboxid[LEN_SENSEBOXID] = SENSEBOXID;
+bool ssl_madavi = SSL_MADAVI;
+bool ssl_dusti = SSL_DUSTI;
+char senseboxid[LEN_SENSEBOXID] = SENSEBOXID;
 
-	char host_influx[LEN_HOST_INFLUX] = HOST_INFLUX;
-	char url_influx[LEN_URL_INFLUX] = URL_INFLUX;
-	int port_influx = PORT_INFLUX;
-	char user_influx[LEN_USER_INFLUX] = USER_INFLUX;
-	char pwd_influx[LEN_PWD_INFLUX] = PWD_INFLUX;
-	char measurement_name_influx[LEN_MEASUREMENT_NAME_INFLUX] = MEASUREMENT_NAME_INFLUX;
-	bool ssl_influx = SSL_INFLUX;
+char host_influx[LEN_HOST_INFLUX] = HOST_INFLUX;
+char url_influx[LEN_URL_INFLUX] = URL_INFLUX;
+int port_influx = PORT_INFLUX;
+char user_influx[LEN_USER_INFLUX] = USER_INFLUX;
+char pwd_influx[LEN_PWD_INFLUX] = PWD_INFLUX;
+char measurement_name_influx[LEN_MEASUREMENT_NAME_INFLUX] = MEASUREMENT_NAME_INFLUX;
+bool ssl_influx = SSL_INFLUX;
 
-	char host_custom[LEN_HOST_CUSTOM] = HOST_CUSTOM;
-	char url_custom[LEN_URL_CUSTOM] = URL_CUSTOM;
-	int port_custom = PORT_CUSTOM;
-	char user_custom[LEN_USER_CUSTOM] = USER_CUSTOM;
-	char pwd_custom[LEN_PWD_CUSTOM] = PWD_CUSTOM;
+char host_custom[LEN_HOST_CUSTOM] = HOST_CUSTOM;
+char url_custom[LEN_URL_CUSTOM] = URL_CUSTOM;
+int port_custom = PORT_CUSTOM;
+char user_custom[LEN_USER_CUSTOM] = USER_CUSTOM;
+char pwd_custom[LEN_PWD_CUSTOM] = PWD_CUSTOM;
+bool ssl_custom = SSL_CUSTOM;
 
-	unsigned long time_for_wifi_config = 600000;
-	unsigned long sending_intervall_ms = 145000;
+unsigned long time_for_wifi_config = 600000;
+unsigned long sending_intervall_ms = 145000;
 
-	void initNonTrivials(const char* id) {
-		strcpy(cfg::current_lang, CURRENT_LANG);
-		if (fs_ssid[0] == '\0') {
-			strcpy(fs_ssid, "Feinstaubsensor-");
-			strcat(fs_ssid, id);
-		}
+void initNonTrivials(const char* id) {
+	strcpy(cfg::current_lang, CURRENT_LANG);
+	if (fs_ssid[0] == '\0') {
+		strcpy(fs_ssid, "Feinstaubsensor-");
+		strcat(fs_ssid, id);
 	}
+}
 }
 
 #define HOST_MADAVI "api-rrd.madavi.de"
@@ -604,18 +605,18 @@ String Float2String(const double value, uint8_t digits) {
 }
 
 String Float2String(const double value) {
-  return Float2String(value, 2);
+	return Float2String(value, 2);
 }
 
 /*****************************************************************
  * check display values, return '-' if undefined                 *
  *****************************************************************/
 String check_display_value(double value, double undef, uint8_t len, uint8_t str_len) {
-  String s = (value != undef ? Float2String(value, len) : "-");
-  while (s.length() < str_len) {
-    s = " " + s;
-  }
-  return s;
+	String s = (value != undef ? Float2String(value, len) : "-");
+	while (s.length() < str_len) {
+		s = " " + s;
+	}
+	return s;
 }
 
 /*****************************************************************
@@ -896,7 +897,7 @@ void readConfig() {
 #if defined(ESP32)
 	if (SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED)) {
 #else
-  if (SPIFFS.begin()) {
+	if (SPIFFS.begin()) {
 #endif
 		debug_out(F("mounted file system..."), DEBUG_MIN_INFO, 1);
 		if (SPIFFS.exists("/config.json")) {
@@ -912,8 +913,8 @@ void readConfig() {
 //				configFile.readBytes(buf.get(), size);
 				StaticJsonDocument<JSON_BUFFER_SIZE> json;
 //        DeserializationError err=deserializeJson(json, buf.get());
-				DeserializationError err=deserializeJson(json, configFile);
-				serializeJson(json,json_string);
+				DeserializationError err = deserializeJson(json, configFile);
+				serializeJson(json, json_string);
 //				debug_out(F("File content: "), DEBUG_MAX_INFO, 0);
 //				debug_out(String(buf.get()), DEBUG_MAX_INFO, 1);
 				debug_out(F("JSON Buffer content: "), DEBUG_MAX_INFO, 0);
@@ -954,7 +955,7 @@ void readConfig() {
 					setFromJSON(ssl_madavi);
 					setFromJSON(send2sensemap);
 					setFromJSON(send2fsapp);
-          setFromJSON(send2aircms);
+					setFromJSON(send2aircms);
 					setFromJSON(send2lora);
 					setFromJSON(send2csv);
 					setFromJSON(auto_update);
@@ -978,6 +979,7 @@ void readConfig() {
 					setFromJSON(port_custom);
 					strcpyFromJSON(user_custom);
 					strcpyFromJSON(pwd_custom);
+					setFromJSON(ssl_custom);
 					setFromJSON(send2influx);
 					strcpyFromJSON(host_influx);
 					strcpyFromJSON(url_influx);
@@ -1069,6 +1071,7 @@ void writeConfig() {
 	copyToJSON_Int(port_custom);
 	copyToJSON_String(user_custom);
 	copyToJSON_String(pwd_custom);
+	copyToJSON_Bool(ssl_custom);
 
 	copyToJSON_Bool(send2influx);
 	copyToJSON_String(host_influx);
@@ -1120,21 +1123,21 @@ void sha1Hex(const String& s, char hash[41]) {
 	sha1(s, &buf[0]);
 #endif
 #if defined(EPS32)
-  esp_sha(SHA1, s, &buf[0]);
+	esp_sha(SHA1, s, &buf[0]);
 #endif
 	for(int i = 0; i < 20; i++) {
-		sprintf(&hash[i*2], "%02x", buf[i]);
+		sprintf(&hash[i * 2], "%02x", buf[i]);
 	}
 	hash[40] = (char)0;
 }
 
 void hmac1(const String& secret, const String& s, char hash[41]) {
-	Serial.print("Hashing string: ");
-	Serial.println(s);
+	debug_out(F("Hashing string: "), DEBUG_MIN_INFO, 1);
+	debug_out(s, DEBUG_MIN_INFO, 1);
 	char buf[41];
 	sha1Hex(s, &buf[0]);
 	String str = (char*)buf;
-	Serial.println(secret + str);
+	debug_out(secret + str, DEBUG_MIN_INFO, 1);
 	sha1Hex(secret + str, &hash[0]);
 }
 
@@ -1257,7 +1260,7 @@ String form_select_lang() {
 					"</tr>");
 
 	s.replace("{t}", FPSTR(INTL_LANGUAGE));
-	s.replace("'"+String(cfg::current_lang)+"'>", "'"+String(cfg::current_lang)+"'"+s_select+">");
+	s.replace("'" + String(cfg::current_lang) + "'>", "'" + String(cfg::current_lang) + "'" + s_select + ">");
 	return s;
 }
 
@@ -1367,7 +1370,7 @@ static bool webserver_request_auth() {
 	debug_out(F("validate request auth..."), DEBUG_MIN_INFO, 1);
 	if (cfg::www_basicauth_enabled && ! wificonfig_loop) {
 		if (!server.authenticate(cfg::www_username, cfg::www_password)) {
-			server.requestAuthentication(BASIC_AUTH,"Sensor Login", "Authentication failed");
+			server.requestAuthentication(BASIC_AUTH, "Sensor Login", "Authentication failed");
 			return false;
 		}
 	}
@@ -1443,9 +1446,9 @@ void webserver_config() {
 		if (! wificonfig_loop) {
 			page_content += FPSTR(INTL_BASICAUTH);
 			page_content += FPSTR(WEB_B_BR);
-      page_content += form_checkbox("www_basicauth_enabled", FPSTR(INTL_BASICAUTH), www_basicauth_enabled);
+			page_content += form_checkbox("www_basicauth_enabled", FPSTR(INTL_BASICAUTH), www_basicauth_enabled);
 			page_content += FPSTR(TABLE_TAG_OPEN);
-      page_content += form_input("www_username", FPSTR(INTL_USER), www_username, LEN_WWW_USERNAME);
+			page_content += form_input("www_username", FPSTR(INTL_USER), www_username, LEN_WWW_USERNAME);
 			page_content += form_password("www_password", FPSTR(INTL_PASSWORD), www_password, LEN_WWW_PASSWORD);
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 
@@ -1460,10 +1463,10 @@ void webserver_config() {
 			page_content += form_password("fs_pwd", FPSTR(INTL_PASSWORD), fs_pwd, LEN_FS_PWD);
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 
-      page_content += FPSTR(WEB_BR_LF_B);
+			page_content += FPSTR(WEB_BR_LF_B);
 
 			page_content += F("APIs");
-      page_content += FPSTR(WEB_B_BR);
+			page_content += FPSTR(WEB_B_BR);
 			page_content += form_checkbox("send2dusti", F("API Luftdaten.info"), send2dusti, false);
 			page_content += FPSTR(WEB_NBSP_NBSP);
 			page_content += form_checkbox("ssl_dusti", FPSTR(WEB_HTTPS), ssl_dusti, false);
@@ -1473,9 +1476,9 @@ void webserver_config() {
 			page_content += form_checkbox("ssl_madavi", FPSTR(WEB_HTTPS), ssl_madavi, false);
 			page_content += F(")<br/>");
 
-	    page_content += FPSTR(WEB_BR_LF_B);
+			page_content += FPSTR(WEB_BR_LF_B);
 
-  		page_content += FPSTR(INTL_SENSORS);
+			page_content += FPSTR(INTL_SENSORS);
 			page_content += FPSTR(WEB_B_BR);
 			page_content += form_checkbox_sensor("sds_read", FPSTR(INTL_SDS011), sds_read);
 			page_content += form_checkbox_sensor("pms_read", FPSTR(INTL_PMS), pms_read);
@@ -1489,7 +1492,7 @@ void webserver_config() {
 			page_content += form_checkbox_sensor("ds18b20_read", FPSTR(INTL_DS18B20), ds18b20_read);
 			page_content += form_checkbox("gps_read", FPSTR(INTL_NEO6M), gps_read);
 
-      page_content += FPSTR(WEB_BR_LF_B);
+			page_content += FPSTR(WEB_BR_LF_B);
 
 		}
 
@@ -1521,8 +1524,11 @@ void webserver_config() {
 			page_content += FPSTR(TABLE_TAG_OPEN);
 			page_content += form_input("senseboxid", "senseBox&nbsp;ID: ", senseboxid, LEN_SENSEBOXID);
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-      page_content += F("<br/>");
-			page_content += form_checkbox("send2custom", FPSTR(INTL_SEND_TO_OWN_API), send2custom);
+			page_content += F("<br/>");
+			page_content += form_checkbox("send2custom", FPSTR(INTL_SEND_TO_OWN_API), send2custom, false);
+			page_content += FPSTR(WEB_NBSP_NBSP);
+			page_content += form_checkbox("ssl_custom", FPSTR(WEB_HTTPS), ssl_custom, false);
+			page_content += F(")<br/>");
 			page_content += FPSTR(TABLE_TAG_OPEN);
 			page_content += form_input("host_custom", FPSTR(INTL_SERVER), host_custom, LEN_HOST_CUSTOM);
 			page_content += form_input("url_custom", FPSTR(INTL_PATH), url_custom, LEN_URL_CUSTOM);
@@ -1531,14 +1537,12 @@ void webserver_config() {
 			page_content += form_password("pwd_custom", FPSTR(INTL_PASSWORD), pwd_custom, LEN_PWD_CUSTOM);
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 
-      page_content += F("<br/>");
+			page_content += F("<br/>");
 
-			send_influx_data_string = F("InfluxDB");
-			send_influx_data_string += F("&nbsp;&nbsp;(");
-			send_influx_data_string += form_checkbox("ssl_influx", F("HTTPS"), ssl_influx, false);
-			send_influx_data_string += F(")");
-
-			page_content += form_checkbox("send2influx", tmpl(FPSTR(INTL_SEND_TO), send_influx_data_string), send2influx);
+			page_content += form_checkbox("send2influx", tmpl(FPSTR(INTL_SEND_TO), F("InfluxDB")), send2influx, false);
+			page_content += FPSTR(WEB_NBSP_NBSP);
+			page_content += form_checkbox("ssl_influx", FPSTR(WEB_HTTPS), ssl_influx, false);
+			page_content += F(")<br/>");
 			page_content += FPSTR(TABLE_TAG_OPEN);
 			page_content += form_input("host_influx", FPSTR(INTL_SERVER), host_influx, LEN_HOST_INFLUX);
 			page_content += form_input("url_influx", FPSTR(INTL_PATH), url_influx, LEN_URL_INFLUX);
@@ -1548,7 +1552,7 @@ void webserver_config() {
 			page_content += form_input("measurement_name_influx", F("Measurement"), measurement_name_influx, LEN_MEASUREMENT_NAME_INFLUX);
 			page_content += form_submit(FPSTR(INTL_SAVE_AND_RESTART));
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-      page_content += F("<br/>");
+			page_content += F("<br/>");
 			page_content += FPSTR(WEB_BR_FORM);
 		}
 		if (wificonfig_loop) {  // scan for wlan ssids
@@ -1782,10 +1786,10 @@ void webserver_wifi() {
 			}
 			// Print SSID and RSSI for each network found
 #if defined(ESP8266)
-      page_content += wlan_ssid_to_table_row(wifiInfo[indices[i]].ssid, ((wifiInfo[indices[i]].encryptionType == ENC_TYPE_NONE) ? " " : u8"🔒"), wifiInfo[indices[i]].RSSI);
+			page_content += wlan_ssid_to_table_row(wifiInfo[indices[i]].ssid, ((wifiInfo[indices[i]].encryptionType == ENC_TYPE_NONE) ? " " : u8"🔒"), wifiInfo[indices[i]].RSSI);
 #endif
 #if defined(ESP32)
-      page_content += wlan_ssid_to_table_row(wifiInfo[indices[i]].ssid, ((wifiInfo[indices[i]].encryptionType == WIFI_AUTH_OPEN) ? " " : u8"🔒"), wifiInfo[indices[i]].RSSI);
+			page_content += wlan_ssid_to_table_row(wifiInfo[indices[i]].ssid, ((wifiInfo[indices[i]].encryptionType == WIFI_AUTH_OPEN) ? " " : u8"🔒"), wifiInfo[indices[i]].RSSI);
 #endif
 		}
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
@@ -2035,7 +2039,7 @@ void webserver_prometheus_endpoint() {
 	data_4_prometheus.replace("{si}", String(cfg::sending_intervall_ms));
 	data_4_prometheus.replace("{cs}", String(count_sends));
 	StaticJsonDocument<JSON_BUFFER_SIZE> json2data;
-	DeserializationError err=deserializeJson(json2data, last_data_string);;
+	DeserializationError err = deserializeJson(json2data, last_data_string);;
 	if (!err) {
 		for (uint8_t i = 0; i < json2data["sensordatavalues"].size() - 1; i++) {
 			String tmp_str = json2data["sensordatavalues"][i]["value_type"].as<char*>();
@@ -2160,7 +2164,7 @@ void wifiConfig() {
 		dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
 		dnsServer.start(53, "*", apIP);							// 53 is port for DNS server
 
-    setup_webserver();
+		setup_webserver();
 
 		// 10 minutes timeout for wifi config
 		last_page_load = millis();
@@ -2168,7 +2172,7 @@ void wifiConfig() {
 			dnsServer.processNextRequest();
 			server.handleClient();
 #if defined(esp8266)
-      wdt_reset(); // nodemcu is alive
+			wdt_reset(); // nodemcu is alive
 #endif
 			yield();
 		}
@@ -2256,7 +2260,7 @@ void connectWifi() {
 	WiFi.mode(WIFI_STA);
 	WiFi.begin(cfg::wlanssid, cfg::wlanpwd); // Start WiFI
 
-  mac_addr_sta = WiFi.macAddress();
+	mac_addr_sta = WiFi.macAddress();
 
 	debug_out(FPSTR(DBG_TXT_CONNECTING_TO), DEBUG_MIN_INFO, 0);
 	debug_out(cfg::wlanssid, DEBUG_MIN_INFO, 1);
@@ -2333,10 +2337,10 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 		while (client->connected() && !client->available()) {
 			delay(100);
 #if defined(esp8266)
-      wdt_reset(); // nodemcu is alive
+			wdt_reset(); // nodemcu is alive
 #endif
 			if (!--retries)
-				break;
+			{ break; }
 		}
 
 		// Read reply from server and print them
@@ -2355,35 +2359,35 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 			doRequest(&client_s);
 		}
 
-/*		WiFiClientSecure client_s;
-		if (doConnect(&client_s)) {
-			if (verify) {
-				if (client_s.setCACert_P(dst_root_ca_x3_bin_crt, dst_root_ca_x3_bin_crt_len)) {
-					if (client_s.verifyCertChain(host)) {
-						debug_out(F("Server cert verified"), DEBUG_MIN_INFO, 1);
-						doRequest(&client_s);
+		/*		WiFiClientSecure client_s;
+				if (doConnect(&client_s)) {
+					if (verify) {
+						if (client_s.setCACert_P(dst_root_ca_x3_bin_crt, dst_root_ca_x3_bin_crt_len)) {
+							if (client_s.verifyCertChain(host)) {
+								debug_out(F("Server cert verified"), DEBUG_MIN_INFO, 1);
+								doRequest(&client_s);
+							} else {
+								debug_out(F("ERROR: cert verification failed!"), DEBUG_ERROR, 1);
+							}
+						} else {
+							debug_out(F("Failed to load root CA cert!"), DEBUG_ERROR, 1);
+						}
 					} else {
-						debug_out(F("ERROR: cert verification failed!"), DEBUG_ERROR, 1);
+						doRequest(&client_s);
 					}
-				} else {
-					debug_out(F("Failed to load root CA cert!"), DEBUG_ERROR, 1);
 				}
-			} else {
-				doRequest(&client_s);
-			}
-		}
-*/
-/*		BearSSL::WiFiClientSecure client_s;
-		if (verify) {
-			BearSSLX509List cert(dst_root_ca_x3);
-			client_s.setTrustAnchors(&cert);
-		} else {
-			client_s.setInsecure();
-		}
-		if (doConnect(&client_s)) {
-			doRequest(&client_s);
-		}
-*/
+		*/
+		/*		BearSSL::WiFiClientSecure client_s;
+				if (verify) {
+					BearSSLX509List cert(dst_root_ca_x3);
+					client_s.setTrustAnchors(&cert);
+				} else {
+					client_s.setInsecure();
+				}
+				if (doConnect(&client_s)) {
+					doRequest(&client_s);
+				}
+		*/
 	} else {
 		WiFiClient client;
 		if (doConnect(&client)) {
@@ -2394,7 +2398,7 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 	debug_out(host, DEBUG_MIN_INFO, 1);
 
 #if defined(esp8266)
-  wdt_reset(); // nodemcu is alive
+	wdt_reset(); // nodemcu is alive
 #endif
 	yield();
 }
@@ -2435,7 +2439,7 @@ String create_influxdb_string(const String& data) {
 	debug_out(F("Parse JSON for influx DB"), DEBUG_MIN_INFO, 1);
 	debug_out(data, DEBUG_MIN_INFO, 1);
 	StaticJsonDocument<JSON_BUFFER_SIZE> json2data;
-	DeserializationError err=deserializeJson(json2data, data);
+	DeserializationError err = deserializeJson(json2data, data);
 	if (!err) {
 		data_4_influxdb += cfg::measurement_name_influx;
 		data_4_influxdb += F(",node=esp8266-");
@@ -2462,7 +2466,7 @@ String create_influxdb_string(const String& data) {
  *****************************************************************/
 void send_csv(const String& data) {
 	StaticJsonDocument<JSON_BUFFER_SIZE> json2data;
-	DeserializationError err=deserializeJson(json2data, data);
+	DeserializationError err = deserializeJson(json2data, data);
 	debug_out(F("CSV Output"), DEBUG_MIN_INFO, 1);
 	debug_out(data, DEBUG_MIN_INFO, 1);
 	if (!err) {
@@ -3354,17 +3358,17 @@ static void autoUpdate() {
 		const String SDS_version = cfg::sds_read ? SDS_version_date() : "";
 		display_debug(F("Looking for"), F("OTA update"));
 		last_update_attempt = millis();
-    String version = SOFTWARE_VERSION + String(" ") + esp_chipid + String(" ") + SDS_version + String(" ") +
-                  String(cfg::current_lang) + String(" ") + String(INTL_LANG) + String(" ") +
-                   String(cfg::use_beta ? "BETA" : "");
+		String version = SOFTWARE_VERSION + String(" ") + esp_chipid + String(" ") + SDS_version + String(" ") +
+						 String(cfg::current_lang) + String(" ") + String(INTL_LANG) + String(" ") +
+						 String(cfg::use_beta ? "BETA" : "");
 #if defined(ESP8266)
 		const HTTPUpdateResult ret = ESPhttpUpdate.update(UPDATE_HOST, UPDATE_PORT, UPDATE_URL, version);
-    String LastErrorString = ESPhttpUpdate.getLastErrorString().c_str();
+		String LastErrorString = ESPhttpUpdate.getLastErrorString().c_str();
 #endif
 #if defined(ESP32)
-    WiFiClient client;
-    t_httpUpdate_return ret = httpUpdate.update(client, UPDATE_HOST, UPDATE_PORT, UPDATE_URL, version);
-    String LastErrorString = httpUpdate.getLastErrorString().c_str();
+		WiFiClient client;
+		t_httpUpdate_return ret = httpUpdate.update(client, UPDATE_HOST, UPDATE_PORT, UPDATE_URL, version);
+		String LastErrorString = httpUpdate.getLastErrorString().c_str();
 #endif
 		switch(ret) {
 		case HTTP_UPDATE_FAILED:
@@ -3824,10 +3828,10 @@ static bool acquireNetworkTime() {
 	debug_out(F("Setting time using SNTP"), DEBUG_MIN_INFO, 1);
 	time_t now = time(nullptr);
 	debug_out(ctime(&now), DEBUG_MIN_INFO, 1);
-	debug_out(F("NTP.org:"),DEBUG_MIN_INFO,1);
-	#if defined(ESP8266)
+	debug_out(F("NTP.org:"), DEBUG_MIN_INFO, 1);
+#if defined(ESP8266)
 	settimeofday_cb(time_is_set);
-  #endif
+#endif
 	configTime(8 * 3600, 0, "pool.ntp.org");
 	while (retryCount++ < 20) {
 		// later than 2000/01/01:00:00:00
@@ -3837,9 +3841,9 @@ static bool acquireNetworkTime() {
 			return true;
 		}
 		delay(500);
-		debug_out(".",DEBUG_MIN_INFO,0);
+		debug_out(".", DEBUG_MIN_INFO, 0);
 	}
-	debug_out(F("\nrouter/gateway:"),DEBUG_MIN_INFO,1);
+	debug_out(F("\nrouter/gateway:"), DEBUG_MIN_INFO, 1);
 	retryCount = 0;
 	configTime(0, 0, WiFi.gatewayIP().toString().c_str());
 	while (retryCount++ < 20) {
@@ -3850,7 +3854,7 @@ static bool acquireNetworkTime() {
 			return true;
 		}
 		delay(500);
-		debug_out(".",DEBUG_MIN_INFO,0);
+		debug_out(".", DEBUG_MIN_INFO, 0);
 	}
 	return false;
 }
@@ -3862,9 +3866,9 @@ void setup() {
 	Serial.begin(9600);					// Output to Serial at 9600 baud
 
 #ifdef ESP32
-  serialSDS.begin(9600,SERIAL_8N1,D1,D2);
-  serialGPS.begin(9600,SERIAL_8N1,D5,D6);
-	pinMode(16,OUTPUT);
+	serialSDS.begin(9600, SERIAL_8N1, D1, D2);
+	serialGPS.begin(9600, SERIAL_8N1, D5, D6);
+	pinMode(16, OUTPUT);
 	digitalWrite(16, LOW);
 	delay(50);
 	digitalWrite(16, HIGH);
@@ -3875,10 +3879,10 @@ void setup() {
 	esp_chipid = String(ESP.getChipId());
 #endif
 #if defined(ESP32)
-  uint64_t chipid_num;
-  chipid_num = ESP.getEfuseMac();
-  esp_chipid = String((uint16_t)(chipid_num>>32), HEX);
-  esp_chipid += String((uint32_t)chipid_num, HEX);
+	uint64_t chipid_num;
+	chipid_num = ESP.getEfuseMac();
+	esp_chipid = String((uint16_t)(chipid_num >> 32), HEX);
+	esp_chipid += String((uint32_t)chipid_num, HEX);
 #endif
 	cfg::initNonTrivials(esp_chipid.c_str());
 	readConfig();
@@ -3889,9 +3893,9 @@ void setup() {
 	connectWifi();
 	got_ntp = acquireNetworkTime();
 	debug_out(F("\nNTP time "), DEBUG_MIN_INFO, 0);
-	debug_out(String(got_ntp?"":"not ")+F("received"), DEBUG_MIN_INFO, 1);
+	debug_out(String(got_ntp ? "" : "not ") + F("received"), DEBUG_MIN_INFO, 1);
 	autoUpdate();
-  setup_webserver();
+	setup_webserver();
 	create_basic_auth_strings();
 	serialSDS.begin(9600);
 	debug_out(F("\nChipId: "), DEBUG_MIN_INFO, 0);
@@ -3972,7 +3976,7 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 		char token_hash[41];
 		sha1Hex(token, &token_hash[0]);
 		char hash[41];
-		hmac1(String(token_hash), aircms_data+token, &hash[0]);
+		hmac1(String(token_hash), aircms_data + token, &hash[0]);
 		char char_full_url[100];
 		sprintf(char_full_url, "%s%s", URL_AIRCMS, hash);
 
@@ -4004,7 +4008,7 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 		data_4_custom = "{\"esp8266id\": \"" + String(esp_chipid) + "\", " + data_4_custom;
 		debug_out(String(FPSTR(DBG_TXT_SENDING_TO)) + F("custom api: "), DEBUG_MIN_INFO, 1);
 		start_send = millis();
-		sendData(data_4_custom, 0, cfg::host_custom, cfg::port_custom, cfg::url_custom, cfg::port_custom == 443, false, basic_auth_custom.c_str(), FPSTR(TXT_CONTENT_TYPE_JSON));
+		sendData(data_4_custom, 0, cfg::host_custom, cfg::port_custom, cfg::url_custom, cfg::ssl_custom || (cfg::port_custom == 443), false, basic_auth_custom.c_str(), FPSTR(TXT_CONTENT_TYPE_JSON));
 		sum_send_time += millis() - start_send;
 	}
 	return sum_send_time;

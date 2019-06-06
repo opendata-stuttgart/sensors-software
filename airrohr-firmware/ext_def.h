@@ -43,6 +43,7 @@
 #define PORT_CUSTOM 80
 #define USER_CUSTOM ""
 #define PWD_CUSTOM ""
+#define SSL_CUSTOM 0
 
 // define own InfluxDB
 #define HOST_INFLUX "influx.server"

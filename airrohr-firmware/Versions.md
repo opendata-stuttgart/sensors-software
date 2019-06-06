@@ -1,7 +1,10 @@
+NRZ-2019-124-B4
+* SSL options for custom and influxdb added
+
 NRZ-2019-124-B3
-merged changes for aircms support
-some optimizations of html code
-changes for support of ESP32 (not working completely until now)
+* merged changes for aircms support
+* some optimizations of html code
+* changes for support of ESP32 (not working completely until now)
 
 NRZ-2018-124-B2
 * redefine function overload
