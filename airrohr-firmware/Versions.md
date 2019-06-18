@@ -1,3 +1,13 @@
+NRZ-2019-124-B5
+* some comments removed
+* Var2Json casts optimized
+* new name "airRohr"
+* new logo (license CC0)
+
+NRZ-2019-124-B4
+* wrong variable use in PMSx003 function
+* showing text on wrong LCD display
+
 NRZ-2019-124-B4
 * SSL options for custom and influxdb added
 

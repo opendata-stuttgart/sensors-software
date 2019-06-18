@@ -104,18 +104,14 @@
  *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2019-124-B4"
+#define SOFTWARE_VERSION "NRZ-2019-124-B5"
 
 /*****************************************************************
  * Includes                                                      *
  *****************************************************************/
 #if defined(ESP8266)
 #include <FS.h>                     // must be first
-#define USING_AXTLS
 #include <ESP8266WiFi.h>
-//#include <WiFiClientSecure.h>
-#include "WiFiClientSecureAxTLS.h"
-using namespace axTLS;
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
@@ -193,6 +189,7 @@ using namespace axTLS;
 #else
 #include "intl_de.h"
 #endif
+
 #include "defines.h"
 #include "ext_def.h"
 #include "html-content.h"
@@ -287,7 +284,7 @@ unsigned long sending_intervall_ms = 145000;
 void initNonTrivials(const char* id) {
 	strcpy(cfg::current_lang, CURRENT_LANG);
 	if (fs_ssid[0] == '\0') {
-		strcpy(fs_ssid, "Feinstaubsensor-");
+		strcpy(fs_ssid, "airRohr-");
 		strcat(fs_ssid, id);
 	}
 }
@@ -633,7 +630,7 @@ String Value2Json(const String& type, const String& value) {
  * convert string value to json string                           *
  *****************************************************************/
 String Var2Json(const String& name, const String& value) {
-	String s = F("\"{n}\":\"{v}\",");
+	String s = FPSTR(WEB_REPLN_REPLV);
 	String tmp = value;
 	tmp.replace("\\", "\\\\"); tmp.replace("\"", "\\\"");
 	s.replace("{n}", name);
@@ -645,20 +642,14 @@ String Var2Json(const String& name, const String& value) {
  * convert boolean value to json string                          *
  *****************************************************************/
 String Var2Json(const String& name, const bool value) {
-	String s = FPSTR(WEB_REPLN_REPLV);
-	s.replace("{n}", name);
-	s.replace("{v}", (value ? "true" : "false"));
-	return s;
+	return Var2Json(name, String(value ? "true" : "false"));
 }
 
 /*****************************************************************
  * convert boolean value to json string                          *
  *****************************************************************/
 String Var2Json(const String& name, const int value) {
-	String s = FPSTR(WEB_REPLN_REPLV);
-	s.replace("{n}", name);
-	s.replace("{v}", String(value));
-	return s;
+	return Var2Json(name, String(value));
 }
 
 /*****************************************************************
@@ -894,11 +885,13 @@ void readConfig() {
 	bool pms24_read = 0;
 	bool pms32_read = 0;
 
+
 #if defined(ESP32)
-	if (SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED)) {
+	bool spiffs_begin_ok = SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED);
 #else
-	if (SPIFFS.begin()) {
+	bool spiffs_begin_ok = SPIFFS.begin();
 #endif
+	if (spiffs_begin_ok) {
 		debug_out(F("mounted file system..."), DEBUG_MIN_INFO, 1);
 		if (SPIFFS.exists("/config.json")) {
 			//file exists, reading and loading
@@ -906,19 +899,8 @@ void readConfig() {
 			File configFile = SPIFFS.open("/config.json", "r");
 			if (configFile) {
 				debug_out(F("opened config file..."), DEBUG_MIN_INFO, 1);
-//				const size_t size = configFile.size();
-				// Allocate a buffer to store contents of the file.
-//				std::unique_ptr<char[]> buf(new char[size]);
-
-//				configFile.readBytes(buf.get(), size);
 				StaticJsonDocument<JSON_BUFFER_SIZE> json;
-//        DeserializationError err=deserializeJson(json, buf.get());
 				DeserializationError err = deserializeJson(json, configFile);
-				serializeJson(json, json_string);
-//				debug_out(F("File content: "), DEBUG_MAX_INFO, 0);
-//				debug_out(String(buf.get()), DEBUG_MAX_INFO, 1);
-				debug_out(F("JSON Buffer content: "), DEBUG_MAX_INFO, 0);
-				debug_out(json_string, DEBUG_MAX_INFO, 1);
 				if (!err) {
 					debug_out(F("parsed json..."), DEBUG_MIN_INFO, 1);
 					if (json.containsKey("SOFTWARE_VERSION")) {
@@ -1117,28 +1099,22 @@ void create_basic_auth_strings() {
 /*****************************************************************
  * aircms.online helper functions                                *
  *****************************************************************/
-void sha1Hex(const String& s, char hash[41]) {
-	uint8_t buf[20];
+String sha1Hex(const String& s) {
 #if defined(ESP8266)
-	sha1(s, &buf[0]);
+	return sha1(s);
 #endif
 #if defined(EPS32)
-	esp_sha(SHA1, s, &buf[0]);
+	return esp_sha(SHA1, s);
 #endif
-	for(int i = 0; i < 20; i++) {
-		sprintf(&hash[i * 2], "%02x", buf[i]);
-	}
-	hash[40] = (char)0;
 }
 
-void hmac1(const String& secret, const String& s, char hash[41]) {
+String hmac1(const String& secret, const String& s) {
 	debug_out(F("Hashing string: "), DEBUG_MIN_INFO, 1);
 	debug_out(s, DEBUG_MIN_INFO, 1);
-	char buf[41];
-	sha1Hex(s, &buf[0]);
-	String str = (char*)buf;
+	String str = sha1Hex(s);
 	debug_out(secret + str, DEBUG_MIN_INFO, 1);
-	sha1Hex(secret + str, &hash[0]);
+	str = secret + str;
+	return sha1Hex(str);
 }
 
 /*****************************************************************
@@ -2039,7 +2015,7 @@ void webserver_prometheus_endpoint() {
 	data_4_prometheus.replace("{si}", String(cfg::sending_intervall_ms));
 	data_4_prometheus.replace("{cs}", String(count_sends));
 	StaticJsonDocument<JSON_BUFFER_SIZE> json2data;
-	DeserializationError err = deserializeJson(json2data, last_data_string);;
+	DeserializationError err = deserializeJson(json2data, last_data_string);
 	if (!err) {
 		for (uint8_t i = 0; i < json2data["sensordatavalues"].size() - 1; i++) {
 			String tmp_str = json2data["sensordatavalues"][i]["value_type"].as<char*>();
@@ -2148,7 +2124,7 @@ void wifiConfig() {
 		for (int i = 0; i < count_wifiInfo; i++) {
 			uint8_t* BSSID;
 			String SSID;
-#if defined(esp8266)
+#if defined(ESP8266)
 			WiFi.getNetworkInfo(i, SSID, wifiInfo[i].encryptionType, wifiInfo[i].RSSI, BSSID, wifiInfo[i].channel, wifiInfo[i].isHidden);
 #endif
 			SSID.toCharArray(wifiInfo[i].ssid, 35);
@@ -2171,7 +2147,7 @@ void wifiConfig() {
 		while (((millis() - last_page_load) < cfg::time_for_wifi_config)) {
 			dnsServer.processNextRequest();
 			server.handleClient();
-#if defined(esp8266)
+#if defined(ESP8266)
 			wdt_reset(); // nodemcu is alive
 #endif
 			yield();
@@ -2253,7 +2229,7 @@ static void waitForWifiToConnect(int maxRetries) {
 void connectWifi() {
 	debug_out(String(WiFi.status()), DEBUG_MIN_INFO, 1);
 	WiFi.disconnect();
-#if defined(esp8266)
+#if defined(ESP8266)
 	WiFi.setOutputPower(20.5);
 	WiFi.setPhyMode(WIFI_PHY_MODE_11N);
 #endif
@@ -2336,7 +2312,7 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 		int retries = 20;
 		while (client->connected() && !client->available()) {
 			delay(100);
-#if defined(esp8266)
+#if defined(ESP8266)
 			wdt_reset(); // nodemcu is alive
 #endif
 			if (!--retries)
@@ -2397,7 +2373,7 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 	debug_out(F("End connecting to "), DEBUG_MIN_INFO, 0);
 	debug_out(host, DEBUG_MIN_INFO, 1);
 
-#if defined(esp8266)
+#if defined(ESP8266)
 	wdt_reset(); // nodemcu is alive
 #endif
 	yield();
@@ -2941,23 +2917,23 @@ String sensorPMS() {
 						pms_pm1_sum += pm1_serial;
 						pms_pm10_sum += pm10_serial;
 						pms_pm25_sum += pm25_serial;
-						if (pms_pm1_min > pm10_serial) {
+						if (pms_pm1_min > pm1_serial) {
 							pms_pm1_min = pm1_serial;
 						}
-						if (pms_pm1_max < pm10_serial) {
+						if (pms_pm1_max < pm1_serial) {
 							pms_pm1_max = pm1_serial;
-						}
-						if (pms_pm10_min > pm10_serial) {
-							pms_pm10_min = pm10_serial;
-						}
-						if (pms_pm10_max < pm10_serial) {
-							pms_pm10_max = pm10_serial;
 						}
 						if (pms_pm25_min > pm25_serial) {
 							pms_pm25_min = pm25_serial;
 						}
 						if (pms_pm25_max < pm25_serial) {
 							pms_pm25_max = pm25_serial;
+						}
+						if (pms_pm10_min > pm10_serial) {
+							pms_pm10_min = pm10_serial;
+						}
+						if (pms_pm10_max < pm10_serial) {
+							pms_pm10_max = pm10_serial;
 						}
 						debug_out(F("PM1 (sec.): "), DEBUG_MED_INFO, 0);
 						debug_out(Float2String(double(pm1_serial)), DEBUG_MED_INFO, 1);
@@ -3501,7 +3477,7 @@ void display_values() {
 		case (1):
 			display_header = pm25_sensor;
 			if (pm25_sensor != pm10_sensor) {
-				display_header += " / " + pm25_sensor;
+				display_header += " / " + pm10_sensor;
 			}
 			display_lines[0] = "PM2.5: " + check_display_value(pm25_value, -1, 1, 6) + " µg/m³";
 			display_lines[1] = "PM10:  " + check_display_value(pm10_value, -1, 1, 6) + " µg/m³";
@@ -3865,7 +3841,7 @@ static bool acquireNetworkTime() {
 void setup() {
 	Serial.begin(9600);					// Output to Serial at 9600 baud
 
-#ifdef ESP32
+#if defined(ESP32)
 	serialSDS.begin(9600, SERIAL_8N1, D1, D2);
 	serialGPS.begin(9600, SERIAL_8N1, D5, D6);
 	pinMode(16, OUTPUT);
@@ -3912,7 +3888,7 @@ void setup() {
 	logEnabledAPIs();
 	logEnabledDisplays();
 
-	String server_name = F("Feinstaubsensor-");
+	String server_name = F("airRohr-");
 	server_name += esp_chipid;
 	if (MDNS.begin(server_name.c_str())) {
 		MDNS.addService("http", "tcp", 80);
@@ -3973,12 +3949,10 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 		String token = WiFi.macAddress();
 
 		String aircms_data = "L=" + login + "&t=" + String(ts, DEC) + "&airrohr=" + data;
-		char token_hash[41];
-		sha1Hex(token, &token_hash[0]);
-		char hash[41];
-		hmac1(String(token_hash), aircms_data + token, &hash[0]);
+		String token_hash = sha1Hex(token);
+		String hash = hmac1(String(token_hash), aircms_data + token);
 		char char_full_url[100];
-		sprintf(char_full_url, "%s%s", URL_AIRCMS, hash);
+		sprintf(char_full_url, "%s%s", URL_AIRCMS, hash.c_str());
 
 		sendData(aircms_data, 0, HOST_AIRCMS, PORT_AIRCMS, char_full_url, true, false, "", FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN));
 		sum_send_time += millis() - start_send;
@@ -4039,7 +4013,7 @@ void loop() {
 
 	sample_count++;
 
-#if defined(esp8266)
+#if defined(ESP8266)
 	wdt_reset(); // nodemcu is alive
 #endif
 

@@ -77,19 +77,19 @@ In ESP8266 für Arduino IDE enthalten:
 * ESP8266WebServer (GNU Lesser Public License >=2.1)
 * ESP8266httpUpdate (1.1.0) (GNU Lesser Public License >=2.1)
 * DNSServer (GNU Lesser Public License >=2.1)
+* SoftwareSerial (GNU Lesser Public License >=2.1). Don't install additional library!!!
 
 Installierbar über Arduino IDE (Menü Sketch -> Bibliothek einbinden -> Bibliotheken verwalten, in Klammern die getestete Version und die Art der Lizenz):
-* [ArduinoJson](https://github.com/bblanchon/ArduinoJson) (5.13.2) (MIT)
-* [Adafruit Unified Sensor](https://github.com/adafruit/Adafruit_Sensor) (1.0.2) (Apache)
+* [ArduinoJson](https://github.com/bblanchon/ArduinoJson) (6.11.0) (MIT)
+* [Adafruit Unified Sensor](https://github.com/adafruit/Adafruit_Sensor) (1.0.3) (Apache)
 * [Adafruit BMP085 library](https://github.com/adafruit/Adafruit-BMP085-Library) (1.0.0) (BSD)
-* [Adafruit BMP280 library](https://github.com/adafruit/Adafruit_BMP280_Library) (1.0.2) (BSD)
-* [Adafruit BME280 library](https://github.com/adafruit/Adafruit_BME280_Library) (1.0.7) (BSD)
+* [Adafruit BMP280 library](https://github.com/adafruit/Adafruit_BMP280_Library) (1.0.3) (BSD)
+* [Adafruit BME280 library](https://github.com/adafruit/Adafruit_BME280_Library) (1.0.8) (BSD)
+* [Adafruit HTU21DF library](https://github.com/adafruit/Adafruit_HTU21DF_Library) (1.0.1) (BSD)
 * [DallasTemperature](https://github.com/milesburton/Arduino-Temperature-Control-Library) (3.8.0)
 * [ESP8266 and ESP32 Oled driver for SSD1306 display](https://github.com/squix78/esp8266-oled-ssd1306) (4.0.0) (MIT)
 * [OneWire](www.pjrc.com/teensy/td_libs_OneWire.html) (2.3.4)
 * [LiquidCrystal I2C](https://github.com/marcoschwartz/LiquidCrystal_I2C) (1.1.2)
-* [Adafruit HTU21DF Library](https://github.com/adafruit/Adafruit_HTU21DF_Library) (1.0.1)
-* [SoftwareSerial](https://github.com/plerup/espsoftwareserial) (1.0.0) (GNU Lesser Public License >=2.1)
 
 Manuell zu installieren:
 * [TinyGPS++](http://arduiniana.org/libraries/tinygpsplus/) (0.95) (GNU Lesser Public License >=2.1)
