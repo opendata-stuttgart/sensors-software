@@ -437,6 +437,7 @@ double last_value_BME280_T = -128.0;
 double last_value_BME280_H = -1.0;
 double last_value_BME280_P = -1.0;
 double last_value_CCS811_C = -1.0;
+double last_value_CCS811_T = -1.0;
 double last_value_DS18B20_T = -1.0;
 double last_value_GPS_lat = -200.0;
 double last_value_GPS_lon = -200.0;
@@ -1269,6 +1270,7 @@ String add_sensor_type(const String& sensor_text) {
 	s.replace("{h}", FPSTR(INTL_HUMIDITY));
 	s.replace("{p}", FPSTR(INTL_PRESSURE));
 	s.replace("{co2}", FPSTR(INTL_CO2));
+	s.replace("{tvoc}", FPSTR(INTL_TVOC));
 	return s;
 }
 
@@ -1697,6 +1699,7 @@ void webserver_values() {
 		const String unit_H = "%";
 		const String unit_P = "hPa";
 		const String unit_PPM = "ppm";
+		const String unit_PPB = "ppb";
 		last_page_load = millis();
 
 		const int signal_quality = calcWiFiSignalQuality(WiFi.RSSI());
@@ -1760,6 +1763,7 @@ void webserver_values() {
 		if (cfg::ccs811_read) {
 			page_content += FPSTR(EMPTY_ROW);
 			page_content += table_row_from_value(FPSTR(SENSORS_CCS811), FPSTR(INTL_CO2), check_display_value(last_value_CCS811_C, -1, 1, 0), unit_PPM);  // TO BE VERIFIED
+			page_content += table_row_from_value(FPSTR(SENSORS_CCS811), FPSTR(INTL_TVOC), check_display_value(last_value_CCS811_T, -1, 1, 0), unit_PPB);  // TO BE VERIFIED
 		}
 		if (cfg::ds18b20_read) {
 			page_content += FPSTR(EMPTY_ROW);
@@ -2512,18 +2516,22 @@ static String sensorCCS811() {
 	
 	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_CCS811), DEBUG_MED_INFO, 1);
 
-	if(!ccs811.readData()){
+	if(!ccs811.readData()) {
 		const auto co2 = ccs811.geteCO2();
-	
+		const auto tvoc = ccs811.getTVOC();
+		
 		if (isnan(co2)) {
 			last_value_CCS811_C = -1.0;
+			last_value_CCS811_T = -1.0;
 			debug_out(String(FPSTR(SENSORS_CCS811)) + FPSTR(DBG_TXT_COULDNT_BE_READ), DEBUG_ERROR, 1);
 		}
 		else {
 			debug_out(FPSTR(DBG_TXT_CO2), DEBUG_MIN_INFO, 0);
 			debug_out(Float2String(co2) + " PPM", DEBUG_MIN_INFO, 1);  // check unit
 			last_value_CCS811_C = co2;
+			last_value_CCS811_T = tvoc;
 			s += Value2Json(F("CCS811_co2"), Float2String(last_value_CCS811_C));
+			s += Value2Json(F("CCS811_tvoc"), Float2String(last_value_CCS811_T));
 		}
 		debug_out("----", DEBUG_MIN_INFO, 1);
 
@@ -2531,6 +2539,7 @@ static String sensorCCS811() {
 	}
 	else {
 		last_value_CCS811_C = -1.0;
+		last_value_CCS811_T = -1.0;
 		debug_out(String(FPSTR(SENSORS_CCS811)) + FPSTR(DBG_TXT_COULDNT_BE_READ), DEBUG_ERROR, 1);
 	}
 	return s;
@@ -3600,7 +3609,7 @@ bool initCCS811(char addr) {
   debug_out(String(addr, HEX), DEBUG_MIN_INFO, 0);
 
   if(ccs811.begin(addr)) {
-     debug_out(F(" ... found"), DEBUG_MIN_INFO, 1);
+    debug_out(F(" ... found"), DEBUG_MIN_INFO, 1);
 
     while(!ccs811.available());
     float temp = ccs811.calculateTemperature();
@@ -3684,7 +3693,7 @@ static void powerOnTestSensors() {
 		}
 	}
 
-	if (cfg::ccs811_read) { // TODO
+	if (cfg::ccs811_read) {
 		debug_out(F("Read CCS811..."), DEBUG_MIN_INFO, 1);
 		if (!initCCS811(0x5A) && !initCCS811(0x5B)) {
 			debug_out(F("Check CCS811 wiring"), DEBUG_MIN_INFO, 1);
@@ -3991,7 +4000,7 @@ void loop() {
 
 		if (cfg::ccs811_read && (! ccs811_init_failed)) {
 			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + FPSTR(SENSORS_CCS811), DEBUG_MAX_INFO, 1);
-			result_CCS811 = sensorCCS811();                 // getting co2
+			result_CCS811 = sensorCCS811();                 // getting co2 and tvoc
 		}
 
 		if (cfg::ds18b20_read) {
