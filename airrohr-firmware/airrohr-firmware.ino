@@ -894,7 +894,7 @@ void readConfig() {
 					setFromJSON(bmp_read);
 					setFromJSON(bmp280_read);
 					setFromJSON(bme280_read);
-          			setFromJSON(ccs811_read);
+					setFromJSON(ccs811_read);
 					setFromJSON(ds18b20_read);
 					setFromJSON(gps_read);
 					setFromJSON(send2dusti);
@@ -1399,7 +1399,7 @@ void webserver_config() {
 			page_content += form_checkbox_sensor("bmp_read", FPSTR(INTL_BMP180), bmp_read);
 			page_content += form_checkbox_sensor("bmp280_read", FPSTR(INTL_BMP280), bmp280_read);
 			page_content += form_checkbox_sensor("bme280_read", FPSTR(INTL_BME280), bme280_read);
-      		page_content += form_checkbox_sensor("ccs811_read", FPSTR(INTL_CCS811), ccs811_read);
+			page_content += form_checkbox_sensor("ccs811_read", FPSTR(INTL_CCS811), ccs811_read);
 			page_content += form_checkbox_sensor("ds18b20_read", FPSTR(INTL_DS18B20), ds18b20_read);
 			page_content += form_checkbox("gps_read", FPSTR(INTL_NEO6M), gps_read);
 			page_content += F("<br/><br/>\n<b>");
@@ -1524,7 +1524,7 @@ void webserver_config() {
 			readBoolParam(bmp_read);
 			readBoolParam(bmp280_read);
 			readBoolParam(bme280_read);
-      		readBoolParam(ccs811_read);
+			readBoolParam(ccs811_read);
 			readBoolParam(ds18b20_read);
 			readBoolParam(gps_read);
 
@@ -1580,7 +1580,7 @@ void webserver_config() {
 		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), "BMP180"), String(bmp_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), "BMP280"), String(bmp280_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), "BME280"), String(bme280_read));
-    	page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), "CCS811"), String(ccs811_read));
+		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), "CCS811"), String(ccs811_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), "DS18B20"), String(ds18b20_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), "GPS"), String(gps_read));
 		page_content += line_from_value(FPSTR(INTL_AUTO_UPDATE), String(auto_update));
@@ -3605,21 +3605,21 @@ bool initBME280(char addr) {
  * Init CCS811                                                   *
  *****************************************************************/
 bool initCCS811(char addr) {
-  debug_out(F("Trying CCS811 sensor on "), DEBUG_MIN_INFO, 0);
-  debug_out(String(addr, HEX), DEBUG_MIN_INFO, 0);
+	debug_out(F("Trying CCS811 sensor on "), DEBUG_MIN_INFO, 0);
+	debug_out(String(addr, HEX), DEBUG_MIN_INFO, 0);
 
-  if(ccs811.begin(addr)) {
-    debug_out(F(" ... found"), DEBUG_MIN_INFO, 1);
+	if(ccs811.begin(addr)) {
+		debug_out(F(" ... found"), DEBUG_MIN_INFO, 1);
 
-    while(!ccs811.available());
-    float temp = ccs811.calculateTemperature();
-    ccs811.setTempOffset(temp - 25.0);
-    return true;
-  }
-  else {
-    debug_out(F(" ... not found"), DEBUG_MIN_INFO, 1);
-    return false;
-  }
+		while(!ccs811.available());
+		float temp = ccs811.calculateTemperature();
+		ccs811.setTempOffset(temp - 25.0);
+		return true;
+	}
+	else {
+		debug_out(F(" ... not found"), DEBUG_MIN_INFO, 1);
+		return false;
+	}
 }
 
 static void powerOnTestSensors() {
