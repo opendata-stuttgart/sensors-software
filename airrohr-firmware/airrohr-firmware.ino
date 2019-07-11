@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#define INTL_EN
+#define INTL_DE
 
 /************************************************************************
  *                                                                      *
@@ -188,7 +188,7 @@ namespace cfg {
 	char wlanssid[35] = WLANSSID;
 	char wlanpwd[65] = WLANPWD;
 
-	char current_lang[3] = "en";
+	char current_lang[3] = "DE";
 	char www_username[65] = WWW_USERNAME;
 	char www_password[65] = WWW_PASSWORD;
 	bool www_basicauth_enabled = WWW_BASICAUTH_ENABLED;
