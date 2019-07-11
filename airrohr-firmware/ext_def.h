@@ -119,6 +119,10 @@
 #define BME280_READ 0
 #define BME280_API_PIN 11
 
+// CCS811, co2
+#define CCS811_READ 0
+#define CCS811_API_PIN 12
+
 // DS18B20, temperature
 #define DS18B20_READ 0
 #define DS18B20_API_PIN 13
