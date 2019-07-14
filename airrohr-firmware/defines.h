@@ -1,10 +1,10 @@
-#define LEN_WLANSSID 35
+#define LEN_WLANSSID 35				// credentials for wifi connection
 #define LEN_WLANPWD 65
 
-#define LEN_WWW_USERNAME 65
+#define LEN_WWW_USERNAME 65			// credentials for basic auth of server internal website
 #define LEN_WWW_PASSWORD 65
 
-#define LEN_FS_SSID 33
+#define LEN_FS_SSID 33				// credentials for sensor access point mode
 #define LEN_FS_PWD 65
 
 #define LEN_SENSEBOXID 30

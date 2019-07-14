@@ -197,15 +197,15 @@
 /******************************************************************
  * Constants                                                      *
  ******************************************************************/
-const unsigned long SAMPLETIME_MS = 30000;
-const unsigned long SAMPLETIME_SDS_MS = 1000;
-const unsigned long WARMUPTIME_SDS_MS = 15000;
-const unsigned long READINGTIME_SDS_MS = 5000;
+const unsigned long SAMPLETIME_MS = 30000;									// time between two measurements of the PPD42NS
+const unsigned long SAMPLETIME_SDS_MS = 1000;								// time between two measurements of the SDS011, PMSx003, Honeywell PM sensor
+const unsigned long WARMUPTIME_SDS_MS = 15000;								// time needed to "warm up" the sensor before we can take the first measurement
+const unsigned long READINGTIME_SDS_MS = 5000;								// how long we read data from the PM sensors
 const unsigned long SAMPLETIME_GPS_MS = 50;
-const unsigned long DISPLAY_UPDATE_INTERVAL_MS = 5000;
+const unsigned long DISPLAY_UPDATE_INTERVAL_MS = 5000;						// time between switching display to next "screen"
 const unsigned long ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
-const unsigned long PAUSE_BETWEEN_UPDATE_ATTEMPTS_MS = ONE_DAY_IN_MS;        // check for firmware updates once a day
-const unsigned long DURATION_BEFORE_FORCED_RESTART_MS = ONE_DAY_IN_MS * 28;  // force a reboot every ~4 weeks
+const unsigned long PAUSE_BETWEEN_UPDATE_ATTEMPTS_MS = ONE_DAY_IN_MS;		// check for firmware updates once a day
+const unsigned long DURATION_BEFORE_FORCED_RESTART_MS = ONE_DAY_IN_MS * 28;	// force a reboot every ~4 weeks
 
 /******************************************************************
  * The variables inside the cfg namespace are persistent          *
@@ -217,19 +217,24 @@ const unsigned long DURATION_BEFORE_FORCED_RESTART_MS = ONE_DAY_IN_MS * 28;  // 
  * as they are part of the json format used to persist the data.  *
  ******************************************************************/
 namespace cfg {
+	char current_lang[3] = "DE";
+
+	// wifi credentials
 	char wlanssid[LEN_WLANSSID] = WLANSSID;
 	char wlanpwd[LEN_WLANPWD] = WLANPWD;
 
-	char current_lang[3] = "DE";
+	// credentials for basic auth of internal web server
 	char www_username[LEN_WWW_USERNAME] = WWW_USERNAME;
 	char www_password[LEN_WWW_PASSWORD] = WWW_PASSWORD;
 	bool www_basicauth_enabled = WWW_BASICAUTH_ENABLED;
 
+	// credentials of the sensor in access point mode
 	char fs_ssid[LEN_FS_SSID] = FS_SSID;
 	char fs_pwd[LEN_FS_PWD] = FS_PWD;
 
 	char version_from_local_config[20] = "";
 
+	// (in)active sensors
 	bool dht_read = DHT_READ;
 	bool htu21d_read = HTU21D_READ;
 	bool ppd_read = PPD_READ;
@@ -241,6 +246,8 @@ namespace cfg {
 	bool bme280_read = BME280_READ;
 	bool ds18b20_read = DS18B20_READ;
 	bool gps_read = GPS_READ;
+
+	// send to "APIs"
 	bool send2dusti = SEND2DUSTI;
 	bool send2madavi = SEND2MADAVI;
 	bool send2sensemap = SEND2SENSEMAP;
@@ -250,15 +257,20 @@ namespace cfg {
 	bool send2lora = SEND2LORA;
 	bool send2influx = SEND2INFLUX;
 	bool send2csv = SEND2CSV;
+
 	bool auto_update = AUTO_UPDATE;
 	bool use_beta = USE_BETA;
-	bool has_display = HAS_DISPLAY;
+
+	// (in)active displays
+	bool has_display = HAS_DISPLAY;											// OLED with SSD1306 and I2C
 	bool has_sh1106 = HAS_SH1106;
 	bool has_lcd1602 = HAS_LCD1602;
 	bool has_lcd1602_27 = HAS_LCD1602_27;
 	bool has_lcd2004_27 = HAS_LCD2004_27;
+
 	int  debug = DEBUG;
 
+	// API settings
 	bool ssl_madavi = SSL_MADAVI;
 	bool ssl_dusti = SSL_DUSTI;
 	char senseboxid[LEN_SENSEBOXID] = SENSEBOXID;
@@ -3971,6 +3983,7 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 				send_lora(data);
 			}
 	*/
+
 	if (cfg::send2csv) {
 		debug_out(F("## Sending as csv: "), DEBUG_MIN_INFO, 1);
 		send_csv(data);
@@ -3985,6 +3998,7 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 		sendData(data_4_custom, 0, cfg::host_custom, cfg::port_custom, cfg::url_custom, cfg::ssl_custom || (cfg::port_custom == 443), false, basic_auth_custom.c_str(), FPSTR(TXT_CONTENT_TYPE_JSON));
 		sum_send_time += millis() - start_send;
 	}
+
 	return sum_send_time;
 }
 
@@ -4116,6 +4130,7 @@ void loop() {
 		yield();
 		server.stop();
 		const int HTTP_PORT_DUSTI = (cfg::ssl_dusti ? 443 : 80);
+
 		if (cfg::ppd_read) {
 			data += result_PPD;
 			if (cfg::send2dusti) {
@@ -4125,6 +4140,7 @@ void loop() {
 				sum_send_time += millis() - start_send;
 			}
 		}
+
 		if (cfg::sds_read) {
 			data += result_SDS;
 			if (cfg::send2dusti) {
@@ -4134,6 +4150,7 @@ void loop() {
 				sum_send_time += millis() - start_send;
 			}
 		}
+
 		if (cfg::pms_read) {
 			data += result_PMS;
 			if (cfg::send2dusti) {
@@ -4143,6 +4160,7 @@ void loop() {
 				sum_send_time += millis() - start_send;
 			}
 		}
+
 		if (cfg::hpm_read) {
 			data += result_HPM;
 			if (cfg::send2dusti) {
@@ -4152,6 +4170,7 @@ void loop() {
 				sum_send_time += millis() - start_send;
 			}
 		}
+
 		if (cfg::dht_read) {
 			data += result_DHT;
 			if (cfg::send2dusti) {
@@ -4161,6 +4180,7 @@ void loop() {
 				sum_send_time += millis() - start_send;
 			}
 		}
+
 		if (cfg::htu21d_read) {
 			data += result_HTU21D;
 			if (cfg::send2dusti) {
@@ -4170,6 +4190,7 @@ void loop() {
 				sum_send_time += millis() - start_send;
 			}
 		}
+
 		if (cfg::bmp_read && (! bmp_init_failed)) {
 			data += result_BMP;
 			if (cfg::send2dusti) {
@@ -4179,6 +4200,7 @@ void loop() {
 				sum_send_time += millis() - start_send;
 			}
 		}
+
 		if (cfg::bmp280_read && (! bmp280_init_failed)) {
 			data += result_BMP280;
 			if (cfg::send2dusti) {
@@ -4188,6 +4210,7 @@ void loop() {
 				sum_send_time += millis() - start_send;
 			}
 		}
+
 		if (cfg::bme280_read && (! bme280_init_failed)) {
 			data += result_BME280;
 			if (cfg::send2dusti) {
