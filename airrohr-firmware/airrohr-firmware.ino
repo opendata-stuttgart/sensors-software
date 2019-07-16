@@ -1553,6 +1553,11 @@ void webserver_config() {
 #undef readTimeParam
 #undef readPasswdParam
 
+    // Check sending_intervall_ms. It must be larger than SDS011 time acquisition requirement if SDS011 is used
+    if ((sds_read) && (sending_intervall_ms < (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS))) {
+      sending_intervall_ms = WARMUPTIME_SDS_MS + READINGTIME_SDS_MS;
+    }
+
 		page_content += line_from_value(tmpl(FPSTR(INTL_SEND_TO), F("Luftdaten.info")), String(send2dusti));
 		page_content += line_from_value(tmpl(FPSTR(INTL_SEND_TO), F("Madavi")), String(send2madavi));
 		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), "DHT"), String(dht_read));
