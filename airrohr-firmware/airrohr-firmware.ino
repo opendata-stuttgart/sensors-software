@@ -4287,4 +4287,6 @@ void loop() {
 	}
 	yield();
 //	if (sample_count % 500 == 0) { Serial.println(ESP.getFreeHeap(),DEC); }
+
+    MDNS.update();
 }
