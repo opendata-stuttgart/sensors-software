@@ -1,6 +1,3 @@
-#include <Arduino.h>
-#define INTL_DE
-
 /************************************************************************
  *                                                                      *
  *  This source code needs to be compiled for the board                 *
@@ -118,6 +115,11 @@
 /*****************************************************************
  * Includes                                                      *
  *****************************************************************/
+
+#ifndef INTL_DE
+#define INTL_DE
+#endif
+
 #if defined(ESP8266)
 #include <FS.h>                     // must be first
 #include <ESP8266WiFi.h>
