@@ -4278,14 +4278,10 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 		unsigned long ts = millis() / 1000;
 		String login = esp_chipid;
 		String token = WiFi.macAddress();
-
 		String aircms_data = "L=" + login + "&t=" + String(ts, DEC) + "&airrohr=" + data;
-		String token_hash = sha1Hex(token);
-		String hash = hmac1(String(token_hash), aircms_data + token);
-		char char_full_url[100];
-		sprintf(char_full_url, "%s%s", URL_AIRCMS, hash.c_str());
+		String aircms_url = URL_AIRCMS + hmac1(sha1Hex(token), aircms_data + token);
 
-		sum_send_time += sendData(aircms_data, 0, HOST_AIRCMS, PORT_AIRCMS, char_full_url, true, false, "", FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN));
+		sum_send_time += sendData(aircms_data, 0, HOST_AIRCMS, PORT_AIRCMS, aircms_url.c_str(), true, false, "", FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN));
 	}
 
 	if (cfg::send2influx) {
