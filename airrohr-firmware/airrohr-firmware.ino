@@ -228,93 +228,93 @@ const unsigned long DURATION_BEFORE_FORCED_RESTART_MS = ONE_DAY_IN_MS * 28;	// f
  * as they are part of the json format used to persist the data.  *
  ******************************************************************/
 namespace cfg {
-char current_lang[3] = "DE";
+	char current_lang[3] = "DE";
 
-// wifi credentials
-char wlanssid[LEN_WLANSSID] = WLANSSID;
-char wlanpwd[LEN_WLANPWD] = WLANPWD;
+	// wifi credentials
+	char wlanssid[LEN_WLANSSID] = WLANSSID;
+	char wlanpwd[LEN_WLANPWD] = WLANPWD;
 
-// credentials for basic auth of internal web server
-char www_username[LEN_WWW_USERNAME] = WWW_USERNAME;
-char www_password[LEN_WWW_PASSWORD] = WWW_PASSWORD;
-bool www_basicauth_enabled = WWW_BASICAUTH_ENABLED;
+	// credentials for basic auth of internal web server
+	char www_username[LEN_WWW_USERNAME] = WWW_USERNAME;
+	char www_password[LEN_WWW_PASSWORD] = WWW_PASSWORD;
+	bool www_basicauth_enabled = WWW_BASICAUTH_ENABLED;
 
-// credentials of the sensor in access point mode
-char fs_ssid[LEN_FS_SSID] = FS_SSID;
-char fs_pwd[LEN_FS_PWD] = FS_PWD;
+	// credentials of the sensor in access point mode
+	char fs_ssid[LEN_FS_SSID] = FS_SSID;
+	char fs_pwd[LEN_FS_PWD] = FS_PWD;
 
-char version_from_local_config[20] = "";
+	char version_from_local_config[20] = "";
 
-// (in)active sensors
-bool dht_read = DHT_READ;
-bool htu21d_read = HTU21D_READ;
-bool ppd_read = PPD_READ;
-bool sds_read = SDS_READ;
-bool pms_read = PMS_READ;
-bool hpm_read = HPM_READ;
-bool sps30_read = SPS30_READ;
-bool bmp_read = BMP_READ;
-bool bmp280_read = BMP280_READ;
-bool bme280_read = BME280_READ;
-bool ds18b20_read = DS18B20_READ;
-bool dnms_read = DNMS_READ;
-char dnms_correction[LEN_DNMS_CORRECTION] = DNMS_CORRECTION;
-bool gps_read = GPS_READ;
+	// (in)active sensors
+	bool dht_read = DHT_READ;
+	bool htu21d_read = HTU21D_READ;
+	bool ppd_read = PPD_READ;
+	bool sds_read = SDS_READ;
+	bool pms_read = PMS_READ;
+	bool hpm_read = HPM_READ;
+	bool sps30_read = SPS30_READ;
+	bool bmp_read = BMP_READ;
+	bool bmp280_read = BMP280_READ;
+	bool bme280_read = BME280_READ;
+	bool ds18b20_read = DS18B20_READ;
+	bool dnms_read = DNMS_READ;
+	char dnms_correction[LEN_DNMS_CORRECTION] = DNMS_CORRECTION;
+	bool gps_read = GPS_READ;
 
-// send to "APIs"
-bool send2dusti = SEND2DUSTI;
-bool send2madavi = SEND2MADAVI;
-bool send2sensemap = SEND2SENSEMAP;
-bool send2fsapp = SEND2FSAPP;
-bool send2aircms = SEND2AIRCMS;
-bool send2custom = SEND2CUSTOM;
-bool send2lora = SEND2LORA;
-bool send2influx = SEND2INFLUX;
-bool send2csv = SEND2CSV;
+	// send to "APIs"
+	bool send2dusti = SEND2DUSTI;
+	bool send2madavi = SEND2MADAVI;
+	bool send2sensemap = SEND2SENSEMAP;
+	bool send2fsapp = SEND2FSAPP;
+	bool send2aircms = SEND2AIRCMS;
+	bool send2custom = SEND2CUSTOM;
+	bool send2lora = SEND2LORA;
+	bool send2influx = SEND2INFLUX;
+	bool send2csv = SEND2CSV;
 
-bool auto_update = AUTO_UPDATE;
-bool use_beta = USE_BETA;
+	bool auto_update = AUTO_UPDATE;
+	bool use_beta = USE_BETA;
 
-// (in)active displays
-bool has_display = HAS_DISPLAY;											// OLED with SSD1306 and I2C
-bool has_sh1106 = HAS_SH1106;
-bool has_flipped_display = HAS_FLIPPED_DISPLAY;
-bool has_lcd1602 = HAS_LCD1602;
-bool has_lcd1602_27 = HAS_LCD1602_27;
-bool has_lcd2004_27 = HAS_LCD2004_27;
+	// (in)active displays
+	bool has_display = HAS_DISPLAY;											// OLED with SSD1306 and I2C
+	bool has_sh1106 = HAS_SH1106;
+	bool has_flipped_display = HAS_FLIPPED_DISPLAY;
+	bool has_lcd1602 = HAS_LCD1602;
+	bool has_lcd1602_27 = HAS_LCD1602_27;
+	bool has_lcd2004_27 = HAS_LCD2004_27;
 
-int  debug = DEBUG;
+	int  debug = DEBUG;
 
-// API settings
-bool ssl_madavi = SSL_MADAVI;
-bool ssl_dusti = SSL_DUSTI;
-char senseboxid[LEN_SENSEBOXID] = SENSEBOXID;
+	// API settings
+	bool ssl_madavi = SSL_MADAVI;
+	bool ssl_dusti = SSL_DUSTI;
+	char senseboxid[LEN_SENSEBOXID] = SENSEBOXID;
 
-char host_influx[LEN_HOST_INFLUX] = HOST_INFLUX;
-char url_influx[LEN_URL_INFLUX] = URL_INFLUX;
-int port_influx = PORT_INFLUX;
-char user_influx[LEN_USER_INFLUX] = USER_INFLUX;
-char pwd_influx[LEN_PWD_INFLUX] = PWD_INFLUX;
-char measurement_name_influx[LEN_MEASUREMENT_NAME_INFLUX] = MEASUREMENT_NAME_INFLUX;
-bool ssl_influx = SSL_INFLUX;
+	char host_influx[LEN_HOST_INFLUX] = HOST_INFLUX;
+	char url_influx[LEN_URL_INFLUX] = URL_INFLUX;
+	int port_influx = PORT_INFLUX;
+	char user_influx[LEN_USER_INFLUX] = USER_INFLUX;
+	char pwd_influx[LEN_PWD_INFLUX] = PWD_INFLUX;
+	char measurement_name_influx[LEN_MEASUREMENT_NAME_INFLUX] = MEASUREMENT_NAME_INFLUX;
+	bool ssl_influx = SSL_INFLUX;
 
-char host_custom[LEN_HOST_CUSTOM] = HOST_CUSTOM;
-char url_custom[LEN_URL_CUSTOM] = URL_CUSTOM;
-int port_custom = PORT_CUSTOM;
-char user_custom[LEN_USER_CUSTOM] = USER_CUSTOM;
-char pwd_custom[LEN_PWD_CUSTOM] = PWD_CUSTOM;
-bool ssl_custom = SSL_CUSTOM;
+	char host_custom[LEN_HOST_CUSTOM] = HOST_CUSTOM;
+	char url_custom[LEN_URL_CUSTOM] = URL_CUSTOM;
+	int port_custom = PORT_CUSTOM;
+	char user_custom[LEN_USER_CUSTOM] = USER_CUSTOM;
+	char pwd_custom[LEN_PWD_CUSTOM] = PWD_CUSTOM;
+	bool ssl_custom = SSL_CUSTOM;
 
-unsigned long time_for_wifi_config = 600000;
-unsigned long sending_intervall_ms = 145000;
+	unsigned long time_for_wifi_config = 600000;
+	unsigned long sending_intervall_ms = 145000;
 
-void initNonTrivials(const char* id) {
-	strcpy(cfg::current_lang, CURRENT_LANG);
-	if (fs_ssid[0] == '\0') {
-		strcpy(fs_ssid, "airRohr-");
-		strcat(fs_ssid, id);
+	void initNonTrivials(const char* id) {
+		strcpy(cfg::current_lang, CURRENT_LANG);
+		if (fs_ssid[0] == '\0') {
+			strcpy(fs_ssid, "airRohr-");
+			strcat(fs_ssid, id);
+		}
 	}
-}
 }
 
 #define HOST_MADAVI "api-rrd.madavi.de"
