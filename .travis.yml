@@ -12,7 +12,7 @@ env:
     - PLATFORMIO_CI_SRC=./
 
 install:
-    - pip install -U platformio
+    - pip install -U 'platformio<4.0.0'
     - platformio update
 
 script:
