@@ -1325,13 +1325,6 @@ static String tmpl(const String& patt, const String& value) {
 	return s;
 }
 
-static String tmpl(const String& patt, const String& value1, const String& value2) {
-	String s = patt;
-	s.replace("{v1}", value1);
-	s.replace("{v2}", value2);
-	return s;
-}
-
 static String tmpl(const String& patt, const String& value1, const String& value2, const String& value3) {
 	String s = patt;
 	s.replace("{v1}", value1);
