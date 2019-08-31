@@ -2872,7 +2872,8 @@ String sensorSDS() {
 			if (len > 2) { checksum_is += value; }
 			len++;
 			if (len == 10 && checksum_ok == 1 && (msSince(starttime) > (cfg::sending_intervall_ms - READINGTIME_SDS_MS))) {
-				if ((! isnan(pm10_serial)) && (! isnan(pm25_serial))) {
+				if (!isnan(pm10_serial) && pm10_serial >= 0 && pm10_serial < 1999
+				    && !isnan(pm25_serial) && pm25_serial >= 0 && pm25_serial < 999) {
 					sds_pm10_sum += pm10_serial;
 					sds_pm25_sum += pm25_serial;
 					if (sds_pm10_min > pm10_serial) {
