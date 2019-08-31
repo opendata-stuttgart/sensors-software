@@ -114,6 +114,12 @@
 #define HPM_READ 0
 #define HPM_API_PIN 1
 
+// Sensirion SPS30 PM Sensor I2C connection
+#define SPS30_READ 0
+#define SPS30_API_PIN 1
+#define SPS30_WAITING_AFTER_LAST_READ 11000   // waiting time after last reading mesurement data in ms
+#define SPS30_AUTO_CLEANING_INTERVAL 7200 // time in seconds
+
 // BMP180, temperature, pressure
 #define BMP_READ 0
 #define BMP_API_PIN 3
@@ -130,6 +136,10 @@
 #define DS18B20_READ 0
 #define DS18B20_API_PIN 13
 
+// DNMS Noise Measurement
+#define DNMS_READ 0
+#define DNMS_API_PIN 15
+#define DNMS_CORRECTION "0.0"
 
 // GPS, preferred Neo-6M
 #define GPS_READ 0
@@ -146,6 +156,9 @@
 
 // OLED Display SH1106 connected?
 #define HAS_SH1106 0
+
+// OLED Display um 180° gedreht?
+#define HAS_FLIPPED_DISPLAY 0
 
 // LCD Display LCD1602 connected?
 #define HAS_LCD1602 0

@@ -7,6 +7,8 @@
 #define LEN_FS_SSID 33				// credentials for sensor access point mode
 #define LEN_FS_PWD 65
 
+#define LEN_DNMS_CORRECTION 10
+
 #define LEN_SENSEBOXID 30
 
 #define LEN_HOST_INFLUX 100

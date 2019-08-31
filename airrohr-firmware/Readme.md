@@ -55,6 +55,7 @@ Die Daten können als CSV via USB ausgegeben werden. Dafür sollte sowohl in ext
 * Board: NodeMCU 1.0 (ESP-12E Module)
 * CPU Frequency: 160MHz
 * Flash Size: 4M (3M SPIFFS)
+
 Ab "ESP für Arduino 2.4.2":
 * Debug Port: Disabled
 * Debug Level: NoAssert-NDEBUG
@@ -65,6 +66,8 @@ Ab "ESP für Arduino 2.4.2":
   'build.float=-u _printf_float -u _scanf_float'
   ändern in
   'build.float='
+
+* in Wire.h muss bei Verwendung des Sensirion SPS30 noch BUFFER_LENGTH auf 64 gesetzt werden
 
 ### Verwendete Bibliotheken (für ESP8266):
 
