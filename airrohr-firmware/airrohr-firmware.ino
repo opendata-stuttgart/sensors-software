@@ -566,7 +566,7 @@ String esp_chipid;
 
 String mac_addr_sta;
 
-long last_page_load = millis();
+unsigned long last_page_load = millis();
 
 bool wificonfig_loop = false;
 
