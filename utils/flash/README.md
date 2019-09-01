@@ -1,4 +1,15 @@
-# Flash script for Linux
+# Flashing firmware for luftdaten.info airrohr sensors
+
+## Airrohr Firmware Flasher
+
+
+Since 2019 there is a dedicated software for easy flashing of the firmware.
+It can be run on different operating systems and provides a GUI.
+On github you can find the [source code repository](https://github.com/opendata-stuttgart/airrohr-firmware-flasher) with [binary releases](https://github.com/opendata-stuttgart/airrohr-firmware-flasher/releases).
+It is an alternative to the script provided here.
+
+
+## Flash script for Linux
 
 [Here](https://github.com/opendata-stuttgart/sensors-software/tree/master/utils/flash) you find a tool for flashing an ESP8266 with the most recent firmware release of the fine dust measuring station.
 
