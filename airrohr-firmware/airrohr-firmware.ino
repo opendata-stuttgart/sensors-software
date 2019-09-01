@@ -480,6 +480,16 @@ bool is_HPM_running = true;
 unsigned long sending_time = 0;
 unsigned long last_update_attempt;
 
+float last_value_BMP_T = -128.0;
+float last_value_BMP_P = -1.0;
+float last_value_BMP280_T = -128.0;
+float last_value_BMP280_P = -1.0;
+float last_value_BME280_T = -128.0;
+float last_value_BME280_H = -1.0;
+float last_value_BME280_P = -1.0;
+float last_value_DHT_T = -128.0;
+float last_value_DHT_H = -1.0;
+
 int sds_pm10_sum = 0;
 int sds_pm25_sum = 0;
 int sds_val_count = 0;
@@ -527,6 +537,8 @@ float value_SPS30_N2 = 0.0;
 float value_SPS30_N3 = 0.0;
 float value_SPS30_N4 = 0.0;
 float value_SPS30_TS = 0.0;
+
+
 uint16_t  SPS30_measurement_count = 0;
 unsigned long SPS30_read_counter = 0;
 unsigned long SPS30_read_error_counter = 0;
@@ -543,17 +555,8 @@ double last_value_PMS_P1 = -1.0;
 double last_value_PMS_P2 = -1.0;
 double last_value_HPM_P1 = -1.0;
 double last_value_HPM_P2 = -1.0;
-double last_value_DHT_T = -128.0;
-double last_value_DHT_H = -1.0;
 double last_value_HTU21D_T = -128.0;
 double last_value_HTU21D_H = -1.0;
-double last_value_BMP_T = -128.0;
-double last_value_BMP_P = -1.0;
-double last_value_BMP280_T = -128.0;
-double last_value_BMP280_P = -1.0;
-double last_value_BME280_T = -128.0;
-double last_value_BME280_H = -1.0;
-double last_value_BME280_P = -1.0;
 double last_value_DS18B20_T = -1.0;
 double last_value_GPS_lat = -200.0;
 double last_value_GPS_lon = -200.0;
