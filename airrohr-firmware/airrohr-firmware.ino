@@ -1638,13 +1638,10 @@ void webserver_config() {
 		}
 
 #define readBoolParam(param) \
-		param = false; \
-		if (server.hasArg(#param)){ \
-			param = server.arg(#param) == "1";\
-		}
+		param = server.arg(#param) == "1";
 
 #define readIntParam(param) \
-		if (server.hasArg(#param)){ \
+		{ \
 			int val = server.arg(#param).toInt(); \
 			if (val != 0){ \
 				param = val; \
@@ -1653,17 +1650,17 @@ void webserver_config() {
 
 #define readTimeParam(param) \
 		if (server.hasArg(#param)){ \
-			int val = server.arg(#param).toInt(); \
-			param = val*1000; \
+			param = server.arg(#param).toInt() * 1000; \
 		}
 
 #define readPasswdParam(param) \
-		if (server.hasArg(#param)){ \
+		if (server.hasArg(#param)) { \
+			const String server_arg(server.arg(#param)); \
 			masked_pwd = ""; \
-			for (uint8_t i=0;i<server.arg(#param).length();i++) \
+			for (uint8_t i=0;i<server_arg.length();i++) \
 				masked_pwd += "*"; \
-			if (masked_pwd != server.arg(#param) || server.arg(#param) == "") {\
-				server.arg(#param).toCharArray(param, sizeof(param)); \
+			if (masked_pwd != server_arg || !server_arg.length()) {\
+				server_arg.toCharArray(param, sizeof(param)); \
 			}\
 		}
 
