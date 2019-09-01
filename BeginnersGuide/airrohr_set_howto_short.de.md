@@ -51,33 +51,39 @@ Die elektronischen Teile werden zusammen geschaltet
 
 Pins sind von RECHTS nach LINKS nummeriert, beim Verbinden darauf achten, das die Kabel wirklich auf den Pins stecken, da die meisten Dupont-Kabel auch „neben“ die Pins passen. Falls lange und kurze Kabel da sind, hier die kurzen nutzen.
 
-* SDS011 Pin 1 -> Pin D1 / GPIO5  
-* SDS011 Pin 2 -> Pin D2 / GPIO4  
-* SDS011 Pin 3 -> GND  
-* SDS011 Pin 4 -> unused  
-* SDS011 Pin 5 -> VU (NodeMCU v3) / VIN (NodeMCU v1,v2)  
-* SDS011 Pin 6 -> unused  
-* SDS011 Pin 7 -> unused
+| SDS011 Pin| Text   | NodeMCU (ESP8266)                       |
+|----------:|-------:|:----------------------------------------|
+|         1 | TXD    | Pin D1                                  |
+|         2 | RXD    | Pin D2                                  |
+|         3 | GND    | GND/G                                   |
+|         4 | 2,5 um |                                         |
+|         5 | 5V     | VU (NodeMCU v3) / VIN (NodeMCU v1,v2)   |
+|         6 | 1 um   |                                         |
+|         7 | NC     |                                         |
 
-<!--
-### Anschluß des DHT22
 
-Pins sind von LINKS nach RECHTS nummeriert, Vorderseite ist das „Gitter“  
+### Anschluß eines DHT22
 
-* DHT22 Pin 1 -> Pin 3V3 (3.3V)  
-* DHT22 Pin 2 -> Pin D7 (GPIO13)  
-* DHT22 Pin 3 -> unused  
-* DHT22 Pin 4 -> Pin GND
--->
+Pins sind von LINKS nach RECHTS nummeriert, Vorderseite ist das „Gitter“. 
+
+| DHT22 Pin |  NodeMCU (ESP8266) |
+|----------:|:-------------------|
+|  1 | 3V3 (3.3V)                |
+|  2 | D7                        |
+|  3 |                           | 
+|  4 | GND/G                     |
+
 
 ### Anschluß eines BME280 (Alternative zum DHT22)
 
-Die Pins sind beschriftet:
+Die Pins des BME280 sind beschriftet, es werden 4 Pins verbunden:
 
-* BME280 Pin VIN -> Pin 3V3 (3.3V)  
-* BME280 Pin GND -> Pin GND
-* BME280 Pin SDA -> Pin D3  
-* BME280 Pin SCL -> Pin D4  
+| BME280  | NodeMCU (ESP8266) |
+|--------:|:------------------|
+|     VIN | 3V3 (3.3V)    |
+|     GND | GND/G         |
+|     SDA | D3            |
+|     SCL | D4            |
 
 Andere i²c-Geräte (z.B. Display) werden ebenfalls dieselben Pins SDA-D3 und SCL-D4 angeschlossen (y-Kabelverbindung notwendig). Anschlüsse für einige weitere Bauteile sind online in der [FAQ](https://luftdaten.info/faq/) aufgeführt.
 
