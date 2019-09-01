@@ -2257,7 +2257,8 @@ void wifiConfig() {
 		const IPAddress apIP(192, 168, 4, 1);
 		WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
 		WiFi.softAP(cfg::fs_ssid, cfg::fs_pwd, selectChannelForAp(wifiInfo.get(), count_wifiInfo));
-		debug_outln(String(WLANPWD), DEBUG_MIN_INFO);
+		// In case we create a unique password at first start
+		debug_outln(String(F("AP Password is: ")) + String(WLANPWD), DEBUG_MIN_INFO);
 
 		DNSServer dnsServer;
 		dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
