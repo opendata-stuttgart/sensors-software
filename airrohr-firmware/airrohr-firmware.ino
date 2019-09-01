@@ -696,11 +696,15 @@ String check_display_value(double value, double undef, uint8_t len, uint8_t str_
 /*****************************************************************
  * convert value to json string                                  *
  *****************************************************************/
-String Value2Json(const String& type, const String& value) {
+String Value2Json(const __FlashStringHelper* type, const String& value) {
 	String s = F("{\"value_type\":\"{t}\",\"value\":\"{v}\"},");
-	s.replace("{t}", type);
+	s.replace("{t}", String(type));
 	s.replace("{v}", value);
 	return s;
+}
+
+String Value2Json(const __FlashStringHelper* type, const float& value) {
+	return Value2Json(type, Float2String(value));
 }
 
 /*****************************************************************
@@ -1085,9 +1089,9 @@ void writeConfig() {
 	String json_string = "{";
 	debug_outln(F("saving config..."), DEBUG_MIN_INFO);
 
-#define copyToJSON_Bool(varname) json_string += Var2Json(#varname,varname);
-#define copyToJSON_Int(varname) json_string += Var2Json(#varname,varname);
-#define copyToJSON_String(varname) json_string += Var2Json(#varname,String(varname));
+#define copyToJSON_Bool(varname) json_string += Var2Json(#varname, varname);
+#define copyToJSON_Int(varname) json_string += Var2Json(#varname, varname);
+#define copyToJSON_String(varname) json_string += Var2Json(#varname, String(varname));
 	copyToJSON_String(current_lang);
 	copyToJSON_String(SOFTWARE_VERSION);
 	copyToJSON_String(wlanssid);
@@ -2625,8 +2629,8 @@ static String sensorDHT() {
 			debug_outln(String(h) + "%", DEBUG_MIN_INFO);
 			last_value_DHT_T = t;
 			last_value_DHT_H = h;
-			s += Value2Json(F("temperature"), Float2String(last_value_DHT_T));
-			s += Value2Json(F("humidity"), Float2String(last_value_DHT_H));
+			s += Value2Json(F("temperature"), last_value_DHT_T);
+			s += Value2Json(F("humidity"), last_value_DHT_H);
 		}
 	}
 	debug_outln("----", DEBUG_MIN_INFO);
@@ -2657,8 +2661,8 @@ static String sensorHTU21D() {
 		debug_outln(Float2String(h) + " %", DEBUG_MIN_INFO);
 		last_value_HTU21D_T = t;
 		last_value_HTU21D_H = h;
-		s += Value2Json(F("HTU21D_temperature"), Float2String(last_value_HTU21D_T));
-		s += Value2Json(F("HTU21D_humidity"), Float2String(last_value_HTU21D_H));
+		s += Value2Json(F("HTU21D_temperature"), last_value_HTU21D_T);
+		s += Value2Json(F("HTU21D_humidity"), last_value_HTU21D_H);
 	}
 	debug_outln("----", DEBUG_MIN_INFO);
 
@@ -2688,8 +2692,8 @@ static String sensorBMP() {
 		debug_outln(Float2String(p / 100) + " hPa", DEBUG_MIN_INFO);
 		last_value_BMP_T = t;
 		last_value_BMP_P = p;
-		s += Value2Json(F("BMP_pressure"), Float2String(last_value_BMP_P));
-		s += Value2Json(F("BMP_temperature"), Float2String(last_value_BMP_T));
+		s += Value2Json(F("BMP_pressure"), last_value_BMP_P);
+		s += Value2Json(F("BMP_temperature"), last_value_BMP_T);
 	}
 	debug_outln("----", DEBUG_MIN_INFO);
 
@@ -2719,8 +2723,8 @@ static String sensorBMP280() {
 		debug_outln(Float2String(p / 100) + " hPa", DEBUG_MIN_INFO);
 		last_value_BMP280_T = t;
 		last_value_BMP280_P = p;
-		s += Value2Json(F("BMP280_pressure"), Float2String(last_value_BMP280_P));
-		s += Value2Json(F("BMP280_temperature"), Float2String(last_value_BMP280_T));
+		s += Value2Json(F("BMP280_pressure"), last_value_BMP280_P);
+		s += Value2Json(F("BMP280_temperature"), last_value_BMP280_T);
 	}
 	debug_outln("----", DEBUG_MIN_INFO);
 
@@ -2756,9 +2760,9 @@ static String sensorBME280() {
 		last_value_BME280_T = t;
 		last_value_BME280_H = h;
 		last_value_BME280_P = p;
-		s += Value2Json(F("BME280_temperature"), Float2String(last_value_BME280_T));
-		s += Value2Json(F("BME280_humidity"), Float2String(last_value_BME280_H));
-		s += Value2Json(F("BME280_pressure"), Float2String(last_value_BME280_P));
+		s += Value2Json(F("BME280_temperature"), last_value_BME280_T);
+		s += Value2Json(F("BME280_humidity"), last_value_BME280_H);
+		s += Value2Json(F("BME280_pressure"), last_value_BME280_P);
 	}
 	debug_outln("----", DEBUG_MIN_INFO);
 
@@ -2795,7 +2799,7 @@ static String sensorDS18B20() {
 		debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO);
 		debug_outln(Float2String(t) + " C", DEBUG_MIN_INFO);
 		last_value_DS18B20_T = t;
-		s += Value2Json(F("DS18B20_temperature"), Float2String(last_value_DS18B20_T));
+		s += Value2Json(F("DS18B20_temperature"), last_value_DS18B20_T);
 	}
 	debug_outln("----", DEBUG_MIN_INFO);
 	debug_outln(String(FPSTR(DBG_TXT_END_READING)) + FPSTR(SENSORS_DS18B20), DEBUG_MED_INFO);
@@ -2920,8 +2924,8 @@ String sensorSDS() {
 			debug_outln("PM10:  " + Float2String(last_value_SDS_P1), DEBUG_MIN_INFO);
 			debug_outln("PM2.5: " + Float2String(last_value_SDS_P2), DEBUG_MIN_INFO);
 			debug_outln("----", DEBUG_MIN_INFO);
-			s += Value2Json("SDS_P1", Float2String(last_value_SDS_P1));
-			s += Value2Json("SDS_P2", Float2String(last_value_SDS_P2));
+			s += Value2Json(F("SDS_P1"), last_value_SDS_P1);
+			s += Value2Json(F("SDS_P2"), last_value_SDS_P2);
 		}
 		sds_pm10_sum = 0;
 		sds_pm25_sum = 0;
@@ -3096,9 +3100,9 @@ String sensorPMS() {
 			debug_outln("PM2.5: " + Float2String(last_value_PMS_P2), DEBUG_MIN_INFO);
 			debug_outln("PM10:  " + Float2String(last_value_PMS_P1), DEBUG_MIN_INFO);
 			debug_outln("-------", DEBUG_MIN_INFO);
-			s += Value2Json("PMS_P0", Float2String(last_value_PMS_P0));
-			s += Value2Json("PMS_P1", Float2String(last_value_PMS_P1));
-			s += Value2Json("PMS_P2", Float2String(last_value_PMS_P2));
+			s += Value2Json(F("PMS_P0"), last_value_PMS_P0);
+			s += Value2Json(F("PMS_P1"), last_value_PMS_P1);
+			s += Value2Json(F("PMS_P2"), last_value_PMS_P2);
 		}
 		pms_pm1_sum = 0;
 		pms_pm10_sum = 0;
@@ -3241,8 +3245,8 @@ String sensorHPM() {
 			debug_outln("PM2.5: " + Float2String(last_value_HPM_P1), DEBUG_MIN_INFO);
 			debug_outln("PM10:  " + Float2String(last_value_HPM_P2), DEBUG_MIN_INFO);
 			debug_outln("-------", DEBUG_MIN_INFO);
-			s += Value2Json("HPM_P1", Float2String(last_value_HPM_P1));
-			s += Value2Json("HPM_P2", Float2String(last_value_HPM_P2));
+			s += Value2Json(F("HPM_P1"), last_value_HPM_P1);
+			s += Value2Json(F("HPM_P2"), last_value_HPM_P2);
 		}
 		hpm_pm10_sum = 0;
 		hpm_pm25_sum = 0;
@@ -3319,9 +3323,9 @@ String sensorPPD() {
 
 		// json for push to api / P1
 		last_value_PPD_P1 = concentration;
-		s += Value2Json("durP1", String(lowpulseoccupancyP1));
-		s += Value2Json("ratioP1", Float2String(ratio));
-		s += Value2Json("P1", Float2String(last_value_PPD_P1));
+		s += Value2Json(F("durP1"), String(lowpulseoccupancyP1));
+		s += Value2Json(F("ratioP1"), ratio);
+		s += Value2Json(F("P1"), last_value_PPD_P1);
 
 		ratio = lowpulseoccupancyP2 / (SAMPLETIME_MS * 10.0);
 		concentration = calcConcentration(ratio);
@@ -3335,9 +3339,9 @@ String sensorPPD() {
 
 		// json for push to api / P2
 		last_value_PPD_P2 = concentration;
-		s += Value2Json("durP2", String(lowpulseoccupancyP2));
-		s += Value2Json("ratioP2", Float2String(ratio));
-		s += Value2Json("P2", Float2String(last_value_PPD_P2));
+		s += Value2Json(F("durP2"), String(lowpulseoccupancyP2));
+		s += Value2Json(F("ratioP2"), ratio);
+		s += Value2Json(F("P2"), last_value_PPD_P2);
 
 		debug_outln("----", DEBUG_MIN_INFO);
 	}
@@ -3377,16 +3381,16 @@ static String sensorSPS30() {
 	debug_outln("NC10:  " + Float2String(last_value_SPS30_N4), DEBUG_MIN_INFO);
 	debug_outln("TPS:  " + Float2String(last_value_SPS30_TS), DEBUG_MIN_INFO);
 
-	s += Value2Json(F("SPS30_P0"), Float2String(last_value_SPS30_P0));
-	s += Value2Json(F("SPS30_P1"), Float2String(last_value_SPS30_P1));
-	s += Value2Json(F("SPS30_P2"), Float2String(last_value_SPS30_P2));
-	s += Value2Json(F("SPS30_P3"), Float2String(last_value_SPS30_P3));
-	s += Value2Json(F("SPS30_N0"), Float2String(last_value_SPS30_N0));
-	s += Value2Json(F("SPS30_N1"), Float2String(last_value_SPS30_N1));
-	s += Value2Json(F("SPS30_N2"), Float2String(last_value_SPS30_N2));
-	s += Value2Json(F("SPS30_N3"), Float2String(last_value_SPS30_N3));
-	s += Value2Json(F("SPS30_N4"), Float2String(last_value_SPS30_N4));
-	s += Value2Json(F("SPS30_TS"), Float2String(last_value_SPS30_TS));
+	s += Value2Json(F("SPS30_P0"), last_value_SPS30_P0);
+	s += Value2Json(F("SPS30_P1"), last_value_SPS30_P1);
+	s += Value2Json(F("SPS30_P2"), last_value_SPS30_P2);
+	s += Value2Json(F("SPS30_P3"), last_value_SPS30_P3);
+	s += Value2Json(F("SPS30_N0"), last_value_SPS30_N0);
+	s += Value2Json(F("SPS30_N1"), last_value_SPS30_N1);
+	s += Value2Json(F("SPS30_N2"), last_value_SPS30_N2);
+	s += Value2Json(F("SPS30_N3"), last_value_SPS30_N3);
+	s += Value2Json(F("SPS30_N4"), last_value_SPS30_N4);
+	s += Value2Json(F("SPS30_TS"), last_value_SPS30_TS);
 
 	debug_outln("SPS30 read counter: " + String(SPS30_read_counter), DEBUG_MIN_INFO);
 	debug_outln("SPS30 read error counter: " + String(SPS30_read_error_counter), DEBUG_MIN_INFO);
@@ -3458,9 +3462,9 @@ String sensorDNMS() {
 		debug_out(FPSTR(DBG_TXT_DNMS_LA_MAX), DEBUG_MIN_INFO);
 		debug_outln(Float2String(last_value_dnms_la_max) + " dB", DEBUG_MIN_INFO);
 
-		s += Value2Json(F("noise_LAeq"), Float2String(last_value_dnms_laeq));
-		s += Value2Json(F("noise_LA_min"), Float2String(last_value_dnms_la_min));
-		s += Value2Json(F("noise_LA_max"), Float2String(last_value_dnms_la_max));
+		s += Value2Json(F("noise_LAeq"), last_value_dnms_laeq);
+		s += Value2Json(F("noise_LA_min"), last_value_dnms_la_min);
+		s += Value2Json(F("noise_LA_max"), last_value_dnms_la_max);
 	}
 	debug_outln(F("----"), DEBUG_MIN_INFO);
 
@@ -4639,7 +4643,7 @@ void loop() {
 			}
 		}
 
-		data_sample_times += Value2Json("signal", signal_strength);
+		data_sample_times += Value2Json(F("signal"), signal_strength);
 		data += data_sample_times;
 
 		if ((unsigned)(data.lastIndexOf(',') + 1) == data.length()) {
