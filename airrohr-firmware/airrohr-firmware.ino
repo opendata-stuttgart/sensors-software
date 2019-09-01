@@ -2397,22 +2397,21 @@ void sendData(const String& data, const int pin, const char* host, const int htt
 
 	String request_head = F("POST ");
 	request_head += String(url);
-	request_head += F(" HTTP/1.1\r\n");
-	request_head += F("Host: ");
-	request_head += String(host) + "\r\n";
-	request_head += F("Content-Type: ");
+	request_head += F(" HTTP/1.1\r\nHost: ");
+	request_head += String(host);
+	request_head += F("\r\nContent-Type: ");
 	request_head += contentType + "\r\n";
 	if (strlen(basic_auth_string) != 0) {
 		request_head += F("Authorization: Basic ");
 		request_head += String(basic_auth_string) + "\r\n";
 	}
 	request_head += F("X-PIN: ");
-	request_head += String(pin) + "\r\n";
-	request_head += F("X-Sensor: esp8266-");
-	request_head += esp_chipid + "\r\n";
-	request_head += F("Content-Length: ");
-	request_head += String(data.length(), DEC) + "\r\n";
-	request_head += F("Connection: close\r\n\r\n");
+	request_head += String(pin);
+	request_head += F("\r\nX-Sensor: esp8266-");
+	request_head += esp_chipid;
+	request_head += F("\r\nContent-Length: ");
+	request_head += String(data.length(), DEC);
+	request_head += F("\r\nConnection: close\r\n\r\n");
 
 	const auto doConnect = [ = ](WiFiClient * client) -> bool {
 		client->setNoDelay(true);
