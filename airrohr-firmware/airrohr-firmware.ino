@@ -1122,6 +1122,7 @@ void writeConfig() {
 	copyToJSON_Bool(has_lcd1602);
 	copyToJSON_Bool(has_lcd1602_27);
 	copyToJSON_Bool(has_lcd2004_27);
+	copyToJSON_Bool(has_flipped_display);
 	copyToJSON_String(debug);
 	copyToJSON_String(sending_intervall_ms);
 	copyToJSON_String(time_for_wifi_config);
