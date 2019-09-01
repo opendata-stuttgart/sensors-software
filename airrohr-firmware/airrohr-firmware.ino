@@ -1534,13 +1534,13 @@ void webserver_config() {
 			page_content += F("APIs");
 			page_content += FPSTR(WEB_B_BR);
 			page_content += form_checkbox("send2dusti", F("API Luftdaten.info"), send2dusti, false);
-			page_content += FPSTR(WEB_NBSP_NBSP);
+			page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
 			page_content += form_checkbox("ssl_dusti", FPSTR(WEB_HTTPS), ssl_dusti, false);
-			page_content += F(")<br/>");
+			page_content += FPSTR(WEB_BRACE_BR);
 			page_content += form_checkbox("send2madavi", F("API Madavi.de"), send2madavi, false);
-			page_content += FPSTR(WEB_NBSP_NBSP);
+			page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
 			page_content += form_checkbox("ssl_madavi", FPSTR(WEB_HTTPS), ssl_madavi, false);
-			page_content += F(")<br/>");
+			page_content += FPSTR(WEB_BRACE_BR);
 
 			page_content += FPSTR(WEB_BR_LF_B);
 
@@ -1596,11 +1596,11 @@ void webserver_config() {
 			page_content += FPSTR(TABLE_TAG_OPEN);
 			page_content += form_input("senseboxid", "senseBox&nbsp;ID: ", senseboxid, LEN_SENSEBOXID);
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-			page_content += F("<br/>");
+			page_content += FPSTR(BR_TAG);
 			page_content += form_checkbox("send2custom", FPSTR(INTL_SEND_TO_OWN_API), send2custom, false);
-			page_content += FPSTR(WEB_NBSP_NBSP);
+			page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
 			page_content += form_checkbox("ssl_custom", FPSTR(WEB_HTTPS), ssl_custom, false);
-			page_content += F(")<br/>");
+			page_content += FPSTR(WEB_BRACE_BR);
 			page_content += FPSTR(TABLE_TAG_OPEN);
 			page_content += form_input("host_custom", FPSTR(INTL_SERVER), host_custom, LEN_HOST_CUSTOM);
 			page_content += form_input("url_custom", FPSTR(INTL_PATH), url_custom, LEN_URL_CUSTOM);
@@ -1609,12 +1609,12 @@ void webserver_config() {
 			page_content += form_password("pwd_custom", FPSTR(INTL_PASSWORD), pwd_custom, LEN_PWD_CUSTOM);
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 
-			page_content += F("<br/>");
+			page_content += FPSTR(BR_TAG);
 
 			page_content += form_checkbox("send2influx", tmpl(FPSTR(INTL_SEND_TO), F("InfluxDB")), send2influx, false);
-			page_content += FPSTR(WEB_NBSP_NBSP);
+			page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
 			page_content += form_checkbox("ssl_influx", FPSTR(WEB_HTTPS), ssl_influx, false);
-			page_content += F(")<br/>");
+			page_content += FPSTR(WEB_BRACE_BR);
 			page_content += FPSTR(TABLE_TAG_OPEN);
 			page_content += form_input("host_influx", FPSTR(INTL_SERVER), host_influx, LEN_HOST_INFLUX);
 			page_content += form_input("url_influx", FPSTR(INTL_PATH), url_influx, LEN_URL_INFLUX);
@@ -1624,7 +1624,7 @@ void webserver_config() {
 			page_content += form_input("measurement_name_influx", F("Measurement"), measurement_name_influx, LEN_MEASUREMENT_NAME_INFLUX);
 			page_content += form_submit(FPSTR(INTL_SAVE_AND_RESTART));
 			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-			page_content += F("<br/>");
+			page_content += FPSTR(BR_TAG);
 			page_content += FPSTR(WEB_BR_FORM);
 		}
 		if (wificonfig_loop) {  // scan for wlan ssids
@@ -2624,10 +2624,8 @@ static String sensorDHT() {
 		if (isnan(t) || isnan(h)) {
 			debug_outln(String(FPSTR(SENSORS_DHT22)) + FPSTR(DBG_TXT_COULDNT_BE_READ), DEBUG_ERROR);
 		} else {
-			debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO);
-			debug_outln(String(t) + u8"°C", DEBUG_MIN_INFO);
-			debug_out(FPSTR(DBG_TXT_HUMIDITY), DEBUG_MIN_INFO);
-			debug_outln(String(h) + "%", DEBUG_MIN_INFO);
+			debug_outln(tmpl(FPSTR(DBG_TXT_TEMPERATURE), String(t)), DEBUG_MIN_INFO);
+			debug_outln(tmpl(FPSTR(DBG_TXT_HUMIDITY), String(h)), DEBUG_MIN_INFO);
 			last_value_DHT_T = t;
 			last_value_DHT_H = h;
 			s += Value2Json(F("temperature"), last_value_DHT_T);
@@ -2656,10 +2654,8 @@ static String sensorHTU21D() {
 		last_value_HTU21D_H = -1.0;
 		debug_outln(String(FPSTR(SENSORS_HTU21D)) + FPSTR(DBG_TXT_COULDNT_BE_READ), DEBUG_ERROR);
 	} else {
-		debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO);
-		debug_outln(Float2String(t) + " C", DEBUG_MIN_INFO);
-		debug_out(FPSTR(DBG_TXT_HUMIDITY), DEBUG_MIN_INFO);
-		debug_outln(Float2String(h) + " %", DEBUG_MIN_INFO);
+		debug_outln(tmpl(FPSTR(DBG_TXT_TEMPERATURE), Float2String(t)), DEBUG_MIN_INFO);
+		debug_outln(tmpl(FPSTR(DBG_TXT_HUMIDITY),Float2String(h)), DEBUG_MIN_INFO);
 		last_value_HTU21D_T = t;
 		last_value_HTU21D_H = h;
 		s += Value2Json(F("HTU21D_temperature"), last_value_HTU21D_T);
@@ -2687,10 +2683,8 @@ static String sensorBMP() {
 		last_value_BMP_P = -1.0;
 		debug_outln(String(FPSTR(SENSORS_BMP180)) + FPSTR(DBG_TXT_COULDNT_BE_READ), DEBUG_ERROR);
 	} else {
-		debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO);
-		debug_outln(String(t) + " C", DEBUG_MIN_INFO);
-		debug_out(FPSTR(DBG_TXT_PRESSURE), DEBUG_MIN_INFO);
-		debug_outln(Float2String(p / 100) + " hPa", DEBUG_MIN_INFO);
+		debug_outln(tmpl(FPSTR(DBG_TXT_TEMPERATURE), String(t)), DEBUG_MIN_INFO);
+		debug_outln(tmpl(FPSTR(DBG_TXT_PRESSURE), Float2String(p / 100.0)), DEBUG_MIN_INFO);
 		last_value_BMP_T = t;
 		last_value_BMP_P = p;
 		s += Value2Json(F("BMP_pressure"), last_value_BMP_P);
@@ -2718,10 +2712,8 @@ static String sensorBMP280() {
 		last_value_BMP280_P = -1.0;
 		debug_outln(String(FPSTR(SENSORS_BMP280)) + FPSTR(DBG_TXT_COULDNT_BE_READ), DEBUG_ERROR);
 	} else {
-		debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO);
-		debug_outln(String(t) + " C", DEBUG_MIN_INFO);
-		debug_out(FPSTR(DBG_TXT_PRESSURE), DEBUG_MIN_INFO);
-		debug_outln(Float2String(p / 100) + " hPa", DEBUG_MIN_INFO);
+		debug_outln(tmpl(FPSTR(DBG_TXT_TEMPERATURE), String(t)), DEBUG_MIN_INFO);
+		debug_outln(tmpl(FPSTR(DBG_TXT_PRESSURE), Float2String(p / 100.0)), DEBUG_MIN_INFO);
 		last_value_BMP280_T = t;
 		last_value_BMP280_P = p;
 		s += Value2Json(F("BMP280_pressure"), last_value_BMP280_P);
@@ -2752,12 +2744,9 @@ static String sensorBME280() {
 		last_value_BME280_P = -1.0;
 		debug_outln(String(FPSTR(SENSORS_BME280)) + FPSTR(DBG_TXT_COULDNT_BE_READ), DEBUG_ERROR);
 	} else {
-		debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO);
-		debug_outln(Float2String(t) + " C", DEBUG_MIN_INFO);
-		debug_out(FPSTR(DBG_TXT_HUMIDITY), DEBUG_MIN_INFO);
-		debug_outln(Float2String(h) + " %", DEBUG_MIN_INFO);
-		debug_out(FPSTR(DBG_TXT_PRESSURE), DEBUG_MIN_INFO);
-		debug_outln(Float2String(p / 100) + " hPa", DEBUG_MIN_INFO);
+		debug_outln(tmpl(FPSTR(DBG_TXT_TEMPERATURE), Float2String(t)), DEBUG_MIN_INFO);
+		debug_outln(tmpl(FPSTR(DBG_TXT_HUMIDITY), Float2String(h)), DEBUG_MIN_INFO);
+		debug_outln(tmpl(FPSTR(DBG_TXT_PRESSURE), Float2String(p / 100.0)), DEBUG_MIN_INFO);
 		last_value_BME280_T = t;
 		last_value_BME280_H = h;
 		last_value_BME280_P = p;
@@ -2797,8 +2786,7 @@ static String sensorDS18B20() {
 		last_value_DS18B20_T = -128.0;
 		debug_outln(String(FPSTR(SENSORS_DS18B20)) + FPSTR(DBG_TXT_COULDNT_BE_READ), DEBUG_ERROR);
 	} else {
-		debug_out(FPSTR(DBG_TXT_TEMPERATURE), DEBUG_MIN_INFO);
-		debug_outln(Float2String(t) + " C", DEBUG_MIN_INFO);
+		debug_outln(tmpl(FPSTR(DBG_TXT_TEMPERATURE), Float2String(t)), DEBUG_MIN_INFO);
 		last_value_DS18B20_T = t;
 		s += Value2Json(F("DS18B20_temperature"), last_value_DS18B20_T);
 	}
