@@ -1,13 +1,7 @@
 % Bauanleitung Feinstaubsensor
 % luftdaten.info – Feinstaub selber messen
 
-* [Bauanleitung online (im folgenden Stand 2019-08-25)](https://luftdaten.info/feinstaubsensor-bauen/)
-
-<!--
-* [3. Zusammenbau der Elektronik][2]
-* [4. Messstation fertigstellen][3]
-* [5. Konfiguration der Messstation][4]
--->
+* [Bauanleitung online](https://luftdaten.info/feinstaubsensor-bauen/)
 
 ## Feinstaubsensor – Bauanleitung
 
@@ -38,10 +32,6 @@
 ## Zusammenbau der Elektronik
 
 Die elektronischen Teile werden zusammen geschaltet
-
-<!--
-![nodemcu-v3-schaltplan-sds011](https://luftdaten.info/wp-content/uploads/2015/02/nodemcu-v3-schaltplan-sds011.jpg){width=30%}
--->
 
 ![NodeMCU v.3 + SDS011 + BME280](img/airrohr_connection_sds011_bme280.png){width=40%}
 
@@ -74,6 +64,10 @@ Pins sind von LINKS nach RECHTS nummeriert, Vorderseite ist das „Gitter“.
 |  4 | GND/G                     |
 
 
+<!--
+![nodemcu-v3-schaltplan-sds011](https://luftdaten.info/wp-content/uploads/2015/02/nodemcu-v3-schaltplan-sds011.jpg){width=30%}
+-->
+
 ### Anschluß eines BME280 (Alternative zum DHT22)
 
 Die Pins des BME280 sind beschriftet, es werden 4 Pins verbunden:
@@ -100,14 +94,11 @@ Andere i²c-Geräte (z.B. Display) werden ebenfalls dieselben Pins SDA-D3 und SC
 * Den Temperatursensor am Schlauch so positionieren, dass er knapp im Rohrinneren ist
 * Den Schlauch am Rohrende abschneiden.
 * Die offenen Enden der Rohre mit einem Netz, Gitter oder ähnlichen verschließen, dass die Luft zirkulieren kann aber die Tiere wie Käfer, Spinnen oder ähnliches draußen bleiben.
-
 * Bilderstrecke 
-<!--    ![](https://luftdaten.info/wp-content/uploads/2015/02/IMG_6490-e1500917420519-495x400.png){width=30%}
+
     ![](https://luftdaten.info/wp-content/uploads/2015/02/IMG_6491-495x400.png){width=30%}-->
-    
     ![](https://luftdaten.info/wp-content/uploads/2015/02/IMG_6492-e1500917451756-495x400.png){width=30%}
-    <!--    ![](https://luftdaten.info/wp-content/uploads/2015/02/IMG_6493-e1500917485942-495x400.png){width=30%}    -->
-    ![](https://luftdaten.info/wp-content/uploads/2015/02/IMG_6494-e1500917517160-495x400.png){width=30%} <!--    ![](https://luftdaten.info/wp-content/uploads/2015/02/IMG_6496-e1500917549862-495x400.png){width=30%}-->
+    ![](https://luftdaten.info/wp-content/uploads/2015/02/IMG_6494-e1500917517160-495x400.png){width=30%}
 
 ## Konfiguration der Messstation
 
@@ -119,7 +110,6 @@ Andere i²c-Geräte (z.B. Display) werden ebenfalls dieselben Pins SDA-D3 und SC
 * Dann im Browser die Seite http://192.168.4.1/ aufrufen, dort kann der Sensor konfiguriert werden: http://192.168.4.1/ –> Konfigurieren 
 
     **Bitte beachten:** Es braucht eventuell ein paar Versuche, bis der NodeMCU sich mit dem Heim-WLAN verbindet. Bitte nicht ungeduldig werden und es solange versuchen, bis es klappt. Der Chip kann auch über ein Smartphone konfiguriert werden. Wenn die Konfiguration des Sensors funktioniert hat, ist die Konfigurationsseite unter dieser IP 192.168.4.1 nicht mehr erreichbar 
-    <!--Beispiel: Ansicht der Sensors als Router mit der Nummer des ESP8266-->
 * Unter ‚Konfigurieren‘ die SSID (Name des Heim-WLANs) und den Netzwerksicherheitsschlüssel (unter Windows) bzw. das WLAN-Passwort des Heim-WLANs eintragen, speichern
 * Für Feinstaubsensoren nach dieser Anleitung muss nichts weiter geändert werden
 * Nach dem Speichern wird der Sensor neu gestartet und ist auf diesem Weg nicht mehr erreichbar, wenn er sich mit dem WLAN verbindet
