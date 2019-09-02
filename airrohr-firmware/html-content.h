@@ -4,9 +4,9 @@ const char TXT_CONTENT_TYPE_TEXT_HTML[] PROGMEM = "text/html; charset=utf-8";
 const char TXT_CONTENT_TYPE_TEXT_PLAIN[] PROGMEM = "text/plain";
 const char TXT_CONTENT_TYPE_IMAGE_SVG[] PROGMEM = "image/svg+xml";
 
-const char DBG_TXT_TEMPERATURE[] PROGMEM = "Temperature: ";
-const char DBG_TXT_HUMIDITY[] PROGMEM = "Humidity: ";
-const char DBG_TXT_PRESSURE[] PROGMEM = "Pressure: ";
+const char DBG_TXT_TEMPERATURE[] PROGMEM = "Temperature: {v} °C";
+const char DBG_TXT_HUMIDITY[] PROGMEM = "Humidity: {v} %";
+const char DBG_TXT_PRESSURE[] PROGMEM = "Pressure: {v} hPa";
 const char DBG_TXT_DNMS_LAEQ[] PROGMEM = "LAeq: ";
 const char DBG_TXT_DNMS_LA_MIN[] PROGMEM = "LA_MIN: ";
 const char DBG_TXT_DNMS_LA_MAX[] PROGMEM = "LA_MAX: ";
@@ -109,6 +109,7 @@ window.location = \"http://192.168.4.1/config\";\
 </body></html>";
 
 const char WEB_B_BR_BR[] PROGMEM = "</b><br/><br/>";
+const char WEB_BRACE_BR[] PROGMEM = ")<br/>";
 const char WEB_B_BR[] PROGMEM = "</b><br/>";
 const char WEB_BR_BR[] PROGMEM = "<br/><br/>";
 const char WEB_BR_FORM[] PROGMEM = "<br/></form>";
@@ -117,7 +118,7 @@ const char WEB_LF_B[] PROGMEM = "\n<b>";
 const char WEB_CSV[] PROGMEM = "CSV";
 const char WEB_FEINSTAUB_APP[] PROGMEM = "Feinstaub-App";
 const char WEB_HTTPS[] PROGMEM = "HTTPS";
-const char WEB_NBSP_NBSP[] PROGMEM = "&nbsp;&nbsp;(";
+const char WEB_NBSP_NBSP_BRACE[] PROGMEM = "&nbsp;&nbsp;(";
 const char WEB_REPLN_REPLV[] PROGMEM = "\"{n}\":\"{v}\",";
 const char WEB_PM1[] PROGMEM = "PM1";
 const char WEB_PM25[] PROGMEM = "PM2.5";
