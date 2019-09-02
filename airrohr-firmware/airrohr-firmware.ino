@@ -2798,7 +2798,7 @@ static String sensorDS18B20() {
 /*****************************************************************
  * read SDS011 sensor values                                     *
  *****************************************************************/
-String sensorSDS() {
+static String sensorSDS() {
 	String s = "";
 	char buffer;
 	int value;
@@ -2935,7 +2935,7 @@ String sensorSDS() {
 /*****************************************************************
  * read Plantronic PM sensor sensor values                       *
  *****************************************************************/
-String sensorPMS() {
+static String sensorPMS() {
 	String s = "";
 	char buffer;
 	int value;
@@ -3115,7 +3115,7 @@ String sensorPMS() {
 /*****************************************************************
  * read Honeywell PM sensor sensor values                        *
  *****************************************************************/
-String sensorHPM() {
+static String sensorHPM() {
 	String s = "";
 	char buffer;
 	int value;
@@ -3256,7 +3256,7 @@ String sensorHPM() {
 /*****************************************************************
  * read PPD42NS sensor values                                    *
  *****************************************************************/
-String sensorPPD() {
+static String sensorPPD() {
 	String s = "";
 
 	debug_outln(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_PPD42NS), DEBUG_MED_INFO);
