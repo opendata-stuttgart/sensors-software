@@ -33,7 +33,8 @@
 
 Die elektronischen Teile werden zusammen geschaltet
 
-![NodeMCU v.3 + SDS011 + BME280](img/airrohr_connection_sds011_bme280.png){width=40%}
+![NodeMCU v.3 + SDS011 + BME280](img/airrohr_connection_sds011_bme280.pdf){width=40%}
+![NodeMCU v.3 + SDS011 + BME280](img/airrohr_connection_sds011_dht22.pdf){width=40%}
 
 **Hinweis:**Unsere Anleitung bezieht sich auf Version 3 der NodeMCU. Diese ist zu erkennen an den Anschlüssen VU und G (siehe Zeichnung). Bei anderen Versionen steht an diesen Anschlüssen RSV. Dort können die Anschlüsse VIN statt VU und GND statt G neben dem MicroUSB-Anschluß genutzt werden. Siehe auch [Pinouts NodeMCU v2, v3](https://github.com/opendata-stuttgart/meta/wiki/Pinouts-NodeMCU-v2,-v3).
 
@@ -58,7 +59,7 @@ Pins sind von LINKS nach RECHTS nummeriert, Vorderseite ist das „Gitter“.
 
 | DHT22 Pin |  NodeMCU (ESP8266) |
 |----------:|:-------------------|
-|  1 | 3V3 (3.3V)                |
+|  1 | 3V3 (3.3V)/VU (5V)        |
 |  2 | D7                        |
 |  3 |                           | 
 |  4 | GND/G                     |
@@ -148,3 +149,4 @@ Registriere dich, falls noch nicht geschehen, und logge dich ein, dann füge ein
     ![](luftdaten-screenshots/meine_luftdaten_node_settings_additional_de.png){width=30%}
     ![](luftdaten-screenshots/meine_luftdaten_node_settings_location_de.png){width=30%}
 
+* (c) NodeMCU drawing by [roman-minyaylov](https://github.com/roman-minyaylov/nodemcu-v3-fritzing), MIT License
