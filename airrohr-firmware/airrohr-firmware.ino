@@ -146,6 +146,7 @@
 #include <WiFiClient.h>
 #include <WiFiClientSecure.h>
 #include <HardwareSerial.h>
+#include <hwcrypto/sha.h>
 #include <HTTPUpdate.h>
 #include <WebServer.h>
 #include <DNSServer.h>
@@ -162,6 +163,8 @@
 #include <Adafruit_BME280.h>
 #include <DallasTemperature.h>
 #include <TinyGPS++.h>
+#include "./sps30_i2c.h"
+#include "./dnms_i2c.h"
 #endif
 
 #if defined(INTL_BG)
@@ -577,7 +580,9 @@ struct struct_wifiInfo {
 	uint8_t encryptionType;
 	int32_t RSSI;
 	int32_t channel;
+#if defined(ESP8266)
 	bool isHidden;
+#endif
 };
 
 struct struct_wifiInfo *wifiInfo;
@@ -1182,8 +1187,10 @@ String sha1Hex(const String& s) {
 #if defined(ESP8266)
 	return sha1(s);
 #endif
-#if defined(EPS32)
-	return esp_sha(SHA1, s);
+#if defined(ESP32)
+	char sha1sum_output[21];
+	esp_sha(SHA1, (const unsigned char*) s.c_str(), s.length(), (unsigned char*)sha1sum_output);
+	return String(sha1sum_output);
 #endif
 }
 
@@ -1815,13 +1822,13 @@ void webserver_wifi() {
 		page_content += FPSTR(INTL_NO_NETWORKS);
 		page_content += FPSTR(BR_TAG);
 	} else {
-		std::unique_ptr<int[]> indices(new int[count_wifiInfo]);
+		std::unique_ptr<unsigned[]> indices(new unsigned[count_wifiInfo]);
 		debug_outln(F("output config page 2"), DEBUG_MIN_INFO);
-		for (int i = 0; i < count_wifiInfo; i++) {
+		for (unsigned i = 0; i < count_wifiInfo; ++i) {
 			indices[i] = i;
 		}
-		for (int i = 0; i < count_wifiInfo; i++) {
-			for (int j = i + 1; j < count_wifiInfo; j++) {
+		for (unsigned i = 0; i < count_wifiInfo; i++) {
+			for (unsigned j = i + 1; j < count_wifiInfo; j++) {
 				if (wifiInfo[indices[j]].RSSI > wifiInfo[indices[i]].RSSI) {
 					std::swap(indices[i], indices[j]);
 				}
@@ -1834,7 +1841,7 @@ void webserver_wifi() {
 				continue;
 			}
 			for (int j = i + 1; j < count_wifiInfo; j++) {
-				if (strncmp(wifiInfo[indices[i]].ssid, wifiInfo[indices[j]].ssid, 35) == 0) {
+				if (strncmp(wifiInfo[indices[i]].ssid, wifiInfo[indices[j]].ssid, sizeof(wifiInfo[0].ssid)) == 0) {
 					indices[j] = -1; // set dup aps to index -1
 					++duplicateSsids;
 				}
@@ -1848,7 +1855,11 @@ void webserver_wifi() {
 		page_content += FPSTR(TABLE_TAG_OPEN);
 		//if(n > 30) n=30;
 		for (int i = 0; i < count_wifiInfo; ++i) {
-			if (indices[i] == -1 || wifiInfo[indices[i]].isHidden) {
+			if (indices[i] == -1
+ #if defined (ESP8266)
+				|| wifiInfo[indices[i]].isHidden
+ #endif
+			) {
 				continue;
 			}
 			// Print SSID and RSSI for each network found
@@ -2198,13 +2209,13 @@ void setup_webserver() {
 	server.begin();
 }
 
-static int selectChannelForAp(struct struct_wifiInfo *info, int count) {
+static int selectChannelForAp() {
 	std::array<int, 14> channels_rssi;
 	std::fill(channels_rssi.begin(), channels_rssi.end(), -100);
 
-	for (int i = 0; i < count; i++) {
-		if (info[i].RSSI > channels_rssi[info[i].channel]) {
-			channels_rssi[info[i].channel] = info[i].RSSI;
+	for (unsigned i = 0; i < count_wifiInfo; i++) {
+		if (wifiInfo[i].RSSI > channels_rssi[wifiInfo[i].channel]) {
+			channels_rssi[wifiInfo[i].channel] = wifiInfo[i].RSSI;
 		}
 	}
 
@@ -2231,22 +2242,31 @@ void wifiConfig() {
 
 	WiFi.disconnect(true);
 	debug_outln(F("scan for wifi networks..."), DEBUG_MIN_INFO);
-	count_wifiInfo = WiFi.scanNetworks(false, true);
+	count_wifiInfo = WiFi.scanNetworks(false /* scan async */, true /* show hidden networks */);
 	{
-		std::unique_ptr<struct_wifiInfo[]> wifiInfo(new struct_wifiInfo[count_wifiInfo]);
+		delete [] wifiInfo;
+		wifiInfo = new struct_wifiInfo[count_wifiInfo];
+
 		for (int i = 0; i < count_wifiInfo; i++) {
-			uint8_t* BSSID;
 			String SSID;
+			uint8_t* BSSID;
+
+			memset(&wifiInfo[i], 0, sizeof(struct_wifiInfo));
 #if defined(ESP8266)
-			WiFi.getNetworkInfo(i, SSID, wifiInfo[i].encryptionType, wifiInfo[i].RSSI, BSSID, wifiInfo[i].channel, wifiInfo[i].isHidden);
+			WiFi.getNetworkInfo(i, SSID, wifiInfo[i].encryptionType,
+				wifiInfo[i].RSSI, BSSID, wifiInfo[i].channel,
+				wifiInfo[i].isHidden);
+#else
+			WiFi.getNetworkInfo(i, SSID, wifiInfo[i].encryptionType,
+				wifiInfo[i].RSSI, BSSID, wifiInfo[i].channel);
 #endif
-			SSID.toCharArray(wifiInfo[i].ssid, 35);
+			SSID.toCharArray(wifiInfo[i].ssid, sizeof(wifiInfo[0].ssid));
 		}
 
 		WiFi.mode(WIFI_AP);
 		const IPAddress apIP(192, 168, 4, 1);
 		WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
-		WiFi.softAP(cfg::fs_ssid, cfg::fs_pwd, selectChannelForAp(wifiInfo.get(), count_wifiInfo));
+		WiFi.softAP(cfg::fs_ssid, cfg::fs_pwd, selectChannelForAp());
 		// In case we create a unique password at first start
 		debug_outln(String(F("AP Password is: ")) + String(WLANPWD), DEBUG_MIN_INFO);
 
@@ -4668,6 +4688,8 @@ void loop() {
 	yield();
 	if (sample_count % 500 == 0) {
 //		Serial.println(ESP.getFreeHeap(),DEC);
+#if defined(ESP8266)
 		MDNS.update();
+#endif
 	}
 }

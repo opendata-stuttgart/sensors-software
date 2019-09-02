@@ -173,14 +173,14 @@ uint16_t dnms_fill_cmd_send_buf(uint8_t *buf, uint16_t cmd, const uint16_t *args
   uint8_t i;
   uint16_t idx = 0;
 
-  buf[idx++] = (u8)((cmd & 0xFF00) >> 8);
-  buf[idx++] = (u8)((cmd & 0x00FF) >> 0);
+  buf[idx++] = (uint8_t)((cmd & 0xFF00) >> 8);
+  buf[idx++] = (uint8_t)((cmd & 0x00FF) >> 0);
 
   for (i = 0; i < num_args; ++i) {
-    buf[idx++] = (u8)((args[i] & 0xFF00) >> 8);
-    buf[idx++] = (u8)((args[i] & 0x00FF) >> 0);
+    buf[idx++] = (uint8_t)((args[i] & 0xFF00) >> 8);
+    buf[idx++] = (uint8_t)((args[i] & 0x00FF) >> 0);
 
-    crc = dnms_common_generate_crc((u8 *)&buf[idx - 2], DNMS_WORD_SIZE);
+    crc = dnms_common_generate_crc((uint8_t *)&buf[idx - 2], DNMS_WORD_SIZE);
     buf[idx++] = crc;
   }
   return idx;

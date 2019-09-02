@@ -175,7 +175,8 @@ int16_t sps30_get_fan_auto_cleaning_interval(uint32_t *interval_seconds) {
 
 int16_t sps30_set_fan_auto_cleaning_interval(uint32_t interval_seconds) {
   int16_t ret;
-  const uint16_t data[] = {(interval_seconds & 0xFFFF0000) >> 16, (interval_seconds & 0x0000FFFF) >> 0};
+  const uint16_t data[] = {(uint16_t)((interval_seconds & 0xFFFF0000) >> 16),
+                           (uint16_t)((interval_seconds & 0x0000FFFF) >> 0)};
 
   ret = sensirion_i2c_write_cmd_with_args(SPS_I2C_ADDRESS,  SPS_CMD_AUTOCLEAN_INTERVAL, data, SENSIRION_NUM_WORDS(data));
 //  sensirion_sleep_usec(SPS_WRITE_DELAY_US);
@@ -199,7 +200,7 @@ int16_t sps30_get_fan_auto_cleaning_interval_days(uint8_t *interval_days) {
 
 
 int16_t sps30_set_fan_auto_cleaning_interval_days(uint8_t interval_days) {
-  return sps30_set_fan_auto_cleaning_interval((u32)interval_days * 24 * 60 * 60);
+  return sps30_set_fan_auto_cleaning_interval((uint32_t)interval_days * 24 * 60 * 60);
 }
 */
 
@@ -271,7 +272,7 @@ int8_t sensirion_i2c_write(uint8_t address, const uint8_t* data, uint16_t count)
    @param useconds the sleep time in microseconds
 */
 /*
-void sensirion_sleep_usec(u32 useconds) {
+void sensirion_sleep_usec(uint32_t useconds) {
   delay((useconds / 1000) + 1);
 }
 */
@@ -307,14 +308,14 @@ uint16_t sensirion_fill_cmd_send_buf(uint8_t *buf, uint16_t cmd, const uint16_t 
   uint8_t i;
   uint16_t idx = 0;
 
-  buf[idx++] = (u8)((cmd & 0xFF00) >> 8);
-  buf[idx++] = (u8)((cmd & 0x00FF) >> 0);
+  buf[idx++] = (uint8_t)((cmd & 0xFF00) >> 8);
+  buf[idx++] = (uint8_t)((cmd & 0x00FF) >> 0);
 
   for (i = 0; i < num_args; ++i) {
-    buf[idx++] = (u8)((args[i] & 0xFF00) >> 8);
-    buf[idx++] = (u8)((args[i] & 0x00FF) >> 0);
+    buf[idx++] = (uint8_t)((args[i] & 0xFF00) >> 8);
+    buf[idx++] = (uint8_t)((args[i] & 0x00FF) >> 0);
 
-    crc = sensirion_common_generate_crc((u8 *)&buf[idx - 2],
+    crc = sensirion_common_generate_crc((uint8_t *)&buf[idx - 2],
                                         SENSIRION_WORD_SIZE);
     buf[idx++] = crc;
   }
@@ -326,7 +327,7 @@ int16_t sensirion_i2c_read_bytes(uint8_t address, uint8_t *data, uint16_t num_wo
   uint16_t i, j;
   uint16_t size = num_words * (SENSIRION_WORD_SIZE + CRC8_LEN);
   uint16_t word_buf[SENSIRION_MAX_BUFFER_WORDS];
-  uint8_t * const buf8 = (u8 *)word_buf;
+  uint8_t * const buf8 = (uint8_t *)word_buf;
 
   ret = sensirion_i2c_read(address, buf8, size);
   if (ret != STATUS_OK) {
