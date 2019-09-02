@@ -84,20 +84,9 @@
  *                                                                      *
  ************************************************************************
  *
- * 06.07.2018
- * Der Sketch verwendet 459607 Bytes (44%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
- * Globale Variablen verwenden 48736 Bytes (59%) des dynamischen Speichers, 33184 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
- *
- * first version with esp8266 lib 2.4.2
- * Der Sketch verwendet 491364 Bytes (47%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
- * Globale Variablen verwenden 37172 Bytes (45%) des dynamischen Speichers, 44748 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
- *
- * Der Sketch verwendet 489152 Bytes (46%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
- * Globale Variablen verwenden 37160 Bytes (45%) des dynamischen Speichers, 44760 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
- *
- * latest mit lib 2.4.2 und axTLS
- * Der Sketch verwendet 493024 Bytes (47%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
- * Globale Variablen verwenden 36288 Bytes (44%) des dynamischen Speichers, 45632 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
+ * latest mit lib 2.4.2
+ * Der Sketch verwendet 511608 Bytes (48%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
+ * Globale Variablen verwenden 37264 Bytes (45%) des dynamischen Speichers, 44656 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
  *
  * Attention:
  * the driver for the Sensirion PM Sensor SPS30 needs I²C lransmission of 64 Bytes
@@ -3369,16 +3358,16 @@ static String sensorSPS30() {
 	last_value_SPS30_N4 = value_SPS30_N4 / SPS30_measurement_count;
 	last_value_SPS30_TS = value_SPS30_TS / SPS30_measurement_count;
 
-	debug_outln("PM1.0:  " + Float2String(last_value_SPS30_P0), DEBUG_MIN_INFO);
-	debug_outln("PM2.5:  " + Float2String(last_value_SPS30_P1), DEBUG_MIN_INFO);
-	debug_outln("PM4.0:  " + Float2String(last_value_SPS30_P2), DEBUG_MIN_INFO);
+	debug_outln("PM1.0: " + Float2String(last_value_SPS30_P0), DEBUG_MIN_INFO);
+	debug_outln("PM2.5: " + Float2String(last_value_SPS30_P1), DEBUG_MIN_INFO);
+	debug_outln("PM4.0: " + Float2String(last_value_SPS30_P2), DEBUG_MIN_INFO);
 	debug_outln("PM10:  " + Float2String(last_value_SPS30_P3), DEBUG_MIN_INFO);
-	debug_outln("NC0.5:  " + Float2String(last_value_SPS30_N0), DEBUG_MIN_INFO);
-	debug_outln("NC1.0:  " + Float2String(last_value_SPS30_N1), DEBUG_MIN_INFO);
-	debug_outln("NC2.5:  " + Float2String(last_value_SPS30_N2), DEBUG_MIN_INFO);
-	debug_outln("NC4.0:  " + Float2String(last_value_SPS30_N3), DEBUG_MIN_INFO);
+	debug_outln("NC0.5: " + Float2String(last_value_SPS30_N0), DEBUG_MIN_INFO);
+	debug_outln("NC1.0: " + Float2String(last_value_SPS30_N1), DEBUG_MIN_INFO);
+	debug_outln("NC2.5: " + Float2String(last_value_SPS30_N2), DEBUG_MIN_INFO);
+	debug_outln("NC4.0: " + Float2String(last_value_SPS30_N3), DEBUG_MIN_INFO);
 	debug_outln("NC10:  " + Float2String(last_value_SPS30_N4), DEBUG_MIN_INFO);
-	debug_outln("TPS:  " + Float2String(last_value_SPS30_TS), DEBUG_MIN_INFO);
+	debug_outln("TPS:   " + Float2String(last_value_SPS30_TS), DEBUG_MIN_INFO);
 
 	s += Value2Json(F("SPS30_P0"), Float2String(last_value_SPS30_P0));
 	s += Value2Json(F("SPS30_P1"), Float2String(last_value_SPS30_P1));
