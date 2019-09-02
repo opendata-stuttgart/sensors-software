@@ -2209,13 +2209,13 @@ void setup_webserver() {
 	server.begin();
 }
 
-static int selectChannelForAp(struct struct_wifiInfo *info, int count) {
+static int selectChannelForAp() {
 	std::array<int, 14> channels_rssi;
 	std::fill(channels_rssi.begin(), channels_rssi.end(), -100);
 
-	for (int i = 0; i < count; i++) {
-		if (info[i].RSSI > channels_rssi[info[i].channel]) {
-			channels_rssi[info[i].channel] = info[i].RSSI;
+	for (unsigned i = 0; i < count_wifiInfo; i++) {
+		if (wifiInfo[i].RSSI > channels_rssi[wifiInfo[i].channel]) {
+			channels_rssi[wifiInfo[i].channel] = wifiInfo[i].RSSI;
 		}
 	}
 
@@ -2242,14 +2242,23 @@ void wifiConfig() {
 
 	WiFi.disconnect(true);
 	debug_outln(F("scan for wifi networks..."), DEBUG_MIN_INFO);
-	count_wifiInfo = WiFi.scanNetworks(false, true);
+	count_wifiInfo = WiFi.scanNetworks(false /* scan async */, true /* show hidden networks */);
 	{
-		std::unique_ptr<struct_wifiInfo[]> wifiInfo(new struct_wifiInfo[count_wifiInfo]);
+		delete [] wifiInfo;
+		wifiInfo = new struct_wifiInfo[count_wifiInfo];
+
 		for (int i = 0; i < count_wifiInfo; i++) {
-			uint8_t* BSSID;
 			String SSID;
+			uint8_t* BSSID;
+
+			memset(&wifiInfo[i], 0, sizeof(struct_wifiInfo));
 #if defined(ESP8266)
-			WiFi.getNetworkInfo(i, SSID, wifiInfo[i].encryptionType, wifiInfo[i].RSSI, BSSID, wifiInfo[i].channel, wifiInfo[i].isHidden);
+			WiFi.getNetworkInfo(i, SSID, wifiInfo[i].encryptionType,
+				wifiInfo[i].RSSI, BSSID, wifiInfo[i].channel,
+				wifiInfo[i].isHidden);
+#else
+			WiFi.getNetworkInfo(i, SSID, wifiInfo[i].encryptionType,
+				wifiInfo[i].RSSI, BSSID, wifiInfo[i].channel);
 #endif
 			SSID.toCharArray(wifiInfo[i].ssid, sizeof(wifiInfo[0].ssid));
 		}
@@ -2257,7 +2266,7 @@ void wifiConfig() {
 		WiFi.mode(WIFI_AP);
 		const IPAddress apIP(192, 168, 4, 1);
 		WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
-		WiFi.softAP(cfg::fs_ssid, cfg::fs_pwd, selectChannelForAp(wifiInfo.get(), count_wifiInfo));
+		WiFi.softAP(cfg::fs_ssid, cfg::fs_pwd, selectChannelForAp());
 		// In case we create a unique password at first start
 		debug_outln(String(F("AP Password is: ")) + String(WLANPWD), DEBUG_MIN_INFO);
 
