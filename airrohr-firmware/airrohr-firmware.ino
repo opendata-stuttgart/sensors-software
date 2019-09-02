@@ -146,6 +146,7 @@
 #include <WiFiClient.h>
 #include <WiFiClientSecure.h>
 #include <HardwareSerial.h>
+#include <hwcrypto/sha.h>
 #include <HTTPUpdate.h>
 #include <WebServer.h>
 #include <DNSServer.h>
@@ -162,6 +163,8 @@
 #include <Adafruit_BME280.h>
 #include <DallasTemperature.h>
 #include <TinyGPS++.h>
+#include "./sps30_i2c.h"
+#include "./dnms_i2c.h"
 #endif
 
 #if defined(INTL_BG)
@@ -577,7 +580,9 @@ struct struct_wifiInfo {
 	uint8_t encryptionType;
 	int32_t RSSI;
 	int32_t channel;
+#if defined(ESP8266)
 	bool isHidden;
+#endif
 };
 
 struct struct_wifiInfo *wifiInfo;
@@ -1182,8 +1187,10 @@ String sha1Hex(const String& s) {
 #if defined(ESP8266)
 	return sha1(s);
 #endif
-#if defined(EPS32)
-	return esp_sha(SHA1, s);
+#if defined(ESP32)
+	char sha1sum_output[21];
+	esp_sha(SHA1, (const unsigned char*) s.c_str(), s.length(), (unsigned char*)sha1sum_output);
+	return String(sha1sum_output);
 #endif
 }
 
@@ -1848,7 +1855,11 @@ void webserver_wifi() {
 		page_content += FPSTR(TABLE_TAG_OPEN);
 		//if(n > 30) n=30;
 		for (int i = 0; i < count_wifiInfo; ++i) {
-			if (indices[i] == -1 || wifiInfo[indices[i]].isHidden) {
+			if (indices[i] == -1
+ #if defined (ESP8266)
+				|| wifiInfo[indices[i]].isHidden
+ #endif
+			) {
 				continue;
 			}
 			// Print SSID and RSSI for each network found
@@ -4668,6 +4679,8 @@ void loop() {
 	yield();
 	if (sample_count % 500 == 0) {
 //		Serial.println(ESP.getFreeHeap(),DEC);
+#if defined(ESP8266)
 		MDNS.update();
+#endif
 	}
 }

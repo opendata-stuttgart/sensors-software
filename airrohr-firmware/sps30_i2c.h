@@ -74,18 +74,18 @@
 #define SPS_WRITE_DELAY_US              20000
 
 
-#define be16_to_cpu(s) (((u16)(s) << 8) | (0xff & ((u16)(s)) >> 8))
-#define be32_to_cpu(s) (((u32)be16_to_cpu(s) << 16) | \
+#define be16_to_cpu(s) (((uint16_t)(s) << 8) | (0xff & ((uint16_t)(s)) >> 8))
+#define be32_to_cpu(s) (((uint32_t)be16_to_cpu(s) << 16) | \
                         (0xffff & (be16_to_cpu((s) >> 16))))
 
 /**
    Convert a word-array to a bytes-array, effectively reverting the
    host-endianness to big-endian
-   @a:  word array to change (must be (u16 *) castable)
+   @a:  word array to change (must be (uint16_t *) castable)
    @w:  number of word-sized elements in the array (SENSIRION_NUM_WORDS(a)).
 */
 #define SENSIRION_WORDS_TO_BYTES(a, w) \
-  for (u16 *__a = (u16 *)(a), __e = (w), __w = 0; __w < __e; ++__w) { \
+  for (uint16_t *__a = (uint16_t *)(a), __e = (w), __w = 0; __w < __e; ++__w) { \
     __a[__w] = be16_to_cpu(__a[__w]); \
   }
 
@@ -155,7 +155,7 @@ int16_t sps30_set_fan_auto_cleaning_interval_days(uint8_t interval_days);
 int16_t sensirion_i2c_read_cmd(uint8_t address, uint16_t cmd, uint16_t *data_words, uint16_t num_words);
 
 /*
-int16_t sensirion_i2c_delayed_read_cmd(uint8_t address, uint16_t cmd, uint32_t delay_us, uint16_t *data_words, u16 num_words);
+int16_t sensirion_i2c_delayed_read_cmd(uint8_t address, uint16_t cmd, uint32_t delay_us, uint16_t *data_words, uint16_t num_words);
 */
 
 int8_t sensirion_i2c_read(uint8_t address, uint8_t* data, uint16_t count);
