@@ -610,17 +610,15 @@ const char data_first_part[] PROGMEM = "{\"software_version\": \"{v}\", \"sensor
  * Debug output                                                  *
  *****************************************************************/
 
-void debug_out(const String& text, const int level) {
-	if (level <= cfg::debug) {
-		Serial.print(text);
-	}
-}
+#define debug_level_check if(level > cfg::debug) return;
 
-void debug_outln(const String& text, const int level) {
-	if (level <= cfg::debug) {
-		Serial.println(text);
-	}
-}
+void debug_out(const String& text, const int level) { debug_level_check; Serial.print(text); }
+void debug_out(const __FlashStringHelper* text, const int level) { debug_level_check; Serial.print(text); }
+
+void debug_outln(const String& text, const int level) { debug_level_check; Serial.println(text); }
+void debug_outln(const __FlashStringHelper* text, const int level) { debug_level_check; Serial.println(text); }
+
+#undef debug_level_check
 
 /*****************************************************************
  * display values                                                *
@@ -2657,7 +2655,7 @@ static String sensorHTU21D() {
 		debug_outln(String(FPSTR(SENSORS_HTU21D)) + FPSTR(DBG_TXT_COULDNT_BE_READ), DEBUG_ERROR);
 	} else {
 		debug_outln(tmpl(FPSTR(DBG_TXT_TEMPERATURE), Float2String(t)), DEBUG_MIN_INFO);
-		debug_outln(tmpl(FPSTR(DBG_TXT_HUMIDITY),Float2String(h)), DEBUG_MIN_INFO);
+		debug_outln(tmpl(FPSTR(DBG_TXT_HUMIDITY), Float2String(h)), DEBUG_MIN_INFO);
 		last_value_HTU21D_T = t;
 		last_value_HTU21D_H = h;
 		s += Value2Json(F("HTU21D_temperature"), last_value_HTU21D_T);
