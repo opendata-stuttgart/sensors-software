@@ -1841,7 +1841,7 @@ void webserver_wifi() {
 				continue;
 			}
 			for (int j = i + 1; j < count_wifiInfo; j++) {
-				if (strncmp(wifiInfo[indices[i]].ssid, wifiInfo[indices[j]].ssid, 35) == 0) {
+				if (strncmp(wifiInfo[indices[i]].ssid, wifiInfo[indices[j]].ssid, sizeof(wifiInfo[0].ssid)) == 0) {
 					indices[j] = -1; // set dup aps to index -1
 					++duplicateSsids;
 				}
@@ -2251,7 +2251,7 @@ void wifiConfig() {
 #if defined(ESP8266)
 			WiFi.getNetworkInfo(i, SSID, wifiInfo[i].encryptionType, wifiInfo[i].RSSI, BSSID, wifiInfo[i].channel, wifiInfo[i].isHidden);
 #endif
-			SSID.toCharArray(wifiInfo[i].ssid, 35);
+			SSID.toCharArray(wifiInfo[i].ssid, sizeof(wifiInfo[0].ssid));
 		}
 
 		WiFi.mode(WIFI_AP);
