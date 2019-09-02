@@ -1822,13 +1822,13 @@ void webserver_wifi() {
 		page_content += FPSTR(INTL_NO_NETWORKS);
 		page_content += FPSTR(BR_TAG);
 	} else {
-		std::unique_ptr<int[]> indices(new int[count_wifiInfo]);
+		std::unique_ptr<unsigned[]> indices(new unsigned[count_wifiInfo]);
 		debug_outln(F("output config page 2"), DEBUG_MIN_INFO);
-		for (int i = 0; i < count_wifiInfo; i++) {
+		for (unsigned i = 0; i < count_wifiInfo; ++i) {
 			indices[i] = i;
 		}
-		for (int i = 0; i < count_wifiInfo; i++) {
-			for (int j = i + 1; j < count_wifiInfo; j++) {
+		for (unsigned i = 0; i < count_wifiInfo; i++) {
+			for (unsigned j = i + 1; j < count_wifiInfo; j++) {
 				if (wifiInfo[indices[j]].RSSI > wifiInfo[indices[i]].RSSI) {
 					std::swap(indices[i], indices[j]);
 				}
