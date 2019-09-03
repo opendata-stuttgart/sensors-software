@@ -1634,10 +1634,12 @@ static void webserver_config_body_post(String& page_content) {
 
 	using namespace cfg;
 
-#define readCharParam(param) \
-		if (server.hasArg(#param)){ \
-			server.arg(#param).toCharArray(param, sizeof(param)); \
-		}
+#define readCharParam(param) { \
+		const String s_param(#param); \
+		if (server.hasArg(s_param)){ \
+			server.arg(s_param).toCharArray(param, sizeof(param)); \
+		} \
+	}
 
 #define readBoolParam(param) \
 		param = server.arg(#param) == "1";
@@ -1650,21 +1652,25 @@ static void webserver_config_body_post(String& page_content) {
 			} \
 		}
 
-#define readTimeParam(param) \
-		if (server.hasArg(#param)){ \
-			param = server.arg(#param).toInt() * 1000; \
-		}
+#define readTimeParam(param) { \
+		const String s_param(#param); \
+		if (server.hasArg(s_param)){ \
+			param = server.arg(s_param).toInt() * 1000; \
+		} \
+	}
 
-#define readPasswdParam(param) \
-		if (server.hasArg(#param)) { \
-			const String server_arg(server.arg(#param)); \
+#define readPasswdParam(param) { \
+		const String s_param(#param); \
+		if (server.hasArg(s_param)) { \
+			const String server_arg(server.arg(s_param)); \
 			masked_pwd = ""; \
 			for (uint8_t i=0;i<server_arg.length();i++) \
 				masked_pwd += "*"; \
 			if (masked_pwd != server_arg || !server_arg.length()) {\
 				server_arg.toCharArray(param, sizeof(param)); \
-			}\
-		}
+			} \
+		} \
+	}
 
 	if (server.hasArg("wlanssid") && server.arg("wlanssid") != "") {
 		readCharParam(wlanssid);
@@ -1676,7 +1682,8 @@ static void webserver_config_body_post(String& page_content) {
 		readPasswdParam(www_password);
 		readBoolParam(www_basicauth_enabled);
 		readCharParam(fs_ssid);
-		if (server.hasArg("fs_pwd") && ((server.arg("fs_pwd").length() > 7) || (server.arg("fs_pwd").length() == 0))) {
+		String s_fs_pwd("fs_pwd");
+		if (server.hasArg(s_fs_pwd) && ((server.arg(s_fs_pwd).length() > 7) || (server.arg(s_fs_pwd).length() == 0))) {
 			readPasswdParam(fs_pwd);
 		}
 		readBoolParam(send2dusti);
@@ -1753,9 +1760,9 @@ static void webserver_config_body_post(String& page_content) {
 	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("HPM")), hpm_read);
 	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("SPS30")), sps30_read);
 	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("PPD")), ppd_read);
-	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("BMP180")), bmp_read);
-	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("BMP280")), bmp280_read);
-	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("BME280")), bme280_read);
+	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), FPSTR(SENSORS_BMP180)), bmp_read);
+	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), FPSTR(SENSORS_BMP280)), bmp280_read);
+	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), FPSTR(SENSORS_BME280)), bme280_read);
 	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("DS18B20")), ds18b20_read);
 	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("DNMS")), dnms_read);
 	page_content += line_from_value_bool(FPSTR(INTL_DNMS_CORRECTION), String(dnms_correction));
