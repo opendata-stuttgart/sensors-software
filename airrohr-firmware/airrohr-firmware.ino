@@ -171,6 +171,9 @@
 #include <TinyGPS++.h>
 #include "./sps30_i2c.h"
 #include "./dnms_i2c.h"
+
+String emptyString;
+
 #endif
 
 #if defined(INTL_BG)
@@ -1235,7 +1238,7 @@ String make_footer() {
 	return s;
 }
 
-String form_input(const String& name, const String& info, const String& value, const int length) {
+String form_input(const char* name, const String& info, const String& value, const int length) {
 	String s = F(	"<tr>"
 					"<td>{i} </td>"
 					"<td style='width:90%;'>"
@@ -1245,13 +1248,13 @@ String form_input(const String& name, const String& info, const String& value, c
 	String t_value = value;
 	t_value.replace("'", "&#39;");
 	s.replace("{i}", info);
-	s.replace("{n}", name);
+	s.replace("{n}", String(name));
 	s.replace("{v}", t_value);
 	s.replace("{l}", String(length));
 	return s;
 }
 
-String form_password(const String& name, const String& info, const String& value, const int length) {
+String form_password(const char* name, const String& info, const String& value, const int length) {
 	String s = F(	"<tr>"
 					"<td>{i} </td>"
 					"<td style='width:90%;'>"
@@ -1269,7 +1272,7 @@ String form_password(const String& name, const String& info, const String& value
 	return s;
 }
 
-String form_checkbox(const String& name, const String& info, const bool checked, const bool linebreak) {
+String form_checkbox(const char* name, const String& info, const bool checked, const bool linebreak) {
 	String s = F("<label for='{n}'><input type='checkbox' name='{n}' value='1' id='{n}' {c}/> {i}</label><br/>");
 	if (checked) {
 		s.replace("{c}", F(" checked='checked'"));
@@ -1284,11 +1287,11 @@ String form_checkbox(const String& name, const String& info, const bool checked,
 	return s;
 }
 
-String form_checkbox(const String& name, const String& info, const bool checked) {
+String form_checkbox(const char* name, const String& info, const bool checked) {
 	return form_checkbox(name, info, checked, true);
 }
 
-String form_checkbox_sensor(const String& name, const String& info, const bool checked) {
+String form_checkbox_sensor(const char* name, const String& info, const bool checked) {
 	return form_checkbox(name, add_sensor_type(info), checked);
 }
 
@@ -1347,7 +1350,7 @@ static String tmpl(const String& patt, const String& value1, const String& value
 
 String line_from_value(const String& name, const String& value) {
 	String s = F("<br/>{n}: {v}");
-	s.replace("{n}", name);
+	s.replace("{n}", String(name));
 	s.replace("{v}", value);
 	return s;
 }
@@ -1474,165 +1477,162 @@ void webserver_root() {
 /*****************************************************************
  * Webserver config: show config page                            *
  *****************************************************************/
-void webserver_config() {
-	if (!webserver_request_auth())
-	{ return; }
 
-	String page_content = make_header(FPSTR(INTL_CONFIGURATION));
-	String masked_pwd, send_influx_data_string;
-	last_page_load = millis();
+static void webserver_config_body_get(String& page_content) {
+	using namespace cfg;
 
-	debug_outln(F("output config page ..."), DEBUG_MIN_INFO);
+
+	debug_outln(F("begin webserver_config_body_get ..."), DEBUG_MIN_INFO);
+	page_content += F("<form method='POST' action='/config' style='width:100%;'>\n<b>");
+	page_content += FPSTR(INTL_WIFI_SETTINGS);
+	page_content += FPSTR(WEB_B_BR);
+	debug_outln(F("output config page 1"), DEBUG_MIN_INFO);
 	if (wificonfig_loop) {  // scan for wlan ssids
-		page_content += FPSTR(WEB_CONFIG_SCRIPT);
+		page_content += F("<div id='wifilist'>");
+		page_content += FPSTR(INTL_WIFI_NETWORKS);
+		page_content += F("</div><br/>");
+	}
+	page_content += FPSTR(TABLE_TAG_OPEN);
+	page_content += form_input("wlanssid", FPSTR(INTL_FS_WIFI_NAME), wlanssid, LEN_WLANSSID);
+	page_content += form_password("wlanpwd", FPSTR(INTL_PASSWORD), wlanpwd, LEN_WLANSSID);
+	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+	page_content += F("<hr/>\n<br/><b>");
+
+	page_content += FPSTR(INTL_AB_HIER_NUR_ANDERN);
+	page_content += F("</b><br/><br/>\n<b>");
+
+	if (! wificonfig_loop) {
+		page_content += FPSTR(INTL_BASICAUTH);
+		page_content += FPSTR(WEB_B_BR);
+		page_content += form_checkbox("www_basicauth_enabled", FPSTR(INTL_BASICAUTH), www_basicauth_enabled);
+		page_content += FPSTR(TABLE_TAG_OPEN);
+		page_content += form_input("www_username", FPSTR(INTL_USER), www_username, LEN_WWW_USERNAME);
+		page_content += form_password("www_password", FPSTR(INTL_PASSWORD), www_password, LEN_WWW_PASSWORD);
+		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+
+		page_content += FPSTR(WEB_BR_LF_B);
+
+		page_content += FPSTR(INTL_FS_WIFI);
+		page_content += FPSTR(WEB_B_BR);
+		page_content += FPSTR(INTL_FS_WIFI_DESCRIPTION);
+		page_content += FPSTR(BR_TAG);
+		page_content += FPSTR(TABLE_TAG_OPEN);
+		page_content += form_input("fs_ssid", FPSTR(INTL_FS_WIFI_NAME), fs_ssid, LEN_FS_SSID);
+		page_content += form_password("fs_pwd", FPSTR(INTL_PASSWORD), fs_pwd, LEN_FS_PWD);
+		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+
+		page_content += FPSTR(WEB_BR_LF_B);
+
+		page_content += F("APIs");
+		page_content += FPSTR(WEB_B_BR);
+		page_content += form_checkbox("send2dusti", F("API Luftdaten.info"), send2dusti, false);
+		page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
+		page_content += form_checkbox("ssl_dusti", FPSTR(WEB_HTTPS), ssl_dusti, false);
+		page_content += FPSTR(WEB_BRACE_BR);
+		page_content += form_checkbox("send2madavi", F("API Madavi.de"), send2madavi, false);
+		page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
+		page_content += form_checkbox("ssl_madavi", FPSTR(WEB_HTTPS), ssl_madavi, false);
+		page_content += FPSTR(WEB_BRACE_BR);
+
+		page_content += FPSTR(WEB_BR_LF_B);
+
+		page_content += FPSTR(INTL_SENSORS);
+		page_content += FPSTR(WEB_B_BR);
+		page_content += form_checkbox_sensor("sds_read", FPSTR(INTL_SDS011), sds_read);
+		page_content += form_checkbox_sensor("pms_read", FPSTR(INTL_PMS), pms_read);
+		page_content += form_checkbox_sensor("hpm_read", FPSTR(INTL_HPM), hpm_read);
+		page_content += form_checkbox_sensor("sps30_read", FPSTR(INTL_SPS30), sps30_read);
+		page_content += form_checkbox_sensor("ppd_read", FPSTR(INTL_PPD42NS), ppd_read);
+		page_content += form_checkbox_sensor("dht_read", FPSTR(INTL_DHT22), dht_read);
+		page_content += form_checkbox_sensor("htu21d_read", FPSTR(INTL_HTU21D), htu21d_read);
+		page_content += form_checkbox_sensor("bmp_read", FPSTR(INTL_BMP180), bmp_read);
+		page_content += form_checkbox_sensor("bmp280_read", FPSTR(INTL_BMP280), bmp280_read);
+		page_content += form_checkbox_sensor("bme280_read", FPSTR(INTL_BME280), bme280_read);
+		page_content += form_checkbox_sensor("ds18b20_read", FPSTR(INTL_DS18B20), ds18b20_read);
+		page_content += form_checkbox_sensor("dnms_read", FPSTR(INTL_DNMS), dnms_read);
+		page_content += FPSTR(TABLE_TAG_OPEN);
+		page_content += form_input("dnms_correction", FPSTR(INTL_DNMS_CORRECTION), dnms_correction, LEN_DNMS_CORRECTION);
+		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+		page_content += form_checkbox("gps_read", FPSTR(INTL_NEO6M), gps_read);
+
+		page_content += FPSTR(WEB_BR_LF_B);
+
 	}
 
-	using namespace cfg;
-	if (server.method() == HTTP_GET) {
-		page_content += F("<form method='POST' action='/config' style='width:100%;'>\n<b>");
-		page_content += FPSTR(INTL_WIFI_SETTINGS);
-		page_content += FPSTR(WEB_B_BR);
-		debug_outln(F("output config page 1"), DEBUG_MIN_INFO);
-		if (wificonfig_loop) {  // scan for wlan ssids
-			page_content += F("<div id='wifilist'>");
-			page_content += FPSTR(INTL_WIFI_NETWORKS);
-			page_content += F("</div><br/>");
-		}
+	page_content += FPSTR(INTL_MORE_SETTINGS);
+	page_content += FPSTR(WEB_B_BR);
+	page_content += form_checkbox("auto_update", FPSTR(INTL_AUTO_UPDATE), auto_update);
+	page_content += form_checkbox("use_beta", FPSTR(INTL_USE_BETA), use_beta);
+	page_content += form_checkbox("has_display", FPSTR(INTL_DISPLAY), has_display);
+	page_content += form_checkbox("has_sh1106", FPSTR(INTL_SH1106), has_sh1106);
+	page_content += form_checkbox("has_flipped_display", FPSTR(INTL_FLIP_DISPLAY), has_flipped_display);
+	page_content += form_checkbox("has_lcd1602_27", FPSTR(INTL_LCD1602_27), has_lcd1602_27);
+	page_content += form_checkbox("has_lcd1602", FPSTR(INTL_LCD1602_3F), has_lcd1602);
+	page_content += form_checkbox("has_lcd2004_27", FPSTR(INTL_LCD2004_27), has_lcd2004_27);
+
+	if (! wificonfig_loop) {
 		page_content += FPSTR(TABLE_TAG_OPEN);
-		page_content += form_input("wlanssid", FPSTR(INTL_FS_WIFI_NAME), wlanssid, LEN_WLANSSID);
-		page_content += form_password("wlanpwd", FPSTR(INTL_PASSWORD), wlanpwd, LEN_WLANSSID);
+		page_content += form_select_lang();
+		page_content += form_input("debug", FPSTR(INTL_DEBUG_LEVEL), String(debug), 1);
+		page_content += form_input("sending_intervall_ms", FPSTR(INTL_MEASUREMENT_INTERVAL), String(sending_intervall_ms / 1000), 5);
+		page_content += form_input("time_for_wifi_config", FPSTR(INTL_DURATION_ROUTER_MODE), String(time_for_wifi_config / 1000), 5);
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-		page_content += F("<hr/>\n<br/><b>");
+		page_content += FPSTR(WEB_BR_LF_B);
 
-		page_content += FPSTR(INTL_AB_HIER_NUR_ANDERN);
-		page_content += F("</b><br/><br/>\n<b>");
-
-		if (! wificonfig_loop) {
-			page_content += FPSTR(INTL_BASICAUTH);
-			page_content += FPSTR(WEB_B_BR);
-			page_content += form_checkbox("www_basicauth_enabled", FPSTR(INTL_BASICAUTH), www_basicauth_enabled);
-			page_content += FPSTR(TABLE_TAG_OPEN);
-			page_content += form_input("www_username", FPSTR(INTL_USER), www_username, LEN_WWW_USERNAME);
-			page_content += form_password("www_password", FPSTR(INTL_PASSWORD), www_password, LEN_WWW_PASSWORD);
-			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-
-			page_content += FPSTR(WEB_BR_LF_B);
-
-			page_content += FPSTR(INTL_FS_WIFI);
-			page_content += FPSTR(WEB_B_BR);
-			page_content += FPSTR(INTL_FS_WIFI_DESCRIPTION);
-			page_content += FPSTR(BR_TAG);
-			page_content += FPSTR(TABLE_TAG_OPEN);
-			page_content += form_input("fs_ssid", FPSTR(INTL_FS_WIFI_NAME), fs_ssid, LEN_FS_SSID);
-			page_content += form_password("fs_pwd", FPSTR(INTL_PASSWORD), fs_pwd, LEN_FS_PWD);
-			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-
-			page_content += FPSTR(WEB_BR_LF_B);
-
-			page_content += F("APIs");
-			page_content += FPSTR(WEB_B_BR);
-			page_content += form_checkbox("send2dusti", F("API Luftdaten.info"), send2dusti, false);
-			page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
-			page_content += form_checkbox("ssl_dusti", FPSTR(WEB_HTTPS), ssl_dusti, false);
-			page_content += FPSTR(WEB_BRACE_BR);
-			page_content += form_checkbox("send2madavi", F("API Madavi.de"), send2madavi, false);
-			page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
-			page_content += form_checkbox("ssl_madavi", FPSTR(WEB_HTTPS), ssl_madavi, false);
-			page_content += FPSTR(WEB_BRACE_BR);
-
-			page_content += FPSTR(WEB_BR_LF_B);
-
-			page_content += FPSTR(INTL_SENSORS);
-			page_content += FPSTR(WEB_B_BR);
-			page_content += form_checkbox_sensor("sds_read", FPSTR(INTL_SDS011), sds_read);
-			page_content += form_checkbox_sensor("pms_read", FPSTR(INTL_PMS), pms_read);
-			page_content += form_checkbox_sensor("hpm_read", FPSTR(INTL_HPM), hpm_read);
-			page_content += form_checkbox_sensor("sps30_read", FPSTR(INTL_SPS30), sps30_read);
-			page_content += form_checkbox_sensor("ppd_read", FPSTR(INTL_PPD42NS), ppd_read);
-			page_content += form_checkbox_sensor("dht_read", FPSTR(INTL_DHT22), dht_read);
-			page_content += form_checkbox_sensor("htu21d_read", FPSTR(INTL_HTU21D), htu21d_read);
-			page_content += form_checkbox_sensor("bmp_read", FPSTR(INTL_BMP180), bmp_read);
-			page_content += form_checkbox_sensor("bmp280_read", FPSTR(INTL_BMP280), bmp280_read);
-			page_content += form_checkbox_sensor("bme280_read", FPSTR(INTL_BME280), bme280_read);
-			page_content += form_checkbox_sensor("ds18b20_read", FPSTR(INTL_DS18B20), ds18b20_read);
-			page_content += form_checkbox_sensor("dnms_read", FPSTR(INTL_DNMS), dnms_read);
-			page_content += FPSTR(TABLE_TAG_OPEN);
-			page_content += form_input("dnms_correction", FPSTR(INTL_DNMS_CORRECTION), dnms_correction, LEN_DNMS_CORRECTION);
-			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-			page_content += form_checkbox("gps_read", FPSTR(INTL_NEO6M), gps_read);
-
-			page_content += FPSTR(WEB_BR_LF_B);
-
-		}
-
-		page_content += FPSTR(INTL_MORE_SETTINGS);
+		page_content += FPSTR(INTL_MORE_APIS);
 		page_content += FPSTR(WEB_B_BR);
-		page_content += form_checkbox("auto_update", FPSTR(INTL_AUTO_UPDATE), auto_update);
-		page_content += form_checkbox("use_beta", FPSTR(INTL_USE_BETA), use_beta);
-		page_content += form_checkbox("has_display", FPSTR(INTL_DISPLAY), has_display);
-		page_content += form_checkbox("has_sh1106", FPSTR(INTL_SH1106), has_sh1106);
-		page_content += form_checkbox("has_flipped_display", FPSTR(INTL_FLIP_DISPLAY), has_flipped_display);
-		page_content += form_checkbox("has_lcd1602_27", FPSTR(INTL_LCD1602_27), has_lcd1602_27);
-		page_content += form_checkbox("has_lcd1602", FPSTR(INTL_LCD1602_3F), has_lcd1602);
-		page_content += form_checkbox("has_lcd2004_27", FPSTR(INTL_LCD2004_27), has_lcd2004_27);
+		page_content += form_checkbox("send2csv", tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_CSV)), send2csv);
+		page_content += form_checkbox("send2fsapp", tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_FEINSTAUB_APP)), send2fsapp);
+		page_content += form_checkbox("send2aircms", tmpl(FPSTR(INTL_SEND_TO), F("aircms.online")), send2aircms);
+		page_content += form_checkbox("send2sensemap", tmpl(FPSTR(INTL_SEND_TO), F("OpenSenseMap")), send2sensemap);
+		page_content += FPSTR(TABLE_TAG_OPEN);
+		page_content += form_input("senseboxid", "senseBox&nbsp;ID: ", senseboxid, LEN_SENSEBOXID);
+		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+		page_content += FPSTR(BR_TAG);
+		page_content += form_checkbox("send2custom", FPSTR(INTL_SEND_TO_OWN_API), send2custom, false);
+		page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
+		page_content += form_checkbox("ssl_custom", FPSTR(WEB_HTTPS), ssl_custom, false);
+		page_content += FPSTR(WEB_BRACE_BR);
+		page_content += FPSTR(TABLE_TAG_OPEN);
+		page_content += form_input("host_custom", FPSTR(INTL_SERVER), host_custom, LEN_HOST_CUSTOM);
+		page_content += form_input("url_custom", FPSTR(INTL_PATH), url_custom, LEN_URL_CUSTOM);
+		page_content += form_input("port_custom", FPSTR(INTL_PORT), String(port_custom), MAX_PORT_DIGITS);
+		page_content += form_input("user_custom", FPSTR(INTL_USER), user_custom, LEN_USER_CUSTOM);
+		page_content += form_password("pwd_custom", FPSTR(INTL_PASSWORD), pwd_custom, LEN_PWD_CUSTOM);
+		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 
-		if (! wificonfig_loop) {
-			page_content += FPSTR(TABLE_TAG_OPEN);
-			page_content += form_select_lang();
-			page_content += form_input("debug", FPSTR(INTL_DEBUG_LEVEL), String(debug), 1);
-			page_content += form_input("sending_intervall_ms", FPSTR(INTL_MEASUREMENT_INTERVAL), String(sending_intervall_ms / 1000), 5);
-			page_content += form_input("time_for_wifi_config", FPSTR(INTL_DURATION_ROUTER_MODE), String(time_for_wifi_config / 1000), 5);
-			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-			page_content += FPSTR(WEB_BR_LF_B);
+		page_content += FPSTR(BR_TAG);
 
-			page_content += FPSTR(INTL_MORE_APIS);
-			page_content += FPSTR(WEB_B_BR);
-			page_content += form_checkbox("send2csv", tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_CSV)), send2csv);
-			page_content += form_checkbox("send2fsapp", tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_FEINSTAUB_APP)), send2fsapp);
-			page_content += form_checkbox("send2aircms", tmpl(FPSTR(INTL_SEND_TO), F("aircms.online")), send2aircms);
-			page_content += form_checkbox("send2sensemap", tmpl(FPSTR(INTL_SEND_TO), F("OpenSenseMap")), send2sensemap);
-			page_content += FPSTR(TABLE_TAG_OPEN);
-			page_content += form_input("senseboxid", "senseBox&nbsp;ID: ", senseboxid, LEN_SENSEBOXID);
-			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-			page_content += FPSTR(BR_TAG);
-			page_content += form_checkbox("send2custom", FPSTR(INTL_SEND_TO_OWN_API), send2custom, false);
-			page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
-			page_content += form_checkbox("ssl_custom", FPSTR(WEB_HTTPS), ssl_custom, false);
-			page_content += FPSTR(WEB_BRACE_BR);
-			page_content += FPSTR(TABLE_TAG_OPEN);
-			page_content += form_input("host_custom", FPSTR(INTL_SERVER), host_custom, LEN_HOST_CUSTOM);
-			page_content += form_input("url_custom", FPSTR(INTL_PATH), url_custom, LEN_URL_CUSTOM);
-			page_content += form_input("port_custom", FPSTR(INTL_PORT), String(port_custom), MAX_PORT_DIGITS);
-			page_content += form_input("user_custom", FPSTR(INTL_USER), user_custom, LEN_USER_CUSTOM);
-			page_content += form_password("pwd_custom", FPSTR(INTL_PASSWORD), pwd_custom, LEN_PWD_CUSTOM);
-			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+		page_content += form_checkbox("send2influx", tmpl(FPSTR(INTL_SEND_TO), F("InfluxDB")), send2influx, false);
+		page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
+		page_content += form_checkbox("ssl_influx", FPSTR(WEB_HTTPS), ssl_influx, false);
+		page_content += FPSTR(WEB_BRACE_BR);
+		page_content += FPSTR(TABLE_TAG_OPEN);
+		page_content += form_input("host_influx", FPSTR(INTL_SERVER), host_influx, LEN_HOST_INFLUX);
+		page_content += form_input("url_influx", FPSTR(INTL_PATH), url_influx, LEN_URL_INFLUX);
+		page_content += form_input("port_influx", FPSTR(INTL_PORT), String(port_influx), MAX_PORT_DIGITS);
+		page_content += form_input("user_influx", FPSTR(INTL_USER), user_influx, LEN_USER_INFLUX);
+		page_content += form_password("pwd_influx", FPSTR(INTL_PASSWORD), pwd_influx, LEN_PWD_INFLUX);
+		page_content += form_input("measurement_name_influx", F("Measurement"), measurement_name_influx, LEN_MEASUREMENT_NAME_INFLUX);
+		page_content += form_submit(FPSTR(INTL_SAVE_AND_RESTART));
+		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+		page_content += FPSTR(BR_TAG);
+		page_content += FPSTR(WEB_BR_FORM);
+	}
+	if (wificonfig_loop) {  // scan for wlan ssids
+		page_content += FPSTR(TABLE_TAG_OPEN);
+		page_content += form_submit(FPSTR(INTL_SAVE_AND_RESTART));
+		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+		page_content += FPSTR(WEB_BR_FORM);
+		page_content += F("<script>window.setTimeout(load_wifi_list,1000);</script>");
+	}
+}
 
-			page_content += FPSTR(BR_TAG);
 
-			page_content += form_checkbox("send2influx", tmpl(FPSTR(INTL_SEND_TO), F("InfluxDB")), send2influx, false);
-			page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
-			page_content += form_checkbox("ssl_influx", FPSTR(WEB_HTTPS), ssl_influx, false);
-			page_content += FPSTR(WEB_BRACE_BR);
-			page_content += FPSTR(TABLE_TAG_OPEN);
-			page_content += form_input("host_influx", FPSTR(INTL_SERVER), host_influx, LEN_HOST_INFLUX);
-			page_content += form_input("url_influx", FPSTR(INTL_PATH), url_influx, LEN_URL_INFLUX);
-			page_content += form_input("port_influx", FPSTR(INTL_PORT), String(port_influx), MAX_PORT_DIGITS);
-			page_content += form_input("user_influx", FPSTR(INTL_USER), user_influx, LEN_USER_INFLUX);
-			page_content += form_password("pwd_influx", FPSTR(INTL_PASSWORD), pwd_influx, LEN_PWD_INFLUX);
-			page_content += form_input("measurement_name_influx", F("Measurement"), measurement_name_influx, LEN_MEASUREMENT_NAME_INFLUX);
-			page_content += form_submit(FPSTR(INTL_SAVE_AND_RESTART));
-			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-			page_content += FPSTR(BR_TAG);
-			page_content += FPSTR(WEB_BR_FORM);
-		}
-		if (wificonfig_loop) {  // scan for wlan ssids
-			page_content += FPSTR(TABLE_TAG_OPEN);
-			page_content += form_submit(FPSTR(INTL_SAVE_AND_RESTART));
-			page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-			page_content += FPSTR(WEB_BR_FORM);
-			page_content += F("<script>window.setTimeout(load_wifi_list,1000);</script>");
-		}
-	} else {
+static void webserver_config_body_post(String& page_content) {
+	String masked_pwd;
+
+	using namespace cfg;
 
 #define readCharParam(param) \
 		if (server.hasArg(#param)){ \
@@ -1666,77 +1666,77 @@ void webserver_config() {
 			}\
 		}
 
-		if (server.hasArg("wlanssid") && server.arg("wlanssid") != "") {
-			readCharParam(wlanssid);
-			readPasswdParam(wlanpwd);
+	if (server.hasArg("wlanssid") && server.arg("wlanssid") != "") {
+		readCharParam(wlanssid);
+		readPasswdParam(wlanpwd);
+	}
+	if (! wificonfig_loop) {
+		readCharParam(current_lang);
+		readCharParam(www_username);
+		readPasswdParam(www_password);
+		readBoolParam(www_basicauth_enabled);
+		readCharParam(fs_ssid);
+		if (server.hasArg("fs_pwd") && ((server.arg("fs_pwd").length() > 7) || (server.arg("fs_pwd").length() == 0))) {
+			readPasswdParam(fs_pwd);
 		}
-		if (! wificonfig_loop) {
-			readCharParam(current_lang);
-			readCharParam(www_username);
-			readPasswdParam(www_password);
-			readBoolParam(www_basicauth_enabled);
-			readCharParam(fs_ssid);
-			if (server.hasArg("fs_pwd") && ((server.arg("fs_pwd").length() > 7) || (server.arg("fs_pwd").length() == 0))) {
-				readPasswdParam(fs_pwd);
-			}
-			readBoolParam(send2dusti);
-			readBoolParam(ssl_dusti);
-			readBoolParam(send2madavi);
-			readBoolParam(ssl_madavi);
-			readBoolParam(dht_read);
-			readBoolParam(htu21d_read);
-			readBoolParam(sds_read);
-			readBoolParam(pms_read);
-			readBoolParam(hpm_read);
-			readBoolParam(sps30_read);
-			readBoolParam(ppd_read);
-			readBoolParam(bmp_read);
-			readBoolParam(bmp280_read);
-			readBoolParam(bme280_read);
-			readBoolParam(ds18b20_read);
-			readBoolParam(dnms_read);
-			readCharParam(dnms_correction);
-			readBoolParam(gps_read);
+		readBoolParam(send2dusti);
+		readBoolParam(ssl_dusti);
+		readBoolParam(send2madavi);
+		readBoolParam(ssl_madavi);
+		readBoolParam(dht_read);
+		readBoolParam(htu21d_read);
+		readBoolParam(sds_read);
+		readBoolParam(pms_read);
+		readBoolParam(hpm_read);
+		readBoolParam(sps30_read);
+		readBoolParam(ppd_read);
+		readBoolParam(bmp_read);
+		readBoolParam(bmp280_read);
+		readBoolParam(bme280_read);
+		readBoolParam(ds18b20_read);
+		readBoolParam(dnms_read);
+		readCharParam(dnms_correction);
+		readBoolParam(gps_read);
 
-			readIntParam(debug);
-			readTimeParam(sending_intervall_ms);
-			readTimeParam(time_for_wifi_config);
+		readIntParam(debug);
+		readTimeParam(sending_intervall_ms);
+		readTimeParam(time_for_wifi_config);
 
-			readBoolParam(send2csv);
+		readBoolParam(send2csv);
 
-			readBoolParam(send2fsapp);
+		readBoolParam(send2fsapp);
 
-			readBoolParam(send2aircms);
+		readBoolParam(send2aircms);
 
-			readBoolParam(send2sensemap);
-			readCharParam(senseboxid);
+		readBoolParam(send2sensemap);
+		readCharParam(senseboxid);
 
-			readBoolParam(send2custom);
-			readCharParam(host_custom);
-			readCharParam(url_custom);
-			readIntParam(port_custom);
-			readCharParam(user_custom);
-			readPasswdParam(pwd_custom);
+		readBoolParam(send2custom);
+		readCharParam(host_custom);
+		readCharParam(url_custom);
+		readIntParam(port_custom);
+		readCharParam(user_custom);
+		readPasswdParam(pwd_custom);
 
-			readBoolParam(send2influx);
-			readCharParam(host_influx);
-			readCharParam(url_influx);
-			readIntParam(port_influx);
-			readCharParam(user_influx);
-			readPasswdParam(pwd_influx);
-			readCharParam(measurement_name_influx);
-			readBoolParam(ssl_influx);
+		readBoolParam(send2influx);
+		readCharParam(host_influx);
+		readCharParam(url_influx);
+		readIntParam(port_influx);
+		readCharParam(user_influx);
+		readPasswdParam(pwd_influx);
+		readCharParam(measurement_name_influx);
+		readBoolParam(ssl_influx);
 
-		}
+	}
 
-		readBoolParam(auto_update);
-		readBoolParam(use_beta);
-		readBoolParam(has_display);
-		readBoolParam(has_sh1106);
-		readBoolParam(has_flipped_display);
-		readBoolParam(has_lcd1602);
-		readBoolParam(has_lcd1602_27);
-		readBoolParam(has_lcd2004_27);
+	readBoolParam(auto_update);
+	readBoolParam(use_beta);
+	readBoolParam(has_display);
+	readBoolParam(has_sh1106);
+	readBoolParam(has_flipped_display);
+	readBoolParam(has_lcd1602);
+	readBoolParam(has_lcd1602_27);
+	readBoolParam(has_lcd2004_27);
 
 #undef readCharParam
 #undef readBoolParam
@@ -1744,57 +1744,78 @@ void webserver_config() {
 #undef readTimeParam
 #undef readPasswdParam
 
-		page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), F("Luftdaten.info")), send2dusti);
-		page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), F("Madavi")), send2madavi);
-		page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("DHT")), dht_read);
-		page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("HTU21D")), htu21d_read);
-		page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("SDS")), sds_read);
-		page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("PMS(1,3,5,6,7)003")), pms_read);
-		page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("HPM")), hpm_read);
-		page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("SPS30")), sps30_read);
-		page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("PPD")), ppd_read);
-		page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("BMP180")), bmp_read);
-		page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("BMP280")), bmp280_read);
-		page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("BME280")), bme280_read);
-		page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("DS18B20")), ds18b20_read);
-		page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("DNMS")), dnms_read);
-		page_content += line_from_value_bool(FPSTR(INTL_DNMS_CORRECTION), String(dnms_correction));
-		page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("GPS")), gps_read);
-		page_content += line_from_value_bool(FPSTR(INTL_AUTO_UPDATE), auto_update);
-		page_content += line_from_value_bool(FPSTR(INTL_USE_BETA), use_beta);
-		page_content += line_from_value_bool(FPSTR(INTL_DISPLAY), has_display);
-		page_content += line_from_value_bool(FPSTR(INTL_SH1106), has_sh1106);
-		page_content += line_from_value_bool(FPSTR(INTL_FLIP_DISPLAY), has_flipped_display);
-		page_content += line_from_value_bool(FPSTR(INTL_LCD1602_27), has_lcd1602_27);
-		page_content += line_from_value_bool(FPSTR(INTL_LCD1602_3F), has_lcd1602);
-		page_content += line_from_value_bool(FPSTR(INTL_LCD2004_27), has_lcd2004_27);
-		page_content += line_from_value(FPSTR(INTL_DEBUG_LEVEL), String(debug));
-		page_content += line_from_value(FPSTR(INTL_MEASUREMENT_INTERVAL), String(sending_intervall_ms));
-		page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), F("Feinstaub-App")), send2fsapp);
-		page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), F("aircms.online")), send2aircms);
-		page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_CSV)), send2csv);
-		page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_FEINSTAUB_APP)), send2fsapp);
-		page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), F("opensensemap")), send2sensemap);
-		page_content += F("<br/>senseBox-ID ");
-		page_content += senseboxid;
-		page_content += FPSTR(WEB_BR_BR);
-		page_content += line_from_value_bool(FPSTR(INTL_SEND_TO_OWN_API), send2custom);
-		page_content += line_from_value(FPSTR(INTL_SERVER), host_custom);
-		page_content += line_from_value(FPSTR(INTL_PATH), url_custom);
-		page_content += line_from_value(FPSTR(INTL_PORT), String(port_custom));
-		page_content += line_from_value(FPSTR(INTL_USER), user_custom);
-		page_content += line_from_value(FPSTR(INTL_PASSWORD), pwd_custom);
-		page_content += F("<br/><br/>InfluxDB: ");
-		page_content += String(send2influx);
-		page_content += line_from_value(FPSTR(INTL_SERVER), host_influx);
-		page_content += line_from_value(FPSTR(INTL_PATH), url_influx);
-		page_content += line_from_value(FPSTR(INTL_PORT), String(port_influx));
-		page_content += line_from_value(FPSTR(INTL_USER), user_influx);
-		page_content += line_from_value(FPSTR(INTL_PASSWORD), pwd_influx);
-		page_content += line_from_value(F("Measurement"), measurement_name_influx);
-		page_content += line_from_value(F("SSL"), String(ssl_influx));
-		page_content += FPSTR(WEB_BR_BR);
-		page_content += FPSTR(INTL_SENSOR_IS_REBOOTING);
+	page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), F("Luftdaten.info")), send2dusti);
+	page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), F("Madavi")), send2madavi);
+	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("DHT")), dht_read);
+	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("HTU21D")), htu21d_read);
+	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("SDS")), sds_read);
+	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("PMS(1,3,5,6,7)003")), pms_read);
+	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("HPM")), hpm_read);
+	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("SPS30")), sps30_read);
+	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("PPD")), ppd_read);
+	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("BMP180")), bmp_read);
+	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("BMP280")), bmp280_read);
+	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("BME280")), bme280_read);
+	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("DS18B20")), ds18b20_read);
+	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("DNMS")), dnms_read);
+	page_content += line_from_value_bool(FPSTR(INTL_DNMS_CORRECTION), String(dnms_correction));
+	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("GPS")), gps_read);
+	page_content += line_from_value_bool(FPSTR(INTL_AUTO_UPDATE), auto_update);
+	page_content += line_from_value_bool(FPSTR(INTL_USE_BETA), use_beta);
+	page_content += line_from_value_bool(FPSTR(INTL_DISPLAY), has_display);
+	page_content += line_from_value_bool(FPSTR(INTL_SH1106), has_sh1106);
+	page_content += line_from_value_bool(FPSTR(INTL_FLIP_DISPLAY), has_flipped_display);
+	page_content += line_from_value_bool(FPSTR(INTL_LCD1602_27), has_lcd1602_27);
+	page_content += line_from_value_bool(FPSTR(INTL_LCD1602_3F), has_lcd1602);
+	page_content += line_from_value_bool(FPSTR(INTL_LCD2004_27), has_lcd2004_27);
+	page_content += line_from_value(FPSTR(INTL_DEBUG_LEVEL), String(debug));
+	page_content += line_from_value(FPSTR(INTL_MEASUREMENT_INTERVAL), String(sending_intervall_ms));
+	page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), F("Feinstaub-App")), send2fsapp);
+	page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), F("aircms.online")), send2aircms);
+	page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_CSV)), send2csv);
+	page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_FEINSTAUB_APP)), send2fsapp);
+	page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), F("opensensemap")), send2sensemap);
+	page_content += F("<br/>senseBox-ID ");
+	page_content += senseboxid;
+	page_content += FPSTR(WEB_BR_BR);
+	page_content += line_from_value_bool(FPSTR(INTL_SEND_TO_OWN_API), send2custom);
+	page_content += line_from_value(FPSTR(INTL_SERVER), host_custom);
+	page_content += line_from_value(FPSTR(INTL_PATH), url_custom);
+	page_content += line_from_value(FPSTR(INTL_PORT), String(port_custom));
+	page_content += line_from_value(FPSTR(INTL_USER), user_custom);
+	page_content += line_from_value(FPSTR(INTL_PASSWORD), pwd_custom);
+	page_content += F("<br/><br/>InfluxDB: ");
+	page_content += String(send2influx);
+	page_content += line_from_value(FPSTR(INTL_SERVER), host_influx);
+	page_content += line_from_value(FPSTR(INTL_PATH), url_influx);
+	page_content += line_from_value(FPSTR(INTL_PORT), String(port_influx));
+	page_content += line_from_value(FPSTR(INTL_USER), user_influx);
+	page_content += line_from_value(FPSTR(INTL_PASSWORD), pwd_influx);
+	page_content += line_from_value(F("Measurement"), measurement_name_influx);
+	page_content += line_from_value(F("SSL"), String(ssl_influx));
+	page_content += FPSTR(WEB_BR_BR);
+	page_content += FPSTR(INTL_SENSOR_IS_REBOOTING);
+}
+
+void webserver_config() {
+	if (!webserver_request_auth())
+	{ return; }
+
+	String page_content = make_header(FPSTR(INTL_CONFIGURATION));
+	// This is a large page...
+	page_content.reserve(12 * 1024);
+
+	last_page_load = millis();
+
+	debug_outln(F("output config page ..."), DEBUG_MIN_INFO);
+	if (wificonfig_loop) {  // scan for wlan ssids
+		page_content += FPSTR(WEB_CONFIG_SCRIPT);
+	}
+
+	if (server.method() == HTTP_GET) {
+		webserver_config_body_get(page_content);
+	} else {
+		webserver_config_body_post(page_content);
 	}
 	page_content += make_footer();
 
