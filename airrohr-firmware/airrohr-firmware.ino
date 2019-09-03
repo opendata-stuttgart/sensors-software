@@ -1832,7 +1832,7 @@ void webserver_wifi() {
 		page_content += FPSTR(INTL_NO_NETWORKS);
 		page_content += FPSTR(BR_TAG);
 	} else {
-		std::unique_ptr<unsigned[]> indices(new unsigned[count_wifiInfo]);
+		std::unique_ptr<int[]> indices(new int[count_wifiInfo]);
 		debug_outln(F("output config page 2"), DEBUG_MIN_INFO);
 		for (unsigned i = 0; i < count_wifiInfo; ++i) {
 			indices[i] = i;
