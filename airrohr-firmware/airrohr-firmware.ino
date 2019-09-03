@@ -172,8 +172,6 @@
 #include "./sps30_i2c.h"
 #include "./dnms_i2c.h"
 
-String emptyString;
-
 #endif
 
 #if defined(INTL_BG)
@@ -350,6 +348,8 @@ namespace cfg {
 #define UPDATE_PORT 80
 
 #define JSON_BUFFER_SIZE 2300
+
+String emptyString;
 
 enum class PmSensorCmd {
 	Start,
@@ -1576,6 +1576,8 @@ static void webserver_config_body_get(String& page_content) {
 	page_content += form_checkbox("has_lcd1602_27", FPSTR(INTL_LCD1602_27), has_lcd1602_27);
 	page_content += form_checkbox("has_lcd1602", FPSTR(INTL_LCD1602_3F), has_lcd1602);
 	page_content += form_checkbox("has_lcd2004_27", FPSTR(INTL_LCD2004_27), has_lcd2004_27);
+	page_content += form_checkbox("display_wifi_info", FPSTR(INTL_DISPLAY_WIFI_INFO), display_wifi_info);
+	page_content += form_checkbox("display_device_info", FPSTR(INTL_DISPLAY_DEVICE_INFO), display_device_info);
 
 	if (! wificonfig_loop) {
 		page_content += FPSTR(TABLE_TAG_OPEN);
@@ -1751,6 +1753,8 @@ static void webserver_config_body_post(String& page_content) {
 	readBoolParam(has_lcd1602);
 	readBoolParam(has_lcd1602_27);
 	readBoolParam(has_lcd2004_27);
+	readBoolParam(display_wifi_info);
+	readBoolParam(display_device_info);
 
 #undef readCharParam
 #undef readBoolParam
@@ -1782,6 +1786,8 @@ static void webserver_config_body_post(String& page_content) {
 	page_content += line_from_value_bool(FPSTR(INTL_LCD1602_27), has_lcd1602_27);
 	page_content += line_from_value_bool(FPSTR(INTL_LCD1602_3F), has_lcd1602);
 	page_content += line_from_value_bool(FPSTR(INTL_LCD2004_27), has_lcd2004_27);
+	page_content += line_from_value_bool(FPSTR(INTL_DISPLAY_WIFI_INFO), display_wifi_info);
+	page_content += line_from_value_bool(FPSTR(INTL_DISPLAY_DEVICE_INFO), display_device_info);
 	page_content += line_from_value(FPSTR(INTL_DEBUG_LEVEL), String(debug));
 	page_content += line_from_value(FPSTR(INTL_MEASUREMENT_INTERVAL), String(sending_intervall_ms));
 	page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), F("Feinstaub-App")), send2fsapp);
