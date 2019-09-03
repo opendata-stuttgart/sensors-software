@@ -352,8 +352,8 @@ enum class PmSensorCmd {
 	VersionDate
 };
 
-String basic_auth_influx = "";
-String basic_auth_custom = "";
+String basic_auth_influx;
+String basic_auth_custom;
 
 long int sample_count = 0;
 bool bmp_init_failed = false;
@@ -379,7 +379,7 @@ float last_value_dnms_la_max = -1.0;
 float dnms_leq_a = -1.0;
 float dnms_leq_a_min = -1.0;
 float dnms_leq_a_max = -1.0;
-String dnms_sensor = "";
+String dnms_sensor;
 char dnms_version[DNMS_MAX_VERSION_LEN];
 uint16_t data_ready;
 bool dnms_error = false;
@@ -559,9 +559,9 @@ double last_value_DS18B20_T = -1.0;
 double last_value_GPS_lat = -200.0;
 double last_value_GPS_lon = -200.0;
 double last_value_GPS_alt = -1000.0;
-String last_value_GPS_date = "";
-String last_value_GPS_time = "";
-String last_data_string = "";
+String last_value_GPS_date;
+String last_value_GPS_time;
+String last_data_string;
 
 String esp_chipid;
 
@@ -845,12 +845,10 @@ static bool HPM_cmd(PmSensorCmd cmd) {
  * read SDS011 sensor serial and firmware date                   *
  *****************************************************************/
 String SDS_version_date() {
-	String s = "";
 	char buffer;
 	int value;
 	int len = 0;
-	String version_date = "";
-	String device_id = "";
+	String s, version_date, device_id;
 	int checksum_is = 0;
 	int checksum_ok = 0;
 
@@ -964,11 +962,11 @@ void disable_unneeded_nmea() {
  *****************************************************************/
 void readConfig() {
 	using namespace cfg;
-	String json_string = "";
-	debug_outln(F("mounting FS..."), DEBUG_MIN_INFO);
+	String json_string;
 	bool pms24_read = 0;
 	bool pms32_read = 0;
 
+	debug_outln(F("mounting FS..."), DEBUG_MIN_INFO);
 
 #if defined(ESP32)
 	bool spiffs_begin_ok = SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED);
@@ -1261,7 +1259,7 @@ String form_password(const String& name, const String& info, const String& value
 					"<input type='password' name='{n}' id='{n}' placeholder='{i}' value='{v}' maxlength='{l}'/>"
 					"</td>"
 					"</tr>");
-	String password = "";
+	String password;
 	for (uint8_t i = 0; i < value.length(); i++) {
 		password += "*";
 	}
@@ -1489,8 +1487,7 @@ void webserver_config() {
 	{ return; }
 
 	String page_content = make_header(FPSTR(INTL_CONFIGURATION));
-	String masked_pwd = "";
-	String send_influx_data_string = "";
+	String masked_pwd, send_influx_data_string;
 	last_page_load = millis();
 
 	debug_outln(F("output config page ..."), DEBUG_MIN_INFO);
@@ -1826,9 +1823,10 @@ void webserver_config() {
  * Webserver wifi: show available wifi networks                  *
  *****************************************************************/
 void webserver_wifi() {
+	String page_content;
+
 	debug_out(F("wifi networks found: "), DEBUG_MIN_INFO);
 	debug_outln(String(count_wifiInfo), DEBUG_MIN_INFO);
-	String page_content = "";
 	if (count_wifiInfo == 0) {
 		page_content += FPSTR(BR_TAG);
 		page_content += FPSTR(INTL_NO_NETWORKS);
@@ -2103,8 +2101,9 @@ void webserver_reset() {
  * Webserver data.json                                           *
  *****************************************************************/
 void webserver_data_json() {
-	String s1 = "";
+	String s1;
 	unsigned long age = 0;
+
 	debug_outln(F("output data json..."), DEBUG_MIN_INFO);
 	if (first_cycle) {
 		s1 = FPSTR(data_first_part);
@@ -2560,7 +2559,8 @@ void sendLuftdaten(const String& data, const int pin, const char* host, const in
  * send data to influxdb                                         *
  *****************************************************************/
 String create_influxdb_string(const String& data) {
-	String data_4_influxdb = "";
+	String data_4_influxdb;
+
 	debug_outln(F("Parse JSON for influx DB"), DEBUG_MIN_INFO);
 	debug_outln(data, DEBUG_MIN_INFO);
 	StaticJsonDocument<JSON_BUFFER_SIZE> json2data;
@@ -2821,7 +2821,7 @@ static String sensorDS18B20() {
  * read SDS011 sensor values                                     *
  *****************************************************************/
 static String sensorSDS() {
-	String s = "";
+	String s;
 	char buffer;
 	int value;
 	int len = 0;
@@ -2958,7 +2958,7 @@ static String sensorSDS() {
  * read Plantronic PM sensor sensor values                       *
  *****************************************************************/
 static String sensorPMS() {
-	String s = "";
+	String s;
 	char buffer;
 	int value;
 	int len = 0;
@@ -3138,7 +3138,7 @@ static String sensorPMS() {
  * read Honeywell PM sensor sensor values                        *
  *****************************************************************/
 static String sensorHPM() {
-	String s = "";
+	String s;
 	char buffer;
 	int value;
 	int len = 0;
@@ -3279,7 +3279,7 @@ static String sensorHPM() {
  * read PPD42NS sensor values                                    *
  *****************************************************************/
 static String sensorPPD() {
-	String s = "";
+	String s;
 
 	debug_outln(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_PPD42NS), DEBUG_MED_INFO);
 
@@ -3428,7 +3428,7 @@ static String sensorSPS30() {
    read DNMS values
  *****************************************************************/
 String sensorDNMS() {
-	String s = "";
+	String s;
 	uint16_t i;
 	dnms_error = false;
 	debug_outln(String(FPSTR(DBG_TXT_START_READING)) + "DNMS", DEBUG_MED_INFO);
@@ -3486,9 +3486,7 @@ String sensorDNMS() {
  * read GPS sensor values                                        *
  *****************************************************************/
 String sensorGPS() {
-	String s = "";
-	String gps_lat = "";
-	String gps_lon = "";
+	String s, gps_lat, gps_lon;
 
 	debug_outln(String(FPSTR(DBG_TXT_START_READING)) + "GPS", DEBUG_MED_INFO);
 
@@ -3512,7 +3510,7 @@ String sensorGPS() {
 				debug_outln(F("Altitude INVALID"), DEBUG_MAX_INFO);
 			}
 			if (gps.date.isValid()) {
-				String gps_date = "";
+				String gps_date;
 				if (gps.date.month() < 10) {
 					gps_date += "0";
 				}
@@ -3529,7 +3527,7 @@ String sensorGPS() {
 				debug_outln(F("Date INVALID"), DEBUG_MAX_INFO);
 			}
 			if (gps.time.isValid()) {
-				String gps_time = "";
+				String gps_time;
 				if (gps.time.hour() < 10) {
 					gps_time += "0";
 				}
@@ -3636,15 +3634,13 @@ void display_values() {
 	double t_value = -128.0;
 	double h_value = -1.0;
 	double p_value = -1.0;
-	String t_sensor = "";
-	String h_sensor = "";
-	String p_sensor = "";
+	String t_sensor, h_sensor, p_sensor;
 	float pm010_value = -1.0;
 	float pm040_value = -1.0;
 	double pm10_value = -1.0;
 	double pm25_value = -1.0;
-	String pm10_sensor = "";
-	String pm25_sensor = "";
+	String pm10_sensor;
+	String pm25_sensor;
 	float nc005_value = -1.0;
 	float nc010_value = -1.0;
 	float nc025_value = -1.0;
@@ -3653,13 +3649,12 @@ void display_values() {
 	float la_eq_value = -1.0;
 	float la_max_value = -1.0;
 	float la_min_value = -1.0;
-	String la_sensor = "";
+	String la_sensor;
 	float tps_value = -1.0;
 	double lat_value = -200.0;
 	double lon_value = -200.0;
 	double alt_value = -1000.0;
-	String gps_sensor = "";
-	String display_header = "";
+	String gps_sensor, display_header;
 	String display_lines[3] = { "", "", ""};
 	int screen_count = 0;
 	int screens[5];
@@ -4367,20 +4362,10 @@ static unsigned long sendDataToOptionalApis(const String &data) {
  * And action                                                    *
  *****************************************************************/
 void loop() {
-	String result_PPD = "";
-	String result_SDS = "";
-	String result_PMS = "";
-	String result_HPM = "";
-	String result_SPS30 = "";
+	String result_PPD, result_SDS, result_PMS, result_HPM, result_SPS30;
+	String result_DHT, result_HTU21D, result_BMP, result_BMP280;
+	String result_BME280, result_DS18B20, result_GPS, result_DNMS;
 	int16_t ret_SPS30;
-	String result_DHT = "";
-	String result_HTU21D = "";
-	String result_BMP = "";
-	String result_BMP280 = "";
-	String result_BME280 = "";
-	String result_DS18B20 = "";
-	String result_GPS = "";
-	String result_DNMS = "";
 
 	unsigned long sum_send_time = 0;
 	unsigned long start_send;
