@@ -69,7 +69,7 @@ const char TABLE_TAG_CLOSE_BR[] PROGMEM = "</table>";
 const char EMPTY_ROW[] PROGMEM = "<tr><td colspan='3'>&nbsp;</td></tr>";
 
 const char WEB_PAGE_FOOTER[] PROGMEM = "<br/><br/><a href='/' style='display:inline;'>{t}</a><br/><br/><br/>\
-<a href='https://codefor.de/stuttgart/' target='_blank' style='display:inline;background:none;color:black;'>&copy; Open Knowledge Lab Stuttgart a.o. (Code for Germany)</a>\
+<a href='https://codefor.de/stuttgart/' target='_blank' rel='noreferrer' style='display:inline;background:none;color:black;'>&copy; Open Knowledge Lab Stuttgart a.o. (Code for Germany)</a>\
 </div></body></html>\r\n";
 
 const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a href='/values'>{t}</a><br/>\
