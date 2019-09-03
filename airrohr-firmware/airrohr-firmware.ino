@@ -1220,7 +1220,7 @@ String make_header(const String& title) {
 	if(title != " ") {
 		s.replace("{n}", F("&raquo;"));
 	} else {
-		s.replace("{n}", "");
+		s.replace("{n}", emptyString);
 	}
 	s.replace("{t}", title);
 	s.replace("{id}", esp_chipid);
@@ -1275,12 +1275,12 @@ String form_checkbox(const String& name, const String& info, const bool checked,
 	if (checked) {
 		s.replace("{c}", F(" checked='checked'"));
 	} else {
-		s.replace("{c}", "");
+		s.replace("{c}", emptyString);
 	};
 	s.replace("{i}", info);
 	s.replace("{n}", name);
 	if (! linebreak) {
-		s.replace("<br/>", "");
+		s.replace("<br/>", emptyString);
 	}
 	return s;
 }
@@ -1452,7 +1452,7 @@ static bool webserver_request_auth() {
 
 static void sendHttpRedirect() {
 	server.sendHeader(F("Location"), F("http://192.168.4.1/config"));
-	server.send(302, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), "");
+	server.send(302, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), emptyString);
 }
 
 /*****************************************************************
@@ -1989,8 +1989,8 @@ void webserver_values() {
 			page_content += table_row_from_value(FPSTR(WEB_GPS), FPSTR(INTL_LATITUDE), check_display_value(last_value_GPS_lat, -200.0, 6, 0), "°");
 			page_content += table_row_from_value(FPSTR(WEB_GPS), FPSTR(INTL_LONGITUDE), check_display_value(last_value_GPS_lon, -200.0, 6, 0), "°");
 			page_content += table_row_from_value(FPSTR(WEB_GPS), FPSTR(INTL_ALTITUDE), check_display_value(last_value_GPS_alt, -1000.0, 2, 0), "m");
-			page_content += table_row_from_value(FPSTR(WEB_GPS), FPSTR(INTL_DATE), last_value_GPS_date, "");
-			page_content += table_row_from_value(FPSTR(WEB_GPS), FPSTR(INTL_TIME), last_value_GPS_time, "");
+			page_content += table_row_from_value(FPSTR(WEB_GPS), FPSTR(INTL_DATE), last_value_GPS_date, emptyString);
+			page_content += table_row_from_value(FPSTR(WEB_GPS), FPSTR(INTL_TIME), last_value_GPS_time, emptyString);
 		}
 
 		page_content += FPSTR(EMPTY_ROW);
@@ -2535,7 +2535,7 @@ void sendLuftdaten(const String& data, const int pin, const char* host, const in
 	data_4_dusti.replace("{v}", SOFTWARE_VERSION);
 	data_4_dusti += data;
 	data_4_dusti.remove(data_4_dusti.length() - 1);
-	data_4_dusti.replace(replace_str, "");
+	data_4_dusti.replace(replace_str, emptyString);
 	data_4_dusti += "]}";
 	if (data != "") {
 		sendData(data_4_dusti, pin, host, httpPort, url, use_ssl, verify, "", FPSTR(TXT_CONTENT_TYPE_JSON));
@@ -3847,9 +3847,9 @@ void display_values() {
 		}
 		if (cfg::has_lcd2004_27) {
 			display_header = String((next_display_count % screen_count) + 1) + "/" + String(screen_count) + " " + display_header;
-			display_lines[0].replace(" µg/m³", "");
+			display_lines[0].replace(" µg/m³", emptyString);
 			display_lines[0].replace("°", String(char(223)));
-			display_lines[1].replace(" µg/m³", "");
+			display_lines[1].replace(" µg/m³", emptyString);
 			lcd_2004_27.clear();
 			lcd_2004_27.setCursor(0, 0);
 			lcd_2004_27.print(display_header);
