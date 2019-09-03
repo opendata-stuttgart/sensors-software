@@ -328,7 +328,7 @@ namespace cfg {
 // IMPORTANT: NO MORE CHANGES TO VARIABLE NAMES NEEDED FOR EXTERNAL APIS
 
 #define HOST_SENSEMAP "ingress.opensensemap.org"
-#define URL_SENSEMAP "/boxes/BOXID/data?luftdaten=1"
+#define URL_SENSEMAP "/boxes/{v}/data?luftdaten=1"
 #define PORT_SENSEMAP 443
 
 #define HOST_FSAPP "www.h2801469.stratoserver.net"
@@ -2106,8 +2106,7 @@ void webserver_data_json() {
 
 	debug_outln(F("output data json..."), DEBUG_MIN_INFO);
 	if (first_cycle) {
-		s1 = FPSTR(data_first_part);
-		s1.replace("{v}", SOFTWARE_VERSION);
+		s1 = tmpl(FPSTR(data_first_part), SOFTWARE_VERSION);
 		s1 += "]}";
 		age = cfg::sending_intervall_ms - msSince(starttime);
 		if (age > cfg::sending_intervall_ms) {
@@ -2531,8 +2530,7 @@ void sendData(const String& data, const int pin, const char* host, const int htt
  * send single sensor data to luftdaten.info api                 *
  *****************************************************************/
 void sendLuftdaten(const String& data, const int pin, const char* host, const int httpPort, const char* url, const bool use_ssl, const bool verify, const char* replace_str) {
-	String data_4_dusti = FPSTR(data_first_part);
-	data_4_dusti.replace("{v}", SOFTWARE_VERSION);
+	String data_4_dusti = tmpl(FPSTR(data_first_part), SOFTWARE_VERSION);
 	data_4_dusti += data;
 	data_4_dusti.remove(data_4_dusti.length() - 1);
 	data_4_dusti.replace(replace_str, emptyString);
@@ -4298,8 +4296,7 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 	if (cfg::send2sensemap && (cfg::senseboxid[0] != '\0')) {
 		debug_outln(String(FPSTR(DBG_TXT_SENDING_TO)) + F("opensensemap: "), DEBUG_MIN_INFO);
 		start_send = millis();
-		String sensemap_path = URL_SENSEMAP;
-		sensemap_path.replace("BOXID", cfg::senseboxid);
+		String sensemap_path(tmpl(F(URL_SENSEMAP), cfg::senseboxid));
 		sendData(data, 0, HOST_SENSEMAP, PORT_SENSEMAP, sensemap_path.c_str(), true, false, "", FPSTR(TXT_CONTENT_TYPE_JSON));
 		sum_send_time += millis() - start_send;
 	}
@@ -4501,8 +4498,7 @@ void loop() {
 
 	if (send_now) {
 		debug_outln(F("Creating data string:"), DEBUG_MIN_INFO);
-		String data = FPSTR(data_first_part);
-		data.replace("{v}", SOFTWARE_VERSION);
+		String data = tmpl(FPSTR(data_first_part), SOFTWARE_VERSION);
 		String data_sample_times = Value2Json(F("samples"), String(sample_count));
 		data_sample_times += Value2Json(F("min_micro"), String(min_micro));
 		data_sample_times += Value2Json(F("max_micro"), String(max_micro));
