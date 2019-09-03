@@ -88,6 +88,12 @@
  * Der Sketch verwendet 511608 Bytes (48%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
  * Globale Variablen verwenden 37264 Bytes (45%) des dynamischen Speichers, 44656 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
  *
+ * Der Sketch verwendet 506304 Bytes (48%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
+ * Globale Variablen verwenden 37128 Bytes (45%) des dynamischen Speichers, 44792 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
+ * 
+ * Der Sketch verwendet 505504 Bytes (48%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
+ * Globale Variablen verwenden 37128 Bytes (45%) des dynamischen Speichers, 44792 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
+ * 
  * Attention:
  * the driver for the Sensirion PM Sensor SPS30 needs I²C lransmission of 64 Bytes
  *
@@ -607,9 +613,11 @@ const char data_first_part[] PROGMEM = "{\"software_version\": \"{v}\", \"sensor
 #define debug_level_check if(level > cfg::debug) return;
 
 void debug_out(const String& text, const int level) { debug_level_check; Serial.print(text); }
+void debug_out_bool(const bool text, const int level) { debug_level_check; Serial.print(String(text)); }
 void debug_out(const __FlashStringHelper* text, const int level) { debug_level_check; Serial.print(text); }
 
 void debug_outln(const String& text, const int level) { debug_level_check; Serial.println(text); }
+void debug_outln_bool(const bool text, const int level) { debug_level_check; Serial.println(String(text)); }
 void debug_outln(const __FlashStringHelper* text, const int level) { debug_level_check; Serial.println(text); }
 
 #undef debug_level_check
@@ -1354,6 +1362,10 @@ String line_from_value(const String& name, const String& value) {
 	return s;
 }
 
+String line_from_value_bool(const String& name, const bool value) {
+	return line_from_value(name, String(value));
+}
+
 String table_row_from_value(const String& sensor, const String& param, const String& value, const String& unit) {
 	String s = F(	"<tr>"
 					"<td>{s}</td>"
@@ -1743,41 +1755,41 @@ void webserver_config() {
 #undef readTimeParam
 #undef readPasswdParam
 
-		page_content += line_from_value(tmpl(FPSTR(INTL_SEND_TO), F("Luftdaten.info")), String(send2dusti));
-		page_content += line_from_value(tmpl(FPSTR(INTL_SEND_TO), F("Madavi")), String(send2madavi));
-		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), F("DHT")), String(dht_read));
-		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), F("HTU21D")), String(htu21d_read));
-		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), F("SDS")), String(sds_read));
-		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), F("PMS(1,3,5,6,7)003")), String(pms_read));
-		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), F("HPM")), String(hpm_read));
-		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), F("SPS30")), String(sps30_read));
-		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), F("PPD")), String(ppd_read));
-		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), F("BMP180")), String(bmp_read));
-		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), F("BMP280")), String(bmp280_read));
-		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), F("BME280")), String(bme280_read));
-		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), F("DS18B20")), String(ds18b20_read));
-		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), F("DNMS")), String(dnms_read));
-		page_content += line_from_value(FPSTR(INTL_DNMS_CORRECTION), String(dnms_correction));
-		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), F("GPS")), String(gps_read));
-		page_content += line_from_value(FPSTR(INTL_AUTO_UPDATE), String(auto_update));
-		page_content += line_from_value(FPSTR(INTL_USE_BETA), String(use_beta));
-		page_content += line_from_value(FPSTR(INTL_DISPLAY), String(has_display));
-		page_content += line_from_value(FPSTR(INTL_SH1106), String(has_sh1106));
-		page_content += line_from_value(FPSTR(INTL_FLIP_DISPLAY), String(has_flipped_display));
-		page_content += line_from_value(FPSTR(INTL_LCD1602_27), String(has_lcd1602_27));
-		page_content += line_from_value(FPSTR(INTL_LCD1602_3F), String(has_lcd1602));
-		page_content += line_from_value(FPSTR(INTL_LCD2004_27), String(has_lcd2004_27));
+		page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), F("Luftdaten.info")), send2dusti);
+		page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), F("Madavi")), send2madavi);
+		page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("DHT")), dht_read);
+		page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("HTU21D")), htu21d_read);
+		page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("SDS")), sds_read);
+		page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("PMS(1,3,5,6,7)003")), pms_read);
+		page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("HPM")), hpm_read);
+		page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("SPS30")), sps30_read);
+		page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("PPD")), ppd_read);
+		page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("BMP180")), bmp_read);
+		page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("BMP280")), bmp280_read);
+		page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("BME280")), bme280_read);
+		page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("DS18B20")), ds18b20_read);
+		page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("DNMS")), dnms_read);
+		page_content += line_from_value_bool(FPSTR(INTL_DNMS_CORRECTION), String(dnms_correction));
+		page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("GPS")), gps_read);
+		page_content += line_from_value_bool(FPSTR(INTL_AUTO_UPDATE), auto_update);
+		page_content += line_from_value_bool(FPSTR(INTL_USE_BETA), use_beta);
+		page_content += line_from_value_bool(FPSTR(INTL_DISPLAY), has_display);
+		page_content += line_from_value_bool(FPSTR(INTL_SH1106), has_sh1106);
+		page_content += line_from_value_bool(FPSTR(INTL_FLIP_DISPLAY), has_flipped_display);
+		page_content += line_from_value_bool(FPSTR(INTL_LCD1602_27), has_lcd1602_27);
+		page_content += line_from_value_bool(FPSTR(INTL_LCD1602_3F), has_lcd1602);
+		page_content += line_from_value_bool(FPSTR(INTL_LCD2004_27), has_lcd2004_27);
 		page_content += line_from_value(FPSTR(INTL_DEBUG_LEVEL), String(debug));
 		page_content += line_from_value(FPSTR(INTL_MEASUREMENT_INTERVAL), String(sending_intervall_ms));
-		page_content += line_from_value(tmpl(FPSTR(INTL_SEND_TO), F("Feinstaub-App")), String(send2fsapp));
-		page_content += line_from_value(tmpl(FPSTR(INTL_SEND_TO), F("aircms.online")), String(send2aircms));
-		page_content += line_from_value(tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_CSV)), String(send2csv));
-		page_content += line_from_value(tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_FEINSTAUB_APP)), String(send2fsapp));
-		page_content += line_from_value(tmpl(FPSTR(INTL_SEND_TO), F("opensensemap")), String(send2sensemap));
+		page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), F("Feinstaub-App")), send2fsapp);
+		page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), F("aircms.online")), send2aircms);
+		page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_CSV)), send2csv);
+		page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_FEINSTAUB_APP)), send2fsapp);
+		page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), F("opensensemap")), send2sensemap);
 		page_content += F("<br/>senseBox-ID ");
 		page_content += senseboxid;
 		page_content += FPSTR(WEB_BR_BR);
-		page_content += line_from_value(FPSTR(INTL_SEND_TO_OWN_API), String(send2custom));
+		page_content += line_from_value_bool(FPSTR(INTL_SEND_TO_OWN_API), send2custom);
 		page_content += line_from_value(FPSTR(INTL_SERVER), host_custom);
 		page_content += line_from_value(FPSTR(INTL_PATH), url_custom);
 		page_content += line_from_value(FPSTR(INTL_PORT), String(port_custom));
@@ -2314,39 +2326,39 @@ void wifiConfig() {
 	debug_outln(cfg::wlanssid, DEBUG_MIN_INFO);
 	debug_outln(F("----\nReading ..."), DEBUG_MIN_INFO);
 	debug_out(F("PPD: "), DEBUG_MIN_INFO);
-	debug_outln(String(cfg::ppd_read), DEBUG_MIN_INFO);
+	debug_outln_bool(cfg::ppd_read, DEBUG_MIN_INFO);
 	debug_out(F("SDS: "), DEBUG_MIN_INFO);
-	debug_outln(String(cfg::sds_read), DEBUG_MIN_INFO);
+	debug_outln_bool(cfg::sds_read, DEBUG_MIN_INFO);
 	debug_out(F("PMS: "), DEBUG_MIN_INFO);
-	debug_outln(String(cfg::pms_read), DEBUG_MIN_INFO);
+	debug_outln_bool(cfg::pms_read, DEBUG_MIN_INFO);
 	debug_out(F("HPM: "), DEBUG_MIN_INFO);
-	debug_outln(String(cfg::hpm_read), DEBUG_MIN_INFO);
+	debug_outln_bool(cfg::hpm_read, DEBUG_MIN_INFO);
 	debug_out(F("SPS30: "), DEBUG_MIN_INFO);
-	debug_outln(String(cfg::sps30_read), DEBUG_MIN_INFO);
+	debug_outln_bool(cfg::sps30_read, DEBUG_MIN_INFO);
 	debug_out(F("DHT: "), DEBUG_MIN_INFO);
-	debug_outln(String(cfg::dht_read), DEBUG_MIN_INFO);
+	debug_outln_bool(cfg::dht_read, DEBUG_MIN_INFO);
 	debug_out(F("DS18B20: "), DEBUG_MIN_INFO);
-	debug_outln(String(cfg::ds18b20_read), DEBUG_MIN_INFO);
+	debug_outln_bool(cfg::ds18b20_read, DEBUG_MIN_INFO);
 	debug_out(F("HTU21D: "), DEBUG_MIN_INFO);
-	debug_outln(String(cfg::htu21d_read), DEBUG_MIN_INFO);
+	debug_outln_bool(cfg::htu21d_read, DEBUG_MIN_INFO);
 	debug_out(F("BMP: "), DEBUG_MIN_INFO);
-	debug_outln(String(cfg::bmp_read), DEBUG_MIN_INFO);
+	debug_outln_bool(cfg::bmp_read, DEBUG_MIN_INFO);
 	debug_out(F("DNMS: "), DEBUG_MIN_INFO);
-	debug_outln(String(cfg::dnms_read), DEBUG_MIN_INFO);
+	debug_outln_bool(cfg::dnms_read, DEBUG_MIN_INFO);
 	debug_outln(F("----\nSend to ..."), DEBUG_MIN_INFO);
 	debug_out(F("Dusti: "), DEBUG_MIN_INFO);
-	debug_outln(String(cfg::send2dusti), DEBUG_MIN_INFO);
+	debug_outln_bool(cfg::send2dusti, DEBUG_MIN_INFO);
 	debug_out(F("Madavi: "), DEBUG_MIN_INFO);
-	debug_outln(String(cfg::send2madavi), DEBUG_MIN_INFO);
+	debug_outln_bool(cfg::send2madavi, DEBUG_MIN_INFO);
 	debug_out(F("CSV: "), DEBUG_MIN_INFO);
-	debug_outln(String(cfg::send2csv), DEBUG_MIN_INFO);
+	debug_outln_bool(cfg::send2csv, DEBUG_MIN_INFO);
 	debug_outln("----", DEBUG_MIN_INFO);
 	debug_out(F("Autoupdate: "), DEBUG_MIN_INFO);
-	debug_outln(String(cfg::auto_update), DEBUG_MIN_INFO);
+	debug_outln_bool(cfg::auto_update, DEBUG_MIN_INFO);
 	debug_out(F("Display: "), DEBUG_MIN_INFO);
-	debug_outln(String(cfg::has_display), DEBUG_MIN_INFO);
+	debug_outln_bool(cfg::has_display, DEBUG_MIN_INFO);
 	debug_out(F("LCD 1602: "), DEBUG_MIN_INFO);
-	debug_outln(String(cfg::has_lcd1602), DEBUG_MIN_INFO);
+	debug_outln_bool(cfg::has_lcd1602, DEBUG_MIN_INFO);
 	debug_out(F("Debug: "), DEBUG_MIN_INFO);
 	debug_outln(String(cfg::debug), DEBUG_MIN_INFO);
 	wificonfig_loop = false;
@@ -3979,7 +3991,7 @@ bool initSPS30() {
 	sps30_reset();
 	delay(200);
 	if ( sps30_get_serial(serial) != 0 ) {
-		debug_outln(F(" ... not found"), DEBUG_MIN_INFO);
+		debug_outln(FPSTR(DBG_TXT_NOT_FOUND), DEBUG_MIN_INFO);
 		return false;
 	} else {
 		debug_out(F(" ... found, Serial-No.: "), DEBUG_MIN_INFO);
@@ -4007,10 +4019,10 @@ bool initDNMS() {
 	delay(1000);
 	dnms_corr_value = atof(cfg::dnms_correction);
 	if (dnms_read_version(dnms_version) != 0) {
-		debug_outln(F(" ... not found"), DEBUG_MIN_INFO);
+		debug_outln(FPSTR(DBG_TXT_NOT_FOUND), DEBUG_MIN_INFO);
 		return false;
 	} else {
-		debug_out(F(" ... found: "), DEBUG_MIN_INFO);
+		debug_out(FPSTR(DBG_TXT_FOUND), DEBUG_MIN_INFO);
 		debug_outln(String(dnms_version), DEBUG_MIN_INFO);
 		return true;
 	}
