@@ -1160,12 +1160,11 @@ void writeConfig() {
 	json_string.remove(json_string.length() - 1);
 	json_string += "}";
 
-	debug_outln(json_string, DEBUG_MIN_INFO);
 	File configFile = SPIFFS.open("/config.json", "w");
 	if (configFile) {
 		configFile.print(json_string);
 		debug_out(F("Config written: "), DEBUG_MIN_INFO);
-		debug_outln(json_string, DEBUG_MIN_INFO);
+		debug_outln(json_string, DEBUG_MAX_INFO);
 		configFile.close();
 	} else {
 		debug_outln(F("failed to open config file for writing"), DEBUG_ERROR);
