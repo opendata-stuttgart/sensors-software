@@ -987,7 +987,7 @@ void readConfig() {
 			File configFile = SPIFFS.open("/config.json", "r");
 			if (configFile) {
 				debug_outln(F("opened config file..."), DEBUG_MIN_INFO);
-				StaticJsonDocument<JSON_BUFFER_SIZE> json;
+				DynamicJsonDocument json(JSON_BUFFER_SIZE);
 				DeserializationError err = deserializeJson(json, configFile);
 				if (!err) {
 					debug_outln(F("parsed json..."), DEBUG_MIN_INFO);
@@ -2181,7 +2181,7 @@ void webserver_prometheus_endpoint() {
 	data_4_prometheus.replace("{up}", String(msSince(time_point_device_start_ms)));
 	data_4_prometheus.replace("{si}", String(cfg::sending_intervall_ms));
 	data_4_prometheus.replace("{cs}", String(count_sends));
-	StaticJsonDocument<JSON_BUFFER_SIZE> json2data;
+	DynamicJsonDocument json2data(JSON_BUFFER_SIZE);
 	DeserializationError err = deserializeJson(json2data, last_data_string);
 	if (!err) {
 		for (uint8_t i = 0; i < json2data["sensordatavalues"].size() - 1; i++) {
@@ -2594,7 +2594,7 @@ String create_influxdb_string(const String& data) {
 
 	debug_outln(F("Parse JSON for influx DB"), DEBUG_MIN_INFO);
 	debug_outln(data, DEBUG_MIN_INFO);
-	StaticJsonDocument<JSON_BUFFER_SIZE> json2data;
+	DynamicJsonDocument json2data(JSON_BUFFER_SIZE);
 	DeserializationError err = deserializeJson(json2data, data);
 	if (!err) {
 		data_4_influxdb += cfg::measurement_name_influx;
@@ -2621,7 +2621,7 @@ String create_influxdb_string(const String& data) {
  * send data as csv to serial out                                *
  *****************************************************************/
 void send_csv(const String& data) {
-	StaticJsonDocument<JSON_BUFFER_SIZE> json2data;
+	DynamicJsonDocument json2data(JSON_BUFFER_SIZE);
 	DeserializationError err = deserializeJson(json2data, data);
 	debug_outln(F("CSV Output"), DEBUG_MIN_INFO);
 	debug_outln(data, DEBUG_MIN_INFO);
