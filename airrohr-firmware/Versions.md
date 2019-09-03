@@ -3,6 +3,7 @@ NRZ-2019-124-B6
 * Sensirion SPS30 added
 * option to flip OLED output
 * Fix crash on selecting available networks in AP mode
+* add options to disable display of wifi and device infos
 
 NRZ-2019-124-B5
 * some comments removed

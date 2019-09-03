@@ -282,6 +282,9 @@ namespace cfg {
 	bool has_lcd1602 = HAS_LCD1602;
 	bool has_lcd1602_27 = HAS_LCD1602_27;
 	bool has_lcd2004_27 = HAS_LCD2004_27;
+	
+	bool display_wifi_info = DISPLAY_WIFI_INFO;
+	bool display_device_info = DISPLAY_DEVICE_INFO;
 
 	int  debug = DEBUG;
 
@@ -1033,6 +1036,8 @@ void readConfig() {
 					setFromJSON(has_lcd1602);
 					setFromJSON(has_lcd1602_27);
 					setFromJSON(has_lcd2004_27);
+					setFromJSON(display_wifi_info);
+					setFromJSON(display_device_info);
 					setFromJSON(debug);
 					setFromJSON(sending_intervall_ms);
 					setFromJSON(time_for_wifi_config);
@@ -1129,10 +1134,12 @@ void writeConfig() {
 	copyToJSON_Bool(use_beta);
 	copyToJSON_Bool(has_display);
 	copyToJSON_Bool(has_sh1106);
+	copyToJSON_Bool(has_flipped_display);
 	copyToJSON_Bool(has_lcd1602);
 	copyToJSON_Bool(has_lcd1602_27);
 	copyToJSON_Bool(has_lcd2004_27);
-	copyToJSON_Bool(has_flipped_display);
+	copyToJSON_Bool(display_wifi_info);
+	copyToJSON_Bool(display_device_info);
 	copyToJSON_String(debug);
 	copyToJSON_String(sending_intervall_ms);
 	copyToJSON_String(time_for_wifi_config);
@@ -1583,6 +1590,8 @@ void webserver_config() {
 		page_content += form_checkbox("has_lcd1602_27", FPSTR(INTL_LCD1602_27), has_lcd1602_27);
 		page_content += form_checkbox("has_lcd1602", FPSTR(INTL_LCD1602_3F), has_lcd1602);
 		page_content += form_checkbox("has_lcd2004_27", FPSTR(INTL_LCD2004_27), has_lcd2004_27);
+		page_content += form_checkbox("display_wifi_info", FPSTR(INTL_DISPLAY_WIFI_INFO), display_wifi_info);
+		page_content += form_checkbox("display_device_info", FPSTR(INTL_DISPLAY_DEVICE_INFO), display_device_info);
 
 		if (! wificonfig_loop) {
 			page_content += FPSTR(TABLE_TAG_OPEN);
@@ -1745,6 +1754,8 @@ void webserver_config() {
 		readBoolParam(has_lcd1602);
 		readBoolParam(has_lcd1602_27);
 		readBoolParam(has_lcd2004_27);
+		readBoolParam(display_wifi_info);
+		readBoolParam(display_device_info);
 
 #undef readCharParam
 #undef readBoolParam
@@ -1776,6 +1787,8 @@ void webserver_config() {
 		page_content += line_from_value_bool(FPSTR(INTL_LCD1602_27), has_lcd1602_27);
 		page_content += line_from_value_bool(FPSTR(INTL_LCD1602_3F), has_lcd1602);
 		page_content += line_from_value_bool(FPSTR(INTL_LCD2004_27), has_lcd2004_27);
+		page_content += line_from_value_bool(FPSTR(INTL_DISPLAY_WIFI_INFO), display_wifi_info);
+		page_content += line_from_value_bool(FPSTR(INTL_DISPLAY_DEVICE_INFO), display_device_info);
 		page_content += line_from_value(FPSTR(INTL_DEBUG_LEVEL), String(debug));
 		page_content += line_from_value(FPSTR(INTL_MEASUREMENT_INTERVAL), String(sending_intervall_ms));
 		page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), F("Feinstaub-App")), send2fsapp);
@@ -3761,8 +3774,12 @@ void display_values() {
 	if (cfg::dnms_read) {
 		screens[screen_count++] = 5;
 	}
-	screens[screen_count++] = 6;	// Wifi info
-	screens[screen_count++] = 7;	// chipID, firmware and count of measurements
+	if (cfg::display_wifi_info) {
+		screens[screen_count++] = 6;	// Wifi info
+	}
+	if (cfg::display_device_info) {
+		screens[screen_count++] = 7;	// chipID, firmware and count of measurements
+	}
 	if (cfg::has_display || cfg::has_sh1106 || cfg::has_lcd2004_27) {
 		switch (screens[next_display_count % screen_count]) {
 		case (1):
@@ -4205,79 +4222,6 @@ static bool acquireNetworkTime() {
 	return false;
 }
 
-/*****************************************************************
- * The Setup                                                     *
- *****************************************************************/
-void setup() {
-	Serial.begin(9600);					// Output to Serial at 9600 baud
-
-#if defined(ESP32)
-	serialSDS.begin(9600, SERIAL_8N1, D1, D2);
-	serialGPS.begin(9600, SERIAL_8N1, D5, D6);
-	pinMode(16, OUTPUT);
-	digitalWrite(16, LOW);
-	delay(50);
-	digitalWrite(16, HIGH);
-#endif
-	Wire.begin(I2C_PIN_SDA, I2C_PIN_SCL);
-
-#if defined(ESP8266)
-	esp_chipid = String(ESP.getChipId());
-#endif
-#if defined(ESP32)
-	uint64_t chipid_num;
-	chipid_num = ESP.getEfuseMac();
-	esp_chipid = String((uint16_t)(chipid_num >> 32), HEX);
-	esp_chipid += String((uint32_t)chipid_num, HEX);
-#endif
-	cfg::initNonTrivials(esp_chipid.c_str());
-	readConfig();
-
-	init_display();
-	init_lcd();
-	display_debug(F("Connecting to"), String(cfg::wlanssid));
-	connectWifi();
-	got_ntp = acquireNetworkTime();
-	debug_out(F("\nNTP time "), DEBUG_MIN_INFO);
-	debug_outln(String(got_ntp ? "" : "not ") + F("received"), DEBUG_MIN_INFO);
-	autoUpdate();
-	setup_webserver();
-	create_basic_auth_strings();
-	serialSDS.begin(9600);
-	debug_out(F("\nChipId: "), DEBUG_MIN_INFO);
-	debug_outln(esp_chipid, DEBUG_MIN_INFO);
-
-	powerOnTestSensors();
-
-	if (cfg::gps_read) {
-		serialGPS.begin(9600);
-		debug_outln(F("Read GPS..."), DEBUG_MIN_INFO);
-		disable_unneeded_nmea();
-	}
-
-	logEnabledAPIs();
-	logEnabledDisplays();
-
-	String server_name = F("airRohr-");
-	server_name += esp_chipid;
-	if (MDNS.begin(server_name.c_str())) {
-		MDNS.addService("http", "tcp", 80);
-	}
-
-	delay(50);
-
-	// sometimes parallel sending data and web page will stop nodemcu, watchdogtimer set to 30 seconds
-#if defined(ESP8266)
-	wdt_disable();
-	wdt_enable(30000);
-#endif
-
-	starttime = millis();									// store the start time
-	time_point_device_start_ms = starttime;
-	starttime_SDS = starttime;
-	next_display_millis = starttime + DISPLAY_UPDATE_INTERVAL_MS;
-}
-
 static void checkForceRestart() {
 	if (msSince(time_point_device_start_ms) > DURATION_BEFORE_FORCED_RESTART_MS) {
 		ESP.restart();
@@ -4356,6 +4300,79 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 		sum_send_time += millis() - start_send;
 	}
 	return sum_send_time;
+}
+
+/*****************************************************************
+ * The Setup                                                     *
+ *****************************************************************/
+void setup() {
+	Serial.begin(9600);					// Output to Serial at 9600 baud
+
+#if defined(ESP32)
+	serialSDS.begin(9600, SERIAL_8N1, D1, D2);
+	serialGPS.begin(9600, SERIAL_8N1, D5, D6);
+	pinMode(16, OUTPUT);
+	digitalWrite(16, LOW);
+	delay(50);
+	digitalWrite(16, HIGH);
+#endif
+	Wire.begin(I2C_PIN_SDA, I2C_PIN_SCL);
+
+#if defined(ESP8266)
+	esp_chipid = String(ESP.getChipId());
+#endif
+#if defined(ESP32)
+	uint64_t chipid_num;
+	chipid_num = ESP.getEfuseMac();
+	esp_chipid = String((uint16_t)(chipid_num >> 32), HEX);
+	esp_chipid += String((uint32_t)chipid_num, HEX);
+#endif
+	cfg::initNonTrivials(esp_chipid.c_str());
+	readConfig();
+
+	init_display();
+	init_lcd();
+	display_debug(F("Connecting to"), String(cfg::wlanssid));
+	connectWifi();
+	got_ntp = acquireNetworkTime();
+	debug_out(F("\nNTP time "), DEBUG_MIN_INFO);
+	debug_outln(String(got_ntp ? "" : "not ") + F("received"), DEBUG_MIN_INFO);
+	autoUpdate();
+	setup_webserver();
+	create_basic_auth_strings();
+	serialSDS.begin(9600);
+	debug_out(F("\nChipId: "), DEBUG_MIN_INFO);
+	debug_outln(esp_chipid, DEBUG_MIN_INFO);
+
+	powerOnTestSensors();
+
+	if (cfg::gps_read) {
+		serialGPS.begin(9600);
+		debug_outln(F("Read GPS..."), DEBUG_MIN_INFO);
+		disable_unneeded_nmea();
+	}
+
+	logEnabledAPIs();
+	logEnabledDisplays();
+
+	String server_name = F("airRohr-");
+	server_name += esp_chipid;
+	if (MDNS.begin(server_name.c_str())) {
+		MDNS.addService("http", "tcp", 80);
+	}
+
+	delay(50);
+
+	// sometimes parallel sending data and web page will stop nodemcu, watchdogtimer set to 30 seconds
+#if defined(ESP8266)
+	wdt_disable();
+	wdt_enable(30000);
+#endif
+
+	starttime = millis();									// store the start time
+	time_point_device_start_ms = starttime;
+	starttime_SDS = starttime;
+	next_display_millis = starttime + DISPLAY_UPDATE_INTERVAL_MS;
 }
 
 /*****************************************************************

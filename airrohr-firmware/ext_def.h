@@ -169,5 +169,11 @@
 // LCD Display LCD2004 (0x27) connected?
 #define HAS_LCD2004_27 0
 
-// Set debug level for serial outpur?
+// Show wifi info on displays
+#define DISPLAY_WIFI_INFO 1
+
+// Show device info on displays
+#define DISPLAY_DEVICE_INFO 1
+
+// Set debug level for serial output?
 #define DEBUG 3
