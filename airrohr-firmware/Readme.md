@@ -107,6 +107,11 @@ Ich hoffe, alle Bibliotheken erwischt zu haben. Falls beim Kompilieren eine Bibl
 ACHTUNG: Die DHT sensor library hat ab Version 1.2 ein Problem auf den ESP8266. Daher unbedingt max. Version 1.1.1 benutzen
 Um Probleme zu vermeiden, haben wir die letzte funktionierende Version als lokale Kopie eingebunden.
 
+ACHTUNG: Um Over-The-Air Updates zu ermoeglichen (OTA) muss das resultierende Firmware Image weniger als 512kByte
+gross bleiben. Daher verwendet Airrrohr im Moment Arduino Core 2.4.2, da neuere Versionen einen zu grossen
+Footprint erzeugen. Siehe https://arduino-esp8266.readthedocs.io/en/latest/ota_updates/readme.html#update-process-memory-view fuer das memory layout das benoetigt wird.
+
+
 ## Anschluss der Sensoren
 
 Beim Anschluss von Sensoren mit 5V bitte die Board-Version beachten. NodeMCU v3 liefert 5V an `VU`, Version 2 fehlt dieser Anschluss und `VIN` kann dafür genutzt werden.
