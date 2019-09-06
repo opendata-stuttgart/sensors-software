@@ -3619,42 +3619,42 @@ String sensorGPS() {
  * AutoUpdate                                                    *
  *****************************************************************/
 static void autoUpdate() {
-	if (cfg::auto_update) {
-		debug_outln(F("Starting OTA update ..."), DEBUG_MIN_INFO);
-		debug_out(F("NodeMCU firmware : "), DEBUG_MIN_INFO);
-		debug_outln(SOFTWARE_VERSION, DEBUG_MIN_INFO);
-		debug_outln(UPDATE_HOST, DEBUG_MED_INFO);
-		debug_outln(UPDATE_URL, DEBUG_MED_INFO);
+	if (!cfg::auto_update) return;
 
-		const String SDS_version = cfg::sds_read ? SDS_version_date() : "";
-		display_debug(F("Looking for"), F("OTA update"));
-		last_update_attempt = millis();
-		String version = SOFTWARE_VERSION + String(" ") + esp_chipid + String(" ") + SDS_version + String(" ") +
-						 String(cfg::current_lang) + String(" ") + String(INTL_LANG) + String(" ") +
-						 String(cfg::use_beta ? "BETA" : "");
+	debug_outln(F("Starting OTA update ..."), DEBUG_MIN_INFO);
+	debug_out(F("NodeMCU firmware : "), DEBUG_MIN_INFO);
+	debug_outln(SOFTWARE_VERSION, DEBUG_MIN_INFO);
+	debug_outln(UPDATE_HOST, DEBUG_MED_INFO);
+	debug_outln(UPDATE_URL, DEBUG_MED_INFO);
+
+	const String SDS_version = cfg::sds_read ? SDS_version_date() : "";
+	display_debug(F("Looking for"), F("OTA update"));
+	last_update_attempt = millis();
+	String version = SOFTWARE_VERSION + String(" ") + esp_chipid + String(" ") + SDS_version + String(" ") +
+					 String(cfg::current_lang) + String(" ") + String(INTL_LANG) + String(" ") +
+					 String(cfg::use_beta ? "BETA" : "");
 #if defined(ESP8266)
-		const HTTPUpdateResult ret = ESPhttpUpdate.update(UPDATE_HOST, UPDATE_PORT, UPDATE_URL, version);
-		String LastErrorString = ESPhttpUpdate.getLastErrorString().c_str();
+	const HTTPUpdateResult ret = ESPhttpUpdate.update(UPDATE_HOST, UPDATE_PORT, UPDATE_URL, version);
+	String LastErrorString = ESPhttpUpdate.getLastErrorString().c_str();
 #endif
 #if defined(ESP32)
-		WiFiClient client;
-		t_httpUpdate_return ret = httpUpdate.update(client, UPDATE_HOST, UPDATE_PORT, UPDATE_URL, version);
-		String LastErrorString = httpUpdate.getLastErrorString().c_str();
+	WiFiClient client;
+	t_httpUpdate_return ret = httpUpdate.update(client, UPDATE_HOST, UPDATE_PORT, UPDATE_URL, version);
+	String LastErrorString = httpUpdate.getLastErrorString().c_str();
 #endif
-		switch(ret) {
-		case HTTP_UPDATE_FAILED:
-			debug_out(String(FPSTR(DBG_TXT_UPDATE)) + FPSTR(DBG_TXT_UPDATE_FAILED), DEBUG_ERROR);
-			debug_outln(LastErrorString, DEBUG_ERROR);
-			display_debug(FPSTR(DBG_TXT_UPDATE), FPSTR(DBG_TXT_UPDATE_FAILED));
-			break;
-		case HTTP_UPDATE_NO_UPDATES:
-			debug_outln(String(FPSTR(DBG_TXT_UPDATE)) + FPSTR(DBG_TXT_UPDATE_NO_UPDATE), DEBUG_MIN_INFO);
-			display_debug(FPSTR(DBG_TXT_UPDATE), FPSTR(DBG_TXT_UPDATE_NO_UPDATE));
-			break;
-		case HTTP_UPDATE_OK:
-			debug_outln(String(FPSTR(DBG_TXT_UPDATE)) + FPSTR(DBG_TXT_UPDATE_OK), DEBUG_MIN_INFO); // may not called we reboot the ESP
-			break;
-		}
+	switch(ret) {
+	case HTTP_UPDATE_FAILED:
+		debug_out(String(FPSTR(DBG_TXT_UPDATE)) + FPSTR(DBG_TXT_UPDATE_FAILED), DEBUG_ERROR);
+		debug_outln(LastErrorString, DEBUG_ERROR);
+		display_debug(FPSTR(DBG_TXT_UPDATE), FPSTR(DBG_TXT_UPDATE_FAILED));
+		break;
+	case HTTP_UPDATE_NO_UPDATES:
+		debug_outln(String(FPSTR(DBG_TXT_UPDATE)) + FPSTR(DBG_TXT_UPDATE_NO_UPDATE), DEBUG_MIN_INFO);
+		display_debug(FPSTR(DBG_TXT_UPDATE), FPSTR(DBG_TXT_UPDATE_NO_UPDATE));
+		break;
+	case HTTP_UPDATE_OK:
+		debug_outln(String(FPSTR(DBG_TXT_UPDATE)) + FPSTR(DBG_TXT_UPDATE_OK), DEBUG_MIN_INFO); // may not called we reboot the ESP
+		break;
 	}
 }
 
