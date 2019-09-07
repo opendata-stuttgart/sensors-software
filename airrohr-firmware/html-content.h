@@ -4,9 +4,9 @@ const char TXT_CONTENT_TYPE_TEXT_HTML[] PROGMEM = "text/html; charset=utf-8";
 const char TXT_CONTENT_TYPE_TEXT_PLAIN[] PROGMEM = "text/plain";
 const char TXT_CONTENT_TYPE_IMAGE_SVG[] PROGMEM = "image/svg+xml";
 
-const char DBG_TXT_TEMPERATURE[] PROGMEM = "Temperature: {v} °C";
-const char DBG_TXT_HUMIDITY[] PROGMEM = "Humidity: {v} %";
-const char DBG_TXT_PRESSURE[] PROGMEM = "Pressure: {v} hPa";
+const char DBG_TXT_TEMPERATURE[] PROGMEM = "Temperature (°C): ";
+const char DBG_TXT_HUMIDITY[] PROGMEM = "Humidity (%): ";
+const char DBG_TXT_PRESSURE[] PROGMEM = "Pressure (hPa): ";
 const char DBG_TXT_DNMS_LAEQ[] PROGMEM = "LAeq: ";
 const char DBG_TXT_DNMS_LA_MIN[] PROGMEM = "LA_MIN: ";
 const char DBG_TXT_DNMS_LA_MAX[] PROGMEM = "LA_MAX: ";
@@ -15,7 +15,6 @@ const char DBG_TXT_END_READING[] PROGMEM = "End reading ";
 const char DBG_TXT_CHECKSUM_IS[] PROGMEM = "Checksum is: ";
 const char DBG_TXT_CHECKSUM_SHOULD[] PROGMEM = "Checksum should: ";
 const char DBG_TXT_DATA_READ_FAILED[] PROGMEM = "Data read failed";
-const char DBG_TXT_COULDNT_BE_READ[] PROGMEM = " couldn't be read";
 const char DBG_TXT_UPDATE[] PROGMEM = "[update] ";
 const char DBG_TXT_UPDATE_FAILED[] PROGMEM = "Update failed.";
 const char DBG_TXT_UPDATE_NO_UPDATE[] PROGMEM = "No update.";
@@ -73,18 +72,17 @@ const char WEB_PAGE_FOOTER[] PROGMEM = "<br/><br/><a href='/' style='display:inl
 </div></body></html>\r\n";
 
 const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a href='/values'>{t}</a><br/>\
-<a href='https://maps.luftdaten.info/' target='_blank'>{map}</a><br/>\
+<a href='https://maps.luftdaten.info/' target='_blank' rel='noreferrer'>{map}</a><br/>\
 <a href='/config'>{conf}</a><br/>\
 <a href='/removeConfig'>{conf_delete}</a><br/>\
 <a href='/reset'>{restart}</a><br/>\
+<h4>{debug_setting}</h4><br/>\
 <table style='width:100%;'>\
-<tr><td style='width:33%;'><a href='/debug?lvl=0'>Debug null</a></td>\
-<td style='width:33%;'><a href='/debug?lvl=1'>Debug Error</a></td>\
-<td style='width:33%;'><a href='/debug?lvl=2'>Debug Warning</a></td>\
+<tr><td style='width:25%;'><a href='/debug?lvl=0'>None</a></td>\
+<td style='width:25%;'><a href='/debug?lvl=1'>Error</a></td>\
+<td style='width:25%;'><a href='/debug?lvl=3'>Info</a></td>\
+<td style='width:25%;'><a href='/debug?lvl=5'>Verbose</a></td>\
 </tr><tr>\
-<td><a href='/debug?lvl=3'>Debug Info low</a></td>\
-<td><a href='/debug?lvl=4'>Debug Info medium</a></td>\
-<td><a href='/debug?lvl=5'>Debug Info high</a></td>\
 </tr>\
 </table>\
 ";
