@@ -3574,6 +3574,7 @@ static String sensorGPS() {
 static void autoUpdate() {
 	if (!cfg::auto_update) return;
 
+#if defined(ESP8266)
 	// Unmout Filesystem before reboot
 	SPIFFS.end();
 
@@ -3613,6 +3614,7 @@ static void autoUpdate() {
 		debug_outln_info(FPSTR(DBG_TXT_UPDATE), FPSTR(DBG_TXT_UPDATE_OK));
 		break;
 	}
+#endif
 }
 
 static String displayGenerateFooter(unsigned int screen_count) {
