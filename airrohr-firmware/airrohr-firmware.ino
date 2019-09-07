@@ -618,20 +618,20 @@ const char data_first_part[] PROGMEM = "{\"software_version\": \"{v}\", \"sensor
 
 #define debug_level_check if(level > cfg::debug) return;
 
-void debug_out(const String& text, const int level) { debug_level_check; Serial.print(text); }
-void debug_out_bool(const bool text, const int level) { debug_level_check; Serial.print(String(text)); }
-void debug_out(const __FlashStringHelper* text, const int level) { debug_level_check; Serial.print(text); }
+static void debug_out(const String& text, const int level) { debug_level_check; Serial.print(text); }
+static void debug_out_bool(const bool text, const int level) { debug_level_check; Serial.print(String(text)); }
+static void debug_out(const __FlashStringHelper* text, const int level) { debug_level_check; Serial.print(text); }
 
-void debug_outln(const String& text, const int level) { debug_level_check; Serial.println(text); }
-void debug_outln_bool(const bool text, const int level) { debug_level_check; Serial.println(String(text)); }
-void debug_outln(const __FlashStringHelper* text, const int level) { debug_level_check; Serial.println(text); }
+static void debug_outln(const String& text, const int level) { debug_level_check; Serial.println(text); }
+static void debug_outln_bool(const bool text, const int level) { debug_level_check; Serial.println(String(text)); }
+static void debug_outln(const __FlashStringHelper* text, const int level) { debug_level_check; Serial.println(text); }
 
 #undef debug_level_check
 
 /*****************************************************************
  * display values                                                *
  *****************************************************************/
-void display_debug(const String& text1, const String& text2) {
+static void display_debug(const String& text1, const String& text2) {
 	debug_outln(F("output debug text to displays..."), DEBUG_MIN_INFO);
 	debug_outln(text1 + "\n" + text2, DEBUG_MAX_INFO);
 	if (cfg::has_display) {
@@ -954,7 +954,7 @@ String SDS_version_date() {
 /*****************************************************************
  * disable unneeded NMEA sentences, TinyGPS++ needs GGA, RMC     *
  *****************************************************************/
-void disable_unneeded_nmea() {
+static void disable_unneeded_nmea() {
 	serialGPS.println(F("$PUBX,40,GLL,0,0,0,0*5C"));       // Geographic position, latitude / longitude
 //	serialGPS.println(F("$PUBX,40,GGA,0,0,0,0*5A"));       // Global Positioning System Fix Data
 	serialGPS.println(F("$PUBX,40,GSA,0,0,0,0*4E"));       // GPS DOP and active satellites
@@ -966,7 +966,7 @@ void disable_unneeded_nmea() {
 /*****************************************************************
  * read config from spiffs                                       *
  *****************************************************************/
-void readConfig() {
+static void readConfig() {
 	using namespace cfg;
 	String json_string;
 	bool pms24_read = 0;
@@ -1093,7 +1093,7 @@ void readConfig() {
 /*****************************************************************
  * write config to spiffs                                        *
  *****************************************************************/
-void writeConfig() {
+static void writeConfig() {
 	using namespace cfg;
 	String json_string = "{";
 	debug_outln(F("saving config..."), DEBUG_MIN_INFO);
@@ -1184,7 +1184,7 @@ void writeConfig() {
 /*****************************************************************
  * Base64 encode user:password                                   *
  *****************************************************************/
-void create_basic_auth_strings() {
+static void create_basic_auth_strings() {
 	basic_auth_custom = "";
 	if (cfg::user_custom[0] != '\0' || cfg::pwd_custom[0] != '\0') {
 		basic_auth_custom = base64::encode(String(cfg::user_custom) + ":" + String(cfg::pwd_custom));
@@ -1460,7 +1460,7 @@ static void sendHttpRedirect() {
 /*****************************************************************
  * Webserver root: show all options                              *
  *****************************************************************/
-void webserver_root() {
+static void webserver_root() {
 	if (WiFi.status() != WL_CONNECTED) {
 		sendHttpRedirect();
 	} else {
@@ -1817,7 +1817,7 @@ static void webserver_config_body_post(String& page_content) {
 	page_content += FPSTR(INTL_SENSOR_IS_REBOOTING);
 }
 
-void webserver_config() {
+static void webserver_config() {
 	if (!webserver_request_auth())
 	{ return; }
 
@@ -1856,7 +1856,7 @@ void webserver_config() {
 /*****************************************************************
  * Webserver wifi: show available wifi networks                  *
  *****************************************************************/
-void webserver_wifi() {
+static void webserver_wifi() {
 	String page_content;
 
 	debug_out(F("wifi networks found: "), DEBUG_MIN_INFO);
@@ -1923,7 +1923,7 @@ void webserver_wifi() {
 /*****************************************************************
  * Webserver root: show latest values                            *
  *****************************************************************/
-void webserver_values() {
+static void webserver_values() {
 	if (WiFi.status() != WL_CONNECTED) {
 		sendHttpRedirect();
 	} else {
@@ -2046,7 +2046,7 @@ void webserver_values() {
 /*****************************************************************
  * Webserver set debug level                                     *
  *****************************************************************/
-void webserver_debug_level() {
+static void webserver_debug_level() {
 	if (!webserver_request_auth())
 	{ return; }
 
@@ -2077,7 +2077,7 @@ void webserver_debug_level() {
 /*****************************************************************
  * Webserver remove config                                       *
  *****************************************************************/
-void webserver_removeConfig() {
+static void webserver_removeConfig() {
 	if (!webserver_request_auth())
 	{ return; }
 
@@ -2111,7 +2111,7 @@ void webserver_removeConfig() {
 /*****************************************************************
  * Webserver reset NodeMCU                                       *
  *****************************************************************/
-void webserver_reset() {
+static void webserver_reset() {
 	if (!webserver_request_auth())
 	{ return; }
 
@@ -2134,7 +2134,7 @@ void webserver_reset() {
 /*****************************************************************
  * Webserver data.json                                           *
  *****************************************************************/
-void webserver_data_json() {
+static void webserver_data_json() {
 	String s1;
 	unsigned long age = 0;
 
@@ -2170,7 +2170,7 @@ void webserver_data_json() {
 /*****************************************************************
  * Webserver prometheus metrics endpoint                         *
  *****************************************************************/
-void webserver_prometheus_endpoint() {
+static void webserver_prometheus_endpoint() {
 	debug_outln(F("output prometheus endpoint..."), DEBUG_MIN_INFO);
 	String data_4_prometheus = F("software_version{version=\"{ver}\",node=\"-{id}\"} 1\nuptime_ms{{id}} {up}\nsending_intervall_ms{{id}} {si}\nnumber_of_measurements{{id}} {cs}\n");
 	debug_outln(F("Parse JSON for Prometheus"), DEBUG_MIN_INFO);
@@ -2215,7 +2215,7 @@ static void webserver_images() {
 /*****************************************************************
  * Webserver page not found                                      *
  *****************************************************************/
-void webserver_not_found() {
+static void webserver_not_found() {
 	last_page_load = millis();
 	debug_outln(F("output not found page..."), DEBUG_MIN_INFO);
 	if (WiFi.status() != WL_CONNECTED) {
@@ -2232,7 +2232,7 @@ void webserver_not_found() {
 /*****************************************************************
  * Webserver setup                                               *
  *****************************************************************/
-void setup_webserver() {
+static void setup_webserver() {
 	server.on("/", webserver_root);
 	server.on("/config", webserver_config);
 	server.on("/wifi", webserver_wifi);
@@ -2275,7 +2275,7 @@ static int selectChannelForAp() {
 /*****************************************************************
  * WifiConfig                                                    *
  *****************************************************************/
-void wifiConfig() {
+static void wifiConfig() {
 	debug_outln(F("Starting WiFiManager"), DEBUG_MIN_INFO);
 	debug_out(F("AP ID: "), DEBUG_MIN_INFO);
 	debug_outln(cfg::fs_ssid, DEBUG_MIN_INFO);
@@ -2408,7 +2408,7 @@ static void waitForWifiToConnect(int maxRetries) {
 /*****************************************************************
  * WiFi auto connecting script                                   *
  *****************************************************************/
-void connectWifi() {
+static void connectWifi() {
 	debug_outln(String(WiFi.status()), DEBUG_MIN_INFO);
 	WiFi.disconnect();
 #if defined(ESP8266)
@@ -2629,7 +2629,7 @@ String create_influxdb_string(const String& data) {
 /*****************************************************************
  * send data as csv to serial out                                *
  *****************************************************************/
-void send_csv(const String& data) {
+static void send_csv(const String& data) {
 	DynamicJsonDocument json2data(JSON_BUFFER_SIZE);
 	DeserializationError err = deserializeJson(json2data, data);
 	debug_outln(F("CSV Output"), DEBUG_MIN_INFO);
@@ -3673,7 +3673,7 @@ static String displayGenerateFooter(unsigned int screen_count) {
 /*****************************************************************
  * display values                                                *
  *****************************************************************/
-void display_values() {
+static void display_values() {
 	double t_value = -128.0;
 	double h_value = -1.0;
 	double p_value = -1.0;
@@ -3959,7 +3959,7 @@ void display_values() {
 /*****************************************************************
  * Init OLED display                                             *
  *****************************************************************/
-void init_display() {
+static void init_display() {
 	display.init();
 	display_sh1106.init();
 	if (cfg::has_flipped_display) {
@@ -3971,7 +3971,7 @@ void init_display() {
 /*****************************************************************
  * Init LCD display                                              *
  *****************************************************************/
-void init_lcd() {
+static void init_lcd() {
 	if (cfg::has_lcd1602_27) {
 		lcd_1602_27.init();
 		lcd_1602_27.backlight();
@@ -3989,7 +3989,7 @@ void init_lcd() {
 /*****************************************************************
  * Init BMP280                                                   *
  *****************************************************************/
-bool initBMP280(char addr) {
+static bool initBMP280(char addr) {
 	debug_out(F("Trying BMP280 sensor on "), DEBUG_MIN_INFO);
 	debug_out(String(addr, HEX), DEBUG_MIN_INFO);
 
@@ -4005,7 +4005,7 @@ bool initBMP280(char addr) {
 /*****************************************************************
  * Init BME280                                                   *
  *****************************************************************/
-bool initBME280(char addr) {
+static bool initBME280(char addr) {
 	debug_out(F("Trying BME280 sensor on "), DEBUG_MIN_INFO);
 	debug_out(String(addr, HEX), DEBUG_MIN_INFO);
 
@@ -4027,7 +4027,7 @@ bool initBME280(char addr) {
 /*****************************************************************
    Init SPS30 PM Sensor
  *****************************************************************/
-bool initSPS30() {
+static bool initSPS30() {
 	char serial[SPS_MAX_SERIAL_LEN];
 	debug_out(F("Trying SPS30 sensor on 0x69H "), DEBUG_MIN_INFO);
 	sps30_reset();
@@ -4055,7 +4055,7 @@ bool initSPS30() {
 /*****************************************************************
    Init DNMS - Digital Noise Measurement Sensor
  *****************************************************************/
-bool initDNMS() {
+static bool initDNMS() {
 	debug_out(F("Trying DNMS sensor on 0x55H "), DEBUG_MIN_INFO);
 	dnms_reset();
 	delay(1000);
@@ -4212,7 +4212,7 @@ static void logEnabledDisplays() {
 	}
 }
 
-void time_is_set (void) {
+static void time_is_set (void) {
 	sntp_time_is_set = true;
 }
 
