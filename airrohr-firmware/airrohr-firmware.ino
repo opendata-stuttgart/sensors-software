@@ -478,6 +478,9 @@ float last_value_BME280_H = -1.0;
 float last_value_BME280_P = -1.0;
 float last_value_DHT_T = -128.0;
 float last_value_DHT_H = -1.0;
+float last_value_DS18B20_T = -1.0;
+float last_value_HTU21D_T = -128.0;
+float last_value_HTU21D_H = -1.0;
 
 int sds_pm10_sum = 0;
 int sds_pm25_sum = 0;
@@ -543,9 +546,6 @@ double last_value_PMS_P1 = -1.0;
 double last_value_PMS_P2 = -1.0;
 double last_value_HPM_P1 = -1.0;
 double last_value_HPM_P2 = -1.0;
-double last_value_HTU21D_T = -128.0;
-double last_value_HTU21D_H = -1.0;
-double last_value_DS18B20_T = -1.0;
 double last_value_GPS_lat = -200.0;
 double last_value_GPS_lon = -200.0;
 double last_value_GPS_alt = -1000.0;
@@ -2540,18 +2540,24 @@ static unsigned long sendData(const String& data, const int pin, const char* hos
 /*****************************************************************
  * send single sensor data to luftdaten.info api                 *
  *****************************************************************/
-static unsigned long sendLuftdaten(const String& data, const int pin, const char* host, const int httpPort, const char* url, const bool use_ssl, const bool verify, const char* replace_str) {
-	String data_4_dusti = tmpl(FPSTR(data_first_part), SOFTWARE_VERSION);
+static unsigned long sendLuftdaten(const String& data, const int pin, const __FlashStringHelper* sensorname, const char* replace_str) {
 	unsigned long sum_send_time = 0;
 
-	data_4_dusti += data;
-	data_4_dusti.remove(data_4_dusti.length() - 1);
-	data_4_dusti.replace(replace_str, empty_String);
-	data_4_dusti += "]}";
-	if (data != "") {
-		sum_send_time = sendData(data_4_dusti, pin, host, httpPort, url, use_ssl, verify, "", FPSTR(TXT_CONTENT_TYPE_JSON));
-	} else {
-		debug_outln_info(F("No data sent..."));
+	if (cfg::send2dusti) {
+		String data_4_dusti = tmpl(FPSTR(data_first_part), SOFTWARE_VERSION);
+
+		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN), sensorname);
+		data_4_dusti += data;
+		data_4_dusti.remove(data_4_dusti.length() - 1);
+		data_4_dusti.replace(replace_str, empty_String);
+		data_4_dusti += "]}";
+		if (data != "") {
+			const int HTTP_PORT_DUSTI = (cfg::ssl_dusti ? 443 : 80);
+			sum_send_time = sendData(data_4_dusti, pin, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI,
+						 cfg::ssl_dusti, true, "", FPSTR(TXT_CONTENT_TYPE_JSON));
+		} else {
+			debug_outln_info(F("No data sent..."));
+		}
 	}
 
 	return sum_send_time;
@@ -2797,7 +2803,7 @@ static String sensorBME280() {
  * read DS18B20 sensor values                                    *
  *****************************************************************/
 static String sensorDS18B20() {
-	double t;
+	float t;
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_DS18B20));
 
 	//it's very unlikely (-127: impossible) to get these temperatures in reality. Most times this means that the sensor is currently faulty
@@ -2912,14 +2918,14 @@ static String sensorSDS() {
 					if (sds_pm25_max < pm25_serial) {
 						sds_pm25_max = pm25_serial;
 					}
-					debug_outln_verbose(F("PM10 (sec.) : "), Float2String(double(pm10_serial) / 10));
-					debug_outln_verbose(F("PM2.5 (sec.): "), Float2String(double(pm25_serial) / 10));
+					debug_outln_verbose(F("PM10 (sec.) : "), Float2String(double(pm10_serial) / 10.0));
+					debug_outln_verbose(F("PM2.5 (sec.): "), Float2String(double(pm25_serial) / 10.0));
 					sds_val_count++;
 				}
 				len = 0;
 				checksum_ok = 0;
-				pm10_serial = 0.0;
-				pm25_serial = 0.0;
+				pm10_serial = 0;
+				pm25_serial = 0;
 				checksum_is = 0;
 			}
 			yield();
@@ -3621,8 +3627,8 @@ static String displayGenerateFooter(unsigned int screen_count) {
  * display values                                                *
  *****************************************************************/
 static void display_values() {
-	double t_value = -128.0;
-	double h_value = -1.0;
+	float t_value = -128.0;
+	float h_value = -1.0;
 	double p_value = -1.0;
 	String t_sensor, h_sensor, p_sensor;
 	float pm010_value = -1.0;
@@ -4392,25 +4398,21 @@ void loop() {
 	}
 
 	if (cfg::ppd_read) {
-		debug_outln(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "PPD", DEBUG_MAX_INFO);
 		result_PPD = sensorPPD();
 	}
 
 	if ((msSince(starttime_SDS) > SAMPLETIME_SDS_MS) || send_now) {
 		if (cfg::sds_read) {
-			debug_outln(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "SDS", DEBUG_MAX_INFO);
 			result_SDS = sensorSDS();
 			starttime_SDS = act_milli;
 		}
 
 		if (cfg::pms_read) {
-			debug_outln(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "PMS", DEBUG_MAX_INFO);
 			result_PMS = sensorPMS();
 			starttime_SDS = act_milli;
 		}
 
 		if (cfg::hpm_read) {
-			debug_outln(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "HPM", DEBUG_MAX_INFO);
 			result_HPM = sensorHPM();
 			starttime_SDS = act_milli;
 		}
@@ -4420,48 +4422,39 @@ void loop() {
 
 	if (send_now) {
 		if (cfg::dht_read) {
-			debug_outln(String(FPSTR(DBG_TXT_CALL_SENSOR)) + FPSTR(SENSORS_DHT22), DEBUG_MAX_INFO);
 			result_DHT = sensorDHT();						// getting temperature and humidity (optional)
 		}
 
 		if (cfg::htu21d_read) {
-			debug_outln(String(FPSTR(DBG_TXT_CALL_SENSOR)) + FPSTR(SENSORS_HTU21D), DEBUG_MAX_INFO);
 			result_HTU21D = sensorHTU21D();					// getting temperature and humidity (optional)
 		}
 
 		if (cfg::bmp_read && (! bmp_init_failed)) {
-			debug_outln(String(FPSTR(DBG_TXT_CALL_SENSOR)) + FPSTR(SENSORS_BMP180), DEBUG_MAX_INFO);
 			result_BMP = sensorBMP();						// getting temperature and pressure (optional)
 		}
 
 		if (cfg::bmp280_read && (! bmp280_init_failed)) {
-			debug_outln(String(FPSTR(DBG_TXT_CALL_SENSOR)) + FPSTR(SENSORS_BMP280), DEBUG_MAX_INFO);
 			result_BMP280 = sensorBMP280();					// getting temperature, humidity and pressure (optional)
 		}
 
 		if (cfg::bme280_read && (! bme280_init_failed)) {
-			debug_outln(String(FPSTR(DBG_TXT_CALL_SENSOR)) + FPSTR(SENSORS_BME280), DEBUG_MAX_INFO);
 			result_BME280 = sensorBME280();					// getting temperature, humidity and pressure (optional)
 		}
 
 		if (cfg::ds18b20_read) {
-			debug_outln(String(FPSTR(DBG_TXT_CALL_SENSOR)) + FPSTR(SENSORS_DS18B20), DEBUG_MAX_INFO);
 			result_DS18B20 = sensorDS18B20();				// getting temperature (optional)
 		}
 
 		if (cfg::sps30_read && (! sps30_init_failed)) {
-			debug_outln(String(FPSTR(DBG_TXT_CALL_SENSOR)) + FPSTR(SENSORS_SPS30), DEBUG_MAX_INFO);
 			result_SPS30 = sensorSPS30();               // getting PM values
 		}
 
 		if (cfg::dnms_read && (! dnms_init_failed)) {
-			debug_outln(String(FPSTR(DBG_TXT_CALL_SENSOR)) + FPSTR(SENSORS_DNMS), DEBUG_MAX_INFO);
 			result_DNMS = sensorDNMS();                 // getting noise measurement values from dnms (optional)
 		}
 	}
 
 	if (cfg::gps_read && ((msSince(starttime_GPS) > SAMPLETIME_GPS_MS) || send_now)) {
-		debug_outln(String(FPSTR(DBG_TXT_CALL_SENSOR)) + "GPS", DEBUG_MAX_INFO);
 		result_GPS = sensorGPS();							// getting GPS coordinates
 		starttime_GPS = act_milli;
 	}
@@ -4485,100 +4478,57 @@ void loop() {
 		server.handleClient();
 		yield();
 		server.stop();
-		const int HTTP_PORT_DUSTI = (cfg::ssl_dusti ? 443 : 80);
 		if (cfg::ppd_read) {
 			data += result_PPD;
-			if (cfg::send2dusti) {
-				debug_outln_info(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN), F("(PPD42NS): "));
-				sum_send_time += sendLuftdaten(result_PPD, PPD_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, cfg::ssl_dusti, true, "PPD_");
-			}
+			sum_send_time += sendLuftdaten(result_PPD, PPD_API_PIN, FPSTR(SENSORS_PPD42NS), "PPD_");
 		}
 		if (cfg::sds_read) {
 			data += result_SDS;
-			if (cfg::send2dusti) {
-				debug_outln_info(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN), F("(SDS): "));
-				sum_send_time += sendLuftdaten(result_SDS, SDS_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, cfg::ssl_dusti, true, "SDS_");
-			}
+			sum_send_time += sendLuftdaten(result_SDS, SDS_API_PIN, FPSTR(SENSORS_SDS011), "SDS_");
 		}
 		if (cfg::pms_read) {
 			data += result_PMS;
-			if (cfg::send2dusti) {
-				debug_outln_info(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN), F("(PMS): "));
-				sum_send_time += sendLuftdaten(result_PMS, PMS_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, cfg::ssl_dusti, true, "PMS_");
-			}
+			sum_send_time += sendLuftdaten(result_PMS, PMS_API_PIN, FPSTR(SENSORS_PMSx003), "PMS_");
 		}
 		if (cfg::hpm_read) {
 			data += result_HPM;
-			if (cfg::send2dusti) {
-				debug_outln_info(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN), F("(HPM): "));
-				sum_send_time += sendLuftdaten(result_HPM, HPM_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, cfg::ssl_dusti, true, "HPM_");
-			}
+			sum_send_time += sendLuftdaten(result_HPM, HPM_API_PIN, FPSTR(SENSORS_HPM), "HPM_");
 		}
 		if (cfg::sps30_read && (! sps30_init_failed)) {
 			data += result_SPS30;
-			if (cfg::send2dusti) {
-				debug_outln_info(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN), F("(SPS30): "));
-				sum_send_time += sendLuftdaten(result_SPS30, SPS30_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, cfg::ssl_dusti, true, "SPS30_");
-			}
+			sum_send_time += sendLuftdaten(result_SPS30, SPS30_API_PIN, FPSTR(SENSORS_SPS30), "SPS30_");
 		}
 		if (cfg::dht_read) {
 			data += result_DHT;
-			if (cfg::send2dusti) {
-				debug_outln_info(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN), F("(DHT): "));
-				sum_send_time += sendLuftdaten(result_DHT, DHT_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, cfg::ssl_dusti, true, "DHT_");
-			}
+			sum_send_time += sendLuftdaten(result_DHT, DHT_API_PIN, FPSTR(SENSORS_DHT22), "DHT_");
 		}
 		if (cfg::htu21d_read) {
 			data += result_HTU21D;
-			if (cfg::send2dusti) {
-				debug_outln_info(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN), F("(HTU21D): "));
-				sum_send_time += sendLuftdaten(result_HTU21D, HTU21D_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, cfg::ssl_dusti, true, "HTU21D_");
-			}
+			sum_send_time += sendLuftdaten(result_HTU21D, HTU21D_API_PIN, FPSTR(SENSORS_HTU21D), "HTU21D_");
 		}
 		if (cfg::bmp_read && (! bmp_init_failed)) {
 			data += result_BMP;
-			if (cfg::send2dusti) {
-				debug_outln_info(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN), F("(BMP): "));
-				sum_send_time += sendLuftdaten(result_BMP, BMP_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, cfg::ssl_dusti, true, "BMP_");
-			}
+			sum_send_time += sendLuftdaten(result_BMP, BMP_API_PIN, FPSTR(SENSORS_BMP180), "BMP_");
 		}
 		if (cfg::bmp280_read && (! bmp280_init_failed)) {
 			data += result_BMP280;
-			if (cfg::send2dusti) {
-				debug_outln_info(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN), F("(BMP280): "));
-				sum_send_time += sendLuftdaten(result_BMP280, BMP280_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, cfg::ssl_dusti, true, "BMP280_");
-			}
+			sum_send_time += sendLuftdaten(result_BMP280, BMP280_API_PIN, FPSTR(SENSORS_BMP280), "BMP280_");
 		}
 		if (cfg::bme280_read && (! bme280_init_failed)) {
 			data += result_BME280;
-			if (cfg::send2dusti) {
-				debug_outln_info(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN), F("(BME280): "));
-				sum_send_time += sendLuftdaten(result_BME280, BME280_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, cfg::ssl_dusti, true, "BME280_");
-			}
+			sum_send_time += sendLuftdaten(result_BME280, BME280_API_PIN, FPSTR(SENSORS_BME280), "BME280_");
 		}
-
 		if (cfg::ds18b20_read) {
 			data += result_DS18B20;
-			if (cfg::send2dusti) {
-				debug_outln_info(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN), F("(DS18B20): "));
-				sum_send_time += sendLuftdaten(result_DS18B20, DS18B20_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, cfg::ssl_dusti, true, "DS18B20_");
-			}
+			sum_send_time += sendLuftdaten(result_DS18B20, DS18B20_API_PIN, FPSTR(SENSORS_DS18B20), "DS18B20_");
 		}
-
 		if (cfg::dnms_read && (! dnms_init_failed)) {
 			data += result_DNMS;
-			if (cfg::send2dusti) {
-				debug_outln_info(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN), F("(DNMS): "));
-				sum_send_time += sendLuftdaten(result_DNMS, DNMS_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, cfg::ssl_dusti, true, "DNMS_");
-			}
+			sum_send_time += sendLuftdaten(result_DNMS, DNMS_API_PIN, FPSTR(SENSORS_DNMS), "DNMS_");
 		}
-
 		if (cfg::gps_read) {
 			data += result_GPS;
-			if (cfg::send2dusti) {
-				debug_outln_info(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN), F("(GPS): "));
-				sum_send_time += sendLuftdaten(result_GPS, GPS_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, cfg::ssl_dusti, true, "GPS_");
-			}
+			sum_send_time += sendLuftdaten(result_GPS, GPS_API_PIN, F("GPS"), "GPS_");
 		}
 
 		data_sample_times += Value2Json(F("signal"), signal_strength);
