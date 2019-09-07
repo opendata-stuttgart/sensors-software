@@ -1847,6 +1847,7 @@ void webserver_config() {
 	if (server.method() == HTTP_POST) {
 		display_debug(F("Writing config"), F("and restarting"));
 		writeConfig();
+		SPIFFS.end();
 		delay(500);
 		ESP.restart();
 	}
@@ -3620,6 +3621,9 @@ String sensorGPS() {
  *****************************************************************/
 static void autoUpdate() {
 	if (!cfg::auto_update) return;
+
+	// Unmout Filesystem before reboot
+	SPIFFS.end();
 
 	debug_outln(F("Starting OTA update ..."), DEBUG_MIN_INFO);
 	debug_out(F("NodeMCU firmware : "), DEBUG_MIN_INFO);
