@@ -3689,46 +3689,39 @@ static void display_values() {
 		tps_value = last_value_SPS30_TS;
 	}
 	if (cfg::sds_read) {
+		pm10_sensor = pm25_sensor = FPSTR(SENSORS_SDS011);
 		pm10_value = last_value_SDS_P1;
-		pm10_sensor = FPSTR(SENSORS_SDS011);
 		pm25_value = last_value_SDS_P2;
-		pm25_sensor = FPSTR(SENSORS_SDS011);
 	}
 	if (cfg::dht_read) {
+		t_sensor = h_sensor = FPSTR(SENSORS_DHT22);
 		t_value = last_value_DHT_T;
-		t_sensor = FPSTR(SENSORS_DHT22);
 		h_value = last_value_DHT_H;
-		h_sensor = FPSTR(SENSORS_DHT22);
 	}
 	if (cfg::ds18b20_read) {
-		t_value = last_value_DS18B20_T;
 		t_sensor = FPSTR(SENSORS_DS18B20);
+		t_value = last_value_DS18B20_T;
 	}
 	if (cfg::htu21d_read) {
+		h_sensor = t_sensor = FPSTR(SENSORS_HTU21D);
 		t_value = last_value_HTU21D_T;
-		t_sensor = FPSTR(SENSORS_HTU21D);
 		h_value = last_value_HTU21D_H;
-		h_sensor = FPSTR(SENSORS_HTU21D);
 	}
 	if (cfg::bmp_read) {
+		t_sensor = h_sensor = FPSTR(SENSORS_BMP180);
 		t_value = last_value_BMP_T;
-		t_sensor = FPSTR(SENSORS_BMP180);
 		p_value = last_value_BMP_P;
-		p_sensor = FPSTR(SENSORS_BMP180);
 	}
 	if (cfg::bmp280_read) {
+		t_sensor = p_sensor = FPSTR(SENSORS_BMP280);
 		t_value = last_value_BMP280_T;
-		t_sensor = FPSTR(SENSORS_BMP280);
 		p_value = last_value_BMP280_P;
-		p_sensor = FPSTR(SENSORS_BMP280);
 	}
 	if (cfg::bme280_read) {
+		t_sensor = h_sensor = p_sensor = FPSTR(SENSORS_BME280);
 		t_value = last_value_BME280_T;
-		t_sensor = FPSTR(SENSORS_BME280);
 		h_value = last_value_BME280_H;
-		h_sensor = FPSTR(SENSORS_BME280);
 		p_value = last_value_BME280_P;
-		p_sensor = FPSTR(SENSORS_BME280);
 	}
 	if (cfg::dnms_read) {
 		la_sensor = FPSTR(SENSORS_DNMS);
