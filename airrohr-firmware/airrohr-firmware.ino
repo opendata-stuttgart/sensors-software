@@ -4225,11 +4225,15 @@ static bool acquireNetworkTime() {
 #if defined(ESP8266)
 	settimeofday_cb(time_is_set);
 #endif
-	configTime(8 * 3600, 0, "pool.ntp.org");
+	configTime(0, 0, "pool.ntp.org"); // using UTC as timezone
 	while (retryCount++ < 20) {
-		// later than 2000/01/01:00:00:00
+		now = time(nullptr);		
+#if defined(ESP8266)
 		if (sntp_time_is_set) {
-			now = time(nullptr);
+#endif
+#if defined(ESP32)
+		if (now > 17897*24*60*60) { // later than 2019/01/01:00:00:00
+#endif
 			debug_outln(ctime(&now), DEBUG_MIN_INFO);
 			return true;
 		}
@@ -4240,9 +4244,13 @@ static bool acquireNetworkTime() {
 	retryCount = 0;
 	configTime(0, 0, WiFi.gatewayIP().toString().c_str());
 	while (retryCount++ < 20) {
-		// later than 2000/01/01:00:00:00
+		now = time(nullptr);
+#if defined(ESP8266)
 		if (sntp_time_is_set) {
-			now = time(nullptr);
+#endif
+#if defined(ESP32)
+		if (now > 17897*24*60*60) { // later than 2019/01/01:00:00:00
+#endif
 			debug_outln(ctime(&now), DEBUG_MIN_INFO);
 			return true;
 		}
