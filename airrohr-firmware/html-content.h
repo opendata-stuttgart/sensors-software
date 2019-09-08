@@ -57,7 +57,7 @@ input[type='submit']{border-radius:5px;font-size:medium;padding:5px;}\
 </style>\
 </head><body>\
 <div style='min-height:120px;background-color:#38b5ad;margin-bottom:20px'>\
-<a href='/' style='background:none;display:inline'><img src='/images?name=luftdaten_logo' style='float:left;width:80px;margin:20px'/></a>\
+<a href='/' style='background:none;display:inline'><img src='/images?name=luftdaten_logo' style='float:left;margin:20px' width='100' height='89'/></a>\
 <h3 style='margin:0'>{tt}</h3>\
 <small>ID: {id}<br/>MAC: {mac}<br/>{fwt}: {fw}</small></div><div class='content'><h4>{h} {n} {t}</h4>";
 
