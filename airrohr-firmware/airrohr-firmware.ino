@@ -908,7 +908,7 @@ String Var2Json(const String& name, const String& value) {
 /*****************************************************************
  * convert boolean value to json string                          *
  *****************************************************************/
-String Var2Json(const String& name, const bool value) {
+String Var2JsonBool(const String& name, const bool value) {
 	String s = "\"";
 	s += name;
 	s += "\":";
@@ -920,11 +920,11 @@ String Var2Json(const String& name, const bool value) {
 /*****************************************************************
  * convert int value to json string                          *
  *****************************************************************/
-String Var2Json(const String& name, const int value) {
+String Var2JsonLong(const String& name, const long value) {
 	String s = "\"";
 	s += name;
 	s += "\":";
-	s += String(value);
+	s += Float2String(value, 0);
 	s += ",";
 	return s;
 }
@@ -1288,8 +1288,8 @@ void writeConfig() {
 	String json_string = "{";
 	debug_outln(F("saving config..."), DEBUG_MIN_INFO);
 
-#define copyToJSON_Bool(varname) json_string += Var2Json(#varname, varname);
-#define copyToJSON_Int(varname) json_string += Var2Json(#varname, varname);
+#define copyToJSON_Bool(varname) json_string += Var2JsonBool(#varname, varname);
+#define copyToJSON_Int(varname) json_string += Var2JsonLong(#varname, varname);
 #define copyToJSON_String(varname) json_string += Var2Json(#varname, String(varname));
 	copyToJSON_String(current_lang);
 	copyToJSON_String(SOFTWARE_VERSION);
