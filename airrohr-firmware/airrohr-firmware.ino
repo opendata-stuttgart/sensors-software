@@ -4317,7 +4317,7 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 /*****************************************************************
  * The Setup                                                     *
  *****************************************************************/
-void setup() {
+void setup(void) {
 	Serial.begin(9600);					// Output to Serial at 9600 baud
 
 #if defined(ESP32)
@@ -4390,7 +4390,7 @@ void setup() {
 /*****************************************************************
  * And action                                                    *
  *****************************************************************/
-void loop() {
+void loop(void) {
 	String result_PPD, result_SDS, result_PMS, result_HPM, result_SPS30;
 	String result_DHT, result_HTU21D, result_BMP, result_BMP280;
 	String result_BME280, result_DS18B20, result_GPS, result_DNMS;
