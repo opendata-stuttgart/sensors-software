@@ -4557,15 +4557,18 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 /*****************************************************************
  * The Setup                                                     *
  *****************************************************************/
-void setup(void) {
+extern "C" void setup(void) {
 	Serial.begin(9600);					// Output to Serial at 9600 baud
 
+#if defined(ESP8266)
+	serialSDS.begin(9600);
+#endif
 #if defined(ESP32)
 	serialSDS.begin(9600, SERIAL_8N1, D1, D2);
-	pinMode(16, OUTPUT);
-	digitalWrite(16, LOW);
+	pinMode(16, OUTPUT); // TODO: define magic number
+	digitalWrite(16, LOW); // TODO: define magic number
 	delay(50);
-	digitalWrite(16, HIGH);
+	digitalWrite(16, HIGH); // TODO: define magic number
 #endif
 	Wire.begin(I2C_PIN_SDA, I2C_PIN_SCL);
 
@@ -4591,21 +4594,21 @@ void setup(void) {
 	autoUpdate();
 	setup_webserver();
 	create_basic_auth_strings();
-	serialSDS.begin(9600);
 	debug_out(F("\nChipId: "), DEBUG_MIN_INFO);
 	debug_outln(esp_chipid, DEBUG_MIN_INFO);
 
 	powerOnTestSensors();
 
 	if (cfg::gps_read) {
-#ifdef ESP32
-#if 0
-		serialGPS.begin(9600, SERIAL_8N1, D5, D6);
-#else
-		serialGPS.begin(9600, SERIAL_8N1, 22 /* RX (orig: SCL) */, 21 /* TX (orig: SDA) */);  // TODO: define magic number
-#endif
-#else
+#if defined(ESP8266)
 		serialGPS.begin(9600);
+#endif
+#ifdef ESP32
+#if defined(ARDUINO_LOLIN_D32_PRO)
+		serialGPS.begin(9600, SERIAL_8N1, 22 /* RX (orig: SCL) */, 21 /* TX (orig: SDA) */);  // TODO: define magic number
+#else
+		serialGPS.begin(9600, SERIAL_8N1, D5, D6);
+#endif
 #endif
 
 		debug_outln(F("Read GPS..."), DEBUG_MIN_INFO);
@@ -4613,10 +4616,10 @@ void setup(void) {
 	}
 	else if(cfg::mhz19_read) { // can not be active at the same time as gps because it uses the same serial port
 #ifdef ESP32
-#if 0
-		serialGPS.begin(9600, SERIAL_8N1, D5, D6);
-#else
+#if defined(ARDUINO_LOLIN_D32_PRO)
 		serialGPS.begin(co2Sensor.mh_z19_baudrate, SERIAL_8N1, 22 /* RX (orig: SCL) */, 21 /* TX (orig: SDA) */);
+#else
+		serialGPS.begin(9600, SERIAL_8N1, D5, D6);
 #endif
 #else
 		serialGPS.begin(9600);
@@ -4650,7 +4653,7 @@ void setup(void) {
 /*****************************************************************
  * And action                                                    *
  *****************************************************************/
-void loop(void) {
+extern "C" void loop(void) {
 	String result_PPD, result_SDS, result_PMS, result_HPM, result_SPS30;
 	String result_DHT, result_HTU21D, result_BMP, result_BMP280;
 	String result_BME280, result_DS18B20, result_GPS, result_DNMS;
