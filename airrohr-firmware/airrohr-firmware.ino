@@ -1676,15 +1676,20 @@ static void webserver_config_send_body_post() {
 		} \
 	}
 
-	if (server.hasArg("wlanssid") && server.arg("wlanssid") != "") {
+	if (server.arg("wlanssid").length()) {
 		readCharParam(wlanssid);
 		readPasswdParam(wlanpwd);
 	}
 	if (! wificonfig_loop) {
 		readCharParam(current_lang);
-		readCharParam(www_username);
-		readPasswdParam(www_password);
+
+
 		readBoolParam(www_basicauth_enabled);
+		if (www_basicauth_enabled) {
+			readCharParam(www_username);
+			readPasswdParam(www_password);
+		}
+
 		readCharParam(fs_ssid);
 		String s_fs_pwd("fs_pwd");
 		if (server.hasArg(s_fs_pwd) && ((server.arg(s_fs_pwd).length() > 7) || (server.arg(s_fs_pwd).length() == 0))) {
@@ -1714,11 +1719,8 @@ static void webserver_config_send_body_post() {
 		readTimeParam(time_for_wifi_config);
 
 		readBoolParam(send2csv);
-
 		readBoolParam(send2fsapp);
-
 		readBoolParam(send2aircms);
-
 		readBoolParam(send2sensemap);
 		readCharParam(senseboxid);
 
