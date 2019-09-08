@@ -4599,16 +4599,25 @@ void setup() {
 
 	if (cfg::gps_read) {
 #ifdef ESP32
+#if 0
 		serialGPS.begin(9600, SERIAL_8N1, D5, D6);
+#else
+		serialGPS.begin(9600, SERIAL_8N1, 22 /* RX (orig: SCL) */, 21 /* TX (orig: SDA) */);  // TODO: define magic number
+#endif
 #else
 		serialGPS.begin(9600);
 #endif
+
 		debug_outln(F("Read GPS..."), DEBUG_MIN_INFO);
 		disable_unneeded_nmea();
 	}
 	else if(cfg::mhz19_read) { // can not be active at the same time as gps because it uses the same serial port
 #ifdef ESP32
+#if 0
 		serialGPS.begin(9600, SERIAL_8N1, D5, D6);
+#else
+		serialGPS.begin(co2Sensor.mh_z19_baudrate, SERIAL_8N1, 22 /* RX (orig: SCL) */, 21 /* TX (orig: SDA) */);
+#endif
 #else
 		serialGPS.begin(9600);
 #endif
