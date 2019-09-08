@@ -2212,7 +2212,7 @@ static void webserver_prometheus_endpoint() {
 static void webserver_images() {
 	if (server.arg("name") == F("luftdaten_logo")) {
 		debug_outln_info(F("output luftdaten.info logo..."));
-		server.send(200, FPSTR(TXT_CONTENT_TYPE_IMAGE_SVG), FPSTR(LUFTDATEN_INFO_LOGO_SVG));
+		server.send_P(200, TXT_CONTENT_TYPE_IMAGE_SVG, LUFTDATEN_INFO_LOGO_SVG);
 	} else {
 		webserver_not_found();
 	}
