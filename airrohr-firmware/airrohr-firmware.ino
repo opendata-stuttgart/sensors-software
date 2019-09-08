@@ -730,32 +730,6 @@ static String Value2Json(const __FlashStringHelper* type, const float& value) {
 }
 
 /*****************************************************************
- * convert string value to json string                           *
- *****************************************************************/
-static String Var2Json(const String& name, const String& value) {
-	String s = FPSTR(WEB_REPLN_REPLV);
-	String tmp = value;
-	tmp.replace("\\", "\\\\"); tmp.replace("\"", "\\\"");
-	s.replace("{n}", name);
-	s.replace("{v}", tmp);
-	return s;
-}
-
-/*****************************************************************
- * convert boolean value to json string                          *
- *****************************************************************/
-static String Var2Json(const String& name, const bool value) {
-	return Var2Json(name, String(value ? "true" : "false"));
-}
-
-/*****************************************************************
- * convert boolean value to json string                          *
- *****************************************************************/
-static String Var2Json(const String& name, const int value) {
-	return Var2Json(name, String(value));
-}
-
-/*****************************************************************
  * send SDS011 command (start, stop, continuous mode, version    *
  *****************************************************************/
 static bool SDS_cmd(PmSensorCmd cmd) {
@@ -1103,87 +1077,79 @@ static void readConfig() {
  * write config to spiffs                                        *
  *****************************************************************/
 static void writeConfig() {
-	using namespace cfg;
-	String json_string = "{";
 	debug_outln_info(F("saving config..."));
 
-#define copyToJSON_Bool(varname) json_string += Var2Json(#varname, varname);
-#define copyToJSON_Int(varname) json_string += Var2Json(#varname, varname);
-#define copyToJSON_String(varname) json_string += Var2Json(#varname, String(varname));
-	copyToJSON_String(current_lang);
-	copyToJSON_String(SOFTWARE_VERSION);
-	copyToJSON_String(wlanssid);
-	copyToJSON_String(wlanpwd);
-	copyToJSON_String(www_username);
-	copyToJSON_String(www_password);
-	copyToJSON_String(fs_ssid);
-	copyToJSON_String(fs_pwd);
-	copyToJSON_Bool(www_basicauth_enabled);
-	copyToJSON_Bool(dht_read);
-	copyToJSON_Bool(htu21d_read);
-	copyToJSON_Bool(ppd_read);
-	copyToJSON_Bool(sds_read);
-	copyToJSON_Bool(pms_read);
-	copyToJSON_Bool(hpm_read);
-	copyToJSON_Bool(sps30_read);
-	copyToJSON_Bool(bmp_read);
-	copyToJSON_Bool(bmp280_read);
-	copyToJSON_Bool(bme280_read);
-	copyToJSON_Bool(ds18b20_read);
-	copyToJSON_Bool(dnms_read);
-	copyToJSON_String(dnms_correction);
-	copyToJSON_Bool(gps_read);
-	copyToJSON_Bool(send2dusti);
-	copyToJSON_Bool(ssl_dusti);
-	copyToJSON_Bool(send2madavi);
-	copyToJSON_Bool(ssl_madavi);
-	copyToJSON_Bool(send2sensemap);
-	copyToJSON_Bool(send2fsapp);
-	copyToJSON_Bool(send2aircms);
-	copyToJSON_Bool(send2lora);
-	copyToJSON_Bool(send2csv);
-	copyToJSON_Bool(auto_update);
-	copyToJSON_Bool(use_beta);
-	copyToJSON_Bool(has_display);
-	copyToJSON_Bool(has_sh1106);
-	copyToJSON_Bool(has_flipped_display);
-	copyToJSON_Bool(has_lcd1602);
-	copyToJSON_Bool(has_lcd1602_27);
-	copyToJSON_Bool(has_lcd2004_27);
-	copyToJSON_Bool(display_wifi_info);
-	copyToJSON_Bool(display_device_info);
-	copyToJSON_String(debug);
-	copyToJSON_String(sending_intervall_ms);
-	copyToJSON_String(time_for_wifi_config);
-	copyToJSON_String(senseboxid);
-	copyToJSON_Bool(send2custom);
-	copyToJSON_String(host_custom);
-	copyToJSON_String(url_custom);
-	copyToJSON_Int(port_custom);
-	copyToJSON_String(user_custom);
-	copyToJSON_String(pwd_custom);
-	copyToJSON_Bool(ssl_custom);
+	DynamicJsonDocument json(JSON_BUFFER_SIZE);
+	json["SOFTWARE_VERSION"] = String(SOFTWARE_VERSION);
+#define SetJSON(varname) json[#varname].set(cfg::varname);
+	SetJSON(current_lang);
+	SetJSON(wlanssid);
+	SetJSON(wlanpwd);
+	SetJSON(www_username);
+	SetJSON(www_password);
+	SetJSON(fs_ssid);
+	SetJSON(fs_pwd);
+	SetJSON(www_basicauth_enabled);
+	SetJSON(dht_read);
+	SetJSON(htu21d_read);
+	SetJSON(ppd_read);
+	SetJSON(sds_read);
+	SetJSON(pms_read);
+	SetJSON(hpm_read);
+	SetJSON(sps30_read);
+	SetJSON(bmp_read);
+	SetJSON(bmp280_read);
+	SetJSON(bme280_read);
+	SetJSON(ds18b20_read);
+	SetJSON(dnms_read);
+	SetJSON(dnms_correction);
+	SetJSON(gps_read);
+	SetJSON(send2dusti);
+	SetJSON(ssl_dusti);
+	SetJSON(send2madavi);
+	SetJSON(ssl_madavi);
+	SetJSON(send2sensemap);
+	SetJSON(send2fsapp);
+	SetJSON(send2aircms);
+	SetJSON(send2lora);
+	SetJSON(send2csv);
+	SetJSON(auto_update);
+	SetJSON(use_beta);
+	SetJSON(has_display);
+	SetJSON(has_sh1106);
+	SetJSON(has_flipped_display);
+	SetJSON(has_lcd1602);
+	SetJSON(has_lcd1602_27);
+	SetJSON(has_lcd2004_27);
+	SetJSON(display_wifi_info);
+	SetJSON(display_device_info);
+	SetJSON(debug);
+	SetJSON(sending_intervall_ms);
+	SetJSON(time_for_wifi_config);
+	SetJSON(senseboxid);
+	SetJSON(send2custom);
+	SetJSON(host_custom);
+	SetJSON(url_custom);
+	SetJSON(port_custom);
+	SetJSON(user_custom);
+	SetJSON(pwd_custom);
+	SetJSON(ssl_custom);
 
-	copyToJSON_Bool(send2influx);
-	copyToJSON_String(host_influx);
-	copyToJSON_String(url_influx);
-	copyToJSON_Int(port_influx);
-	copyToJSON_String(user_influx);
-	copyToJSON_String(pwd_influx);
-	copyToJSON_String(measurement_name_influx);
-	copyToJSON_Bool(ssl_influx);
-#undef copyToJSON_Bool
-#undef copyToJSON_Int
-#undef copyToJSON_String
-
-	json_string.remove(json_string.length() - 1);
-	json_string += "}";
+	SetJSON(send2influx);
+	SetJSON(host_influx);
+	SetJSON(url_influx);
+	SetJSON(port_influx);
+	SetJSON(user_influx);
+	SetJSON(pwd_influx);
+	SetJSON(measurement_name_influx);
+	SetJSON(ssl_influx);
+#undef SetJSON
 
 	File configFile = SPIFFS.open("/config.json", "w");
 	if (configFile) {
-		configFile.print(json_string);
-		debug_outln_verbose(F("Config written: "), json_string);
+		serializeJson(json, configFile);
 		configFile.close();
+		debug_outln_info(F("Config written successfully."));
 	} else {
 		debug_outln_error(F("failed to open config file for writing"));
 	}
