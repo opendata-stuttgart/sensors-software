@@ -214,7 +214,7 @@ const unsigned long SAMPLETIME_SDS_MS = 1000;								// time between two measure
 const unsigned long WARMUPTIME_SDS_MS = 15000;								// time needed to "warm up" the sensor before we can take the first measurement
 const unsigned long READINGTIME_SDS_MS = 5000;								// how long we read data from the PM sensors
 const unsigned long SAMPLETIME_GPS_MS = 50;
-const unsigned long SAMPLETIME_MHZ19_MS = 4800; // TODO: check MHZ19 documentation
+const unsigned long SAMPLETIME_MHZ19_MS = 5000;
 const unsigned long DISPLAY_UPDATE_INTERVAL_MS = 5000;						// time between switching display to next "screen"
 const unsigned long ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
 const unsigned long PAUSE_BETWEEN_UPDATE_ATTEMPTS_MS = ONE_DAY_IN_MS;		// check for firmware updates once a day
@@ -587,7 +587,7 @@ bool CMHZ19Sensor::SynchronizeStream()
   return false; // not synchronized
 }
 
-CMHZ19Sensor co2Sensor(Serial1);
+CMHZ19Sensor co2Sensor(serialGPS);
 
 /*****************************************************************
  * DHT declaration                                               *
@@ -4554,7 +4554,6 @@ void setup() {
 
 #if defined(ESP32)
 	serialSDS.begin(9600, SERIAL_8N1, D1, D2);
-	serialGPS.begin(9600, SERIAL_8N1, D5, D6);
 	pinMode(16, OUTPUT);
 	digitalWrite(16, LOW);
 	delay(50);
@@ -4591,12 +4590,20 @@ void setup() {
 	powerOnTestSensors();
 
 	if (cfg::gps_read) {
+#ifdef ESP32
+		serialGPS.begin(9600, SERIAL_8N1, D5, D6);
+#else
 		serialGPS.begin(9600);
+#endif
 		debug_outln(F("Read GPS..."), DEBUG_MIN_INFO);
 		disable_unneeded_nmea();
 	}
 	else if(cfg::mhz19_read) { // can not be active at the same time as gps because it uses the same serial port
+#ifdef ESP32
+		serialGPS.begin(9600, SERIAL_8N1, D5, D6);
+#else
 		serialGPS.begin(9600);
+#endif
 		debug_outln(F("Read MHZ19..."), DEBUG_MIN_INFO);
 	}
 
