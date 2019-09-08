@@ -412,8 +412,8 @@ SoftwareSerial serialSDS(PM_SERIAL_RX, PM_SERIAL_TX, false, 128);
 SoftwareSerial serialGPS(GPS_SERIAL_RX, GPS_SERIAL_TX, false, 512);
 #endif
 #if defined(ESP32)
-HardwareSerial serialSDS(2);
-HardwareSerial serialGPS(3);
+#define serialSDS (Serial1)
+#define serialGPS (Serial2)
 #endif
 
 /*****************************************************************
