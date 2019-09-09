@@ -1,3 +1,13 @@
+#if defined(ESP8266)
+#define SENSOR_BASENAME "esp8266-"
+#endif
+#if defined(ESP32)
+#define SENSOR_BASENAME "esp32-"
+#endif
+
+#define SSID_BASENAME "airRohr-"
+#define HOSTNAME_BASE "airRohr-"
+
 #define LEN_WLANSSID 35				// credentials for wifi connection
 #define LEN_WLANPWD 65
 

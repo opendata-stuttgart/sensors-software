@@ -317,7 +317,7 @@ namespace cfg {
 	void initNonTrivials(const char* id) {
 		strcpy(cfg::current_lang, CURRENT_LANG);
 		if (fs_ssid[0] == '\0') {
-			strcpy(fs_ssid, "airRohr-");
+			strcpy(fs_ssid, SSID_BASENAME);
 			strcat(fs_ssid, id);
 		}
 	}
@@ -2377,7 +2377,7 @@ void webserver_prometheus_endpoint() {
 	String data_4_prometheus = F("software_version{version=\"{ver}\",node=\"-{id}\"} 1\nuptime_ms{{id}} {up}\nsending_intervall_ms{{id}} {si}\nnumber_of_measurements{{id}} {cs}\n");
 	debug_outln(F("Parse JSON for Prometheus"), DEBUG_MIN_INFO);
 	debug_outln(last_data_string, DEBUG_MED_INFO);
-	String id = F("node=\"esp8266-");
+	String id = F("node=\"" SENSOR_BASENAME);
 	id += esp_chipid + "\"";
 	data_4_prometheus.replace("{id}", esp_chipid);
 	data_4_prometheus.replace("{ver}", SOFTWARE_VERSION);
@@ -2665,7 +2665,7 @@ unsigned long sendData(const String& data, const int pin, const char* host, cons
 	}
 	request_head += F("X-PIN: ");
 	request_head += String(pin);
-	request_head += F("\r\nX-Sensor: esp8266-");
+	request_head += F("\r\nX-Sensor: " SENSOR_BASENAME);
 	request_head += esp_chipid;
 	request_head += F("\r\nContent-Length: ");
 	request_head += String(data.length(), DEC);
@@ -2809,7 +2809,7 @@ String create_influxdb_string(const String& data) {
 	DeserializationError err = deserializeJson(json2data, data);
 	if (!err) {
 		data_4_influxdb += cfg::measurement_name_influx;
-		data_4_influxdb += F(",node=esp8266-");
+		data_4_influxdb += F(",node=" SENSOR_BASENAME);
 		data_4_influxdb += esp_chipid + " ";
 		for (uint8_t i = 0; i < json2data["sensordatavalues"].size(); i++) {
 			String tmp_str = json2data["sensordatavalues"][i]["value_type"].as<char*>();
@@ -4640,7 +4640,7 @@ extern "C" void setup(void) {
 	logEnabledAPIs();
 	logEnabledDisplays();
 
-	String server_name = F("airRohr-");
+	String server_name = F(HOSTNAME_BASE);
 	server_name += esp_chipid;
 	if (MDNS.begin(server_name.c_str())) {
 		MDNS.addService("http", "tcp", 80);
