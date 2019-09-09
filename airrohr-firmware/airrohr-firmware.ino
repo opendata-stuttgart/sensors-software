@@ -2226,7 +2226,7 @@ void webserver_values() {
 		}
 		else if(cfg::mhz19_read) { // can not be active at the same time as gps because it uses the same serial port
 			page_content += FPSTR(EMPTY_ROW);
-			page_content += table_row_from_value(FPSTR(SENSORS_MHZ19), FPSTR(INTL_CO2), check_display_value(last_value_MHZ19_co2, -1.0, 2, 0), unit_CO2);
+			page_content += table_row_from_value(FPSTR(SENSORS_MHZ19), FPSTR(INTL_CO2), check_display_value(last_value_MHZ19_co2, -1.0, 0, 0), unit_CO2);
 		}
 
 		page_content += FPSTR(EMPTY_ROW);
