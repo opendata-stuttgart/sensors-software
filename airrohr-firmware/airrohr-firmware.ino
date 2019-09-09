@@ -1005,7 +1005,7 @@ void readConfig() {
 						strcpy(version_from_local_config, json["SOFTWARE_VERSION"]);
 					}
 
-#define setFromJSON(key)    if (json.containsKey(#key)) {key = json[#key].as<typeof(key)>(); }
+#define setFromJSON(key)    if (json.containsKey(#key)) {key = json[#key]; }
 #define strcpyFromJSON(key) if (json.containsKey(#key)) {strcpy(key, json[#key]); }
 					strcpyFromJSON(current_lang);
 					strcpyFromJSON(wlanssid);
