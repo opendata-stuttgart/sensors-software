@@ -730,32 +730,6 @@ static String Value2Json(const __FlashStringHelper* type, const float& value) {
 }
 
 /*****************************************************************
- * convert string value to json string                           *
- *****************************************************************/
-static String Var2Json(const String& name, const String& value) {
-	String s = FPSTR(WEB_REPLN_REPLV);
-	String tmp = value;
-	tmp.replace("\\", "\\\\"); tmp.replace("\"", "\\\"");
-	s.replace("{n}", name);
-	s.replace("{v}", tmp);
-	return s;
-}
-
-/*****************************************************************
- * convert boolean value to json string                          *
- *****************************************************************/
-static String Var2Json(const String& name, const bool value) {
-	return Var2Json(name, String(value ? "true" : "false"));
-}
-
-/*****************************************************************
- * convert boolean value to json string                          *
- *****************************************************************/
-static String Var2Json(const String& name, const int value) {
-	return Var2Json(name, String(value));
-}
-
-/*****************************************************************
  * send SDS011 command (start, stop, continuous mode, version    *
  *****************************************************************/
 static bool SDS_cmd(PmSensorCmd cmd) {
@@ -1103,87 +1077,79 @@ static void readConfig() {
  * write config to spiffs                                        *
  *****************************************************************/
 static void writeConfig() {
-	using namespace cfg;
-	String json_string = "{";
 	debug_outln_info(F("saving config..."));
 
-#define copyToJSON_Bool(varname) json_string += Var2Json(#varname, varname);
-#define copyToJSON_Int(varname) json_string += Var2Json(#varname, varname);
-#define copyToJSON_String(varname) json_string += Var2Json(#varname, String(varname));
-	copyToJSON_String(current_lang);
-	copyToJSON_String(SOFTWARE_VERSION);
-	copyToJSON_String(wlanssid);
-	copyToJSON_String(wlanpwd);
-	copyToJSON_String(www_username);
-	copyToJSON_String(www_password);
-	copyToJSON_String(fs_ssid);
-	copyToJSON_String(fs_pwd);
-	copyToJSON_Bool(www_basicauth_enabled);
-	copyToJSON_Bool(dht_read);
-	copyToJSON_Bool(htu21d_read);
-	copyToJSON_Bool(ppd_read);
-	copyToJSON_Bool(sds_read);
-	copyToJSON_Bool(pms_read);
-	copyToJSON_Bool(hpm_read);
-	copyToJSON_Bool(sps30_read);
-	copyToJSON_Bool(bmp_read);
-	copyToJSON_Bool(bmp280_read);
-	copyToJSON_Bool(bme280_read);
-	copyToJSON_Bool(ds18b20_read);
-	copyToJSON_Bool(dnms_read);
-	copyToJSON_String(dnms_correction);
-	copyToJSON_Bool(gps_read);
-	copyToJSON_Bool(send2dusti);
-	copyToJSON_Bool(ssl_dusti);
-	copyToJSON_Bool(send2madavi);
-	copyToJSON_Bool(ssl_madavi);
-	copyToJSON_Bool(send2sensemap);
-	copyToJSON_Bool(send2fsapp);
-	copyToJSON_Bool(send2aircms);
-	copyToJSON_Bool(send2lora);
-	copyToJSON_Bool(send2csv);
-	copyToJSON_Bool(auto_update);
-	copyToJSON_Bool(use_beta);
-	copyToJSON_Bool(has_display);
-	copyToJSON_Bool(has_sh1106);
-	copyToJSON_Bool(has_flipped_display);
-	copyToJSON_Bool(has_lcd1602);
-	copyToJSON_Bool(has_lcd1602_27);
-	copyToJSON_Bool(has_lcd2004_27);
-	copyToJSON_Bool(display_wifi_info);
-	copyToJSON_Bool(display_device_info);
-	copyToJSON_String(debug);
-	copyToJSON_String(sending_intervall_ms);
-	copyToJSON_String(time_for_wifi_config);
-	copyToJSON_String(senseboxid);
-	copyToJSON_Bool(send2custom);
-	copyToJSON_String(host_custom);
-	copyToJSON_String(url_custom);
-	copyToJSON_Int(port_custom);
-	copyToJSON_String(user_custom);
-	copyToJSON_String(pwd_custom);
-	copyToJSON_Bool(ssl_custom);
+	DynamicJsonDocument json(JSON_BUFFER_SIZE);
+	json["SOFTWARE_VERSION"] = String(SOFTWARE_VERSION);
+#define SetJSON(varname) json[#varname].set(cfg::varname);
+	SetJSON(current_lang);
+	SetJSON(wlanssid);
+	SetJSON(wlanpwd);
+	SetJSON(www_username);
+	SetJSON(www_password);
+	SetJSON(fs_ssid);
+	SetJSON(fs_pwd);
+	SetJSON(www_basicauth_enabled);
+	SetJSON(dht_read);
+	SetJSON(htu21d_read);
+	SetJSON(ppd_read);
+	SetJSON(sds_read);
+	SetJSON(pms_read);
+	SetJSON(hpm_read);
+	SetJSON(sps30_read);
+	SetJSON(bmp_read);
+	SetJSON(bmp280_read);
+	SetJSON(bme280_read);
+	SetJSON(ds18b20_read);
+	SetJSON(dnms_read);
+	SetJSON(dnms_correction);
+	SetJSON(gps_read);
+	SetJSON(send2dusti);
+	SetJSON(ssl_dusti);
+	SetJSON(send2madavi);
+	SetJSON(ssl_madavi);
+	SetJSON(send2sensemap);
+	SetJSON(send2fsapp);
+	SetJSON(send2aircms);
+	SetJSON(send2lora);
+	SetJSON(send2csv);
+	SetJSON(auto_update);
+	SetJSON(use_beta);
+	SetJSON(has_display);
+	SetJSON(has_sh1106);
+	SetJSON(has_flipped_display);
+	SetJSON(has_lcd1602);
+	SetJSON(has_lcd1602_27);
+	SetJSON(has_lcd2004_27);
+	SetJSON(display_wifi_info);
+	SetJSON(display_device_info);
+	SetJSON(debug);
+	SetJSON(sending_intervall_ms);
+	SetJSON(time_for_wifi_config);
+	SetJSON(senseboxid);
+	SetJSON(send2custom);
+	SetJSON(host_custom);
+	SetJSON(url_custom);
+	SetJSON(port_custom);
+	SetJSON(user_custom);
+	SetJSON(pwd_custom);
+	SetJSON(ssl_custom);
 
-	copyToJSON_Bool(send2influx);
-	copyToJSON_String(host_influx);
-	copyToJSON_String(url_influx);
-	copyToJSON_Int(port_influx);
-	copyToJSON_String(user_influx);
-	copyToJSON_String(pwd_influx);
-	copyToJSON_String(measurement_name_influx);
-	copyToJSON_Bool(ssl_influx);
-#undef copyToJSON_Bool
-#undef copyToJSON_Int
-#undef copyToJSON_String
-
-	json_string.remove(json_string.length() - 1);
-	json_string += "}";
+	SetJSON(send2influx);
+	SetJSON(host_influx);
+	SetJSON(url_influx);
+	SetJSON(port_influx);
+	SetJSON(user_influx);
+	SetJSON(pwd_influx);
+	SetJSON(measurement_name_influx);
+	SetJSON(ssl_influx);
+#undef SetJSON
 
 	File configFile = SPIFFS.open("/config.json", "w");
 	if (configFile) {
-		configFile.print(json_string);
-		debug_outln_verbose(F("Config written: "), json_string);
+		serializeJson(json, configFile);
 		configFile.close();
+		debug_outln_info(F("Config written successfully."));
 	} else {
 		debug_outln_error(F("failed to open config file for writing"));
 	}
@@ -1491,9 +1457,9 @@ static void webserver_root() {
  * Webserver config: show config page                            *
  *****************************************************************/
 
-static void webserver_config_body_get(String& page_content) {
+static void webserver_config_send_body_get() {
 	using namespace cfg;
-
+	String page_content;
 
 	debug_outln_info(F("begin webserver_config_body_get ..."));
 	page_content += F("<form method='POST' action='/config' style='width:100%;'>\n<b>");
@@ -1513,6 +1479,10 @@ static void webserver_config_body_get(String& page_content) {
 
 	page_content += FPSTR(INTL_AB_HIER_NUR_ANDERN);
 	page_content += F("</b><br/><br/>\n<b>");
+
+	// Paginate page after ~ 1500 Bytes
+	server.sendContent(page_content);
+	page_content = empty_String;
 
 	if (! wificonfig_loop) {
 		page_content += FPSTR(INTL_BASICAUTH);
@@ -1549,6 +1519,10 @@ static void webserver_config_body_get(String& page_content) {
 
 		page_content += FPSTR(WEB_BR_LF_B);
 
+		// Paginate page after ~ 1500 Bytes
+		server.sendContent(page_content);
+		page_content = empty_String;
+
 		page_content += FPSTR(INTL_SENSORS);
 		page_content += FPSTR(WEB_B_BR);
 		page_content += form_checkbox_sensor("sds_read", FPSTR(INTL_SDS011), sds_read);
@@ -1572,6 +1546,10 @@ static void webserver_config_body_get(String& page_content) {
 
 	}
 
+	// Paginate page after ~ 1500 Bytes
+	server.sendContent(page_content);
+	page_content = empty_String;
+
 	page_content += FPSTR(INTL_MORE_SETTINGS);
 	page_content += FPSTR(WEB_B_BR);
 	page_content += form_checkbox("auto_update", FPSTR(INTL_AUTO_UPDATE), auto_update);
@@ -1584,6 +1562,10 @@ static void webserver_config_body_get(String& page_content) {
 	page_content += form_checkbox("has_lcd2004_27", FPSTR(INTL_LCD2004_27), has_lcd2004_27);
 	page_content += form_checkbox("display_wifi_info", FPSTR(INTL_DISPLAY_WIFI_INFO), display_wifi_info);
 	page_content += form_checkbox("display_device_info", FPSTR(INTL_DISPLAY_DEVICE_INFO), display_device_info);
+
+	// Paginate page after ~ 1500 Bytes
+	server.sendContent(page_content);
+	page_content = empty_String;
 
 	if (! wificonfig_loop) {
 		page_content += FPSTR(TABLE_TAG_OPEN);
@@ -1608,6 +1590,11 @@ static void webserver_config_body_get(String& page_content) {
 		page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
 		page_content += form_checkbox("ssl_custom", FPSTR(WEB_HTTPS), ssl_custom, false);
 		page_content += FPSTR(WEB_BRACE_BR);
+
+		// Paginate page after ~ 1500 Bytes
+		server.sendContent(page_content);
+		page_content = empty_String;
+
 		page_content += FPSTR(TABLE_TAG_OPEN);
 		page_content += form_input("host_custom", FPSTR(INTL_SERVER), host_custom, LEN_HOST_CUSTOM);
 		page_content += form_input("url_custom", FPSTR(INTL_PATH), url_custom, LEN_URL_CUSTOM);
@@ -1641,11 +1628,13 @@ static void webserver_config_body_get(String& page_content) {
 		page_content += FPSTR(WEB_BR_FORM);
 		page_content += F("<script>window.setTimeout(load_wifi_list,1000);</script>");
 	}
+
+	server.sendContent(page_content);
 }
 
-
-static void webserver_config_body_post(String& page_content) {
+static void webserver_config_send_body_post() {
 	String masked_pwd;
+	String page_content;
 
 	using namespace cfg;
 
@@ -1687,15 +1676,20 @@ static void webserver_config_body_post(String& page_content) {
 		} \
 	}
 
-	if (server.hasArg("wlanssid") && server.arg("wlanssid") != "") {
+	if (server.arg("wlanssid").length()) {
 		readCharParam(wlanssid);
 		readPasswdParam(wlanpwd);
 	}
 	if (! wificonfig_loop) {
 		readCharParam(current_lang);
-		readCharParam(www_username);
-		readPasswdParam(www_password);
+
+
 		readBoolParam(www_basicauth_enabled);
+		if (www_basicauth_enabled) {
+			readCharParam(www_username);
+			readPasswdParam(www_password);
+		}
+
 		readCharParam(fs_ssid);
 		String s_fs_pwd("fs_pwd");
 		if (server.hasArg(s_fs_pwd) && ((server.arg(s_fs_pwd).length() > 7) || (server.arg(s_fs_pwd).length() == 0))) {
@@ -1725,11 +1719,8 @@ static void webserver_config_body_post(String& page_content) {
 		readTimeParam(time_for_wifi_config);
 
 		readBoolParam(send2csv);
-
 		readBoolParam(send2fsapp);
-
 		readBoolParam(send2aircms);
-
 		readBoolParam(send2sensemap);
 		readCharParam(senseboxid);
 
@@ -1784,6 +1775,11 @@ static void webserver_config_body_post(String& page_content) {
 	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("DNMS")), dnms_read);
 	page_content += line_from_value_bool(FPSTR(INTL_DNMS_CORRECTION), String(dnms_correction));
 	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("GPS")), gps_read);
+
+	// Paginate after ~ 1500 bytes
+	server.sendContent(page_content);
+	page_content = empty_String;
+
 	page_content += line_from_value_bool(FPSTR(INTL_AUTO_UPDATE), auto_update);
 	page_content += line_from_value_bool(FPSTR(INTL_USE_BETA), use_beta);
 	page_content += line_from_value_bool(FPSTR(INTL_DISPLAY), has_display);
@@ -1801,6 +1797,11 @@ static void webserver_config_body_post(String& page_content) {
 	page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_CSV)), send2csv);
 	page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_FEINSTAUB_APP)), send2fsapp);
 	page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), F("opensensemap")), send2sensemap);
+
+	// Paginate after ~ 1500 bytes
+	server.sendContent(page_content);
+	page_content = empty_String;
+
 	page_content += F("<br/>senseBox-ID ");
 	page_content += senseboxid;
 	page_content += FPSTR(WEB_BR_BR);
@@ -1821,38 +1822,41 @@ static void webserver_config_body_post(String& page_content) {
 	page_content += line_from_value(F("SSL"), String(ssl_influx));
 	page_content += FPSTR(WEB_BR_BR);
 	page_content += FPSTR(INTL_SENSOR_IS_REBOOTING);
+
+	server.sendContent(page_content);
 }
 
 static void webserver_config() {
 	if (!webserver_request_auth())
 	{ return; }
 
-	String page_content = make_header(FPSTR(INTL_CONFIGURATION));
-	// This is a large page...
-	page_content.reserve(12 * 1024);
-
 	last_page_load = millis();
 
 	debug_outln_info(F("output config page ..."));
-	if (wificonfig_loop) {  // scan for wlan ssids
-		page_content += FPSTR(WEB_CONFIG_SCRIPT);
-	}
-
-	if (server.method() == HTTP_GET) {
-		webserver_config_body_get(page_content);
-	} else {
-		webserver_config_body_post(page_content);
-	}
-	page_content += make_footer();
 
 	server.sendHeader(F("Cache-Control"), F("no-cache, no-store, must-revalidate"));
 	server.sendHeader(F("Pragma"), F("no-cache"));
 	server.sendHeader(F("Expires"), F("0"));
+	// Enable Pagination (Chunked Transfer)
+	server.setContentLength(CONTENT_LENGTH_UNKNOWN);
+
+	String page_content = make_header(FPSTR(INTL_CONFIGURATION));
+	if (wificonfig_loop) {  // scan for wlan ssids
+		page_content += FPSTR(WEB_CONFIG_SCRIPT);
+	}
 	server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
+
+	if (server.method() == HTTP_GET) {
+		webserver_config_send_body_get();
+	} else {
+		webserver_config_send_body_post();
+	}
+	server.sendContent(make_footer());
 
 	if (server.method() == HTTP_POST) {
 		display_debug(F("Writing config"), F("and restarting"));
 		writeConfig();
+		delay(100);
 		SPIFFS.end();
 		delay(500);
 		ESP.restart();
@@ -2208,7 +2212,7 @@ static void webserver_prometheus_endpoint() {
 static void webserver_images() {
 	if (server.arg("name") == F("luftdaten_logo")) {
 		debug_outln_info(F("output luftdaten.info logo..."));
-		server.send(200, FPSTR(TXT_CONTENT_TYPE_IMAGE_SVG), FPSTR(LUFTDATEN_INFO_LOGO_SVG));
+		server.send_P(200, TXT_CONTENT_TYPE_IMAGE_SVG, LUFTDATEN_INFO_LOGO_SVG);
 	} else {
 		webserver_not_found();
 	}
