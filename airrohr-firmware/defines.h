@@ -84,17 +84,20 @@ static const uint16_t suites[] PROGMEM = {
 // only numbers of usable pins are defined (pins internal used to
 // access flash and PSRAM pins are omitted). Actually it depends on
 // the concrete board which pins are available.
+// see https://randomnerdtutorials.com/esp32-pinout-reference-gpios/
 #define D0 0
 //#define D1 1  // USB serial RX
 #define D2 2
 //#define D3 3  // USB serial TX
 #define D4 4
 #define D5 5
-// pins 12 to 15 are needed by JTAG and should not be used when debugging is required
-//#define D12 12
-//#define D13 13
-//#define D14 14
-//#define D15 15
+// pins 12 to 15 are needed by JTAG and should not be used to allow debugging
+#define D12_JTAG_TDI_LOW_DURING_BOOT 12
+#define D13_JTAG_TCK 13
+#define D14_JTAG_TMS 14
+#define D15_JTAG_TDO_HIGH_DURING_BOOT 15
+#define D16_WROOM_ONLY 16
+#define D17_WROOM_ONLY 17
 #define D18 18
 #define D19 19
 #define D21 21
@@ -105,10 +108,10 @@ static const uint16_t suites[] PROGMEM = {
 #define D27 27
 #define D32 32
 #define D33 33
-#define D34 34
-#define D35 35
-#define D36 36
-#define D39 39
+#define D34_INPUTONLY 34
+#define D35_INPUTONLY 35
+#define D36_INPUTONLY 36
+#define D39_INPUTONLY 39
 
 // RFM69 FSK module
 #define RF69_FREQ 868.0
