@@ -4644,7 +4644,7 @@ void setup(void) {
 	delay(50);
 
 	// sometimes parallel sending data and web page will stop nodemcu, watchdogtimer set to 30 seconds
-#if defined(ESP8266) || defined(ESP32)
+#if defined(ESP8266)
 	wdt_disable();
 #if defined(NDEBUG)
 	wdt_enable(30000);
