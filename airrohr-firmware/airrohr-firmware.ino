@@ -4339,12 +4339,13 @@ void setup(void) {
 	Serial.begin(9600);					// Output to Serial at 9600 baud
 
 #if defined(ESP32)
-	serialSDS.begin(9600, SERIAL_8N1, D1, D2);
-	serialGPS.begin(9600, SERIAL_8N1, D5, D6);
-	pinMode(16, OUTPUT);
-	digitalWrite(16, LOW);
+	serialSDS.begin(9600, SERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX);
+	/* TODO: what shall this be good for?
+	pinMode(16, OUTPUT); // TODO: define magic number
+	digitalWrite(16, LOW); // TODO: define magic number
 	delay(50);
-	digitalWrite(16, HIGH);
+	digitalWrite(16, HIGH); // TODO: define magic number
+	*/
 #endif
 	Wire.begin(I2C_PIN_SDA, I2C_PIN_SCL);
 
@@ -4370,7 +4371,6 @@ void setup(void) {
 	autoUpdate();
 	setup_webserver();
 	create_basic_auth_strings();
-	serialSDS.begin(9600);
 	debug_out(F("\nChipId: "), DEBUG_MIN_INFO);
 	debug_outln(esp_chipid, DEBUG_MIN_INFO);
 
@@ -4378,6 +4378,11 @@ void setup(void) {
 
 	if (cfg::gps_read) {
 		serialGPS.begin(9600);
+#endif
+#ifdef ESP32
+		serialGPS.begin(9600, SERIAL_8N1, GPS_SERIAL_RX, GPS_SERIAL_TX);
+#endif
+
 		debug_outln(F("Read GPS..."), DEBUG_MIN_INFO);
 		disable_unneeded_nmea();
 	}
@@ -4385,7 +4390,7 @@ void setup(void) {
 	logEnabledAPIs();
 	logEnabledDisplays();
 
-	String server_name = F("airRohr-");
+	String server_name = F("HOSTNAME_BASE");
 	server_name += esp_chipid;
 	if (MDNS.begin(server_name.c_str())) {
 		MDNS.addService("http", "tcp", 80);
@@ -4394,9 +4399,11 @@ void setup(void) {
 	delay(50);
 
 	// sometimes parallel sending data and web page will stop nodemcu, watchdogtimer set to 30 seconds
-#if defined(ESP8266)
+#if defined(ESP8266) || defined(ESP32)
 	wdt_disable();
+#if defined(NDEBUG)
 	wdt_enable(30000);
+#endif
 #endif
 
 	starttime = millis();									// store the start time
