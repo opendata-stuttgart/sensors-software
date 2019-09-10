@@ -743,7 +743,7 @@ double last_value_GPS_lon = -200.0;
 double last_value_GPS_alt = -1000.0;
 String last_value_GPS_date;
 String last_value_GPS_time;
-double last_value_MHZ19_co2 = -1.0;
+double last_value_MHZ19_co2_ppm = -1.0;
 String last_data_string;
 
 String esp_chipid;
@@ -2132,7 +2132,7 @@ void webserver_values() {
 		const String unit_NC = "#/cm³";
 		const String unit_TS = "µm";
 		const String unit_LA = "dB(A)";
-		const String unit_CO2 = "ppm";
+		const String unit_CO2_ppm = "ppm";
 		last_page_load = millis();
 
 		const int signal_quality = calcWiFiSignalQuality(WiFi.RSSI());
@@ -2226,7 +2226,7 @@ void webserver_values() {
 		}
 		else if(cfg::mhz19_read) { // can not be active at the same time as gps because it uses the same serial port
 			page_content += FPSTR(EMPTY_ROW);
-			page_content += table_row_from_value(FPSTR(SENSORS_MHZ19), FPSTR(INTL_CO2), check_display_value(last_value_MHZ19_co2, -1.0, 0, 0), unit_CO2);
+			page_content += table_row_from_value(FPSTR(SENSORS_MHZ19), FPSTR(INTL_CO2), check_display_value(last_value_MHZ19_co2_ppm, -1.0, 0, 0), unit_CO2_ppm);
 		}
 
 		page_content += FPSTR(EMPTY_ROW);
@@ -3827,17 +3827,17 @@ String sensorMHZ19() {
 
     uint16_t ppm = co2Sensor.ReadCO2Sensor();
 	if(ppm == 0xffff) {
-		last_value_MHZ19_co2 = -1.0;
+		last_value_MHZ19_co2_ppm = -1.0;
 		debug_outln(F("No MHZ19 data received: check wiring"), DEBUG_ERROR);
 	}
 	else
 	{
-		last_value_MHZ19_co2 = ppm;
+		last_value_MHZ19_co2_ppm = ppm;
 	}
 
 	if (send_now) {
-		debug_outln("CO2: " + Float2String(last_value_MHZ19_co2, 0), DEBUG_MIN_INFO);
-		s += Value2Json(F("MHZ19_CO2"), Float2String(last_value_MHZ19_co2, 0));
+		debug_outln("CO2 ppm: " + Float2String(last_value_MHZ19_co2_ppm, 0), DEBUG_MIN_INFO);
+		s += Value2Json(F("conc_co2_ppm"), Float2String(last_value_MHZ19_co2_ppm, 0));
 	}
 
 	debug_outln(String(FPSTR(DBG_TXT_END_READING)) + "MHZ19", DEBUG_MED_INFO);
@@ -3926,7 +3926,7 @@ void display_values() {
 	double lat_value = -200.0;
 	double lon_value = -200.0;
 	double alt_value = -1000.0;
-	double co2_value = -1.0;
+	double co2_ppm_value = -1.0;
 	String gps_sensor, display_header;
 	String display_lines[3] = { "", "", ""};
 	int screen_count = 0;
@@ -4020,7 +4020,7 @@ void display_values() {
 		gps_sensor = "NEO6M";
 	}
 	if(cfg::mhz19_read) {
-		co2_value = last_value_MHZ19_co2;
+		co2_ppm_value = last_value_MHZ19_co2_ppm;
 	}
 	if (cfg::ppd_read || cfg::pms_read || cfg::hpm_read || cfg::sds_read) {
 		screens[screen_count++] = 1;
@@ -4102,7 +4102,7 @@ void display_values() {
 			break;
 		case (8):
 			display_header = FPSTR(SENSORS_MHZ19);
-			display_lines[0] = "CO2: " + check_display_value(co2_value, -1.0, 0, 4);
+			display_lines[0] = "CO2: " + check_display_value(co2_ppm_value, -1.0, 0, 4);
 			display_lines[1] = FPSTR("");
 			display_lines[2] = FPSTR("");
 			break;
