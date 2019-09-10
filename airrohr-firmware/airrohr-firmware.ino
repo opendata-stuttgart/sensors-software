@@ -4574,11 +4574,13 @@ void setup(void) {
 	serialSDS.begin(9600);
 #endif
 #if defined(ESP32)
-	serialSDS.begin(9600, SERIAL_8N1, D1, D2);
+	serialSDS.begin(9600, SERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX);
+	/* TODO: what shall this be good for?
 	pinMode(16, OUTPUT); // TODO: define magic number
 	digitalWrite(16, LOW); // TODO: define magic number
 	delay(50);
 	digitalWrite(16, HIGH); // TODO: define magic number
+	*/
 #endif
 	Wire.begin(I2C_PIN_SDA, I2C_PIN_SCL);
 
@@ -4614,25 +4616,18 @@ void setup(void) {
 		serialGPS.begin(9600);
 #endif
 #ifdef ESP32
-#if defined(ARDUINO_LOLIN_D32_PRO)
-		serialGPS.begin(9600, SERIAL_8N1, 22 /* RX (orig: SCL) */, 21 /* TX (orig: SDA) */);  // TODO: define magic number
-#else
-		serialGPS.begin(9600, SERIAL_8N1, D5, D6);
-#endif
+		serialGPS.begin(9600, SERIAL_8N1, GPS_SERIAL_RX, GPS_SERIAL_TX);
 #endif
 
 		debug_outln(F("Read GPS..."), DEBUG_MIN_INFO);
 		disable_unneeded_nmea();
 	}
 	else if(cfg::mhz19_read) { // can not be active at the same time as gps because it uses the same serial port
-#ifdef ESP32
-#if defined(ARDUINO_LOLIN_D32_PRO)
-		serialGPS.begin(co2Sensor.mh_z19_baudrate, SERIAL_8N1, 22 /* RX (orig: SCL) */, 21 /* TX (orig: SDA) */);
-#else
-		serialGPS.begin(9600, SERIAL_8N1, D5, D6);
-#endif
-#else
+#if defined(ESP8266)
 		serialGPS.begin(9600);
+#endif
+#ifdef ESP32
+		serialGPS.begin(9600, SERIAL_8N1, GPS_SERIAL_RX, GPS_SERIAL_TX);
 #endif
 		debug_outln(F("Read MHZ19..."), DEBUG_MIN_INFO);
 	}
@@ -4649,9 +4644,11 @@ void setup(void) {
 	delay(50);
 
 	// sometimes parallel sending data and web page will stop nodemcu, watchdogtimer set to 30 seconds
-#if defined(ESP8266)
+#if defined(ESP8266) || defined(ESP32)
 	wdt_disable();
+#if defined(NDEBUG)
 	wdt_enable(30000);
+#endif
 #endif
 
 	starttime = millis();									// store the start time

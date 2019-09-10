@@ -55,8 +55,20 @@
 #define SSL_INFLUX 0
 
 // define pins for I2C
-#define I2C_PIN_SCL D4
-#define I2C_PIN_SDA D3
+#if defined(ESP8266)
+#define I2C_PIN_SCL SDA
+#define I2C_PIN_SDA SCL
+#endif
+
+#if defined(ESP32)
+#if defined(ARDUINO_LOLIN_D32_PRO)
+#define I2C_PIN_SCL D19
+#define I2C_PIN_SDA D23
+#else
+#define I2C_PIN_SCL SCL
+#define I2C_PIN_SDA SDA
+#endif
+#endif
 
 // define pin for one wire sensors
 #if defined(ESP8266)
@@ -65,8 +77,13 @@
 #if defined(ARDUINO_SAMD_ZERO)
 #define ONEWIRE_PIN D7
 #endif
+
 #if defined(ESP32)
+#if defined(ARDUINO_LOLIN_D32_PRO)
+#define ONEWIRE_PIN D32
+#else
 #define ONEWIRE_PIN D7
+#endif
 #endif
 
 // define serial interface pins for particle sensors
@@ -79,10 +96,30 @@
 #define PM_SERIAL_TX D2
 #endif
 
+#if defined(ESP32)
+#if defined(ARDUINO_LOLIN_D32_PRO)
+#define PM_SERIAL_RX D27
+#define PM_SERIAL_TX D33
+#else
+#define PM_SERIAL_RX D12
+#define PM_SERIAL_TX D13
+#endif
+#endif
+
 // define serial interface pins for GPS modules
 #if defined(ESP8266)
 #define GPS_SERIAL_RX D5
 #define GPS_SERIAL_TX D6
+#endif
+
+#if defined(ESP32)
+#if defined(ARDUINO_LOLIN_D32_PRO)
+#define GPS_SERIAL_RX SCL
+#define GPS_SERIAL_TX SDA
+#else
+#define GPS_SERIAL_RX D19
+#define GPS_SERIAL_TX D23
+#endif
 #endif
 
 // DHT22, temperature, humidity
@@ -98,8 +135,8 @@
 #define PPD_READ 0
 #define PPD_API_PIN 5
 #if defined(ARDUINO_SAMD_ZERO) || defined(ESP8266) || defined(ESP32)
-#define PPD_PIN_PM1 D6
-#define PPD_PIN_PM2 D5
+#define PPD_PIN_PM1 GPS_SERIAL_TX
+#define PPD_PIN_PM2 GPS_SERIAL_RX
 #endif
 
 // SDS011, the more expensive version of the particle sensor
@@ -147,6 +184,25 @@
 
 // MHZ19 CO2 sensor
 #define MHZ19_READ 0
+
+// RFM69
+#if defined(ESP32)
+#if defined(ARDUINO_LOLIN_D32_PRO)
+#define RFM69_CS D0
+#define RFM69_RST D2
+#define RFM69_INT D4
+#else
+#define RFM69_CS D0
+#define RFM69_RST D2
+#define RFM69_INT D4
+#endif
+#endif
+
+#if defined(ARDUINO_SAMD_ZERO) && defined(SERIAL_PORT_USBVIRTUAL)
+#define RFM69_CS 8
+#define RFM69_RST 4
+#define RFM69_INT 3
+#endif
 
 // automatic firmware updates
 #define AUTO_UPDATE 1
