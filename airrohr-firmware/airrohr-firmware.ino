@@ -1551,11 +1551,10 @@ static void webserver_config_send_body_get() {
 
 		page_content += FPSTR(WEB_BR_LF_B);
 
+		// Paginate page after ~ 1500 Bytes
+		server.sendContent(page_content);
+		page_content = empty_String;
 	}
-
-	// Paginate page after ~ 1500 Bytes
-	server.sendContent(page_content);
-	page_content = empty_String;
 
 	page_content += FPSTR(INTL_MORE_SETTINGS);
 	page_content += FPSTR(WEB_B_BR);
