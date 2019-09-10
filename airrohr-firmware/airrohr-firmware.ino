@@ -4573,14 +4573,13 @@ void setup(void) {
 #if defined(ESP8266)
 	serialSDS.begin(9600);
 #endif
-#if defined(ESP32)
+#if defined(WIFI_LoRa_32_V2)
 	serialSDS.begin(9600, SERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX);
-	/* TODO: what shall this be good for?
-	pinMode(16, OUTPUT); // TODO: define magic number
-	digitalWrite(16, LOW); // TODO: define magic number
+	// reset the OLED display, e.g. of the heltec_wifi_lora_32 board
+	pinMode(RST_OLED, OUTPUT);
+	digitalWrite(RST_OLED, LOW);
 	delay(50);
-	digitalWrite(16, HIGH); // TODO: define magic number
-	*/
+	digitalWrite(RST_OLED, HIGH);
 #endif
 	Wire.begin(I2C_PIN_SDA, I2C_PIN_SCL);
 
