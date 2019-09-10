@@ -118,7 +118,6 @@
 #if defined(ESP8266)
 #include <FS.h>                     // must be first
 #include <ESP8266WiFi.h>
-#include <DNSServer.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include <ESP8266httpUpdate.h>
@@ -155,7 +154,6 @@
 #include <hwcrypto/sha.h>
 #include <HTTPUpdate.h>
 #include <WebServer.h>
-#include <DNSServer.h>
 #include <ESPmDNS.h>
 #include <SSD1306.h>
 #include <SH1106.h>
@@ -171,7 +169,6 @@
 #include <TinyGPS++.h>
 #include "./sps30_i2c.h"
 #include "./dnms_i2c.h"
-
 #endif
 
 #if defined(INTL_BG)
@@ -2300,67 +2297,58 @@ static void wifiConfig() {
 	WiFi.disconnect(true);
 	debug_outln_info(F("scan for wifi networks..."));
 	count_wifiInfo = WiFi.scanNetworks(false /* scan async */, true /* show hidden networks */);
-	{
-		delete [] wifiInfo;
-		wifiInfo = new struct_wifiInfo[count_wifiInfo];
 
-		for (int i = 0; i < count_wifiInfo; i++) {
-			String SSID;
-			uint8_t* BSSID;
+	delete [] wifiInfo;
+	wifiInfo = new struct_wifiInfo[count_wifiInfo];
 
-			memset(&wifiInfo[i], 0, sizeof(struct_wifiInfo));
+	for (int i = 0; i < count_wifiInfo; i++) {
+		String SSID;
+		uint8_t* BSSID;
+
+		memset(&wifiInfo[i], 0, sizeof(struct_wifiInfo));
 #if defined(ESP8266)
-			WiFi.getNetworkInfo(i, SSID, wifiInfo[i].encryptionType,
-				wifiInfo[i].RSSI, BSSID, wifiInfo[i].channel,
-				wifiInfo[i].isHidden);
+		WiFi.getNetworkInfo(i, SSID, wifiInfo[i].encryptionType,
+			wifiInfo[i].RSSI, BSSID, wifiInfo[i].channel,
+			wifiInfo[i].isHidden);
 #else
-			WiFi.getNetworkInfo(i, SSID, wifiInfo[i].encryptionType,
-				wifiInfo[i].RSSI, BSSID, wifiInfo[i].channel);
+		WiFi.getNetworkInfo(i, SSID, wifiInfo[i].encryptionType,
+			wifiInfo[i].RSSI, BSSID, wifiInfo[i].channel);
 #endif
-			SSID.toCharArray(wifiInfo[i].ssid, sizeof(wifiInfo[0].ssid));
-		}
-
-		WiFi.mode(WIFI_AP);
-		const IPAddress apIP(192, 168, 4, 1);
-		WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
-		WiFi.softAP(cfg::fs_ssid, cfg::fs_pwd, selectChannelForAp());
-		// In case we create a unique password at first start
-		debug_outln_info(F("AP Password is: "), String(WLANPWD));
-
-		DNSServer dnsServer;
-		dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
-		dnsServer.start(53, "*", apIP);							// 53 is port for DNS server
-
-		setup_webserver();
-
-		// 10 minutes timeout for wifi config
-		last_page_load = millis();
-		while (((millis() - last_page_load) < cfg::time_for_wifi_config)) {
-			dnsServer.processNextRequest();
-			server.handleClient();
-#if defined(ESP8266)
-			wdt_reset(); // nodemcu is alive
-#endif
-			yield();
-		}
-
-		// half second to answer last requests
-		last_page_load = millis();
-		while ((millis() - last_page_load) < 500) {
-			dnsServer.processNextRequest();
-			server.handleClient();
-			yield();
-		}
-
-		WiFi.disconnect(true);
-		WiFi.softAPdisconnect(true);
-		WiFi.mode(WIFI_STA);
-
-		dnsServer.stop();
+		SSID.toCharArray(wifiInfo[i].ssid, sizeof(wifiInfo[0].ssid));
 	}
 
-	delay(100);
+	WiFi.mode(WIFI_AP);
+	const IPAddress apIP(192, 168, 4, 1);
+	WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
+	WiFi.softAP(cfg::fs_ssid, cfg::fs_pwd, selectChannelForAp());
 
+	uint8 mode = 0;
+	wifi_softap_set_dhcps_offer_option(OFFER_ROUTER, &mode);
+
+	MDNS.begin("airRohr", apIP);
+	MDNS.addService("http", "tcp", 80);
+	MDNS.addServiceTxt("http", "tcp", "PATH", "/config");
+
+	// In case we create a unique password at first start
+	debug_outln_info(F("AP Password is: "), String(WLANPWD));
+
+	setup_webserver();
+
+	// 10 minutes timeout for wifi config
+	last_page_load = millis();
+	while ((millis() - last_page_load) < cfg::time_for_wifi_config + 500) {
+		server.handleClient();
+#if defined(ESP8266)
+		wdt_reset(); // nodemcu is alive
+		MDNS.update();
+#endif
+		yield();
+	}
+
+	WiFi.softAPdisconnect(true);
+	WiFi.mode(WIFI_STA);
+
+	delay(100);
 	debug_outln_info(FPSTR(DBG_TXT_CONNECTING_TO), cfg::wlanssid);
 
 	WiFi.begin(cfg::wlanssid, cfg::wlanpwd);
