@@ -2219,6 +2219,8 @@ static void webserver_prometheus_endpoint() {
  * Webserver Images                                              *
  *****************************************************************/
 static void webserver_images() {
+	server.sendHeader(F("Cache-Control"), F("max-age=2592000, public"));
+
 	if (server.arg("name") == F("luftdaten_logo")) {
 		debug_outln_info(F("output luftdaten.info logo..."));
 		server.send_P(200, TXT_CONTENT_TYPE_IMAGE_SVG, LUFTDATEN_INFO_LOGO_SVG);
