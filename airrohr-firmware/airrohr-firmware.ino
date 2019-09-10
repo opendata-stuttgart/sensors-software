@@ -560,7 +560,6 @@ unsigned long last_page_load = millis();
 bool wificonfig_loop = false;
 bool first_cycle = true;
 bool sntp_time_is_set = false;
-bool got_ntp = false;
 
 unsigned long count_sends = 0;
 unsigned long next_display_millis = 0;
@@ -4161,29 +4160,14 @@ static void time_is_set (void) {
 }
 
 static bool acquireNetworkTime() {
-	int retryCount = 0;
-	debug_outln_info(F("Setting time using SNTP"));
+	debug_outln(F("Setting time using SNTP"), DEBUG_MIN_INFO);
 	time_t now = time(nullptr);
 	debug_outln(ctime(&now), DEBUG_MIN_INFO);
-	debug_outln_info(F("NTP.org:"));
 #if defined(ESP8266)
 	settimeofday_cb(time_is_set);
 #endif
-	configTime(8 * 3600, 0, "pool.ntp.org");
-	while (retryCount++ < 20) {
-		// later than 2000/01/01:00:00:00
-		if (sntp_time_is_set) {
-			now = time(nullptr);
-			debug_outln(ctime(&now), DEBUG_MIN_INFO);
-			return true;
-		}
-		delay(500);
-		debug_out(".", DEBUG_MIN_INFO);
-	}
-	debug_outln_info(F("\nrouter/gateway:"));
-	retryCount = 0;
-	configTime(0, 0, WiFi.gatewayIP().toString().c_str());
-	while (retryCount++ < 20) {
+	configTime(0, 0, WiFi.gatewayIP().toString().c_str(), String(String(INTL_LANG) + ".pool.ntp.org").c_str());
+	for (int retryCount = 0; retryCount++ < 20; ++retryCount) {
 		// later than 2000/01/01:00:00:00
 		if (sntp_time_is_set) {
 			now = time(nullptr);
@@ -4290,7 +4274,7 @@ void setup() {
 	init_lcd();
 	display_debug(F("Connecting to"), String(cfg::wlanssid));
 	connectWifi();
-	got_ntp = acquireNetworkTime();
+	bool got_ntp = acquireNetworkTime();
 	debug_out(F("\nNTP time "), DEBUG_MIN_INFO);
 	debug_outln_info(got_ntp ? FPSTR(DBG_TXT_FOUND) : FPSTR(DBG_TXT_NOT_FOUND));
 	autoUpdate();
