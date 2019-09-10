@@ -690,7 +690,7 @@ static void display_debug(const String& text1, const String& text2) {
  * convert float to string with a                                *
  * precision of two (or a given number of) decimal places        *
  *****************************************************************/
-String Float2String(const double value, uint8_t digits) {
+static String Float2String(const double value, uint8_t digits) {
 	// Convert a float to String with two decimals.
 	char temp[15];
 
@@ -716,17 +716,17 @@ static String check_display_value(double value, double undef, uint8_t len, uint8
 }
 
 /*****************************************************************
- * convert value to json string                                  *
+ * add value to json string                                  *
  *****************************************************************/
-static String Value2Json(const __FlashStringHelper* type, const String& value) {
+static void add_Value2Json(String& res, const __FlashStringHelper* type, const String& value) {
 	String s = F("{\"value_type\":\"{t}\",\"value\":\"{v}\"},");
 	s.replace("{t}", String(type));
 	s.replace("{v}", value);
-	return s;
+	res += s;
 }
 
-static String Value2Json(const __FlashStringHelper* type, const float& value) {
-	return Value2Json(type, Float2String(value));
+static void add_Value2Json(String& res, const __FlashStringHelper* type, const float& value) {
+	add_Value2Json(res, type, Float2String(value));
 }
 
 /*****************************************************************
@@ -1216,7 +1216,7 @@ static String make_footer() {
 	return s;
 }
 
-static String form_input(const char* name, const String& info, const String& value, const int length) {
+static void add_form_input(String& page_content, const char* name, const __FlashStringHelper* info, const String& value, const int length) {
 	String s = F(	"<tr>"
 					"<td>{i} </td>"
 					"<td style='width:90%;'>"
@@ -1229,7 +1229,7 @@ static String form_input(const char* name, const String& info, const String& val
 	s.replace("{n}", String(name));
 	s.replace("{v}", t_value);
 	s.replace("{l}", String(length));
-	return s;
+	page_content += s;
 }
 
 static String form_password(const char* name, const String& info, const String& value, const int length) {
@@ -1265,12 +1265,12 @@ static String form_checkbox(const char* name, const String& info, const bool che
 	return s;
 }
 
-static String form_checkbox(const char* name, const String& info, const bool checked) {
-	return form_checkbox(name, info, checked, true);
+static void add_form_checkbox(String& page_content, const char* name, const String& info, const bool checked) {
+	page_content += form_checkbox(name, info, checked, true);
 }
 
-static String form_checkbox_sensor(const char* name, const String& info, const bool checked) {
-	return form_checkbox(name, add_sensor_type(info), checked);
+static void add_form_checkbox_sensor(String& page_content, const char* name, const String& info, const bool checked) {
+	add_form_checkbox(page_content, name, add_sensor_type(info), checked);
 }
 
 static String form_submit(const String& value) {
@@ -1326,18 +1326,25 @@ static String tmpl(const String& patt, const String& value1, const String& value
 	return s;
 }
 
-static String line_from_value(const String& name, const String& value) {
-	String s = F("<br/>{n}: {v}");
-	s.replace("{n}", String(name));
-	s.replace("{v}", value);
-	return s;
+static void add_line_value(String& s, const __FlashStringHelper* name, const String& value) {
+	s += F("<br/>");
+	s += name;
+	s += ": ";
+	s += value;
 }
 
-static String line_from_value_bool(const String& name, const bool value) {
-	return line_from_value(name, String(value));
+static void add_line_value_bool(String& s, const __FlashStringHelper* name, const bool value) {
+	add_line_value(s, name, String(value));
 }
 
-static String table_row_from_value(const String& sensor, const String& param, const String& value, const String& unit) {
+static void add_line_value_bool(String&s, const __FlashStringHelper* patt, const __FlashStringHelper* name, const bool value) {
+	s += F("<br/>");
+	s += tmpl(patt, name);
+	s += ": ";
+	s += String(value);
+}
+
+static void add_table_row_from_value(String& page_content, const __FlashStringHelper* sensor, const __FlashStringHelper* param, const String& value, const String& unit) {
 	String s = F(	"<tr>"
 					"<td>{s}</td>"
 					"<td>{p}</td>"
@@ -1347,7 +1354,7 @@ static String table_row_from_value(const String& sensor, const String& param, co
 	s.replace("{p}", param);
 	s.replace("{v}", value);
 	s.replace("{u}", unit);
-	return s;
+	page_content += s;
 }
 
 static int32_t calcWiFiSignalQuality(int32_t rssi) {
@@ -1472,7 +1479,7 @@ static void webserver_config_send_body_get() {
 		page_content += F("</div><br/>");
 	}
 	page_content += FPSTR(TABLE_TAG_OPEN);
-	page_content += form_input("wlanssid", FPSTR(INTL_FS_WIFI_NAME), wlanssid, LEN_WLANSSID);
+	add_form_input(page_content, "wlanssid", FPSTR(INTL_FS_WIFI_NAME), wlanssid, LEN_WLANSSID);
 	page_content += form_password("wlanpwd", FPSTR(INTL_PASSWORD), wlanpwd, LEN_WLANSSID);
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 	page_content += F("<hr/>\n<br/><b>");
@@ -1487,9 +1494,9 @@ static void webserver_config_send_body_get() {
 	if (! wificonfig_loop) {
 		page_content += FPSTR(INTL_BASICAUTH);
 		page_content += FPSTR(WEB_B_BR);
-		page_content += form_checkbox("www_basicauth_enabled", FPSTR(INTL_BASICAUTH), www_basicauth_enabled);
+		add_form_checkbox(page_content, "www_basicauth_enabled", FPSTR(INTL_BASICAUTH), www_basicauth_enabled);
 		page_content += FPSTR(TABLE_TAG_OPEN);
-		page_content += form_input("www_username", FPSTR(INTL_USER), www_username, LEN_WWW_USERNAME);
+		add_form_input(page_content, "www_username", FPSTR(INTL_USER), www_username, LEN_WWW_USERNAME);
 		page_content += form_password("www_password", FPSTR(INTL_PASSWORD), www_password, LEN_WWW_PASSWORD);
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 
@@ -1500,7 +1507,7 @@ static void webserver_config_send_body_get() {
 		page_content += FPSTR(INTL_FS_WIFI_DESCRIPTION);
 		page_content += FPSTR(BR_TAG);
 		page_content += FPSTR(TABLE_TAG_OPEN);
-		page_content += form_input("fs_ssid", FPSTR(INTL_FS_WIFI_NAME), fs_ssid, LEN_FS_SSID);
+		add_form_input(page_content, "fs_ssid", FPSTR(INTL_FS_WIFI_NAME), fs_ssid, LEN_FS_SSID);
 		page_content += form_password("fs_pwd", FPSTR(INTL_PASSWORD), fs_pwd, LEN_FS_PWD);
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 
@@ -1525,22 +1532,22 @@ static void webserver_config_send_body_get() {
 
 		page_content += FPSTR(INTL_SENSORS);
 		page_content += FPSTR(WEB_B_BR);
-		page_content += form_checkbox_sensor("sds_read", FPSTR(INTL_SDS011), sds_read);
-		page_content += form_checkbox_sensor("pms_read", FPSTR(INTL_PMS), pms_read);
-		page_content += form_checkbox_sensor("hpm_read", FPSTR(INTL_HPM), hpm_read);
-		page_content += form_checkbox_sensor("sps30_read", FPSTR(INTL_SPS30), sps30_read);
-		page_content += form_checkbox_sensor("ppd_read", FPSTR(INTL_PPD42NS), ppd_read);
-		page_content += form_checkbox_sensor("dht_read", FPSTR(INTL_DHT22), dht_read);
-		page_content += form_checkbox_sensor("htu21d_read", FPSTR(INTL_HTU21D), htu21d_read);
-		page_content += form_checkbox_sensor("bmp_read", FPSTR(INTL_BMP180), bmp_read);
-		page_content += form_checkbox_sensor("bmp280_read", FPSTR(INTL_BMP280), bmp280_read);
-		page_content += form_checkbox_sensor("bme280_read", FPSTR(INTL_BME280), bme280_read);
-		page_content += form_checkbox_sensor("ds18b20_read", FPSTR(INTL_DS18B20), ds18b20_read);
-		page_content += form_checkbox_sensor("dnms_read", FPSTR(INTL_DNMS), dnms_read);
+		add_form_checkbox_sensor(page_content, "sds_read", FPSTR(INTL_SDS011), sds_read);
+		add_form_checkbox_sensor(page_content, "pms_read", FPSTR(INTL_PMS), pms_read);
+		add_form_checkbox_sensor(page_content, "hpm_read", FPSTR(INTL_HPM), hpm_read);
+		add_form_checkbox_sensor(page_content, "sps30_read", FPSTR(INTL_SPS30), sps30_read);
+		add_form_checkbox_sensor(page_content, "ppd_read", FPSTR(INTL_PPD42NS), ppd_read);
+		add_form_checkbox_sensor(page_content, "dht_read", FPSTR(INTL_DHT22), dht_read);
+		add_form_checkbox_sensor(page_content, "htu21d_read", FPSTR(INTL_HTU21D), htu21d_read);
+		add_form_checkbox_sensor(page_content, "bmp_read", FPSTR(INTL_BMP180), bmp_read);
+		add_form_checkbox_sensor(page_content, "bmp280_read", FPSTR(INTL_BMP280), bmp280_read);
+		add_form_checkbox_sensor(page_content, "bme280_read", FPSTR(INTL_BME280), bme280_read);
+		add_form_checkbox_sensor(page_content, "ds18b20_read", FPSTR(INTL_DS18B20), ds18b20_read);
+		add_form_checkbox_sensor(page_content, "dnms_read", FPSTR(INTL_DNMS), dnms_read);
 		page_content += FPSTR(TABLE_TAG_OPEN);
-		page_content += form_input("dnms_correction", FPSTR(INTL_DNMS_CORRECTION), dnms_correction, LEN_DNMS_CORRECTION);
+		add_form_input(page_content, "dnms_correction", FPSTR(INTL_DNMS_CORRECTION), dnms_correction, LEN_DNMS_CORRECTION);
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-		page_content += form_checkbox("gps_read", FPSTR(INTL_NEO6M), gps_read);
+		add_form_checkbox(page_content, "gps_read", FPSTR(INTL_NEO6M), gps_read);
 
 		page_content += FPSTR(WEB_BR_LF_B);
 
@@ -1552,16 +1559,16 @@ static void webserver_config_send_body_get() {
 
 	page_content += FPSTR(INTL_MORE_SETTINGS);
 	page_content += FPSTR(WEB_B_BR);
-	page_content += form_checkbox("auto_update", FPSTR(INTL_AUTO_UPDATE), auto_update);
-	page_content += form_checkbox("use_beta", FPSTR(INTL_USE_BETA), use_beta);
-	page_content += form_checkbox("has_display", FPSTR(INTL_DISPLAY), has_display);
-	page_content += form_checkbox("has_sh1106", FPSTR(INTL_SH1106), has_sh1106);
-	page_content += form_checkbox("has_flipped_display", FPSTR(INTL_FLIP_DISPLAY), has_flipped_display);
-	page_content += form_checkbox("has_lcd1602_27", FPSTR(INTL_LCD1602_27), has_lcd1602_27);
-	page_content += form_checkbox("has_lcd1602", FPSTR(INTL_LCD1602_3F), has_lcd1602);
-	page_content += form_checkbox("has_lcd2004_27", FPSTR(INTL_LCD2004_27), has_lcd2004_27);
-	page_content += form_checkbox("display_wifi_info", FPSTR(INTL_DISPLAY_WIFI_INFO), display_wifi_info);
-	page_content += form_checkbox("display_device_info", FPSTR(INTL_DISPLAY_DEVICE_INFO), display_device_info);
+	add_form_checkbox(page_content, "auto_update", FPSTR(INTL_AUTO_UPDATE), auto_update);
+	add_form_checkbox(page_content, "use_beta", FPSTR(INTL_USE_BETA), use_beta);
+	add_form_checkbox(page_content, "has_display", FPSTR(INTL_DISPLAY), has_display);
+	add_form_checkbox(page_content, "has_sh1106", FPSTR(INTL_SH1106), has_sh1106);
+	add_form_checkbox(page_content, "has_flipped_display", FPSTR(INTL_FLIP_DISPLAY), has_flipped_display);
+	add_form_checkbox(page_content, "has_lcd1602_27", FPSTR(INTL_LCD1602_27), has_lcd1602_27);
+	add_form_checkbox(page_content, "has_lcd1602", FPSTR(INTL_LCD1602_3F), has_lcd1602);
+	add_form_checkbox(page_content, "has_lcd2004_27", FPSTR(INTL_LCD2004_27), has_lcd2004_27);
+	add_form_checkbox(page_content, "display_wifi_info", FPSTR(INTL_DISPLAY_WIFI_INFO), display_wifi_info);
+	add_form_checkbox(page_content, "display_device_info", FPSTR(INTL_DISPLAY_DEVICE_INFO), display_device_info);
 
 	// Paginate page after ~ 1500 Bytes
 	server.sendContent(page_content);
@@ -1570,20 +1577,20 @@ static void webserver_config_send_body_get() {
 	if (! wificonfig_loop) {
 		page_content += FPSTR(TABLE_TAG_OPEN);
 		page_content += form_select_lang();
-		page_content += form_input("debug", FPSTR(INTL_DEBUG_LEVEL), String(debug), 1);
-		page_content += form_input("sending_intervall_ms", FPSTR(INTL_MEASUREMENT_INTERVAL), String(sending_intervall_ms / 1000), 5);
-		page_content += form_input("time_for_wifi_config", FPSTR(INTL_DURATION_ROUTER_MODE), String(time_for_wifi_config / 1000), 5);
+		add_form_input(page_content, "debug", FPSTR(INTL_DEBUG_LEVEL), String(debug), 1);
+		add_form_input(page_content, "sending_intervall_ms", FPSTR(INTL_MEASUREMENT_INTERVAL), String(sending_intervall_ms / 1000), 5);
+		add_form_input(page_content, "time_for_wifi_config", FPSTR(INTL_DURATION_ROUTER_MODE), String(time_for_wifi_config / 1000), 5);
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 		page_content += FPSTR(WEB_BR_LF_B);
 
 		page_content += FPSTR(INTL_MORE_APIS);
 		page_content += FPSTR(WEB_B_BR);
-		page_content += form_checkbox("send2csv", tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_CSV)), send2csv);
-		page_content += form_checkbox("send2fsapp", tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_FEINSTAUB_APP)), send2fsapp);
-		page_content += form_checkbox("send2aircms", tmpl(FPSTR(INTL_SEND_TO), F("aircms.online")), send2aircms);
-		page_content += form_checkbox("send2sensemap", tmpl(FPSTR(INTL_SEND_TO), F("OpenSenseMap")), send2sensemap);
+		add_form_checkbox(page_content, "send2csv", tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_CSV)), send2csv);
+		add_form_checkbox(page_content, "send2fsapp", tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_FEINSTAUB_APP)), send2fsapp);
+		add_form_checkbox(page_content, "send2aircms", tmpl(FPSTR(INTL_SEND_TO), F("aircms.online")), send2aircms);
+		add_form_checkbox(page_content, "send2sensemap", tmpl(FPSTR(INTL_SEND_TO), F("OpenSenseMap")), send2sensemap);
 		page_content += FPSTR(TABLE_TAG_OPEN);
-		page_content += form_input("senseboxid", "senseBox&nbsp;ID: ", senseboxid, LEN_SENSEBOXID);
+		add_form_input(page_content, "senseboxid", F("senseBox&nbsp;ID: "), senseboxid, LEN_SENSEBOXID);
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 		page_content += FPSTR(BR_TAG);
 		page_content += form_checkbox("send2custom", FPSTR(INTL_SEND_TO_OWN_API), send2custom, false);
@@ -1596,10 +1603,10 @@ static void webserver_config_send_body_get() {
 		page_content = empty_String;
 
 		page_content += FPSTR(TABLE_TAG_OPEN);
-		page_content += form_input("host_custom", FPSTR(INTL_SERVER), host_custom, LEN_HOST_CUSTOM);
-		page_content += form_input("url_custom", FPSTR(INTL_PATH), url_custom, LEN_URL_CUSTOM);
-		page_content += form_input("port_custom", FPSTR(INTL_PORT), String(port_custom), MAX_PORT_DIGITS);
-		page_content += form_input("user_custom", FPSTR(INTL_USER), user_custom, LEN_USER_CUSTOM);
+		add_form_input(page_content, "host_custom", FPSTR(INTL_SERVER), host_custom, LEN_HOST_CUSTOM);
+		add_form_input(page_content, "url_custom", FPSTR(INTL_PATH), url_custom, LEN_URL_CUSTOM);
+		add_form_input(page_content, "port_custom", FPSTR(INTL_PORT), String(port_custom), MAX_PORT_DIGITS);
+		add_form_input(page_content, "user_custom", FPSTR(INTL_USER), user_custom, LEN_USER_CUSTOM);
 		page_content += form_password("pwd_custom", FPSTR(INTL_PASSWORD), pwd_custom, LEN_PWD_CUSTOM);
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 
@@ -1610,12 +1617,12 @@ static void webserver_config_send_body_get() {
 		page_content += form_checkbox("ssl_influx", FPSTR(WEB_HTTPS), ssl_influx, false);
 		page_content += FPSTR(WEB_BRACE_BR);
 		page_content += FPSTR(TABLE_TAG_OPEN);
-		page_content += form_input("host_influx", FPSTR(INTL_SERVER), host_influx, LEN_HOST_INFLUX);
-		page_content += form_input("url_influx", FPSTR(INTL_PATH), url_influx, LEN_URL_INFLUX);
-		page_content += form_input("port_influx", FPSTR(INTL_PORT), String(port_influx), MAX_PORT_DIGITS);
-		page_content += form_input("user_influx", FPSTR(INTL_USER), user_influx, LEN_USER_INFLUX);
+		add_form_input(page_content, "host_influx", FPSTR(INTL_SERVER), host_influx, LEN_HOST_INFLUX);
+		add_form_input(page_content, "url_influx", FPSTR(INTL_PATH), url_influx, LEN_URL_INFLUX);
+		add_form_input(page_content, "port_influx", FPSTR(INTL_PORT), String(port_influx), MAX_PORT_DIGITS);
+		add_form_input(page_content, "user_influx", FPSTR(INTL_USER), user_influx, LEN_USER_INFLUX);
 		page_content += form_password("pwd_influx", FPSTR(INTL_PASSWORD), pwd_influx, LEN_PWD_INFLUX);
-		page_content += form_input("measurement_name_influx", F("Measurement"), measurement_name_influx, LEN_MEASUREMENT_NAME_INFLUX);
+		add_form_input(page_content, "measurement_name_influx", F("Measurement"), measurement_name_influx, LEN_MEASUREMENT_NAME_INFLUX);
 		page_content += form_submit(FPSTR(INTL_SAVE_AND_RESTART));
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 		page_content += FPSTR(BR_TAG);
@@ -1759,44 +1766,45 @@ static void webserver_config_send_body_post() {
 #undef readTimeParam
 #undef readPasswdParam
 
-	page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), F("Luftdaten.info")), send2dusti);
-	page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), F("Madavi")), send2madavi);
-	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("DHT")), dht_read);
-	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("HTU21D")), htu21d_read);
-	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("SDS")), sds_read);
-	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("PMS(1,3,5,6,7)003")), pms_read);
-	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("HPM")), hpm_read);
-	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("SPS30")), sps30_read);
-	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("PPD")), ppd_read);
-	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), FPSTR(SENSORS_BMP180)), bmp_read);
-	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), FPSTR(SENSORS_BMP280)), bmp280_read);
-	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), FPSTR(SENSORS_BME280)), bme280_read);
-	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("DS18B20")), ds18b20_read);
-	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("DNMS")), dnms_read);
-	page_content += line_from_value_bool(FPSTR(INTL_DNMS_CORRECTION), String(dnms_correction));
-	page_content += line_from_value_bool(tmpl(FPSTR(INTL_READ_FROM), F("GPS")), gps_read);
+#if 1
+	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("Luftdaten.info"), send2dusti);
+	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("Madavi"), send2madavi);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("DHT"), dht_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("HTU21D"), htu21d_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("SDS"), sds_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("PMS(1,3,5,6,7)003"), pms_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("HPM"), hpm_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("SPS30"), sps30_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("PPD"), ppd_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_BMP180), bmp_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_BMP280), bmp280_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_BME280), bme280_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("DS18B20"), ds18b20_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("DNMS"), dnms_read);
+	add_line_value_bool(page_content, FPSTR(INTL_DNMS_CORRECTION), String(dnms_correction));
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("GPS"), gps_read);
 
 	// Paginate after ~ 1500 bytes
 	server.sendContent(page_content);
 	page_content = empty_String;
 
-	page_content += line_from_value_bool(FPSTR(INTL_AUTO_UPDATE), auto_update);
-	page_content += line_from_value_bool(FPSTR(INTL_USE_BETA), use_beta);
-	page_content += line_from_value_bool(FPSTR(INTL_DISPLAY), has_display);
-	page_content += line_from_value_bool(FPSTR(INTL_SH1106), has_sh1106);
-	page_content += line_from_value_bool(FPSTR(INTL_FLIP_DISPLAY), has_flipped_display);
-	page_content += line_from_value_bool(FPSTR(INTL_LCD1602_27), has_lcd1602_27);
-	page_content += line_from_value_bool(FPSTR(INTL_LCD1602_3F), has_lcd1602);
-	page_content += line_from_value_bool(FPSTR(INTL_LCD2004_27), has_lcd2004_27);
-	page_content += line_from_value_bool(FPSTR(INTL_DISPLAY_WIFI_INFO), display_wifi_info);
-	page_content += line_from_value_bool(FPSTR(INTL_DISPLAY_DEVICE_INFO), display_device_info);
-	page_content += line_from_value(FPSTR(INTL_DEBUG_LEVEL), String(debug));
-	page_content += line_from_value(FPSTR(INTL_MEASUREMENT_INTERVAL), String(sending_intervall_ms));
-	page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), F("Feinstaub-App")), send2fsapp);
-	page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), F("aircms.online")), send2aircms);
-	page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_CSV)), send2csv);
-	page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_FEINSTAUB_APP)), send2fsapp);
-	page_content += line_from_value_bool(tmpl(FPSTR(INTL_SEND_TO), F("opensensemap")), send2sensemap);
+	add_line_value_bool(page_content, FPSTR(INTL_AUTO_UPDATE), auto_update);
+	add_line_value_bool(page_content, FPSTR(INTL_USE_BETA), use_beta);
+	add_line_value_bool(page_content, FPSTR(INTL_DISPLAY), has_display);
+	add_line_value_bool(page_content, FPSTR(INTL_SH1106), has_sh1106);
+	add_line_value_bool(page_content, FPSTR(INTL_FLIP_DISPLAY), has_flipped_display);
+	add_line_value_bool(page_content, FPSTR(INTL_LCD1602_27), has_lcd1602_27);
+	add_line_value_bool(page_content, FPSTR(INTL_LCD1602_3F), has_lcd1602);
+	add_line_value_bool(page_content, FPSTR(INTL_LCD2004_27), has_lcd2004_27);
+	add_line_value_bool(page_content, FPSTR(INTL_DISPLAY_WIFI_INFO), display_wifi_info);
+	add_line_value_bool(page_content, FPSTR(INTL_DISPLAY_DEVICE_INFO), display_device_info);
+	add_line_value(page_content, FPSTR(INTL_DEBUG_LEVEL), String(debug));
+	add_line_value(page_content, FPSTR(INTL_MEASUREMENT_INTERVAL), String(sending_intervall_ms));
+	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("Feinstaub-App"), send2fsapp);
+	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("aircms.online"), send2aircms);
+	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), FPSTR(WEB_CSV), send2csv);
+	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), FPSTR(WEB_FEINSTAUB_APP), send2fsapp);
+	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("opensensemap"), send2sensemap);
 
 	// Paginate after ~ 1500 bytes
 	server.sendContent(page_content);
@@ -1805,25 +1813,26 @@ static void webserver_config_send_body_post() {
 	page_content += F("<br/>senseBox-ID ");
 	page_content += senseboxid;
 	page_content += FPSTR(WEB_BR_BR);
-	page_content += line_from_value_bool(FPSTR(INTL_SEND_TO_OWN_API), send2custom);
-	page_content += line_from_value(FPSTR(INTL_SERVER), host_custom);
-	page_content += line_from_value(FPSTR(INTL_PATH), url_custom);
-	page_content += line_from_value(FPSTR(INTL_PORT), String(port_custom));
-	page_content += line_from_value(FPSTR(INTL_USER), user_custom);
-	page_content += line_from_value(FPSTR(INTL_PASSWORD), pwd_custom);
+	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO_OWN_API), send2custom);
+	add_line_value(page_content, FPSTR(INTL_SERVER), host_custom);
+	add_line_value(page_content, FPSTR(INTL_PATH), url_custom);
+	add_line_value(page_content, FPSTR(INTL_PORT), String(port_custom));
+	add_line_value(page_content, FPSTR(INTL_USER), user_custom);
+	add_line_value(page_content, FPSTR(INTL_PASSWORD), pwd_custom);
 	page_content += F("<br/><br/>InfluxDB: ");
 	page_content += String(send2influx);
-	page_content += line_from_value(FPSTR(INTL_SERVER), host_influx);
-	page_content += line_from_value(FPSTR(INTL_PATH), url_influx);
-	page_content += line_from_value(FPSTR(INTL_PORT), String(port_influx));
-	page_content += line_from_value(FPSTR(INTL_USER), user_influx);
-	page_content += line_from_value(FPSTR(INTL_PASSWORD), pwd_influx);
-	page_content += line_from_value(F("Measurement"), measurement_name_influx);
-	page_content += line_from_value(F("SSL"), String(ssl_influx));
+	add_line_value(page_content, FPSTR(INTL_SERVER), host_influx);
+	add_line_value(page_content, FPSTR(INTL_PATH), url_influx);
+	add_line_value(page_content, FPSTR(INTL_PORT), String(port_influx));
+	add_line_value(page_content, FPSTR(INTL_USER), user_influx);
+	add_line_value(page_content, FPSTR(INTL_PASSWORD), pwd_influx);
+	add_line_value(page_content, F("Measurement"), measurement_name_influx);
+	add_line_value(page_content, F("SSL"), String(ssl_influx));
 	page_content += FPSTR(WEB_BR_BR);
 	page_content += FPSTR(INTL_SENSOR_IS_REBOOTING);
 
 	server.sendContent(page_content);
+#endif
 }
 
 static void webserver_config() {
@@ -1959,92 +1968,92 @@ static void webserver_values() {
 		page_content += tmpl(F("<tr><th>{v1}</th><th>{v2}</th><th>{v3}</th>"), FPSTR(INTL_SENSOR), FPSTR(INTL_PARAMETER), FPSTR(INTL_VALUE));
 		if (cfg::ppd_read) {
 			page_content += FPSTR(EMPTY_ROW);
-			page_content += table_row_from_value(FPSTR(SENSORS_PPD42NS), FPSTR(WEB_PM1), check_display_value(last_value_PPD_P1, -1, 1, 0), FPSTR(INTL_PARTICLES_PER_LITER));
-			page_content += table_row_from_value(FPSTR(SENSORS_PPD42NS), FPSTR(WEB_PM25), check_display_value(last_value_PPD_P2, -1, 1, 0), FPSTR(INTL_PARTICLES_PER_LITER));
+			add_table_row_from_value(page_content, FPSTR(SENSORS_PPD42NS), FPSTR(WEB_PM1), check_display_value(last_value_PPD_P1, -1, 1, 0), FPSTR(INTL_PARTICLES_PER_LITER));
+			add_table_row_from_value(page_content, FPSTR(SENSORS_PPD42NS), FPSTR(WEB_PM25), check_display_value(last_value_PPD_P2, -1, 1, 0), FPSTR(INTL_PARTICLES_PER_LITER));
 		}
 		if (cfg::sds_read) {
 			page_content += FPSTR(EMPTY_ROW);
-			page_content += table_row_from_value(FPSTR(SENSORS_SDS011), FPSTR(WEB_PM25), check_display_value(last_value_SDS_P2, -1, 1, 0), unit_PM);
-			page_content += table_row_from_value(FPSTR(SENSORS_SDS011), FPSTR(WEB_PM10), check_display_value(last_value_SDS_P1, -1, 1, 0), unit_PM);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), FPSTR(WEB_PM25), check_display_value(last_value_SDS_P2, -1, 1, 0), unit_PM);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), FPSTR(WEB_PM10), check_display_value(last_value_SDS_P1, -1, 1, 0), unit_PM);
 		}
 		if (cfg::pms_read) {
 			page_content += FPSTR(EMPTY_ROW);
-			page_content += table_row_from_value(FPSTR(SENSORS_PMSx003), FPSTR(WEB_PM1), check_display_value(last_value_PMS_P0, -1, 1, 0), unit_PM);
-			page_content += table_row_from_value(FPSTR(SENSORS_PMSx003), FPSTR(WEB_PM25), check_display_value(last_value_PMS_P2, -1, 1, 0), unit_PM);
-			page_content += table_row_from_value(FPSTR(SENSORS_PMSx003), FPSTR(WEB_PM10), check_display_value(last_value_PMS_P1, -1, 1, 0), unit_PM);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_PMSx003), FPSTR(WEB_PM1), check_display_value(last_value_PMS_P0, -1, 1, 0), unit_PM);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_PMSx003), FPSTR(WEB_PM25), check_display_value(last_value_PMS_P2, -1, 1, 0), unit_PM);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_PMSx003), FPSTR(WEB_PM10), check_display_value(last_value_PMS_P1, -1, 1, 0), unit_PM);
 		}
 		if (cfg::hpm_read) {
 			page_content += FPSTR(EMPTY_ROW);
-			page_content += table_row_from_value(FPSTR(SENSORS_HPM), FPSTR(WEB_PM25), check_display_value(last_value_HPM_P2, -1, 1, 0), unit_PM);
-			page_content += table_row_from_value(FPSTR(SENSORS_HPM), FPSTR(WEB_PM10), check_display_value(last_value_HPM_P1, -1, 1, 0), unit_PM);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_HPM), FPSTR(WEB_PM25), check_display_value(last_value_HPM_P2, -1, 1, 0), unit_PM);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_HPM), FPSTR(WEB_PM10), check_display_value(last_value_HPM_P1, -1, 1, 0), unit_PM);
 		}
 		if (cfg::sps30_read) {
 			page_content += FPSTR(EMPTY_ROW);
-			page_content += table_row_from_value(FPSTR(SENSORS_SPS30), FPSTR(WEB_PM1), check_display_value(last_value_SPS30_P0, -1, 1, 0), unit_PM);
-			page_content += table_row_from_value(FPSTR(SENSORS_SPS30), FPSTR(WEB_PM25), check_display_value(last_value_SPS30_P1, -1, 1, 0), unit_PM);
-			page_content += table_row_from_value(FPSTR(SENSORS_SPS30), FPSTR(WEB_PM4), check_display_value(last_value_SPS30_P2, -1, 1, 0), unit_PM);
-			page_content += table_row_from_value(FPSTR(SENSORS_SPS30), FPSTR(WEB_PM10), check_display_value(last_value_SPS30_P3, -1, 1, 0), unit_PM);
-			page_content += table_row_from_value(FPSTR(SENSORS_SPS30), FPSTR(WEB_NC0k5), check_display_value(last_value_SPS30_N0, -1, 0, 0), unit_NC);
-			page_content += table_row_from_value(FPSTR(SENSORS_SPS30), FPSTR(WEB_NC1k0), check_display_value(last_value_SPS30_N1, -1, 0, 0), unit_NC);
-			page_content += table_row_from_value(FPSTR(SENSORS_SPS30), FPSTR(WEB_NC2k5), check_display_value(last_value_SPS30_N2, -1, 0, 0), unit_NC);
-			page_content += table_row_from_value(FPSTR(SENSORS_SPS30), FPSTR(WEB_NC4k0), check_display_value(last_value_SPS30_N3, -1, 0, 0), unit_NC);
-			page_content += table_row_from_value(FPSTR(SENSORS_SPS30), FPSTR(WEB_NC10), check_display_value(last_value_SPS30_N4, -1, 0, 0), unit_NC);
-			page_content += table_row_from_value(FPSTR(SENSORS_SPS30), FPSTR(WEB_TPS), check_display_value(last_value_SPS30_TS, -1, 1, 0), unit_TS);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_PM1), check_display_value(last_value_SPS30_P0, -1, 1, 0), unit_PM);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_PM25), check_display_value(last_value_SPS30_P1, -1, 1, 0), unit_PM);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_PM4), check_display_value(last_value_SPS30_P2, -1, 1, 0), unit_PM);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_PM10), check_display_value(last_value_SPS30_P3, -1, 1, 0), unit_PM);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_NC0k5), check_display_value(last_value_SPS30_N0, -1, 0, 0), unit_NC);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_NC1k0), check_display_value(last_value_SPS30_N1, -1, 0, 0), unit_NC);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_NC2k5), check_display_value(last_value_SPS30_N2, -1, 0, 0), unit_NC);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_NC4k0), check_display_value(last_value_SPS30_N3, -1, 0, 0), unit_NC);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_NC10), check_display_value(last_value_SPS30_N4, -1, 0, 0), unit_NC);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_TPS), check_display_value(last_value_SPS30_TS, -1, 1, 0), unit_TS);
 		}
 		if (cfg::dht_read) {
 			page_content += FPSTR(EMPTY_ROW);
-			page_content += table_row_from_value(FPSTR(SENSORS_DHT22), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_DHT_T, -128, 1, 0), unit_T);
-			page_content += table_row_from_value(FPSTR(SENSORS_DHT22), FPSTR(INTL_HUMIDITY), check_display_value(last_value_DHT_H, -1, 1, 0), unit_H);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_DHT22), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_DHT_T, -128, 1, 0), unit_T);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_DHT22), FPSTR(INTL_HUMIDITY), check_display_value(last_value_DHT_H, -1, 1, 0), unit_H);
 		}
 		if (cfg::htu21d_read) {
 			page_content += FPSTR(EMPTY_ROW);
-			page_content += table_row_from_value(FPSTR(SENSORS_HTU21D), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_HTU21D_T, -128, 1, 0), unit_T);
-			page_content += table_row_from_value(FPSTR(SENSORS_HTU21D), FPSTR(INTL_HUMIDITY), check_display_value(last_value_HTU21D_H, -1, 1, 0), unit_H);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_HTU21D), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_HTU21D_T, -128, 1, 0), unit_T);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_HTU21D), FPSTR(INTL_HUMIDITY), check_display_value(last_value_HTU21D_H, -1, 1, 0), unit_H);
 		}
 		if (cfg::bmp_read) {
 			page_content += FPSTR(EMPTY_ROW);
-			page_content += table_row_from_value(FPSTR(SENSORS_BMP180), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_BMP_T, -128, 1, 0), unit_T);
-			page_content += table_row_from_value(FPSTR(SENSORS_BMP180), FPSTR(INTL_PRESSURE), check_display_value(last_value_BMP_P / 100.0, (-1 / 100.0), 2, 0), unit_P);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_BMP180), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_BMP_T, -128, 1, 0), unit_T);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_BMP180), FPSTR(INTL_PRESSURE), check_display_value(last_value_BMP_P / 100.0, (-1 / 100.0), 2, 0), unit_P);
 		}
 		if (cfg::bmp280_read) {
 			page_content += FPSTR(EMPTY_ROW);
-			page_content += table_row_from_value(FPSTR(SENSORS_BMP280), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_BMP280_T, -128, 1, 0), unit_T);
-			page_content += table_row_from_value(FPSTR(SENSORS_BMP280), FPSTR(INTL_PRESSURE), check_display_value(last_value_BMP280_P / 100.0, (-1 / 100.0), 2, 0), unit_P);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_BMP280), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_BMP280_T, -128, 1, 0), unit_T);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_BMP280), FPSTR(INTL_PRESSURE), check_display_value(last_value_BMP280_P / 100.0, (-1 / 100.0), 2, 0), unit_P);
 		}
 		if (cfg::bme280_read) {
 			page_content += FPSTR(EMPTY_ROW);
-			page_content += table_row_from_value(FPSTR(SENSORS_BME280), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_BME280_T, -128, 1, 0), unit_T);
-			page_content += table_row_from_value(FPSTR(SENSORS_BME280), FPSTR(INTL_HUMIDITY), check_display_value(last_value_BME280_H, -1, 1, 0), unit_H);
-			page_content += table_row_from_value(FPSTR(SENSORS_BME280), FPSTR(INTL_PRESSURE), check_display_value(last_value_BME280_P / 100.0, (-1 / 100.0), 2, 0), unit_P);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_BME280), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_BME280_T, -128, 1, 0), unit_T);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_BME280), FPSTR(INTL_HUMIDITY), check_display_value(last_value_BME280_H, -1, 1, 0), unit_H);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_BME280), FPSTR(INTL_PRESSURE), check_display_value(last_value_BME280_P / 100.0, (-1 / 100.0), 2, 0), unit_P);
 		}
 		if (cfg::ds18b20_read) {
 			page_content += FPSTR(EMPTY_ROW);
-			page_content += table_row_from_value(FPSTR(SENSORS_DS18B20), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_DS18B20_T, -128, 1, 0), unit_T);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_DS18B20), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_DS18B20_T, -128, 1, 0), unit_T);
 		}
 		if (cfg::dnms_read) {
 			page_content += FPSTR(EMPTY_ROW);
-			page_content += table_row_from_value(FPSTR(SENSORS_DNMS), FPSTR(INTL_LEQ_A), check_display_value(last_value_dnms_laeq, -1, 1, 0), unit_LA);
-			page_content += table_row_from_value(FPSTR(SENSORS_DNMS), FPSTR(INTL_LA_MIN), check_display_value(last_value_dnms_la_min, -1, 1, 0), unit_LA);
-			page_content += table_row_from_value(FPSTR(SENSORS_DNMS), FPSTR(INTL_LA_MAX), check_display_value(last_value_dnms_la_max, -1, 1, 0), unit_LA);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_DNMS), FPSTR(INTL_LEQ_A), check_display_value(last_value_dnms_laeq, -1, 1, 0), unit_LA);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_DNMS), FPSTR(INTL_LA_MIN), check_display_value(last_value_dnms_la_min, -1, 1, 0), unit_LA);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_DNMS), FPSTR(INTL_LA_MAX), check_display_value(last_value_dnms_la_max, -1, 1, 0), unit_LA);
 		}
 		if (cfg::gps_read) {
 			page_content += FPSTR(EMPTY_ROW);
-			page_content += table_row_from_value(FPSTR(WEB_GPS), FPSTR(INTL_LATITUDE), check_display_value(last_value_GPS_lat, -200.0, 6, 0), "°");
-			page_content += table_row_from_value(FPSTR(WEB_GPS), FPSTR(INTL_LONGITUDE), check_display_value(last_value_GPS_lon, -200.0, 6, 0), "°");
-			page_content += table_row_from_value(FPSTR(WEB_GPS), FPSTR(INTL_ALTITUDE), check_display_value(last_value_GPS_alt, -1000.0, 2, 0), "m");
-			page_content += table_row_from_value(FPSTR(WEB_GPS), FPSTR(INTL_DATE), last_value_GPS_date, empty_String);
-			page_content += table_row_from_value(FPSTR(WEB_GPS), FPSTR(INTL_TIME), last_value_GPS_time, empty_String);
+			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_LATITUDE), check_display_value(last_value_GPS_lat, -200.0, 6, 0), "°");
+			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_LONGITUDE), check_display_value(last_value_GPS_lon, -200.0, 6, 0), "°");
+			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_ALTITUDE), check_display_value(last_value_GPS_alt, -1000.0, 2, 0), "m");
+			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_DATE), last_value_GPS_date, empty_String);
+			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_TIME), last_value_GPS_time, empty_String);
 		}
 
 		page_content += FPSTR(EMPTY_ROW);
-		page_content += table_row_from_value("WiFi", FPSTR(INTL_SIGNAL_STRENGTH), String(WiFi.RSSI()), "dBm");
-		page_content += table_row_from_value("WiFi", FPSTR(INTL_SIGNAL_QUALITY), String(signal_quality), "%");
+		add_table_row_from_value(page_content, F("WiFi"), FPSTR(INTL_SIGNAL_STRENGTH), String(WiFi.RSSI()), "dBm");
+		add_table_row_from_value(page_content, F("WiFi"), FPSTR(INTL_SIGNAL_QUALITY), String(signal_quality), "%");
 
 		page_content += FPSTR(EMPTY_ROW);
 		page_content += F("<tr><td colspan='2'>");
 		page_content += FPSTR(INTL_NUMBER_OF_MEASUREMENTS);
 		page_content += F("</td><td class='r'>");
-		page_content += String(count_sends);
+		page_content += count_sends;
 		page_content += F("</td></tr>");
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 		page_content += make_footer();
@@ -2430,17 +2439,18 @@ static unsigned long sendData(const String& data, const int pin, const char* hos
 	debug_outln_info(F(":"), String(httpPort));
 
 	String request_head = F("POST ");
-	request_head += String(url);
+	request_head += url;
 	request_head += F(" HTTP/1.1\r\nHost: ");
 	request_head += s_Host;
 	request_head += F("\r\nContent-Type: ");
 	request_head += contentType + "\r\n";
 	if (strlen(basic_auth_string) != 0) {
 		request_head += F("Authorization: Basic ");
-		request_head += String(basic_auth_string) + "\r\n";
+		request_head += String(basic_auth_string);
+		request_head += "\r\n";
 	}
 	request_head += F("X-PIN: ");
-	request_head += String(pin);
+	request_head += pin;
 	request_head += F("\r\nX-Sensor: esp8266-");
 	request_head += esp_chipid;
 	request_head += F("\r\nContent-Length: ");
@@ -2669,8 +2679,8 @@ static String sensorDHT() {
 			debug_outln_info(FPSTR(DBG_TXT_HUMIDITY), String(h));
 			last_value_DHT_T = t;
 			last_value_DHT_H = h;
-			s += Value2Json(F("temperature"), last_value_DHT_T);
-			s += Value2Json(F("humidity"), last_value_DHT_H);
+			add_Value2Json(s, F("temperature"), last_value_DHT_T);
+			add_Value2Json(s, F("humidity"), last_value_DHT_H);
 		}
 	}
 	debug_outln_info(F("----"));
@@ -2699,8 +2709,8 @@ static String sensorHTU21D() {
 		debug_outln_info(FPSTR(DBG_TXT_HUMIDITY), String(h));
 		last_value_HTU21D_T = t;
 		last_value_HTU21D_H = h;
-		s += Value2Json(F("HTU21D_temperature"), last_value_HTU21D_T);
-		s += Value2Json(F("HTU21D_humidity"), last_value_HTU21D_H);
+		add_Value2Json(s, F("HTU21D_temperature"), last_value_HTU21D_T);
+		add_Value2Json(s, F("HTU21D_humidity"), last_value_HTU21D_H);
 	}
 	debug_outln_info(F("----"));
 
@@ -2728,8 +2738,8 @@ static String sensorBMP() {
 		debug_outln_info(FPSTR(DBG_TXT_PRESSURE), Float2String(p / 100.0));
 		last_value_BMP_T = t;
 		last_value_BMP_P = p;
-		s += Value2Json(F("BMP_pressure"), last_value_BMP_P);
-		s += Value2Json(F("BMP_temperature"), last_value_BMP_T);
+		add_Value2Json(s, F("BMP_pressure"), last_value_BMP_P);
+		add_Value2Json(s, F("BMP_temperature"), last_value_BMP_T);
 	}
 	debug_outln_info(F("----"));
 
@@ -2757,8 +2767,8 @@ static String sensorBMP280() {
 		debug_outln_info(FPSTR(DBG_TXT_PRESSURE), Float2String(p / 100.0));
 		last_value_BMP280_T = t;
 		last_value_BMP280_P = p;
-		s += Value2Json(F("BMP280_pressure"), last_value_BMP280_P);
-		s += Value2Json(F("BMP280_temperature"), last_value_BMP280_T);
+		add_Value2Json(s, F("BMP280_pressure"), last_value_BMP280_P);
+		add_Value2Json(s, F("BMP280_temperature"), last_value_BMP280_T);
 	}
 	debug_outln_info(F("----"));
 
@@ -2791,9 +2801,9 @@ static String sensorBME280() {
 		last_value_BME280_T = t;
 		last_value_BME280_H = h;
 		last_value_BME280_P = p;
-		s += Value2Json(F("BME280_temperature"), last_value_BME280_T);
-		s += Value2Json(F("BME280_humidity"), last_value_BME280_H);
-		s += Value2Json(F("BME280_pressure"), last_value_BME280_P);
+		add_Value2Json(s, F("BME280_temperature"), last_value_BME280_T);
+		add_Value2Json(s, F("BME280_humidity"), last_value_BME280_H);
+		add_Value2Json(s, F("BME280_pressure"), last_value_BME280_P);
 	}
 	debug_outln_info(F("----"));
 
@@ -2828,7 +2838,7 @@ static String sensorDS18B20() {
 	} else {
 		debug_outln_info(FPSTR(DBG_TXT_TEMPERATURE), String(t));
 		last_value_DS18B20_T = t;
-		s += Value2Json(F("DS18B20_temperature"), last_value_DS18B20_T);
+		add_Value2Json(s, F("DS18B20_temperature"), last_value_DS18B20_T);
 	}
 	debug_outln_info(F("----"));
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_DS18B20));
@@ -2949,8 +2959,8 @@ static String sensorSDS() {
 			debug_outln_info(F("PM10:  "), Float2String(last_value_SDS_P1));
 			debug_outln_info(F("PM2.5: "), Float2String(last_value_SDS_P2));
 			debug_outln_info(F("----"));
-			s += Value2Json(F("SDS_P1"), last_value_SDS_P1);
-			s += Value2Json(F("SDS_P2"), last_value_SDS_P2);
+			add_Value2Json(s, F("SDS_P1"), last_value_SDS_P1);
+			add_Value2Json(s, F("SDS_P2"), last_value_SDS_P2);
 		}
 		sds_pm10_sum = 0;
 		sds_pm25_sum = 0;
@@ -3120,9 +3130,9 @@ static String sensorPMS() {
 			debug_outln_info(F("PM2.5: "), Float2String(last_value_PMS_P2));
 			debug_outln_info(F("PM10:  "), Float2String(last_value_PMS_P1));
 			debug_outln_info(F("-------"));
-			s += Value2Json(F("PMS_P0"), last_value_PMS_P0);
-			s += Value2Json(F("PMS_P1"), last_value_PMS_P1);
-			s += Value2Json(F("PMS_P2"), last_value_PMS_P2);
+			add_Value2Json(s, F("PMS_P0"), last_value_PMS_P0);
+			add_Value2Json(s, F("PMS_P1"), last_value_PMS_P1);
+			add_Value2Json(s, F("PMS_P2"), last_value_PMS_P2);
 		}
 		pms_pm1_sum = 0;
 		pms_pm10_sum = 0;
@@ -3261,8 +3271,8 @@ static String sensorHPM() {
 			debug_outln_info(F("PM2.5: "), Float2String(last_value_HPM_P1));
 			debug_outln_info(F("PM10:  "), Float2String(last_value_HPM_P2));
 			debug_outln_info(F("-------"));
-			s += Value2Json(F("HPM_P1"), last_value_HPM_P1);
-			s += Value2Json(F("HPM_P2"), last_value_HPM_P2);
+			add_Value2Json(s, F("HPM_P1"), last_value_HPM_P1);
+			add_Value2Json(s, F("HPM_P2"), last_value_HPM_P2);
 		}
 		hpm_pm10_sum = 0;
 		hpm_pm25_sum = 0;
@@ -3334,9 +3344,9 @@ static String sensorPPD() {
 
 		// json for push to api / P1
 		last_value_PPD_P1 = concentration;
-		s += Value2Json(F("durP1"), String(lowpulseoccupancyP1));
-		s += Value2Json(F("ratioP1"), ratio);
-		s += Value2Json(F("P1"), last_value_PPD_P1);
+		add_Value2Json(s, F("durP1"), String(lowpulseoccupancyP1));
+		add_Value2Json(s, F("ratioP1"), ratio);
+		add_Value2Json(s, F("P1"), last_value_PPD_P1);
 
 		ratio = lowpulseoccupancyP2 / (SAMPLETIME_MS * 10.0);
 		concentration = calcConcentration(ratio);
@@ -3347,9 +3357,9 @@ static String sensorPPD() {
 
 		// json for push to api / P2
 		last_value_PPD_P2 = concentration;
-		s += Value2Json(F("durP2"), String(lowpulseoccupancyP2));
-		s += Value2Json(F("ratioP2"), ratio);
-		s += Value2Json(F("P2"), last_value_PPD_P2);
+		add_Value2Json(s, F("durP2"), String(lowpulseoccupancyP2));
+		add_Value2Json(s, F("ratioP2"), ratio);
+		add_Value2Json(s, F("P2"), last_value_PPD_P2);
 
 		debug_outln_info(F("----"));
 	}
@@ -3389,16 +3399,16 @@ static String sensorSPS30() {
 	debug_outln_info(F("NC10:  "), Float2String(last_value_SPS30_N4));
 	debug_outln_info(F("TPS:   "), Float2String(last_value_SPS30_TS));
 
-	s += Value2Json(F("SPS30_P0"), last_value_SPS30_P0);
-	s += Value2Json(F("SPS30_P1"), last_value_SPS30_P1);
-	s += Value2Json(F("SPS30_P2"), last_value_SPS30_P2);
-	s += Value2Json(F("SPS30_P3"), last_value_SPS30_P3);
-	s += Value2Json(F("SPS30_N0"), last_value_SPS30_N0);
-	s += Value2Json(F("SPS30_N1"), last_value_SPS30_N1);
-	s += Value2Json(F("SPS30_N2"), last_value_SPS30_N2);
-	s += Value2Json(F("SPS30_N3"), last_value_SPS30_N3);
-	s += Value2Json(F("SPS30_N4"), last_value_SPS30_N4);
-	s += Value2Json(F("SPS30_TS"), last_value_SPS30_TS);
+	add_Value2Json(s, F("SPS30_P0"), last_value_SPS30_P0);
+	add_Value2Json(s, F("SPS30_P1"), last_value_SPS30_P1);
+	add_Value2Json(s, F("SPS30_P2"), last_value_SPS30_P2);
+	add_Value2Json(s, F("SPS30_P3"), last_value_SPS30_P3);
+	add_Value2Json(s, F("SPS30_N0"), last_value_SPS30_N0);
+	add_Value2Json(s, F("SPS30_N1"), last_value_SPS30_N1);
+	add_Value2Json(s, F("SPS30_N2"), last_value_SPS30_N2);
+	add_Value2Json(s, F("SPS30_N3"), last_value_SPS30_N3);
+	add_Value2Json(s, F("SPS30_N4"), last_value_SPS30_N4);
+	add_Value2Json(s, F("SPS30_TS"), last_value_SPS30_TS);
 
 	debug_outln_info(F("SPS30 read counter: "), String(SPS30_read_counter));
 	debug_outln_info(F("SPS30 read error counter: "), String(SPS30_read_error_counter));
@@ -3468,9 +3478,9 @@ static String sensorDNMS() {
 		debug_outln_info(FPSTR(DBG_TXT_DNMS_LA_MIN), Float2String(last_value_dnms_la_min));
 		debug_outln_info(FPSTR(DBG_TXT_DNMS_LA_MAX), Float2String(last_value_dnms_la_max));
 
-		s += Value2Json(F("noise_LAeq"), last_value_dnms_laeq);
-		s += Value2Json(F("noise_LA_min"), last_value_dnms_la_min);
-		s += Value2Json(F("noise_LA_max"), last_value_dnms_la_max);
+		add_Value2Json(s, F("noise_LAeq"), last_value_dnms_laeq);
+		add_Value2Json(s, F("noise_LA_min"), last_value_dnms_la_min);
+		add_Value2Json(s, F("noise_LA_max"), last_value_dnms_la_max);
 	}
 	debug_outln_info(F("----"));
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_DNMS));
@@ -3555,11 +3565,11 @@ static String sensorGPS() {
 		debug_outln_info(F("Date: "), last_value_GPS_date);
 		debug_outln_info(F("Time "), last_value_GPS_time);
 		debug_outln_info(F("----"));
-		s += Value2Json(F("GPS_lat"), Float2String(last_value_GPS_lat, 6));
-		s += Value2Json(F("GPS_lon"), Float2String(last_value_GPS_lon, 6));
-		s += Value2Json(F("GPS_height"), Float2String(last_value_GPS_alt, 2));
-		s += Value2Json(F("GPS_date"), last_value_GPS_date);
-		s += Value2Json(F("GPS_time"), last_value_GPS_time);
+		add_Value2Json(s, F("GPS_lat"), Float2String(last_value_GPS_lat, 6));
+		add_Value2Json(s, F("GPS_lon"), Float2String(last_value_GPS_lon, 6));
+		add_Value2Json(s, F("GPS_height"), Float2String(last_value_GPS_alt, 2));
+		add_Value2Json(s, F("GPS_date"), last_value_GPS_date);
+		add_Value2Json(s, F("GPS_time"), last_value_GPS_time);
 	}
 
 	if ( gps.charsProcessed() < 10) {
@@ -4450,9 +4460,10 @@ void loop() {
 	if (send_now) {
 		debug_outln_info(F("Creating data string:"));
 		String data = tmpl(FPSTR(data_first_part), SOFTWARE_VERSION);
-		String data_sample_times = Value2Json(F("samples"), String(sample_count));
-		data_sample_times += Value2Json(F("min_micro"), String(min_micro));
-		data_sample_times += Value2Json(F("max_micro"), String(max_micro));
+		String data_sample_times;
+		add_Value2Json(data_sample_times, F("samples"), String(sample_count));
+		add_Value2Json(data_sample_times, F("min_micro"), String(min_micro));
+		add_Value2Json(data_sample_times, F("max_micro"), String(max_micro));
 
 		String signal_strength = String(WiFi.RSSI());
 		debug_outln_info(F("WLAN signal strength (dBm): "), signal_strength);
@@ -4514,7 +4525,7 @@ void loop() {
 			sum_send_time += sendLuftdaten(result_GPS, GPS_API_PIN, F("GPS"), "GPS_");
 		}
 
-		data_sample_times += Value2Json(F("signal"), signal_strength);
+		add_Value2Json(data_sample_times, F("signal"), signal_strength);
 		data += data_sample_times;
 
 		if ((unsigned)(data.lastIndexOf(',') + 1) == data.length()) {
