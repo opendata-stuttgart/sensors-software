@@ -271,7 +271,6 @@ namespace cfg {
 	bool send2fsapp = SEND2FSAPP;
 	bool send2aircms = SEND2AIRCMS;
 	bool send2custom = SEND2CUSTOM;
-	bool send2lora = SEND2LORA;
 	bool send2influx = SEND2INFLUX;
 	bool send2csv = SEND2CSV;
 
@@ -1026,7 +1025,6 @@ static void readConfig() {
 					setBoolFromJSON(send2sensemap);
 					setBoolFromJSON(send2fsapp);
 					setBoolFromJSON(send2aircms);
-					setBoolFromJSON(send2lora);
 					setBoolFromJSON(send2csv);
 					setBoolFromJSON(auto_update);
 					setBoolFromJSON(use_beta);
@@ -1126,7 +1124,6 @@ static void writeConfig() {
 	SetJSON(send2sensemap);
 	SetJSON(send2fsapp);
 	SetJSON(send2aircms);
-	SetJSON(send2lora);
 	SetJSON(send2csv);
 	SetJSON(auto_update);
 	SetJSON(use_beta);
@@ -2591,12 +2588,6 @@ static unsigned long sendLuftdaten(const String& data, const int pin, const __Fl
 
 	return sum_send_time;
 }
-
-/*****************************************************************
- * send data to LoRa gateway                                     *
- *****************************************************************/
-// void send_lora(const String& data) {
-// }
 
 /*****************************************************************
  * send data to mqtt api                                         *
@@ -4148,10 +4139,6 @@ static void logEnabledAPIs() {
 		debug_outln_info(F("Madavi.de"));
 	}
 
-	if (cfg::send2lora) {
-		debug_outln_info(F("LoRa gateway"));
-	}
-
 	if (cfg::send2csv) {
 		debug_outln_info(F("Serial as CSV"));
 	}
@@ -4252,11 +4239,6 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 		sum_send_time += sendData(data_4_influxdb, 0, cfg::host_influx, cfg::port_influx, cfg::url_influx, cfg::ssl_influx, false, basic_auth_influx.c_str(), FPSTR(TXT_CONTENT_TYPE_INFLUXDB));
 	}
 
-	/*		if (send2lora) {
-				debug_outln_info(F("## Sending to LoRa gateway: "));
-				send_lora(data);
-			}
-	*/
 	if (cfg::send2csv) {
 		debug_outln_info(F("## Sending as csv: "));
 		send_csv(data);
