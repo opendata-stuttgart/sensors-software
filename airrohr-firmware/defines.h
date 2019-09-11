@@ -101,7 +101,7 @@ static const uint16_t suites[] PROGMEM = {
 #define D4 4
 #define D5 5
 // pins 12 to 15 are needed by JTAG and should not be used to allow debugging (if you can afford it)
-#if not defined(DJTAG_DEBUGGER)
+#if not defined(USING_JTAG_DEBUGGER_PINS)
 #define D12_JTAG_TDI_LOW_DURING_BOOT 12
 #define D13_JTAG_TCK 13
 #define D14_JTAG_TMS 14
