@@ -68,8 +68,8 @@
 #define PM_SERIAL_TX D2
 
 // define pins for I2C
-#define I2C_PIN_SCL SDA
-#define I2C_PIN_SDA SCL
+#define I2C_PIN_SCL D4
+#define I2C_PIN_SDA D3
 
 // define serial interface pins for GPS modules
 #define GPS_SERIAL_RX D5
