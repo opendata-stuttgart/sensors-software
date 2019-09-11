@@ -78,26 +78,40 @@ static const uint16_t suites[] PROGMEM = {
 
 #if defined(ESP32)
 //GPIO Pins
-// the mapping should _not_ be done on this level. The mapping between
-// the Dxx Arduino Digital Pin Numbers and the xx IO number is defined
-// by the board manufacturer because the Dxx numbers are printed on the board
-// only numbers of usable pins are defined (pins internal used to
-// access flash and PSRAM pins are omitted). Actually it depends on
-// the concrete board which pins are available.
+// the IO pins which can be used for what depends on the following:
+//   - The board which is used
+//     - onboard peripherials like LCD or LoRa chips which already occupy an IO pin
+//     - the ESP32 module which is used
+//         - the WROVER board uses the IOs 16 and 17 to access the PSRAW
+//         - on WROOM boards the IOs 16 and 17 can be freely used  
+//   - if JTAG debugging shall be used
+//   - some IOs have constraints
+//     - configuration of ESP32 module configuration options ("strapping") like operating voltage and boot medium
+//     - some IOs can only be used for inputs (34, 35, 36, 39)
 // see https://randomnerdtutorials.com/esp32-pinout-reference-gpios/
-#define D0 0
-//#define D1 1  // USB serial RX
-#define D2 2
-//#define D3 3  // USB serial TX
+//     https://github.com/va3wam/TWIPi/blob/master/Eagle/doc/feather-pinout-map.pdf
+#define D0_STRAPPING 0
+#if defined(NO_USB_SERIAL_ON_UART0)
+#define D1 1  // often used for USB serial RX
+#endif
+#define D2_STRAPPING 2
+#if defined(NO_USB_SERIAL_ON_UART0)
+#define D3 3  // often used USB serial TX
+#endif
 #define D4 4
 #define D5 5
-// pins 12 to 15 are needed by JTAG and should not be used to allow debugging
+// pins 12 to 15 are needed by JTAG and should not be used to allow debugging (if you can afford it)
+#if not defined(DJTAG_DEBUGGER)
 #define D12_JTAG_TDI_LOW_DURING_BOOT 12
 #define D13_JTAG_TCK 13
 #define D14_JTAG_TMS 14
 #define D15_JTAG_TDO_HIGH_DURING_BOOT 15
+#endif
+#if defined(ESP32_WROOM_MODULE)
+// these two pins are used to access PSRAM on WROVER modules
 #define D16_WROOM_ONLY 16
 #define D17_WROOM_ONLY 17
+#endif
 #define D18 18
 #define D19 19
 #define D21 21
