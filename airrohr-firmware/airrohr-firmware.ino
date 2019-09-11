@@ -732,24 +732,14 @@ String Var2Json(const String& name, const String& value) {
  * convert boolean value to json string                          *
  *****************************************************************/
 String Var2Json(const String& name, const bool value) {
-	String s = "\"";
-	s += name;
-	s += "\":";
-	s += value ? "true" : "false";
-	s += ",";
-	return s;
+	return Var2Json(name, String(value ? "true" : "false"));
 }
 
 /*****************************************************************
- * convert int value to json string                          *
+ * convert boolean value to json string                          *
  *****************************************************************/
 String Var2Json(const String& name, const int value) {
-	String s = "\"";
-	s += name;
-	s += "\":";
-	s += String(value);
-	s += ",";
-	return s;
+	return Var2Json(name, String(value));
 }
 
 /*****************************************************************
@@ -1005,8 +995,8 @@ void readConfig() {
 						strcpy(version_from_local_config, json["SOFTWARE_VERSION"]);
 					}
 
-#define setFromJSON(key)    if (json.containsKey(#key)) {key = json[#key].as<typeof(key)>(); }
-#define strcpyFromJSON(key) if (json.containsKey(#key)) {strcpy(key, json[#key]); }
+#define setFromJSON(key)    if (json.containsKey(#key)) key = json[#key];
+#define strcpyFromJSON(key) if (json.containsKey(#key)) strcpy(key, json[#key]);
 					strcpyFromJSON(current_lang);
 					strcpyFromJSON(wlanssid);
 					strcpyFromJSON(wlanpwd);
