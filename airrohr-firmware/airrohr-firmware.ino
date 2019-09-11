@@ -123,25 +123,10 @@
 #include <ESP8266mDNS.h>
 #include <ESP8266httpUpdate.h>
 #include <SoftwareSerial.h>
-#include "./oledfont.h"				// avoids including the default Arial font, needs to be included before SSD1306.h
-#include <SSD1306.h>
-#include <SH1106.h>
-#include <LiquidCrystal_I2C.h>
-#include <base64.h>
-#include <ArduinoJson.h>
-#include "./DHT.h"
-#include <Adafruit_HTU21DF.h>
-#include <Adafruit_BMP085.h>
-#include <Adafruit_BMP280.h>
-#include <Adafruit_BME280.h>
-#include <DallasTemperature.h>
-#include <TinyGPS++.h>
+#include <Hash.h>
 #include <time.h>
 #include <coredecls.h>
 #include <assert.h>
-#include <Hash.h>
-#include "./sps30_i2c.h"
-#include "./dnms_i2c.h"
 #endif
 
 #if defined(ESP32)
@@ -157,10 +142,14 @@
 #include <WebServer.h>
 #include <DNSServer.h>
 #include <ESPmDNS.h>
+#endif
+
+// includes common to ESP8266 and ESP32 (especially external libraries)
+#include <base64.h>
+#include "./oledfont.h"				// avoids including the default Arial font, needs to be included before SSD1306.h
 #include <SSD1306.h>
 #include <SH1106.h>
 #include <LiquidCrystal_I2C.h>
-#include <base64.h>
 #include <ArduinoJson.h>
 #include "./DHT.h"
 #include <Adafruit_HTU21DF.h>
@@ -172,7 +161,6 @@
 #include "./sps30_i2c.h"
 #include "./dnms_i2c.h"
 
-#endif
 
 #if defined(INTL_BG)
 #include "intl_bg.h"
