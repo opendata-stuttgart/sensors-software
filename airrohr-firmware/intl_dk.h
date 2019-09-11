@@ -8,7 +8,7 @@
  *	We only have 512 kB for the entire firmware
  */
 
-const char INTL_LANG[] = "DA";
+const char INTL_LANG[] = "DK";
 const char INTL_PM_SENSOR[] PROGMEM = "Partikelsensor";
 const char INTL_CONFIGURATION[] PROGMEM = "Opsætning";
 const char INTL_WIFI_SETTINGS[] PROGMEM = "Wi-Fi indstillinger";
