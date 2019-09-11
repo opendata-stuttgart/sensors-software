@@ -115,6 +115,20 @@
 #define INTL_DE
 #endif
 
+// Workaround for FPSTR bug in espressif32 versions < 1.0.3-rc2
+// see https://github.com/espressif/arduino-esp32/issues/1371
+//     https://github.com/bxparks/arduino-esp32/commit/0906aedcf9fe8df3969cd336117c1219b507be14
+// TODO: Workaround can be removed once using a espressif32 version newer than 1.0.3-rc2. 
+// Make sure the includes Wstring.h and pgmspace.h are already loaded before the #define is redefined!
+#include <WString.h>
+#include <pgmspace.h>
+#if defined(ESP32)
+#undef FPSTR
+#define FPSTR(pstr_pointer) (reinterpret_cast<const __FlashStringHelper *>(pstr_pointer))
+#undef F
+#define F(string_literal) (FPSTR(PSTR(string_literal)))
+#endif
+
 #if defined(ESP8266)
 #include <FS.h>                     // must be first
 #include <ESP8266WiFi.h>
@@ -123,25 +137,10 @@
 #include <ESP8266mDNS.h>
 #include <ESP8266httpUpdate.h>
 #include <SoftwareSerial.h>
-#include "./oledfont.h"				// avoids including the default Arial font, needs to be included before SSD1306.h
-#include <SSD1306.h>
-#include <SH1106.h>
-#include <LiquidCrystal_I2C.h>
-#include <base64.h>
-#include <ArduinoJson.h>
-#include "./DHT.h"
-#include <Adafruit_HTU21DF.h>
-#include <Adafruit_BMP085.h>
-#include <Adafruit_BMP280.h>
-#include <Adafruit_BME280.h>
-#include <DallasTemperature.h>
-#include <TinyGPS++.h>
+#include <Hash.h>
 #include <time.h>
 #include <coredecls.h>
 #include <assert.h>
-#include <Hash.h>
-#include "./sps30_i2c.h"
-#include "./dnms_i2c.h"
 #endif
 
 #if defined(ESP32)
@@ -157,10 +156,14 @@
 #include <WebServer.h>
 #include <DNSServer.h>
 #include <ESPmDNS.h>
+#endif
+
+// includes common to ESP8266 and ESP32 (especially external libraries)
+#include <base64.h>
+#include "./oledfont.h"				// avoids including the default Arial font, needs to be included before SSD1306.h
 #include <SSD1306.h>
 #include <SH1106.h>
 #include <LiquidCrystal_I2C.h>
-#include <base64.h>
 #include <ArduinoJson.h>
 #include "./DHT.h"
 #include <Adafruit_HTU21DF.h>
@@ -172,7 +175,6 @@
 #include "./sps30_i2c.h"
 #include "./dnms_i2c.h"
 
-#endif
 
 #if defined(INTL_BG)
 #include "intl_bg.h"
@@ -315,7 +317,7 @@ namespace cfg {
 	void initNonTrivials(const char* id) {
 		strcpy(cfg::current_lang, CURRENT_LANG);
 		if (fs_ssid[0] == '\0') {
-			strcpy(fs_ssid, "airRohr-");
+			strcpy(fs_ssid, SSID_BASENAME);
 			strcat(fs_ssid, id);
 		}
 	}
@@ -398,8 +400,8 @@ SoftwareSerial serialSDS(PM_SERIAL_RX, PM_SERIAL_TX, false, 128);
 SoftwareSerial serialGPS(GPS_SERIAL_RX, GPS_SERIAL_TX, false, 512);
 #endif
 #if defined(ESP32)
-HardwareSerial serialSDS(2);
-HardwareSerial serialGPS(3);
+#define serialSDS (Serial1)
+#define serialGPS (Serial2)
 #endif
 
 /*****************************************************************
@@ -2189,7 +2191,7 @@ static void webserver_prometheus_endpoint() {
 	String data_4_prometheus = F("software_version{version=\"{ver}\",node=\"-{id}\"} 1\nuptime_ms{{id}} {up}\nsending_intervall_ms{{id}} {si}\nnumber_of_measurements{{id}} {cs}\n");
 	debug_outln_info(F("Parse JSON for Prometheus"));
 	debug_outln(last_data_string, DEBUG_MED_INFO);
-	String id = F("node=\"esp8266-");
+	String id = F("node=\"" SENSOR_BASENAME);
 	id += esp_chipid + "\"";
 	data_4_prometheus.replace("{id}", esp_chipid);
 	data_4_prometheus.replace("{ver}", SOFTWARE_VERSION);
@@ -2452,7 +2454,7 @@ static unsigned long sendData(const String& data, const int pin, const char* hos
 	}
 	request_head += F("X-PIN: ");
 	request_head += pin;
-	request_head += F("\r\nX-Sensor: esp8266-");
+	request_head += F("\r\nX-Sensor: " SENSOR_BASENAME);
 	request_head += esp_chipid;
 	request_head += F("\r\nContent-Length: ");
 	request_head += String(data.length(), DEC);
@@ -2599,7 +2601,7 @@ static String create_influxdb_string(const String& data) {
 	DeserializationError err = deserializeJson(json2data, data);
 	if (!err) {
 		data_4_influxdb += cfg::measurement_name_influx;
-		data_4_influxdb += F(",node=esp8266-");
+		data_4_influxdb += F(",node=" SENSOR_BASENAME);
 		data_4_influxdb += esp_chipid + " ";
 		for (uint8_t i = 0; i < json2data["sensordatavalues"].size(); i++) {
 			String tmp_str = json2data["sensordatavalues"][i]["value_type"].as<char*>();
@@ -4260,16 +4262,22 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 /*****************************************************************
  * The Setup                                                     *
  *****************************************************************/
-void setup() {
+void setup(void) {
 	Serial.begin(9600);					// Output to Serial at 9600 baud
 
+#if defined(ESP8266)
+	serialSDS.begin(9600);
+#endif
 #if defined(ESP32)
-	serialSDS.begin(9600, SERIAL_8N1, D1, D2);
-	serialGPS.begin(9600, SERIAL_8N1, D5, D6);
-	pinMode(16, OUTPUT);
-	digitalWrite(16, LOW);
+	serialSDS.begin(9600, SERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX);
+#endif
+
+#if defined(WIFI_LoRa_32_V2)
+	// reset the OLED display, e.g. of the heltec_wifi_lora_32 board
+	pinMode(RST_OLED, OUTPUT);
+	digitalWrite(RST_OLED, LOW);
 	delay(50);
-	digitalWrite(16, HIGH);
+	digitalWrite(RST_OLED, HIGH);
 #endif
 	Wire.begin(I2C_PIN_SDA, I2C_PIN_SCL);
 
@@ -4295,21 +4303,25 @@ void setup() {
 	autoUpdate();
 	setup_webserver();
 	create_basic_auth_strings();
-	serialSDS.begin(9600);
 	debug_outln_info(F("\nChipId: "), esp_chipid);
 
-	powerOnTestSensors();
 
 	if (cfg::gps_read) {
+#if defined(ESP8266)
 		serialGPS.begin(9600);
+#endif
+#if defined(ESP32)
+		serialGPS.begin(9600, SERIAL_8N1, GPS_SERIAL_RX, GPS_SERIAL_TX);
+#endif
 		debug_outln_info(F("Read GPS..."));
 		disable_unneeded_nmea();
 	}
 
+	powerOnTestSensors();
 	logEnabledAPIs();
 	logEnabledDisplays();
 
-	String server_name = F("airRohr-");
+	String server_name = F(HOSTNAME_BASE);
 	server_name += esp_chipid;
 	if (MDNS.begin(server_name.c_str())) {
 		MDNS.addService("http", "tcp", 80);
@@ -4320,7 +4332,9 @@ void setup() {
 	// sometimes parallel sending data and web page will stop nodemcu, watchdogtimer set to 30 seconds
 #if defined(ESP8266)
 	wdt_disable();
+#if defined(NDEBUG)
 	wdt_enable(30000);
+#endif
 #endif
 
 	starttime = millis();									// store the start time
@@ -4332,7 +4346,7 @@ void setup() {
 /*****************************************************************
  * And action                                                    *
  *****************************************************************/
-void loop() {
+void loop(void) {
 	String result_PPD, result_SDS, result_PMS, result_HPM, result_SPS30;
 	String result_DHT, result_HTU21D, result_BMP, result_BMP280;
 	String result_BME280, result_DS18B20, result_GPS, result_DNMS;

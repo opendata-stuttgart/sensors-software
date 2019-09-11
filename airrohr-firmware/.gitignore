@@ -1,13 +1,14 @@
 .pio/
 .pioenvs
 .piolibdeps
+.pio/
 examples
 keywords.txt
 library.json
 TinyGPS++.cpp
 TinyGPS++.h
 *.ino.orig
-builds/*
+builds/
 !builds/readme.md
 .clang_complete
 .gcc-flags.json
