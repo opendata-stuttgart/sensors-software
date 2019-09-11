@@ -4269,6 +4269,7 @@ void setup(void) {
 #if defined(ESP32)
 	serialSDS.begin(9600, SERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX);
 #endif
+
 #if defined(WIFI_LoRa_32_V2)
 	// reset the OLED display, e.g. of the heltec_wifi_lora_32 board
 	pinMode(RST_OLED, OUTPUT);
@@ -4302,20 +4303,19 @@ void setup(void) {
 	create_basic_auth_strings();
 	debug_outln_info(F("\nChipId: "), esp_chipid);
 
-	powerOnTestSensors();
 
 	if (cfg::gps_read) {
 #if defined(ESP8266)
 		serialGPS.begin(9600);
 #endif
-#ifdef ESP32
+#if defined(ESP32)
 		serialGPS.begin(9600, SERIAL_8N1, GPS_SERIAL_RX, GPS_SERIAL_TX);
 #endif
-
 		debug_outln_info(F("Read GPS..."));
 		disable_unneeded_nmea();
 	}
 
+	powerOnTestSensors();
 	logEnabledAPIs();
 	logEnabledDisplays();
 
