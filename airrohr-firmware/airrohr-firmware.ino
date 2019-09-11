@@ -420,6 +420,8 @@ public:
 
   /*  set the measuring range to 1000, 2000, 3000 or 5000
       ppm range for sensor MH-Z19 is set to 2000 when sensor is delivered
+	  value is stored in EEPROM, so don't call this too often otherwise
+	  EEPROM will be damaged
   */
   bool SetRange(uint16_t range);
 
@@ -438,8 +440,8 @@ private:
   Stream* m_pSerialPort;
   uint16_t ppmMaxValue; // 1000, 2000, 3000 or 5000
   
-  CMHZ19Sensor(); // not allowed to be used
-  uint8_t CalcCheckSum(uint8_t *packet);
+  CMHZ19Sensor(); // default constructor not allowed to be used
+  static uint8_t CalcCheckSum(uint8_t *packet);
 
   // synchronize with receive stream: first uint8_t must be 0xff
   // actually this consumes the rest of any dangling uint8_ts from the previous packet (will mainly happen on startup)
@@ -3892,7 +3894,7 @@ static void display_values() {
 	String gps_sensor, display_header;
 	String display_lines[3] = { "", "", ""};
 	int screen_count = 0;
-	int screens[5];
+	int screens[8];
 	int line_count = 0;
 	debug_outln_info(F("output values to display..."));
 	if (cfg::ppd_read) {
@@ -3998,7 +4000,7 @@ static void display_values() {
 	if (cfg::display_device_info) {
 		screens[screen_count++] = 7;	// chipID, firmware and count of measurements
 	}
-	else if(cfg::mhz19_read) {
+	if(cfg::mhz19_read) {
 		screens[screen_count++] = 8;
 	}
 	if (cfg::has_display || cfg::has_sh1106 || cfg::has_lcd2004_27) {
