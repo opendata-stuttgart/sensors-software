@@ -1153,9 +1153,9 @@ void writeConfig() {
 	copyToJSON_Bool(has_lcd2004_27);
 	copyToJSON_Bool(display_wifi_info);
 	copyToJSON_Bool(display_device_info);
-	copyToJSON_Int(debug);
-	copyToJSON_Int(sending_intervall_ms);
-	copyToJSON_Int(time_for_wifi_config);
+	copyToJSON_String(debug);
+	copyToJSON_String(sending_intervall_ms);
+	copyToJSON_String(time_for_wifi_config);
 	copyToJSON_String(senseboxid);
 	copyToJSON_Bool(send2custom);
 	copyToJSON_String(host_custom);
