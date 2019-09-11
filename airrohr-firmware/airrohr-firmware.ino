@@ -1285,8 +1285,8 @@ static void writeConfig() {
 	SetJSON(ds18b20_read);
 	SetJSON(dnms_read);
 	SetJSON(dnms_correction);
-	if(gps_read && mhz19_read) // cannot be active at the same time
-		mhz19_read = false;
+	if(cfg::gps_read && cfg::mhz19_read) // cannot be active at the same time
+		cfg::mhz19_read = false;
 	SetJSON(gps_read);
 	SetJSON(mhz19_read);
 	SetJSON(send2dusti);
@@ -3796,7 +3796,7 @@ static String sensorMHZ19() {
 
 	if (send_now) {
 		debug_outln("CO2 ppm: " + Float2String(last_value_MHZ19_co2_ppm, 0), DEBUG_MIN_INFO);
-		s += Value2Json(F("conc_co2_ppm"), Float2String(last_value_MHZ19_co2_ppm, 0));
+		add_Value2Json(s, F("conc_co2_ppm"), Float2String(last_value_MHZ19_co2_ppm, 0));
 	}
 
 	debug_outln(String(FPSTR(DBG_TXT_END_READING)) + "MHZ19", DEBUG_MED_INFO);
@@ -4787,10 +4787,10 @@ void loop(void) {
 			data += result_GPS;
 			sum_send_time += sendLuftdaten(result_GPS, GPS_API_PIN, F("GPS"), "GPS_");
 		}
-		else if(cfg::mhz19_read && ((msSince(starttime_MHZ19) > SAMPLETIME_MHZ19_MS) || send_now))
+		else if(cfg::mhz19_read)
 		{
 			data += result_MHZ19;
-			sum_send_time += sendLuftdaten(result_MHZ19, GPS_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, cfg::ssl_dusti, true, "MHZ19_");
+			sum_send_time += sendLuftdaten(result_MHZ19, GPS_API_PIN, F("MHZ19"), "MHZ19_");
 		}
 
 		add_Value2Json(data_sample_times, F("signal"), signal_strength);
