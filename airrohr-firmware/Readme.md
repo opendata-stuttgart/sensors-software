@@ -55,6 +55,7 @@ Die Daten können als CSV via USB ausgegeben werden. Dafür sollte sowohl in ext
 * Board: NodeMCU 1.0 (ESP-12E Module)
 * CPU Frequency: 160MHz
 * Flash Size: 4M (3M SPIFFS)
+
 Ab "ESP für Arduino 2.4.2":
 * Debug Port: Disabled
 * Debug Level: NoAssert-NDEBUG
@@ -65,6 +66,8 @@ Ab "ESP für Arduino 2.4.2":
   'build.float=-u _printf_float -u _scanf_float'
   ändern in
   'build.float='
+
+* in Wire.h muss bei Verwendung des Sensirion SPS30 noch BUFFER_LENGTH auf 64 gesetzt werden
 
 ### Verwendete Bibliotheken (für ESP8266):
 
@@ -80,10 +83,10 @@ In ESP8266 für Arduino IDE enthalten:
 * SoftwareSerial (GNU Lesser Public License >=2.1). Don't install additional library!!!
 
 Installierbar über Arduino IDE (Menü Sketch -> Bibliothek einbinden -> Bibliotheken verwalten, in Klammern die getestete Version und die Art der Lizenz):
-* [ArduinoJson](https://github.com/bblanchon/ArduinoJson) (6.11.0) (MIT)
+* [ArduinoJson](https://github.com/bblanchon/ArduinoJson) (6.11.5) (MIT)
 * [Adafruit Unified Sensor](https://github.com/adafruit/Adafruit_Sensor) (1.0.3) (Apache)
-* [Adafruit BMP085 library](https://github.com/adafruit/Adafruit-BMP085-Library) (1.0.0) (BSD)
-* [Adafruit BMP280 library](https://github.com/adafruit/Adafruit_BMP280_Library) (1.0.3) (BSD)
+* [Adafruit BMP085 library](https://github.com/adafruit/Adafruit-BMP085-Library) (1.0.1) (BSD)
+* [Adafruit BMP280 library](https://github.com/adafruit/Adafruit_BMP280_Library) (1.0.4) (BSD)
 * [Adafruit BME280 library](https://github.com/adafruit/Adafruit_BME280_Library) (1.0.8) (BSD)
 * [Adafruit HTU21DF library](https://github.com/adafruit/Adafruit_HTU21DF_Library) (1.0.1) (BSD)
 * [DallasTemperature](https://github.com/milesburton/Arduino-Temperature-Control-Library) (3.8.0)
@@ -103,6 +106,11 @@ Ich hoffe, alle Bibliotheken erwischt zu haben. Falls beim Kompilieren eine Bibl
 
 ACHTUNG: Die DHT sensor library hat ab Version 1.2 ein Problem auf den ESP8266. Daher unbedingt max. Version 1.1.1 benutzen
 Um Probleme zu vermeiden, haben wir die letzte funktionierende Version als lokale Kopie eingebunden.
+
+ACHTUNG: Um Over-The-Air Updates zu ermoeglichen (OTA) muss das resultierende Firmware Image weniger als 512kByte
+gross bleiben. Daher verwendet Airrrohr im Moment Arduino Core 2.4.2, da neuere Versionen einen zu grossen
+Footprint erzeugen. Siehe https://arduino-esp8266.readthedocs.io/en/latest/ota_updates/readme.html#update-process-memory-view fuer das memory layout das benoetigt wird.
+
 
 ## Anschluss der Sensoren
 

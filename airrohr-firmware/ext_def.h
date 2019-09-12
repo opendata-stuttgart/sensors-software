@@ -54,36 +54,94 @@
 #define MEASUREMENT_NAME_INFLUX "feinstaub"
 #define SSL_INFLUX 0
 
-// define pins for I2C
-#define I2C_PIN_SCL D4
-#define I2C_PIN_SDA D3
-
-// define pin for one wire sensors
+//  === pin assignments for NodeMCU V2 board ===================================
 #if defined(ESP8266)
+// define pin for one wire sensors
 #define ONEWIRE_PIN D7
-#endif
-#if defined(ARDUINO_SAMD_ZERO)
-#define ONEWIRE_PIN D7
-#endif
-#if defined(ESP32)
-#define ONEWIRE_PIN D7
-#endif
 
 // define serial interface pins for particle sensors
 // Serial confusion: These definitions are based on SoftSerial
 // TX (transmitting) pin on one side goes to RX (receiving) pin on other side
 // SoftSerial RX PIN is D1 and goes to SDS TX
 // SoftSerial TX PIN is D2 and goes to SDS RX
-#if defined(ESP8266)
 #define PM_SERIAL_RX D1
 #define PM_SERIAL_TX D2
-#endif
+
+// define pins for I2C
+#define I2C_PIN_SCL D4
+#define I2C_PIN_SDA D3
 
 // define serial interface pins for GPS modules
-#if defined(ESP8266)
 #define GPS_SERIAL_RX D5
 #define GPS_SERIAL_TX D6
+
+// PPD42NS, the cheaper version of the particle sensor
+#define PPD_PIN_PM1 GPS_SERIAL_TX
+#define PPD_PIN_PM2 GPS_SERIAL_RX
 #endif
+
+
+//  === pin assignments for Arduino SAMD Zero board ===================================
+#if defined(ARDUINO_SAMD_ZERO)
+#define ONEWIRE_PIN D7
+#define PPD_PIN_PM1 GPS_SERIAL_TX
+#define PPD_PIN_PM2 GPS_SERIAL_RX
+#if defined(SERIAL_PORT_USBVIRTUAL)
+#define RFM69_CS 8
+#define RFM69_RST 4
+#define RFM69_INT 3
+#endif
+#endif
+
+//  === pin assignments for lolin_d32_pro board ===================================
+#if defined(ARDUINO_LOLIN_D32_PRO)
+#define ONEWIRE_PIN D32
+#define PM_SERIAL_RX D27
+#define PM_SERIAL_TX D33
+#if defined(FLIP_I2C_PMSERIAL) // exchange the pins of the ports to use external i2c connector for gps
+#define I2C_PIN_SCL D23
+#define I2C_PIN_SDA D19
+#define GPS_SERIAL_RX D22
+#define GPS_SERIAL_TX D21
+#else
+#define I2C_PIN_SCL D22
+#define I2C_PIN_SDA D21
+#define GPS_SERIAL_RX D19
+#define GPS_SERIAL_TX D23
+#endif
+#define PPD_PIN_PM1 GPS_SERIAL_TX
+#define PPD_PIN_PM2 GPS_SERIAL_RX
+//#define RFM69_CS D0
+//#define RFM69_RST D2
+//#define RFM69_INT D4
+#endif
+
+//  === pin assignments for heltec_wifi_lora_32_V2 board ===================================
+#if defined(WIFI_LoRa_32_V2)
+#define ONEWIRE_PIN D32
+#define I2C_PIN_SCL D22
+#define I2C_PIN_SDA D17_WROOM_ONLY
+#define PM_SERIAL_RX D23
+#define PM_SERIAL_TX D2_STRAPPING
+#define GPS_SERIAL_RX D13_JTAG_TCK
+#define GPS_SERIAL_TX D0_STRAPPING
+#define PPD_PIN_PM1 GPS_SERIAL_TX
+#define PPD_PIN_PM2 GPS_SERIAL_RX
+#endif
+
+//  === pin assignments for heltec_wifi_lora_32 board ===================================
+#if defined(WIFI_LoRa_32)
+#define ONEWIRE_PIN D25 // TODO: this overlaps with LED, so it might not work
+#define I2C_PIN_SCL D22
+#define I2C_PIN_SDA D17_WROOM_ONLY
+#define PM_SERIAL_RX D23
+#define PM_SERIAL_TX D2_STRAPPING
+#define GPS_SERIAL_RX D13_JTAG_TCK
+#define GPS_SERIAL_TX D0_STRAPPING
+#define PPD_PIN_PM1 GPS_SERIAL_TX
+#define PPD_PIN_PM2 GPS_SERIAL_RX
+#endif
+
 
 // DHT22, temperature, humidity
 #define DHT_READ 1
@@ -97,10 +155,6 @@
 // PPD42NS, the cheaper version of the particle sensor
 #define PPD_READ 0
 #define PPD_API_PIN 5
-#if defined(ARDUINO_SAMD_ZERO) || defined(ESP8266) || defined(ESP32)
-#define PPD_PIN_PM1 D6
-#define PPD_PIN_PM2 D5
-#endif
 
 // SDS011, the more expensive version of the particle sensor
 #define SDS_READ 1
@@ -113,6 +167,12 @@
 // Honeywell PM sensor
 #define HPM_READ 0
 #define HPM_API_PIN 1
+
+// Sensirion SPS30 PM Sensor I2C connection
+#define SPS30_READ 0
+#define SPS30_API_PIN 1
+#define SPS30_WAITING_AFTER_LAST_READ 11000   // waiting time after last reading mesurement data in ms
+#define SPS30_AUTO_CLEANING_INTERVAL 7200 // time in seconds
 
 // BMP180, temperature, pressure
 #define BMP_READ 0
@@ -130,10 +190,17 @@
 #define DS18B20_READ 0
 #define DS18B20_API_PIN 13
 
+// DNMS Noise Measurement
+#define DNMS_READ 0
+#define DNMS_API_PIN 15
+#define DNMS_CORRECTION "0.0"
 
 // GPS, preferred Neo-6M
 #define GPS_READ 0
 #define GPS_API_PIN 9
+
+// MHZ19 CO2 sensor
+#define MHZ19_READ 0
 
 // automatic firmware updates
 #define AUTO_UPDATE 1
@@ -147,6 +214,9 @@
 // OLED Display SH1106 connected?
 #define HAS_SH1106 0
 
+// OLED Display um 180° gedreht?
+#define HAS_FLIPPED_DISPLAY 0
+
 // LCD Display LCD1602 connected?
 #define HAS_LCD1602 0
 
@@ -156,5 +226,11 @@
 // LCD Display LCD2004 (0x27) connected?
 #define HAS_LCD2004_27 0
 
-// Set debug level for serial outpur?
+// Show wifi info on displays
+#define DISPLAY_WIFI_INFO 1
+
+// Show device info on displays
+#define DISPLAY_DEVICE_INFO 1
+
+// Set debug level for serial output?
 #define DEBUG 3

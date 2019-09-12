@@ -88,51 +88,10 @@ namespace cfg {
 
 	char version_from_local_config[20] = "";
 
-	bool dht_read;
-	bool htu21d_read;
-	bool ppd_read;
-	bool sds_read;
-	bool pms_read;
-	bool hpm_read;
-	bool bmp_read;
-	bool bmp280_read;
-	bool bme280_read;
-	bool ds18b20_read;
-	bool gps_read;
-	bool send2dusti;
-	bool send2madavi;
-	bool send2sensemap;
-	bool send2fsapp;
-	bool send2custom;
-	bool send2lora;
-	bool send2influx;
-	bool send2csv;
 	bool auto_update;
 	bool use_beta;
-	bool has_display;
-	bool has_sh1106;
-	bool has_lcd1602;
-	bool has_lcd1602_27;
-	bool has_lcd2004_27;
+
 	int  debug;
-
-	bool ssl_madavi;
-	bool ssl_dusti;
-	char senseboxid[30];
-
-	char host_influx[100];
-	char url_influx[100];
-	int port_influx;
-	char user_influx[65];
-	char pwd_influx[65];
-	char measurement_name_influx[100];
-	bool ssl_influx;
-
-	char host_custom[100];
-	char url_custom[100];
-	int port_custom;
-	char user_custom[65];
-	char pwd_custom[65];
 
 	unsigned long time_for_wifi_config = 600000;
 	unsigned long sending_intervall_ms = 145000;
@@ -160,37 +119,22 @@ bool sntp_time_is_set = false;
 
 bool got_ntp = false;
 
-struct struct_wifiInfo {
-	char ssid[35];
-	uint8_t encryptionType;
-	int32_t RSSI;
-	int32_t channel;
-	bool isHidden;
-};
-
-struct struct_wifiInfo *wifiInfo;
-uint8_t count_wifiInfo;
-
-template<typename T, std::size_t N> constexpr std::size_t array_num_elements(const T(&)[N]) {
-	return N;
-}
-
-template<typename T, std::size_t N> constexpr std::size_t capacity_null_terminated_char_array(const T(&)[N]) {
-	return N - 1;
-}
-
 /*****************************************************************
  * Debug output                                                  *
  *****************************************************************/
-void debug_out(const String& text, const int level, const bool linebreak) {
-	if (level <= cfg::debug) {
-		if (linebreak) {
-			Serial.println(text);
-		} else {
-			Serial.print(text);
-		}
-	}
-}
+
+
+#define debug_level_check if(level > cfg::debug) return;
+
+void debug_out(const String& text, const int level) { debug_level_check; Serial.print(text); }
+void debug_out_bool(const bool text, const int level) { debug_level_check; Serial.print(String(text)); }
+void debug_out(const __FlashStringHelper* text, const int level) { debug_level_check; Serial.print(text); }
+
+void debug_outln(const String& text, const int level) { debug_level_check; Serial.println(text); }
+void debug_outln_bool(const bool text, const int level) { debug_level_check; Serial.println(String(text)); }
+void debug_outln(const __FlashStringHelper* text, const int level) { debug_level_check; Serial.println(text); }
+
+#undef debug_level_check
 
 /*****************************************************************
  * read config from spiffs                                       *
@@ -198,30 +142,25 @@ void debug_out(const String& text, const int level, const bool linebreak) {
 void readConfig() {
 	using namespace cfg;
 	String json_string = "";
-	debug_out(F("mounting FS..."), DEBUG_MIN_INFO, 1);
+	debug_outln(F("mounting FS..."), DEBUG_MIN_INFO);
 
 	if (SPIFFS.begin()) {
-		debug_out(F("mounted file system..."), DEBUG_MIN_INFO, 1);
+		debug_outln(F("mounted file system..."), DEBUG_MIN_INFO);
 		if (SPIFFS.exists("/config.json")) {
 			//file exists, reading and loading
-			debug_out(F("reading config file..."), DEBUG_MIN_INFO, 1);
+			debug_outln(F("reading config file..."), DEBUG_MIN_INFO);
 			File configFile = SPIFFS.open("/config.json", "r");
 			if (configFile) {
-				debug_out(F("opened config file..."), DEBUG_MIN_INFO, 1);
+				debug_outln(F("opened config file..."), DEBUG_MIN_INFO);
 				const size_t size = configFile.size();
 				// Allocate a buffer to store contents of the file.
 				std::unique_ptr<char[]> buf(new char[size]);
 
 				configFile.readBytes(buf.get(), size);
-				StaticJsonBuffer<JSON_BUFFER_SIZE> jsonBuffer;
-				JsonObject& json = jsonBuffer.parseObject(buf.get());
-				json.printTo(json_string);
-				debug_out(F("File content: "), DEBUG_MAX_INFO, 0);
-				debug_out(String(buf.get()), DEBUG_MAX_INFO, 1);
-				debug_out(F("JSON Buffer content: "), DEBUG_MAX_INFO, 0);
-				debug_out(json_string, DEBUG_MAX_INFO, 1);
-				if (json.success()) {
-					debug_out(F("parsed json..."), DEBUG_MIN_INFO, 1);
+				DynamicJsonDocument json(JSON_BUFFER_SIZE);
+				DeserializationError err = deserializeJson(json, configFile);
+				if (!err) {
+					debug_outln(F("parsed json..."), DEBUG_MIN_INFO);
 					if (json.containsKey("SOFTWARE_VERSION")) {
 						strcpy(version_from_local_config, json["SOFTWARE_VERSION"]);
 					}
@@ -239,14 +178,14 @@ void readConfig() {
 #undef setFromJSON
 #undef strcpyFromJSON
 				} else {
-					debug_out(F("failed to load json config"), DEBUG_ERROR, 1);
+					debug_outln(F("failed to load json config"), DEBUG_ERROR);
 				}
+			} else {
+				debug_outln(F("config file not found ..."), DEBUG_ERROR);
 			}
 		} else {
-			debug_out(F("config file not found ..."), DEBUG_ERROR, 1);
+			debug_outln(F("failed to mount FS"), DEBUG_ERROR);
 		}
-	} else {
-		debug_out(F("failed to mount FS"), DEBUG_ERROR, 1);
 	}
 }
 
@@ -254,7 +193,7 @@ static void waitForWifiToConnect(int maxRetries) {
 	int retryCount = 0;
 	while ((WiFi.status() != WL_CONNECTED) && (retryCount <  maxRetries)) {
 		delay(500);
-		debug_out(".", DEBUG_MIN_INFO, 0);
+		debug_out(".", DEBUG_MIN_INFO);
 		++retryCount;
 	}
 }
@@ -263,49 +202,61 @@ static void waitForWifiToConnect(int maxRetries) {
  * WiFi auto connecting script                                   *
  *****************************************************************/
 void connectWifi() {
-	debug_out(String(WiFi.status()), DEBUG_MIN_INFO, 1);
+	debug_outln(String(WiFi.status()), DEBUG_MIN_INFO);
 	WiFi.disconnect();
 	WiFi.setOutputPower(20.5);
 	WiFi.setPhyMode(WIFI_PHY_MODE_11N);
 	WiFi.mode(WIFI_STA);
 	WiFi.begin(cfg::wlanssid, cfg::wlanpwd); // Start WiFI
 
-	debug_out(F("Connecting to "), DEBUG_MIN_INFO, 0);
-	debug_out(cfg::wlanssid, DEBUG_MIN_INFO, 1);
+	debug_out(F("Connecting to "), DEBUG_MIN_INFO);
+	debug_outln(cfg::wlanssid, DEBUG_MIN_INFO);
 
 	waitForWifiToConnect(40);
-	debug_out("", DEBUG_MIN_INFO, 1);
-	debug_out(F("WiFi connected\nIP address: "), DEBUG_MIN_INFO, 0);
-	debug_out(WiFi.localIP().toString(), DEBUG_MIN_INFO, 1);
+	debug_outln("", DEBUG_MIN_INFO);
+	debug_out(F("WiFi connected\nIP address: "), DEBUG_MIN_INFO);
+	debug_outln(WiFi.localIP().toString(), DEBUG_MIN_INFO);
 }
 
 /*****************************************************************
  * AutoUpdate                                                    *
  *****************************************************************/
 static void autoUpdate() {
-	if (cfg::auto_update) {
-		debug_out(F("Starting OTA update ..."), DEBUG_MIN_INFO, 1);
-		debug_out(F("NodeMCU firmware : "), DEBUG_MIN_INFO, 0);
-		debug_out(SOFTWARE_VERSION, DEBUG_MIN_INFO, 1);
-		debug_out(UPDATE_HOST, DEBUG_MED_INFO, 1);
-		debug_out(UPDATE_URL, DEBUG_MED_INFO, 1);
+	if (!cfg::auto_update) return;
 
-		t_httpUpdate_return ret = ESPhttpUpdate.update(UPDATE_HOST, UPDATE_PORT, UPDATE_URL,
-									 SOFTWARE_VERSION + String(" ") + esp_chipid + String(" ") + String("update_loader") + String(" ") +
-									 String(cfg::current_lang) + String(" ") + String(cfg::current_lang) + String(" ") +
-									 String(cfg::use_beta ? "BETA" : ""));
-		switch(ret) {
-		case HTTP_UPDATE_FAILED:
-			debug_out(F("Update failed ..."), DEBUG_ERROR, 0);
-			debug_out(ESPhttpUpdate.getLastErrorString().c_str(), DEBUG_ERROR, 1);
-			break;
-		case HTTP_UPDATE_NO_UPDATES:
-			debug_out(F("No update found ..."), DEBUG_MIN_INFO, 1);
-			break;
-		case HTTP_UPDATE_OK:
-			debug_out(F("Update ok..."), DEBUG_MIN_INFO, 1); // may not called we reboot the ESP
-			break;
-		}
+	debug_outln(F("Starting OTA update ..."), DEBUG_MIN_INFO);
+	debug_out(F("NodeMCU firmware : "), DEBUG_MIN_INFO);
+	debug_outln(SOFTWARE_VERSION, DEBUG_MIN_INFO);
+	debug_outln(UPDATE_HOST, DEBUG_MED_INFO);
+	debug_outln(UPDATE_URL, DEBUG_MED_INFO);
+
+	String version = SOFTWARE_VERSION + String(" ") + esp_chipid + String(" ") + String("update_loader") + String(" ") +
+					 String(cfg::current_lang) + String(" ") + String(cfg::current_lang) + String(" ") +
+					 String(cfg::use_beta ? "BETA" : "");
+
+
+	WiFiClient client;
+
+#if defined(ESP8266)
+	const HTTPUpdateResult ret = ESPhttpUpdate.update(client, UPDATE_HOST, UPDATE_PORT, UPDATE_URL, version);
+	String LastErrorString = ESPhttpUpdate.getLastErrorString().c_str();
+#endif
+#if defined(ESP32)
+	t_httpUpdate_return ret = httpUpdate.update(client, UPDATE_HOST, UPDATE_PORT, UPDATE_URL, version);
+	String LastErrorString = httpUpdate.getLastErrorString().c_str();
+#endif
+
+	switch(ret) {
+	case HTTP_UPDATE_FAILED:
+		debug_out(F("Update failed ..."), DEBUG_ERROR);
+		debug_outln(LastErrorString, DEBUG_ERROR);
+		break;
+	case HTTP_UPDATE_NO_UPDATES:
+		debug_outln(F("No update found ..."), DEBUG_MIN_INFO);
+		break;
+	case HTTP_UPDATE_OK:
+		debug_outln(F("Update ok..."), DEBUG_MIN_INFO); // may not called we reboot the ESP
+		break;
 	}
 }
 
@@ -315,34 +266,34 @@ void time_is_set (void) {
 
 static bool acquireNetworkTime() {
 	int retryCount = 0;
-	debug_out(F("Setting time using SNTP"), DEBUG_MIN_INFO, 1);
+	debug_outln(F("Setting time using SNTP"), DEBUG_MIN_INFO);
 	time_t now = time(nullptr);
-	debug_out(ctime(&now), DEBUG_MIN_INFO, 1);
-	debug_out(F("NTP.org:"),DEBUG_MIN_INFO,1);
+	debug_outln(String(ctime(&now)), DEBUG_MIN_INFO);
+	debug_outln(F("NTP.org:"), DEBUG_MIN_INFO);
 	settimeofday_cb(time_is_set);
 	configTime(8 * 3600, 0, "pool.ntp.org");
 	while (retryCount++ < 20) {
 		// later than 2000/01/01:00:00:00
 		if (sntp_time_is_set) {
 			now = time(nullptr);
-			debug_out(ctime(&now), DEBUG_MIN_INFO, 1);
+			debug_outln(ctime(&now), DEBUG_MIN_INFO);
 			return true;
 		}
 		delay(500);
-		debug_out(".",DEBUG_MIN_INFO,0);
+		debug_out(".", DEBUG_MIN_INFO);
 	}
-	debug_out(F("\nrouter/gateway:"),DEBUG_MIN_INFO,1);
+	debug_outln(F("\nrouter/gateway:"), DEBUG_MIN_INFO);
 	retryCount = 0;
 	configTime(0, 0, WiFi.gatewayIP().toString().c_str());
 	while (retryCount++ < 20) {
 		// later than 2000/01/01:00:00:00
 		if (sntp_time_is_set) {
 			now = time(nullptr);
-			debug_out(ctime(&now), DEBUG_MIN_INFO, 1);
+			debug_outln(ctime(&now), DEBUG_MIN_INFO);
 			return true;
 		}
 		delay(500);
-		debug_out(".",DEBUG_MIN_INFO,0);
+		debug_out(".", DEBUG_MIN_INFO);
 	}
 	return false;
 }
@@ -359,8 +310,8 @@ void setup() {
 
 	connectWifi();
 	got_ntp = acquireNetworkTime();
-	debug_out(F("\nNTP time "), DEBUG_MIN_INFO, 0);
-	debug_out(String(got_ntp?"":"not ")+F("received"), DEBUG_MIN_INFO, 1);
+	debug_out(F("\nNTP time "), DEBUG_MIN_INFO);
+	debug_outln(String(got_ntp ? "" : "not ") + F("received"), DEBUG_MIN_INFO);
 	autoUpdate();
 }
 
