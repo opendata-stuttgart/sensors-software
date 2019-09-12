@@ -132,7 +132,6 @@
 #if defined(ESP8266)
 #include <FS.h>                     // must be first
 #include <ESP8266WiFi.h>
-#include <DNSServer.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include <ESP8266httpUpdate.h>
@@ -154,7 +153,6 @@
 #include <hwcrypto/sha.h>
 #include <HTTPUpdate.h>
 #include <WebServer.h>
-#include <DNSServer.h>
 #include <ESPmDNS.h>
 #endif
 
@@ -165,6 +163,7 @@
 #include <SH1106.h>
 #include <LiquidCrystal_I2C.h>
 #include <ArduinoJson.h>
+#include <DNSServer.h>
 #include "./DHT.h"
 #include <Adafruit_HTU21DF.h>
 #include <Adafruit_BMP085.h>
@@ -174,7 +173,6 @@
 #include <TinyGPS++.h>
 #include "./sps30_i2c.h"
 #include "./dnms_i2c.h"
-
 
 #if defined(INTL_BG)
 #include "intl_bg.h"
@@ -273,7 +271,6 @@ namespace cfg {
 	bool send2fsapp = SEND2FSAPP;
 	bool send2aircms = SEND2AIRCMS;
 	bool send2custom = SEND2CUSTOM;
-	bool send2lora = SEND2LORA;
 	bool send2influx = SEND2INFLUX;
 	bool send2csv = SEND2CSV;
 
@@ -1130,6 +1127,17 @@ static void disable_unneeded_nmea() {
 /*****************************************************************
  * read config from spiffs                                       *
  *****************************************************************/
+
+/* backward compatibility for the times when we stored booleans as strings */
+
+static bool boolFromJSON(const DynamicJsonDocument& json, const char* key)
+{
+	if (json[key].is<char*>()) {
+		return !strcmp(json[key].as<char*>(), "true");
+	}
+	return json[key].as<bool>();
+}
+
 static void readConfig() {
 	using namespace cfg;
 	String json_string;
@@ -1159,6 +1167,7 @@ static void readConfig() {
 						strcpy(version_from_local_config, json["SOFTWARE_VERSION"]);
 					}
 
+#define setBoolFromJSON(key)    if (json.containsKey(#key)) key = boolFromJSON(json, #key);
 #define setFromJSON(key)    if (json.containsKey(#key)) key = json[#key];
 #define strcpyFromJSON(key) if (json.containsKey(#key)) strcpy(key, json[#key]);
 					strcpyFromJSON(current_lang);
@@ -1169,45 +1178,44 @@ static void readConfig() {
 					strcpyFromJSON(fs_ssid);
 					strcpyFromJSON(fs_pwd);
 
-					setFromJSON(www_basicauth_enabled);
-					setFromJSON(dht_read);
-					setFromJSON(htu21d_read);
-					setFromJSON(ppd_read);
-					setFromJSON(sds_read);
-					setFromJSON(pms_read);
-					setFromJSON(pms24_read);
-					setFromJSON(pms32_read);
-					setFromJSON(hpm_read);
-					setFromJSON(sps30_read);
-					setFromJSON(bmp_read);
-					setFromJSON(bmp280_read);
-					setFromJSON(bme280_read);
-					setFromJSON(ds18b20_read);
-					setFromJSON(dnms_read);
+					setBoolFromJSON(www_basicauth_enabled);
+					setBoolFromJSON(dht_read);
+					setBoolFromJSON(htu21d_read);
+					setBoolFromJSON(ppd_read);
+					setBoolFromJSON(sds_read);
+					setBoolFromJSON(pms_read);
+					setBoolFromJSON(pms24_read);
+					setBoolFromJSON(pms32_read);
+					setBoolFromJSON(hpm_read);
+					setBoolFromJSON(sps30_read);
+					setBoolFromJSON(bmp_read);
+					setBoolFromJSON(bmp280_read);
+					setBoolFromJSON(bme280_read);
+					setBoolFromJSON(ds18b20_read);
+					setBoolFromJSON(dnms_read);
 					strcpyFromJSON(dnms_correction);
-					setFromJSON(gps_read);
-					setFromJSON(mhz19_read);
+					setBoolFromJSON(gps_read);
+					setBoolFromJSON(mhz19_read);
 					if(gps_read && mhz19_read) // cannot be active at the same time
 						mhz19_read = false;
-					setFromJSON(send2dusti);
-					setFromJSON(ssl_dusti);
-					setFromJSON(send2madavi);
-					setFromJSON(ssl_madavi);
-					setFromJSON(send2sensemap);
-					setFromJSON(send2fsapp);
-					setFromJSON(send2aircms);
-					setFromJSON(send2lora);
-					setFromJSON(send2csv);
-					setFromJSON(auto_update);
-					setFromJSON(use_beta);
-					setFromJSON(has_display);
-					setFromJSON(has_sh1106);
-					setFromJSON(has_flipped_display);
-					setFromJSON(has_lcd1602);
-					setFromJSON(has_lcd1602_27);
-					setFromJSON(has_lcd2004_27);
-					setFromJSON(display_wifi_info);
-					setFromJSON(display_device_info);
+					setBoolFromJSON(send2dusti);
+					setBoolFromJSON(ssl_dusti);
+					setBoolFromJSON(send2madavi);
+					setBoolFromJSON(ssl_madavi);
+					setBoolFromJSON(send2sensemap);
+					setBoolFromJSON(send2fsapp);
+					setBoolFromJSON(send2aircms);
+					setBoolFromJSON(send2csv);
+					setBoolFromJSON(auto_update);
+					setBoolFromJSON(use_beta);
+					setBoolFromJSON(has_display);
+					setBoolFromJSON(has_sh1106);
+					setBoolFromJSON(has_flipped_display);
+					setBoolFromJSON(has_lcd1602);
+					setBoolFromJSON(has_lcd1602_27);
+					setBoolFromJSON(has_lcd2004_27);
+					setBoolFromJSON(display_wifi_info);
+					setBoolFromJSON(display_device_info);
 					setFromJSON(debug);
 					setFromJSON(sending_intervall_ms);
 					setFromJSON(time_for_wifi_config);
@@ -1216,14 +1224,14 @@ static void readConfig() {
 						strcpy(senseboxid, "");
 						send2sensemap = 0;
 					}
-					setFromJSON(send2custom);
+					setBoolFromJSON(send2custom);
 					strcpyFromJSON(host_custom);
 					strcpyFromJSON(url_custom);
 					setFromJSON(port_custom);
 					strcpyFromJSON(user_custom);
 					strcpyFromJSON(pwd_custom);
-					setFromJSON(ssl_custom);
-					setFromJSON(send2influx);
+					setBoolFromJSON(ssl_custom);
+					setBoolFromJSON(send2influx);
 					strcpyFromJSON(host_influx);
 					strcpyFromJSON(url_influx);
 					setFromJSON(port_influx);
@@ -1233,7 +1241,7 @@ static void readConfig() {
 					if (strlen(measurement_name_influx) == 0) {
 						strcpy(measurement_name_influx, MEASUREMENT_NAME_INFLUX);
 					}
-					setFromJSON(ssl_influx);
+					setBoolFromJSON(ssl_influx);
 					if (strcmp(host_influx, "api.luftdaten.info") == 0) {
 						strcpy(host_influx, "");
 						send2influx = 0;
@@ -1243,6 +1251,7 @@ static void readConfig() {
 						pms_read = 1;
 						writeConfig();
 					}
+#undef setBoolFromJSON
 #undef setFromJSON
 #undef strcpyFromJSON
 				} else {
@@ -1298,7 +1307,6 @@ static void writeConfig() {
 	SetJSON(send2sensemap);
 	SetJSON(send2fsapp);
 	SetJSON(send2aircms);
-	SetJSON(send2lora);
 	SetJSON(send2csv);
 	SetJSON(auto_update);
 	SetJSON(use_beta);
@@ -2496,65 +2504,56 @@ static void wifiConfig() {
 	WiFi.disconnect(true);
 	debug_outln_info(F("scan for wifi networks..."));
 	count_wifiInfo = WiFi.scanNetworks(false /* scan async */, true /* show hidden networks */);
-	{
-		delete [] wifiInfo;
-		wifiInfo = new struct_wifiInfo[count_wifiInfo];
+	delete [] wifiInfo;
+	wifiInfo = new struct_wifiInfo[count_wifiInfo];
 
-		for (int i = 0; i < count_wifiInfo; i++) {
-			String SSID;
-			uint8_t* BSSID;
+	for (int i = 0; i < count_wifiInfo; i++) {
+		String SSID;
+		uint8_t* BSSID;
 
-			memset(&wifiInfo[i], 0, sizeof(struct_wifiInfo));
+		memset(&wifiInfo[i], 0, sizeof(struct_wifiInfo));
 #if defined(ESP8266)
-			WiFi.getNetworkInfo(i, SSID, wifiInfo[i].encryptionType,
-				wifiInfo[i].RSSI, BSSID, wifiInfo[i].channel,
-				wifiInfo[i].isHidden);
+		WiFi.getNetworkInfo(i, SSID, wifiInfo[i].encryptionType,
+			wifiInfo[i].RSSI, BSSID, wifiInfo[i].channel,
+			wifiInfo[i].isHidden);
 #else
-			WiFi.getNetworkInfo(i, SSID, wifiInfo[i].encryptionType,
-				wifiInfo[i].RSSI, BSSID, wifiInfo[i].channel);
+		WiFi.getNetworkInfo(i, SSID, wifiInfo[i].encryptionType,
+			wifiInfo[i].RSSI, BSSID, wifiInfo[i].channel);
 #endif
-			SSID.toCharArray(wifiInfo[i].ssid, sizeof(wifiInfo[0].ssid));
-		}
-
-		WiFi.mode(WIFI_AP);
-		const IPAddress apIP(192, 168, 4, 1);
-		WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
-		WiFi.softAP(cfg::fs_ssid, cfg::fs_pwd, selectChannelForAp());
-		// In case we create a unique password at first start
-		debug_outln_info(F("AP Password is: "), String(WLANPWD));
-
-		DNSServer dnsServer;
-		dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
-		dnsServer.start(53, "*", apIP);							// 53 is port for DNS server
-
-		setup_webserver();
-
-		// 10 minutes timeout for wifi config
-		last_page_load = millis();
-		while (((millis() - last_page_load) < cfg::time_for_wifi_config)) {
-			dnsServer.processNextRequest();
-			server.handleClient();
-#if defined(ESP8266)
-			wdt_reset(); // nodemcu is alive
-#endif
-			yield();
-		}
-
-		// half second to answer last requests
-		last_page_load = millis();
-		while ((millis() - last_page_load) < 500) {
-			dnsServer.processNextRequest();
-			server.handleClient();
-			yield();
-		}
-
-		WiFi.disconnect(true);
-		WiFi.softAPdisconnect(true);
-		WiFi.mode(WIFI_STA);
-
-		dnsServer.stop();
+		SSID.toCharArray(wifiInfo[i].ssid, sizeof(wifiInfo[0].ssid));
 	}
 
+	WiFi.mode(WIFI_AP);
+	const IPAddress apIP(192, 168, 4, 1);
+	WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
+	WiFi.softAP(cfg::fs_ssid, cfg::fs_pwd, selectChannelForAp());
+	// In case we create a unique password at first start
+	debug_outln_info(F("AP Password is: "), String(WLANPWD));
+
+	DNSServer dnsServer;
+	// Ensure we don't poison the client DNS cache
+	dnsServer.setTTL(0);
+	dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
+	dnsServer.start(53, "*", apIP);							// 53 is port for DNS server
+
+	setup_webserver();
+
+	// 10 minutes timeout for wifi config
+	last_page_load = millis();
+	while (((millis() - last_page_load) < cfg::time_for_wifi_config) + 500) {
+		dnsServer.processNextRequest();
+		server.handleClient();
+#if defined(ESP8266)
+		wdt_reset(); // nodemcu is alive
+		MDNS.update();
+#endif
+		yield();
+	}
+
+	WiFi.softAPdisconnect(true);
+	WiFi.mode(WIFI_STA);
+
+	dnsServer.stop();
 	delay(100);
 
 	debug_outln_info(FPSTR(DBG_TXT_CONNECTING_TO), cfg::wlanssid);
@@ -2609,6 +2608,11 @@ static void connectWifi() {
 	WiFi.begin(cfg::wlanssid, cfg::wlanpwd); // Start WiFI
 
 	debug_outln_info(FPSTR(DBG_TXT_CONNECTING_TO), cfg::wlanssid);
+
+	if (MDNS.begin(cfg::fs_ssid)) {
+		MDNS.addService("http", "tcp", 80);
+		MDNS.addServiceTxt("http", "tcp", "PATH", "/config");
+	}
 
 	waitForWifiToConnect(40);
 	debug_outln("", DEBUG_MIN_INFO);
@@ -2773,12 +2777,6 @@ static unsigned long sendLuftdaten(const String& data, const int pin, const __Fl
 
 	return sum_send_time;
 }
-
-/*****************************************************************
- * send data to LoRa gateway                                     *
- *****************************************************************/
-// void send_lora(const String& data) {
-// }
 
 /*****************************************************************
  * send data to mqtt api                                         *
@@ -4370,10 +4368,6 @@ static void logEnabledAPIs() {
 		debug_outln_info(F("Madavi.de"));
 	}
 
-	if (cfg::send2lora) {
-		debug_outln_info(F("LoRa gateway"));
-	}
-
 	if (cfg::send2csv) {
 		debug_outln_info(F("Serial as CSV"));
 	}
@@ -4412,15 +4406,19 @@ static void time_is_set (void) {
 }
 
 static bool acquireNetworkTime() {
+	// server name ptrs must be persisted after the call to configTime because internally
+	// the pointers are stored see implementation of lwip sntp_setservername() 
+	static String ntpServer1, ntpServer2;
 	debug_outln(F("Setting time using SNTP"), DEBUG_MIN_INFO);
 	time_t now = time(nullptr);
 	debug_outln(ctime(&now), DEBUG_MIN_INFO);
 #if defined(ESP8266)
 	settimeofday_cb(time_is_set);
 #endif
-	configTime(0, 0, WiFi.gatewayIP().toString().c_str(), String(String(INTL_LANG) + ".pool.ntp.org").c_str());
+	ntpServer1 = WiFi.gatewayIP().toString();
+	ntpServer2 = String(INTL_LANG) + ".pool.ntp.org";
+	configTime(0, 0, ntpServer1.c_str(), ntpServer2.c_str());
 	for (int retryCount = 0; retryCount++ < 20; ++retryCount) {
-		// later than 2000/01/01:00:00:00
 		if (sntp_time_is_set) {
 			now = time(nullptr);
 			debug_outln(ctime(&now), DEBUG_MIN_INFO);
@@ -4474,11 +4472,6 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 		sum_send_time += sendData(data_4_influxdb, 0, cfg::host_influx, cfg::port_influx, cfg::url_influx, cfg::ssl_influx, false, basic_auth_influx.c_str(), FPSTR(TXT_CONTENT_TYPE_INFLUXDB));
 	}
 
-	/*		if (send2lora) {
-				debug_outln_info(F("## Sending to LoRa gateway: "));
-				send_lora(data);
-			}
-	*/
 	if (cfg::send2csv) {
 		debug_outln_info(F("## Sending as csv: "));
 		send_csv(data);
@@ -4564,12 +4557,6 @@ void setup(void) {
 	powerOnTestSensors();
 	logEnabledAPIs();
 	logEnabledDisplays();
-
-	String server_name = F(HOSTNAME_BASE);
-	server_name += esp_chipid;
-	if (MDNS.begin(server_name.c_str())) {
-		MDNS.addService("http", "tcp", 80);
-	}
 
 	delay(50);
 
