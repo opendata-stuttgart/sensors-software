@@ -4,6 +4,10 @@ NRZ-2019-124-B6
 * option to flip OLED output
 * Fix crash on selecting available networks in AP mode
 * add options to disable display of wifi and device infos
+* Code size optimisations
+* Serve config pages incrementally to avoid running out of memory
+* Write more compliant config JSON
+* Advertise as http://airrohr.local/ in AP mode
 
 NRZ-2019-124-B5
 * some comments removed
