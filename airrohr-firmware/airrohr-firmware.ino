@@ -2345,7 +2345,7 @@ static void wifiConfig() {
 
 	// 10 minutes timeout for wifi config
 	last_page_load = millis();
-	while (((millis() - last_page_load) < cfg::time_for_wifi_config) + 500) {
+	while ((millis() - last_page_load) < cfg::time_for_wifi_config + 500) {
 		dnsServer.processNextRequest();
 		server.handleClient();
 #if defined(ESP8266)
