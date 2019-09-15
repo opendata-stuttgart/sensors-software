@@ -105,7 +105,7 @@
  *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION "NRZ-2019-124-B6"
+const String SOFTWARE_VERSION("NRZ-2019-124-B6");
 
 /*****************************************************************
  * Includes                                                      *
@@ -1107,7 +1107,7 @@ static void writeConfig() {
 	debug_outln_info(F("saving config..."));
 
 	DynamicJsonDocument json(JSON_BUFFER_SIZE);
-	json["SOFTWARE_VERSION"] = String(SOFTWARE_VERSION);
+	json["SOFTWARE_VERSION"] = SOFTWARE_VERSION;
 #define SetJSON(varname) json[#varname].set(cfg::varname);
 	SetJSON(current_lang);
 	SetJSON(wlanssid);
@@ -3624,13 +3624,13 @@ static void autoUpdate() {
 	SPIFFS.end();
 
 	debug_outln_info(F("Starting OTA update ..."));
-	debug_outln_info(F("NodeMCU firmware : "), String(SOFTWARE_VERSION));
+	debug_outln_info(F("NodeMCU firmware : "), SOFTWARE_VERSION);
 
 	const String SDS_version = cfg::sds_read ? SDS_version_date() : "";
 	display_debug(F("Looking for"), F("OTA update"));
 	last_update_attempt = millis();
-	String version = SOFTWARE_VERSION + String(" ") + esp_chipid + String(" ") + SDS_version + String(" ") +
-					 String(cfg::current_lang) + String(" ") + String(INTL_LANG) + String(" ") +
+	String version = SOFTWARE_VERSION + ' ' + esp_chipid + ' ' + SDS_version + ' ' +
+					 String(cfg::current_lang) + ' ' + String(INTL_LANG) + ' ' +
 					 String(cfg::use_beta ? "BETA" : "");
 #if defined(ESP8266)
 	const HTTPUpdateResult ret = ESPhttpUpdate.update(UPDATE_HOST, UPDATE_PORT, UPDATE_URL, version);
@@ -3924,7 +3924,7 @@ static void display_values() {
 		break;
 	case (5):
 		display_lines[0] = "ID: " + esp_chipid;
-		display_lines[1] = "FW: " + String(SOFTWARE_VERSION);
+		display_lines[1] = "FW: " + SOFTWARE_VERSION;
 		break;
 	}
 
