@@ -932,7 +932,7 @@ static String SDS_version_date() {
 		if (len > 2) { checksum_is += value; }
 		len++;
 		if (len == 10 && checksum_ok == 1) {
-			s = version_date + "(" + device_id + ")";
+			s = version_date + '(' + device_id + ')';
 			debug_outln_info(F("SDS version date : "), version_date);
 			debug_outln_info(F("SDS device ID: "), device_id);
 			len = 0;
@@ -1187,11 +1187,11 @@ static void writeConfig() {
 static void create_basic_auth_strings() {
 	basic_auth_custom = "";
 	if (cfg::user_custom[0] != '\0' || cfg::pwd_custom[0] != '\0') {
-		basic_auth_custom = base64::encode(String(cfg::user_custom) + ":" + String(cfg::pwd_custom));
+		basic_auth_custom = base64::encode(String(cfg::user_custom) + ':' + String(cfg::pwd_custom));
 	}
 	basic_auth_influx = "";
 	if (cfg::user_influx[0] != '\0' || cfg::pwd_influx[0] != '\0') {
-		basic_auth_influx = base64::encode(String(cfg::user_influx) + ":" + String(cfg::pwd_influx));
+		basic_auth_influx = base64::encode(String(cfg::user_influx) + ':' + String(cfg::pwd_influx));
 	}
 }
 
@@ -2112,7 +2112,7 @@ static void webserver_debug_level() {
 			cfg::debug = lvl;
 			page_content += F("<h3>");
 			page_content += FPSTR(INTL_DEBUG_SETTING_TO);
-			page_content += F(" ");
+			page_content += ' ';
 
 			static constexpr std::array<const char *, 6> lvlText PROGMEM = {
 				INTL_NONE, INTL_ERROR, INTL_WARNING, INTL_MIN_INFO, INTL_MED_INFO, INTL_MAX_INFO
