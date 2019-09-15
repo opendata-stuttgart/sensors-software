@@ -167,10 +167,9 @@ const String SOFTWARE_VERSION("NRZ-2019-124-B6");
 #include "./DHT.h"
 #include <Adafruit_HTU21DF.h>
 #include <Adafruit_BMP085.h>
-#include <Adafruit_BMP280.h>
-#include <Adafruit_BME280.h>
 #include <DallasTemperature.h>
 #include <TinyGPS++.h>
+#include "./bmx280_i2c.h"
 #include "./sps30_i2c.h"
 #include "./dnms_i2c.h"
 
@@ -262,8 +261,7 @@ namespace cfg {
 	bool hpm_read = HPM_READ;
 	bool sps30_read = SPS30_READ;
 	bool bmp_read = BMP_READ;
-	bool bmp280_read = BMP280_READ;
-	bool bme280_read = BME280_READ;
+	bool bmx280_read = BMX280_READ;
 	bool ds18b20_read = DS18B20_READ;
 	bool dnms_read = DNMS_READ;
 	char dnms_correction[LEN_DNMS_CORRECTION] = DNMS_CORRECTION;
@@ -364,8 +362,7 @@ String basic_auth_custom;
 
 long int sample_count = 0;
 bool bmp_init_failed = false;
-bool bmp280_init_failed = false;
-bool bme280_init_failed = false;
+bool bmx280_init_failed = false;
 bool dnms_init_failed = false;
 
 #if defined(ESP8266)
@@ -421,14 +418,9 @@ Adafruit_HTU21DF htu21d;
 Adafruit_BMP085 bmp;
 
 /*****************************************************************
- * BMP280 declaration                                               *
+ * BMP/BME280 declaration                                        *
  *****************************************************************/
-Adafruit_BMP280 bmp280;
-
-/*****************************************************************
- * BME280 declaration                                            *
- *****************************************************************/
-Adafruit_BME280 bme280;
+BMX280 bmx280;
 
 /*****************************************************************
  * DS18B20 declaration                                            *
@@ -474,11 +466,9 @@ unsigned long last_update_attempt;
 
 float last_value_BMP_T = -128.0;
 float last_value_BMP_P = -1.0;
-float last_value_BMP280_T = -128.0;
-float last_value_BMP280_P = -1.0;
-float last_value_BME280_T = -128.0;
+float last_value_BMX280_T = -128.0;
+float last_value_BMX280_P = -1.0;
 float last_value_BME280_H = -1.0;
-float last_value_BME280_P = -1.0;
 float last_value_DHT_T = -128.0;
 float last_value_DHT_H = -1.0;
 float last_value_DS18B20_T = -1.0;
@@ -1035,10 +1025,15 @@ static void readConfig() {
 			strcpy(cfg::host_influx, "");
 			cfg::send2influx = false;
 		}
-		if (json["pm24_read"] || json["pms32_read"]) {
+		if (boolFromJSON(json, "pm24_read") || boolFromJSON(json, "pms32_read")) {
 			cfg::pms_read = true;
 			writeConfig();
 		}
+		if (boolFromJSON(json, "bmp280_read") || boolFromJSON(json, "bme280_read")) {
+			cfg::bmx280_read = true;
+			writeConfig();
+		}
+
 	} else {
 		debug_outln_error(F("failed to load json config"));
 	}
@@ -1470,8 +1465,7 @@ static void webserver_config_send_body_get() {
 		add_form_checkbox_sensor(page_content, "dht_read", FPSTR(INTL_DHT22), dht_read);
 		add_form_checkbox_sensor(page_content, "htu21d_read", FPSTR(INTL_HTU21D), htu21d_read);
 		add_form_checkbox_sensor(page_content, "bmp_read", FPSTR(INTL_BMP180), bmp_read);
-		add_form_checkbox_sensor(page_content, "bmp280_read", FPSTR(INTL_BMP280), bmp280_read);
-		add_form_checkbox_sensor(page_content, "bme280_read", FPSTR(INTL_BME280), bme280_read);
+		add_form_checkbox_sensor(page_content, "bmx280_read", FPSTR(INTL_BMX280), bmx280_read);
 		add_form_checkbox_sensor(page_content, "ds18b20_read", FPSTR(INTL_DS18B20), ds18b20_read);
 		add_form_checkbox_sensor(page_content, "dnms_read", FPSTR(INTL_DNMS), dnms_read);
 		page_content += FPSTR(TABLE_TAG_OPEN);
@@ -1668,9 +1662,7 @@ static void webserver_config_send_body_post() {
 	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("HPM"), hpm_read);
 	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("SPS30"), sps30_read);
 	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("PPD"), ppd_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_BMP180), bmp_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_BMP280), bmp280_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_BME280), bme280_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_BMX280), bmx280_read);
 	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("DS18B20"), ds18b20_read);
 	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("DNMS"), dnms_read);
 	add_line_value_bool(page_content, FPSTR(INTL_DNMS_CORRECTION), String(dnms_correction));
@@ -1913,16 +1905,13 @@ static void webserver_values() {
 			add_table_row_from_value(page_content, FPSTR(SENSORS_BMP180), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_BMP_T, -128, 1, 0), unit_T);
 			add_table_row_from_value(page_content, FPSTR(SENSORS_BMP180), FPSTR(INTL_PRESSURE), check_display_value(last_value_BMP_P / 100.0, (-1 / 100.0), 2, 0), unit_P);
 		}
-		if (cfg::bmp280_read) {
+		if (cfg::bmx280_read) {
 			page_content += FPSTR(EMPTY_ROW);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_BMP280), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_BMP280_T, -128, 1, 0), unit_T);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_BMP280), FPSTR(INTL_PRESSURE), check_display_value(last_value_BMP280_P / 100.0, (-1 / 100.0), 2, 0), unit_P);
-		}
-		if (cfg::bme280_read) {
-			page_content += FPSTR(EMPTY_ROW);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_BME280), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_BME280_T, -128, 1, 0), unit_T);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_BME280), FPSTR(INTL_HUMIDITY), check_display_value(last_value_BME280_H, -1, 1, 0), unit_H);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_BME280), FPSTR(INTL_PRESSURE), check_display_value(last_value_BME280_P / 100.0, (-1 / 100.0), 2, 0), unit_P);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_BMX280), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_BMX280_T, -128, 1, 0), unit_T);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_BMX280), FPSTR(INTL_PRESSURE), check_display_value(last_value_BMX280_P / 100.0, (-1 / 100.0), 2, 0), unit_P);
+			if (bmx280.sensorID() == BME280_SENSOR_ID) {
+				add_table_row_from_value(page_content, FPSTR(SENSORS_BMX280), FPSTR(INTL_HUMIDITY), check_display_value(last_value_BME280_H, -1, 1, 0), unit_H);
+			}
 		}
 		if (cfg::ds18b20_read) {
 			page_content += FPSTR(EMPTY_ROW);
@@ -2071,7 +2060,7 @@ static void webserver_data_json() {
 		age = 0 - age;
 	} else {
 		s1 = last_data_string;
-		debug_outln_info(F("last data: "), s1);
+		debug_outln(last_data_string, DEBUG_MED_INFO);
 		age = msSince(starttime);
 		if (age > cfg::sending_intervall_ms) {
 			age = 0;
@@ -2093,7 +2082,6 @@ static void webserver_prometheus_endpoint() {
 	debug_outln_info(F("output prometheus endpoint..."));
 	String data_4_prometheus = F("software_version{version=\"{ver}\",node=\"-{id}\"} 1\nuptime_ms{{id}} {up}\nsending_intervall_ms{{id}} {si}\nnumber_of_measurements{{id}} {cs}\n");
 	debug_outln_info(F("Parse JSON for Prometheus"));
-	debug_outln(last_data_string, DEBUG_MED_INFO);
 	String id(F("node=\"" SENSOR_BASENAME));
 	id += esp_chipid + "\"";
 	data_4_prometheus.replace("{id}", esp_chipid);
@@ -2645,65 +2633,41 @@ static String sensorBMP() {
 }
 
 /*****************************************************************
- * read BMP280 sensor values                                     *
+ * read BMP280/BME280 sensor values                              *
  *****************************************************************/
-static String sensorBMP280() {
+static String sensorBMX280() {
 	String s;
 
-	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_BMP280));
+	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_BMX280));
 
-	const auto p = bmp280.readPressure();
-	const auto t = bmp280.readTemperature();
-	if (isnan(p) || isnan(t)) {
-		last_value_BMP280_T = -128.0;
-		last_value_BMP280_P = -1.0;
-		debug_outln_error(F("BMP280 read failed"));
-	} else {
-		debug_outln_info(FPSTR(DBG_TXT_TEMPERATURE), t);
-		debug_outln_info(FPSTR(DBG_TXT_PRESSURE), (p / 100.0));
-		last_value_BMP280_T = t;
-		last_value_BMP280_P = p;
-		add_Value2Json(s, F("BMP280_pressure"), last_value_BMP280_P);
-		add_Value2Json(s, F("BMP280_temperature"), last_value_BMP280_T);
-	}
-	debug_outln_info(F("----"));
-
-	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_BMP280));
-
-	return s;
-}
-
-/*****************************************************************
- * read BME280 sensor values                                     *
- *****************************************************************/
-static String sensorBME280() {
-	String s;
-
-	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_BME280));
-
-	bme280.takeForcedMeasurement();
-	const auto t = bme280.readTemperature();
-	const auto h = bme280.readHumidity();
-	const auto p = bme280.readPressure();
-	if (isnan(t) || isnan(h) || isnan(p)) {
-		last_value_BME280_T = -128.0;
+	bmx280.takeForcedMeasurement();
+	const auto t = bmx280.readTemperature();
+	const auto p = bmx280.readPressure();
+	const auto h = bmx280.readHumidity();
+	if (isnan(t) || isnan(p)) {
+		last_value_BMX280_T = -128.0;
+		last_value_BMX280_P = -1.0;
 		last_value_BME280_H = -1.0;
-		last_value_BME280_P = -1.0;
-		debug_outln_error(F("BME280 read failed"));
+		debug_outln_error(F("BMP/BME280 read failed"));
 	} else {
 		debug_outln_info(FPSTR(DBG_TXT_TEMPERATURE), t);
-		debug_outln_info(FPSTR(DBG_TXT_HUMIDITY), h);
 		debug_outln_info(FPSTR(DBG_TXT_PRESSURE), (p / 100.0));
-		last_value_BME280_T = t;
-		last_value_BME280_H = h;
-		last_value_BME280_P = p;
-		add_Value2Json(s, F("BME280_temperature"), last_value_BME280_T);
-		add_Value2Json(s, F("BME280_humidity"), last_value_BME280_H);
-		add_Value2Json(s, F("BME280_pressure"), last_value_BME280_P);
+		last_value_BMX280_T = t;
+		last_value_BMX280_P = p;
+		if (bmx280.sensorID() == BME280_SENSOR_ID) {
+			add_Value2Json(s, F("BME280_temperature"), last_value_BMX280_T);
+			add_Value2Json(s, F("BME280_pressure"), last_value_BMX280_P);
+			debug_outln_info(FPSTR(DBG_TXT_HUMIDITY), h);
+			last_value_BME280_H = h;
+			add_Value2Json(s, F("BME280_humidity"), last_value_BME280_H);
+		} else {
+			add_Value2Json(s, F("BMP280_pressure"), last_value_BMX280_P);
+			add_Value2Json(s, F("BMP280_temperature"), last_value_BMX280_T);
+		}
 	}
 	debug_outln_info(F("----"));
 
-	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_BME280));
+	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_BMX280));
 
 	return s;
 }
@@ -3621,16 +3585,14 @@ static void display_values() {
 		t_value = last_value_BMP_T;
 		p_value = last_value_BMP_P;
 	}
-	if (cfg::bmp280_read) {
-		t_sensor = p_sensor = FPSTR(SENSORS_BMP280);
-		t_value = last_value_BMP280_T;
-		p_value = last_value_BMP280_P;
-	}
-	if (cfg::bme280_read) {
-		t_sensor = h_sensor = p_sensor = FPSTR(SENSORS_BME280);
-		t_value = last_value_BME280_T;
-		h_value = last_value_BME280_H;
-		p_value = last_value_BME280_P;
+	if (cfg::bmx280_read) {
+		t_sensor = p_sensor = FPSTR(SENSORS_BMX280);
+		t_value = last_value_BMX280_T;
+		p_value = last_value_BMX280_P;
+		if (bmx280.sensorID() == BME280_SENSOR_ID) {
+			h_sensor = FPSTR(SENSORS_BMX280);
+			h_value = last_value_BME280_H;
+		}
 	}
 	if (cfg::dnms_read) {
 		la_sensor = FPSTR(SENSORS_DNMS);
@@ -3647,7 +3609,7 @@ static void display_values() {
 	if (cfg::ppd_read || cfg::pms_read || cfg::hpm_read || cfg::sds_read) {
 		screens[screen_count++] = 1;
 	}
-	if (cfg::dht_read || cfg::ds18b20_read || cfg::htu21d_read || cfg::bmp_read || cfg::bmp280_read || cfg::bme280_read) {
+	if (cfg::dht_read || cfg::ds18b20_read || cfg::htu21d_read || cfg::bmp_read || cfg::bmx280_read) {
 		screens[screen_count++] = 2;
 	}
 	if (cfg::gps_read) {
@@ -3842,34 +3804,18 @@ static void init_lcd() {
 }
 
 /*****************************************************************
- * Init BMP280                                                   *
+ * Init BMP280/BME280                                            *
  *****************************************************************/
-static bool initBMP280(char addr) {
-	debug_outln_info(F("Trying BMP280 sensor on "), String(addr, HEX));
+static bool initBMX280(char addr) {
+	debug_outln_info(F("Trying BMP280/BME280 sensor on "), String(addr, HEX));
 
-	if (bmp280.begin(addr)) {
+	if (bmx280.begin(addr)) {
 		debug_outln_info(FPSTR(DBG_TXT_FOUND));
-		return true;
-	} else {
-		debug_outln_info(FPSTR(DBG_TXT_NOT_FOUND));
-		return false;
-	}
-}
-
-/*****************************************************************
- * Init BME280                                                   *
- *****************************************************************/
-static bool initBME280(char addr) {
-	debug_outln_info(F("Trying BME280 sensor on "), String(addr, HEX));
-
-	if (bme280.begin(addr)) {
-		debug_outln_info(FPSTR(DBG_TXT_FOUND));
-		bme280.setSampling(
-			Adafruit_BME280::MODE_FORCED,
-			Adafruit_BME280::SAMPLING_X1,
-			Adafruit_BME280::SAMPLING_X1,
-			Adafruit_BME280::SAMPLING_X1,
-			Adafruit_BME280::FILTER_OFF);
+		bmx280.setSampling(
+			BMX280::MODE_FORCED,
+			BMX280::SAMPLING_X1,
+			BMX280::SAMPLING_X1,
+			BMX280::SAMPLING_X1);
 		return true;
 	} else {
 		debug_outln_info(FPSTR(DBG_TXT_NOT_FOUND));
@@ -3984,19 +3930,11 @@ static void powerOnTestSensors() {
 		}
 	}
 
-	if (cfg::bmp280_read) {
-		debug_outln_info(F("Read BMP280..."));
-		if (!initBMP280(0x76) && !initBMP280(0x77)) {
-			debug_outln_error(F("Check BMP280 wiring"));
-			bmp280_init_failed = 1;
-		}
-	}
-
-	if (cfg::bme280_read) {
-		debug_outln_info(F("Read BME280..."));
-		if (!initBME280(0x76) && !initBME280(0x77)) {
-			debug_outln_error(F("Check BME280 wiring"));
-			bme280_init_failed = 1;
+	if (cfg::bmx280_read) {
+		debug_outln_info(F("Read BMP280/BME280..."));
+		if (!initBMX280(0x76) && !initBMX280(0x77)) {
+			debug_outln_error(F("Check BMP280/BME280 wiring"));
+			bmx280_init_failed = 1;
 		}
 	}
 
@@ -4227,8 +4165,8 @@ void setup(void) {
  *****************************************************************/
 void loop(void) {
 	String result_PPD, result_SDS, result_PMS, result_HPM, result_SPS30;
-	String result_DHT, result_HTU21D, result_BMP, result_BMP280;
-	String result_BME280, result_DS18B20, result_GPS, result_DNMS;
+	String result_DHT, result_HTU21D, result_BMP;
+	String result_BMX280, result_DS18B20, result_GPS, result_DNMS;
 	int16_t ret_SPS30;
 
 	unsigned long sum_send_time = 0;
@@ -4320,12 +4258,8 @@ void loop(void) {
 			result_BMP = sensorBMP();						// getting temperature and pressure (optional)
 		}
 
-		if (cfg::bmp280_read && (! bmp280_init_failed)) {
-			result_BMP280 = sensorBMP280();					// getting temperature, humidity and pressure (optional)
-		}
-
-		if (cfg::bme280_read && (! bme280_init_failed)) {
-			result_BME280 = sensorBME280();					// getting temperature, humidity and pressure (optional)
+		if (cfg::bmx280_read && (! bmx280_init_failed)) {
+			result_BMX280 = sensorBMX280();					// getting temperature, humidity and pressure (optional)
 		}
 
 		if (cfg::ds18b20_read) {
@@ -4398,13 +4332,13 @@ void loop(void) {
 			data += result_BMP;
 			sum_send_time += sendLuftdaten(result_BMP, BMP_API_PIN, FPSTR(SENSORS_BMP180), "BMP_");
 		}
-		if (cfg::bmp280_read && (! bmp280_init_failed)) {
-			data += result_BMP280;
-			sum_send_time += sendLuftdaten(result_BMP280, BMP280_API_PIN, FPSTR(SENSORS_BMP280), "BMP280_");
-		}
-		if (cfg::bme280_read && (! bme280_init_failed)) {
-			data += result_BME280;
-			sum_send_time += sendLuftdaten(result_BME280, BME280_API_PIN, FPSTR(SENSORS_BME280), "BME280_");
+		if (cfg::bmx280_read && (! bmx280_init_failed)) {
+			data += result_BMX280;
+			if (bmx280.sensorID() == BME280_SENSOR_ID) {
+				sum_send_time += sendLuftdaten(result_BMX280, BME280_API_PIN, FPSTR(SENSORS_BMX280), "BME280_");
+			} else {
+				sum_send_time += sendLuftdaten(result_BMX280, BMP280_API_PIN, FPSTR(SENSORS_BMX280), "BMP280_");
+			}
 		}
 		if (cfg::ds18b20_read) {
 			data += result_DS18B20;
