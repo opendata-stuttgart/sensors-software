@@ -4171,8 +4171,9 @@ void setup(void) {
 	esp_chipid += String((uint32_t)chipid_num, HEX);
 #endif
 	cfg::initNonTrivials(esp_chipid.c_str());
-	readConfig();
+	WiFi.persistent(false);
 
+	readConfig();
 	init_display();
 	init_lcd();
 	display_debug(F("Connecting to"), String(cfg::wlanssid));
