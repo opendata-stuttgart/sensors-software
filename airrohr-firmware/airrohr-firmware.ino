@@ -1176,7 +1176,10 @@ static String form_password(const char* name, const String& info, const String& 
 }
 
 static String form_checkbox(const char* name, const String& info, const bool checked, const bool linebreak) {
-	String s = F("<label for='{n}'><input type='checkbox' name='{n}' value='1' id='{n}' {c}/> {i}</label><br/>");
+	String s = F("<label for='{n}'>"
+	"<input type='checkbox' name='{n}' value='1' id='{n}' {c}/>"
+	"<input type='hidden' name='{n}' value='0'/>"
+	"{i}</label><br/>");
 	if (checked) {
 		s.replace("{c}", F(" checked='checked'"));
 	} else {
@@ -1578,9 +1581,6 @@ static void webserver_config_send_body_post() {
 		} \
 	}
 
-#define readBoolParam(param) \
-		param = server.arg(#param) == "1";
-
 #define readIntParam(param) \
 		{ \
 			int val = server.arg(#param).toInt(); \
@@ -1615,79 +1615,46 @@ static void webserver_config_send_body_post() {
 	}
 	if (! wificonfig_loop) {
 		readCharParam(current_lang);
-
-
-		readBoolParam(www_basicauth_enabled);
-		if (www_basicauth_enabled) {
-			readCharParam(www_username);
-			readPasswdParam(www_password);
-		}
-
 		readCharParam(fs_ssid);
 		String s_fs_pwd("fs_pwd");
 		if (server.hasArg(s_fs_pwd) && ((server.arg(s_fs_pwd).length() > 7) || (server.arg(s_fs_pwd).length() == 0))) {
 			readPasswdParam(fs_pwd);
 		}
-		readBoolParam(send2dusti);
-		readBoolParam(ssl_dusti);
-		readBoolParam(send2madavi);
-		readBoolParam(ssl_madavi);
-		readBoolParam(dht_read);
-		readBoolParam(htu21d_read);
-		readBoolParam(sds_read);
-		readBoolParam(pms_read);
-		readBoolParam(hpm_read);
-		readBoolParam(sps30_read);
-		readBoolParam(ppd_read);
-		readBoolParam(bmp_read);
-		readBoolParam(bmp280_read);
-		readBoolParam(bme280_read);
-		readBoolParam(ds18b20_read);
-		readBoolParam(dnms_read);
 		readCharParam(dnms_correction);
-		readBoolParam(gps_read);
 
 		readIntParam(debug);
 		readTimeParam(sending_intervall_ms);
 		readTimeParam(time_for_wifi_config);
-
-		readBoolParam(send2csv);
-		readBoolParam(send2fsapp);
-		readBoolParam(send2aircms);
-		readBoolParam(send2sensemap);
 		readCharParam(senseboxid);
 
-		readBoolParam(send2custom);
 		readCharParam(host_custom);
 		readCharParam(url_custom);
 		readIntParam(port_custom);
 		readCharParam(user_custom);
 		readPasswdParam(pwd_custom);
 
-		readBoolParam(send2influx);
 		readCharParam(host_influx);
 		readCharParam(url_influx);
 		readIntParam(port_influx);
 		readCharParam(user_influx);
 		readPasswdParam(pwd_influx);
 		readCharParam(measurement_name_influx);
-		readBoolParam(ssl_influx);
-
 	}
 
-	readBoolParam(auto_update);
-	readBoolParam(use_beta);
-	readBoolParam(has_display);
-	readBoolParam(has_sh1106);
-	readBoolParam(has_flipped_display);
-	readBoolParam(has_lcd1602);
-	readBoolParam(has_lcd1602_27);
-	readBoolParam(has_lcd2004_27);
-	readBoolParam(display_wifi_info);
-	readBoolParam(display_device_info);
+	for (unsigned e = 0; e < sizeof(configShape)/sizeof(configShape[0]); ++e) {
+		ConfigShapeEntry c;
+		memcpy_P(&c, &configShape[e], sizeof(ConfigShapeEntry));
+		if (c.cfg_type == Config_Type_Bool && server.hasArg(c.cfg_key)) {
+			*(c.cfg_val.as_bool) = (server.arg(c.cfg_key) == "1");
+		}
+	}
+
+	if (www_basicauth_enabled) {
+		readCharParam(www_username);
+		readPasswdParam(www_password);
+	}
 
 #undef readCharParam
-#undef readBoolParam
 #undef readIntParam
 #undef readTimeParam
 #undef readPasswdParam
