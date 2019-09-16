@@ -3880,28 +3880,30 @@ static bool initBME280(char addr) {
 /*****************************************************************
    Init SPS30 PM Sensor
  *****************************************************************/
-static bool initSPS30() {
+static void initSPS30() {
 	char serial[SPS_MAX_SERIAL_LEN];
 	debug_out(F("Trying SPS30 sensor on 0x69H "), DEBUG_MIN_INFO);
 	sps30_reset();
 	delay(200);
 	if ( sps30_get_serial(serial) != 0 ) {
 		debug_outln_info(FPSTR(DBG_TXT_NOT_FOUND));
-		return false;
-	} else {
-		debug_outln_info(F(" ... found, Serial-No.: "), String(serial));
-		if (sps30_set_fan_auto_cleaning_interval(SPS30_AUTO_CLEANING_INTERVAL) != 0) {
-			debug_outln_error(F("setting of Auto Cleaning Intervall SPS30 failed!"));
-			return false;
-		} else {
-			delay(100);
-			if (sps30_start_measurement() != 0) {
-				debug_outln_error(F("SPS30 error starting measurement"));
-				return false;
-			}
-		}
+
+		debug_outln_info(F("Check SPS30 wiring"));
+		sps30_init_failed = true;
+		return;
 	}
-	return true;
+	debug_outln_info(F(" ... found, Serial-No.: "), String(serial));
+	if (sps30_set_fan_auto_cleaning_interval(SPS30_AUTO_CLEANING_INTERVAL) != 0) {
+		debug_outln_error(F("setting of Auto Cleaning Intervall SPS30 failed!"));
+		sps30_init_failed = true;
+		return;
+	}
+	delay(100);
+	if (sps30_start_measurement() != 0) {
+		debug_outln_error(F("SPS30 error starting measurement"));
+		sps30_init_failed = true;
+		return;
+	}
 }
 
 /*****************************************************************
@@ -3961,10 +3963,7 @@ static void powerOnTestSensors() {
 
 	if (cfg::sps30_read) {
 		debug_outln_info(F("Read SPS30..."));
-		if (!initSPS30()) {
-			debug_outln_info(F("Check SPS30 wiring"));
-			sps30_init_failed = true;
-		}
+		initSPS30();
 	}
 
 	if (cfg::dht_read) {
