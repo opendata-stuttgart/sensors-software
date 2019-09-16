@@ -83,11 +83,11 @@ In ESP8266 für Arduino IDE enthalten:
 * SoftwareSerial (GNU Lesser Public License >=2.1). Don't install additional library!!!
 
 Installierbar über Arduino IDE (Menü Sketch -> Bibliothek einbinden -> Bibliotheken verwalten, in Klammern die getestete Version und die Art der Lizenz):
-* [ArduinoJson](https://github.com/bblanchon/ArduinoJson) (6.11.5) (MIT)
+* [ArduinoJson](https://github.com/bblanchon/ArduinoJson) (6.12.0) (MIT)
 * [Adafruit Unified Sensor](https://github.com/adafruit/Adafruit_Sensor) (1.0.3) (Apache)
 * [Adafruit BMP085 library](https://github.com/adafruit/Adafruit-BMP085-Library) (1.0.1) (BSD)
-* [Adafruit BMP280 library](https://github.com/adafruit/Adafruit_BMP280_Library) (1.0.4) (BSD)
-* [Adafruit BME280 library](https://github.com/adafruit/Adafruit_BME280_Library) (1.0.8) (BSD)
+* [Adafruit BMP280 library](https://github.com/adafruit/Adafruit_BMP280_Library) (1.0.5) (BSD)
+* [Adafruit BME280 library](https://github.com/adafruit/Adafruit_BME280_Library) (1.0.10) (BSD)
 * [Adafruit HTU21DF library](https://github.com/adafruit/Adafruit_HTU21DF_Library) (1.0.1) (BSD)
 * [DallasTemperature](https://github.com/milesburton/Arduino-Temperature-Control-Library) (3.8.0)
 * [ESP8266 and ESP32 Oled driver for SSD1306 display](https://github.com/squix78/esp8266-oled-ssd1306) (4.0.0) (MIT)
