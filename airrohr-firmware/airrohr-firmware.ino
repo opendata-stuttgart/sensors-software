@@ -2376,8 +2376,8 @@ static unsigned long sendData(const String& data, const int pin, const char* hos
 
 	const auto doRequest = [ = ](WiFiClient * client) {
 		debug_outln_info(F("Requesting URL: "), url);
-		debug_outln(esp_chipid, DEBUG_MIN_INFO);
-		debug_outln(data, DEBUG_MIN_INFO);
+		debug_outln_verbose(esp_chipid);
+		debug_outln_verbose(data);
 
 		// send request to the server
 		client->print(request_head);
