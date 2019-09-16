@@ -2110,7 +2110,7 @@ static void webserver_prometheus_endpoint() {
 			data_4_prometheus += id;
 			data_4_prometheus += "} ";
 			data_4_prometheus += measurement["value"].as<char*>();
-			data_4_prometheus += "\n";
+			data_4_prometheus += '\n';
 		}
 		data_4_prometheus += F("last_sample_age_ms{");
 		data_4_prometheus += id;
@@ -2506,7 +2506,7 @@ static String create_influxdb_string(const String& data) {
 			data_4_influxdb.remove(data_4_influxdb.length() - 1);
 		}
 
-		data_4_influxdb += "\n";
+		data_4_influxdb += '\n';
 	} else {
 		debug_outln_error(FPSTR(DBG_TXT_DATA_READ_FAILED));
 	}
