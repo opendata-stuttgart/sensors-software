@@ -239,18 +239,16 @@ namespace cfg {
 
 	// credentials for basic auth of internal web server
 	bool www_basicauth_enabled = WWW_BASICAUTH_ENABLED;
-	char www_username[LEN_WWW_USERNAME]  = WWW_USERNAME;
-	char www_password[LEN_WWW_PASSWORD]   = WWW_PASSWORD;
+	char www_username[LEN_WWW_USERNAME];
+	char www_password[LEN_WWW_PASSWORD];
 
 	// wifi credentials
-	char wlanssid[LEN_WLANSSID]  = WLANSSID;
-	char wlanpwd[LEN_WLANPWD]  = WLANPWD;
+	char wlanssid[LEN_WLANSSID];
+	char wlanpwd[LEN_WLANPWD];
 
 	// credentials of the sensor in access point mode
-	char fs_ssid[LEN_FS_SSID]  = FS_SSID;
-	char fs_pwd[LEN_FS_PWD]   = FS_PWD;
-
-	char version_from_local_config[20]   = "";
+	char fs_ssid[LEN_FS_SSID] = FS_SSID;
+	char fs_pwd[LEN_FS_PWD] = FS_PWD;
 
 	// (in)active sensors
 	bool dht_read = DHT_READ;
@@ -296,12 +294,12 @@ namespace cfg {
 	bool ssl_dusti = SSL_DUSTI;
 	char senseboxid[LEN_SENSEBOXID] = SENSEBOXID;
 
-	char host_influx[LEN_HOST_INFLUX] = HOST_INFLUX;
-	char url_influx[LEN_URL_INFLUX] = URL_INFLUX;
+	char host_influx[LEN_HOST_INFLUX];
+	char url_influx[LEN_URL_INFLUX];
 	unsigned int port_influx = PORT_INFLUX;
 	char user_influx[LEN_USER_INFLUX] = USER_INFLUX;
 	char pwd_influx[LEN_PWD_INFLUX] = PWD_INFLUX;
-	char measurement_name_influx[LEN_MEASUREMENT_NAME_INFLUX]  = MEASUREMENT_NAME_INFLUX;
+	char measurement_name_influx[LEN_MEASUREMENT_NAME_INFLUX];
 	bool ssl_influx = SSL_INFLUX;
 
 	char host_custom[LEN_HOST_CUSTOM] = HOST_CUSTOM;
@@ -313,6 +311,14 @@ namespace cfg {
 
 	void initNonTrivials(const char* id) {
 		strcpy(cfg::current_lang, CURRENT_LANG);
+		strcpy_P(www_username, WWW_USERNAME);
+		strcpy_P(www_password, WWW_PASSWORD);
+		strcpy_P(wlanssid, WLANSSID);
+		strcpy_P(wlanpwd, WLANPWD);
+		strcpy_P(host_influx, HOST_INFLUX);
+		strcpy_P(url_influx, URL_INFLUX);
+		strcpy_P(measurement_name_influx, MEASUREMENT_NAME_INFLUX);
+
 		if (fs_ssid[0] == '\0') {
 			strcpy(fs_ssid, SSID_BASENAME);
 			strcat(fs_ssid, id);
@@ -990,10 +996,6 @@ static void readConfig() {
 
 	if (!err) {
 		debug_outln_info(F("parsed json..."));
-		if (json.containsKey("SOFTWARE_VERSION")) {
-			strcpy(cfg::version_from_local_config, json["SOFTWARE_VERSION"]);
-		}
-
 		for (unsigned e = 0; e < sizeof(configShape)/sizeof(configShape[0]); ++e) {
 			ConfigShapeEntry c;
 			memcpy_P(&c, &configShape[e], sizeof(ConfigShapeEntry));
@@ -1014,15 +1016,15 @@ static void readConfig() {
 			};
 		}
 
-		if (strcmp(cfg::senseboxid, "00112233445566778899aabb") == 0) {
-			strcpy(cfg::senseboxid, "");
+		if (strcmp_P(cfg::senseboxid, PSTR("00112233445566778899aabb")) == 0) {
+			cfg::senseboxid[0] = '\0';
 			cfg::send2sensemap = false;
 		}
 		if (strlen(cfg::measurement_name_influx) == 0) {
-			strcpy(cfg::measurement_name_influx, MEASUREMENT_NAME_INFLUX);
+			strcpy_P(cfg::measurement_name_influx, MEASUREMENT_NAME_INFLUX);
 		}
-		if (strcmp(cfg::host_influx, "api.luftdaten.info") == 0) {
-			strcpy(cfg::host_influx, "");
+		if (strcmp_P(cfg::host_influx, PSTR("api.luftdaten.info")) == 0) {
+			cfg::host_influx[0] = '\0';
 			cfg::send2influx = false;
 		}
 		if (boolFromJSON(json, "pm24_read") || boolFromJSON(json, "pms32_read")) {
@@ -2148,17 +2150,17 @@ static void webserver_not_found() {
  *****************************************************************/
 static void setup_webserver() {
 	server.on("/", webserver_root);
-	server.on("/config", webserver_config);
-	server.on("/wifi", webserver_wifi);
-	server.on("/values", webserver_values);
-	server.on("/generate_204", webserver_config);
-	server.on("/fwlink", webserver_config);
-	server.on("/debug", webserver_debug_level);
-	server.on("/removeConfig", webserver_removeConfig);
-	server.on("/reset", webserver_reset);
-	server.on("/data.json", webserver_data_json);
-	server.on("/metrics", webserver_prometheus_endpoint);
-	server.on("/images", webserver_images);
+	server.on(F("/config"), webserver_config);
+	server.on(F("/wifi"), webserver_wifi);
+	server.on(F("/values"), webserver_values);
+	server.on(F("/generate_204"), webserver_config);
+	server.on(F("/fwlink"), webserver_config);
+	server.on(F("/debug"), webserver_debug_level);
+	server.on(F("/removeConfig"), webserver_removeConfig);
+	server.on(F("/reset"), webserver_reset);
+	server.on(F("/data.json"), webserver_data_json);
+	server.on(F("/metrics"), webserver_prometheus_endpoint);
+	server.on(F("/images"), webserver_images);
 	server.onNotFound(webserver_not_found);
 
 	debug_outln_info(F("Starting Webserver... "), WiFi.localIP().toString());
@@ -3638,7 +3640,7 @@ static void display_values() {
 			}
 			display_lines[0] = "PM2.5: " + check_display_value(pm25_value, -1, 1, 6) + " µg/m³";
 			display_lines[1] = "PM10:  " + check_display_value(pm10_value, -1, 1, 6) + " µg/m³";
-			display_lines[2] = "";
+			display_lines[2] = empty_String;
 			break;
 		case 2:
 			display_header = t_sensor;
@@ -3651,7 +3653,7 @@ static void display_values() {
 			if (t_sensor != "") { display_lines[line_count++] = "Temp.: " + check_display_value(t_value, -128, 1, 6) + " °C"; }
 			if (h_sensor != "") { display_lines[line_count++] = "Hum.:  " + check_display_value(h_value, -1, 1, 6) + " %"; }
 			if (p_sensor != "") { display_lines[line_count++] = "Pres.: " + check_display_value(p_value / 100, (-1 / 100.0), 1, 6) + " hPa"; }
-			while (line_count < 3) { display_lines[line_count++] = ""; }
+			while (line_count < 3) { display_lines[line_count++] = empty_String; }
 			break;
 		case 3:
 			display_header = gps_sensor;
