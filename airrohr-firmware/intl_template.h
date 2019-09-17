@@ -40,6 +40,7 @@ const char INTL_FS_WIFI_NAME[] PROGMEM = "";
 const char INTL_MORE_SETTINGS[] PROGMEM ="";
 const char INTL_AUTO_UPDATE[] PROGMEM = "";
 const char INTL_USE_BETA[] PROGMEM = "";
+const char INTL_USE_SLEEP[] PROGMEM = "";
 const char INTL_DISPLAY[] PROGMEM = "OLED SSD1306";
 const char INTL_SH1106[] PROGMEM = "OLED SH1106";
 const char INTL_FLIP_DISPLAY[] PROGMEM = "OLED Display Flip";

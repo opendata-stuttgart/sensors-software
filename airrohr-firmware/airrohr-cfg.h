@@ -52,6 +52,7 @@ static constexpr ConfigShapeEntry configShape[] PROGMEM = {
 	Config_Bool(send2csv),
 	Config_Bool(auto_update),
 	Config_Bool(use_beta),
+	Config_Bool(use_sleep),
 	Config_Bool(has_display),
 	Config_Bool(has_sh1106),
 	Config_Bool(has_flipped_display),

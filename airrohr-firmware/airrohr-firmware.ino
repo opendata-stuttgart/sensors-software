@@ -281,6 +281,7 @@ namespace cfg {
 
 	bool auto_update = AUTO_UPDATE;
 	bool use_beta = USE_BETA;
+	bool use_sleep = USE_LIGHT_SLEEP;
 
 	// (in)active displays
 	bool has_display = HAS_DISPLAY;											// OLED with SSD1306 and I2C
@@ -562,6 +563,7 @@ unsigned long last_page_load = millis();
 
 bool wificonfig_loop = false;
 bool first_cycle = true;
+bool wifi_force_sleep = false;
 bool sntp_time_is_set = false;
 
 unsigned long count_sends = 0;
@@ -1490,6 +1492,7 @@ static void webserver_config_send_body_get() {
 	page_content += FPSTR(WEB_B_BR);
 	add_form_checkbox(page_content, "auto_update", FPSTR(INTL_AUTO_UPDATE), auto_update);
 	add_form_checkbox(page_content, "use_beta", FPSTR(INTL_USE_BETA), use_beta);
+	add_form_checkbox(page_content, "use_sleep", FPSTR(INTL_USE_SLEEP), use_sleep);
 	add_form_checkbox(page_content, "has_display", FPSTR(INTL_DISPLAY), has_display);
 	add_form_checkbox(page_content, "has_sh1106", FPSTR(INTL_SH1106), has_sh1106);
 	add_form_checkbox(page_content, "has_flipped_display", FPSTR(INTL_FLIP_DISPLAY), has_flipped_display);
@@ -1682,6 +1685,7 @@ static void webserver_config_send_body_post() {
 
 	add_line_value_bool(page_content, FPSTR(INTL_AUTO_UPDATE), auto_update);
 	add_line_value_bool(page_content, FPSTR(INTL_USE_BETA), use_beta);
+	add_line_value_bool(page_content, FPSTR(INTL_USE_SLEEP), use_sleep);
 	add_line_value_bool(page_content, FPSTR(INTL_DISPLAY), has_display);
 	add_line_value_bool(page_content, FPSTR(INTL_SH1106), has_sh1106);
 	add_line_value_bool(page_content, FPSTR(INTL_FLIP_DISPLAY), has_flipped_display);
@@ -2255,14 +2259,15 @@ static void wifiConfig() {
 		yield();
 	}
 
+	dnsServer.stop();
+
 	WiFi.softAPdisconnect(true);
 	WiFi.mode(WIFI_STA);
 
-	dnsServer.stop();
 	delay(100);
-
 	debug_outln_info(FPSTR(DBG_TXT_CONNECTING_TO), cfg::wlanssid);
 
+	WiFi.forceSleepWake();
 	WiFi.begin(cfg::wlanssid, cfg::wlanpwd);
 
 	debug_outln_info(F("---- Result Webconfig ----"));
@@ -2310,6 +2315,7 @@ static void connectWifi() {
 	WiFi.setPhyMode(WIFI_PHY_MODE_11N);
 #endif
 	WiFi.mode(WIFI_STA);
+	WiFi.forceSleepWake();
 	WiFi.begin(cfg::wlanssid, cfg::wlanpwd); // Start WiFI
 
 	debug_outln_info(FPSTR(DBG_TXT_CONNECTING_TO), cfg::wlanssid);
@@ -4237,6 +4243,14 @@ void loop(void) {
 	act_milli = millis();
 	send_now = msSince(starttime) > cfg::sending_intervall_ms;
 
+	if (cfg::use_sleep && wifi_force_sleep && !wificonfig_loop && send_now) {
+		debug_outln_info(F("### Waking up modem"));
+		wifi_force_sleep = false;
+		WiFi.forceSleepWake();
+		delay (1);
+		WiFi.reconnect();
+	}
+
 	sample_count++;
 
 #if defined(ESP8266)
@@ -4444,6 +4458,9 @@ void loop(void) {
 		// reconnect to WiFi if disconnected
 		if (WiFi.status() != WL_CONNECTED) {
 			debug_outln_info(F("Connection lost, reconnecting "));
+			WiFi.forceSleepWake();
+			delay (1);
+			wifi_force_sleep = false;
 			WiFi.reconnect();
 			waitForWifiToConnect(20);
 		}
@@ -4462,10 +4479,17 @@ void loop(void) {
 		count_sends += 1;
 	}
 	yield();
-	if (sample_count % 500 == 0) {
+	if (sample_count % 1024 == 0) {
 //		Serial.println(ESP.getFreeHeap(),DEC);
 #if defined(ESP8266)
 		MDNS.update();
 #endif
+		 if (cfg::use_sleep && !wificonfig_loop && !wifi_force_sleep && 
+				!first_cycle && msSince(last_page_load) > cfg::time_for_wifi_config ) {
+			debug_outln_info(F("### Modem sleep"));
+			wifi_force_sleep = true;
+			WiFi.forceSleepBegin();
+			delay(1);
+		}
 	}
 }

@@ -40,6 +40,7 @@ const char INTL_FS_WIFI_NAME[] PROGMEM = "Name";
 const char INTL_MORE_SETTINGS[] PROGMEM ="Weitere Einstellungen";
 const char INTL_AUTO_UPDATE[] PROGMEM = "Auto Update";
 const char INTL_USE_BETA[] PROGMEM = "Lade Beta Versionen";
+const char INTL_USE_SLEEP[] PROGMEM = "Unbenutztes WiFi pausieren";
 const char INTL_DISPLAY[] PROGMEM = "OLED SSD1306";
 const char INTL_SH1106[] PROGMEM = "OLED SH1106";
 const char INTL_FLIP_DISPLAY[] PROGMEM = "OLED Display um 180° drehen";
