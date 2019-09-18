@@ -173,6 +173,7 @@ const String SOFTWARE_VERSION("NRZ-2019-124-B6");
 #include <TinyGPS++.h>
 #include "./sps30_i2c.h"
 #include "./dnms_i2c.h"
+#include "./mhz19.h"
 
 #if defined(INTL_BG)
 #include "intl_bg.h"
@@ -408,179 +409,9 @@ SoftwareSerial serialGPS(GPS_SERIAL_RX, GPS_SERIAL_TX, false, 512);
 #endif
 
 /*****************************************************************
- * MHZ19 declarations                                           *
+ * MH-Z19 declaration                                               *
  *****************************************************************/
-class CMHZ19Sensor
-{
-public:
-  CMHZ19Sensor(Stream& serialPort);
-  
-  // returns 0xffff when reading fails
-  uint16_t ReadCO2Sensor();
-  static const uint16_t mh_z19_baudrate = 9600;
-
-  /*  set the measuring range to 1000, 2000, 3000 or 5000
-      ppm range for sensor MH-Z19 is set to 2000 when sensor is delivered
-	  value is stored in EEPROM, so don't call this too often otherwise
-	  EEPROM will be damaged
-  */
-  bool SetRange(uint16_t range);
-
-  // this only contains a value of the sensor has been done a reset cycle
-  // otherwise it will return 0xffff
-  uint16_t GetRange();
-
-/* this can't be implemented, because of Arduino issue 570, see here: https://github.com/arduino/Arduino/issues/570
-  void Setup() {
-    serialPort.begin(mh_z19_baudrate);
-  }
-*/
-
-private:
-  static const uint8_t packetLen = 9;
-  Stream* m_pSerialPort;
-  uint16_t ppmMaxValue; // 1000, 2000, 3000 or 5000
-  
-  CMHZ19Sensor(); // default constructor not allowed to be used
-  static uint8_t CalcCheckSum(uint8_t *packet);
-
-  // synchronize with receive stream: first uint8_t must be 0xff
-  // actually this consumes the rest of any dangling uint8_ts from the previous packet (will mainly happen on startup)
-  bool SynchronizeStream();
-};
-
-CMHZ19Sensor::CMHZ19Sensor(Stream& serialPort) :
-  m_pSerialPort(&serialPort),
-  ppmMaxValue(0xffff)
-{
-}
-
-
-/*
-set the measuring range to 1000, 2000, 3000 or 5000
-ppm range for sensor MH-Z19 is set to 2000 when sensor is delivered
-*/
-bool CMHZ19Sensor::SetRange(uint16_t range)
-{
-  if((range % 1000) == 0
-    && range >= 1000
-    && range <= 5000
-  )
-  {
-    uint8_t cmd[packetLen] = {0xFF, 0x01, 0x99, 0x00, 0x00, 0x00, (uint8_t)((range >> 8) & 0xff), (uint8_t)(range & 0xff), 0x00}; // 2nd uint8_t is the sensor number
-    cmd[packetLen - 1] = CalcCheckSum(cmd);
-    m_pSerialPort->write(cmd, sizeof(cmd));
-    // TODO: check return value if any
-    // consume any response in the receive buffer
-    delay(200);
-    while(m_pSerialPort->available())
-      m_pSerialPort->read();
-
-    return true;
-  }
-  else
-  {
-    return false;
-  }
-}
-
-uint16_t CMHZ19Sensor::GetRange()
-{
-  return ppmMaxValue;
-}
-
-
-// returns 0xffff when reading fails
-uint16_t CMHZ19Sensor::ReadCO2Sensor(){
-  uint16_t ppm = 0xffff;
-  uint8_t response[packetLen]; 
-  static const uint8_t cmd[packetLen] = {0xFF,0x01,0x86,0x00,0x00,0x00,0x00,0x00,0x79}; // 2nd uint8_t is the sensor number
-  m_pSerialPort->write(cmd, sizeof(cmd));
-  if(!SynchronizeStream())
-  {
-#if DEBUG_OUTPUT    
-      Serial.print(F("Stream not synchronized "));
-#endif
-  }
-  else
-  {
-    uint8_t recvCnt = m_pSerialPort->readBytes((char*)response, sizeof(response));
-
-#if DEBUG_OUTPUT    
-    for(int8_t i = 0; i < min(recvCnt, packetLen); i++)
-    {
-      Serial.print(response[i], HEX);
-      Serial.write(' ');
-    }
-#endif
-  
-    if(recvCnt == sizeof(response)
-      && response[0] == 0xff
-      && response[1] == 0x86
-      && CalcCheckSum(response) == response[packetLen - 1]
-    )
-    {
-      uint16_t ppmRaw = (response[2] << 8) | response[3];
-      if(response[6] == 0x3A) // this marks the startup value (first ppm value will be 128 and then the max limit). After the startup phase this status goes to 0x35 and some time later to 0x34
-      {
-        // there will be values of 128, <maxValue>, 5, 301 and 400 on startup => ensure to ignore the non-relevant values!
-        // note: 397 was the smallest measured value, when using a range of 5000 ppm. This might me pure coincidence, but the values might also have a meaning
-        if(((ppmRaw % 1000) == 0) //&& (ppmRaw != 128) && (ppmRaw != 5) && (ppmRaw != 301) && (ppmRaw != 400)
-          && (ppmMaxValue != ppmRaw)
-         )
-        {
-          ppmMaxValue = ppmRaw;
-#if DEBUG_OUTPUT    
-          Serial.print(F("ppmMaxValue="));
-          Serial.println(ppmMaxValue);
-#endif
-        }      
-      }
-      else
-      {
-        ppm = ppmRaw;
-      }
-    }
-  }
-  return ppm;
-}
-
-uint8_t CMHZ19Sensor::CalcCheckSum(uint8_t *packet)
-{
-  uint8_t checksum = 0;
-  for(int8_t i = 1; i < (packetLen - 1); i++) //without the first uint8_t
-  {
-    checksum += packet[i];
-  }
-  return -checksum;
-}
-
-// synchronize with receive stream: first uint8_t must be 0xff
-// actually this consumes the rest of any dangling uint8_ts from the previous packet (will mainly happen on startup)
-bool CMHZ19Sensor::SynchronizeStream()
-{
-  const uint16_t millisecondsPerChar = 1.0/(mh_z19_baudrate / 10.0) * 1000.0 + 1.1; // 9600 Baud, 8N1
-  const uint16_t millisecondsPerPacket = packetLen * 1.0/(mh_z19_baudrate / 10.0) * 1000.0 + 10.1;// 9600 Baud, 8N1
-  delay(millisecondsPerPacket); // allow buffer to fill up
-  for(int8_t i = 0; i < (4*packetLen); i++)
-  {
-    int16_t c = m_pSerialPort->peek();
-    if(c == 0xff)
-    {
-      return true; // now we are 'probably' synchronized
-    }
-    else if(c != -1)
-    {
-      m_pSerialPort->read(); // remove the trash from the input stream
-    }
-    if(!m_pSerialPort->available())
-      delay(millisecondsPerChar); // give sender a chance to transmit some more
-  }
-
-  return false; // not synchronized
-}
-
-CMHZ19Sensor co2Sensor(serialGPS);
+CMHZ19Sensor mhz19(serialGPS); // uses the same serial port as the GPS sensor
 
 /*****************************************************************
  * DHT declaration                                               *
@@ -3675,12 +3506,12 @@ static String sensorGPS() {
  *****************************************************************/
 static String sensorMHZ19() {
 	String s;
-	debug_outln(String(FPSTR(DBG_TXT_START_READING)) + "MHZ19", DEBUG_MED_INFO);
+	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), F("MHZ19"));
 
-    uint16_t ppm = co2Sensor.ReadCO2Sensor();
+    uint16_t ppm = mhz19.ReadCO2Sensor();
 	if(ppm == 0xffff) {
 		last_value_MHZ19_co2_ppm = -1.0;
-		debug_outln(F("No MHZ19 data received: check wiring"), DEBUG_ERROR);
+		debug_outln_error(F("No MHZ19 data received: check wiring"));
 	}
 	else
 	{
@@ -3688,11 +3519,11 @@ static String sensorMHZ19() {
 	}
 
 	if (send_now) {
-		debug_outln("CO2 ppm: " + Float2String(last_value_MHZ19_co2_ppm, 0), DEBUG_MIN_INFO);
+		debug_outln_info(F("CO2 ppm: "), Float2String(last_value_MHZ19_co2_ppm, 0));
 		add_Value2Json(s, F("conc_co2_ppm"), Float2String(last_value_MHZ19_co2_ppm, 0));
 	}
 
-	debug_outln(String(FPSTR(DBG_TXT_END_READING)) + "MHZ19", DEBUG_MED_INFO);
+	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), F("MHZ19"));
 
 	return s;
 }
@@ -3949,8 +3780,8 @@ static void display_values() {
 		case (8):
 			display_header = FPSTR(SENSORS_MHZ19);
 			display_lines[0] = "CO2: " + check_display_value(co2_ppm_value, -1.0, 0, 4);
-			display_lines[1] = FPSTR("");
-			display_lines[2] = FPSTR("");
+			display_lines[1] = empty_String;
+			display_lines[2] = empty_String;
 			break;
 		}
 
