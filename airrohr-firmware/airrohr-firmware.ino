@@ -4060,15 +4060,19 @@ static void time_is_set (void) {
 }
 
 static bool acquireNetworkTime() {
+	// server name ptrs must be persisted after the call to configTime because internally
+	// the pointers are stored see implementation of lwip sntp_setservername() 
+	static String ntpServer1, ntpServer2;
 	debug_outln(F("Setting time using SNTP"), DEBUG_MIN_INFO);
 	time_t now = time(nullptr);
 	debug_outln(ctime(&now), DEBUG_MIN_INFO);
 #if defined(ESP8266)
 	settimeofday_cb(time_is_set);
 #endif
-	configTime(0, 0, WiFi.gatewayIP().toString().c_str(), String(String(INTL_LANG) + ".pool.ntp.org").c_str());
+	ntpServer1 = WiFi.gatewayIP().toString();
+	ntpServer2 = String(INTL_LANG) + ".pool.ntp.org";
+	configTime(0, 0, ntpServer1.c_str(), ntpServer2.c_str());
 	for (int retryCount = 0; retryCount++ < 20; ++retryCount) {
-		// later than 2000/01/01:00:00:00
 		if (sntp_time_is_set) {
 			now = time(nullptr);
 			debug_outln(ctime(&now), DEBUG_MIN_INFO);
