@@ -173,6 +173,7 @@ const String SOFTWARE_VERSION("NRZ-2019-124-B6");
 #include <TinyGPS++.h>
 #include "./sps30_i2c.h"
 #include "./dnms_i2c.h"
+#include "./mhz19.h"
 
 #if defined(INTL_BG)
 #include "intl_bg.h"
@@ -216,6 +217,7 @@ const unsigned long SAMPLETIME_SDS_MS = 1000;								// time between two measure
 const unsigned long WARMUPTIME_SDS_MS = 15000;								// time needed to "warm up" the sensor before we can take the first measurement
 const unsigned long READINGTIME_SDS_MS = 5000;								// how long we read data from the PM sensors
 const unsigned long SAMPLETIME_GPS_MS = 50;
+const unsigned long SAMPLETIME_MHZ19_MS = 5000;
 const unsigned long DISPLAY_UPDATE_INTERVAL_MS = 5000;						// time between switching display to next "screen"
 const unsigned long ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
 const unsigned long PAUSE_BETWEEN_UPDATE_ATTEMPTS_MS = ONE_DAY_IN_MS;		// check for firmware updates once a day
@@ -268,6 +270,7 @@ namespace cfg {
 	bool dnms_read = DNMS_READ;
 	char dnms_correction[LEN_DNMS_CORRECTION] = DNMS_CORRECTION;
 	bool gps_read = GPS_READ;
+	bool mhz19_read = MHZ19_READ;
 
 	// send to "APIs"
 	bool send2dusti = SEND2DUSTI;
@@ -406,6 +409,11 @@ SoftwareSerial serialGPS(GPS_SERIAL_RX, GPS_SERIAL_TX, false, 512);
 #endif
 
 /*****************************************************************
+ * MH-Z19 declaration                                               *
+ *****************************************************************/
+CMHZ19Sensor mhz19(serialGPS); // uses the same serial port as the GPS sensor
+
+/*****************************************************************
  * DHT declaration                                               *
  *****************************************************************/
 DHT dht(ONEWIRE_PIN, DHT_TYPE);
@@ -459,6 +467,7 @@ unsigned long starttime;
 unsigned long time_point_device_start_ms;
 unsigned long starttime_SDS;
 unsigned long starttime_GPS;
+unsigned long starttime_MHZ19;
 unsigned long act_micro;
 unsigned long act_milli;
 unsigned long last_micro = 0;
@@ -554,6 +563,7 @@ double last_value_GPS_lon = -200.0;
 double last_value_GPS_alt = -1000.0;
 String last_value_GPS_date;
 String last_value_GPS_time;
+double last_value_MHZ19_co2_ppm = -1.0;
 String last_data_string;
 
 String esp_chipid;
@@ -1035,6 +1045,9 @@ static void readConfig() {
 			strcpy(cfg::host_influx, "");
 			cfg::send2influx = false;
 		}
+		if(cfg::gps_read && cfg::mhz19_read) { // cannot be active at the same time
+			cfg::mhz19_read = false;
+		}
 		if (json["pm24_read"] || json["pms32_read"]) {
 			cfg::pms_read = true;
 			writeConfig();
@@ -1478,6 +1491,7 @@ static void webserver_config_send_body_get() {
 		add_form_input(page_content, "dnms_correction", FPSTR(INTL_DNMS_CORRECTION), dnms_correction, LEN_DNMS_CORRECTION);
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 		add_form_checkbox(page_content, "gps_read", FPSTR(INTL_NEO6M), gps_read);
+		add_form_checkbox(page_content, "mhz19_read", FPSTR(INTL_MHZ19), mhz19_read);
 
 		page_content += FPSTR(WEB_BR_LF_B);
 
@@ -1654,6 +1668,10 @@ static void webserver_config_send_body_post() {
 		readPasswdParam(www_password);
 	}
 
+	if(gps_read && mhz19_read) { // cannot be active at the same time
+		mhz19_read = false;
+	}
+
 #undef readCharParam
 #undef readIntParam
 #undef readTimeParam
@@ -1675,6 +1693,7 @@ static void webserver_config_send_body_post() {
 	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("DNMS"), dnms_read);
 	add_line_value_bool(page_content, FPSTR(INTL_DNMS_CORRECTION), String(dnms_correction));
 	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("GPS"), gps_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("MHZ19"), mhz19_read);
 
 	// Paginate after ~ 1500 bytes
 	server.sendContent(page_content);
@@ -1851,6 +1870,7 @@ static void webserver_values() {
 		const String unit_NC = "#/cm³";
 		const String unit_TS = "µm";
 		const String unit_LA = "dB(A)";
+		const String unit_CO2_ppm = "ppm";
 		last_page_load = millis();
 
 		const int signal_quality = calcWiFiSignalQuality(WiFi.RSSI());
@@ -1941,6 +1961,10 @@ static void webserver_values() {
 			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_ALTITUDE), check_display_value(last_value_GPS_alt, -1000.0, 2, 0), "m");
 			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_DATE), last_value_GPS_date, empty_String);
 			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_TIME), last_value_GPS_time, empty_String);
+		}
+		else if(cfg::mhz19_read) { // can not be active at the same time as gps because it uses the same serial port
+			page_content += FPSTR(EMPTY_ROW);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_MHZ19), FPSTR(INTL_CO2), check_display_value(last_value_MHZ19_co2_ppm, -1.0, 0, 0), unit_CO2_ppm);
 		}
 
 		page_content += FPSTR(EMPTY_ROW);
@@ -3478,6 +3502,33 @@ static String sensorGPS() {
 }
 
 /*****************************************************************
+ * read MHZ19 CO2 sensor values                                        *
+ *****************************************************************/
+static String sensorMHZ19() {
+	String s;
+	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), F("MHZ19"));
+
+    uint16_t ppm = mhz19.ReadCO2Sensor();
+	if(ppm == 0xffff) {
+		last_value_MHZ19_co2_ppm = -1.0;
+		debug_outln_error(F("No MHZ19 data received: check wiring"));
+	}
+	else
+	{
+		last_value_MHZ19_co2_ppm = ppm;
+	}
+
+	if (send_now) {
+		debug_outln_info(F("CO2 ppm: "), Float2String(last_value_MHZ19_co2_ppm, 0));
+		add_Value2Json(s, F("conc_co2_ppm"), Float2String(last_value_MHZ19_co2_ppm, 0));
+	}
+
+	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), F("MHZ19"));
+
+	return s;
+}
+
+/*****************************************************************
  * AutoUpdate                                                    *
  *****************************************************************/
 static void autoUpdate() {
@@ -3559,10 +3610,11 @@ static void display_values() {
 	double lat_value = -200.0;
 	double lon_value = -200.0;
 	double alt_value = -1000.0;
+	double co2_ppm_value = -1.0;
 	String gps_sensor, display_header;
 	String display_lines[3] = { "", "", ""};
 	int screen_count = 0;
-	int screens[5];
+	int screens[8];
 	int line_count = 0;
 	debug_outln_info(F("output values to display..."));
 	if (cfg::ppd_read) {
@@ -3644,6 +3696,9 @@ static void display_values() {
 		alt_value = last_value_GPS_alt;
 		gps_sensor = "NEO6M";
 	}
+	if(cfg::mhz19_read) {
+		co2_ppm_value = last_value_MHZ19_co2_ppm;
+	}
 	if (cfg::ppd_read || cfg::pms_read || cfg::hpm_read || cfg::sds_read) {
 		screens[screen_count++] = 1;
 	}
@@ -3664,6 +3719,9 @@ static void display_values() {
 	}
 	if (cfg::display_device_info) {
 		screens[screen_count++] = 7;	// chipID, firmware and count of measurements
+	}
+	if(cfg::mhz19_read) {
+		screens[screen_count++] = 8;
 	}
 	if (cfg::has_display || cfg::has_sh1106 || cfg::has_lcd2004_27) {
 		switch (screens[next_display_count % screen_count]) {
@@ -3718,6 +3776,12 @@ static void display_values() {
 			display_lines[0] = "ID: " + esp_chipid;
 			display_lines[1] = "FW: " + String(SOFTWARE_VERSION);
 			display_lines[2] = "Measurements: " + String(count_sends);
+			break;
+		case (8):
+			display_header = FPSTR(SENSORS_MHZ19);
+			display_lines[0] = "CO2: " + check_display_value(co2_ppm_value, -1.0, 0, 4);
+			display_lines[1] = empty_String;
+			display_lines[2] = empty_String;
 			break;
 		}
 
@@ -4201,6 +4265,15 @@ void setup(void) {
 		debug_outln_info(F("Read GPS..."));
 		disable_unneeded_nmea();
 	}
+	else if(cfg::mhz19_read) { // can not be active at the same time as gps because it uses the same serial port
+#if defined(ESP8266)
+		serialGPS.begin(9600);
+#endif
+#ifdef ESP32
+		serialGPS.begin(9600, SERIAL_8N1, GPS_SERIAL_RX, GPS_SERIAL_TX);
+#endif
+		debug_outln(F("Read MHZ19..."), DEBUG_MIN_INFO);
+	}
 
 	powerOnTestSensors();
 	logEnabledAPIs();
@@ -4229,6 +4302,7 @@ void loop(void) {
 	String result_PPD, result_SDS, result_PMS, result_HPM, result_SPS30;
 	String result_DHT, result_HTU21D, result_BMP, result_BMP280;
 	String result_BME280, result_DS18B20, result_GPS, result_DNMS;
+	String result_MHZ19;
 	int16_t ret_SPS30;
 
 	unsigned long sum_send_time = 0;
@@ -4345,6 +4419,11 @@ void loop(void) {
 		result_GPS = sensorGPS();							// getting GPS coordinates
 		starttime_GPS = act_milli;
 	}
+	else if(cfg::mhz19_read && ((msSince(starttime_MHZ19) > SAMPLETIME_MHZ19_MS) || send_now))
+	{ // can not be active at the same time as gps because it uses the same serial port
+		result_MHZ19 = sensorMHZ19();
+		starttime_MHZ19 = act_milli;
+	}
 
 	if ((cfg::has_display || cfg::has_sh1106 || cfg::has_lcd2004_27 || cfg::has_lcd1602 ||
 			cfg::has_lcd1602_27) && (act_milli > next_display_millis)) {
@@ -4417,6 +4496,11 @@ void loop(void) {
 		if (cfg::gps_read) {
 			data += result_GPS;
 			sum_send_time += sendLuftdaten(result_GPS, GPS_API_PIN, F("GPS"), "GPS_");
+		}
+		else if(cfg::mhz19_read)
+		{
+			data += result_MHZ19;
+			sum_send_time += sendLuftdaten(result_MHZ19, GPS_API_PIN, F("MHZ19"), "MHZ19_");
 		}
 
 		add_Value2Json(data_sample_times, F("signal"), signal_strength);

@@ -42,6 +42,7 @@ static constexpr ConfigShapeEntry configShape[] PROGMEM = {
 	Config_Bool(dnms_read),
 	Config_String(dnms_correction),
 	Config_Bool(gps_read),
+	Config_Bool(mhz19_read),
 	Config_Bool(send2dusti),
 	Config_Bool(ssl_dusti),
 	Config_Bool(send2madavi),

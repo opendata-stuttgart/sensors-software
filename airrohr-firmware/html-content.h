@@ -38,6 +38,7 @@ const char SENSORS_BMP180[] PROGMEM = "BMP180";
 const char SENSORS_BMP280[] PROGMEM = "BMP280";
 const char SENSORS_BME280[] PROGMEM = "BME280";
 const char SENSORS_DNMS[] PROGMEM = "DNMS";
+const char SENSORS_MHZ19[] PROGMEM = "MHZ19";
 
 const char WEB_PAGE_HEADER[] PROGMEM = "<!DOCTYPE html><html>\
 <head>\
