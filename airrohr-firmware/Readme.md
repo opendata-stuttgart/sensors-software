@@ -213,16 +213,27 @@ TX (senden) und RX (empfangen) werden gekreuzt verkabelt!
 * TX von Neo -> Pin D5 (RX) 
 * RX von Neo -> Pin D6 (TX) 
 
+### MH-Z19 (seriell)
+GPS(Neo-6M) und MH-Z19 verwenden denselben seriellen Port und können daher nicht gleichzeitig angeschlossen werden.
+Strom und Masse vom Board. (GND => GND und 3,3V => Vin, vorher prüfen) 
+TX (senden) und RX (empfangen) werden gekreuzt verkabelt! 
+* TX von MH-Z19 -> Pin D5 (RX) 
+* RX von MH-Z19 -> Pin D6 (TX) 
+
+
 ### Luftdaten.info API "Pins"
 Bei Aktivierung von mehreren Sensoren, z.B. "gleichzeitig" DHT22 und PPD42NS, benötigt die API zur Zuordnung der Sensorwerte die Angabe eines Pins, an dem der Sensor (virtuell) angeschlossen ist.
 Diese Firmware definiert die Pins für die verschiedenenen Sensoren wie folgt:
 * PPD42NS => Pin 5
-* DHT22 => Pin 7
-* SDS011 => Pin 1
-* BMP180 => Pin 3
-* BMP280 => Pin 3
-* BME280 => Pin 11
+* DHT22   => Pin 7 (auch für HTU21D)
+* SDS011  => Pin 1 (auch für PMS1003, PMS300, 3PMS5003, PMS6003, PMS7003, Honeywell PM und SPS30)
+* BMP180  => Pin 3
+* BMP280  => Pin 3
+* BME280  => Pin 11
 * GPS(Neo-6M) => Pin 9
+* DS18B20 => Pin 13
+* DNMS    => Pin 15
+* MH-Z19  => Pin 17
 
 
 ## Translations
