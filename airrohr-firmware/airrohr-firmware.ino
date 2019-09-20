@@ -4500,7 +4500,7 @@ void loop(void) {
 		else if(cfg::mhz19_read)
 		{
 			data += result_MHZ19;
-			sum_send_time += sendLuftdaten(result_MHZ19, GPS_API_PIN, F("MHZ19"), "MHZ19_");
+			sum_send_time += sendLuftdaten(result_MHZ19, MHZ19_API_PIN, F("MHZ19"), "MHZ19_");
 		}
 
 		add_Value2Json(data_sample_times, F("signal"), signal_strength);
