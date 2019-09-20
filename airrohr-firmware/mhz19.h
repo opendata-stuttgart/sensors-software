@@ -17,7 +17,8 @@
  ***********************************************************************/
 
 #include <Arduino.h>
-#define MHZ19_SUPPORT_RANGE
+//#define MHZ19_SUPPORT_RANGE
+//#define MHZ19_DEBUG_OUTPUT
 
 class CMHZ19Sensor
 {

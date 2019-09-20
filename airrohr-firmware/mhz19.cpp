@@ -69,7 +69,7 @@ uint16_t CMHZ19Sensor::readCO2Sensor(){
   m_pSerialPort->write(cmd, sizeof(cmd));
   if(!synchronizeStream())
   {
-#if DEBUG_OUTPUT
+#if defined(MHZ19_DEBUG_OUTPUT)
       Serial.print(F("Stream not synchronized "));
 #endif
   }
@@ -77,7 +77,7 @@ uint16_t CMHZ19Sensor::readCO2Sensor(){
   {
     uint8_t recvCnt = m_pSerialPort->readBytes((char*)response, sizeof(response));
 
-#if DEBUG_OUTPUT
+#if defined(MHZ19_DEBUG_OUTPUT)
     for(int8_t i = 0; i < min(recvCnt, packetLen); i++)
     {
       Serial.print(response[i], HEX);
@@ -102,7 +102,7 @@ uint16_t CMHZ19Sensor::readCO2Sensor(){
          )
         {
           ppmMaxValue = ppmRaw;
-#if DEBUG_OUTPUT
+#if defined(MHZ19_DEBUG_OUTPUT)
           Serial.print(F("ppmMaxValue="));
           Serial.println(ppmMaxValue);
 #endif
