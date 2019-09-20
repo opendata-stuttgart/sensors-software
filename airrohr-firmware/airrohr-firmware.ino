@@ -3508,7 +3508,7 @@ static String sensorMHZ19() {
 	String s;
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), F("MHZ19"));
 
-    uint16_t ppm = mhz19.ReadCO2Sensor();
+    uint16_t ppm = mhz19.readCO2Sensor();
 	if(ppm == 0xffff) {
 		last_value_MHZ19_co2_ppm = -1.0;
 		debug_outln_error(F("No MHZ19 data received: check wiring"));

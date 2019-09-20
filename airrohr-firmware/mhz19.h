@@ -24,7 +24,7 @@ public:
 	CMHZ19Sensor(Stream& serialPort);
 
 	// returns 0xffff when reading fails
-	uint16_t ReadCO2Sensor();
+	uint16_t readCO2Sensor();
 	static const uint16_t mh_z19_baudrate = 9600;
 
 	/*  set the measuring range to 1000, 2000, 3000 or 5000
@@ -32,11 +32,11 @@ public:
 	    value is stored in EEPROM, so don't call this too often otherwise
 	    EEPROM will be damaged
 	*/
-	bool SetRange(uint16_t range);
+	bool setRange(uint16_t range);
 
 	// this only contains a value of the sensor has been done a reset cycle
 	// otherwise it will return 0xffff
-	uint16_t GetRange();
+	uint16_t getRange();
 
 /* this can't be implemented, because of Arduino issue 570, see here: https://github.com/arduino/Arduino/issues/570
 	void Setup() {
@@ -50,10 +50,10 @@ private:
 	uint16_t ppmMaxValue; // 1000, 2000, 3000 or 5000
 
 	CMHZ19Sensor(); // default constructor not allowed to be used
-	static uint8_t CalcCheckSum(uint8_t *packet);
+	static uint8_t calcCheckSum(uint8_t *packet);
 
 	// synchronize with receive stream: first uint8_t must be 0xff
 	// actually this consumes the rest of any dangling uint8_ts from the previous packet (will mainly happen on startup)
-	bool SynchronizeStream();
+	bool synchronizeStream();
 };
 
