@@ -19,11 +19,14 @@
 #include "mhz19.h"
 
 CMHZ19Sensor::CMHZ19Sensor(Stream& serialPort) :
-	m_pSerialPort(&serialPort),
-	ppmMaxValue(0xffff)
+#if defined(MHZ19_SUPPORT_RANGE)
+	ppmMaxValue(0xffff),
+#endif
+	m_pSerialPort(&serialPort)
 {
 }
 
+#if defined(MHZ19_SUPPORT_RANGE)
 /*
 set the measuring range to 1000, 2000, 3000 or 5000
 ppm range for sensor MH-Z19 is set to 2000 when sensor is delivered
@@ -56,7 +59,7 @@ uint16_t CMHZ19Sensor::getRange()
 {
   return ppmMaxValue;
 }
-
+#endif
 
 // returns 0xffff when reading fails
 uint16_t CMHZ19Sensor::readCO2Sensor(){
@@ -91,6 +94,7 @@ uint16_t CMHZ19Sensor::readCO2Sensor(){
       uint16_t ppmRaw = (response[2] << 8) | response[3];
       if(response[6] == 0x3A) // this marks the startup value (first ppm value will be 128 and then the max limit). After the startup phase this status goes to 0x35 and some time later to 0x34
       {
+#if defined(MHZ19_SUPPORT_RANGE)
         // there will be values of 128, <maxValue>, 5, 301 and 400 on startup => ensure to ignore the non-relevant values!
         // note: 397 was the smallest measured value, when using a range of 5000 ppm. This might me pure coincidence, but the values might also have a meaning
         if(((ppmRaw % 1000) == 0) //&& (ppmRaw != 128) && (ppmRaw != 5) && (ppmRaw != 301) && (ppmRaw != 400)
@@ -103,6 +107,7 @@ uint16_t CMHZ19Sensor::readCO2Sensor(){
           Serial.println(ppmMaxValue);
 #endif
         }
+#endif
       }
       else
       {

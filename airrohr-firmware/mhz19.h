@@ -17,6 +17,7 @@
  ***********************************************************************/
 
 #include <Arduino.h>
+#define MHZ19_SUPPORT_RANGE
 
 class CMHZ19Sensor
 {
@@ -27,6 +28,13 @@ public:
 	uint16_t readCO2Sensor();
 	static const uint16_t mh_z19_baudrate = 9600;
 
+/* this can't be implemented, because of Arduino issue 570, see here: https://github.com/arduino/Arduino/issues/570
+	void Setup() {
+		serialPort.begin(mh_z19_baudrate);
+	}
+*/
+
+#if defined(MHZ19_SUPPORT_RANGE)
 	/*  set the measuring range to 1000, 2000, 3000 or 5000
 	    ppm range for sensor MH-Z19 is set to 2000 when sensor is delivered
 	    value is stored in EEPROM, so don't call this too often otherwise
@@ -38,16 +46,14 @@ public:
 	// otherwise it will return 0xffff
 	uint16_t getRange();
 
-/* this can't be implemented, because of Arduino issue 570, see here: https://github.com/arduino/Arduino/issues/570
-	void Setup() {
-		serialPort.begin(mh_z19_baudrate);
-	}
-*/
+private:
+	uint16_t ppmMaxValue; // 1000, 2000, 3000 or 5000
+#endif
+
 
 private:
 	static const uint8_t packetLen = 9;
 	Stream* m_pSerialPort;
-	uint16_t ppmMaxValue; // 1000, 2000, 3000 or 5000
 
 	CMHZ19Sensor(); // default constructor not allowed to be used
 	static uint8_t calcCheckSum(uint8_t *packet);
@@ -56,4 +62,3 @@ private:
 	// actually this consumes the rest of any dangling uint8_ts from the previous packet (will mainly happen on startup)
 	bool synchronizeStream();
 };
-
