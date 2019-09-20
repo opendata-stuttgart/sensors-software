@@ -53,7 +53,7 @@ int16_t dnms_read_version(char *dnms_version) {
   if ((dnms_version[0] == 'D') && (dnms_version[1] == 'N') && (dnms_version[2] == 'M') && (dnms_version[3] == 'S')) {
     return 0;
   }
-  return 1;  // error 
+  return 1;  // error
 }
 
 
@@ -124,9 +124,9 @@ int8_t dnms_i2c_read(uint8_t address, uint8_t* data, uint16_t count) {
     }
   }
   memcpy(data, readData, count);
-  for ( i = 0; i < count; i++) {   
+  for ( i = 0; i < count; i++) {
   }
-  for ( i = 0; i < count; i++) {  
+  for ( i = 0; i < count; i++) {
   }
   return 0;
 }
@@ -193,7 +193,7 @@ int16_t dnms_i2c_read_bytes(uint8_t address, uint8_t *data, uint16_t num_words) 
   uint16_t size = num_words * (DNMS_WORD_SIZE + CRC8_LEN);
   uint16_t word_buf[DNMS_MAX_BUFFER_WORDS];
   uint8_t * const buf8 = (uint8_t *)word_buf;
-  
+
   ret = dnms_i2c_read(address, buf8, size);
   if (ret != STATUS_OK) {
     return ret;

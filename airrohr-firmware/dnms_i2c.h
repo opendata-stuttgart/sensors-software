@@ -29,11 +29,11 @@
 #include <Arduino.h>
 #include <Wire.h>
 /*
- * 
+ *
  * Attention: in Wire.h set BUFFER_LENGTH to 64 !!
  *
  * #define BUFFER_LENGTH 64
- * 
+ *
  */
 
 
@@ -83,7 +83,7 @@ struct dnms_measurements {
 
 /**
    dnms_reset() - reset the dnms system
-   
+
    Return:  0 on success, an error code otherwise
 */
 int16_t dnms_reset();

@@ -83,7 +83,7 @@ static const uint16_t suites[] PROGMEM = {
 //     - onboard peripherials like LCD or LoRa chips which already occupy an IO pin
 //     - the ESP32 module which is used
 //         - the WROVER board uses the IOs 16 and 17 to access the PSRAW
-//         - on WROOM boards the IOs 16 and 17 can be freely used  
+//         - on WROOM boards the IOs 16 and 17 can be freely used
 //   - if JTAG debugging shall be used
 //   - some IOs have constraints
 //     - configuration of ESP32 module configuration options ("strapping") like operating voltage and boot medium

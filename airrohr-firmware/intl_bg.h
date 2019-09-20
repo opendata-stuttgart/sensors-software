@@ -1,9 +1,9 @@
 /*
  *	airRohr firmware
  *	Copyright (C) 2016-2018  Code for Stuttgart a.o.
- * 
+ *
  *  Bulgarian translations
- * 
+ *
  *	Texts should be as short as possible
  *	We only have 512 kB for the entire firmware
  */
@@ -54,12 +54,12 @@ const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Интервал на изме
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Продължителност като рутер";
 const char INTL_MORE_APIS[] PROGMEM = "Още API";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Изпращане към собствено API";
-const char INTL_SERVER[] PROGMEM = "Сървър"; 
-const char INTL_PATH[] PROGMEM = "Път"; 
-const char INTL_PORT[] PROGMEM = "Порт"; 
-const char INTL_USER[] PROGMEM = "Потребител"; 
-const char INTL_PASSWORD[] PROGMEM = "Парола"; 
-const char INTL_SEND_TO[] PROGMEM = "Изпрати до {v}"; 
+const char INTL_SERVER[] PROGMEM = "Сървър";
+const char INTL_PATH[] PROGMEM = "Път";
+const char INTL_PORT[] PROGMEM = "Порт";
+const char INTL_USER[] PROGMEM = "Потребител";
+const char INTL_PASSWORD[] PROGMEM = "Парола";
+const char INTL_SEND_TO[] PROGMEM = "Изпрати до {v}";
 const char INTL_READ_FROM[] PROGMEM = "Получено от {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "";
 const char INTL_RESTART_DEVICE[] PROGMEM = "Рестартирайте устройството";

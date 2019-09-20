@@ -61,12 +61,12 @@ uint16_t CMHZ19Sensor::GetRange()
 // returns 0xffff when reading fails
 uint16_t CMHZ19Sensor::ReadCO2Sensor(){
   uint16_t ppm = 0xffff;
-  uint8_t response[packetLen]; 
+  uint8_t response[packetLen];
   static const uint8_t cmd[packetLen] = {0xFF,0x01,0x86,0x00,0x00,0x00,0x00,0x00,0x79}; // 2nd uint8_t is the sensor number
   m_pSerialPort->write(cmd, sizeof(cmd));
   if(!SynchronizeStream())
   {
-#if DEBUG_OUTPUT    
+#if DEBUG_OUTPUT
       Serial.print(F("Stream not synchronized "));
 #endif
   }
@@ -74,14 +74,14 @@ uint16_t CMHZ19Sensor::ReadCO2Sensor(){
   {
     uint8_t recvCnt = m_pSerialPort->readBytes((char*)response, sizeof(response));
 
-#if DEBUG_OUTPUT    
+#if DEBUG_OUTPUT
     for(int8_t i = 0; i < min(recvCnt, packetLen); i++)
     {
       Serial.print(response[i], HEX);
       Serial.write(' ');
     }
 #endif
-  
+
     if(recvCnt == sizeof(response)
       && response[0] == 0xff
       && response[1] == 0x86
@@ -98,11 +98,11 @@ uint16_t CMHZ19Sensor::ReadCO2Sensor(){
          )
         {
           ppmMaxValue = ppmRaw;
-#if DEBUG_OUTPUT    
+#if DEBUG_OUTPUT
           Serial.print(F("ppmMaxValue="));
           Serial.println(ppmMaxValue);
 #endif
-        }      
+        }
       }
       else
       {

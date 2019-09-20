@@ -118,7 +118,7 @@ const String SOFTWARE_VERSION("NRZ-2019-124-B6");
 // Workaround for FPSTR bug in espressif32 versions < 1.0.3-rc2
 // see https://github.com/espressif/arduino-esp32/issues/1371
 //     https://github.com/bxparks/arduino-esp32/commit/0906aedcf9fe8df3969cd336117c1219b507be14
-// TODO: Workaround can be removed once using a espressif32 version newer than 1.0.3-rc2. 
+// TODO: Workaround can be removed once using a espressif32 version newer than 1.0.3-rc2.
 // Make sure the includes Wstring.h and pgmspace.h are already loaded before the #define is redefined!
 #include <WString.h>
 #include <pgmspace.h>
@@ -292,7 +292,7 @@ namespace cfg {
 	bool has_lcd1602 = HAS_LCD1602;
 	bool has_lcd1602_27 = HAS_LCD1602_27;
 	bool has_lcd2004_27 = HAS_LCD2004_27;
-	
+
 	bool display_wifi_info = DISPLAY_WIFI_INFO;
 	bool display_device_info = DISPLAY_DEVICE_INFO;
 
@@ -4125,7 +4125,7 @@ static void time_is_set (void) {
 
 static bool acquireNetworkTime() {
 	// server name ptrs must be persisted after the call to configTime because internally
-	// the pointers are stored see implementation of lwip sntp_setservername() 
+	// the pointers are stored see implementation of lwip sntp_setservername()
 	static String ntpServer1, ntpServer2;
 	debug_outln(F("Setting time using SNTP"), DEBUG_MIN_INFO);
 	time_t now = time(nullptr);
