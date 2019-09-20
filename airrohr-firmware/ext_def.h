@@ -201,7 +201,7 @@
 
 // MHZ19 CO2 sensor
 #define MHZ19_READ 0
-#define MHZ19_API_PIN 16
+#define MHZ19_API_PIN 17
 
 // automatic firmware updates
 #define AUTO_UPDATE 1
