@@ -3425,26 +3425,125 @@ static void fetchSensorGPS(String& s) {
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), "GPS");
 }
 
+
 /*****************************************************************
  * AutoUpdate                                                    *
  *****************************************************************/
-static void autoUpdate() {
+
+static const char FW_DOWNLOAD_HOST[] PROGMEM = "air.dmllr.de";
+
+static bool fwDownloadStreamFile(const String& url, const String& fname) {
+
+	HTTPClient http;
+	String fname_new(fname + ".new");
+	int bytes_written = -1;
+
+	http.setTimeout(20 * 1000);
+	const String SDS_version = cfg::sds_read ? SDS_version_date() : "";
+	http.setUserAgent(SOFTWARE_VERSION + ' ' + esp_chipid + ' ' + SDS_version + ' ' +
+				 String(cfg::current_lang) + ' ' + String(INTL_LANG) + ' ' +
+				 String(cfg::use_beta ? "BETA" : ""));
+
+	if (http.begin(FPSTR(FW_DOWNLOAD_HOST), 80, url)) {
+		if (http.GET() == HTTP_CODE_OK) {
+			File fwFile = SPIFFS.open(fname_new, "w+");
+			if (fwFile) {
+				bytes_written = http.writeToStream(&fwFile);
+				fwFile.close();
+				if (bytes_written > 0) {
+					SPIFFS.remove(fname);
+					SPIFFS.rename(fname_new, fname);
+					debug_outln_info(F("Success downloading: "), url);
+				}
+			}
+		}
+		http.end();
+	}
+
+	if (bytes_written > 0)
+		return true;
+
+	debug_outln_info("Download failed!");
+	SPIFFS.remove(fname_new);
+	return false;
+}
+
+static void twoStageAutoUpdate() {
+
 	if (!cfg::auto_update) return;
 
 #if defined(ESP8266)
+	debug_outln(F("twoStageAutoUpdate"), DEBUG_MIN_INFO);
+
+	String lang_variant(cfg::current_lang);
+	lang_variant.toLowerCase();
+
+	String fwprefix = String("/air-rohr/latest_");
+	if (cfg::use_beta) {
+		fwprefix = "/air-rohr-beta/latest_";
+	}
+
+	String firmware_md5("/firmware.bin.md5");
+	String fetch_md5_name = fwprefix + lang_variant + ".bin.md5";
+	bool downloadSuccess = fwDownloadStreamFile(fetch_md5_name, firmware_md5);
+	if (!downloadSuccess)
+		return;
+
+	File fwFile = SPIFFS.open(firmware_md5, "r");
+	if (!fwFile || fwFile.size() >= 40) {
+		debug_outln_error(F("Failed reopening md5 file.."));
+		return;
+	}
+
+	String newFwmd5 = fwFile.readString();
+	newFwmd5.trim();
+	fwFile.close();
+
+	debug_outln_info(F("NewFW md5: "), newFwmd5);
+	debug_outln_info(F("Sketch md5    : "), ESP.getSketchMD5());
+
+	if (newFwmd5 == ESP.getSketchMD5()) {
+		debug_outln_verbose("No newer version available.");
+		return;
+	}
+
+	String firmware_name("/firmware.bin");
+	String fetch_name = String("/air-rohr/latest_") + lang_variant + ".bin";
+	downloadSuccess = fwDownloadStreamFile(fetch_name, firmware_name);
+
+	if (!downloadSuccess)
+		return;
+
+	fwFile = SPIFFS.open(firmware_name, "r");
+	if (!fwFile) {
+		debug_outln_error(F("Failed reopening fw file.."));
+		return;
+	}
+
+	size_t fwSize = fwFile.size();
+	MD5Builder md5;
+	md5.begin();
+	md5.addStream(fwFile, fwSize);
+	md5.calculate();
+	fwFile.close();
+
+	String md5String = md5.toString();
+
+	// Firmware is always at least 64 and padded to 16 bytes
+	if (fwSize < (1<<16) || (fwSize % 16 != 0) || newFwmd5 != md5String) {
+		debug_outln_info(F("FW download failed validation.. deleting"));
+		SPIFFS.remove(firmware_name);
+		SPIFFS.remove(firmware_md5);
+		return;
+	}
+	debug_outln("success!", DEBUG_MIN_INFO);
 	// Unmout Filesystem before reboot
 	SPIFFS.end();
 
-	debug_outln_info(F("Starting OTA update ..."));
-	debug_outln_info(F("NodeMCU firmware : "), SOFTWARE_VERSION);
+	debug_outln("launching 2nd stage", DEBUG_MIN_INFO);
+	const HTTPUpdateResult ret = ESPhttpUpdate.update(FPSTR(FW_DOWNLOAD_HOST), 80,
+		"/air-rohr/loader-002.bin", String("LOADER-002"));
 
-	const String SDS_version = cfg::sds_read ? SDS_version_date() : "";
-	display_debug(F("Looking for"), F("OTA update"));
-	last_update_attempt = millis();
-	String version = SOFTWARE_VERSION + ' ' + esp_chipid + ' ' + SDS_version + ' ' +
-					 String(cfg::current_lang) + ' ' + String(INTL_LANG) + ' ' +
-					 String(cfg::use_beta ? "BETA" : "");
-	const HTTPUpdateResult ret = ESPhttpUpdate.update(FPSTR(UPDATE_HOST), UPDATE_PORT, UPDATE_URL, version);
 	String LastErrorString = ESPhttpUpdate.getLastErrorString().c_str();
 	switch(ret) {
 	case HTTP_UPDATE_FAILED:
@@ -4103,7 +4202,7 @@ void setup(void) {
 	bool got_ntp = acquireNetworkTime();
 	debug_out(F("\nNTP time "), DEBUG_MIN_INFO);
 	debug_outln_info(got_ntp ? FPSTR(DBG_TXT_FOUND) : FPSTR(DBG_TXT_NOT_FOUND));
-	autoUpdate();
+	twoStageAutoUpdate();
 	setup_webserver();
 	create_basic_auth_strings();
 	debug_outln_info(F("\nChipId: "), esp_chipid);
@@ -4354,7 +4453,7 @@ void loop(void) {
 		checkForceRestart();
 
 		if (msSince(last_update_attempt) > PAUSE_BETWEEN_UPDATE_ATTEMPTS_MS) {
-			autoUpdate();
+			twoStageAutoUpdate();
 		}
 
 		sending_time = (4 * sending_time + sum_send_time) / 5;
