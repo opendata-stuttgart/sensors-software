@@ -330,26 +330,26 @@ namespace cfg {
 #define URL_MADAVI "/data.php"
 #define PORT_MADAVI 80
 
-#define HOST_DUSTI "api.sensor.community"
-#define URL_DUSTI "/v1/push-sensor-data/"
+static const char HOST_DUSTI[] PROGMEM = "api.sensor.community";
+static const char URL_DUSTI[] PROGMEM = "/v1/push-sensor-data/";
 #define PORT_DUSTI 80
 
 // IMPORTANT: NO MORE CHANGES TO VARIABLE NAMES NEEDED FOR EXTERNAL APIS
 
-#define HOST_SENSEMAP "ingress.opensensemap.org"
-#define URL_SENSEMAP "/boxes/{v}/data?luftdaten=1"
+static const char HOST_SENSEMAP[] PROGMEM = "ingress.opensensemap.org";
+static const char URL_SENSEMAP[] PROGMEM = "/boxes/{v}/data?luftdaten=1";
 #define PORT_SENSEMAP 443
 
-#define HOST_FSAPP "www.h2801469.stratoserver.net"
-#define URL_FSAPP "/data.php"
+static const char HOST_FSAPP[] PROGMEM = "www.h2801469.stratoserver.net";
+static const char URL_FSAPP[] PROGMEM = "/data.php";
 #define PORT_FSAPP 80
 
-#define HOST_AIRCMS "doiot.ru"
-#define URL_AIRCMS "/php/sensors.php?h="
+static const char HOST_AIRCMS[] PROGMEM = "doiot.ru";
+static const char URL_AIRCMS[] PROGMEM = "/php/sensors.php?h=";
 #define PORT_AIRCMS 443
 
-#define UPDATE_HOST "firmware.sensor.community"
-#define UPDATE_URL "/airrohr/firmware.php"
+static const char UPDATE_HOST[] PROGMEM = "firmware.sensor.community";
+static const char UPDATE_URL[] PROGMEM = "/airrohr/firmware.php";
 #define UPDATE_PORT 80
 
 #define JSON_BUFFER_SIZE 2300
@@ -2329,12 +2329,13 @@ static void connectWifi() {
 static unsigned long sendData(const String& data, const int pin, const char* host, const int httpPort, const char* url, const bool use_ssl, const char* basic_auth_string, const __FlashStringHelper* contentType) {
 
 	unsigned long start_send = millis();
-	String s_Host = host;
+	String s_Host = FPSTR(host);
+	String s_url = FPSTR(url);
 
 	debug_outln_info(F("Start sendData to "), s_Host);
 
 	String request_head = F("POST ");
-	request_head += url;
+	request_head += s_url;
 	request_head += F(" HTTP/1.1\r\nHost: ");
 	request_head += s_Host;
 	request_head += F("\r\nContent-Type: ");
@@ -2365,7 +2366,7 @@ static unsigned long sendData(const String& data, const int pin, const char* hos
 	};
 
 	const auto doRequest = [ = ](WiFiClient * client) {
-		debug_outln_info(F("Requesting URL: "), url);
+		debug_outln_info(F("Requesting URL: "), s_url);
 		debug_outln_verbose(esp_chipid);
 		debug_outln_verbose(data);
 
@@ -3462,15 +3463,8 @@ static void autoUpdate() {
 	String version = SOFTWARE_VERSION + ' ' + esp_chipid + ' ' + SDS_version + ' ' +
 					 String(cfg::current_lang) + ' ' + String(INTL_LANG) + ' ' +
 					 String(cfg::use_beta ? "BETA" : "");
-#if defined(ESP8266)
-	const HTTPUpdateResult ret = ESPhttpUpdate.update(UPDATE_HOST, UPDATE_PORT, UPDATE_URL, version);
+	const HTTPUpdateResult ret = ESPhttpUpdate.update(FPSTR(UPDATE_HOST), UPDATE_PORT, UPDATE_URL, version);
 	String LastErrorString = ESPhttpUpdate.getLastErrorString().c_str();
-#endif
-#if defined(ESP32)
-	WiFiClient client;
-	t_httpUpdate_return ret = httpUpdate.update(client, UPDATE_HOST, UPDATE_PORT, UPDATE_URL, version);
-	String LastErrorString = httpUpdate.getLastErrorString().c_str();
-#endif
 	switch(ret) {
 	case HTTP_UPDATE_FAILED:
 		debug_outln_error(FPSTR(DBG_TXT_UPDATE));
@@ -4042,7 +4036,7 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 
 	if (cfg::send2sensemap && (cfg::senseboxid[0] != '\0')) {
 		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("opensensemap: "));
-		String sensemap_path(tmpl(F(URL_SENSEMAP), cfg::senseboxid));
+		String sensemap_path(tmpl(FPSTR(URL_SENSEMAP), cfg::senseboxid));
 		sum_send_time += sendData(data, 0, HOST_SENSEMAP, PORT_SENSEMAP, sensemap_path.c_str(), true, "", FPSTR(TXT_CONTENT_TYPE_JSON));
 	}
 
@@ -4056,7 +4050,8 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 		unsigned long ts = millis() / 1000;
 		String token = WiFi.macAddress();
 		String aircms_data = "L=" + esp_chipid + "&t=" + String(ts, DEC) + "&airrohr=" + data;
-		String aircms_url = URL_AIRCMS + hmac1(sha1Hex(token), aircms_data + token);
+		String aircms_url(FPSTR(URL_AIRCMS));
+		aircms_url += hmac1(sha1Hex(token), aircms_data + token);
 
 		sum_send_time += sendData(aircms_data, 0, HOST_AIRCMS, PORT_AIRCMS, aircms_url.c_str(), true, "", FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN));
 	}
