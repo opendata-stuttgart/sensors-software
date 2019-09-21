@@ -872,47 +872,47 @@ static String SDS_version_date() {
 //		"aa" = 170, "ab" = 171, "c0" = 192
 		value = int(buffer);
 		switch (len) {
-		case (0):
+		case 0:
 			if (value != 170) {
 				len = -1;
 			};
 			break;
-		case (1):
+		case 1:
 			if (value != 197) {
 				len = -1;
 			};
 			break;
-		case (2):
+		case 2:
 			if (value != 7) {
 				len = -1;
 			};
 			checksum_is = 7;
 			break;
-		case (3):
+		case 3:
 			version_date  = String(value);
 			break;
-		case (4):
+		case 4:
 			version_date += '-';
 			version_date += String(value);
 			break;
-		case (5):
+		case 5:
 			version_date += '-';
 			version_date += String(value);
 			break;
-		case (6):
+		case 6:
 			if (value < 0x10) {
 				device_id  = "0" + String(value, HEX);
 			} else {
 				device_id  = String(value, HEX);
 			};
 			break;
-		case (7):
+		case 7:
 			if (value < 0x10) {
 				device_id += '0';
 			};
 			device_id += String(value, HEX);
 			break;
-		case (8):
+		case 8:
 			debug_outln_verbose(FPSTR(DBG_TXT_CHECKSUM_IS), String(checksum_is % 256));
 			debug_outln_verbose(FPSTR(DBG_TXT_CHECKSUM_SHOULD), String(value));
 			if (value == (checksum_is % 256)) {
@@ -921,7 +921,7 @@ static String SDS_version_date() {
 				len = -1;
 			};
 			break;
-		case (9):
+		case 9:
 			if (value != 171) {
 				len = -1;
 			};
@@ -2771,30 +2771,30 @@ static String sensorSDS() {
 //			"aa" = 170, "ab" = 171, "c0" = 192
 			value = int(buffer);
 			switch (len) {
-			case (0):
+			case 0:
 				if (value != 170) {
 					len = -1;
 				};
 				break;
-			case (1):
+			case 1:
 				if (value != 192) {
 					len = -1;
 				};
 				break;
-			case (2):
+			case 2:
 				pm25_serial = value;
 				checksum_is = value;
 				break;
-			case (3):
+			case 3:
 				pm25_serial += (value << 8);
 				break;
-			case (4):
+			case 4:
 				pm10_serial = value;
 				break;
-			case (5):
+			case 5:
 				pm10_serial += (value << 8);
 				break;
-			case (8):
+			case 8:
 				debug_outln_verbose(FPSTR(DBG_TXT_CHECKSUM_IS), String(checksum_is % 256));
 				debug_outln_verbose(FPSTR(DBG_TXT_CHECKSUM_SHOULD), String(value));
 				if (value == (checksum_is % 256)) {
@@ -2803,7 +2803,7 @@ static String sensorSDS() {
 					len = -1;
 				};
 				break;
-			case (9):
+			case 9:
 				if (value != 171) {
 					len = -1;
 				};
@@ -2907,54 +2907,54 @@ static String sensorPMS() {
 //			"aa" = 170, "ab" = 171, "c0" = 192
 			value = int(buffer);
 			switch (len) {
-			case (0):
+			case 0:
 				if (value != 66) {
 					len = -1;
 				};
 				break;
-			case (1):
+			case 1:
 				if (value != 77) {
 					len = -1;
 				};
 				break;
-			case (2):
+			case 2:
 				checksum_is = value;
 				break;
-			case (3):
+			case 3:
 				frame_len = value + 4;
 				break;
-			case (10):
+			case 10:
 				pm1_serial += ( value << 8);
 				break;
-			case (11):
+			case 11:
 				pm1_serial += value;
 				break;
-			case (12):
+			case 12:
 				pm25_serial = ( value << 8);
 				break;
-			case (13):
+			case 13:
 				pm25_serial += value;
 				break;
-			case (14):
+			case 14:
 				pm10_serial = ( value << 8);
 				break;
-			case (15):
+			case 15:
 				pm10_serial += value;
 				break;
-			case (22):
+			case 22:
 				if (frame_len == 24) {
 					checksum_should = ( value << 8 );
 				};
 				break;
-			case (23):
+			case 23:
 				if (frame_len == 24) {
 					checksum_should += value;
 				};
 				break;
-			case (30):
+			case 30:
 				checksum_should = ( value << 8 );
 				break;
-			case (31):
+			case 31:
 				checksum_should += value;
 				break;
 			}
@@ -3080,35 +3080,35 @@ static String sensorHPM() {
 //			"aa" = 170, "ab" = 171, "c0" = 192
 			value = int(buffer);
 			switch (len) {
-			case (0):
+			case 0:
 				if (value != 66) {
 					len = -1;
 				};
 				break;
-			case (1):
+			case 1:
 				if (value != 77) {
 					len = -1;
 				};
 				break;
-			case (2):
+			case 2:
 				checksum_is = value;
 				break;
-			case (6):
+			case 6:
 				pm25_serial += ( value << 8);
 				break;
-			case (7):
+			case 7:
 				pm25_serial += value;
 				break;
-			case (8):
+			case 8:
 				pm10_serial = ( value << 8);
 				break;
-			case (9):
+			case 9:
 				pm10_serial += value;
 				break;
-			case (30):
+			case 30:
 				checksum_should = ( value << 8 );
 				break;
-			case (31):
+			case 31:
 				checksum_should += value;
 				break;
 			}
@@ -3667,7 +3667,7 @@ static void display_values() {
 	}
 	if (cfg::has_display || cfg::has_sh1106 || cfg::has_lcd2004_27) {
 		switch (screens[next_display_count % screen_count]) {
-		case (1):
+		case 1:
 			display_header = pm25_sensor;
 			if (pm25_sensor != pm10_sensor) {
 				display_header += " / " + pm10_sensor;
@@ -3676,7 +3676,7 @@ static void display_values() {
 			display_lines[1] = "PM10:  " + check_display_value(pm10_value, -1, 1, 6) + " µg/m³";
 			display_lines[2] = "";
 			break;
-		case (2):
+		case 2:
 			display_header = t_sensor;
 			if (h_sensor != "" && t_sensor != h_sensor) {
 				display_header += " / " + h_sensor;
@@ -3689,31 +3689,31 @@ static void display_values() {
 			if (p_sensor != "") { display_lines[line_count++] = "Pres.: " + check_display_value(p_value / 100, (-1 / 100.0), 1, 6) + " hPa"; }
 			while (line_count < 3) { display_lines[line_count++] = ""; }
 			break;
-		case (3):
+		case 3:
 			display_header = gps_sensor;
 			display_lines[0] = "Lat: " + check_display_value(lat_value, -200.0, 6, 10);
 			display_lines[1] = "Lon: " + check_display_value(lon_value, -200.0, 6, 10);
 			display_lines[2] = "Alt: " + check_display_value(alt_value, -1000.0, 2, 10);
 			break;
-		case (4):
+		case 4:
 			display_header = FPSTR(SENSORS_SPS30);
 			display_lines[0] = "PM: " + check_display_value(pm010_value, -1, 1, 4) + " " + check_display_value(pm25_value, -1, 1, 4) + " " + check_display_value(pm040_value, -1, 1, 4) + " " + check_display_value(pm10_value, -1, 1, 4);
 			display_lines[1] = "NC: " + check_display_value(nc005_value, -1, 0, 3) + " " + check_display_value(nc010_value, -1, 0, 3) + " " + check_display_value(nc025_value, -1, 0, 3) + " " + check_display_value(nc040_value, -1, 0, 3) + " " + check_display_value(nc100_value, -1, 0, 3);
 			display_lines[2] = "TPS: " + check_display_value(tps_value, -1, 2, 5) + " µm";
 			break;
-		case (5):
+		case 5:
 			display_header = FPSTR(SENSORS_DNMS);
 			display_lines[0] = "LAeq: " + check_display_value(la_eq_value, -1, 1, 6) + " db(A)";
 			display_lines[1] = "LA_max: " + check_display_value(la_max_value, -1, 1, 6) + " db(A)";
 			display_lines[2] = "LA_min: " + check_display_value(la_min_value, -1, 1, 6) + " db(A)";;
 			break;
-		case (6):
+		case 6:
 			display_header = F("Wifi info");
 			display_lines[0] = "IP: " + WiFi.localIP().toString();
 			display_lines[1] = "SSID:" + WiFi.SSID();
 			display_lines[2] = "Signal: " + String(calcWiFiSignalQuality(WiFi.RSSI())) + "%";
 			break;
-		case (7):
+		case 7:
 			display_header = F("Device Info");
 			display_lines[0] = "ID: " + esp_chipid;
 			display_lines[1] = "FW: " + String(SOFTWARE_VERSION);
@@ -3770,23 +3770,23 @@ static void display_values() {
 // T/P: -10.0°C/1000hPa
 
 	switch (screens[next_display_count % screen_count]) {
-	case (1):
+	case 1:
 		display_lines[0] = "PM2.5: " + check_display_value(pm25_value, -1, 1, 6);
 		display_lines[1] = "PM10:  " + check_display_value(pm10_value, -1, 1, 6);
 		break;
-	case (2):
+	case 2:
 		display_lines[0] = "T: " + check_display_value(t_value, -128, 1, 6) + char(223) + "C";
 		display_lines[1] = "H: " + check_display_value(h_value, -1, 1, 6) + "%";
 		break;
-	case (3):
+	case 3:
 		display_lines[0] = "Lat: " + check_display_value(lat_value, -200.0, 6, 11);
 		display_lines[1] = "Lon: " + check_display_value(lon_value, -200.0, 6, 11);
 		break;
-	case (4):
+	case 4:
 		display_lines[0] = WiFi.localIP().toString();
 		display_lines[1] = WiFi.SSID();
 		break;
-	case (5):
+	case 5:
 		display_lines[0] = "ID: " + esp_chipid;
 		display_lines[1] = "FW: " + SOFTWARE_VERSION;
 		break;
