@@ -178,12 +178,9 @@
 #define BMP_READ 0
 #define BMP_API_PIN 3
 
-// BMP280, temperature, pressure
-#define BMP280_READ 0
+// BMP280/BME280, temperature, pressure (humidity on BME280)
+#define BMX280_READ 0
 #define BMP280_API_PIN 3
-
-// BME280, temperature, humidity, pressure
-#define BME280_READ 0
 #define BME280_API_PIN 11
 
 // DS18B20, temperature

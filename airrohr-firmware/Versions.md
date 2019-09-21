@@ -7,7 +7,8 @@ NRZ-2019-124-B6
 * Code size optimisations
 * Serve config pages incrementally to avoid running out of memory
 * Write more compliant config JSON
-* Advertise as http://airrohr.local/ in AP mode
+* Advertise as http://airrohr-$espid.local/ in AP mode
+* BMP280/BME280 sensors are merged into one implementation
 
 NRZ-2019-124-B5
 * some comments removed
