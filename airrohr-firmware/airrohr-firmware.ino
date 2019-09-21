@@ -556,7 +556,7 @@ bool sntp_time_is_set = false;
 
 unsigned long count_sends = 0;
 unsigned long next_display_millis = 0;
-unsigned long next_display_count = 0;
+uint8_t next_display_count = 0;
 
 struct struct_wifiInfo {
 	char ssid[LEN_WLANSSID];
@@ -3525,8 +3525,8 @@ static void display_values() {
 	double alt_value = -1000.0;
 	String gps_sensor, display_header;
 	String display_lines[3] = { "", "", ""};
-	int screen_count = 0;
-	int screens[5];
+	uint8_t screen_count = 0;
+	uint8_t screens[8];
 	int line_count = 0;
 	debug_outln_info(F("output values to display..."));
 	if (cfg::ppd_read) {
@@ -3627,6 +3627,8 @@ static void display_values() {
 	if (cfg::display_device_info) {
 		screens[screen_count++] = 7;	// chipID, firmware and count of measurements
 	}
+	// update size of "screens" when adding more screens!
+
 	if (cfg::has_display || cfg::has_sh1106 || cfg::has_lcd2004_27) {
 		switch (screens[next_display_count % screen_count]) {
 		case 1:
