@@ -2,12 +2,12 @@
 #define CURRENT_LANG INTL_LANG
 
 // Wifi config
-#define WLANSSID "Freifunk-disabled"
-#define WLANPWD ""
+const char WLANSSID[] PROGMEM = "Freifunk-disabled";
+const char WLANPWD[] PROGMEM = "";
 
 // BasicAuth config
-#define WWW_USERNAME "admin"
-#define WWW_PASSWORD "feinstaub"
+const char WWW_USERNAME[] PROGMEM = "admin";
+const char WWW_PASSWORD[] PROGMEM = "feinstaub";
 #define WWW_BASICAUTH_ENABLED 0
 
 // Sensor Wifi config (config mode)
@@ -28,12 +28,8 @@
 #define SEND2CSV 0
 #define SEND2CUSTOM 0
 
-// NTP Server
-#define NTP_SERVER "0.europe.pool.ntp.org"
-
 // OpenSenseMap
 #define SENSEBOXID ""
-
 
 // IMPORTANT: NO MORE CHANGES TO VARIABLE NAMES NEEDED FOR EXTERNAL APIS
 
@@ -46,12 +42,12 @@
 #define SSL_CUSTOM 0
 
 // define own InfluxDB
-#define HOST_INFLUX "influx.server"
-#define URL_INFLUX "/write?db=luftdaten"
+const char HOST_INFLUX[] PROGMEM = "influx.server";
+const char URL_INFLUX[] PROGMEM = "/write?db=luftdaten";
 #define PORT_INFLUX 8086
 #define USER_INFLUX ""
 #define PWD_INFLUX ""
-#define MEASUREMENT_NAME_INFLUX "feinstaub"
+const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 #define SSL_INFLUX 0
 
 //  === pin assignments for NodeMCU V2 board ===================================
@@ -178,12 +174,9 @@
 #define BMP_READ 0
 #define BMP_API_PIN 3
 
-// BMP280, temperature, pressure
-#define BMP280_READ 0
+// BMP280/BME280, temperature, pressure (humidity on BME280)
+#define BMX280_READ 0
 #define BMP280_API_PIN 3
-
-// BME280, temperature, humidity, pressure
-#define BME280_READ 0
 #define BME280_API_PIN 11
 
 // DS18B20, temperature

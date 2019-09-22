@@ -167,10 +167,9 @@ const String SOFTWARE_VERSION("NRZ-2019-124-B6");
 #include "./DHT.h"
 #include <Adafruit_HTU21DF.h>
 #include <Adafruit_BMP085.h>
-#include <Adafruit_BMP280.h>
-#include <Adafruit_BME280.h>
 #include <DallasTemperature.h>
 #include <TinyGPS++.h>
+#include "./bmx280_i2c.h"
 #include "./sps30_i2c.h"
 #include "./dnms_i2c.h"
 #include "./mhz19.h"
@@ -242,18 +241,16 @@ namespace cfg {
 
 	// credentials for basic auth of internal web server
 	bool www_basicauth_enabled = WWW_BASICAUTH_ENABLED;
-	char www_username[LEN_WWW_USERNAME]  = WWW_USERNAME;
-	char www_password[LEN_WWW_PASSWORD]   = WWW_PASSWORD;
+	char www_username[LEN_WWW_USERNAME];
+	char www_password[LEN_WWW_PASSWORD];
 
 	// wifi credentials
-	char wlanssid[LEN_WLANSSID]  = WLANSSID;
-	char wlanpwd[LEN_WLANPWD]  = WLANPWD;
+	char wlanssid[LEN_WLANSSID];
+	char wlanpwd[LEN_WLANPWD];
 
 	// credentials of the sensor in access point mode
-	char fs_ssid[LEN_FS_SSID]  = FS_SSID;
-	char fs_pwd[LEN_FS_PWD]   = FS_PWD;
-
-	char version_from_local_config[20]   = "";
+	char fs_ssid[LEN_FS_SSID] = FS_SSID;
+	char fs_pwd[LEN_FS_PWD] = FS_PWD;
 
 	// (in)active sensors
 	bool dht_read = DHT_READ;
@@ -264,8 +261,7 @@ namespace cfg {
 	bool hpm_read = HPM_READ;
 	bool sps30_read = SPS30_READ;
 	bool bmp_read = BMP_READ;
-	bool bmp280_read = BMP280_READ;
-	bool bme280_read = BME280_READ;
+	bool bmx280_read = BMX280_READ;
 	bool ds18b20_read = DS18B20_READ;
 	bool dnms_read = DNMS_READ;
 	char dnms_correction[LEN_DNMS_CORRECTION] = DNMS_CORRECTION;
@@ -301,12 +297,12 @@ namespace cfg {
 	bool ssl_dusti = SSL_DUSTI;
 	char senseboxid[LEN_SENSEBOXID] = SENSEBOXID;
 
-	char host_influx[LEN_HOST_INFLUX] = HOST_INFLUX;
-	char url_influx[LEN_URL_INFLUX] = URL_INFLUX;
+	char host_influx[LEN_HOST_INFLUX];
+	char url_influx[LEN_URL_INFLUX];
 	unsigned int port_influx = PORT_INFLUX;
 	char user_influx[LEN_USER_INFLUX] = USER_INFLUX;
 	char pwd_influx[LEN_PWD_INFLUX] = PWD_INFLUX;
-	char measurement_name_influx[LEN_MEASUREMENT_NAME_INFLUX]  = MEASUREMENT_NAME_INFLUX;
+	char measurement_name_influx[LEN_MEASUREMENT_NAME_INFLUX];
 	bool ssl_influx = SSL_INFLUX;
 
 	char host_custom[LEN_HOST_CUSTOM] = HOST_CUSTOM;
@@ -318,6 +314,14 @@ namespace cfg {
 
 	void initNonTrivials(const char* id) {
 		strcpy(cfg::current_lang, CURRENT_LANG);
+		strcpy_P(www_username, WWW_USERNAME);
+		strcpy_P(www_password, WWW_PASSWORD);
+		strcpy_P(wlanssid, WLANSSID);
+		strcpy_P(wlanpwd, WLANPWD);
+		strcpy_P(host_influx, HOST_INFLUX);
+		strcpy_P(url_influx, URL_INFLUX);
+		strcpy_P(measurement_name_influx, MEASUREMENT_NAME_INFLUX);
+
 		if (fs_ssid[0] == '\0') {
 			strcpy(fs_ssid, SSID_BASENAME);
 			strcat(fs_ssid, id);
@@ -329,26 +333,26 @@ namespace cfg {
 #define URL_MADAVI "/data.php"
 #define PORT_MADAVI 80
 
-#define HOST_DUSTI "api.sensor.community"
-#define URL_DUSTI "/v1/push-sensor-data/"
+static const char HOST_DUSTI[] PROGMEM = "api.sensor.community";
+static const char URL_DUSTI[] PROGMEM = "/v1/push-sensor-data/";
 #define PORT_DUSTI 80
 
 // IMPORTANT: NO MORE CHANGES TO VARIABLE NAMES NEEDED FOR EXTERNAL APIS
 
-#define HOST_SENSEMAP "ingress.opensensemap.org"
-#define URL_SENSEMAP "/boxes/{v}/data?luftdaten=1"
+static const char HOST_SENSEMAP[] PROGMEM = "ingress.opensensemap.org";
+static const char URL_SENSEMAP[] PROGMEM = "/boxes/{v}/data?luftdaten=1";
 #define PORT_SENSEMAP 443
 
-#define HOST_FSAPP "www.h2801469.stratoserver.net"
-#define URL_FSAPP "/data.php"
+static const char HOST_FSAPP[] PROGMEM = "www.h2801469.stratoserver.net";
+static const char URL_FSAPP[] PROGMEM = "/data.php";
 #define PORT_FSAPP 80
 
-#define HOST_AIRCMS "doiot.ru"
-#define URL_AIRCMS "/php/sensors.php?h="
+static const char HOST_AIRCMS[] PROGMEM = "doiot.ru";
+static const char URL_AIRCMS[] PROGMEM = "/php/sensors.php?h=";
 #define PORT_AIRCMS 443
 
-#define UPDATE_HOST "firmware.sensor.community"
-#define UPDATE_URL "/airrohr/firmware.php"
+static const char UPDATE_HOST[] PROGMEM = "firmware.sensor.community";
+static const char UPDATE_URL[] PROGMEM = "/airrohr/firmware.php";
 #define UPDATE_PORT 80
 
 #define JSON_BUFFER_SIZE 2300
@@ -367,8 +371,7 @@ String basic_auth_custom;
 
 long int sample_count = 0;
 bool bmp_init_failed = false;
-bool bmp280_init_failed = false;
-bool bme280_init_failed = false;
+bool bmx280_init_failed = false;
 bool dnms_init_failed = false;
 
 #if defined(ESP8266)
@@ -429,14 +432,9 @@ Adafruit_HTU21DF htu21d;
 Adafruit_BMP085 bmp;
 
 /*****************************************************************
- * BMP280 declaration                                               *
+ * BMP/BME280 declaration                                        *
  *****************************************************************/
-Adafruit_BMP280 bmp280;
-
-/*****************************************************************
- * BME280 declaration                                            *
- *****************************************************************/
-Adafruit_BME280 bme280;
+BMX280 bmx280;
 
 /*****************************************************************
  * DS18B20 declaration                                            *
@@ -483,11 +481,9 @@ unsigned long last_update_attempt;
 
 float last_value_BMP_T = -128.0;
 float last_value_BMP_P = -1.0;
-float last_value_BMP280_T = -128.0;
-float last_value_BMP280_P = -1.0;
-float last_value_BME280_T = -128.0;
+float last_value_BMX280_T = -128.0;
+float last_value_BMX280_P = -1.0;
 float last_value_BME280_H = -1.0;
-float last_value_BME280_P = -1.0;
 float last_value_DHT_T = -128.0;
 float last_value_DHT_H = -1.0;
 float last_value_DS18B20_T = -1.0;
@@ -576,7 +572,7 @@ bool sntp_time_is_set = false;
 
 unsigned long count_sends = 0;
 unsigned long next_display_millis = 0;
-unsigned long next_display_count = 0;
+uint8_t next_display_count = 0;
 
 struct struct_wifiInfo {
 	char ssid[LEN_WLANSSID];
@@ -882,47 +878,47 @@ static String SDS_version_date() {
 //		"aa" = 170, "ab" = 171, "c0" = 192
 		value = int(buffer);
 		switch (len) {
-		case (0):
+		case 0:
 			if (value != 170) {
 				len = -1;
 			};
 			break;
-		case (1):
+		case 1:
 			if (value != 197) {
 				len = -1;
 			};
 			break;
-		case (2):
+		case 2:
 			if (value != 7) {
 				len = -1;
 			};
 			checksum_is = 7;
 			break;
-		case (3):
+		case 3:
 			version_date  = String(value);
 			break;
-		case (4):
+		case 4:
 			version_date += '-';
 			version_date += String(value);
 			break;
-		case (5):
+		case 5:
 			version_date += '-';
 			version_date += String(value);
 			break;
-		case (6):
+		case 6:
 			if (value < 0x10) {
 				device_id  = "0" + String(value, HEX);
 			} else {
 				device_id  = String(value, HEX);
 			};
 			break;
-		case (7):
+		case 7:
 			if (value < 0x10) {
 				device_id += '0';
 			};
 			device_id += String(value, HEX);
 			break;
-		case (8):
+		case 8:
 			debug_outln_verbose(FPSTR(DBG_TXT_CHECKSUM_IS), String(checksum_is % 256));
 			debug_outln_verbose(FPSTR(DBG_TXT_CHECKSUM_SHOULD), String(value));
 			if (value == (checksum_is % 256)) {
@@ -931,7 +927,7 @@ static String SDS_version_date() {
 				len = -1;
 			};
 			break;
-		case (9):
+		case 9:
 			if (value != 171) {
 				len = -1;
 			};
@@ -1010,10 +1006,6 @@ static void readConfig() {
 
 	if (!err) {
 		debug_outln_info(F("parsed json..."));
-		if (json.containsKey("SOFTWARE_VERSION")) {
-			strcpy(cfg::version_from_local_config, json["SOFTWARE_VERSION"]);
-		}
-
 		for (unsigned e = 0; e < sizeof(configShape)/sizeof(configShape[0]); ++e) {
 			ConfigShapeEntry c;
 			memcpy_P(&c, &configShape[e], sizeof(ConfigShapeEntry));
@@ -1034,24 +1026,29 @@ static void readConfig() {
 			};
 		}
 
-		if (strcmp(cfg::senseboxid, "00112233445566778899aabb") == 0) {
-			strcpy(cfg::senseboxid, "");
+		if (strcmp_P(cfg::senseboxid, PSTR("00112233445566778899aabb")) == 0) {
+			cfg::senseboxid[0] = '\0';
 			cfg::send2sensemap = false;
 		}
 		if (strlen(cfg::measurement_name_influx) == 0) {
-			strcpy(cfg::measurement_name_influx, MEASUREMENT_NAME_INFLUX);
+			strcpy_P(cfg::measurement_name_influx, MEASUREMENT_NAME_INFLUX);
 		}
-		if (strcmp(cfg::host_influx, "api.luftdaten.info") == 0) {
-			strcpy(cfg::host_influx, "");
+		if (strcmp_P(cfg::host_influx, PSTR("api.luftdaten.info")) == 0) {
+			cfg::host_influx[0] = '\0';
 			cfg::send2influx = false;
 		}
 		if(cfg::gps_read && cfg::mhz19_read) { // cannot be active at the same time
 			cfg::mhz19_read = false;
 		}
-		if (json["pm24_read"] || json["pms32_read"]) {
+		if (boolFromJSON(json, "pms24_read") || boolFromJSON(json, "pms32_read")) {
 			cfg::pms_read = true;
 			writeConfig();
 		}
+		if (boolFromJSON(json, "bmp280_read") || boolFromJSON(json, "bme280_read")) {
+			cfg::bmx280_read = true;
+			writeConfig();
+		}
+
 	} else {
 		debug_outln_error(F("failed to load json config"));
 	}
@@ -1483,8 +1480,7 @@ static void webserver_config_send_body_get() {
 		add_form_checkbox_sensor(page_content, "dht_read", FPSTR(INTL_DHT22), dht_read);
 		add_form_checkbox_sensor(page_content, "htu21d_read", FPSTR(INTL_HTU21D), htu21d_read);
 		add_form_checkbox_sensor(page_content, "bmp_read", FPSTR(INTL_BMP180), bmp_read);
-		add_form_checkbox_sensor(page_content, "bmp280_read", FPSTR(INTL_BMP280), bmp280_read);
-		add_form_checkbox_sensor(page_content, "bme280_read", FPSTR(INTL_BME280), bme280_read);
+		add_form_checkbox_sensor(page_content, "bmx280_read", FPSTR(INTL_BMX280), bmx280_read);
 		add_form_checkbox_sensor(page_content, "ds18b20_read", FPSTR(INTL_DS18B20), ds18b20_read);
 		add_form_checkbox_sensor(page_content, "dnms_read", FPSTR(INTL_DNMS), dnms_read);
 		page_content += FPSTR(TABLE_TAG_OPEN);
@@ -1686,9 +1682,7 @@ static void webserver_config_send_body_post() {
 	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("HPM"), hpm_read);
 	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("SPS30"), sps30_read);
 	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("PPD"), ppd_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_BMP180), bmp_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_BMP280), bmp280_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_BME280), bme280_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_BMX280), bmx280_read);
 	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("DS18B20"), ds18b20_read);
 	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("DNMS"), dnms_read);
 	add_line_value_bool(page_content, FPSTR(INTL_DNMS_CORRECTION), String(dnms_correction));
@@ -1933,16 +1927,13 @@ static void webserver_values() {
 			add_table_row_from_value(page_content, FPSTR(SENSORS_BMP180), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_BMP_T, -128, 1, 0), unit_T);
 			add_table_row_from_value(page_content, FPSTR(SENSORS_BMP180), FPSTR(INTL_PRESSURE), check_display_value(last_value_BMP_P / 100.0, (-1 / 100.0), 2, 0), unit_P);
 		}
-		if (cfg::bmp280_read) {
+		if (cfg::bmx280_read) {
 			page_content += FPSTR(EMPTY_ROW);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_BMP280), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_BMP280_T, -128, 1, 0), unit_T);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_BMP280), FPSTR(INTL_PRESSURE), check_display_value(last_value_BMP280_P / 100.0, (-1 / 100.0), 2, 0), unit_P);
-		}
-		if (cfg::bme280_read) {
-			page_content += FPSTR(EMPTY_ROW);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_BME280), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_BME280_T, -128, 1, 0), unit_T);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_BME280), FPSTR(INTL_HUMIDITY), check_display_value(last_value_BME280_H, -1, 1, 0), unit_H);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_BME280), FPSTR(INTL_PRESSURE), check_display_value(last_value_BME280_P / 100.0, (-1 / 100.0), 2, 0), unit_P);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_BMX280), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_BMX280_T, -128, 1, 0), unit_T);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_BMX280), FPSTR(INTL_PRESSURE), check_display_value(last_value_BMX280_P / 100.0, (-1 / 100.0), 2, 0), unit_P);
+			if (bmx280.sensorID() == BME280_SENSOR_ID) {
+				add_table_row_from_value(page_content, FPSTR(SENSORS_BMX280), FPSTR(INTL_HUMIDITY), check_display_value(last_value_BME280_H, -1, 1, 0), unit_H);
+			}
 		}
 		if (cfg::ds18b20_read) {
 			page_content += FPSTR(EMPTY_ROW);
@@ -2095,7 +2086,7 @@ static void webserver_data_json() {
 		age = 0 - age;
 	} else {
 		s1 = last_data_string;
-		debug_outln_info(F("last data: "), s1);
+		debug_outln(last_data_string, DEBUG_MED_INFO);
 		age = msSince(starttime);
 		if (age > cfg::sending_intervall_ms) {
 			age = 0;
@@ -2117,7 +2108,6 @@ static void webserver_prometheus_endpoint() {
 	debug_outln_info(F("output prometheus endpoint..."));
 	String data_4_prometheus = F("software_version{version=\"{ver}\",node=\"-{id}\"} 1\nuptime_ms{{id}} {up}\nsending_intervall_ms{{id}} {si}\nnumber_of_measurements{{id}} {cs}\n");
 	debug_outln_info(F("Parse JSON for Prometheus"));
-	debug_outln(last_data_string, DEBUG_MED_INFO);
 	String id(F("node=\"" SENSOR_BASENAME));
 	id += esp_chipid + "\"";
 	data_4_prometheus.replace("{id}", esp_chipid);
@@ -2184,17 +2174,17 @@ static void webserver_not_found() {
  *****************************************************************/
 static void setup_webserver() {
 	server.on("/", webserver_root);
-	server.on("/config", webserver_config);
-	server.on("/wifi", webserver_wifi);
-	server.on("/values", webserver_values);
-	server.on("/generate_204", webserver_config);
-	server.on("/fwlink", webserver_config);
-	server.on("/debug", webserver_debug_level);
-	server.on("/removeConfig", webserver_removeConfig);
-	server.on("/reset", webserver_reset);
-	server.on("/data.json", webserver_data_json);
-	server.on("/metrics", webserver_prometheus_endpoint);
-	server.on("/images", webserver_images);
+	server.on(F("/config"), webserver_config);
+	server.on(F("/wifi"), webserver_wifi);
+	server.on(F("/values"), webserver_values);
+	server.on(F("/generate_204"), webserver_config);
+	server.on(F("/fwlink"), webserver_config);
+	server.on(F("/debug"), webserver_debug_level);
+	server.on(F("/removeConfig"), webserver_removeConfig);
+	server.on(F("/reset"), webserver_reset);
+	server.on(F("/data.json"), webserver_data_json);
+	server.on(F("/metrics"), webserver_prometheus_endpoint);
+	server.on(F("/images"), webserver_images);
 	server.onNotFound(webserver_not_found);
 
 	debug_outln_info(F("Starting Webserver... "), WiFi.localIP().toString());
@@ -2363,12 +2353,13 @@ static void connectWifi() {
 static unsigned long sendData(const String& data, const int pin, const char* host, const int httpPort, const char* url, const bool use_ssl, const char* basic_auth_string, const __FlashStringHelper* contentType) {
 
 	unsigned long start_send = millis();
-	String s_Host = host;
+	String s_Host = FPSTR(host);
+	String s_url = FPSTR(url);
 
 	debug_outln_info(F("Start sendData to "), s_Host);
 
 	String request_head = F("POST ");
-	request_head += url;
+	request_head += s_url;
 	request_head += F(" HTTP/1.1\r\nHost: ");
 	request_head += s_Host;
 	request_head += F("\r\nContent-Type: ");
@@ -2399,7 +2390,7 @@ static unsigned long sendData(const String& data, const int pin, const char* hos
 	};
 
 	const auto doRequest = [ = ](WiFiClient * client) {
-		debug_outln_info(F("Requesting URL: "), url);
+		debug_outln_info(F("Requesting URL: "), s_url);
 		debug_outln_verbose(esp_chipid);
 		debug_outln_verbose(data);
 
@@ -2573,9 +2564,7 @@ static void send_csv(const String& data) {
 /*****************************************************************
  * read DHT22 sensor values                                      *
  *****************************************************************/
-static String sensorDHT() {
-	String s;
-
+static void fetchSensorDHT(String& s) {
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_DHT22));
 
 	// Check if valid number if non NaN (not a number) will be send.
@@ -2606,16 +2595,12 @@ static String sensorDHT() {
 	debug_outln_info(F("----"));
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_DHT22));
-
-	return s;
 }
 
 /*****************************************************************
  * read HTU21D sensor values                                     *
  *****************************************************************/
-static String sensorHTU21D() {
-	String s;
-
+static void fetchSensorHTU21D(String& s) {
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_HTU21D));
 
 	const auto t = htu21d.readTemperature();
@@ -2635,16 +2620,12 @@ static String sensorHTU21D() {
 	debug_outln_info(F("----"));
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_HTU21D));
-
-	return s;
 }
 
 /*****************************************************************
  * read BMP180 sensor values                                     *
  *****************************************************************/
-static String sensorBMP() {
-	String s;
-
+static void fetchSensorBMP(String& s) {
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_BMP180));
 
 	const auto p = bmp.readPressure();
@@ -2664,78 +2645,48 @@ static String sensorBMP() {
 	debug_outln_info(F("----"));
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_BMP180));
-
-	return s;
 }
 
 /*****************************************************************
- * read BMP280 sensor values                                     *
+ * read BMP280/BME280 sensor values                              *
  *****************************************************************/
-static String sensorBMP280() {
-	String s;
+static void fetchSensorBMX280(String& s) {
+	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_BMX280));
 
-	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_BMP280));
-
-	const auto p = bmp280.readPressure();
-	const auto t = bmp280.readTemperature();
-	if (isnan(p) || isnan(t)) {
-		last_value_BMP280_T = -128.0;
-		last_value_BMP280_P = -1.0;
-		debug_outln_error(F("BMP280 read failed"));
-	} else {
-		debug_outln_info(FPSTR(DBG_TXT_TEMPERATURE), t);
-		debug_outln_info(FPSTR(DBG_TXT_PRESSURE), (p / 100.0));
-		last_value_BMP280_T = t;
-		last_value_BMP280_P = p;
-		add_Value2Json(s, F("BMP280_pressure"), last_value_BMP280_P);
-		add_Value2Json(s, F("BMP280_temperature"), last_value_BMP280_T);
-	}
-	debug_outln_info(F("----"));
-
-	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_BMP280));
-
-	return s;
-}
-
-/*****************************************************************
- * read BME280 sensor values                                     *
- *****************************************************************/
-static String sensorBME280() {
-	String s;
-
-	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_BME280));
-
-	bme280.takeForcedMeasurement();
-	const auto t = bme280.readTemperature();
-	const auto h = bme280.readHumidity();
-	const auto p = bme280.readPressure();
-	if (isnan(t) || isnan(h) || isnan(p)) {
-		last_value_BME280_T = -128.0;
+	bmx280.takeForcedMeasurement();
+	const auto t = bmx280.readTemperature();
+	const auto p = bmx280.readPressure();
+	const auto h = bmx280.readHumidity();
+	if (isnan(t) || isnan(p)) {
+		last_value_BMX280_T = -128.0;
+		last_value_BMX280_P = -1.0;
 		last_value_BME280_H = -1.0;
-		last_value_BME280_P = -1.0;
-		debug_outln_error(F("BME280 read failed"));
+		debug_outln_error(F("BMP/BME280 read failed"));
 	} else {
 		debug_outln_info(FPSTR(DBG_TXT_TEMPERATURE), t);
-		debug_outln_info(FPSTR(DBG_TXT_HUMIDITY), h);
 		debug_outln_info(FPSTR(DBG_TXT_PRESSURE), (p / 100.0));
-		last_value_BME280_T = t;
-		last_value_BME280_H = h;
-		last_value_BME280_P = p;
-		add_Value2Json(s, F("BME280_temperature"), last_value_BME280_T);
-		add_Value2Json(s, F("BME280_humidity"), last_value_BME280_H);
-		add_Value2Json(s, F("BME280_pressure"), last_value_BME280_P);
+		last_value_BMX280_T = t;
+		last_value_BMX280_P = p;
+		if (bmx280.sensorID() == BME280_SENSOR_ID) {
+			add_Value2Json(s, F("BME280_temperature"), last_value_BMX280_T);
+			add_Value2Json(s, F("BME280_pressure"), last_value_BMX280_P);
+			debug_outln_info(FPSTR(DBG_TXT_HUMIDITY), h);
+			last_value_BME280_H = h;
+			add_Value2Json(s, F("BME280_humidity"), last_value_BME280_H);
+		} else {
+			add_Value2Json(s, F("BMP280_pressure"), last_value_BMX280_P);
+			add_Value2Json(s, F("BMP280_temperature"), last_value_BMX280_T);
+		}
 	}
 	debug_outln_info(F("----"));
 
-	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_BME280));
-
-	return s;
+	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_BMX280));
 }
 
 /*****************************************************************
  * read DS18B20 sensor values                                    *
  *****************************************************************/
-static String sensorDS18B20() {
+static void fetchSensorDS18B20(String& s) {
 	float t;
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_DS18B20));
 
@@ -2751,7 +2702,6 @@ static String sensorDS18B20() {
 		debug_outln_info(F("DS18B20 trying...."));
 	} while (count < MAX_ATTEMPTS && (isnan(t) || t >= 85.0 || t <= (-127.0)));
 
-	String s;
 	if (count == MAX_ATTEMPTS) {
 		last_value_DS18B20_T = -128.0;
 		debug_outln_error(F("DS18B20 read failed"));
@@ -2762,15 +2712,12 @@ static String sensorDS18B20() {
 	}
 	debug_outln_info(F("----"));
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_DS18B20));
-
-	return s;
 }
 
 /*****************************************************************
  * read SDS011 sensor values                                     *
  *****************************************************************/
-static String sensorSDS() {
-	String s;
+static void fetchSensorSDS(String& s) {
 	char buffer;
 	int value;
 	int len = 0;
@@ -2795,30 +2742,30 @@ static String sensorSDS() {
 //			"aa" = 170, "ab" = 171, "c0" = 192
 			value = int(buffer);
 			switch (len) {
-			case (0):
+			case 0:
 				if (value != 170) {
 					len = -1;
 				};
 				break;
-			case (1):
+			case 1:
 				if (value != 192) {
 					len = -1;
 				};
 				break;
-			case (2):
+			case 2:
 				pm25_serial = value;
 				checksum_is = value;
 				break;
-			case (3):
+			case 3:
 				pm25_serial += (value << 8);
 				break;
-			case (4):
+			case 4:
 				pm10_serial = value;
 				break;
-			case (5):
+			case 5:
 				pm10_serial += (value << 8);
 				break;
-			case (8):
+			case 8:
 				debug_outln_verbose(FPSTR(DBG_TXT_CHECKSUM_IS), String(checksum_is % 256));
 				debug_outln_verbose(FPSTR(DBG_TXT_CHECKSUM_SHOULD), String(value));
 				if (value == (checksum_is % 256)) {
@@ -2827,7 +2774,7 @@ static String sensorSDS() {
 					len = -1;
 				};
 				break;
-			case (9):
+			case 9:
 				if (value != 171) {
 					len = -1;
 				};
@@ -2851,8 +2798,8 @@ static String sensorSDS() {
 					if (sds_pm25_max < pm25_serial) {
 						sds_pm25_max = pm25_serial;
 					}
-					debug_outln_verbose(F("PM10 (sec.) : "), Float2String(double(pm10_serial) / 10.0));
-					debug_outln_verbose(F("PM2.5 (sec.): "), Float2String(double(pm25_serial) / 10.0));
+					debug_outln_verbose(F("PM10 (sec.) : "), String(double(pm10_serial) / 10.0));
+					debug_outln_verbose(F("PM2.5 (sec.): "), String(double(pm25_serial) / 10.0));
 					sds_val_count++;
 				}
 				len = 0;
@@ -2895,15 +2842,12 @@ static String sensorSDS() {
 	}
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_SDS011));
-
-	return s;
 }
 
 /*****************************************************************
  * read Plantronic PM sensor sensor values                       *
  *****************************************************************/
-static String sensorPMS() {
-	String s;
+static void fetchSensorPMS(String& s) {
 	char buffer;
 	int value;
 	int len = 0;
@@ -2931,54 +2875,54 @@ static String sensorPMS() {
 //			"aa" = 170, "ab" = 171, "c0" = 192
 			value = int(buffer);
 			switch (len) {
-			case (0):
+			case 0:
 				if (value != 66) {
 					len = -1;
 				};
 				break;
-			case (1):
+			case 1:
 				if (value != 77) {
 					len = -1;
 				};
 				break;
-			case (2):
+			case 2:
 				checksum_is = value;
 				break;
-			case (3):
+			case 3:
 				frame_len = value + 4;
 				break;
-			case (10):
+			case 10:
 				pm1_serial += ( value << 8);
 				break;
-			case (11):
+			case 11:
 				pm1_serial += value;
 				break;
-			case (12):
+			case 12:
 				pm25_serial = ( value << 8);
 				break;
-			case (13):
+			case 13:
 				pm25_serial += value;
 				break;
-			case (14):
+			case 14:
 				pm10_serial = ( value << 8);
 				break;
-			case (15):
+			case 15:
 				pm10_serial += value;
 				break;
-			case (22):
+			case 22:
 				if (frame_len == 24) {
 					checksum_should = ( value << 8 );
 				};
 				break;
-			case (23):
+			case 23:
 				if (frame_len == 24) {
 					checksum_should += value;
 				};
 				break;
-			case (30):
+			case 30:
 				checksum_should = ( value << 8 );
 				break;
-			case (31):
+			case 31:
 				checksum_should += value;
 				break;
 			}
@@ -3070,15 +3014,12 @@ static String sensorPMS() {
 	}
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_PMSx003));
-
-	return s;
 }
 
 /*****************************************************************
  * read Honeywell PM sensor sensor values                        *
  *****************************************************************/
-static String sensorHPM() {
-	String s;
+static void fetchSensorHPM(String& s) {
 	char buffer;
 	int value;
 	int len = 0;
@@ -3104,35 +3045,35 @@ static String sensorHPM() {
 //			"aa" = 170, "ab" = 171, "c0" = 192
 			value = int(buffer);
 			switch (len) {
-			case (0):
+			case 0:
 				if (value != 66) {
 					len = -1;
 				};
 				break;
-			case (1):
+			case 1:
 				if (value != 77) {
 					len = -1;
 				};
 				break;
-			case (2):
+			case 2:
 				checksum_is = value;
 				break;
-			case (6):
+			case 6:
 				pm25_serial += ( value << 8);
 				break;
-			case (7):
+			case 7:
 				pm25_serial += value;
 				break;
-			case (8):
+			case 8:
 				pm10_serial = ( value << 8);
 				break;
-			case (9):
+			case 9:
 				pm10_serial += value;
 				break;
-			case (30):
+			case 30:
 				checksum_should = ( value << 8 );
 				break;
-			case (31):
+			case 31:
 				checksum_should += value;
 				break;
 			}
@@ -3207,16 +3148,12 @@ static String sensorHPM() {
 	}
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_HPM));
-
-	return s;
 }
 
 /*****************************************************************
  * read PPD42NS sensor values                                    *
  *****************************************************************/
-static String sensorPPD() {
-	String s;
-
+static void fetchSensorPPD(String& s) {
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_PPD42NS));
 
 	if (msSince(starttime) <= SAMPLETIME_MS) {
@@ -3285,16 +3222,12 @@ static String sensorPPD() {
 	}
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_PPD42NS));
-
-	return s;
 }
 
 /*****************************************************************
    read SPS30 PM sensor values
  *****************************************************************/
-static String sensorSPS30() {
-	String s;
-
+static void fetchSensorSPS30(String& s) {
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_SPS30));
 
 	last_value_SPS30_P0 = value_SPS30_P0 / SPS30_measurement_count;
@@ -3349,14 +3282,23 @@ static String sensorSPS30() {
 
 	debug_outln_info(F("----"));
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_SPS30));
-	return s;
 }
 
 /*****************************************************************
    read DNMS values
  *****************************************************************/
-static String sensorDNMS() {
-	String s;
+
+static float readDNMScorrection() {
+	char* pEnd = nullptr;
+	// Avoiding atof() here as this adds a lot (~ 9kb) of code size
+	float r = float(strtol(cfg::dnms_correction, &pEnd, 10));
+	if (pEnd && pEnd[0] == '.' && pEnd[1] >= '0' && pEnd[1] <= '9') {
+		r += (pEnd[1] - '0') / 10.0;
+	}
+	return r;
+}
+
+static void fetchSensorDNMS(String& s) {
 	static bool dnms_error = false;
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_DNMS));
 	last_value_dnms_laeq = -1.0;
@@ -3380,7 +3322,7 @@ static String sensorDNMS() {
 	if (!dnms_error) {
 		struct dnms_measurements dnms_values;
 		if (dnms_read_leq(&dnms_values) == 0) {
-			float dnms_corr_value = atof(cfg::dnms_correction);
+			float dnms_corr_value = readDNMScorrection();
 			last_value_dnms_laeq = dnms_values.leq_a + dnms_corr_value;
 			last_value_dnms_la_min = dnms_values.leq_a_min + dnms_corr_value;
 			last_value_dnms_la_max = dnms_values.leq_a_max + dnms_corr_value;
@@ -3404,14 +3346,13 @@ static String sensorDNMS() {
 	}
 	debug_outln_info(F("----"));
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_DNMS));
-	return s;
 }
 
 /*****************************************************************
  * read GPS sensor values                                        *
  *****************************************************************/
-static String sensorGPS() {
-	String s, gps_lat, gps_lon;
+static void fetchSensorGPS(String& s) {
+	String gps_lat, gps_lon;
 
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), "GPS");
 
@@ -3497,8 +3438,6 @@ static String sensorGPS() {
 	}
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), "GPS");
-
-	return s;
 }
 
 /*****************************************************************
@@ -3547,15 +3486,8 @@ static void autoUpdate() {
 	String version = SOFTWARE_VERSION + ' ' + esp_chipid + ' ' + SDS_version + ' ' +
 					 String(cfg::current_lang) + ' ' + String(INTL_LANG) + ' ' +
 					 String(cfg::use_beta ? "BETA" : "");
-#if defined(ESP8266)
-	const HTTPUpdateResult ret = ESPhttpUpdate.update(UPDATE_HOST, UPDATE_PORT, UPDATE_URL, version);
+	const HTTPUpdateResult ret = ESPhttpUpdate.update(FPSTR(UPDATE_HOST), UPDATE_PORT, UPDATE_URL, version);
 	String LastErrorString = ESPhttpUpdate.getLastErrorString().c_str();
-#endif
-#if defined(ESP32)
-	WiFiClient client;
-	t_httpUpdate_return ret = httpUpdate.update(client, UPDATE_HOST, UPDATE_PORT, UPDATE_URL, version);
-	String LastErrorString = httpUpdate.getLastErrorString().c_str();
-#endif
 	switch(ret) {
 	case HTTP_UPDATE_FAILED:
 		debug_outln_error(FPSTR(DBG_TXT_UPDATE));
@@ -3613,8 +3545,8 @@ static void display_values() {
 	double co2_ppm_value = -1.0;
 	String gps_sensor, display_header;
 	String display_lines[3] = { "", "", ""};
-	int screen_count = 0;
-	int screens[8];
+	uint8_t screen_count = 0;
+	uint8_t screens[8];
 	int line_count = 0;
 	debug_outln_info(F("output values to display..."));
 	if (cfg::ppd_read) {
@@ -3673,16 +3605,14 @@ static void display_values() {
 		t_value = last_value_BMP_T;
 		p_value = last_value_BMP_P;
 	}
-	if (cfg::bmp280_read) {
-		t_sensor = p_sensor = FPSTR(SENSORS_BMP280);
-		t_value = last_value_BMP280_T;
-		p_value = last_value_BMP280_P;
-	}
-	if (cfg::bme280_read) {
-		t_sensor = h_sensor = p_sensor = FPSTR(SENSORS_BME280);
-		t_value = last_value_BME280_T;
-		h_value = last_value_BME280_H;
-		p_value = last_value_BME280_P;
+	if (cfg::bmx280_read) {
+		t_sensor = p_sensor = FPSTR(SENSORS_BMX280);
+		t_value = last_value_BMX280_T;
+		p_value = last_value_BMX280_P;
+		if (bmx280.sensorID() == BME280_SENSOR_ID) {
+			h_sensor = FPSTR(SENSORS_BMX280);
+			h_value = last_value_BME280_H;
+		}
 	}
 	if (cfg::dnms_read) {
 		la_sensor = FPSTR(SENSORS_DNMS);
@@ -3702,7 +3632,7 @@ static void display_values() {
 	if (cfg::ppd_read || cfg::pms_read || cfg::hpm_read || cfg::sds_read) {
 		screens[screen_count++] = 1;
 	}
-	if (cfg::dht_read || cfg::ds18b20_read || cfg::htu21d_read || cfg::bmp_read || cfg::bmp280_read || cfg::bme280_read) {
+	if (cfg::dht_read || cfg::ds18b20_read || cfg::htu21d_read || cfg::bmp_read || cfg::bmx280_read) {
 		screens[screen_count++] = 2;
 	}
 	if (cfg::gps_read) {
@@ -3723,18 +3653,21 @@ static void display_values() {
 	if(cfg::mhz19_read) {
 		screens[screen_count++] = 8;
 	}
+
+  // update size of "screens" when adding more screens!
+
 	if (cfg::has_display || cfg::has_sh1106 || cfg::has_lcd2004_27) {
 		switch (screens[next_display_count % screen_count]) {
-		case (1):
+		case 1:
 			display_header = pm25_sensor;
 			if (pm25_sensor != pm10_sensor) {
 				display_header += " / " + pm10_sensor;
 			}
 			display_lines[0] = "PM2.5: " + check_display_value(pm25_value, -1, 1, 6) + " µg/m³";
 			display_lines[1] = "PM10:  " + check_display_value(pm10_value, -1, 1, 6) + " µg/m³";
-			display_lines[2] = "";
+			display_lines[2] = empty_String;
 			break;
-		case (2):
+		case 2:
 			display_header = t_sensor;
 			if (h_sensor != "" && t_sensor != h_sensor) {
 				display_header += " / " + h_sensor;
@@ -3745,33 +3678,33 @@ static void display_values() {
 			if (t_sensor != "") { display_lines[line_count++] = "Temp.: " + check_display_value(t_value, -128, 1, 6) + " °C"; }
 			if (h_sensor != "") { display_lines[line_count++] = "Hum.:  " + check_display_value(h_value, -1, 1, 6) + " %"; }
 			if (p_sensor != "") { display_lines[line_count++] = "Pres.: " + check_display_value(p_value / 100, (-1 / 100.0), 1, 6) + " hPa"; }
-			while (line_count < 3) { display_lines[line_count++] = ""; }
+			while (line_count < 3) { display_lines[line_count++] = empty_String; }
 			break;
-		case (3):
+		case 3:
 			display_header = gps_sensor;
 			display_lines[0] = "Lat: " + check_display_value(lat_value, -200.0, 6, 10);
 			display_lines[1] = "Lon: " + check_display_value(lon_value, -200.0, 6, 10);
 			display_lines[2] = "Alt: " + check_display_value(alt_value, -1000.0, 2, 10);
 			break;
-		case (4):
+		case 4:
 			display_header = FPSTR(SENSORS_SPS30);
 			display_lines[0] = "PM: " + check_display_value(pm010_value, -1, 1, 4) + " " + check_display_value(pm25_value, -1, 1, 4) + " " + check_display_value(pm040_value, -1, 1, 4) + " " + check_display_value(pm10_value, -1, 1, 4);
 			display_lines[1] = "NC: " + check_display_value(nc005_value, -1, 0, 3) + " " + check_display_value(nc010_value, -1, 0, 3) + " " + check_display_value(nc025_value, -1, 0, 3) + " " + check_display_value(nc040_value, -1, 0, 3) + " " + check_display_value(nc100_value, -1, 0, 3);
 			display_lines[2] = "TPS: " + check_display_value(tps_value, -1, 2, 5) + " µm";
 			break;
-		case (5):
+		case 5:
 			display_header = FPSTR(SENSORS_DNMS);
 			display_lines[0] = "LAeq: " + check_display_value(la_eq_value, -1, 1, 6) + " db(A)";
 			display_lines[1] = "LA_max: " + check_display_value(la_max_value, -1, 1, 6) + " db(A)";
 			display_lines[2] = "LA_min: " + check_display_value(la_min_value, -1, 1, 6) + " db(A)";;
 			break;
-		case (6):
+		case 6:
 			display_header = F("Wifi info");
 			display_lines[0] = "IP: " + WiFi.localIP().toString();
 			display_lines[1] = "SSID:" + WiFi.SSID();
 			display_lines[2] = "Signal: " + String(calcWiFiSignalQuality(WiFi.RSSI())) + "%";
 			break;
-		case (7):
+		case 7:
 			display_header = F("Device Info");
 			display_lines[0] = "ID: " + esp_chipid;
 			display_lines[1] = "FW: " + String(SOFTWARE_VERSION);
@@ -3834,23 +3767,23 @@ static void display_values() {
 // T/P: -10.0°C/1000hPa
 
 	switch (screens[next_display_count % screen_count]) {
-	case (1):
+	case 1:
 		display_lines[0] = "PM2.5: " + check_display_value(pm25_value, -1, 1, 6);
 		display_lines[1] = "PM10:  " + check_display_value(pm10_value, -1, 1, 6);
 		break;
-	case (2):
+	case 2:
 		display_lines[0] = "T: " + check_display_value(t_value, -128, 1, 6) + char(223) + "C";
 		display_lines[1] = "H: " + check_display_value(h_value, -1, 1, 6) + "%";
 		break;
-	case (3):
+	case 3:
 		display_lines[0] = "Lat: " + check_display_value(lat_value, -200.0, 6, 11);
 		display_lines[1] = "Lon: " + check_display_value(lon_value, -200.0, 6, 11);
 		break;
-	case (4):
+	case 4:
 		display_lines[0] = WiFi.localIP().toString();
 		display_lines[1] = WiFi.SSID();
 		break;
-	case (5):
+	case 5:
 		display_lines[0] = "ID: " + esp_chipid;
 		display_lines[1] = "FW: " + SOFTWARE_VERSION;
 		break;
@@ -3906,34 +3839,18 @@ static void init_lcd() {
 }
 
 /*****************************************************************
- * Init BMP280                                                   *
+ * Init BMP280/BME280                                            *
  *****************************************************************/
-static bool initBMP280(char addr) {
-	debug_outln_info(F("Trying BMP280 sensor on "), String(addr, HEX));
+static bool initBMX280(char addr) {
+	debug_outln_info(F("Trying BMP280/BME280 sensor on "), String(addr, HEX));
 
-	if (bmp280.begin(addr)) {
+	if (bmx280.begin(addr)) {
 		debug_outln_info(FPSTR(DBG_TXT_FOUND));
-		return true;
-	} else {
-		debug_outln_info(FPSTR(DBG_TXT_NOT_FOUND));
-		return false;
-	}
-}
-
-/*****************************************************************
- * Init BME280                                                   *
- *****************************************************************/
-static bool initBME280(char addr) {
-	debug_outln_info(F("Trying BME280 sensor on "), String(addr, HEX));
-
-	if (bme280.begin(addr)) {
-		debug_outln_info(FPSTR(DBG_TXT_FOUND));
-		bme280.setSampling(
-			Adafruit_BME280::MODE_FORCED,
-			Adafruit_BME280::SAMPLING_X1,
-			Adafruit_BME280::SAMPLING_X1,
-			Adafruit_BME280::SAMPLING_X1,
-			Adafruit_BME280::FILTER_OFF);
+		bmx280.setSampling(
+			BMX280::MODE_FORCED,
+			BMX280::SAMPLING_X1,
+			BMX280::SAMPLING_X1,
+			BMX280::SAMPLING_X1);
 		return true;
 	} else {
 		debug_outln_info(FPSTR(DBG_TXT_NOT_FOUND));
@@ -4048,19 +3965,11 @@ static void powerOnTestSensors() {
 		}
 	}
 
-	if (cfg::bmp280_read) {
-		debug_outln_info(F("Read BMP280..."));
-		if (!initBMP280(0x76) && !initBMP280(0x77)) {
-			debug_outln_error(F("Check BMP280 wiring"));
-			bmp280_init_failed = 1;
-		}
-	}
-
-	if (cfg::bme280_read) {
-		debug_outln_info(F("Read BME280..."));
-		if (!initBME280(0x76) && !initBME280(0x77)) {
-			debug_outln_error(F("Check BME280 wiring"));
-			bme280_init_failed = 1;
+	if (cfg::bmx280_read) {
+		debug_outln_info(F("Read BMP280/BME280..."));
+		if (!initBMX280(0x76) && !initBMX280(0x77)) {
+			debug_outln_error(F("Check BMP280/BME280 wiring"));
+			bmx280_init_failed = 1;
 		}
 	}
 
@@ -4164,7 +4073,7 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 
 	if (cfg::send2sensemap && (cfg::senseboxid[0] != '\0')) {
 		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("opensensemap: "));
-		String sensemap_path(tmpl(F(URL_SENSEMAP), cfg::senseboxid));
+		String sensemap_path(tmpl(FPSTR(URL_SENSEMAP), cfg::senseboxid));
 		sum_send_time += sendData(data, 0, HOST_SENSEMAP, PORT_SENSEMAP, sensemap_path.c_str(), true, "", FPSTR(TXT_CONTENT_TYPE_JSON));
 	}
 
@@ -4178,7 +4087,8 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 		unsigned long ts = millis() / 1000;
 		String token = WiFi.macAddress();
 		String aircms_data = "L=" + esp_chipid + "&t=" + String(ts, DEC) + "&airrohr=" + data;
-		String aircms_url = URL_AIRCMS + hmac1(sha1Hex(token), aircms_data + token);
+		String aircms_url(FPSTR(URL_AIRCMS));
+		aircms_url += hmac1(sha1Hex(token), aircms_data + token);
 
 		sum_send_time += sendData(aircms_data, 0, HOST_AIRCMS, PORT_AIRCMS, aircms_url.c_str(), true, "", FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN));
 	}
@@ -4300,12 +4210,12 @@ void setup(void) {
  *****************************************************************/
 void loop(void) {
 	String result_PPD, result_SDS, result_PMS, result_HPM, result_SPS30;
-	String result_DHT, result_HTU21D, result_BMP, result_BMP280;
-	String result_BME280, result_DS18B20, result_GPS, result_DNMS;
 	String result_MHZ19;
 	int16_t ret_SPS30;
+	String result_DHT, result_HTU21D, result_BMP;
+	String result_BMX280, result_DS18B20, result_GPS, result_DNMS;
 
-	unsigned long sum_send_time = 0;
+	unsigned sum_send_time = 0;
 
 	act_micro = micros();
 	act_milli = millis();
@@ -4331,8 +4241,10 @@ void loop(void) {
 	if (cfg::sps30_read && ( !sps30_init_failed)) {
 		if ((msSince(starttime) - SPS30_read_timer) > SPS30_WAITING_AFTER_LAST_READ) {
 			struct sps30_measurement sps30_values;
+			int16_t ret_SPS30;
 
 			SPS30_read_timer = msSince(starttime);
+
 			ret_SPS30 = sps30_read_measurement(&sps30_values);
 			++SPS30_read_counter;
 			if (ret_SPS30 < 0) {
@@ -4359,23 +4271,21 @@ void loop(void) {
 	}
 
 	if (cfg::ppd_read) {
-		result_PPD = sensorPPD();
+		fetchSensorPPD(result_PPD);
 	}
 
 	if ((msSince(starttime_SDS) > SAMPLETIME_SDS_MS) || send_now) {
+		starttime_SDS = act_milli;
 		if (cfg::sds_read) {
-			result_SDS = sensorSDS();
-			starttime_SDS = act_milli;
+			fetchSensorSDS(result_SDS);
 		}
 
 		if (cfg::pms_read) {
-			result_PMS = sensorPMS();
-			starttime_SDS = act_milli;
+			fetchSensorPMS(result_PMS);
 		}
 
 		if (cfg::hpm_read) {
-			result_HPM = sensorHPM();
-			starttime_SDS = act_milli;
+			fetchSensorHPM(result_HPM);
 		}
 	}
 
@@ -4383,40 +4293,43 @@ void loop(void) {
 
 	if (send_now) {
 		if (cfg::dht_read) {
-			result_DHT = sensorDHT();						// getting temperature and humidity (optional)
+			 // getting temperature and humidity (optional)
+			fetchSensorDHT(result_DHT);
 		}
 
 		if (cfg::htu21d_read) {
-			result_HTU21D = sensorHTU21D();					// getting temperature and humidity (optional)
+			 // getting temperature and humidity (optional)
+			fetchSensorHTU21D(result_HTU21D);
 		}
 
 		if (cfg::bmp_read && (! bmp_init_failed)) {
-			result_BMP = sensorBMP();						// getting temperature and pressure (optional)
+			// getting temperature and pressure (optional)
+			fetchSensorBMP(result_BMP);
 		}
 
-		if (cfg::bmp280_read && (! bmp280_init_failed)) {
-			result_BMP280 = sensorBMP280();					// getting temperature, humidity and pressure (optional)
-		}
-
-		if (cfg::bme280_read && (! bme280_init_failed)) {
-			result_BME280 = sensorBME280();					// getting temperature, humidity and pressure (optional)
+		if (cfg::bmx280_read && (! bmx280_init_failed)) {
+			// getting temperature, humidity and pressure (optional)
+			fetchSensorBMX280(result_BMX280);
 		}
 
 		if (cfg::ds18b20_read) {
-			result_DS18B20 = sensorDS18B20();				// getting temperature (optional)
+			// getting temperature (optional)
+			fetchSensorDS18B20(result_DS18B20);
 		}
 
 		if (cfg::sps30_read && (! sps30_init_failed)) {
-			result_SPS30 = sensorSPS30();               // getting PM values
+			fetchSensorSPS30(result_SPS30);
 		}
 
 		if (cfg::dnms_read && (! dnms_init_failed)) {
-			result_DNMS = sensorDNMS();                 // getting noise measurement values from dnms (optional)
+			// getting noise measurement values from dnms (optional)
+			fetchSensorDNMS(result_DNMS);
 		}
 	}
 
 	if (cfg::gps_read && ((msSince(starttime_GPS) > SAMPLETIME_GPS_MS) || send_now)) {
-		result_GPS = sensorGPS();							// getting GPS coordinates
+		// getting GPS coordinates
+		fetchSensorGPS(result_GPS);
 		starttime_GPS = act_milli;
 	}
 	else if(cfg::mhz19_read && ((msSince(starttime_MHZ19) > SAMPLETIME_MHZ19_MS) || send_now))
@@ -4432,13 +4345,14 @@ void loop(void) {
 
 	if (send_now) {
 		debug_outln_info(F("Creating data string:"));
+		String signal_strength = String(WiFi.RSSI());
 		String data = tmpl(FPSTR(data_first_part), SOFTWARE_VERSION);
 		String data_sample_times;
 		add_Value2Json(data_sample_times, F("samples"), String(sample_count));
 		add_Value2Json(data_sample_times, F("min_micro"), String(min_micro));
 		add_Value2Json(data_sample_times, F("max_micro"), String(max_micro));
+		add_Value2Json(data_sample_times, F("signal"), signal_strength);
 
-		String signal_strength = String(WiFi.RSSI());
 		debug_outln_info(F("WLAN signal strength (dBm): "), signal_strength);
 		debug_outln_info(F("----"));
 
@@ -4477,13 +4391,13 @@ void loop(void) {
 			data += result_BMP;
 			sum_send_time += sendLuftdaten(result_BMP, BMP_API_PIN, FPSTR(SENSORS_BMP180), "BMP_");
 		}
-		if (cfg::bmp280_read && (! bmp280_init_failed)) {
-			data += result_BMP280;
-			sum_send_time += sendLuftdaten(result_BMP280, BMP280_API_PIN, FPSTR(SENSORS_BMP280), "BMP280_");
-		}
-		if (cfg::bme280_read && (! bme280_init_failed)) {
-			data += result_BME280;
-			sum_send_time += sendLuftdaten(result_BME280, BME280_API_PIN, FPSTR(SENSORS_BME280), "BME280_");
+		if (cfg::bmx280_read && (! bmx280_init_failed)) {
+			data += result_BMX280;
+			if (bmx280.sensorID() == BME280_SENSOR_ID) {
+				sum_send_time += sendLuftdaten(result_BMX280, BME280_API_PIN, FPSTR(SENSORS_BMX280), "BME280_");
+			} else {
+				sum_send_time += sendLuftdaten(result_BMX280, BMP280_API_PIN, FPSTR(SENSORS_BMX280), "BMP280_");
+			}
 		}
 		if (cfg::ds18b20_read) {
 			data += result_DS18B20;
@@ -4503,7 +4417,6 @@ void loop(void) {
 			sum_send_time += sendLuftdaten(result_MHZ19, MHZ19_API_PIN, F("MHZ19"), "MHZ19_");
 		}
 
-		add_Value2Json(data_sample_times, F("signal"), signal_strength);
 		data += data_sample_times;
 
 		if ((unsigned)(data.lastIndexOf(',') + 1) == data.length()) {
@@ -4523,7 +4436,6 @@ void loop(void) {
 
 		sending_time = (4 * sending_time + sum_send_time) / 5;
 		debug_outln_info(F("Time for sending data (ms): "), String(sending_time));
-
 
 		// reconnect to WiFi if disconnected
 		if (WiFi.status() != WL_CONNECTED) {
