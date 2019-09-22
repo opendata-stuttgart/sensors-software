@@ -2537,9 +2537,7 @@ static void send_csv(const String& data) {
 /*****************************************************************
  * read DHT22 sensor values                                      *
  *****************************************************************/
-static String sensorDHT() {
-	String s;
-
+static void fetchSensorDHT(String& s) {
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_DHT22));
 
 	// Check if valid number if non NaN (not a number) will be send.
@@ -2570,16 +2568,12 @@ static String sensorDHT() {
 	debug_outln_info(F("----"));
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_DHT22));
-
-	return s;
 }
 
 /*****************************************************************
  * read HTU21D sensor values                                     *
  *****************************************************************/
-static String sensorHTU21D() {
-	String s;
-
+static void fetchSensorHTU21D(String& s) {
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_HTU21D));
 
 	const auto t = htu21d.readTemperature();
@@ -2599,16 +2593,12 @@ static String sensorHTU21D() {
 	debug_outln_info(F("----"));
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_HTU21D));
-
-	return s;
 }
 
 /*****************************************************************
  * read BMP180 sensor values                                     *
  *****************************************************************/
-static String sensorBMP() {
-	String s;
-
+static void fetchSensorBMP(String& s) {
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_BMP180));
 
 	const auto p = bmp.readPressure();
@@ -2628,16 +2618,12 @@ static String sensorBMP() {
 	debug_outln_info(F("----"));
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_BMP180));
-
-	return s;
 }
 
 /*****************************************************************
  * read BMP280/BME280 sensor values                              *
  *****************************************************************/
-static String sensorBMX280() {
-	String s;
-
+static void fetchSensorBMX280(String& s) {
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_BMX280));
 
 	bmx280.takeForcedMeasurement();
@@ -2668,14 +2654,12 @@ static String sensorBMX280() {
 	debug_outln_info(F("----"));
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_BMX280));
-
-	return s;
 }
 
 /*****************************************************************
  * read DS18B20 sensor values                                    *
  *****************************************************************/
-static String sensorDS18B20() {
+static void fetchSensorDS18B20(String& s) {
 	float t;
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_DS18B20));
 
@@ -2691,7 +2675,6 @@ static String sensorDS18B20() {
 		debug_outln_info(F("DS18B20 trying...."));
 	} while (count < MAX_ATTEMPTS && (isnan(t) || t >= 85.0 || t <= (-127.0)));
 
-	String s;
 	if (count == MAX_ATTEMPTS) {
 		last_value_DS18B20_T = -128.0;
 		debug_outln_error(F("DS18B20 read failed"));
@@ -2702,15 +2685,12 @@ static String sensorDS18B20() {
 	}
 	debug_outln_info(F("----"));
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_DS18B20));
-
-	return s;
 }
 
 /*****************************************************************
  * read SDS011 sensor values                                     *
  *****************************************************************/
-static String sensorSDS() {
-	String s;
+static void fetchSensorSDS(String& s) {
 	char buffer;
 	int value;
 	int len = 0;
@@ -2791,8 +2771,8 @@ static String sensorSDS() {
 					if (sds_pm25_max < pm25_serial) {
 						sds_pm25_max = pm25_serial;
 					}
-					debug_outln_verbose(F("PM10 (sec.) : "), Float2String(double(pm10_serial) / 10.0));
-					debug_outln_verbose(F("PM2.5 (sec.): "), Float2String(double(pm25_serial) / 10.0));
+					debug_outln_verbose(F("PM10 (sec.) : "), String(double(pm10_serial) / 10.0));
+					debug_outln_verbose(F("PM2.5 (sec.): "), String(double(pm25_serial) / 10.0));
 					sds_val_count++;
 				}
 				len = 0;
@@ -2835,15 +2815,12 @@ static String sensorSDS() {
 	}
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_SDS011));
-
-	return s;
 }
 
 /*****************************************************************
  * read Plantronic PM sensor sensor values                       *
  *****************************************************************/
-static String sensorPMS() {
-	String s;
+static void fetchSensorPMS(String& s) {
 	char buffer;
 	int value;
 	int len = 0;
@@ -3010,15 +2987,12 @@ static String sensorPMS() {
 	}
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_PMSx003));
-
-	return s;
 }
 
 /*****************************************************************
  * read Honeywell PM sensor sensor values                        *
  *****************************************************************/
-static String sensorHPM() {
-	String s;
+static void fetchSensorHPM(String& s) {
 	char buffer;
 	int value;
 	int len = 0;
@@ -3147,16 +3121,12 @@ static String sensorHPM() {
 	}
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_HPM));
-
-	return s;
 }
 
 /*****************************************************************
  * read PPD42NS sensor values                                    *
  *****************************************************************/
-static String sensorPPD() {
-	String s;
-
+static void fetchSensorPPD(String& s) {
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_PPD42NS));
 
 	if (msSince(starttime) <= SAMPLETIME_MS) {
@@ -3225,16 +3195,12 @@ static String sensorPPD() {
 	}
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_PPD42NS));
-
-	return s;
 }
 
 /*****************************************************************
    read SPS30 PM sensor values
  *****************************************************************/
-static String sensorSPS30() {
-	String s;
-
+static void fetchSensorSPS30(String& s) {
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_SPS30));
 
 	last_value_SPS30_P0 = value_SPS30_P0 / SPS30_measurement_count;
@@ -3289,14 +3255,23 @@ static String sensorSPS30() {
 
 	debug_outln_info(F("----"));
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_SPS30));
-	return s;
 }
 
 /*****************************************************************
    read DNMS values
  *****************************************************************/
-static String sensorDNMS() {
-	String s;
+
+static float readDNMScorrection() {
+	char* pEnd = nullptr;
+	// Avoiding atof() here as this adds a lot (~ 9kb) of code size
+	float r = float(strtol(cfg::dnms_correction, &pEnd, 10));
+	if (pEnd && pEnd[0] == '.' && pEnd[1] >= '0' && pEnd[1] <= '9') {
+		r += (pEnd[1] - '0') / 10.0;
+	}
+	return r;
+}
+
+static void fetchSensorDNMS(String& s) {
 	static bool dnms_error = false;
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_DNMS));
 	last_value_dnms_laeq = -1.0;
@@ -3320,7 +3295,7 @@ static String sensorDNMS() {
 	if (!dnms_error) {
 		struct dnms_measurements dnms_values;
 		if (dnms_read_leq(&dnms_values) == 0) {
-			float dnms_corr_value = atof(cfg::dnms_correction);
+			float dnms_corr_value = readDNMScorrection();
 			last_value_dnms_laeq = dnms_values.leq_a + dnms_corr_value;
 			last_value_dnms_la_min = dnms_values.leq_a_min + dnms_corr_value;
 			last_value_dnms_la_max = dnms_values.leq_a_max + dnms_corr_value;
@@ -3344,14 +3319,13 @@ static String sensorDNMS() {
 	}
 	debug_outln_info(F("----"));
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_DNMS));
-	return s;
 }
 
 /*****************************************************************
  * read GPS sensor values                                        *
  *****************************************************************/
-static String sensorGPS() {
-	String s, gps_lat, gps_lon;
+static void fetchSensorGPS(String& s) {
+	String gps_lat, gps_lon;
 
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), "GPS");
 
@@ -3437,8 +3411,6 @@ static String sensorGPS() {
 	}
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), "GPS");
-
-	return s;
 }
 
 /*****************************************************************
@@ -4169,9 +4141,8 @@ void loop(void) {
 	String result_PPD, result_SDS, result_PMS, result_HPM, result_SPS30;
 	String result_DHT, result_HTU21D, result_BMP;
 	String result_BMX280, result_DS18B20, result_GPS, result_DNMS;
-	int16_t ret_SPS30;
 
-	unsigned long sum_send_time = 0;
+	unsigned sum_send_time = 0;
 
 	act_micro = micros();
 	act_milli = millis();
@@ -4197,8 +4168,10 @@ void loop(void) {
 	if (cfg::sps30_read && ( !sps30_init_failed)) {
 		if ((msSince(starttime) - SPS30_read_timer) > SPS30_WAITING_AFTER_LAST_READ) {
 			struct sps30_measurement sps30_values;
+			int16_t ret_SPS30;
 
 			SPS30_read_timer = msSince(starttime);
+
 			ret_SPS30 = sps30_read_measurement(&sps30_values);
 			++SPS30_read_counter;
 			if (ret_SPS30 < 0) {
@@ -4225,23 +4198,21 @@ void loop(void) {
 	}
 
 	if (cfg::ppd_read) {
-		result_PPD = sensorPPD();
+		fetchSensorPPD(result_PPD);
 	}
 
 	if ((msSince(starttime_SDS) > SAMPLETIME_SDS_MS) || send_now) {
+		starttime_SDS = act_milli;
 		if (cfg::sds_read) {
-			result_SDS = sensorSDS();
-			starttime_SDS = act_milli;
+			fetchSensorSDS(result_SDS);
 		}
 
 		if (cfg::pms_read) {
-			result_PMS = sensorPMS();
-			starttime_SDS = act_milli;
+			fetchSensorPMS(result_PMS);
 		}
 
 		if (cfg::hpm_read) {
-			result_HPM = sensorHPM();
-			starttime_SDS = act_milli;
+			fetchSensorHPM(result_HPM);
 		}
 	}
 
@@ -4249,36 +4220,43 @@ void loop(void) {
 
 	if (send_now) {
 		if (cfg::dht_read) {
-			result_DHT = sensorDHT();						// getting temperature and humidity (optional)
+			 // getting temperature and humidity (optional)
+			fetchSensorDHT(result_DHT);
 		}
 
 		if (cfg::htu21d_read) {
-			result_HTU21D = sensorHTU21D();					// getting temperature and humidity (optional)
+			 // getting temperature and humidity (optional)
+			fetchSensorHTU21D(result_HTU21D);
 		}
 
 		if (cfg::bmp_read && (! bmp_init_failed)) {
-			result_BMP = sensorBMP();						// getting temperature and pressure (optional)
+			// getting temperature and pressure (optional)
+			fetchSensorBMP(result_BMP);
 		}
 
 		if (cfg::bmx280_read && (! bmx280_init_failed)) {
-			result_BMX280 = sensorBMX280();					// getting temperature, humidity and pressure (optional)
+			// getting temperature, humidity and pressure (optional)
+			fetchSensorBMX280(result_BMX280);
 		}
 
 		if (cfg::ds18b20_read) {
-			result_DS18B20 = sensorDS18B20();				// getting temperature (optional)
+			// getting temperature (optional)
+			fetchSensorDS18B20(result_DS18B20);
 		}
 
 		if (cfg::sps30_read && (! sps30_init_failed)) {
-			result_SPS30 = sensorSPS30();               // getting PM values
+			fetchSensorSPS30(result_SPS30);
 		}
 
 		if (cfg::dnms_read && (! dnms_init_failed)) {
-			result_DNMS = sensorDNMS();                 // getting noise measurement values from dnms (optional)
+			// getting noise measurement values from dnms (optional)
+			fetchSensorDNMS(result_DNMS);
 		}
 	}
 
 	if (cfg::gps_read && ((msSince(starttime_GPS) > SAMPLETIME_GPS_MS) || send_now)) {
-		result_GPS = sensorGPS();							// getting GPS coordinates
+		// getting GPS coordinates
+		fetchSensorGPS(result_GPS);
 		starttime_GPS = act_milli;
 	}
 
@@ -4289,13 +4267,14 @@ void loop(void) {
 
 	if (send_now) {
 		debug_outln_info(F("Creating data string:"));
+		String signal_strength = String(WiFi.RSSI());
 		String data = tmpl(FPSTR(data_first_part), SOFTWARE_VERSION);
 		String data_sample_times;
 		add_Value2Json(data_sample_times, F("samples"), String(sample_count));
 		add_Value2Json(data_sample_times, F("min_micro"), String(min_micro));
 		add_Value2Json(data_sample_times, F("max_micro"), String(max_micro));
+		add_Value2Json(data_sample_times, F("signal"), signal_strength);
 
-		String signal_strength = String(WiFi.RSSI());
 		debug_outln_info(F("WLAN signal strength (dBm): "), signal_strength);
 		debug_outln_info(F("----"));
 
@@ -4355,7 +4334,6 @@ void loop(void) {
 			sum_send_time += sendLuftdaten(result_GPS, GPS_API_PIN, F("GPS"), "GPS_");
 		}
 
-		add_Value2Json(data_sample_times, F("signal"), signal_strength);
 		data += data_sample_times;
 
 		if ((unsigned)(data.lastIndexOf(',') + 1) == data.length()) {
@@ -4375,7 +4353,6 @@ void loop(void) {
 
 		sending_time = (4 * sending_time + sum_send_time) / 5;
 		debug_outln_info(F("Time for sending data (ms): "), String(sending_time));
-
 
 		// reconnect to WiFi if disconnected
 		if (WiFi.status() != WL_CONNECTED) {
