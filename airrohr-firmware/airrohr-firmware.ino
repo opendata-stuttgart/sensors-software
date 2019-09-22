@@ -2122,7 +2122,8 @@ static void webserver_images() {
 
 	if (server.arg("name") == F("luftdaten_logo")) {
 		debug_outln_info(F("output luftdaten.info logo..."));
-		server.send_P(200, TXT_CONTENT_TYPE_IMAGE_SVG, LUFTDATEN_INFO_LOGO_SVG);
+		server.send_P(200, TXT_CONTENT_TYPE_IMAGE_PNG,
+			LUFTDATEN_INFO_LOGO_PNG, LUFTDATEN_INFO_LOGO_PNG_SIZE);
 	} else {
 		webserver_not_found();
 	}

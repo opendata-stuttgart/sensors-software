@@ -2,7 +2,7 @@ const char TXT_CONTENT_TYPE_JSON[] PROGMEM = "application/json";
 const char TXT_CONTENT_TYPE_INFLUXDB[] PROGMEM = "application/x-www-form-urlencoded";
 const char TXT_CONTENT_TYPE_TEXT_HTML[] PROGMEM = "text/html; charset=utf-8";
 const char TXT_CONTENT_TYPE_TEXT_PLAIN[] PROGMEM = "text/plain";
-const char TXT_CONTENT_TYPE_IMAGE_SVG[] PROGMEM = "image/svg+xml";
+const char TXT_CONTENT_TYPE_IMAGE_PNG[] PROGMEM = "image/png";
 
 const char DBG_TXT_TEMPERATURE[] PROGMEM = "Temperature (°C): ";
 const char DBG_TXT_HUMIDITY[] PROGMEM = "Humidity (%): ";
@@ -47,15 +47,15 @@ body{font-family:Arial;margin:0}\
 .content{margin:10px}\
 .r{text-align:right}\
 td{vertical-align:top;}\
-a{text-decoration:none;padding:10px;background:#38b5ad;color:white;display:block;width:auto;border-radius:5px;}\
+a{text-decoration:none;padding:10px;background:#3ba;color:white;display:block;width:auto;border-radius:5px;}\
 .wifi{background:none;color:blue;padding:5px;display:inline;}\
 input[type='text']{width:100%;}\
 input[type='password']{width:100%;}\
 input[type='submit']{border-radius:5px;font-size:medium;padding:5px;}\
-.s_green{padding:9px !important;width:100%;border-style:none;background:#38b5ad;color:white;text-align:left;}\
+.s_green{padding:9px !important;width:100%;border-style:none;background:#3ba;color:white;text-align:left;}\
 </style>\
 </head><body>\
-<div style='min-height:120px;background-color:#38b5ad;margin-bottom:20px'>\
+<div style='min-height:120px;background-color:#3ba;margin-bottom:20px'>\
 <a href='/' style='background:none;display:inline'><img src='/images?name=luftdaten_logo' style='float:left;margin:20px' width='100' height='89'/></a>\
 <h3 style='margin:0'>{tt}</h3>\
 <small>ID: {id}<br/>MAC: {mac}<br/>{fwt}: {fw}</small></div><div class='content'><h4>{h} {n} {t}</h4>";
