@@ -239,18 +239,16 @@ namespace cfg {
 
 	// credentials for basic auth of internal web server
 	bool www_basicauth_enabled = WWW_BASICAUTH_ENABLED;
-	char www_username[LEN_WWW_USERNAME]  = WWW_USERNAME;
-	char www_password[LEN_WWW_PASSWORD]   = WWW_PASSWORD;
+	char www_username[LEN_WWW_USERNAME];
+	char www_password[LEN_WWW_PASSWORD];
 
 	// wifi credentials
-	char wlanssid[LEN_WLANSSID]  = WLANSSID;
-	char wlanpwd[LEN_WLANPWD]  = WLANPWD;
+	char wlanssid[LEN_WLANSSID];
+	char wlanpwd[LEN_WLANPWD];
 
 	// credentials of the sensor in access point mode
-	char fs_ssid[LEN_FS_SSID]  = FS_SSID;
-	char fs_pwd[LEN_FS_PWD]   = FS_PWD;
-
-	char version_from_local_config[20]   = "";
+	char fs_ssid[LEN_FS_SSID] = FS_SSID;
+	char fs_pwd[LEN_FS_PWD] = FS_PWD;
 
 	// (in)active sensors
 	bool dht_read = DHT_READ;
@@ -296,12 +294,12 @@ namespace cfg {
 	bool ssl_dusti = SSL_DUSTI;
 	char senseboxid[LEN_SENSEBOXID] = SENSEBOXID;
 
-	char host_influx[LEN_HOST_INFLUX] = HOST_INFLUX;
-	char url_influx[LEN_URL_INFLUX] = URL_INFLUX;
+	char host_influx[LEN_HOST_INFLUX];
+	char url_influx[LEN_URL_INFLUX];
 	unsigned int port_influx = PORT_INFLUX;
 	char user_influx[LEN_USER_INFLUX] = USER_INFLUX;
 	char pwd_influx[LEN_PWD_INFLUX] = PWD_INFLUX;
-	char measurement_name_influx[LEN_MEASUREMENT_NAME_INFLUX]  = MEASUREMENT_NAME_INFLUX;
+	char measurement_name_influx[LEN_MEASUREMENT_NAME_INFLUX];
 	bool ssl_influx = SSL_INFLUX;
 
 	char host_custom[LEN_HOST_CUSTOM] = HOST_CUSTOM;
@@ -313,6 +311,14 @@ namespace cfg {
 
 	void initNonTrivials(const char* id) {
 		strcpy(cfg::current_lang, CURRENT_LANG);
+		strcpy_P(www_username, WWW_USERNAME);
+		strcpy_P(www_password, WWW_PASSWORD);
+		strcpy_P(wlanssid, WLANSSID);
+		strcpy_P(wlanpwd, WLANPWD);
+		strcpy_P(host_influx, HOST_INFLUX);
+		strcpy_P(url_influx, URL_INFLUX);
+		strcpy_P(measurement_name_influx, MEASUREMENT_NAME_INFLUX);
+
 		if (fs_ssid[0] == '\0') {
 			strcpy(fs_ssid, SSID_BASENAME);
 			strcat(fs_ssid, id);
@@ -324,26 +330,26 @@ namespace cfg {
 #define URL_MADAVI "/data.php"
 #define PORT_MADAVI 80
 
-#define HOST_DUSTI "api.sensor.community"
-#define URL_DUSTI "/v1/push-sensor-data/"
+static const char HOST_DUSTI[] PROGMEM = "api.sensor.community";
+static const char URL_DUSTI[] PROGMEM = "/v1/push-sensor-data/";
 #define PORT_DUSTI 80
 
 // IMPORTANT: NO MORE CHANGES TO VARIABLE NAMES NEEDED FOR EXTERNAL APIS
 
-#define HOST_SENSEMAP "ingress.opensensemap.org"
-#define URL_SENSEMAP "/boxes/{v}/data?luftdaten=1"
+static const char HOST_SENSEMAP[] PROGMEM = "ingress.opensensemap.org";
+static const char URL_SENSEMAP[] PROGMEM = "/boxes/{v}/data?luftdaten=1";
 #define PORT_SENSEMAP 443
 
-#define HOST_FSAPP "www.h2801469.stratoserver.net"
-#define URL_FSAPP "/data.php"
+static const char HOST_FSAPP[] PROGMEM = "www.h2801469.stratoserver.net";
+static const char URL_FSAPP[] PROGMEM = "/data.php";
 #define PORT_FSAPP 80
 
-#define HOST_AIRCMS "doiot.ru"
-#define URL_AIRCMS "/php/sensors.php?h="
+static const char HOST_AIRCMS[] PROGMEM = "doiot.ru";
+static const char URL_AIRCMS[] PROGMEM = "/php/sensors.php?h=";
 #define PORT_AIRCMS 443
 
-#define UPDATE_HOST "firmware.sensor.community"
-#define UPDATE_URL "/airrohr/firmware.php"
+static const char UPDATE_HOST[] PROGMEM = "firmware.sensor.community";
+static const char UPDATE_URL[] PROGMEM = "/airrohr/firmware.php";
 #define UPDATE_PORT 80
 
 #define JSON_BUFFER_SIZE 2300
@@ -990,10 +996,6 @@ static void readConfig() {
 
 	if (!err) {
 		debug_outln_info(F("parsed json..."));
-		if (json.containsKey("SOFTWARE_VERSION")) {
-			strcpy(cfg::version_from_local_config, json["SOFTWARE_VERSION"]);
-		}
-
 		for (unsigned e = 0; e < sizeof(configShape)/sizeof(configShape[0]); ++e) {
 			ConfigShapeEntry c;
 			memcpy_P(&c, &configShape[e], sizeof(ConfigShapeEntry));
@@ -1014,15 +1016,15 @@ static void readConfig() {
 			};
 		}
 
-		if (strcmp(cfg::senseboxid, "00112233445566778899aabb") == 0) {
-			strcpy(cfg::senseboxid, "");
+		if (strcmp_P(cfg::senseboxid, PSTR("00112233445566778899aabb")) == 0) {
+			cfg::senseboxid[0] = '\0';
 			cfg::send2sensemap = false;
 		}
 		if (strlen(cfg::measurement_name_influx) == 0) {
-			strcpy(cfg::measurement_name_influx, MEASUREMENT_NAME_INFLUX);
+			strcpy_P(cfg::measurement_name_influx, MEASUREMENT_NAME_INFLUX);
 		}
-		if (strcmp(cfg::host_influx, "api.luftdaten.info") == 0) {
-			strcpy(cfg::host_influx, "");
+		if (strcmp_P(cfg::host_influx, PSTR("api.luftdaten.info")) == 0) {
+			cfg::host_influx[0] = '\0';
 			cfg::send2influx = false;
 		}
 		if (boolFromJSON(json, "pm24_read") || boolFromJSON(json, "pms32_read")) {
@@ -2148,17 +2150,17 @@ static void webserver_not_found() {
  *****************************************************************/
 static void setup_webserver() {
 	server.on("/", webserver_root);
-	server.on("/config", webserver_config);
-	server.on("/wifi", webserver_wifi);
-	server.on("/values", webserver_values);
-	server.on("/generate_204", webserver_config);
-	server.on("/fwlink", webserver_config);
-	server.on("/debug", webserver_debug_level);
-	server.on("/removeConfig", webserver_removeConfig);
-	server.on("/reset", webserver_reset);
-	server.on("/data.json", webserver_data_json);
-	server.on("/metrics", webserver_prometheus_endpoint);
-	server.on("/images", webserver_images);
+	server.on(F("/config"), webserver_config);
+	server.on(F("/wifi"), webserver_wifi);
+	server.on(F("/values"), webserver_values);
+	server.on(F("/generate_204"), webserver_config);
+	server.on(F("/fwlink"), webserver_config);
+	server.on(F("/debug"), webserver_debug_level);
+	server.on(F("/removeConfig"), webserver_removeConfig);
+	server.on(F("/reset"), webserver_reset);
+	server.on(F("/data.json"), webserver_data_json);
+	server.on(F("/metrics"), webserver_prometheus_endpoint);
+	server.on(F("/images"), webserver_images);
 	server.onNotFound(webserver_not_found);
 
 	debug_outln_info(F("Starting Webserver... "), WiFi.localIP().toString());
@@ -2327,12 +2329,13 @@ static void connectWifi() {
 static unsigned long sendData(const String& data, const int pin, const char* host, const int httpPort, const char* url, const bool use_ssl, const char* basic_auth_string, const __FlashStringHelper* contentType) {
 
 	unsigned long start_send = millis();
-	String s_Host = host;
+	String s_Host = FPSTR(host);
+	String s_url = FPSTR(url);
 
 	debug_outln_info(F("Start sendData to "), s_Host);
 
 	String request_head = F("POST ");
-	request_head += url;
+	request_head += s_url;
 	request_head += F(" HTTP/1.1\r\nHost: ");
 	request_head += s_Host;
 	request_head += F("\r\nContent-Type: ");
@@ -2363,7 +2366,7 @@ static unsigned long sendData(const String& data, const int pin, const char* hos
 	};
 
 	const auto doRequest = [ = ](WiFiClient * client) {
-		debug_outln_info(F("Requesting URL: "), url);
+		debug_outln_info(F("Requesting URL: "), s_url);
 		debug_outln_verbose(esp_chipid);
 		debug_outln_verbose(data);
 
@@ -3432,15 +3435,8 @@ static void autoUpdate() {
 	String version = SOFTWARE_VERSION + ' ' + esp_chipid + ' ' + SDS_version + ' ' +
 					 String(cfg::current_lang) + ' ' + String(INTL_LANG) + ' ' +
 					 String(cfg::use_beta ? "BETA" : "");
-#if defined(ESP8266)
-	const HTTPUpdateResult ret = ESPhttpUpdate.update(UPDATE_HOST, UPDATE_PORT, UPDATE_URL, version);
+	const HTTPUpdateResult ret = ESPhttpUpdate.update(FPSTR(UPDATE_HOST), UPDATE_PORT, UPDATE_URL, version);
 	String LastErrorString = ESPhttpUpdate.getLastErrorString().c_str();
-#endif
-#if defined(ESP32)
-	WiFiClient client;
-	t_httpUpdate_return ret = httpUpdate.update(client, UPDATE_HOST, UPDATE_PORT, UPDATE_URL, version);
-	String LastErrorString = httpUpdate.getLastErrorString().c_str();
-#endif
 	switch(ret) {
 	case HTTP_UPDATE_FAILED:
 		debug_outln_error(FPSTR(DBG_TXT_UPDATE));
@@ -3610,7 +3606,7 @@ static void display_values() {
 			}
 			display_lines[0] = "PM2.5: " + check_display_value(pm25_value, -1, 1, 6) + " µg/m³";
 			display_lines[1] = "PM10:  " + check_display_value(pm10_value, -1, 1, 6) + " µg/m³";
-			display_lines[2] = "";
+			display_lines[2] = empty_String;
 			break;
 		case 2:
 			display_header = t_sensor;
@@ -3623,7 +3619,7 @@ static void display_values() {
 			if (t_sensor != "") { display_lines[line_count++] = "Temp.: " + check_display_value(t_value, -128, 1, 6) + " °C"; }
 			if (h_sensor != "") { display_lines[line_count++] = "Hum.:  " + check_display_value(h_value, -1, 1, 6) + " %"; }
 			if (p_sensor != "") { display_lines[line_count++] = "Pres.: " + check_display_value(p_value / 100, (-1 / 100.0), 1, 6) + " hPa"; }
-			while (line_count < 3) { display_lines[line_count++] = ""; }
+			while (line_count < 3) { display_lines[line_count++] = empty_String; }
 			break;
 		case 3:
 			display_header = gps_sensor;
@@ -4012,7 +4008,7 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 
 	if (cfg::send2sensemap && (cfg::senseboxid[0] != '\0')) {
 		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("opensensemap: "));
-		String sensemap_path(tmpl(F(URL_SENSEMAP), cfg::senseboxid));
+		String sensemap_path(tmpl(FPSTR(URL_SENSEMAP), cfg::senseboxid));
 		sum_send_time += sendData(data, 0, HOST_SENSEMAP, PORT_SENSEMAP, sensemap_path.c_str(), true, "", FPSTR(TXT_CONTENT_TYPE_JSON));
 	}
 
@@ -4026,7 +4022,8 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 		unsigned long ts = millis() / 1000;
 		String token = WiFi.macAddress();
 		String aircms_data = "L=" + esp_chipid + "&t=" + String(ts, DEC) + "&airrohr=" + data;
-		String aircms_url = URL_AIRCMS + hmac1(sha1Hex(token), aircms_data + token);
+		String aircms_url(FPSTR(URL_AIRCMS));
+		aircms_url += hmac1(sha1Hex(token), aircms_data + token);
 
 		sum_send_time += sendData(aircms_data, 0, HOST_AIRCMS, PORT_AIRCMS, aircms_url.c_str(), true, "", FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN));
 	}
