@@ -3260,6 +3260,17 @@ static void fetchSensorSPS30(String& s) {
 /*****************************************************************
    read DNMS values
  *****************************************************************/
+
+static float readDNMScorrection() {
+	char* pEnd = nullptr;
+	// Avoiding atof() here as this adds a lot (~ 9kb) of code size
+	float r = float(strtol(cfg::dnms_correction, &pEnd, 10));
+	if (pEnd && pEnd[0] == '.' && pEnd[1] >= '0' && pEnd[1] <= '9') {
+		r += (pEnd[1] - '0') / 10.0;
+	}
+	return r;
+}
+
 static void fetchSensorDNMS(String& s) {
 	static bool dnms_error = false;
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_DNMS));
@@ -3284,7 +3295,7 @@ static void fetchSensorDNMS(String& s) {
 	if (!dnms_error) {
 		struct dnms_measurements dnms_values;
 		if (dnms_read_leq(&dnms_values) == 0) {
-			float dnms_corr_value = atof(cfg::dnms_correction);
+			float dnms_corr_value = readDNMScorrection();
 			last_value_dnms_laeq = dnms_values.leq_a + dnms_corr_value;
 			last_value_dnms_la_min = dnms_values.leq_a_min + dnms_corr_value;
 			last_value_dnms_la_max = dnms_values.leq_a_max + dnms_corr_value;
