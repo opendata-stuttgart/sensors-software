@@ -2223,7 +2223,7 @@ static void wifiConfig() {
 	WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
 	WiFi.softAP(cfg::fs_ssid, cfg::fs_pwd, selectChannelForAp());
 	// In case we create a unique password at first start
-	debug_outln_info(F("AP Password is: "), String(WLANPWD));
+	debug_outln_info(F("AP Password is: "), cfg::fs_pwd);
 
 	DNSServer dnsServer;
 	// Ensure we don't poison the client DNS cache
