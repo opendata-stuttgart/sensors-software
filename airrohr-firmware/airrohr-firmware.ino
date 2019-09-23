@@ -177,6 +177,10 @@ const String SOFTWARE_VERSION("NRZ-2019-124-B6");
 #include "intl_bg.h"
 #elif defined(INTL_CZ)
 #include "intl_cz.h"
+#elif defined(INTL_DE)
+#include "intl_de.h"
+#elif defined(INTL_DK)
+#include "intl_dk.h"
 #elif defined(INTL_EN)
 #include "intl_en.h"
 #elif defined(INTL_ES)
@@ -197,8 +201,12 @@ const String SOFTWARE_VERSION("NRZ-2019-124-B6");
 #include "intl_ru.h"
 #elif defined(INTL_SE)
 #include "intl_se.h"
+#elif defined(INTL_TR)
+#include "intl_tr.h"
+#elif defined(INTL_UA)
+#include "intl_ua.h"
 #else
-#include "intl_de.h"
+#error No language defined
 #endif
 
 #include "defines.h"
@@ -2122,7 +2130,8 @@ static void webserver_images() {
 
 	if (server.arg("name") == F("luftdaten_logo")) {
 		debug_outln_info(F("output luftdaten.info logo..."));
-		server.send_P(200, TXT_CONTENT_TYPE_IMAGE_SVG, LUFTDATEN_INFO_LOGO_SVG);
+		server.send_P(200, TXT_CONTENT_TYPE_IMAGE_PNG,
+			LUFTDATEN_INFO_LOGO_PNG, LUFTDATEN_INFO_LOGO_PNG_SIZE);
 	} else {
 		webserver_not_found();
 	}
