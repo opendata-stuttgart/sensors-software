@@ -1913,12 +1913,12 @@ static void webserver_values() {
 		if (cfg::bmp_read) {
 			page_content += FPSTR(EMPTY_ROW);
 			add_table_row_from_value(page_content, FPSTR(SENSORS_BMP180), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_BMP_T, -128, 1, 0), unit_T);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_BMP180), FPSTR(INTL_PRESSURE), check_display_value(last_value_BMP_P / 100.0, (-1 / 100.0), 2, 0), unit_P);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_BMP180), FPSTR(INTL_PRESSURE), check_display_value(last_value_BMP_P / 100.0f, (-1 / 100.0f), 2, 0), unit_P);
 		}
 		if (cfg::bmx280_read) {
 			page_content += FPSTR(EMPTY_ROW);
 			add_table_row_from_value(page_content, FPSTR(SENSORS_BMX280), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_BMX280_T, -128, 1, 0), unit_T);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_BMX280), FPSTR(INTL_PRESSURE), check_display_value(last_value_BMX280_P / 100.0, (-1 / 100.0), 2, 0), unit_P);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_BMX280), FPSTR(INTL_PRESSURE), check_display_value(last_value_BMX280_P / 100.0f, (-1 / 100.0f), 2, 0), unit_P);
 			if (bmx280.sensorID() == BME280_SENSOR_ID) {
 				add_table_row_from_value(page_content, FPSTR(SENSORS_BMX280), FPSTR(INTL_HUMIDITY), check_display_value(last_value_BME280_H, -1, 1, 0), unit_H);
 			}
@@ -2305,7 +2305,7 @@ static void connectWifi() {
 	debug_outln(String(WiFi.status()), DEBUG_MIN_INFO);
 	WiFi.disconnect();
 #if defined(ESP8266)
-	WiFi.setOutputPower(20.5);
+	WiFi.setOutputPower(20.5f);
 	WiFi.setPhyMode(WIFI_PHY_MODE_11N);
 #endif
 	WiFi.mode(WIFI_STA);
@@ -2621,7 +2621,7 @@ static void fetchSensorBMP(String& s) {
 		debug_outln_error(F("BMP180 read failed"));
 	} else {
 		debug_outln_info(FPSTR(DBG_TXT_TEMPERATURE), t);
-		debug_outln_info(FPSTR(DBG_TXT_PRESSURE), (p / 100.0));
+		debug_outln_info(FPSTR(DBG_TXT_PRESSURE), (p / 100.0f));
 		last_value_BMP_T = t;
 		last_value_BMP_P = p;
 		add_Value2Json(s, F("BMP_pressure"), last_value_BMP_P);
@@ -2649,7 +2649,7 @@ static void fetchSensorBMX280(String& s) {
 		debug_outln_error(F("BMP/BME280 read failed"));
 	} else {
 		debug_outln_info(FPSTR(DBG_TXT_TEMPERATURE), t);
-		debug_outln_info(FPSTR(DBG_TXT_PRESSURE), (p / 100.0));
+		debug_outln_info(FPSTR(DBG_TXT_PRESSURE), (p / 100.0f));
 		last_value_BMX280_T = t;
 		last_value_BMX280_P = p;
 		if (bmx280.sensorID() == BME280_SENSOR_ID) {
@@ -2685,7 +2685,7 @@ static void fetchSensorDS18B20(String& s) {
 		t = ds18b20.getTempCByIndex(0);
 		++count;
 		debug_outln_info(F("DS18B20 trying...."));
-	} while (count < MAX_ATTEMPTS && (isnan(t) || t >= 85.0 || t <= (-127.0)));
+	} while (count < MAX_ATTEMPTS && (isnan(t) || t >= 85.0f || t <= (-127.0f)));
 
 	if (count == MAX_ATTEMPTS) {
 		last_value_DS18B20_T = -128.0;
@@ -2783,8 +2783,8 @@ static void fetchSensorSDS(String& s) {
 					if (sds_pm25_max < pm25_serial) {
 						sds_pm25_max = pm25_serial;
 					}
-					debug_outln_verbose(F("PM10 (sec.) : "), String(double(pm10_serial) / 10.0));
-					debug_outln_verbose(F("PM2.5 (sec.): "), String(double(pm25_serial) / 10.0));
+					debug_outln_verbose(F("PM10 (sec.) : "), String(pm10_serial / 10.0f));
+					debug_outln_verbose(F("PM2.5 (sec.): "), String(pm25_serial / 10.0f));
 					sds_val_count++;
 				}
 				len = 0;
@@ -2806,8 +2806,8 @@ static void fetchSensorSDS(String& s) {
 			sds_val_count = sds_val_count - 2;
 		}
 		if (sds_val_count > 0) {
-			last_value_SDS_P1 = double(sds_pm10_sum) / (sds_val_count * 10.0);
-			last_value_SDS_P2 = double(sds_pm25_sum) / (sds_val_count * 10.0);
+			last_value_SDS_P1 = float(sds_pm10_sum) / (sds_val_count * 10.0f);
+			last_value_SDS_P2 = float(sds_pm25_sum) / (sds_val_count * 10.0f);
 			debug_outln_info(F("PM10:  "), last_value_SDS_P1);
 			debug_outln_info(F("PM2.5: "), last_value_SDS_P2);
 			debug_outln_info(F("----"));
@@ -3171,15 +3171,15 @@ static void fetchSensorPPD(String& s) {
 	}
 	// Checking if it is time to sample
 	if (send_now) {
-		const auto calcConcentration = [](double ratio) {
+		auto calcConcentration = [](const float ratio) {
 			/* spec sheet curve*/
-			return (1.1 * pow(ratio, 3) - 3.8 * pow(ratio, 2) + 520 * ratio + 0.62);
+			return (1.1f * ratio * ratio * ratio - 3.8f * ratio * ratio + 520.0f * ratio + 0.62f);
 		};
 
 		last_value_PPD_P1 = -1;
 		last_value_PPD_P2 = -1;
-		double ratio = lowpulseoccupancyP1 / (SAMPLETIME_MS * 10.0);					// int percentage 0 to 100
-		double concentration = calcConcentration(ratio);
+		float ratio = lowpulseoccupancyP1 / (SAMPLETIME_MS * 10.0f);
+		float concentration = calcConcentration(ratio);
 		debug_outln_info(F("LPO P10    : "), String(lowpulseoccupancyP1));
 		debug_outln_info(F("Ratio PM10%: "), ratio);
 		debug_outln_info(F("PM10 Count : "), concentration);
