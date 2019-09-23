@@ -4,6 +4,7 @@ const char TXT_CONTENT_TYPE_TEXT_HTML[] PROGMEM = "text/html; charset=utf-8";
 const char TXT_CONTENT_TYPE_TEXT_PLAIN[] PROGMEM = "text/plain";
 const char TXT_CONTENT_TYPE_IMAGE_SVG[] PROGMEM = "image/svg+xml";
 
+const char DBG_TXT_CO2[] PROGMEM = "CO2: ";
 const char DBG_TXT_TEMPERATURE[] PROGMEM = "Temperature: ";
 const char DBG_TXT_HUMIDITY[] PROGMEM = "Humidity: ";
 const char DBG_TXT_PRESSURE[] PROGMEM = "Pressure: ";
@@ -32,6 +33,7 @@ const char SENSORS_HTU21D[] PROGMEM = "HTU21D";
 const char SENSORS_BMP180[] PROGMEM = "BMP180";
 const char SENSORS_BMP280[] PROGMEM = "BMP280";
 const char SENSORS_BME280[] PROGMEM = "BME280";
+const char SENSORS_CCS811[] PROGMEM = "CCS811";
 
 const char WEB_PAGE_HEADER[] PROGMEM = "<!DOCTYPE html><html>\
 <head>\

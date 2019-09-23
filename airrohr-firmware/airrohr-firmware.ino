@@ -125,6 +125,7 @@
 #include <Adafruit_BMP085.h>
 #include <Adafruit_BMP280.h>
 #include <Adafruit_BME280.h>
+#include <Adafruit_CCS811.h>
 #include <DallasTemperature.h>
 #include <TinyGPS++.h>
 #include <time.h>
@@ -206,6 +207,7 @@ namespace cfg {
 	bool bmp_read = BMP_READ;
 	bool bmp280_read = BMP280_READ;
 	bool bme280_read = BME280_READ;
+  	bool ccs811_read = CCS811_READ;
 	bool ds18b20_read = DS18B20_READ;
 	bool gps_read = GPS_READ;
 	bool send2dusti = SEND2DUSTI;
@@ -292,6 +294,7 @@ long int sample_count = 0;
 bool bmp_init_failed = false;
 bool bmp280_init_failed = false;
 bool bme280_init_failed = false;
+bool ccs811_init_failed = false;
 
 ESP8266WebServer server(80);
 int TimeZone = 1;
@@ -335,6 +338,11 @@ Adafruit_BMP280 bmp280;
  * BME280 declaration                                            *
  *****************************************************************/
 Adafruit_BME280 bme280;
+
+/*****************************************************************
+ * CCS811 declaration                                            *
+ *****************************************************************/
+Adafruit_CCS811 ccs811;
 
 /*****************************************************************
  * DS18B20 declaration                                            *
@@ -428,6 +436,8 @@ double last_value_BMP280_P = -1.0;
 double last_value_BME280_T = -128.0;
 double last_value_BME280_H = -1.0;
 double last_value_BME280_P = -1.0;
+double last_value_CCS811_C = -1.0;
+double last_value_CCS811_T = -1.0;
 double last_value_DS18B20_T = -1.0;
 double last_value_GPS_lat = -200.0;
 double last_value_GPS_lon = -200.0;
@@ -884,6 +894,7 @@ void readConfig() {
 					setFromJSON(bmp_read);
 					setFromJSON(bmp280_read);
 					setFromJSON(bme280_read);
+					setFromJSON(ccs811_read);
 					setFromJSON(ds18b20_read);
 					setFromJSON(gps_read);
 					setFromJSON(send2dusti);
@@ -973,6 +984,7 @@ void writeConfig() {
 	copyToJSON_Bool(bmp_read);
 	copyToJSON_Bool(bmp280_read);
 	copyToJSON_Bool(bme280_read);
+  	copyToJSON_Bool(ccs811_read);
 	copyToJSON_Bool(ds18b20_read);
 	copyToJSON_Bool(gps_read);
 	copyToJSON_Bool(send2dusti);
@@ -1257,6 +1269,8 @@ String add_sensor_type(const String& sensor_text) {
 	s.replace("{t}", FPSTR(INTL_TEMPERATURE));
 	s.replace("{h}", FPSTR(INTL_HUMIDITY));
 	s.replace("{p}", FPSTR(INTL_PRESSURE));
+	s.replace("{co2}", FPSTR(INTL_CO2));
+	s.replace("{tvoc}", FPSTR(INTL_TVOC));
 	return s;
 }
 
@@ -1385,6 +1399,7 @@ void webserver_config() {
 			page_content += form_checkbox_sensor("bmp_read", FPSTR(INTL_BMP180), bmp_read);
 			page_content += form_checkbox_sensor("bmp280_read", FPSTR(INTL_BMP280), bmp280_read);
 			page_content += form_checkbox_sensor("bme280_read", FPSTR(INTL_BME280), bme280_read);
+			page_content += form_checkbox_sensor("ccs811_read", FPSTR(INTL_CCS811), ccs811_read);
 			page_content += form_checkbox_sensor("ds18b20_read", FPSTR(INTL_DS18B20), ds18b20_read);
 			page_content += form_checkbox("gps_read", FPSTR(INTL_NEO6M), gps_read);
 			page_content += F("<br/><br/>\n<b>");
@@ -1509,6 +1524,7 @@ void webserver_config() {
 			readBoolParam(bmp_read);
 			readBoolParam(bmp280_read);
 			readBoolParam(bme280_read);
+			readBoolParam(ccs811_read);
 			readBoolParam(ds18b20_read);
 			readBoolParam(gps_read);
 
@@ -1564,6 +1580,7 @@ void webserver_config() {
 		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), "BMP180"), String(bmp_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), "BMP280"), String(bmp280_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), "BME280"), String(bme280_read));
+		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), "CCS811"), String(ccs811_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), "DS18B20"), String(ds18b20_read));
 		page_content += line_from_value(tmpl(FPSTR(INTL_READ_FROM), "GPS"), String(gps_read));
 		page_content += line_from_value(FPSTR(INTL_AUTO_UPDATE), String(auto_update));
@@ -1681,6 +1698,8 @@ void webserver_values() {
 		const String unit_T = "°C";
 		const String unit_H = "%";
 		const String unit_P = "hPa";
+		const String unit_PPM = "ppm";
+		const String unit_PPB = "ppb";
 		last_page_load = millis();
 
 		const int signal_quality = calcWiFiSignalQuality(WiFi.RSSI());
@@ -1740,6 +1759,11 @@ void webserver_values() {
 			page_content += table_row_from_value(FPSTR(SENSORS_BME280), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_BME280_T, -128, 1, 0), unit_T);
 			page_content += table_row_from_value(FPSTR(SENSORS_BME280), FPSTR(INTL_HUMIDITY), check_display_value(last_value_BME280_H, -1, 1, 0), unit_H);
 			page_content += table_row_from_value(FPSTR(SENSORS_BME280), FPSTR(INTL_PRESSURE),  check_display_value(last_value_BME280_P / 100.0, (-1 / 100.0), 2, 0), unit_P);
+		}
+		if (cfg::ccs811_read) {
+			page_content += FPSTR(EMPTY_ROW);
+			page_content += table_row_from_value(FPSTR(SENSORS_CCS811), FPSTR(INTL_CO2), check_display_value(last_value_CCS811_C, -1, 1, 0), unit_PPM);  // TO BE VERIFIED
+			page_content += table_row_from_value(FPSTR(SENSORS_CCS811), FPSTR(INTL_TVOC), check_display_value(last_value_CCS811_T, -1, 1, 0), unit_PPB);  // TO BE VERIFIED
 		}
 		if (cfg::ds18b20_read) {
 			page_content += FPSTR(EMPTY_ROW);
@@ -2481,6 +2505,43 @@ static String sensorBMP280() {
 
 	debug_out(String(FPSTR(DBG_TXT_END_READING)) + FPSTR(SENSORS_BMP280), DEBUG_MED_INFO, 1);
 
+	return s;
+}
+
+/*****************************************************************
+ * read CCS811 sensor values                                     *
+ *****************************************************************/
+static String sensorCCS811() {
+	String s;
+	
+	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_CCS811), DEBUG_MED_INFO, 1);
+
+	if(!ccs811.readData()) {
+		const auto co2 = ccs811.geteCO2();
+		const auto tvoc = ccs811.getTVOC();
+		
+		if (isnan(co2)) {
+			last_value_CCS811_C = -1.0;
+			last_value_CCS811_T = -1.0;
+			debug_out(String(FPSTR(SENSORS_CCS811)) + FPSTR(DBG_TXT_COULDNT_BE_READ), DEBUG_ERROR, 1);
+		}
+		else {
+			debug_out(FPSTR(DBG_TXT_CO2), DEBUG_MIN_INFO, 0);
+			debug_out(Float2String(co2) + " PPM", DEBUG_MIN_INFO, 1);  // check unit
+			last_value_CCS811_C = co2;
+			last_value_CCS811_T = tvoc;
+			s += Value2Json(F("CCS811_co2"), Float2String(last_value_CCS811_C));
+			s += Value2Json(F("CCS811_tvoc"), Float2String(last_value_CCS811_T));
+		}
+		debug_out("----", DEBUG_MIN_INFO, 1);
+
+		debug_out(String(FPSTR(DBG_TXT_END_READING)) + FPSTR(SENSORS_CCS811), DEBUG_MED_INFO, 1);
+	}
+	else {
+		last_value_CCS811_C = -1.0;
+		last_value_CCS811_T = -1.0;
+		debug_out(String(FPSTR(SENSORS_CCS811)) + FPSTR(DBG_TXT_COULDNT_BE_READ), DEBUG_ERROR, 1);
+	}
 	return s;
 }
 
@@ -3540,6 +3601,27 @@ bool initBME280(char addr) {
 	}
 }
 
+/*****************************************************************
+ * Init CCS811                                                   *
+ *****************************************************************/
+bool initCCS811(char addr) {
+	debug_out(F("Trying CCS811 sensor on "), DEBUG_MIN_INFO, 0);
+	debug_out(String(addr, HEX), DEBUG_MIN_INFO, 0);
+
+	if(ccs811.begin(addr)) {
+		debug_out(F(" ... found"), DEBUG_MIN_INFO, 1);
+
+		while(!ccs811.available());
+		float temp = ccs811.calculateTemperature();
+		ccs811.setTempOffset(temp - 25.0);
+		return true;
+	}
+	else {
+		debug_out(F(" ... not found"), DEBUG_MIN_INFO, 1);
+		return false;
+	}
+}
+
 static void powerOnTestSensors() {
 	if (cfg::ppd_read) {
 		pinMode(PPD_PIN_PM1, INPUT_PULLUP);                 // Listen at the designated PIN
@@ -3609,6 +3691,14 @@ static void powerOnTestSensors() {
 			debug_out(F("Check BME280 wiring"), DEBUG_MIN_INFO, 1);
 			bme280_init_failed = 1;
 		}
+	}
+
+	if (cfg::ccs811_read) {
+		debug_out(F("Read CCS811..."), DEBUG_MIN_INFO, 1);
+		if (!initCCS811(0x5A) && !initCCS811(0x5B)) {
+			debug_out(F("Check CCS811 wiring"), DEBUG_MIN_INFO, 1);
+			ccs811_init_failed = 1;
+		}    
 	}
 
 	if (cfg::ds18b20_read) {
@@ -3705,7 +3795,7 @@ static bool acquireNetworkTime() {
 void setup() {
 	Serial.begin(9600);					// Output to Serial at 9600 baud
 	Wire.begin(I2C_PIN_SDA, I2C_PIN_SCL);
-
+  
 	esp_chipid = String(ESP.getChipId());
 	cfg::initNonTrivials(esp_chipid.c_str());
 	readConfig();
@@ -3829,6 +3919,7 @@ void loop() {
 	String result_BMP = "";
 	String result_BMP280 = "";
 	String result_BME280 = "";
+  	String result_CCS811 = "";
 	String result_DS18B20 = "";
 	String result_GPS = "";
 
@@ -3905,6 +3996,11 @@ void loop() {
 		if (cfg::bme280_read && (! bme280_init_failed)) {
 			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + FPSTR(SENSORS_BME280), DEBUG_MAX_INFO, 1);
 			result_BME280 = sensorBME280();                 // getting temperature, humidity and pressure (optional)
+		}
+
+		if (cfg::ccs811_read && (! ccs811_init_failed)) {
+			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + FPSTR(SENSORS_CCS811), DEBUG_MAX_INFO, 1);
+			result_CCS811 = sensorCCS811();                 // getting co2 and tvoc
 		}
 
 		if (cfg::ds18b20_read) {
@@ -4023,7 +4119,15 @@ void loop() {
 				sum_send_time += millis() - start_send;
 			}
 		}
-
+		if (cfg::ccs811_read && (! ccs811_init_failed)) {
+			data += result_CCS811;
+			if (cfg::send2dusti) {
+				debug_out(String(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN)) + F("(CCS811): "), DEBUG_MIN_INFO, 1);
+				start_send = millis();
+				sendLuftdaten(result_CCS811, CCS811_API_PIN, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI, true, "CCS811_");
+				sum_send_time += millis() - start_send;
+			}
+		}
 		if (cfg::ds18b20_read) {
 			data += result_DS18B20;
 			if (cfg::send2dusti) {
