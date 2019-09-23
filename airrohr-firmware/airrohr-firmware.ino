@@ -660,8 +660,6 @@ static void debug_outln_info_bool(const __FlashStringHelper* text, const bool op
  *****************************************************************/
 static void display_debug(const String& text1, const String& text2) {
 	debug_outln_info(F("output debug text to displays..."));
-	debug_outln(text1, DEBUG_MAX_INFO);
-	debug_outln(text2, DEBUG_MAX_INFO);
 	if (cfg::has_display) {
 		display.clear();
 		display.displayOn();
@@ -1076,10 +1074,10 @@ void writeConfig() {
 
 	File configFile = SPIFFS.open("/config.json", "w");
 	if (configFile) {
-		debug_outln(F("Before writing config.."), DEBUG_MIN_INFO);
+		debug_outln_info(F("Before writing config.."));
 		serializeJson(json, configFile);
 		configFile.close();
-		debug_outln(F("Config written successfully."), DEBUG_MIN_INFO);
+		debug_outln_info(F("Config written successfully."));
 	} else {
 		debug_outln_error(F("failed to open config file for writing"));
 	}
@@ -3406,7 +3404,8 @@ static void fetchSensorGPS(String& s) {
 	}
 
 	if (send_now) {
-		debug_outln("Lat/Lng: " + Float2String(last_value_GPS_lat, 6) + "," + Float2String(last_value_GPS_lon, 6), DEBUG_MIN_INFO);
+		debug_outln_info(F("Lat: "), Float2String(last_value_GPS_lat, 6));
+		debug_outln_info(F("Lng: "), Float2String(last_value_GPS_lon, 6));
 		debug_outln_info(F("Altitude: "), last_value_GPS_alt);
 		debug_outln_info(F("Date: "), last_value_GPS_date);
 		debug_outln_info(F("Time "), last_value_GPS_time);
@@ -3980,9 +3979,9 @@ static bool acquireNetworkTime() {
 	// server name ptrs must be persisted after the call to configTime because internally
 	// the pointers are stored see implementation of lwip sntp_setservername() 
 	static String ntpServer1, ntpServer2;
-	debug_outln(F("Setting time using SNTP"), DEBUG_MIN_INFO);
+	debug_outln_info(F("Setting time using SNTP"));
 	time_t now = time(nullptr);
-	debug_outln(ctime(&now), DEBUG_MIN_INFO);
+	debug_outln_info(ctime(&now));
 #if defined(ESP8266)
 	settimeofday_cb(time_is_set);
 #endif
@@ -3992,7 +3991,7 @@ static bool acquireNetworkTime() {
 	for (int retryCount = 0; retryCount++ < 20; ++retryCount) {
 		if (sntp_time_is_set) {
 			now = time(nullptr);
-			debug_outln(ctime(&now), DEBUG_MIN_INFO);
+			debug_outln_info(ctime(&now));
 			return true;
 		}
 		delay(500);
