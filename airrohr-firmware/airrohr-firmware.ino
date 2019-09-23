@@ -2232,7 +2232,7 @@ static void wifiConfig() {
 	WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
 	WiFi.softAP(cfg::fs_ssid, cfg::fs_pwd, selectChannelForAp());
 	// In case we create a unique password at first start
-	debug_outln_info(F("AP Password is: "), String(WLANPWD));
+	debug_outln_info(F("AP Password is: "), cfg::fs_pwd);
 
 	DNSServer dnsServer;
 	// Ensure we don't poison the client DNS cache
@@ -3278,7 +3278,7 @@ static float readDNMScorrection() {
 	// Avoiding atof() here as this adds a lot (~ 9kb) of code size
 	float r = float(strtol(cfg::dnms_correction, &pEnd, 10));
 	if (pEnd && pEnd[0] == '.' && pEnd[1] >= '0' && pEnd[1] <= '9') {
-		r += (pEnd[1] - '0') / 10.0;
+		r += (r >= 0 ? 1.0 : -1.0) * ((pEnd[1] - '0') / 10.0);
 	}
 	return r;
 }
