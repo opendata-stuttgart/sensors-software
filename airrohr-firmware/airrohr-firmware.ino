@@ -3472,13 +3472,14 @@ static void twoStageAutoUpdate() {
 	String lang_variant(cfg::current_lang);
 	lang_variant.toLowerCase();
 
-	String fwprefix = String("/air-rohr/latest_");
+	String fwprefix = String("/airrohr/update/latest_");
 	if (cfg::use_beta) {
-		fwprefix = "/air-rohr-beta/latest_";
+		fwprefix = "/airrohr/beta/latest_";
 	}
+	fwprefix += lang_variant;
 
 	String firmware_md5("/firmware.bin.md5");
-	String fetch_md5_name = fwprefix + lang_variant + ".bin.md5";
+	String fetch_md5_name = fwprefix + ".bin.md5";
 	bool downloadSuccess = fwDownloadStreamFile(fetch_md5_name, firmware_md5);
 	if (!downloadSuccess)
 		return;
@@ -3502,7 +3503,7 @@ static void twoStageAutoUpdate() {
 	}
 
 	String firmware_name("/firmware.bin");
-	String fetch_name = String("/air-rohr/latest_") + lang_variant + ".bin";
+	String fetch_name = fwprefix + ".bin";
 	downloadSuccess = fwDownloadStreamFile(fetch_name, firmware_name);
 
 	if (!downloadSuccess)
@@ -3536,7 +3537,7 @@ static void twoStageAutoUpdate() {
 
 	debug_outln("launching 2nd stage", DEBUG_MIN_INFO);
 	const HTTPUpdateResult ret = ESPhttpUpdate.update(FPSTR(FW_DOWNLOAD_HOST), 80,
-		"/air-rohr/loader-002.bin", String("LOADER-002"));
+		"/airrohr/loader-002.bin", String("LOADER-002"));
 
 	String LastErrorString = ESPhttpUpdate.getLastErrorString().c_str();
 	switch(ret) {
