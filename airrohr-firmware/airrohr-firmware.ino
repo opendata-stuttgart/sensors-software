@@ -1359,7 +1359,11 @@ static void webserver_root() {
 		add_header(page_content, empty_String);
 		last_page_load = millis();
 		debug_outln_info(F("output root page..."));
-		page_content += FPSTR(WEB_ROOT_PAGE_CONTENT);
+
+		// Enable Pagination
+		server.setContentLength(CONTENT_LENGTH_UNKNOWN);
+		server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
+		page_content = FPSTR(WEB_ROOT_PAGE_CONTENT);
 		page_content.replace(F("{t}"), FPSTR(INTL_CURRENT_DATA));
 		page_content.replace(F("{map}"), FPSTR(INTL_ACTIVE_SENSORS_MAP));
 		page_content.replace(F("{conf}"), FPSTR(INTL_CONFIGURATION));
@@ -1367,7 +1371,7 @@ static void webserver_root() {
 		page_content.replace(F("{restart}"), FPSTR(INTL_RESTART_SENSOR));
 		page_content.replace(F("{debug_setting}"), FPSTR(INTL_DEBUG_SETTING_TO));
 		add_footer(page_content);
-		server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
+		server.sendContent(page_content);
 	}
 }
 
@@ -1840,6 +1844,12 @@ static void webserver_values() {
 		} else {
 			page_content += age_last_values();
 		}
+
+		// Enable Pagination
+		server.setContentLength(CONTENT_LENGTH_UNKNOWN);
+		server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
+		page_content = empty_String;
+
 		page_content += F("<table cellspacing='0' border='1' cellpadding='5'>");
 		page_content += tmpl(F("<tr><th>{v1}</th><th>{v2}</th><th>{v3}</th>"), FPSTR(INTL_SENSOR), FPSTR(INTL_PARAMETER), FPSTR(INTL_VALUE));
 		if (cfg::ppd_read) {
@@ -1876,6 +1886,10 @@ static void webserver_values() {
 			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_NC10), check_display_value(last_value_SPS30_N4, -1, 0, 0), unit_NC);
 			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_TPS), check_display_value(last_value_SPS30_TS, -1, 1, 0), unit_TS);
 		}
+
+		server.sendContent(page_content);
+		page_content = empty_String;
+
 		if (cfg::dht_read) {
 			page_content += FPSTR(EMPTY_ROW);
 			add_table_row_from_value(page_content, FPSTR(SENSORS_DHT22), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_DHT_T, -128, 1, 0), unit_T);
@@ -1918,7 +1932,8 @@ static void webserver_values() {
 			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_TIME), last_value_GPS_time, empty_String);
 		}
 
-		page_content += FPSTR(EMPTY_ROW);
+		server.sendContent(page_content);
+		page_content = FPSTR(EMPTY_ROW);
 		add_table_row_from_value(page_content, F("WiFi"), FPSTR(INTL_SIGNAL_STRENGTH), String(WiFi.RSSI()), "dBm");
 		add_table_row_from_value(page_content, F("WiFi"), FPSTR(INTL_SIGNAL_QUALITY), String(signal_quality), "%");
 		page_content += FPSTR(EMPTY_ROW);
@@ -1929,7 +1944,7 @@ static void webserver_values() {
 		page_content += F("</td></tr>");
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 		add_footer(page_content);
-		server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
+		server.sendContent(page_content);
 	}
 }
 
