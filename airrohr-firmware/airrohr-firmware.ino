@@ -2069,9 +2069,7 @@ static void webserver_data_json() {
 	String s2 = F(", \"age\":\"");
 	s2 += String((long)((age + 500) / 1000));
 	s2 += F("\", \"sensordatavalues\"");
-	debug_outln_info(F("replace with: "), s2);
 	s1.replace(F(", \"sensordatavalues\""), s2);
-	debug_outln_info(F("replaced: "), s1);
 	server.send(200, FPSTR(TXT_CONTENT_TYPE_JSON), s1);
 }
 
