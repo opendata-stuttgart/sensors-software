@@ -105,7 +105,8 @@
  *
  ************************************************************************/
 // increment on change
-const String SOFTWARE_VERSION("NRZ-2019-124-B6");
+#define SOFTWARE_VERSION_STR "NRZ-2019-124-B6"
+const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
  * Includes                                                      *
@@ -243,7 +244,7 @@ namespace cfg {
 	unsigned int time_for_wifi_config = 600000;
 	unsigned int sending_intervall_ms = 145000;
 
-	char current_lang[3] = "DE";
+	char current_lang[3];
 
 	// credentials for basic auth of internal web server
 	bool www_basicauth_enabled = WWW_BASICAUTH_ENABLED;
@@ -568,7 +569,7 @@ template<typename T, std::size_t N> constexpr std::size_t array_num_elements(con
 
 #define msSince(timestamp_before) (act_milli - (timestamp_before))
 
-const char data_first_part[] PROGMEM = "{\"software_version\": \"{v}\", \"sensordatavalues\":[";
+const char data_first_part[] PROGMEM = "{\"software_version\": \"" SOFTWARE_VERSION_STR "\", \"sensordatavalues\":[";
 
 /*****************************************************************
  * Debug output                                                  *
@@ -2036,7 +2037,7 @@ static void webserver_data_json() {
 
 	debug_outln_info(F("output data json..."));
 	if (first_cycle) {
-		s1 = tmpl(FPSTR(data_first_part), SOFTWARE_VERSION);
+		s1 = FPSTR(data_first_part);
 		s1 += "]}";
 		age = cfg::sending_intervall_ms - msSince(starttime);
 		if (age > cfg::sending_intervall_ms) {
@@ -2065,12 +2066,11 @@ static void webserver_data_json() {
  *****************************************************************/
 static void webserver_prometheus_endpoint() {
 	debug_outln_info(F("output prometheus endpoint..."));
-	String data_4_prometheus = F("software_version{version=\"{ver}\",node=\"-{id}\"} 1\nuptime_ms{{id}} {up}\nsending_intervall_ms{{id}} {si}\nnumber_of_measurements{{id}} {cs}\n");
+	String data_4_prometheus = F("software_version{version=\"" SOFTWARE_VERSION_STR "\",node=\"-{id}\"} 1\nuptime_ms{{id}} {up}\nsending_intervall_ms{{id}} {si}\nnumber_of_measurements{{id}} {cs}\n");
 	debug_outln_info(F("Parse JSON for Prometheus"));
 	String id(F("node=\"" SENSOR_BASENAME));
 	id += esp_chipid + "\"";
 	data_4_prometheus.replace("{id}", esp_chipid);
-	data_4_prometheus.replace("{ver}", SOFTWARE_VERSION);
 	data_4_prometheus.replace("{up}", String(msSince(time_point_device_start_ms)));
 	data_4_prometheus.replace("{si}", String(cfg::sending_intervall_ms));
 	data_4_prometheus.replace("{cs}", String(count_sends));
@@ -2438,7 +2438,7 @@ static unsigned long sendLuftdaten(const String& data, const int pin, const __Fl
 	unsigned long sum_send_time = 0;
 
 	if (cfg::send2dusti && data.length()) {
-		String data_4_dusti = tmpl(FPSTR(data_first_part), SOFTWARE_VERSION);
+		String data_4_dusti = FPSTR(data_first_part);
 
 		debug_outln_info(F("## Sending to Luftdaten.info - "), sensorname);
 		data_4_dusti += data;
@@ -4352,7 +4352,7 @@ void loop(void) {
 	if (send_now) {
 		debug_outln_info(F("Creating data string:"));
 		String signal_strength = String(WiFi.RSSI());
-		String data = tmpl(FPSTR(data_first_part), SOFTWARE_VERSION);
+		String data = FPSTR(data_first_part);
 		String data_sample_times;
 		add_Value2Json(data_sample_times, F("samples"), String(sample_count));
 		add_Value2Json(data_sample_times, F("min_micro"), String(min_micro));
