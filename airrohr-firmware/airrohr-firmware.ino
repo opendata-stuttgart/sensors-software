@@ -2439,7 +2439,7 @@ static unsigned long sendLuftdaten(const String& data, const int pin, const __Fl
 	if (cfg::send2dusti && data.length()) {
 		String data_4_dusti = tmpl(FPSTR(data_first_part), SOFTWARE_VERSION);
 
-		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN), sensorname);
+		debug_outln_info(F("## Sending to Luftdaten.info - "), sensorname);
 		data_4_dusti += data;
 		data_4_dusti.remove(data_4_dusti.length() - 1);
 		data_4_dusti.replace(replace_str, empty_String);
@@ -3295,9 +3295,9 @@ static void fetchSensorDNMS(String& s) {
 		dnms_reset(); // try to reset dnms
 		debug_outln_error(F("DNMS read failed"));
 	} else {
-		debug_outln_info(FPSTR(DBG_TXT_DNMS_LAEQ), last_value_dnms_laeq);
-		debug_outln_info(FPSTR(DBG_TXT_DNMS_LA_MIN), last_value_dnms_la_min);
-		debug_outln_info(FPSTR(DBG_TXT_DNMS_LA_MAX), last_value_dnms_la_max);
+		debug_outln_info(F("LAeq: "), last_value_dnms_laeq);
+		debug_outln_info(F("LA_MIN: "), last_value_dnms_la_min);
+		debug_outln_info(F("LA_MAX: "), last_value_dnms_la_max);
 
 		add_Value2Json(s, F("noise_LAeq"), last_value_dnms_laeq);
 		add_Value2Json(s, F("noise_LA_min"), last_value_dnms_la_min);
@@ -3533,7 +3533,6 @@ static void twoStageAutoUpdate() {
 		break;
 	case HTTP_UPDATE_OK:
 		// may not called we reboot the ESP
-		debug_outln_info(FPSTR(DBG_TXT_UPDATE), FPSTR(DBG_TXT_UPDATE_OK));
 		break;
 	}
 #endif
