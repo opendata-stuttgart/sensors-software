@@ -3592,7 +3592,7 @@ static void display_values() {
 	double lat_value = -200.0;
 	double lon_value = -200.0;
 	double alt_value = -1000.0;
-	String gps_sensor, display_header;
+	String display_header;
 	String display_lines[3] = { "", "", ""};
 	uint8_t screen_count = 0;
 	uint8_t screens[8];
@@ -3673,7 +3673,6 @@ static void display_values() {
 		lat_value = last_value_GPS_lat;
 		lon_value = last_value_GPS_lon;
 		alt_value = last_value_GPS_alt;
-		gps_sensor = "NEO6M";
 	}
 	if (cfg::ppd_read || cfg::pms_read || cfg::hpm_read || cfg::sds_read) {
 		screens[screen_count++] = 1;
@@ -3705,8 +3704,8 @@ static void display_values() {
 			if (pm25_sensor != pm10_sensor) {
 				display_header += " / " + pm10_sensor;
 			}
-			display_lines[0] = "PM2.5: " + check_display_value(pm25_value, -1, 1, 6) + " µg/m³";
-			display_lines[1] = "PM10:  " + check_display_value(pm10_value, -1, 1, 6) + " µg/m³";
+			display_lines[0] = tmpl(F("PM2.5: {v} µg/m³"), check_display_value(pm25_value, -1, 1, 6));
+			display_lines[1] = tmpl(F("PM10: {v} µg/m³"), check_display_value(pm10_value, -1, 1, 6));
 			display_lines[2] = empty_String;
 			break;
 		case 2:
@@ -3723,34 +3722,37 @@ static void display_values() {
 			while (line_count < 3) { display_lines[line_count++] = empty_String; }
 			break;
 		case 3:
-			display_header = gps_sensor;
-			display_lines[0] = "Lat: " + check_display_value(lat_value, -200.0, 6, 10);
-			display_lines[1] = "Lon: " + check_display_value(lon_value, -200.0, 6, 10);
-			display_lines[2] = "Alt: " + check_display_value(alt_value, -1000.0, 2, 10);
+			display_header = "NEO6M";
+			display_lines[0] = "Lat: ";
+			display_lines[0] += check_display_value(lat_value, -200.0, 6, 10);
+			display_lines[1] = "Lon: ";
+			display_lines[1] += check_display_value(lon_value, -200.0, 6, 10);
+			display_lines[2] = "Alt: ";
+			display_lines[2] += check_display_value(alt_value, -1000.0, 2, 10);
 			break;
 		case 4:
 			display_header = FPSTR(SENSORS_SPS30);
 			display_lines[0] = "PM: " + check_display_value(pm010_value, -1, 1, 4) + " " + check_display_value(pm25_value, -1, 1, 4) + " " + check_display_value(pm040_value, -1, 1, 4) + " " + check_display_value(pm10_value, -1, 1, 4);
 			display_lines[1] = "NC: " + check_display_value(nc005_value, -1, 0, 3) + " " + check_display_value(nc010_value, -1, 0, 3) + " " + check_display_value(nc025_value, -1, 0, 3) + " " + check_display_value(nc040_value, -1, 0, 3) + " " + check_display_value(nc100_value, -1, 0, 3);
-			display_lines[2] = "TPS: " + check_display_value(tps_value, -1, 2, 5) + " µm";
+			display_lines[2] = tmpl(F("TPS: {v} µm"), check_display_value(tps_value, -1, 2, 5));
 			break;
 		case 5:
 			display_header = FPSTR(SENSORS_DNMS);
-			display_lines[0] = "LAeq: " + check_display_value(la_eq_value, -1, 1, 6) + " db(A)";
-			display_lines[1] = "LA_max: " + check_display_value(la_max_value, -1, 1, 6) + " db(A)";
-			display_lines[2] = "LA_min: " + check_display_value(la_min_value, -1, 1, 6) + " db(A)";;
+			display_lines[0] = tmpl(F("LAeq: {v} db(A)"), check_display_value(la_eq_value, -1, 1, 6));
+			display_lines[1] = tmpl(F("LA_max: {v} db(A)"), check_display_value(la_max_value, -1, 1, 6));
+			display_lines[2] = tmpl(F("LA_min: {v} db(A)"), check_display_value(la_min_value, -1, 1, 6));
 			break;
 		case 6:
 			display_header = F("Wifi info");
-			display_lines[0] = "IP: " + WiFi.localIP().toString();
-			display_lines[1] = "SSID:" + WiFi.SSID();
-			display_lines[2] = "Signal: " + String(calcWiFiSignalQuality(WiFi.RSSI())) + "%";
+			display_lines[0] = "IP: "; display_lines[0] += WiFi.localIP().toString();
+			display_lines[1] = "SSID: "; display_lines[1] += WiFi.SSID();
+			display_lines[2] = tmpl(F("Signal: {v} %"), String(calcWiFiSignalQuality(WiFi.RSSI())));
 			break;
 		case 7:
 			display_header = F("Device Info");
-			display_lines[0] = "ID: " + esp_chipid;
-			display_lines[1] = "FW: " + String(SOFTWARE_VERSION);
-			display_lines[2] = "Measurements: " + String(count_sends);
+			display_lines[0] = "ID: "; display_lines[0] += esp_chipid;
+			display_lines[1] = "FW: "; display_lines[1] += SOFTWARE_VERSION;
+			display_lines[2] = "Measurements: "; display_lines[2] += String(count_sends);
 			break;
 		}
 
@@ -3804,24 +3806,28 @@ static void display_values() {
 
 	switch (screens[next_display_count % screen_count]) {
 	case 1:
-		display_lines[0] = "PM2.5: " + check_display_value(pm25_value, -1, 1, 6);
-		display_lines[1] = "PM10:  " + check_display_value(pm10_value, -1, 1, 6);
+		display_lines[0] = "PM2.5: ";
+		display_lines[0] += check_display_value(pm25_value, -1, 1, 6);
+		display_lines[1] = "PM10:  ";
+		display_lines[1] += check_display_value(pm10_value, -1, 1, 6);
 		break;
 	case 2:
-		display_lines[0] = "T: " + check_display_value(t_value, -128, 1, 6) + char(223) + "C";
-		display_lines[1] = "H: " + check_display_value(h_value, -1, 1, 6) + "%";
+		display_lines[0] = tmpl(F("T: {v} °C"), check_display_value(t_value, -128, 1, 6));
+		display_lines[1] = tmpl(F("H: {v} %"), check_display_value(h_value, -1, 1, 6));
 		break;
 	case 3:
-		display_lines[0] = "Lat: " + check_display_value(lat_value, -200.0, 6, 11);
-		display_lines[1] = "Lon: " + check_display_value(lon_value, -200.0, 6, 11);
+		display_lines[0] = "Lat: ";
+		display_lines[0] += check_display_value(lat_value, -200.0, 6, 11);
+		display_lines[1] = "Lon: ";
+		display_lines[1] += check_display_value(lon_value, -200.0, 6, 11);
 		break;
 	case 4:
 		display_lines[0] = WiFi.localIP().toString();
 		display_lines[1] = WiFi.SSID();
 		break;
 	case 5:
-		display_lines[0] = "ID: " + esp_chipid;
-		display_lines[1] = "FW: " + SOFTWARE_VERSION;
+		display_lines[0] = "ID: "; display_lines[0] += esp_chipid;
+		display_lines[1] = "FW: "; display_lines[1] += SOFTWARE_VERSION;
 		break;
 	}
 
