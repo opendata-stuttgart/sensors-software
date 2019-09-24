@@ -520,8 +520,8 @@ unsigned long SPS30_read_error_counter = 0;
 unsigned long SPS30_read_timer = 0;
 bool sps30_init_failed = false;
 
-double last_value_PPD_P1 = -1.0;
-double last_value_PPD_P2 = -1.0;
+float last_value_PPD_P1 = -1.0;
+float last_value_PPD_P2 = -1.0;
 double last_value_SDS_P1 = -1.0;
 double last_value_SDS_P2 = -1.0;
 double last_value_PMS_P0 = -1.0;
@@ -3154,26 +3154,29 @@ static void fetchSensorPPD(String& s) {
 		last_value_PPD_P2 = -1;
 		float ratio = lowpulseoccupancyP1 / (SAMPLETIME_MS * 10.0f);
 		float concentration = calcConcentration(ratio);
-		debug_outln_info(F("LPO P10    : "), String(lowpulseoccupancyP1));
+		String s_lowpulseoccupancyP1(lowpulseoccupancyP1), s_lowpulseoccupancyP2(lowpulseoccupancyP2);
+
+		debug_outln_info(F("LPO P10    : "), s_lowpulseoccupancyP1);
 		debug_outln_info(F("Ratio PM10%: "), ratio);
 		debug_outln_info(F("PM10 Count : "), concentration);
 
 		// json for push to api / P1
 		last_value_PPD_P1 = concentration;
-		add_Value2Json(s, F("durP1"), String(lowpulseoccupancyP1));
+		add_Value2Json(s, F("durP1"), s_lowpulseoccupancyP1);
 		add_Value2Json(s, F("ratioP1"), ratio);
 		add_Value2Json(s, F("P1"), last_value_PPD_P1);
 
-		ratio = lowpulseoccupancyP2 / (SAMPLETIME_MS * 10.0);
+		ratio = lowpulseoccupancyP2 / (SAMPLETIME_MS * 10.0f);
 		concentration = calcConcentration(ratio);
+
 		// Begin printing
-		debug_outln_info(F("LPO PM25   : "), String(lowpulseoccupancyP2));
+		debug_outln_info(F("LPO PM25   : "), s_lowpulseoccupancyP2);
 		debug_outln_info(F("Ratio PM25%: "), ratio);
 		debug_outln_info(F("PM25 Count : "), concentration);
 
 		// json for push to api / P2
 		last_value_PPD_P2 = concentration;
-		add_Value2Json(s, F("durP2"), String(lowpulseoccupancyP2));
+		add_Value2Json(s, F("durP2"), s_lowpulseoccupancyP2);
 		add_Value2Json(s, F("ratioP2"), ratio);
 		add_Value2Json(s, F("P2"), last_value_PPD_P2);
 
