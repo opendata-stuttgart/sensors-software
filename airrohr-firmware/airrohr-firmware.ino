@@ -310,8 +310,8 @@ namespace cfg {
 	char measurement_name_influx[LEN_MEASUREMENT_NAME_INFLUX];
 	bool ssl_influx = SSL_INFLUX;
 
-	char host_custom[LEN_HOST_CUSTOM] = HOST_CUSTOM;
-	char url_custom[LEN_URL_CUSTOM] = URL_CUSTOM;
+	char host_custom[LEN_HOST_CUSTOM];
+	char url_custom[LEN_URL_CUSTOM];
 	bool ssl_custom = SSL_CUSTOM;
 	unsigned int port_custom = PORT_CUSTOM;
 	char user_custom[LEN_USER_CUSTOM] = USER_CUSTOM;
@@ -323,6 +323,8 @@ namespace cfg {
 		strcpy_P(www_password, WWW_PASSWORD);
 		strcpy_P(wlanssid, WLANSSID);
 		strcpy_P(wlanpwd, WLANPWD);
+		strcpy_P(host_custom, HOST_CUSTOM);
+		strcpy_P(url_custom, URL_CUSTOM);
 		strcpy_P(host_influx, HOST_INFLUX);
 		strcpy_P(url_influx, URL_INFLUX);
 		strcpy_P(measurement_name_influx, MEASUREMENT_NAME_INFLUX);
@@ -333,32 +335,6 @@ namespace cfg {
 		}
 	}
 }
-
-#define HOST_MADAVI "api-rrd.madavi.de"
-#define URL_MADAVI "/data.php"
-#define PORT_MADAVI 80
-
-static const char HOST_DUSTI[] PROGMEM = "api.sensor.community";
-static const char URL_DUSTI[] PROGMEM = "/v1/push-sensor-data/";
-#define PORT_DUSTI 80
-
-// IMPORTANT: NO MORE CHANGES TO VARIABLE NAMES NEEDED FOR EXTERNAL APIS
-
-static const char HOST_SENSEMAP[] PROGMEM = "ingress.opensensemap.org";
-static const char URL_SENSEMAP[] PROGMEM = "/boxes/{v}/data?luftdaten=1";
-#define PORT_SENSEMAP 443
-
-static const char HOST_FSAPP[] PROGMEM = "www.h2801469.stratoserver.net";
-static const char URL_FSAPP[] PROGMEM = "/data.php";
-#define PORT_FSAPP 80
-
-static const char HOST_AIRCMS[] PROGMEM = "doiot.ru";
-static const char URL_AIRCMS[] PROGMEM = "/php/sensors.php?h=";
-#define PORT_AIRCMS 443
-
-static const char UPDATE_HOST[] PROGMEM = "firmware.sensor.community";
-static const char UPDATE_URL[] PROGMEM = "/airrohr/firmware.php";
-#define UPDATE_PORT 80
 
 #define JSON_BUFFER_SIZE 2300
 
@@ -378,6 +354,7 @@ long int sample_count = 0;
 bool bmp_init_failed = false;
 bool bmx280_init_failed = false;
 bool dnms_init_failed = false;
+bool gps_init_failed = false;
 
 #if defined(ESP8266)
 ESP8266WebServer server(80);
@@ -544,8 +521,8 @@ unsigned long SPS30_read_error_counter = 0;
 unsigned long SPS30_read_timer = 0;
 bool sps30_init_failed = false;
 
-double last_value_PPD_P1 = -1.0;
-double last_value_PPD_P2 = -1.0;
+float last_value_PPD_P1 = -1.0;
+float last_value_PPD_P2 = -1.0;
 double last_value_SDS_P1 = -1.0;
 double last_value_SDS_P2 = -1.0;
 double last_value_PMS_P0 = -1.0;
@@ -2336,8 +2313,8 @@ static void connectWifi() {
 static unsigned long sendData(const String& data, const int pin, const char* host, const int httpPort, const char* url, const bool use_ssl, const char* basic_auth_string, const __FlashStringHelper* contentType) {
 
 	unsigned long start_send = millis();
-	String s_Host = FPSTR(host);
-	String s_url = FPSTR(url);
+	String s_Host(FPSTR(host));
+	String s_url(FPSTR(url));
 
 	debug_outln_info(F("Start sendData to "), s_Host);
 
@@ -2365,7 +2342,7 @@ static unsigned long sendData(const String& data, const int pin, const char* hos
 		client->setNoDelay(true);
 		client->setTimeout(20000);
 
-		if (!client->connect(host, httpPort)) {
+		if (!client->connect(s_Host, httpPort)) {
 			debug_outln_error(F("connection failed"));
 			return false;
 		}
@@ -2413,7 +2390,7 @@ static unsigned long sendData(const String& data, const int pin, const char* hos
 				if (doConnect(&client_s)) {
 					if (verify) {
 						if (client_s.setCACert_P(dst_root_ca_x3_bin_crt, dst_root_ca_x3_bin_crt_len)) {
-							if (client_s.verifyCertChain(host)) {
+							if (client_s.verifyCertChain(s_Host)) {
 								debug_outln_info(F("Server cert verified"));
 								doRequest(&client_s);
 							} else {
@@ -2444,7 +2421,7 @@ static unsigned long sendData(const String& data, const int pin, const char* hos
 			doRequest(&client);
 		}
 	}
-	debug_outln_info(F("End connecting to "), host);
+	debug_outln_info(F("End connecting to "), s_Host);
 
 #if defined(ESP8266)
 	wdt_reset(); // nodemcu is alive
@@ -2463,7 +2440,7 @@ static unsigned long sendLuftdaten(const String& data, const int pin, const __Fl
 	if (cfg::send2dusti && data.length()) {
 		String data_4_dusti = tmpl(FPSTR(data_first_part), SOFTWARE_VERSION);
 
-		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO_LUFTDATEN), sensorname);
+		debug_outln_info(F("## Sending to Luftdaten.info - "), sensorname);
 		data_4_dusti += data;
 		data_4_dusti.remove(data_4_dusti.length() - 1);
 		data_4_dusti.replace(replace_str, empty_String);
@@ -3178,26 +3155,29 @@ static void fetchSensorPPD(String& s) {
 		last_value_PPD_P2 = -1;
 		float ratio = lowpulseoccupancyP1 / (SAMPLETIME_MS * 10.0f);
 		float concentration = calcConcentration(ratio);
-		debug_outln_info(F("LPO P10    : "), String(lowpulseoccupancyP1));
+		String s_lowpulseoccupancyP1(lowpulseoccupancyP1), s_lowpulseoccupancyP2(lowpulseoccupancyP2);
+
+		debug_outln_info(F("LPO P10    : "), s_lowpulseoccupancyP1);
 		debug_outln_info(F("Ratio PM10%: "), ratio);
 		debug_outln_info(F("PM10 Count : "), concentration);
 
 		// json for push to api / P1
 		last_value_PPD_P1 = concentration;
-		add_Value2Json(s, F("durP1"), String(lowpulseoccupancyP1));
+		add_Value2Json(s, F("durP1"), s_lowpulseoccupancyP1);
 		add_Value2Json(s, F("ratioP1"), ratio);
 		add_Value2Json(s, F("P1"), last_value_PPD_P1);
 
-		ratio = lowpulseoccupancyP2 / (SAMPLETIME_MS * 10.0);
+		ratio = lowpulseoccupancyP2 / (SAMPLETIME_MS * 10.0f);
 		concentration = calcConcentration(ratio);
+
 		// Begin printing
-		debug_outln_info(F("LPO PM25   : "), String(lowpulseoccupancyP2));
+		debug_outln_info(F("LPO PM25   : "), s_lowpulseoccupancyP2);
 		debug_outln_info(F("Ratio PM25%: "), ratio);
 		debug_outln_info(F("PM25 Count : "), concentration);
 
 		// json for push to api / P2
 		last_value_PPD_P2 = concentration;
-		add_Value2Json(s, F("durP2"), String(lowpulseoccupancyP2));
+		add_Value2Json(s, F("durP2"), s_lowpulseoccupancyP2);
 		add_Value2Json(s, F("ratioP2"), ratio);
 		add_Value2Json(s, F("P2"), last_value_PPD_P2);
 
@@ -3319,9 +3299,9 @@ static void fetchSensorDNMS(String& s) {
 		dnms_reset(); // try to reset dnms
 		debug_outln_error(F("DNMS read failed"));
 	} else {
-		debug_outln_info(FPSTR(DBG_TXT_DNMS_LAEQ), last_value_dnms_laeq);
-		debug_outln_info(FPSTR(DBG_TXT_DNMS_LA_MIN), last_value_dnms_la_min);
-		debug_outln_info(FPSTR(DBG_TXT_DNMS_LA_MAX), last_value_dnms_la_max);
+		debug_outln_info(F("LAeq: "), last_value_dnms_laeq);
+		debug_outln_info(F("LA_MIN: "), last_value_dnms_la_min);
+		debug_outln_info(F("LA_MAX: "), last_value_dnms_la_max);
 
 		add_Value2Json(s, F("noise_LAeq"), last_value_dnms_laeq);
 		add_Value2Json(s, F("noise_LA_min"), last_value_dnms_la_min);
@@ -3419,6 +3399,7 @@ static void fetchSensorGPS(String& s) {
 
 	if ( gps.charsProcessed() < 10) {
 		debug_outln_error(F("No GPS data received: check wiring"));
+		gps_init_failed = true;
 	}
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), "GPS");
@@ -3557,7 +3538,6 @@ static void twoStageAutoUpdate() {
 		break;
 	case HTTP_UPDATE_OK:
 		// may not called we reboot the ESP
-		debug_outln_info(FPSTR(DBG_TXT_UPDATE), FPSTR(DBG_TXT_UPDATE_OK));
 		break;
 	}
 #endif
@@ -4358,7 +4338,7 @@ void loop(void) {
 		}
 	}
 
-	if (cfg::gps_read && ((msSince(starttime_GPS) > SAMPLETIME_GPS_MS) || send_now)) {
+	if (cfg::gps_read && !gps_init_failed && ((msSince(starttime_GPS) > SAMPLETIME_GPS_MS) || send_now)) {
 		// getting GPS coordinates
 		fetchSensorGPS(result_GPS);
 		starttime_GPS = act_milli;
