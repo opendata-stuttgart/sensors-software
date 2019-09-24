@@ -1221,13 +1221,13 @@ static String form_select_lang() {
 	return s;
 }
 
-static String tmpl(const String& patt, const String& value) {
+static String tmpl(const __FlashStringHelper* patt, const String& value) {
 	String s = patt;
 	s.replace("{v}", value);
 	return s;
 }
 
-static String tmpl(const String& patt, const String& value1, const String& value2, const String& value3) {
+static String tmpl(const __FlashStringHelper* patt, const String& value1, const String& value2, const String& value3) {
 	String s = patt;
 	s.replace("{v1}", value1);
 	s.replace("{v2}", value2);
@@ -1976,7 +1976,6 @@ static void webserver_removeConfig() {
 	String page_content;
 	page_content.reserve(LARGE_STR);
 	add_header(page_content, FPSTR(INTL_DELETE_CONFIG));
-	String message_string = F("<h3>{v}.</h3>");
 	last_page_load = millis();
 	debug_outln_info(F("output remove config page..."));
 
@@ -1990,12 +1989,12 @@ static void webserver_removeConfig() {
 		if (SPIFFS.exists("/config.json")) {	//file exists
 			debug_outln_info(F("removing config.json..."));
 			if (SPIFFS.remove("/config.json")) {
-				page_content += tmpl(message_string, FPSTR(INTL_CONFIG_DELETED));
+				page_content += tmpl(F("<h3>{v}.</h3>"), FPSTR(INTL_CONFIG_DELETED));
 			} else {
-				page_content += tmpl(message_string, FPSTR(INTL_CONFIG_CAN_NOT_BE_DELETED));
+				page_content += tmpl(F("<h3>{v}.</h3>"), FPSTR(INTL_CONFIG_CAN_NOT_BE_DELETED));
 			}
 		} else {
-			page_content += tmpl(message_string, FPSTR(INTL_CONFIG_NOT_FOUND));
+			page_content += tmpl(F("<h3>{v}.</h3>"), FPSTR(INTL_CONFIG_NOT_FOUND));
 		}
 	}
 	add_footer(page_content);
