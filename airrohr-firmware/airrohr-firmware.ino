@@ -310,8 +310,8 @@ namespace cfg {
 	char measurement_name_influx[LEN_MEASUREMENT_NAME_INFLUX];
 	bool ssl_influx = SSL_INFLUX;
 
-	char host_custom[LEN_HOST_CUSTOM] = HOST_CUSTOM;
-	char url_custom[LEN_URL_CUSTOM] = URL_CUSTOM;
+	char host_custom[LEN_HOST_CUSTOM];
+	char url_custom[LEN_URL_CUSTOM];
 	bool ssl_custom = SSL_CUSTOM;
 	unsigned int port_custom = PORT_CUSTOM;
 	char user_custom[LEN_USER_CUSTOM] = USER_CUSTOM;
@@ -323,6 +323,8 @@ namespace cfg {
 		strcpy_P(www_password, WWW_PASSWORD);
 		strcpy_P(wlanssid, WLANSSID);
 		strcpy_P(wlanpwd, WLANPWD);
+		strcpy_P(host_custom, HOST_CUSTOM);
+		strcpy_P(url_custom, URL_CUSTOM);
 		strcpy_P(host_influx, HOST_INFLUX);
 		strcpy_P(url_influx, URL_INFLUX);
 		strcpy_P(measurement_name_influx, MEASUREMENT_NAME_INFLUX);
@@ -333,32 +335,6 @@ namespace cfg {
 		}
 	}
 }
-
-#define HOST_MADAVI "api-rrd.madavi.de"
-#define URL_MADAVI "/data.php"
-#define PORT_MADAVI 80
-
-static const char HOST_DUSTI[] PROGMEM = "api.sensor.community";
-static const char URL_DUSTI[] PROGMEM = "/v1/push-sensor-data/";
-#define PORT_DUSTI 80
-
-// IMPORTANT: NO MORE CHANGES TO VARIABLE NAMES NEEDED FOR EXTERNAL APIS
-
-static const char HOST_SENSEMAP[] PROGMEM = "ingress.opensensemap.org";
-static const char URL_SENSEMAP[] PROGMEM = "/boxes/{v}/data?luftdaten=1";
-#define PORT_SENSEMAP 443
-
-static const char HOST_FSAPP[] PROGMEM = "www.h2801469.stratoserver.net";
-static const char URL_FSAPP[] PROGMEM = "/data.php";
-#define PORT_FSAPP 80
-
-static const char HOST_AIRCMS[] PROGMEM = "doiot.ru";
-static const char URL_AIRCMS[] PROGMEM = "/php/sensors.php?h=";
-#define PORT_AIRCMS 443
-
-static const char UPDATE_HOST[] PROGMEM = "firmware.sensor.community";
-static const char UPDATE_URL[] PROGMEM = "/airrohr/firmware.php";
-#define UPDATE_PORT 80
 
 #define JSON_BUFFER_SIZE 2300
 

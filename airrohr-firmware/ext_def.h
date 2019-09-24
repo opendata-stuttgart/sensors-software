@@ -32,22 +32,45 @@ const char WWW_PASSWORD[] PROGMEM = "feinstaub";
 #define SENSEBOXID ""
 
 // IMPORTANT: NO MORE CHANGES TO VARIABLE NAMES NEEDED FOR EXTERNAL APIS
+static const char HOST_MADAVI[] PROGMEM = "api-rrd.madavi.de";
+static const char URL_MADAVI[] PROGMEM = "/data.php";
+#define PORT_MADAVI 80
+
+static const char HOST_DUSTI[] PROGMEM = "api.sensor.community";
+static const char URL_DUSTI[] PROGMEM = "/v1/push-sensor-data/";
+#define PORT_DUSTI 80
+
+static const char HOST_SENSEMAP[] PROGMEM = "ingress.opensensemap.org";
+static const char URL_SENSEMAP[] PROGMEM = "/boxes/{v}/data?luftdaten=1";
+#define PORT_SENSEMAP 443
+
+static const char HOST_FSAPP[] PROGMEM = "www.h2801469.stratoserver.net";
+static const char URL_FSAPP[] PROGMEM = "/data.php";
+#define PORT_FSAPP 80
+
+static const char HOST_AIRCMS[] PROGMEM = "doiot.ru";
+static const char URL_AIRCMS[] PROGMEM = "/php/sensors.php?h=";
+#define PORT_AIRCMS 443
+
+static const char UPDATE_HOST[] PROGMEM = "firmware.sensor.community";
+static const char UPDATE_URL[] PROGMEM = "/airrohr/firmware.php";
+#define UPDATE_PORT 80
 
 // define own API
-#define HOST_CUSTOM "192.168.234.1"
-#define URL_CUSTOM "/data.php"
+static const char HOST_CUSTOM[] PROGMEM = "192.168.234.1";
+static const char URL_CUSTOM[] PROGMEM = "/data.php";
 #define PORT_CUSTOM 80
 #define USER_CUSTOM ""
 #define PWD_CUSTOM ""
 #define SSL_CUSTOM 0
 
 // define own InfluxDB
-const char HOST_INFLUX[] PROGMEM = "influx.server";
-const char URL_INFLUX[] PROGMEM = "/write?db=luftdaten";
+static const char HOST_INFLUX[] PROGMEM = "influx.server";
+static const char URL_INFLUX[] PROGMEM = "/write?db=luftdaten";
 #define PORT_INFLUX 8086
 #define USER_INFLUX ""
 #define PWD_INFLUX ""
-const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
+static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 #define SSL_INFLUX 0
 
 //  === pin assignments for NodeMCU V2 board ===================================
