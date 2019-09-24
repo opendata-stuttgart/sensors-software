@@ -2312,8 +2312,8 @@ static void connectWifi() {
 static unsigned long sendData(const String& data, const int pin, const char* host, const int httpPort, const char* url, const bool use_ssl, const char* basic_auth_string, const __FlashStringHelper* contentType) {
 
 	unsigned long start_send = millis();
-	String s_Host = FPSTR(host);
-	String s_url = FPSTR(url);
+	String s_Host(FPSTR(host));
+	String s_url(FPSTR(url));
 
 	debug_outln_info(F("Start sendData to "), s_Host);
 
@@ -2341,7 +2341,7 @@ static unsigned long sendData(const String& data, const int pin, const char* hos
 		client->setNoDelay(true);
 		client->setTimeout(20000);
 
-		if (!client->connect(host, httpPort)) {
+		if (!client->connect(s_Host, httpPort)) {
 			debug_outln_error(F("connection failed"));
 			return false;
 		}
@@ -2389,7 +2389,7 @@ static unsigned long sendData(const String& data, const int pin, const char* hos
 				if (doConnect(&client_s)) {
 					if (verify) {
 						if (client_s.setCACert_P(dst_root_ca_x3_bin_crt, dst_root_ca_x3_bin_crt_len)) {
-							if (client_s.verifyCertChain(host)) {
+							if (client_s.verifyCertChain(s_Host)) {
 								debug_outln_info(F("Server cert verified"));
 								doRequest(&client_s);
 							} else {
@@ -2420,7 +2420,7 @@ static unsigned long sendData(const String& data, const int pin, const char* hos
 			doRequest(&client);
 		}
 	}
-	debug_outln_info(F("End connecting to "), host);
+	debug_outln_info(F("End connecting to "), s_Host);
 
 #if defined(ESP8266)
 	wdt_reset(); // nodemcu is alive
