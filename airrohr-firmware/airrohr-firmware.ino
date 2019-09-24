@@ -354,6 +354,7 @@ long int sample_count = 0;
 bool bmp_init_failed = false;
 bool bmx280_init_failed = false;
 bool dnms_init_failed = false;
+bool gps_init_failed = false;
 
 #if defined(ESP8266)
 ESP8266WebServer server(80);
@@ -3398,6 +3399,7 @@ static void fetchSensorGPS(String& s) {
 
 	if ( gps.charsProcessed() < 10) {
 		debug_outln_error(F("No GPS data received: check wiring"));
+		gps_init_failed = true;
 	}
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), "GPS");
@@ -4336,7 +4338,7 @@ void loop(void) {
 		}
 	}
 
-	if (cfg::gps_read && ((msSince(starttime_GPS) > SAMPLETIME_GPS_MS) || send_now)) {
+	if (cfg::gps_read && !gps_init_failed && ((msSince(starttime_GPS) > SAMPLETIME_GPS_MS) || send_now)) {
 		// getting GPS coordinates
 		fetchSensorGPS(result_GPS);
 		starttime_GPS = act_milli;
