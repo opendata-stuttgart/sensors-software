@@ -1202,6 +1202,7 @@ static String form_select_lang() {
 					"<option value='DE'>Deutsch (DE)</option>"
 					"<option value='BG'>Bulgarian (BG)</option>"
 					"<option value='CZ'>Český (CZ)</option>"
+					"<option value='DK'>Dansk (DK)</option>"
 					"<option value='EN'>English (EN)</option>"
 					"<option value='ES'>Español (ES)</option>"
 					"<option value='FR'>Français (FR)</option>"
@@ -1212,6 +1213,8 @@ static String form_select_lang() {
 					"<option value='PT'>Português (PT)</option>"
 					"<option value='RU'>Русский (RU)</option>"
 					"<option value='SE'>Svenska (SE)</option>"
+					"<option value='TR'>Türkçe (TR)</option>"
+					"<option value='UA'>Мова (UA)</option>"
 					"</select>"
 					"</td>"
 					"</tr>");
