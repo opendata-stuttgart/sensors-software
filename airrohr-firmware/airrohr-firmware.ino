@@ -2353,95 +2353,73 @@ static unsigned long sendData(const String& data, const int pin, const char* hos
 	request_head += String(data.length(), DEC);
 	request_head += F("\r\nConnection: close\r\n\r\n");
 
-	const auto doConnect = [ = ](WiFiClient * client) -> bool {
-		client->setNoDelay(true);
-		client->setTimeout(20000);
+	// Use WiFiClient class to create TCP connections
+	WiFiClient* _client;
+	if (use_ssl) {
+		_client = new axTLS::WiFiClientSecure;
+	} else {
+		_client = new WiFiClient;
+	}
+	std::unique_ptr<WiFiClient> client(_client);
 
-		if (!client->connect(s_Host, httpPort)) {
-			debug_outln_error(F("connection failed"));
-			return false;
-		}
-		return true;
-	};
+	client->setTimeout(20000);
 
-	const auto doRequest = [ = ](WiFiClient * client) {
+	if (client->connect(s_Host, httpPort)) {
 		debug_outln_info(F("Requesting URL: "), s_url);
 		debug_outln_verbose(esp_chipid);
 		debug_outln_verbose(data);
 
 		// send request to the server
 		client->print(request_head);
-
 		client->println(data);
+		client->flush();
 
-		// wait for response
-		int retries = 20;
-		while (client->connected() && !client->available()) {
-			delay(100);
-#if defined(ESP8266)
-			wdt_reset(); // nodemcu is alive
-#endif
-			if (!--retries)
-			{ break; }
-		}
+		// Wait and read reply from server and print them
+		while (client->connected()) {
 
-		// Read reply from server and print them
-		while(client->available()) {
-			char c = client->read();
-			debug_out(String(c), DEBUG_MIN_INFO);
+			if (client->available()) {
+				uint8_t buf[64];
+				int r = client->read(buf, sizeof(buf)-1);
+				if (r > 0) {
+					buf[r] = '\0';
+				}
+				debug_out(String((const char*)buf), DEBUG_MED_INFO);
+			}
+
+			yield();
 		}
 		client->stop();
 		debug_outln_info(F("\nclosing connection\n----\n\n"));
-	};
-
-	// Use WiFiClient class to create TCP connections
-	if (use_ssl) {
-		WiFiClientSecure client_s;
-		if (doConnect(&client_s)) {
-			doRequest(&client_s);
-		}
-
-		/*		WiFiClientSecure client_s;
-				if (doConnect(&client_s)) {
-					if (verify) {
-						if (client_s.setCACert_P(dst_root_ca_x3_bin_crt, dst_root_ca_x3_bin_crt_len)) {
-							if (client_s.verifyCertChain(s_Host)) {
-								debug_outln_info(F("Server cert verified"));
-								doRequest(&client_s);
-							} else {
-								debug_outln_error(F("ERROR: cert verification failed!"));
-							}
-						} else {
-							debug_outln_error(F("Failed to load root CA cert!"));
-						}
-					} else {
-						doRequest(&client_s);
-					}
-				}
-		*/
-		/*		BearSSL::WiFiClientSecure client_s;
-				if (verify) {
-					BearSSLX509List cert(dst_root_ca_x3);
-					client_s.setTrustAnchors(&cert);
-				} else {
-					client_s.setInsecure();
-				}
-				if (doConnect(&client_s)) {
-					doRequest(&client_s);
-				}
-		*/
-	} else {
-		WiFiClient client;
-		if (doConnect(&client)) {
-			doRequest(&client);
-		}
 	}
-	debug_outln_info(F("End connecting to "), s_Host);
 
-#if defined(ESP8266)
-	wdt_reset(); // nodemcu is alive
-#endif
-	yield();
+/*		WiFiClientSecure client_s;
+			if (verify) {
+				if (client_s.setCACert_P(dst_root_ca_x3_bin_crt, dst_root_ca_x3_bin_crt_len)) {
+					if (client_s.verifyCertChain(s_Host)) {
+						debug_outln_info(F("Server cert verified"));
+						doRequest(&client_s, request_head, data);
+					} else {
+						debug_outln_error(F("ERROR: cert verification failed!"));
+					}
+				} else {
+					debug_outln_error(F("Failed to load root CA cert!"));
+				}
+			} else {
+				doRequest(&client_s, request_head, data);
+			}
+*/
+/*		BearSSL::WiFiClientSecure client_s;
+		if (verify) {
+			BearSSLX509List cert(dst_root_ca_x3);
+			client_s.setTrustAnchors(&cert);
+		} else {
+			client_s.setInsecure();
+		}
+		if (doConnect(&client_s)) {
+			doRequest(&client_s, request_head, data);
+		}
+*/
+	debug_outln_info(F("End connecting to "), s_Host);
 
 	return millis() - start_send;
 }
