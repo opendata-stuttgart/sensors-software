@@ -3676,13 +3676,13 @@ static void display_values() {
 	if (cfg::ppd_read || cfg::pms_read || cfg::hpm_read || cfg::sds_read) {
 		screens[screen_count++] = 1;
 	}
-	if (cfg::dht_read || cfg::ds18b20_read || cfg::htu21d_read || cfg::bmp_read || cfg::bmx280_read) {
+	if (cfg::sps30_read) {
 		screens[screen_count++] = 2;
 	}
-	if (cfg::gps_read) {
+	if (cfg::dht_read || cfg::ds18b20_read || cfg::htu21d_read || cfg::bmp_read || cfg::bmx280_read) {
 		screens[screen_count++] = 3;
 	}
-	if (cfg::sps30_read) {
+	if (cfg::gps_read) {
 		screens[screen_count++] = 4;
 	}
 	if (cfg::dnms_read) {
@@ -3708,6 +3708,12 @@ static void display_values() {
 			display_lines[2] = empty_String;
 			break;
 		case 2:
+			display_header = FPSTR(SENSORS_SPS30);
+			display_lines[0] = "PM: " + check_display_value(pm010_value, -1, 1, 4) + " " + check_display_value(pm25_value, -1, 1, 4) + " " + check_display_value(pm040_value, -1, 1, 4) + " " + check_display_value(pm10_value, -1, 1, 4);
+			display_lines[1] = "NC: " + check_display_value(nc005_value, -1, 0, 3) + " " + check_display_value(nc010_value, -1, 0, 3) + " " + check_display_value(nc025_value, -1, 0, 3) + " " + check_display_value(nc040_value, -1, 0, 3) + " " + check_display_value(nc100_value, -1, 0, 3);
+			display_lines[2] = tmpl(F("TPS: {v} µm"), check_display_value(tps_value, -1, 2, 5));
+			break;
+		case 3:
 			display_header = t_sensor;
 			if (h_sensor != "" && t_sensor != h_sensor) {
 				display_header += " / " + h_sensor;
@@ -3715,12 +3721,12 @@ static void display_values() {
 			if ((h_sensor != "" && p_sensor != "" && (h_sensor != p_sensor)) || (h_sensor == "" && p_sensor != "" && (t_sensor != p_sensor))) {
 				display_header += " / " + p_sensor;
 			}
-			if (t_sensor != "") { display_lines[line_count++] = "Temp.: " + check_display_value(t_value, -128, 1, 6) + " °C"; }
-			if (h_sensor != "") { display_lines[line_count++] = "Hum.:  " + check_display_value(h_value, -1, 1, 6) + " %"; }
-			if (p_sensor != "") { display_lines[line_count++] = "Pres.: " + check_display_value(p_value / 100, (-1 / 100.0), 1, 6) + " hPa"; }
+			if (t_sensor != "") { display_lines[line_count] = "Temp.: "; display_lines[line_count] += check_display_value(t_value, -128, 1, 6); display_lines[line_count++] += " °C"; }
+			if (h_sensor != "") { display_lines[line_count] = "Hum.:  "; display_lines[line_count] += check_display_value(h_value, -1, 1, 6); display_lines[line_count++] += " %"; }
+			if (p_sensor != "") { display_lines[line_count] = "Pres.: "; display_lines[line_count] += check_display_value(p_value / 100, (-1 / 100.0), 1, 6); display_lines[line_count++] += " hPa"; }
 			while (line_count < 3) { display_lines[line_count++] = empty_String; }
 			break;
-		case 3:
+		case 4:
 			display_header = "NEO6M";
 			display_lines[0] = "Lat: ";
 			display_lines[0] += check_display_value(lat_value, -200.0, 6, 10);
@@ -3728,12 +3734,6 @@ static void display_values() {
 			display_lines[1] += check_display_value(lon_value, -200.0, 6, 10);
 			display_lines[2] = "Alt: ";
 			display_lines[2] += check_display_value(alt_value, -1000.0, 2, 10);
-			break;
-		case 4:
-			display_header = FPSTR(SENSORS_SPS30);
-			display_lines[0] = "PM: " + check_display_value(pm010_value, -1, 1, 4) + " " + check_display_value(pm25_value, -1, 1, 4) + " " + check_display_value(pm040_value, -1, 1, 4) + " " + check_display_value(pm10_value, -1, 1, 4);
-			display_lines[1] = "NC: " + check_display_value(nc005_value, -1, 0, 3) + " " + check_display_value(nc010_value, -1, 0, 3) + " " + check_display_value(nc025_value, -1, 0, 3) + " " + check_display_value(nc040_value, -1, 0, 3) + " " + check_display_value(nc100_value, -1, 0, 3);
-			display_lines[2] = tmpl(F("TPS: {v} µm"), check_display_value(tps_value, -1, 2, 5));
 			break;
 		case 5:
 			display_header = FPSTR(SENSORS_DNMS);
@@ -3803,46 +3803,58 @@ static void display_values() {
 // T/H: -10.0°C/100.0%
 // T/P: -10.0°C/1000hPa
 
-	switch (screens[next_display_count % screen_count]) {
-	case 1:
-		display_lines[0] = "PM2.5: ";
-		display_lines[0] += check_display_value(pm25_value, -1, 1, 6);
-		display_lines[1] = "PM10:  ";
-		display_lines[1] += check_display_value(pm10_value, -1, 1, 6);
-		break;
-	case 2:
-		display_lines[0] = tmpl(F("T: {v} °C"), check_display_value(t_value, -128, 1, 6));
-		display_lines[1] = tmpl(F("H: {v} %"), check_display_value(h_value, -1, 1, 6));
-		break;
-	case 3:
-		display_lines[0] = "Lat: ";
-		display_lines[0] += check_display_value(lat_value, -200.0, 6, 11);
-		display_lines[1] = "Lon: ";
-		display_lines[1] += check_display_value(lon_value, -200.0, 6, 11);
-		break;
-	case 4:
-		display_lines[0] = WiFi.localIP().toString();
-		display_lines[1] = WiFi.SSID();
-		break;
-	case 5:
-		display_lines[0] = "ID: "; display_lines[0] += esp_chipid;
-		display_lines[1] = "FW: "; display_lines[1] += SOFTWARE_VERSION;
-		break;
-	}
+	if (cfg::has_lcd1602 || cfg::has_lcd1602_27 ) {
+		switch (screens[next_display_count % screen_count]) {
+		case 1:
+			display_lines[0] = "PM2.5: ";
+			display_lines[0] += check_display_value(pm25_value, -1, 1, 6);
+			display_lines[1] = "PM10:  ";
+			display_lines[1] += check_display_value(pm10_value, -1, 1, 6);
+			break;
+		case 2:
+			display_lines[0] = "PM1.0: ";
+			display_lines[0] += check_display_value(pm010_value, -1, 1, 4);
+			display_lines[1] = "PM4: ";
+			display_lines[1] += check_display_value(pm040_value, -1, 1, 4);
+			break;
+		case 3:
+			display_lines[0] = tmpl(F("T: {v} °C"), check_display_value(t_value, -128, 1, 6));
+			display_lines[1] = tmpl(F("H: {v} %"), check_display_value(h_value, -1, 1, 6));
+			break;
+		case 4:
+			display_lines[0] = "Lat: ";
+			display_lines[0] += check_display_value(lat_value, -200.0, 6, 11);
+			display_lines[1] = "Lon: ";
+			display_lines[1] += check_display_value(lon_value, -200.0, 6, 11);
+			break;
+		case 5:
+			display_lines[0] = tmpl(F("LAeq: {v} db(A)"), check_display_value(la_eq_value, -1, 1, 6));
+			display_lines[1] = tmpl(F("LA_max: {v} db(A)"), check_display_value(la_max_value, -1, 1, 6));
+			break;
+		case 6:
+			display_lines[0] = WiFi.localIP().toString();
+			display_lines[1] = WiFi.SSID();
+			break;
+		case 7:
+			display_lines[0] = "ID: "; display_lines[0] += esp_chipid;
+			display_lines[1] = "FW: "; display_lines[1] += SOFTWARE_VERSION;
+			break;
+		}
 
-	if (cfg::has_lcd1602_27) {
-		lcd_1602_27.clear();
-		lcd_1602_27.setCursor(0, 0);
-		lcd_1602_27.print(display_lines[0]);
-		lcd_1602_27.setCursor(0, 1);
-		lcd_1602_27.print(display_lines[1]);
-	}
-	if (cfg::has_lcd1602) {
-		lcd_1602_3f.clear();
-		lcd_1602_3f.setCursor(0, 0);
-		lcd_1602_3f.print(display_lines[0]);
-		lcd_1602_3f.setCursor(0, 1);
-		lcd_1602_3f.print(display_lines[1]);
+		if (cfg::has_lcd1602_27) {
+			lcd_1602_27.clear();
+			lcd_1602_27.setCursor(0, 0);
+			lcd_1602_27.print(display_lines[0]);
+			lcd_1602_27.setCursor(0, 1);
+			lcd_1602_27.print(display_lines[1]);
+		}
+		if (cfg::has_lcd1602) {
+			lcd_1602_3f.clear();
+			lcd_1602_3f.setCursor(0, 0);
+			lcd_1602_3f.print(display_lines[0]);
+			lcd_1602_3f.setCursor(0, 1);
+			lcd_1602_3f.print(display_lines[1]);
+		}
 	}
 	yield();
 	next_display_count += 1;
