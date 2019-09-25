@@ -105,7 +105,8 @@
  *
  ************************************************************************/
 // increment on change
-const String SOFTWARE_VERSION("NRZ-2019-124-B6");
+#define SOFTWARE_VERSION_STR "NRZ-2019-124-B6"
+const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
  * Includes                                                      *
@@ -243,7 +244,7 @@ namespace cfg {
 	unsigned int time_for_wifi_config = 600000;
 	unsigned int sending_intervall_ms = 145000;
 
-	char current_lang[3] = "DE";
+	char current_lang[3];
 
 	// credentials for basic auth of internal web server
 	bool www_basicauth_enabled = WWW_BASICAUTH_ENABLED;
@@ -568,7 +569,7 @@ template<typename T, std::size_t N> constexpr std::size_t array_num_elements(con
 
 #define msSince(timestamp_before) (act_milli - (timestamp_before))
 
-const char data_first_part[] PROGMEM = "{\"software_version\": \"{v}\", \"sensordatavalues\":[";
+const char data_first_part[] PROGMEM = "{\"software_version\": \"" SOFTWARE_VERSION_STR "\", \"sensordatavalues\":[";
 
 /*****************************************************************
  * Debug output                                                  *
@@ -1220,13 +1221,13 @@ static String form_select_lang() {
 	return s;
 }
 
-static String tmpl(const String& patt, const String& value) {
+static String tmpl(const __FlashStringHelper* patt, const String& value) {
 	String s = patt;
 	s.replace("{v}", value);
 	return s;
 }
 
-static String tmpl(const String& patt, const String& value1, const String& value2, const String& value3) {
+static String tmpl(const __FlashStringHelper* patt, const String& value1, const String& value2, const String& value3) {
 	String s = patt;
 	s.replace("{v1}", value1);
 	s.replace("{v2}", value2);
@@ -1358,7 +1359,11 @@ static void webserver_root() {
 		add_header(page_content, empty_String);
 		last_page_load = millis();
 		debug_outln_info(F("output root page..."));
-		page_content += FPSTR(WEB_ROOT_PAGE_CONTENT);
+
+		// Enable Pagination
+		server.setContentLength(CONTENT_LENGTH_UNKNOWN);
+		server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
+		page_content = FPSTR(WEB_ROOT_PAGE_CONTENT);
 		page_content.replace(F("{t}"), FPSTR(INTL_CURRENT_DATA));
 		page_content.replace(F("{map}"), FPSTR(INTL_ACTIVE_SENSORS_MAP));
 		page_content.replace(F("{conf}"), FPSTR(INTL_CONFIGURATION));
@@ -1366,7 +1371,7 @@ static void webserver_root() {
 		page_content.replace(F("{restart}"), FPSTR(INTL_RESTART_SENSOR));
 		page_content.replace(F("{debug_setting}"), FPSTR(INTL_DEBUG_SETTING_TO));
 		add_footer(page_content);
-		server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
+		server.sendContent(page_content);
 	}
 }
 
@@ -1839,6 +1844,12 @@ static void webserver_values() {
 		} else {
 			page_content += age_last_values();
 		}
+
+		// Enable Pagination
+		server.setContentLength(CONTENT_LENGTH_UNKNOWN);
+		server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
+		page_content = empty_String;
+
 		page_content += F("<table cellspacing='0' border='1' cellpadding='5'>");
 		page_content += tmpl(F("<tr><th>{v1}</th><th>{v2}</th><th>{v3}</th>"), FPSTR(INTL_SENSOR), FPSTR(INTL_PARAMETER), FPSTR(INTL_VALUE));
 		if (cfg::ppd_read) {
@@ -1875,6 +1886,10 @@ static void webserver_values() {
 			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_NC10), check_display_value(last_value_SPS30_N4, -1, 0, 0), unit_NC);
 			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_TPS), check_display_value(last_value_SPS30_TS, -1, 1, 0), unit_TS);
 		}
+
+		server.sendContent(page_content);
+		page_content = empty_String;
+
 		if (cfg::dht_read) {
 			page_content += FPSTR(EMPTY_ROW);
 			add_table_row_from_value(page_content, FPSTR(SENSORS_DHT22), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_DHT_T, -128, 1, 0), unit_T);
@@ -1917,7 +1932,8 @@ static void webserver_values() {
 			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_TIME), last_value_GPS_time, empty_String);
 		}
 
-		page_content += FPSTR(EMPTY_ROW);
+		server.sendContent(page_content);
+		page_content = FPSTR(EMPTY_ROW);
 		add_table_row_from_value(page_content, F("WiFi"), FPSTR(INTL_SIGNAL_STRENGTH), String(WiFi.RSSI()), "dBm");
 		add_table_row_from_value(page_content, F("WiFi"), FPSTR(INTL_SIGNAL_QUALITY), String(signal_quality), "%");
 		page_content += FPSTR(EMPTY_ROW);
@@ -1928,7 +1944,7 @@ static void webserver_values() {
 		page_content += F("</td></tr>");
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 		add_footer(page_content);
-		server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
+		server.sendContent(page_content);
 	}
 }
 
@@ -1975,7 +1991,6 @@ static void webserver_removeConfig() {
 	String page_content;
 	page_content.reserve(LARGE_STR);
 	add_header(page_content, FPSTR(INTL_DELETE_CONFIG));
-	String message_string = F("<h3>{v}.</h3>");
 	last_page_load = millis();
 	debug_outln_info(F("output remove config page..."));
 
@@ -1989,12 +2004,12 @@ static void webserver_removeConfig() {
 		if (SPIFFS.exists("/config.json")) {	//file exists
 			debug_outln_info(F("removing config.json..."));
 			if (SPIFFS.remove("/config.json")) {
-				page_content += tmpl(message_string, FPSTR(INTL_CONFIG_DELETED));
+				page_content += tmpl(F("<h3>{v}.</h3>"), FPSTR(INTL_CONFIG_DELETED));
 			} else {
-				page_content += tmpl(message_string, FPSTR(INTL_CONFIG_CAN_NOT_BE_DELETED));
+				page_content += tmpl(F("<h3>{v}.</h3>"), FPSTR(INTL_CONFIG_CAN_NOT_BE_DELETED));
 			}
 		} else {
-			page_content += tmpl(message_string, FPSTR(INTL_CONFIG_NOT_FOUND));
+			page_content += tmpl(F("<h3>{v}.</h3>"), FPSTR(INTL_CONFIG_NOT_FOUND));
 		}
 	}
 	add_footer(page_content);
@@ -2036,7 +2051,7 @@ static void webserver_data_json() {
 
 	debug_outln_info(F("output data json..."));
 	if (first_cycle) {
-		s1 = tmpl(FPSTR(data_first_part), SOFTWARE_VERSION);
+		s1 = FPSTR(data_first_part);
 		s1 += "]}";
 		age = cfg::sending_intervall_ms - msSince(starttime);
 		if (age > cfg::sending_intervall_ms) {
@@ -2054,9 +2069,7 @@ static void webserver_data_json() {
 	String s2 = F(", \"age\":\"");
 	s2 += String((long)((age + 500) / 1000));
 	s2 += F("\", \"sensordatavalues\"");
-	debug_outln_info(F("replace with: "), s2);
 	s1.replace(F(", \"sensordatavalues\""), s2);
-	debug_outln_info(F("replaced: "), s1);
 	server.send(200, FPSTR(TXT_CONTENT_TYPE_JSON), s1);
 }
 
@@ -2065,12 +2078,11 @@ static void webserver_data_json() {
  *****************************************************************/
 static void webserver_prometheus_endpoint() {
 	debug_outln_info(F("output prometheus endpoint..."));
-	String data_4_prometheus = F("software_version{version=\"{ver}\",node=\"-{id}\"} 1\nuptime_ms{{id}} {up}\nsending_intervall_ms{{id}} {si}\nnumber_of_measurements{{id}} {cs}\n");
+	String data_4_prometheus = F("software_version{version=\"" SOFTWARE_VERSION_STR "\",node=\"-{id}\"} 1\nuptime_ms{{id}} {up}\nsending_intervall_ms{{id}} {si}\nnumber_of_measurements{{id}} {cs}\n");
 	debug_outln_info(F("Parse JSON for Prometheus"));
 	String id(F("node=\"" SENSOR_BASENAME));
 	id += esp_chipid + "\"";
 	data_4_prometheus.replace("{id}", esp_chipid);
-	data_4_prometheus.replace("{ver}", SOFTWARE_VERSION);
 	data_4_prometheus.replace("{up}", String(msSince(time_point_device_start_ms)));
 	data_4_prometheus.replace("{si}", String(cfg::sending_intervall_ms));
 	data_4_prometheus.replace("{cs}", String(count_sends));
@@ -2438,7 +2450,7 @@ static unsigned long sendLuftdaten(const String& data, const int pin, const __Fl
 	unsigned long sum_send_time = 0;
 
 	if (cfg::send2dusti && data.length()) {
-		String data_4_dusti = tmpl(FPSTR(data_first_part), SOFTWARE_VERSION);
+		String data_4_dusti = FPSTR(data_first_part);
 
 		debug_outln_info(F("## Sending to Luftdaten.info - "), sensorname);
 		data_4_dusti += data;
@@ -3458,13 +3470,14 @@ static void twoStageAutoUpdate() {
 	String lang_variant(cfg::current_lang);
 	lang_variant.toLowerCase();
 
-	String fwprefix = String("/air-rohr/latest_");
+	String fwprefix = String("/airrohr/update/latest_");
 	if (cfg::use_beta) {
-		fwprefix = "/air-rohr-beta/latest_";
+		fwprefix = "/airrohr/beta/latest_";
 	}
+	fwprefix += lang_variant;
 
 	String firmware_md5("/firmware.bin.md5");
-	String fetch_md5_name = fwprefix + lang_variant + ".bin.md5";
+	String fetch_md5_name = fwprefix + ".bin.md5";
 	bool downloadSuccess = fwDownloadStreamFile(fetch_md5_name, firmware_md5);
 	if (!downloadSuccess)
 		return;
@@ -3488,7 +3501,7 @@ static void twoStageAutoUpdate() {
 	}
 
 	String firmware_name("/firmware.bin");
-	String fetch_name = String("/air-rohr/latest_") + lang_variant + ".bin";
+	String fetch_name = fwprefix + ".bin";
 	downloadSuccess = fwDownloadStreamFile(fetch_name, firmware_name);
 
 	if (!downloadSuccess)
@@ -3522,7 +3535,7 @@ static void twoStageAutoUpdate() {
 
 	debug_outln("launching 2nd stage", DEBUG_MIN_INFO);
 	const HTTPUpdateResult ret = ESPhttpUpdate.update(FPSTR(FW_DOWNLOAD_HOST), 80,
-		"/air-rohr/loader-002.bin", String("LOADER-002"));
+		"/airrohr/loader-002.bin", String("LOADER-002"));
 
 	String LastErrorString = ESPhttpUpdate.getLastErrorString().c_str();
 	switch(ret) {
@@ -3578,7 +3591,7 @@ static void display_values() {
 	double lat_value = -200.0;
 	double lon_value = -200.0;
 	double alt_value = -1000.0;
-	String gps_sensor, display_header;
+	String display_header;
 	String display_lines[3] = { "", "", ""};
 	uint8_t screen_count = 0;
 	uint8_t screens[8];
@@ -3659,7 +3672,6 @@ static void display_values() {
 		lat_value = last_value_GPS_lat;
 		lon_value = last_value_GPS_lon;
 		alt_value = last_value_GPS_alt;
-		gps_sensor = "NEO6M";
 	}
 	if (cfg::ppd_read || cfg::pms_read || cfg::hpm_read || cfg::sds_read) {
 		screens[screen_count++] = 1;
@@ -3691,8 +3703,8 @@ static void display_values() {
 			if (pm25_sensor != pm10_sensor) {
 				display_header += " / " + pm10_sensor;
 			}
-			display_lines[0] = "PM2.5: " + check_display_value(pm25_value, -1, 1, 6) + " µg/m³";
-			display_lines[1] = "PM10:  " + check_display_value(pm10_value, -1, 1, 6) + " µg/m³";
+			display_lines[0] = tmpl(F("PM2.5: {v} µg/m³"), check_display_value(pm25_value, -1, 1, 6));
+			display_lines[1] = tmpl(F("PM10: {v} µg/m³"), check_display_value(pm10_value, -1, 1, 6));
 			display_lines[2] = empty_String;
 			break;
 		case 2:
@@ -3709,34 +3721,37 @@ static void display_values() {
 			while (line_count < 3) { display_lines[line_count++] = empty_String; }
 			break;
 		case 3:
-			display_header = gps_sensor;
-			display_lines[0] = "Lat: " + check_display_value(lat_value, -200.0, 6, 10);
-			display_lines[1] = "Lon: " + check_display_value(lon_value, -200.0, 6, 10);
-			display_lines[2] = "Alt: " + check_display_value(alt_value, -1000.0, 2, 10);
+			display_header = "NEO6M";
+			display_lines[0] = "Lat: ";
+			display_lines[0] += check_display_value(lat_value, -200.0, 6, 10);
+			display_lines[1] = "Lon: ";
+			display_lines[1] += check_display_value(lon_value, -200.0, 6, 10);
+			display_lines[2] = "Alt: ";
+			display_lines[2] += check_display_value(alt_value, -1000.0, 2, 10);
 			break;
 		case 4:
 			display_header = FPSTR(SENSORS_SPS30);
 			display_lines[0] = "PM: " + check_display_value(pm010_value, -1, 1, 4) + " " + check_display_value(pm25_value, -1, 1, 4) + " " + check_display_value(pm040_value, -1, 1, 4) + " " + check_display_value(pm10_value, -1, 1, 4);
 			display_lines[1] = "NC: " + check_display_value(nc005_value, -1, 0, 3) + " " + check_display_value(nc010_value, -1, 0, 3) + " " + check_display_value(nc025_value, -1, 0, 3) + " " + check_display_value(nc040_value, -1, 0, 3) + " " + check_display_value(nc100_value, -1, 0, 3);
-			display_lines[2] = "TPS: " + check_display_value(tps_value, -1, 2, 5) + " µm";
+			display_lines[2] = tmpl(F("TPS: {v} µm"), check_display_value(tps_value, -1, 2, 5));
 			break;
 		case 5:
 			display_header = FPSTR(SENSORS_DNMS);
-			display_lines[0] = "LAeq: " + check_display_value(la_eq_value, -1, 1, 6) + " db(A)";
-			display_lines[1] = "LA_max: " + check_display_value(la_max_value, -1, 1, 6) + " db(A)";
-			display_lines[2] = "LA_min: " + check_display_value(la_min_value, -1, 1, 6) + " db(A)";;
+			display_lines[0] = tmpl(F("LAeq: {v} db(A)"), check_display_value(la_eq_value, -1, 1, 6));
+			display_lines[1] = tmpl(F("LA_max: {v} db(A)"), check_display_value(la_max_value, -1, 1, 6));
+			display_lines[2] = tmpl(F("LA_min: {v} db(A)"), check_display_value(la_min_value, -1, 1, 6));
 			break;
 		case 6:
 			display_header = F("Wifi info");
-			display_lines[0] = "IP: " + WiFi.localIP().toString();
-			display_lines[1] = "SSID:" + WiFi.SSID();
-			display_lines[2] = "Signal: " + String(calcWiFiSignalQuality(WiFi.RSSI())) + "%";
+			display_lines[0] = "IP: "; display_lines[0] += WiFi.localIP().toString();
+			display_lines[1] = "SSID: "; display_lines[1] += WiFi.SSID();
+			display_lines[2] = tmpl(F("Signal: {v} %"), String(calcWiFiSignalQuality(WiFi.RSSI())));
 			break;
 		case 7:
 			display_header = F("Device Info");
-			display_lines[0] = "ID: " + esp_chipid;
-			display_lines[1] = "FW: " + String(SOFTWARE_VERSION);
-			display_lines[2] = "Measurements: " + String(count_sends);
+			display_lines[0] = "ID: "; display_lines[0] += esp_chipid;
+			display_lines[1] = "FW: "; display_lines[1] += SOFTWARE_VERSION;
+			display_lines[2] = "Measurements: "; display_lines[2] += String(count_sends);
 			break;
 		}
 
@@ -3790,24 +3805,28 @@ static void display_values() {
 
 	switch (screens[next_display_count % screen_count]) {
 	case 1:
-		display_lines[0] = "PM2.5: " + check_display_value(pm25_value, -1, 1, 6);
-		display_lines[1] = "PM10:  " + check_display_value(pm10_value, -1, 1, 6);
+		display_lines[0] = "PM2.5: ";
+		display_lines[0] += check_display_value(pm25_value, -1, 1, 6);
+		display_lines[1] = "PM10:  ";
+		display_lines[1] += check_display_value(pm10_value, -1, 1, 6);
 		break;
 	case 2:
-		display_lines[0] = "T: " + check_display_value(t_value, -128, 1, 6) + char(223) + "C";
-		display_lines[1] = "H: " + check_display_value(h_value, -1, 1, 6) + "%";
+		display_lines[0] = tmpl(F("T: {v} °C"), check_display_value(t_value, -128, 1, 6));
+		display_lines[1] = tmpl(F("H: {v} %"), check_display_value(h_value, -1, 1, 6));
 		break;
 	case 3:
-		display_lines[0] = "Lat: " + check_display_value(lat_value, -200.0, 6, 11);
-		display_lines[1] = "Lon: " + check_display_value(lon_value, -200.0, 6, 11);
+		display_lines[0] = "Lat: ";
+		display_lines[0] += check_display_value(lat_value, -200.0, 6, 11);
+		display_lines[1] = "Lon: ";
+		display_lines[1] += check_display_value(lon_value, -200.0, 6, 11);
 		break;
 	case 4:
 		display_lines[0] = WiFi.localIP().toString();
 		display_lines[1] = WiFi.SSID();
 		break;
 	case 5:
-		display_lines[0] = "ID: " + esp_chipid;
-		display_lines[1] = "FW: " + SOFTWARE_VERSION;
+		display_lines[0] = "ID: "; display_lines[0] += esp_chipid;
+		display_lines[1] = "FW: "; display_lines[1] += SOFTWARE_VERSION;
 		break;
 	}
 
@@ -4057,16 +4076,16 @@ static void time_is_set (void) {
 static bool acquireNetworkTime() {
 	// server name ptrs must be persisted after the call to configTime because internally
 	// the pointers are stored see implementation of lwip sntp_setservername() 
-	static String ntpServer1, ntpServer2;
+	static char ntpServer1[16], ntpServer2[16];
 	debug_outln_info(F("Setting time using SNTP"));
 	time_t now = time(nullptr);
 	debug_outln_info(ctime(&now));
 #if defined(ESP8266)
 	settimeofday_cb(time_is_set);
 #endif
-	ntpServer1 = WiFi.gatewayIP().toString();
-	ntpServer2 = String(INTL_LANG) + ".pool.ntp.org";
-	configTime(0, 0, ntpServer1.c_str(), ntpServer2.c_str());
+	WiFi.gatewayIP().toString().toCharArray(ntpServer1, sizeof(ntpServer1));
+	String(String(INTL_LANG) + ".pool.ntp.org").toCharArray(ntpServer2, sizeof(ntpServer2));
+	configTime(0, 0, ntpServer1, ntpServer2);
 	for (int retryCount = 0; retryCount++ < 20; ++retryCount) {
 		if (sntp_time_is_set) {
 			now = time(nullptr);
@@ -4352,7 +4371,7 @@ void loop(void) {
 	if (send_now) {
 		debug_outln_info(F("Creating data string:"));
 		String signal_strength = String(WiFi.RSSI());
-		String data = tmpl(FPSTR(data_first_part), SOFTWARE_VERSION);
+		String data = FPSTR(data_first_part);
 		String data_sample_times;
 		add_Value2Json(data_sample_times, F("samples"), String(sample_count));
 		add_Value2Json(data_sample_times, F("min_micro"), String(min_micro));

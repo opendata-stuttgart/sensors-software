@@ -9,6 +9,8 @@ NRZ-2019-124-B6
 * Write more compliant config JSON
 * Advertise as http://airrohr-$espid.local/ in AP mode
 * BMP280/BME280 sensors are merged into one implementation
+* Switch OTA updater two a two-Stage implemenation allowing more than 512kb of sketch size
+* Fix memory corruption when using displays
 
 NRZ-2019-124-B5
 * some comments removed
