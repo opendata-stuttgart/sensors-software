@@ -4222,9 +4222,8 @@ void setup(void) {
  * And action                                                    *
  *****************************************************************/
 void loop(void) {
-	String result_PPD, result_SDS, result_PMS, result_HPM, result_SPS30;
-	String result_DHT, result_HTU21D, result_BMP;
-	String result_BMX280, result_DS18B20, result_GPS, result_DNMS;
+	String result_PPD, result_SDS, result_PMS, result_HPM;
+	String result_GPS, result_DNMS;
 
 	unsigned sum_send_time = 0;
 
@@ -4300,44 +4299,6 @@ void loop(void) {
 		}
 	}
 
-	server.handleClient();
-
-	if (send_now) {
-		if (cfg::dht_read) {
-			 // getting temperature and humidity (optional)
-			fetchSensorDHT(result_DHT);
-		}
-
-		if (cfg::htu21d_read) {
-			 // getting temperature and humidity (optional)
-			fetchSensorHTU21D(result_HTU21D);
-		}
-
-		if (cfg::bmp_read && (! bmp_init_failed)) {
-			// getting temperature and pressure (optional)
-			fetchSensorBMP(result_BMP);
-		}
-
-		if (cfg::bmx280_read && (! bmx280_init_failed)) {
-			// getting temperature, humidity and pressure (optional)
-			fetchSensorBMX280(result_BMX280);
-		}
-
-		if (cfg::ds18b20_read) {
-			// getting temperature (optional)
-			fetchSensorDS18B20(result_DS18B20);
-		}
-
-		if (cfg::sps30_read && (! sps30_init_failed)) {
-			fetchSensorSPS30(result_SPS30);
-		}
-
-		if (cfg::dnms_read && (! dnms_init_failed)) {
-			// getting noise measurement values from dnms (optional)
-			fetchSensorDNMS(result_DNMS);
-		}
-	}
-
 	if (cfg::gps_read && !gps_init_failed && ((msSince(starttime_GPS) > SAMPLETIME_GPS_MS) || send_now)) {
 		// getting GPS coordinates
 		fetchSensorGPS(result_GPS);
@@ -4349,11 +4310,16 @@ void loop(void) {
 		display_values();
 	}
 
+	server.handleClient();
+	yield();
+
 	if (send_now) {
 		debug_outln_info(F("Creating data string:"));
 		String signal_strength = String(WiFi.RSSI());
 		String data = FPSTR(data_first_part);
 		String data_sample_times;
+		String result;
+
 		add_Value2Json(data_sample_times, F("samples"), String(sample_count));
 		add_Value2Json(data_sample_times, F("min_micro"), String(min_micro));
 		add_Value2Json(data_sample_times, F("max_micro"), String(max_micro));
@@ -4362,9 +4328,6 @@ void loop(void) {
 		debug_outln_info(F("WLAN signal strength (dBm): "), signal_strength);
 		debug_outln_info(F("----"));
 
-		server.handleClient();
-		yield();
-		server.stop();
 		if (cfg::ppd_read) {
 			data += result_PPD;
 			sum_send_time += sendLuftdaten(result_PPD, PPD_API_PIN, FPSTR(SENSORS_PPD42NS), "PPD_");
@@ -4382,36 +4345,49 @@ void loop(void) {
 			sum_send_time += sendLuftdaten(result_HPM, HPM_API_PIN, FPSTR(SENSORS_HPM), "HPM_");
 		}
 		if (cfg::sps30_read && (! sps30_init_failed)) {
-			data += result_SPS30;
-			sum_send_time += sendLuftdaten(result_SPS30, SPS30_API_PIN, FPSTR(SENSORS_SPS30), "SPS30_");
+			fetchSensorSPS30(result);
+			data += result;
+			sum_send_time += sendLuftdaten(result, SPS30_API_PIN, FPSTR(SENSORS_SPS30), "SPS30_");
 		}
 		if (cfg::dht_read) {
-			data += result_DHT;
-			sum_send_time += sendLuftdaten(result_DHT, DHT_API_PIN, FPSTR(SENSORS_DHT22), "DHT_");
+			// getting temperature and humidity (optional)
+			fetchSensorDHT(result);
+			data += result;
+			sum_send_time += sendLuftdaten(result, DHT_API_PIN, FPSTR(SENSORS_DHT22), "DHT_");
 		}
 		if (cfg::htu21d_read) {
-			data += result_HTU21D;
-			sum_send_time += sendLuftdaten(result_HTU21D, HTU21D_API_PIN, FPSTR(SENSORS_HTU21D), "HTU21D_");
+			// getting temperature and humidity (optional)
+			fetchSensorHTU21D(result);
+			data += result;
+			sum_send_time += sendLuftdaten(result, HTU21D_API_PIN, FPSTR(SENSORS_HTU21D), "HTU21D_");
 		}
 		if (cfg::bmp_read && (! bmp_init_failed)) {
-			data += result_BMP;
-			sum_send_time += sendLuftdaten(result_BMP, BMP_API_PIN, FPSTR(SENSORS_BMP180), "BMP_");
+			// getting temperature and pressure (optional)
+			fetchSensorBMP(result);
+			data += result;
+			sum_send_time += sendLuftdaten(result, BMP_API_PIN, FPSTR(SENSORS_BMP180), "BMP_");
 		}
 		if (cfg::bmx280_read && (! bmx280_init_failed)) {
-			data += result_BMX280;
+			// getting temperature, humidity and pressure (optional)
+			fetchSensorBMX280(result);
+			data += result;
 			if (bmx280.sensorID() == BME280_SENSOR_ID) {
-				sum_send_time += sendLuftdaten(result_BMX280, BME280_API_PIN, FPSTR(SENSORS_BMX280), "BME280_");
+				sum_send_time += sendLuftdaten(result, BME280_API_PIN, FPSTR(SENSORS_BMX280), "BME280_");
 			} else {
-				sum_send_time += sendLuftdaten(result_BMX280, BMP280_API_PIN, FPSTR(SENSORS_BMX280), "BMP280_");
+				sum_send_time += sendLuftdaten(result, BMP280_API_PIN, FPSTR(SENSORS_BMX280), "BMP280_");
 			}
 		}
 		if (cfg::ds18b20_read) {
-			data += result_DS18B20;
-			sum_send_time += sendLuftdaten(result_DS18B20, DS18B20_API_PIN, FPSTR(SENSORS_DS18B20), "DS18B20_");
+			// getting temperature (optional)
+			fetchSensorDS18B20(result);
+			data += result;
+			sum_send_time += sendLuftdaten(result, DS18B20_API_PIN, FPSTR(SENSORS_DS18B20), "DS18B20_");
 		}
 		if (cfg::dnms_read && (! dnms_init_failed)) {
-			data += result_DNMS;
-			sum_send_time += sendLuftdaten(result_DNMS, DNMS_API_PIN, FPSTR(SENSORS_DNMS), "DNMS_");
+			// getting noise measurement values from dnms (optional)
+			fetchSensorDNMS(result);
+			data += result;
+			sum_send_time += sendLuftdaten(result, DNMS_API_PIN, FPSTR(SENSORS_DNMS), "DNMS_");
 		}
 		if (cfg::gps_read) {
 			data += result_GPS;
@@ -4426,8 +4402,6 @@ void loop(void) {
 		data += "]}";
 
 		sum_send_time += sendDataToOptionalApis(data);
-
-		server.begin();
 
 		checkForceRestart();
 
