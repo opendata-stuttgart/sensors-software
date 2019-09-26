@@ -9,11 +9,11 @@
  */
 
 const char INTL_LANG[] = "UA";
-const char INTL_PM_SENSOR[] PROGMEM = "Вимірювач дрібних часток";
+#define INTL_PM_SENSOR "Вимірювач дрібних часток"
 const char INTL_CONFIGURATION[] PROGMEM = "Налаштування";
-const char INTL_WIFI_SETTINGS[] PROGMEM = "Параметри WiFi";
-const char INTL_WIFI_NETWORKS[] PROGMEM = "Пошук WiFi мереж...";
-const char INTL_LANGUAGE[] PROGMEM = "Мова";
+#define INTL_WIFI_SETTINGS "Параметри WiFi"
+#define INTL_WIFI_NETWORKS "Пошук WiFi мереж..."
+#define INTL_LANGUAGE "Мова"
 const char INTL_NO_NETWORKS[] PROGMEM =  "Не знайдено жодної Wifi мережі";
 const char INTL_NETWORKS_FOUND[] PROGMEM = "Знайдені мережі";
 const char INTL_AB_HIER_NUR_ANDERN[] PROGMEM = "Експертні параметри (тільки якщо ви розумієте, що робите)";
@@ -63,18 +63,18 @@ const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Сенсор перезаван
 const char INTL_RESTART_DEVICE[] PROGMEM = "Перезапустити пристрій";
 const char INTL_DELETE_CONFIG[] PROGMEM = "видалити збережену конфігурацію";
 const char INTL_RESTART_SENSOR[] PROGMEM = "Перезапустити сенсор";
-const char INTL_HOME[] PROGMEM = "Головна";
-const char INTL_BACK_TO_HOME[] PROGMEM = "На головну сторінку";
+#define INTL_HOME "Головна"
+#define INTL_BACK_TO_HOME "На головну сторінку"
 const char INTL_CURRENT_DATA[] PROGMEM = "Поточні показники";
-const char INTL_ACTIVE_SENSORS_MAP[] PROGMEM = "Мапа активних сенсорів(зовнішнє посилання)";
-const char INTL_CONFIGURATION_DELETE[] PROGMEM = "Видалити конфігурацію";
-const char INTL_CONFIGURATION_REALLY_DELETE[] PROGMEM = "Ви точно хочете видалити конфігурацію?";
-const char INTL_DELETE[] PROGMEM = "Видалити";
-const char INTL_CANCEL[] PROGMEM = "Скасувати";
-const char INTL_REALLY_RESTART_SENSOR[] PROGMEM = "Ви точно хочете перезавантажити сенсор?";
-const char INTL_RESTART[] PROGMEM = "Перезавантажити";
+#define INTL_ACTIVE_SENSORS_MAP "Мапа активних сенсорів(зовнішнє посилання)"
+#define INTL_CONFIGURATION_DELETE "Видалити конфігурацію"
+#define INTL_CONFIGURATION_REALLY_DELETE "Ви точно хочете видалити конфігурацію?"
+#define INTL_DELETE "Видалити"
+#define INTL_CANCEL "Скасувати"
+#define INTL_REALLY_RESTART_SENSOR "Ви точно хочете перезавантажити сенсор?"
+#define INTL_RESTART "Перезавантажити"
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Зберегти та перезавантажити";
-const char INTL_FIRMWARE[] PROGMEM = "Версія мікропрограми";
+#define INTL_FIRMWARE "Версія мікропрограми"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Зневадження: ";
 const char INTL_NONE[] PROGMEM = "вимкнено";
 const char INTL_ERROR[] PROGMEM = "лише помилки";
@@ -82,9 +82,9 @@ const char INTL_WARNING[] PROGMEM = "попередження";
 const char INTL_MIN_INFO[] PROGMEM = "мінімум інформації";
 const char INTL_MED_INFO[] PROGMEM = "помірно інформації";
 const char INTL_MAX_INFO[] PROGMEM = "максимум інформації";
-const char INTL_CONFIG_DELETED[] PROGMEM = "Конфігурацію видалено";
-const char INTL_CONFIG_CAN_NOT_BE_DELETED[] PROGMEM = "Конфігурацію не можна видалити";
-const char INTL_CONFIG_NOT_FOUND[] PROGMEM = "Конфігурацію не знайдено";
+#define INTL_CONFIG_DELETED "Конфігурацію видалено"
+#define INTL_CONFIG_CAN_NOT_BE_DELETED "Конфігурацію не можна видалити"
+#define INTL_CONFIG_NOT_FOUND "Конфігурацію не знайдено"
 const char INTL_TIME_TO_FIRST_MEASUREMENT[] PROGMEM = "Ще {v} секунд до першого вимірювання";
 const char INTL_TIME_SINCE_LAST_MEASUREMENT[] PROGMEM = "секунд від останнього вимірювання.";
 const char INTL_PARTICLES_PER_LITER[] PROGMEM = "часток/літр";
@@ -102,9 +102,9 @@ const char INTL_DATE[] PROGMEM = "Дата";
 const char INTL_TIME[] PROGMEM = "Час";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "потужність сигналу";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "якість сигналу";
-const char INTL_NUMBER_OF_MEASUREMENTS[] PROGMEM = "Кількість вимірювань:";
-const char INTL_SENSOR[] PROGMEM = "Сенсор";
-const char INTL_PARAMETER[] PROGMEM = "Параметр";
-const char INTL_VALUE[] PROGMEM = "Значення";
+#define INTL_NUMBER_OF_MEASUREMENTS "Кількість вимірювань:"
+#define INTL_SENSOR "Сенсор"
+#define INTL_PARAMETER "Параметр"
+#define INTL_VALUE "Значення"
 
 #include "./airrohr-logo-common.h"

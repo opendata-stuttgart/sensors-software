@@ -9,11 +9,11 @@
  */
 
 const char INTL_LANG[] = "EN";
-const char INTL_PM_SENSOR[] PROGMEM = "Particulate matter sensor";
+#define INTL_PM_SENSOR "Particulate matter sensor"
 const char INTL_CONFIGURATION[] PROGMEM = "Configuration";
-const char INTL_WIFI_SETTINGS[] PROGMEM = "WiFi Settings";
-const char INTL_WIFI_NETWORKS[] PROGMEM = "Loading wifi networks ...";
-const char INTL_LANGUAGE[] PROGMEM = "Language";
+#define INTL_WIFI_SETTINGS "WiFi Settings"
+#define INTL_WIFI_NETWORKS "Loading wifi networks ..."
+#define INTL_LANGUAGE "Language"
 const char INTL_NO_NETWORKS[] PROGMEM =  "No WiFi Network Found";
 const char INTL_NETWORKS_FOUND[] PROGMEM = "Found Networks: ";
 const char INTL_AB_HIER_NUR_ANDERN[] PROGMEM = "Advanced settings (оnly if you know what you are doing)";
@@ -63,18 +63,18 @@ const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Sensor is rebooting.";
 const char INTL_RESTART_DEVICE[] PROGMEM = "Restart device";
 const char INTL_DELETE_CONFIG[] PROGMEM = "delete saved configuration";
 const char INTL_RESTART_SENSOR[] PROGMEM = "Restart sensor";
-const char INTL_HOME[] PROGMEM = "Home";
-const char INTL_BACK_TO_HOME[] PROGMEM = "Back to home page";
+#define INTL_HOME "Home"
+#define INTL_BACK_TO_HOME "Back to home page"
 const char INTL_CURRENT_DATA[] PROGMEM = "Current data";
-const char INTL_ACTIVE_SENSORS_MAP[] PROGMEM = "Active sensors map(external link)";
-const char INTL_CONFIGURATION_DELETE[] PROGMEM = "Configuration delete";
-const char INTL_CONFIGURATION_REALLY_DELETE[] PROGMEM = "Are you sure you want to delete the configuration?";
-const char INTL_DELETE[] PROGMEM = "Delete";
-const char INTL_CANCEL[] PROGMEM = "Cancel";
-const char INTL_REALLY_RESTART_SENSOR[] PROGMEM = "Are you sure you want to restart the sensor?";
-const char INTL_RESTART[] PROGMEM = "Restart";
+#define INTL_ACTIVE_SENSORS_MAP "Active sensors map(external link)"
+#define INTL_CONFIGURATION_DELETE "Configuration delete"
+#define INTL_CONFIGURATION_REALLY_DELETE "Are you sure you want to delete the configuration?"
+#define INTL_DELETE "Delete"
+#define INTL_CANCEL "Cancel"
+#define INTL_REALLY_RESTART_SENSOR "Are you sure you want to restart the sensor?"
+#define INTL_RESTART "Restart"
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Save and restart";
-const char INTL_FIRMWARE[] PROGMEM = "Firmware version";
+#define INTL_FIRMWARE "Firmware version"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Debug setting to ";
 const char INTL_NONE[] PROGMEM = "off";
 const char INTL_ERROR[] PROGMEM = "only errors";
@@ -82,9 +82,9 @@ const char INTL_WARNING[] PROGMEM = "warnings";
 const char INTL_MIN_INFO[] PROGMEM = "min. info";
 const char INTL_MED_INFO[] PROGMEM = "mid. info";
 const char INTL_MAX_INFO[] PROGMEM = "max. info";
-const char INTL_CONFIG_DELETED[] PROGMEM = "Configuration is deleted";
-const char INTL_CONFIG_CAN_NOT_BE_DELETED[] PROGMEM = "Configuration can not be deleted";
-const char INTL_CONFIG_NOT_FOUND[] PROGMEM = "Configuration not found";
+#define INTL_CONFIG_DELETED "Configuration is deleted"
+#define INTL_CONFIG_CAN_NOT_BE_DELETED "Configuration can not be deleted"
+#define INTL_CONFIG_NOT_FOUND "Configuration not found"
 const char INTL_TIME_TO_FIRST_MEASUREMENT[] PROGMEM = "Still {v} seconds until first measurement.";
 const char INTL_TIME_SINCE_LAST_MEASUREMENT[] PROGMEM = " seconds since last measurement.";
 const char INTL_PARTICLES_PER_LITER[] PROGMEM = "particles/liter";
@@ -102,9 +102,9 @@ const char INTL_DATE[] PROGMEM = "Date";
 const char INTL_TIME[] PROGMEM = "Time";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "signal strength";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "signal quality";
-const char INTL_NUMBER_OF_MEASUREMENTS[] PROGMEM = "Number of measurements:";
-const char INTL_SENSOR[] PROGMEM = "Sensor";
-const char INTL_PARAMETER[] PROGMEM = "Parameter";
-const char INTL_VALUE[] PROGMEM = "Value";
+#define INTL_NUMBER_OF_MEASUREMENTS "Number of measurements:"
+#define INTL_SENSOR "Sensor"
+#define INTL_PARAMETER "Parameter"
+#define INTL_VALUE "Value"
 
 #include "./airrohr-logo-common.h"

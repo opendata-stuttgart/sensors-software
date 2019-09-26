@@ -9,11 +9,11 @@
  */
 
 const char INTL_LANG[] = "PL";
-const char INTL_PM_SENSOR[] PROGMEM = "Czujnik pyłu zawieszonego";
+#define INTL_PM_SENSOR "Czujnik pyłu zawieszonego"
 const char INTL_CONFIGURATION[] PROGMEM = "Konfiguracja";
-const char INTL_WIFI_SETTINGS[] PROGMEM = "Ustawienia WiFi";
-const char INTL_WIFI_NETWORKS[] PROGMEM = "Ładowanie sieci WiFi...";
-const char INTL_LANGUAGE[] PROGMEM = "Język";
+#define INTL_WIFI_SETTINGS "Ustawienia WiFi"
+#define INTL_WIFI_NETWORKS "Ładowanie sieci WiFi..."
+#define INTL_LANGUAGE "Język"
 const char INTL_NO_NETWORKS[] PROGMEM =  "Nie znaleziono sieci WiFi";
 const char INTL_NETWORKS_FOUND[] PROGMEM = "Znalezione sieci: ";
 const char INTL_AB_HIER_NUR_ANDERN[] PROGMEM = "Ustawienia zaawansowane (tylko gdy wiesz co robisz)";
@@ -63,18 +63,18 @@ const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Ponowne uruchamianie czujnika."
 const char INTL_RESTART_DEVICE[] PROGMEM = "Uruchom ponownie urządzenie";
 const char INTL_DELETE_CONFIG[] PROGMEM = "Usuń zapisaną konfigurację";
 const char INTL_RESTART_SENSOR[] PROGMEM = "Uruchom ponownie czujnik";
-const char INTL_HOME[] PROGMEM = "Strona startowa";
-const char INTL_BACK_TO_HOME[] PROGMEM = "Powrót do strony startowej";
+#define INTL_HOME "Strona startowa"
+#define INTL_BACK_TO_HOME "Powrót do strony startowej"
 const char INTL_CURRENT_DATA[] PROGMEM = "Obecne wskazania";
-const char INTL_ACTIVE_SENSORS_MAP[] PROGMEM = "Mapa aktywnych czujników (link zewnętrzny)";
-const char INTL_CONFIGURATION_DELETE[] PROGMEM = "Usunięcie konfiguracji";
-const char INTL_CONFIGURATION_REALLY_DELETE[] PROGMEM = "Czy na pewno chcesz usunąć konfigurację?";
-const char INTL_DELETE[] PROGMEM = "Usuń";
-const char INTL_CANCEL[] PROGMEM = "Anuluj";
-const char INTL_REALLY_RESTART_SENSOR[] PROGMEM = "Czy na pewno chcesz uruchomić czujnik ponownie?";
-const char INTL_RESTART[] PROGMEM = "Uruchom ponownie";
+#define INTL_ACTIVE_SENSORS_MAP "Mapa aktywnych czujników (link zewnętrzny)"
+#define INTL_CONFIGURATION_DELETE "Usunięcie konfiguracji"
+#define INTL_CONFIGURATION_REALLY_DELETE "Czy na pewno chcesz usunąć konfigurację?"
+#define INTL_DELETE "Usuń"
+#define INTL_CANCEL "Anuluj"
+#define INTL_REALLY_RESTART_SENSOR "Czy na pewno chcesz uruchomić czujnik ponownie?"
+#define INTL_RESTART "Uruchom ponownie"
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Zapisz i zrestartuj";
-const char INTL_FIRMWARE[] PROGMEM = "Wersja firmware";
+#define INTL_FIRMWARE "Wersja firmware"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Ustaw poziom debugowania na ";
 const char INTL_NONE[] PROGMEM = "wyłączony";
 const char INTL_ERROR[] PROGMEM = "tylko błędy";
@@ -82,9 +82,9 @@ const char INTL_WARNING[] PROGMEM = "ostrzeżenia";
 const char INTL_MIN_INFO[] PROGMEM = "min. info";
 const char INTL_MED_INFO[] PROGMEM = "śr. info";
 const char INTL_MAX_INFO[] PROGMEM = "maks. info";
-const char INTL_CONFIG_DELETED[] PROGMEM = "Usunięto konfigurację";
-const char INTL_CONFIG_CAN_NOT_BE_DELETED[] PROGMEM = "Konfiguracja nie może zostać usunięta";
-const char INTL_CONFIG_NOT_FOUND[] PROGMEM = "Nie znaleziono konfiguracji";
+#define INTL_CONFIG_DELETED "Usunięto konfigurację"
+#define INTL_CONFIG_CAN_NOT_BE_DELETED "Konfiguracja nie może zostać usunięta"
+#define INTL_CONFIG_NOT_FOUND "Nie znaleziono konfiguracji"
 const char INTL_TIME_TO_FIRST_MEASUREMENT[] = "Pozostało {v} sekund do pierwszego pomiaru.";
 const char INTL_TIME_SINCE_LAST_MEASUREMENT[] = " sekund od ostatniego pomiaru.";
 const char INTL_PARTICLES_PER_LITER[] PROGMEM = "cząsteczek/litr";
@@ -102,9 +102,9 @@ const char INTL_DATE[] PROGMEM = "Data";
 const char INTL_TIME[] PROGMEM = "Czas";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Siła sygnału";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Jakość sygnału";
-const char INTL_NUMBER_OF_MEASUREMENTS[] PROGMEM = "Liczba pomiarów:";
-const char INTL_SENSOR[] PROGMEM = "Czujnik";
-const char INTL_PARAMETER[] PROGMEM = "Parametr";
-const char INTL_VALUE[] PROGMEM = "Wartość";
+#define INTL_NUMBER_OF_MEASUREMENTS "Liczba pomiarów:"
+#define INTL_SENSOR "Czujnik"
+#define INTL_PARAMETER "Parametr"
+#define INTL_VALUE "Wartość"
 
 #include "./airrohr-logo-common.h"

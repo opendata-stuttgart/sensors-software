@@ -9,11 +9,11 @@
  */
 
 const char INTL_LANG[] = "DK";
-const char INTL_PM_SENSOR[] PROGMEM = "Partikelsensor";
+#define INTL_PM_SENSOR "Partikelsensor"
 const char INTL_CONFIGURATION[] PROGMEM = "Opsætning";
-const char INTL_WIFI_SETTINGS[] PROGMEM = "Wi-Fi indstillinger";
-const char INTL_WIFI_NETWORKS[] PROGMEM = "Leder efter Wi-Fi netværk...";
-const char INTL_LANGUAGE[] PROGMEM = "Sprog";
+#define INTL_WIFI_SETTINGS "Wi-Fi indstillinger"
+#define INTL_WIFI_NETWORKS "Leder efter Wi-Fi netværk..."
+#define INTL_LANGUAGE "Sprog"
 const char INTL_NO_NETWORKS[] PROGMEM =  "Ingen netværk fundet";
 const char INTL_NETWORKS_FOUND[] PROGMEM = "Netværker fundet: ";
 const char INTL_AB_HIER_NUR_ANDERN[] PROGMEM = "Ændr følgende kun hvis du ved hvad du laver";
@@ -63,18 +63,18 @@ const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Sensor genstartes.";
 const char INTL_RESTART_DEVICE[] PROGMEM = "Genstart enhed";
 const char INTL_DELETE_CONFIG[] PROGMEM = "Slet Config.json";
 const char INTL_RESTART_SENSOR[] PROGMEM = "Genstart sensor";
-const char INTL_HOME[] PROGMEM = "Oversigt";
-const char INTL_BACK_TO_HOME[] PROGMEM = "Tilbage til oversigten";
+#define INTL_HOME "Oversigt"
+#define INTL_BACK_TO_HOME "Tilbage til oversigten"
 const char INTL_CURRENT_DATA[] PROGMEM = "Aktuelle målværdier";
-const char INTL_ACTIVE_SENSORS_MAP[] PROGMEM = "Kort over aktive sensorer (ekstern link)";
-const char INTL_CONFIGURATION_DELETE[] PROGMEM = "Slet opsætningen";
-const char INTL_CONFIGURATION_REALLY_DELETE[] PROGMEM = "Skal opsætningen virkelig slettes?";
-const char INTL_DELETE[] PROGMEM = "Slet";
-const char INTL_CANCEL[] PROGMEM = "Afbryd";
-const char INTL_REALLY_RESTART_SENSOR[] PROGMEM = "Config.json kunne ikke findes";
-const char INTL_RESTART[] PROGMEM = "Genstart";
+#define INTL_ACTIVE_SENSORS_MAP "Kort over aktive sensorer (ekstern link)"
+#define INTL_CONFIGURATION_DELETE "Slet opsætningen"
+#define INTL_CONFIGURATION_REALLY_DELETE "Skal opsætningen virkelig slettes?"
+#define INTL_DELETE "Slet"
+#define INTL_CANCEL "Afbryd"
+#define INTL_REALLY_RESTART_SENSOR "Config.json kunne ikke findes"
+#define INTL_RESTART "Genstart"
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Gem og genstart";
-const char INTL_FIRMWARE[] PROGMEM = "Firmware";
+#define INTL_FIRMWARE "Firmware"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Debug-indstillinger sat til";
 const char INTL_NONE[] PROGMEM = "none";
 const char INTL_ERROR[] PROGMEM = "error";
@@ -82,9 +82,9 @@ const char INTL_WARNING[] PROGMEM = "warning";
 const char INTL_MIN_INFO[] PROGMEM = "min. info";
 const char INTL_MED_INFO[] PROGMEM = "med. info";
 const char INTL_MAX_INFO[] PROGMEM = "max. info";
-const char INTL_CONFIG_DELETED[] PROGMEM = "Config.json slettet";
-const char INTL_CONFIG_CAN_NOT_BE_DELETED[] PROGMEM = "Config.json kunne ikke slettes";
-const char INTL_CONFIG_NOT_FOUND[] PROGMEM = "Config.json kunne ikke findes";
+#define INTL_CONFIG_DELETED "Config.json slettet"
+#define INTL_CONFIG_CAN_NOT_BE_DELETED "Config.json kunne ikke slettes"
+#define INTL_CONFIG_NOT_FOUND "Config.json kunne ikke findes"
 const char INTL_TIME_TO_FIRST_MEASUREMENT[] PROGMEM = "Der går {v} sekunder før den første måling.";
 const char INTL_TIME_SINCE_LAST_MEASUREMENT[] PROGMEM = " sekunder siden den seneste måling.";
 const char INTL_PARTICLES_PER_LITER[] PROGMEM = "Partikler/liter";
@@ -102,9 +102,9 @@ const char INTL_DATE[] PROGMEM = "Dato";
 const char INTL_TIME[] PROGMEM = "Tid";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Signal";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Kvalitet";
-const char INTL_NUMBER_OF_MEASUREMENTS[] PROGMEM = "";
-const char INTL_SENSOR[] PROGMEM = "Sensor";
-const char INTL_PARAMETER[] PROGMEM = "Parameter";
-const char INTL_VALUE[] PROGMEM = "Værdi";
+#define INTL_NUMBER_OF_MEASUREMENTS ""
+#define INTL_SENSOR "Sensor"
+#define INTL_PARAMETER "Parameter"
+#define INTL_VALUE "Værdi"
 
 #include "./airrohr-logo-common.h"

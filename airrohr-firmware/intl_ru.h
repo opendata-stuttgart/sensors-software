@@ -9,11 +9,11 @@
  */
 
 const char INTL_LANG[] = "RU";
-const char INTL_PM_SENSOR[] PROGMEM = "Датчик твердых мелкодисперсных частиц";
+#define INTL_PM_SENSOR "Датчик твердых мелкодисперсных частиц"
 const char INTL_CONFIGURATION[] PROGMEM = "Конфигурация";
-const char INTL_WIFI_SETTINGS[] PROGMEM = "Данные Wi-Fi";
-const char INTL_WIFI_NETWORKS[] PROGMEM = "Загрузить сети Wi-Fi ...";
-const char INTL_LANGUAGE[] PROGMEM = "Язык";
+#define INTL_WIFI_SETTINGS "Данные Wi-Fi"
+#define INTL_WIFI_NETWORKS "Загрузить сети Wi-Fi ..."
+#define INTL_LANGUAGE "Язык"
 const char INTL_NO_NETWORKS[] PROGMEM =  "Cетей не найдено";
 const char INTL_NETWORKS_FOUND[] PROGMEM = "Найденые сети: ";
 const char INTL_AB_HIER_NUR_ANDERN[] PROGMEM = "Изменяйте значения ниже если действительно знаете что делаете";
@@ -63,18 +63,18 @@ const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Устройство перез
 const char INTL_RESTART_DEVICE[] PROGMEM = "Перезапустить устройство";
 const char INTL_DELETE_CONFIG[] PROGMEM = "Config.json удалить";
 const char INTL_RESTART_SENSOR[] PROGMEM = "Перезапустить устройство";
-const char INTL_HOME[] PROGMEM = "Меню";
-const char INTL_BACK_TO_HOME[] PROGMEM = "Вернуться в основное меню";
+#define INTL_HOME "Меню"
+#define INTL_BACK_TO_HOME "Вернуться в основное меню"
 const char INTL_CURRENT_DATA[] PROGMEM = "Текущие значения";
-const char INTL_ACTIVE_SENSORS_MAP[] PROGMEM = "Карта активных датчиков (внешняя ссылка)";
-const char INTL_CONFIGURATION_DELETE[] PROGMEM = "Удалить конфигурацию";
-const char INTL_CONFIGURATION_REALLY_DELETE[] PROGMEM = "Подтвердите удаление конфигурации!";
-const char INTL_DELETE[] PROGMEM = "Удалить";
-const char INTL_CANCEL[] PROGMEM = "Отменить";
-const char INTL_REALLY_RESTART_SENSOR[] PROGMEM = "Подтвердите перезапуск устройства!";
-const char INTL_RESTART[] PROGMEM = "Перезапустить";
+#define INTL_ACTIVE_SENSORS_MAP "Карта активных датчиков (внешняя ссылка)"
+#define INTL_CONFIGURATION_DELETE "Удалить конфигурацию"
+#define INTL_CONFIGURATION_REALLY_DELETE "Подтвердите удаление конфигурации!"
+#define INTL_DELETE "Удалить"
+#define INTL_CANCEL "Отменить"
+#define INTL_REALLY_RESTART_SENSOR "Подтвердите перезапуск устройства!"
+#define INTL_RESTART "Перезапустить"
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Сохранить и перезапустить";
-const char INTL_FIRMWARE[] PROGMEM = "Прошивка";
+#define INTL_FIRMWARE "Прошивка"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Настройки отладки";
 const char INTL_NONE[] PROGMEM = "отключена";
 const char INTL_ERROR[] PROGMEM = "только ошибки";
@@ -82,9 +82,9 @@ const char INTL_WARNING[] PROGMEM = "предупреждения";
 const char INTL_MIN_INFO[] PROGMEM = "минимум информации";
 const char INTL_MED_INFO[] PROGMEM = "среднеинформативно";
 const char INTL_MAX_INFO[] PROGMEM = "максимум информации";
-const char INTL_CONFIG_DELETED[] PROGMEM = "Config.json удалён";
-const char INTL_CONFIG_CAN_NOT_BE_DELETED[] PROGMEM = "Config.json нельзя удалить";
-const char INTL_CONFIG_NOT_FOUND[] PROGMEM = "Config.json не найден";
+#define INTL_CONFIG_DELETED "Config.json удалён"
+#define INTL_CONFIG_CAN_NOT_BE_DELETED "Config.json нельзя удалить"
+#define INTL_CONFIG_NOT_FOUND "Config.json не найден"
 const char INTL_TIME_TO_FIRST_MEASUREMENT[] PROGMEM = "Еще {v} секунд до первого замера.";
 const char INTL_TIME_SINCE_LAST_MEASUREMENT[] PROGMEM = " секунд после последнего замера.";
 const char INTL_PARTICLES_PER_LITER[] PROGMEM = "Частицы/ литр";
@@ -102,9 +102,9 @@ const char INTL_DATE[] PROGMEM = "Дата";
 const char INTL_TIME[] PROGMEM = "Время";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Сигнал";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Качество";
-const char INTL_NUMBER_OF_MEASUREMENTS[] PROGMEM = "Количество измерений:";
-const char INTL_SENSOR[] PROGMEM = "Датчик";
-const char INTL_PARAMETER[] PROGMEM = "Параметр";
-const char INTL_VALUE[] PROGMEM = "Значение";
+#define INTL_NUMBER_OF_MEASUREMENTS "Количество измерений:"
+#define INTL_SENSOR "Датчик"
+#define INTL_PARAMETER "Параметр"
+#define INTL_VALUE "Значение"
 
 #include "./airrohr-logo-common.h"

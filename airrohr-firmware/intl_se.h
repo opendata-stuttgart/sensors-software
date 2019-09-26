@@ -9,11 +9,11 @@
  */
 
 const char INTL_LANG[] = "SE";
-const char INTL_PM_SENSOR[] PROGMEM = "Partikelsensor";
+#define INTL_PM_SENSOR "Partikelsensor"
 const char INTL_CONFIGURATION[] PROGMEM = "Inställningar";
-const char INTL_WIFI_SETTINGS[] PROGMEM = "WLAN konfiguration";
-const char INTL_WIFI_NETWORKS[] PROGMEM = "Laddar trådlösa nätverk...";
-const char INTL_LANGUAGE[] PROGMEM = "Språk";
+#define INTL_WIFI_SETTINGS "WLAN konfiguration"
+#define INTL_WIFI_NETWORKS "Laddar trådlösa nätverk..."
+#define INTL_LANGUAGE "Språk"
 const char INTL_NO_NETWORKS[] PROGMEM =  "Inga nätverk hittades";
 const char INTL_NETWORKS_FOUND[] PROGMEM = "Nätverk hittades: ";
 const char INTL_AB_HIER_NUR_ANDERN[] PROGMEM = "Ändra nedanför enbart om du verkligen vet vad du gör";
@@ -63,18 +63,18 @@ const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Sensor startas om.";
 const char INTL_RESTART_DEVICE[] PROGMEM = "Starta om enhet";
 const char INTL_DELETE_CONFIG[] PROGMEM = "Ta bort Config.json";
 const char INTL_RESTART_SENSOR[] PROGMEM = "Starta om sensor";
-const char INTL_HOME[] PROGMEM = "Översikt";
-const char INTL_BACK_TO_HOME[] PROGMEM = "Tillbaka till översikten";
+#define INTL_HOME "Översikt"
+#define INTL_BACK_TO_HOME "Tillbaka till översikten"
 const char INTL_CURRENT_DATA[] PROGMEM = "Aktuella mätvärden";
-const char INTL_ACTIVE_SENSORS_MAP[] PROGMEM = "Karta över aktiva sensorer (extern länk)";
-const char INTL_CONFIGURATION_DELETE[] PROGMEM = "Ta bort konfiguration";
-const char INTL_CONFIGURATION_REALLY_DELETE[] PROGMEM = "Ska konfigurationen tas bort?";
-const char INTL_DELETE[] PROGMEM = "Ta bort";
-const char INTL_CANCEL[] PROGMEM = "Avbryt";
-const char INTL_REALLY_RESTART_SENSOR[] PROGMEM = "Config.json kunde inte hittas";
-const char INTL_RESTART[] PROGMEM = "Starta om";
+#define INTL_ACTIVE_SENSORS_MAP "Karta över aktiva sensorer (extern länk)"
+#define INTL_CONFIGURATION_DELETE "Ta bort konfiguration"
+#define INTL_CONFIGURATION_REALLY_DELETE "Ska konfigurationen tas bort?"
+#define INTL_DELETE "Ta bort"
+#define INTL_CANCEL "Avbryt"
+#define INTL_REALLY_RESTART_SENSOR "Config.json kunde inte hittas"
+#define INTL_RESTART "Starta om"
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Spara och starta om";
-const char INTL_FIRMWARE[] PROGMEM = "Firmware";
+#define INTL_FIRMWARE "Firmware"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Ställa in debug-läge";
 const char INTL_NONE[] PROGMEM = "none";
 const char INTL_ERROR[] PROGMEM = "error";
@@ -82,9 +82,9 @@ const char INTL_WARNING[] PROGMEM = "warning";
 const char INTL_MIN_INFO[] PROGMEM = "min. info";
 const char INTL_MED_INFO[] PROGMEM = "med. info";
 const char INTL_MAX_INFO[] PROGMEM = "max. info";
-const char INTL_CONFIG_DELETED[] PROGMEM = "Config.json borttagen";
-const char INTL_CONFIG_CAN_NOT_BE_DELETED[] PROGMEM = "Config.json kunde inte tas bort";
-const char INTL_CONFIG_NOT_FOUND[] PROGMEM = "Config.json kunde inte hittas";
+#define INTL_CONFIG_DELETED "Config.json borttagen"
+#define INTL_CONFIG_CAN_NOT_BE_DELETED "Config.json kunde inte tas bort"
+#define INTL_CONFIG_NOT_FOUND "Config.json kunde inte hittas"
 const char INTL_TIME_TO_FIRST_MEASUREMENT[] PROGMEM = "Det är {v} sekunder kvar till första mätningen.";
 const char INTL_TIME_SINCE_LAST_MEASUREMENT[] PROGMEM = " sekunder sedan den senaste mätningen.";
 const char INTL_PARTICLES_PER_LITER[] PROGMEM = "Partiklar/liter";
@@ -102,9 +102,9 @@ const char INTL_DATE[] PROGMEM = "Datum";
 const char INTL_TIME[] PROGMEM = "Tid";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Signal";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Kvalitet";
-const char INTL_NUMBER_OF_MEASUREMENTS[] PROGMEM = "";
-const char INTL_SENSOR[] PROGMEM = "Sensor";
-const char INTL_PARAMETER[] PROGMEM = "Parameter";
-const char INTL_VALUE[] PROGMEM = "Värde";
+#define INTL_NUMBER_OF_MEASUREMENTS ""
+#define INTL_SENSOR "Sensor"
+#define INTL_PARAMETER "Parameter"
+#define INTL_VALUE "Värde"
 
 #include "./airrohr-logo-common.h"

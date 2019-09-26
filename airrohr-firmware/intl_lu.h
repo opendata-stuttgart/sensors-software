@@ -9,11 +9,11 @@
  */
 
 const char INTL_LANG[] = "LU";
-const char INTL_PM_SENSOR[] PROGMEM = "Reng Stëbspartikelensensor";
+#define INTL_PM_SENSOR "Reng Stëbspartikelensensor"
 const char INTL_CONFIGURATION[] PROGMEM = "Konfiguratioun";
-const char INTL_WIFI_SETTINGS[] PROGMEM = "WiFi Daten";
-const char INTL_WIFI_NETWORKS[] PROGMEM = "WiFi Netzwierker lueden ...";
-const char INTL_LANGUAGE[] PROGMEM = "Sprooch";
+#define INTL_WIFI_SETTINGS "WiFi Daten"
+#define INTL_WIFI_NETWORKS "WiFi Netzwierker lueden ..."
+#define INTL_LANGUAGE "Sprooch"
 const char INTL_NO_NETWORKS[] PROGMEM =  "Keng Netzwierker fonnt";
 const char INTL_NETWORKS_FOUND[] PROGMEM = "Netzwierker fonnt: ";
 const char INTL_AB_HIER_NUR_ANDERN[] PROGMEM = "Ab hei nëmmen änneren, wann der wësst wat dir maacht";
@@ -63,18 +63,18 @@ const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "De Sensor gëtt neigestart.";
 const char INTL_RESTART_DEVICE[] PROGMEM = "Apparat nei starten";
 const char INTL_DELETE_CONFIG[] PROGMEM = "Config.json läschen";
 const char INTL_RESTART_SENSOR[] PROGMEM = "Sensor nei starten";
-const char INTL_HOME[] PROGMEM = "Iwwersiicht";
-const char INTL_BACK_TO_HOME[] PROGMEM = "Zréck op d'Haaptsäit";
+#define INTL_HOME "Iwwersiicht"
+#define INTL_BACK_TO_HOME "Zréck op d'Haaptsäit"
 const char INTL_CURRENT_DATA[] PROGMEM = "Aktuell Wäerter";
-const char INTL_ACTIVE_SENSORS_MAP[] PROGMEM = "Kaart vun den aktive Sensoren (externen Link)";
-const char INTL_CONFIGURATION_DELETE[] PROGMEM = "Konfiguratioun läschen";
-const char INTL_CONFIGURATION_REALLY_DELETE[] PROGMEM = "Konfiguratioun wierklech läschen?";
-const char INTL_DELETE[] PROGMEM = "Läschen";
-const char INTL_CANCEL[] PROGMEM = "Ofbriechen";
-const char INTL_REALLY_RESTART_SENSOR[] PROGMEM = "Sensor wierklech nei starten?";
-const char INTL_RESTART[] PROGMEM = "Nei starten";
+#define INTL_ACTIVE_SENSORS_MAP "Kaart vun den aktive Sensoren (externen Link)"
+#define INTL_CONFIGURATION_DELETE "Konfiguratioun läschen"
+#define INTL_CONFIGURATION_REALLY_DELETE "Konfiguratioun wierklech läschen?"
+#define INTL_DELETE "Läschen"
+#define INTL_CANCEL "Ofbriechen"
+#define INTL_REALLY_RESTART_SENSOR "Sensor wierklech nei starten?"
+#define INTL_RESTART "Nei starten"
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Späicheren a nei starten";
-const char INTL_FIRMWARE[] PROGMEM = "Firmware";
+#define INTL_FIRMWARE "Firmware"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Debug setzen op";
 const char INTL_NONE[] PROGMEM = "keng";
 const char INTL_ERROR[] PROGMEM = "fehler";
@@ -82,9 +82,9 @@ const char INTL_WARNING[] PROGMEM = "warnung";
 const char INTL_MIN_INFO[] PROGMEM = "min. info";
 const char INTL_MED_INFO[] PROGMEM = "med. info";
 const char INTL_MAX_INFO[] PROGMEM = "max. info";
-const char INTL_CONFIG_DELETED[] PROGMEM = "Config.json geläscht";
-const char INTL_CONFIG_CAN_NOT_BE_DELETED[] PROGMEM = "Config.json konnt net geläscht ginn";
-const char INTL_CONFIG_NOT_FOUND[] PROGMEM = "Config.json net fonnt";
+#define INTL_CONFIG_DELETED "Config.json geläscht"
+#define INTL_CONFIG_CAN_NOT_BE_DELETED "Config.json konnt net geläscht ginn"
+#define INTL_CONFIG_NOT_FOUND "Config.json net fonnt"
 const char INTL_TIME_TO_FIRST_MEASUREMENT[] PROGMEM = "Nach {v} Sekonnen bis zur éischter Miessung.";
 const char INTL_TIME_SINCE_LAST_MEASUREMENT[] PROGMEM = " Sekonnen zanter der leschter Miessung.";
 const char INTL_PARTICLES_PER_LITER[] PROGMEM = "Partikel/Liter";
@@ -102,9 +102,9 @@ const char INTL_DATE[] PROGMEM = "Datum";
 const char INTL_TIME[] PROGMEM = "Zäit";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Signal";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Qualitéit";
-const char INTL_NUMBER_OF_MEASUREMENTS[] PROGMEM = "Zuel vu Mesuren:";
-const char INTL_SENSOR[] PROGMEM = "Sensor";
-const char INTL_PARAMETER[] PROGMEM = "Parameter";
-const char INTL_VALUE[] PROGMEM = "Wäert";
+#define INTL_NUMBER_OF_MEASUREMENTS "Zuel vu Mesuren:"
+#define INTL_SENSOR "Sensor"
+#define INTL_PARAMETER "Parameter"
+#define INTL_VALUE "Wäert"
 
 #include "./airrohr-logo-common.h"
