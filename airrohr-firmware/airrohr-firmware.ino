@@ -3296,9 +3296,9 @@ static void fetchSensorDNMS(String& s) {
 		debug_outln_info(F("LA_MIN: "), last_value_dnms_la_min);
 		debug_outln_info(F("LA_MAX: "), last_value_dnms_la_max);
 
-		add_Value2Json(s, F("noise_LAeq"), last_value_dnms_laeq);
-		add_Value2Json(s, F("noise_LA_min"), last_value_dnms_la_min);
-		add_Value2Json(s, F("noise_LA_max"), last_value_dnms_la_max);
+		add_Value2Json(s, F("DNMS_noise_LAeq"), last_value_dnms_laeq);
+		add_Value2Json(s, F("DNMS_noise_LA_min"), last_value_dnms_la_min);
+		add_Value2Json(s, F("DNMS_noise_LA_max"), last_value_dnms_la_max);
 	}
 	debug_outln_info(F("----"));
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_DNMS));
