@@ -112,10 +112,6 @@ const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
  * Includes                                                      *
  *****************************************************************/
 
-#ifndef INTL_DE
-#define INTL_DE
-#endif
-
 // Workaround for FPSTR bug in espressif32 versions < 1.0.3-rc2
 // see https://github.com/espressif/arduino-esp32/issues/1371
 //     https://github.com/bxparks/arduino-esp32/commit/0906aedcf9fe8df3969cd336117c1219b507be14
@@ -207,7 +203,8 @@ const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 #elif defined(INTL_UA)
 #include "intl_ua.h"
 #else
-#error No language defined
+#warning No language defined
+#include "intl_en.h"
 #endif
 
 #include "defines.h"
