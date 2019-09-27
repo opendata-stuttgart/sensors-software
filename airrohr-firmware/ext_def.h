@@ -52,9 +52,8 @@ static const char HOST_AIRCMS[] PROGMEM = "doiot.ru";
 static const char URL_AIRCMS[] PROGMEM = "/php/sensors.php?h=";
 #define PORT_AIRCMS 443
 
-static const char UPDATE_HOST[] PROGMEM = "firmware.sensor.community";
-static const char UPDATE_URL[] PROGMEM = "/airrohr/firmware.php";
-#define UPDATE_PORT 80
+static const char FW_DOWNLOAD_HOST[] PROGMEM = "firmware.sensor.community";
+#define FW_DOWNLOAD_PORT 80
 
 // define own API
 static const char HOST_CUSTOM[] PROGMEM = "192.168.234.1";

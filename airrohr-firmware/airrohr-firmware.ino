@@ -115,7 +115,7 @@ const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 // Workaround for FPSTR bug in espressif32 versions < 1.0.3-rc2
 // see https://github.com/espressif/arduino-esp32/issues/1371
 //     https://github.com/bxparks/arduino-esp32/commit/0906aedcf9fe8df3969cd336117c1219b507be14
-// TODO: Workaround can be removed once using a espressif32 version newer than 1.0.3-rc2. 
+// TODO: Workaround can be removed once using a espressif32 version newer than 1.0.3-rc2.
 // Make sure the includes Wstring.h and pgmspace.h are already loaded before the #define is redefined!
 #include <WString.h>
 #include <pgmspace.h>
@@ -296,7 +296,7 @@ namespace cfg {
 	bool has_lcd1602 = HAS_LCD1602;
 	bool has_lcd1602_27 = HAS_LCD1602_27;
 	bool has_lcd2004_27 = HAS_LCD2004_27;
-	
+
 	bool display_wifi_info = DISPLAY_WIFI_INFO;
 	bool display_device_info = DISPLAY_DEVICE_INFO;
 
@@ -3361,8 +3361,6 @@ static void fetchSensorGPS(String& s) {
  * AutoUpdate                                                    *
  *****************************************************************/
 
-static const char FW_DOWNLOAD_HOST[] PROGMEM = "air.dmllr.de";
-
 static bool fwDownloadStreamFile(const String& url, const String& fname) {
 
 	HTTPClient http;
@@ -3775,12 +3773,14 @@ static void display_values() {
 			display_lines[1] = WiFi.SSID();
 			break;
 		case 7:
-			display_lines[0] = "ID: "; 
+			display_lines[0] = "ID: ";
 			display_lines[0] += esp_chipid;
-			display_lines[1] = "FW: "; 
+			display_lines[1] = "FW: ";
 			display_lines[1] += SOFTWARE_VERSION;
 			break;
 		}
+
+		display_lines[0].replace("°", String(char(223)));
 
 		if (cfg::has_lcd1602_27) {
 			lcd_1602_27.clear();
@@ -4028,7 +4028,7 @@ static void time_is_set (void) {
 
 static bool acquireNetworkTime() {
 	// server name ptrs must be persisted after the call to configTime because internally
-	// the pointers are stored see implementation of lwip sntp_setservername() 
+	// the pointers are stored see implementation of lwip sntp_setservername()
 	static char ntpServer1[16], ntpServer2[16];
 	debug_outln_info(F("Setting time using SNTP"));
 	time_t now = time(nullptr);
