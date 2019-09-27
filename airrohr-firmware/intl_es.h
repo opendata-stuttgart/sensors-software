@@ -9,11 +9,11 @@
  */
 
 const char INTL_LANG[] = "ES";
-const char INTL_PM_SENSOR[] PROGMEM = "Sensor de partículas finas";
+#define INTL_PM_SENSOR "Sensor de partículas finas"
 const char INTL_CONFIGURATION[] PROGMEM = "Configuración";
-const char INTL_WIFI_SETTINGS[] PROGMEM = "Configuración WiFi";
-const char INTL_WIFI_NETWORKS[] PROGMEM = "Carga de redes wifi ...";
-const char INTL_LANGUAGE[] PROGMEM = "Idioma";
+#define INTL_WIFI_SETTINGS "Configuración WiFi"
+#define INTL_WIFI_NETWORKS "Carga de redes wifi ..."
+#define INTL_LANGUAGE "Idioma"
 const char INTL_NO_NETWORKS[] PROGMEM =  "Red WiFi no detectada";
 const char INTL_NETWORKS_FOUND[] PROGMEM = "Redes encontradas: ";
 const char INTL_AB_HIER_NUR_ANDERN[] PROGMEM = "Configuración avanzada (solo si sabes que lo que estas haciendo)";
@@ -23,7 +23,7 @@ const char INTL_SDS011[] PROGMEM = "SDS011 ({pm})";
 const char INTL_PMS[] PROGMEM = "Plantower PMS(1,3,5,6,7)003 ({pm})";
 const char INTL_HPM[] PROGMEM = "Honeywell sensor de partículas finas";
 const char INTL_SPS30[] PROGMEM = "Sensirion SPS30 ({pm})";
-const char INTL_PPD42NS[] PROGMEM = "PPD42NS";
+const char INTL_PPD42NS[] PROGMEM = "PPD42NS ({pm})";
 const char INTL_DHT22[] PROGMEM = "DHT22 ({t}, {h})";
 const char INTL_HTU21D[] PROGMEM = "HTU21D ({t}, {h})";
 const char INTL_BMP180[] PROGMEM = "BMP180 ({t}, {p})";
@@ -63,18 +63,18 @@ const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "";
 const char INTL_RESTART_DEVICE[] PROGMEM = "Reiniciar dispositivo";
 const char INTL_DELETE_CONFIG[] PROGMEM = "Borrar configruación actual";
 const char INTL_RESTART_SENSOR[] PROGMEM = "Reiniciar sensor";
-const char INTL_HOME[] PROGMEM = "Visión general";
-const char INTL_BACK_TO_HOME[] PROGMEM = "Volver al inicio";
+#define INTL_HOME "Visión general"
+#define INTL_BACK_TO_HOME "Volver al inicio"
 const char INTL_CURRENT_DATA[] PROGMEM = "Datos actuales";
-const char INTL_ACTIVE_SENSORS_MAP[] PROGMEM = "Mapa de sensores activos (enlace externo)";
-const char INTL_CONFIGURATION_DELETE[] PROGMEM = "Borrar configuración";
-const char INTL_CONFIGURATION_REALLY_DELETE[] PROGMEM = "Estas seguro que quieres borrar la configuración?";
-const char INTL_DELETE[] PROGMEM = "Borrar";
-const char INTL_CANCEL[] PROGMEM = "Cancelar";
-const char INTL_REALLY_RESTART_SENSOR[] PROGMEM = "Estas seguro que quieres reiniciar el sensor?";
-const char INTL_RESTART[] PROGMEM = "Reiniciar";
+#define INTL_ACTIVE_SENSORS_MAP "Mapa de sensores activos (enlace externo)"
+#define INTL_CONFIGURATION_DELETE "Borrar configuración"
+#define INTL_CONFIGURATION_REALLY_DELETE "Estas seguro que quieres borrar la configuración?"
+#define INTL_DELETE "Borrar"
+#define INTL_CANCEL "Cancelar"
+#define INTL_REALLY_RESTART_SENSOR "Estas seguro que quieres reiniciar el sensor?"
+#define INTL_RESTART "Reiniciar"
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Guardar y reiniciar";
-const char INTL_FIRMWARE[] PROGMEM = "Versión del Firmware";
+#define INTL_FIRMWARE "Versión del Firmware"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Ajustar Debug a ";
 const char INTL_NONE[] PROGMEM = "off";
 const char INTL_ERROR[] PROGMEM = "Error";
@@ -82,9 +82,9 @@ const char INTL_WARNING[] PROGMEM = "Advertencia";
 const char INTL_MIN_INFO[] PROGMEM = "min. info";
 const char INTL_MED_INFO[] PROGMEM = "mid. info";
 const char INTL_MAX_INFO[] PROGMEM = "max. info";
-const char INTL_CONFIG_DELETED[] PROGMEM = "Configuración fue borrada";
-const char INTL_CONFIG_CAN_NOT_BE_DELETED[] PROGMEM = "Configuración no puede ser borrada";
-const char INTL_CONFIG_NOT_FOUND[] PROGMEM = "Configuración no encontrada";
+#define INTL_CONFIG_DELETED "Configuración fue borrada"
+#define INTL_CONFIG_CAN_NOT_BE_DELETED "Configuración no puede ser borrada"
+#define INTL_CONFIG_NOT_FOUND "Configuración no encontrada"
 const char INTL_TIME_TO_FIRST_MEASUREMENT[] PROGMEM = "Otros {v} segundos a la primera medición.";
 const char INTL_TIME_SINCE_LAST_MEASUREMENT[] PROGMEM = "";
 const char INTL_PARTICLES_PER_LITER[] PROGMEM = "Partículas/litro";
@@ -102,9 +102,9 @@ const char INTL_DATE[] PROGMEM = "";
 const char INTL_TIME[] PROGMEM = "";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Intensidad de Señal";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Calidad de Señal";
-const char INTL_NUMBER_OF_MEASUREMENTS[] PROGMEM = "";
-const char INTL_SENSOR[] PROGMEM = "Sensor";
-const char INTL_PARAMETER[] PROGMEM = "Parámetro";
-const char INTL_VALUE[] PROGMEM = "Valor";
+#define INTL_NUMBER_OF_MEASUREMENTS ""
+#define INTL_SENSOR "Sensor"
+#define INTL_PARAMETER "Parámetro"
+#define INTL_VALUE "Valor"
 
 #include "./airrohr-logo-common.h"

@@ -9,11 +9,11 @@
  */
 
 const char INTL_LANG[] = "NL";
-const char INTL_PM_SENSOR[] PROGMEM = "Fijnstofsensor";
+#define INTL_PM_SENSOR "Fijnstofsensor"
 const char INTL_CONFIGURATION[] PROGMEM = "Configuratie";
-const char INTL_WIFI_SETTINGS[] PROGMEM = "WiFi-instellingen";
-const char INTL_WIFI_NETWORKS[] PROGMEM = "Zoeken naar WiFi-netwerken ...";
-const char INTL_LANGUAGE[] PROGMEM = "Taal";
+#define INTL_WIFI_SETTINGS "WiFi-instellingen"
+#define INTL_WIFI_NETWORKS "Zoeken naar WiFi-netwerken ..."
+#define INTL_LANGUAGE "Taal"
 const char INTL_NO_NETWORKS[] PROGMEM =  "Geen WiFi-netwerk gevonden";
 const char INTL_NETWORKS_FOUND[] PROGMEM = "Netwerk gevonden: ";
 const char INTL_AB_HIER_NUR_ANDERN[] PROGMEM = "Geavanceerde instellingen (enkel als je weet wat je doet)";
@@ -23,7 +23,7 @@ const char INTL_SDS011[] PROGMEM = "SDS011 ({pm})";
 const char INTL_PMS[] PROGMEM = "Plantower PMS(1,3,5,6,7)003 ({pm})";
 const char INTL_HPM[] PROGMEM = "Honeywell fijnstofsensor";
 const char INTL_SPS30[] PROGMEM = "Sensirion SPS30 ({pm})";
-const char INTL_PPD42NS[] PROGMEM = "PPD42NS";
+const char INTL_PPD42NS[] PROGMEM = "PPD42NS ({pm})";
 const char INTL_DHT22[] PROGMEM = "DHT22 ({t}, {h})";
 const char INTL_HTU21D[] PROGMEM = "HTU21D ({t}, {h})";
 const char INTL_BMP180[] PROGMEM = "BMP180 ({t}, {p})";
@@ -63,18 +63,18 @@ const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Toestel wordt opnieuw opgestart
 const char INTL_RESTART_DEVICE[] PROGMEM = "Herstart toestel";
 const char INTL_DELETE_CONFIG[] PROGMEM = "Verwijder opgeslagen configuratie";
 const char INTL_RESTART_SENSOR[] PROGMEM = "Herstart sensor";
-const char INTL_HOME[] PROGMEM = "Home";
-const char INTL_BACK_TO_HOME[] PROGMEM = "Terug naar homepagina";
+#define INTL_HOME "Home"
+#define INTL_BACK_TO_HOME "Terug naar homepagina"
 const char INTL_CURRENT_DATA[] PROGMEM = "Huidige data";
-const char INTL_ACTIVE_SENSORS_MAP[] PROGMEM = "Actieve sensors kaart (externe link)";
-const char INTL_CONFIGURATION_DELETE[] PROGMEM = "Configuratie verwijderen";
-const char INTL_CONFIGURATION_REALLY_DELETE[] PROGMEM = "Bent u zeker dat u de configuratie wilt verwijderen?";
-const char INTL_DELETE[] PROGMEM = "Verwijderen";
-const char INTL_CANCEL[] PROGMEM = "Annuleren";
-const char INTL_REALLY_RESTART_SENSOR[] PROGMEM = "Bent u zeker dat u de sensor wilt herstarten?";
-const char INTL_RESTART[] PROGMEM = "Herstart";
+#define INTL_ACTIVE_SENSORS_MAP "Actieve sensors kaart (externe link)"
+#define INTL_CONFIGURATION_DELETE "Configuratie verwijderen"
+#define INTL_CONFIGURATION_REALLY_DELETE "Bent u zeker dat u de configuratie wilt verwijderen?"
+#define INTL_DELETE "Verwijderen"
+#define INTL_CANCEL "Annuleren"
+#define INTL_REALLY_RESTART_SENSOR "Bent u zeker dat u de sensor wilt herstarten?"
+#define INTL_RESTART "Herstart"
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Opslaan en herstarten";
-const char INTL_FIRMWARE[] PROGMEM = "Firmware-versie";
+#define INTL_FIRMWARE "Firmware-versie"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Debugniveau naar ";
 const char INTL_NONE[] PROGMEM = "Uit";
 const char INTL_ERROR[] PROGMEM = "enkel foutmeldingen";
@@ -82,9 +82,9 @@ const char INTL_WARNING[] PROGMEM = "waarschuwingen";
 const char INTL_MIN_INFO[] PROGMEM = "min. info";
 const char INTL_MED_INFO[] PROGMEM = "mid. info";
 const char INTL_MAX_INFO[] PROGMEM = "max. info";
-const char INTL_CONFIG_DELETED[] PROGMEM = "Configuratie is verwijderd";
-const char INTL_CONFIG_CAN_NOT_BE_DELETED[] PROGMEM = "Configuratie kan niet worden verwijderd";
-const char INTL_CONFIG_NOT_FOUND[] PROGMEM = "Configuratie is niet gevonden";
+#define INTL_CONFIG_DELETED "Configuratie is verwijderd"
+#define INTL_CONFIG_CAN_NOT_BE_DELETED "Configuratie kan niet worden verwijderd"
+#define INTL_CONFIG_NOT_FOUND "Configuratie is niet gevonden"
 const char INTL_TIME_TO_FIRST_MEASUREMENT[] PROGMEM = "Nog {v} seconden voor de eerste meting.";
 const char INTL_TIME_SINCE_LAST_MEASUREMENT[] PROGMEM = " seconden sinds laatste meting.";
 const char INTL_PARTICLES_PER_LITER[] PROGMEM = "deeltjes/liter";
@@ -102,9 +102,9 @@ const char INTL_DATE[] PROGMEM = "Datum";
 const char INTL_TIME[] PROGMEM = "Tijd";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Signaalsterkte";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Signaalkwaliteit";
-const char INTL_NUMBER_OF_MEASUREMENTS[] PROGMEM = "Aantal metingen:";
-const char INTL_SENSOR[] PROGMEM = "Sensor";
-const char INTL_PARAMETER[] PROGMEM = "Parameter";
-const char INTL_VALUE[] PROGMEM = "Waarde";
+#define INTL_NUMBER_OF_MEASUREMENTS "Aantal metingen:"
+#define INTL_SENSOR "Sensor"
+#define INTL_PARAMETER "Parameter"
+#define INTL_VALUE "Waarde"
 
 #include "./airrohr-logo-common.h"

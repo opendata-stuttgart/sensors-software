@@ -9,11 +9,11 @@
  */
 
 const char INTL_LANG[] = "CZ";
-const char INTL_PM_SENSOR[] PROGMEM = "Senzor prachových èástic";
+#define INTL_PM_SENSOR "Senzor prachových èástic"
 const char INTL_CONFIGURATION[] PROGMEM = "Konfigurace";
-const char INTL_WIFI_SETTINGS[] PROGMEM = "Nastavení Wi-Fi";
-const char INTL_WIFI_NETWORKS[] PROGMEM = "Vyhledávání Wi-Fi sítí ...";
-const char INTL_LANGUAGE[] PROGMEM = "Jazyk";
+#define INTL_WIFI_SETTINGS "Nastavení Wi-Fi"
+#define INTL_WIFI_NETWORKS "Vyhledávání Wi-Fi sítí ..."
+#define INTL_LANGUAGE "Jazyk"
 const char INTL_NO_NETWORKS[] PROGMEM = "Žádné Wi-Fi sítì v dosahu.";
 const char INTL_NETWORKS_FOUND[] PROGMEM = "Dostupné sítì: ";
 const char INTL_AB_HIER_NUR_ANDERN[] PROGMEM = "Rozšíøené nastavení (jen pokud víte jistì, co dìláte)";
@@ -21,9 +21,9 @@ const char INTL_SAVE[] PROGMEM = "Uložit";
 const char INTL_SENSORS[] PROGMEM = "Moduly (èidla)";
 const char INTL_SDS011[] PROGMEM = "SDS011 (modul {pm})";
 const char INTL_PMS[] PROGMEM = "Plantower PMS(1,3,5,6,7)003 (modul {pm})";
-const char INTL_HPM[] PROGMEM = "Honeywell PM modul";
+const char INTL_HPM[] PROGMEM = "Honeywell PM ({pm})";
 const char INTL_SPS30[] PROGMEM = "Sensirion SPS30 ({pm})";
-const char INTL_PPD42NS[] PROGMEM = "PPD42NS";
+const char INTL_PPD42NS[] PROGMEM = "PPD42NS ({pm})";
 const char INTL_DHT22[] PROGMEM = "DHT22 ({t}, {h})";
 const char INTL_HTU21D[] PROGMEM = "HTU21D ({t}, {h})";
 const char INTL_BMP180[] PROGMEM = "BMP180 ({t}, {p})";
@@ -63,18 +63,18 @@ const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Zaøízení bude restartováno"
 const char INTL_RESTART_DEVICE[] PROGMEM = "Restartovat zaøízení";
 const char INTL_DELETE_CONFIG[] PROGMEM = "Smazat Config.json";
 const char INTL_RESTART_SENSOR[] PROGMEM = "Restart senzoru";
-const char INTL_HOME[] PROGMEM = "Hlavní stránka";
-const char INTL_BACK_TO_HOME[] PROGMEM = "Zpìt na hlavní stránku";
+#define INTL_HOME "Hlavní stránka"
+#define INTL_BACK_TO_HOME "Zpìt na hlavní stránku"
 const char INTL_CURRENT_DATA[] PROGMEM = "Aktuální hodnoty";
-const char INTL_ACTIVE_SENSORS_MAP[] PROGMEM = "Mapa aktivních senzorù (externí odkaz)";
-const char INTL_CONFIGURATION_DELETE[] PROGMEM = "Smazat konfiguraci";
-const char INTL_CONFIGURATION_REALLY_DELETE[] PROGMEM = "Opravdu smazat konfiguraci?";
-const char INTL_DELETE[] PROGMEM = "Smazat";
-const char INTL_CANCEL[] PROGMEM = "Zrušit";
-const char INTL_REALLY_RESTART_SENSOR[] PROGMEM = "Opravdu restartovat senzor";
-const char INTL_RESTART[] PROGMEM = "Restartovat";
+#define INTL_ACTIVE_SENSORS_MAP "Mapa aktivních senzorù (externí odkaz)"
+#define INTL_CONFIGURATION_DELETE "Smazat konfiguraci"
+#define INTL_CONFIGURATION_REALLY_DELETE "Opravdu smazat konfiguraci?"
+#define INTL_DELETE "Smazat"
+#define INTL_CANCEL "Zrušit"
+#define INTL_REALLY_RESTART_SENSOR "Opravdu restartovat senzor"
+#define INTL_RESTART "Restartovat"
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Uložit a restartovat";
-const char INTL_FIRMWARE[] PROGMEM = "Firmware verze";
+#define INTL_FIRMWARE "Firmware verze"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Ladìní nastaveno na";
 const char INTL_NONE[] PROGMEM = "žádný";
 const char INTL_ERROR[] PROGMEM = "chyba";
@@ -82,9 +82,9 @@ const char INTL_WARNING[] PROGMEM = "varování";
 const char INTL_MIN_INFO[] PROGMEM = "min. info";
 const char INTL_MED_INFO[] PROGMEM = "stø. info";
 const char INTL_MAX_INFO[] PROGMEM = "max. info";
-const char INTL_CONFIG_DELETED[] PROGMEM = "Config.json smazán";
-const char INTL_CONFIG_CAN_NOT_BE_DELETED[] PROGMEM = "Config.json nemohl být smazán";
-const char INTL_CONFIG_NOT_FOUND[] PROGMEM = "Config.json nenalezen";
+#define INTL_CONFIG_DELETED "Config.json smazán"
+#define INTL_CONFIG_CAN_NOT_BE_DELETED "Config.json nemohl být smazán"
+#define INTL_CONFIG_NOT_FOUND "Config.json nenalezen"
 const char INTL_TIME_TO_FIRST_MEASUREMENT[] PROGMEM = "Zbývá {v} sekund do prvního mìøení.";
 const char INTL_TIME_SINCE_LAST_MEASUREMENT[] PROGMEM = " sekund od posledního mìøení.";
 const char INTL_PARTICLES_PER_LITER[] PROGMEM = "èástice/litr";
@@ -102,9 +102,9 @@ const char INTL_DATE[] PROGMEM = "Datum";
 const char INTL_TIME[] PROGMEM = "Èas";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Síla signálu";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Kvalita signálu";
-const char INTL_NUMBER_OF_MEASUREMENTS[] PROGMEM = "Poèet mìøení:";
-const char INTL_SENSOR[] PROGMEM = "Modul";
-const char INTL_PARAMETER[] PROGMEM = "Parametr";
-const char INTL_VALUE[] PROGMEM = "Hodnota";
+#define INTL_NUMBER_OF_MEASUREMENTS "Poèet mìøení:"
+#define INTL_SENSOR "Modul"
+#define INTL_PARAMETER "Parametr"
+#define INTL_VALUE "Hodnota"
 
 #include "./airrohr-logo-common.h"
