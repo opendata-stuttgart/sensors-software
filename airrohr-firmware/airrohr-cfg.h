@@ -2,7 +2,8 @@
 enum ConfigEntryType {
 	Config_Type_Bool,
 	Config_Type_UInt,
-	Config_Type_String
+	Config_Type_String,
+	Config_Type_Password
 };
 
 struct ConfigShapeEntry {
@@ -19,14 +20,15 @@ struct ConfigShapeEntry {
 static constexpr ConfigShapeEntry configShape[] PROGMEM = {
 #define Config_Bool(varname) { Config_Type_Bool, #varname, &cfg::varname }
 #define Config_String(varname) { Config_Type_String, #varname, cfg::varname }
+#define Config_Password(varname) { Config_Type_Password, #varname, cfg::varname }
 #define Config_UInt(varname) { Config_Type_UInt, #varname, &cfg::varname }
 	Config_String(current_lang),
 	Config_String(wlanssid),
-	Config_String(wlanpwd),
+	Config_Password(wlanpwd),
 	Config_String(www_username),
-	Config_String(www_password),
+	Config_Password(www_password),
 	Config_String(fs_ssid),
-	Config_String(fs_pwd),
+	Config_Password(fs_pwd),
 	Config_Bool(www_basicauth_enabled),
 	Config_Bool(dht_read),
 	Config_Bool(htu21d_read),
@@ -68,18 +70,19 @@ static constexpr ConfigShapeEntry configShape[] PROGMEM = {
 	Config_String(url_custom),
 	Config_UInt(port_custom),
 	Config_String(user_custom),
-	Config_String(pwd_custom),
+	Config_Password(pwd_custom),
 	Config_Bool(ssl_custom),
 	Config_Bool(send2influx),
 	Config_String(host_influx),
 	Config_String(url_influx),
 	Config_UInt(port_influx),
 	Config_String(user_influx),
-	Config_String(pwd_influx),
+	Config_Password(pwd_influx),
 	Config_String(measurement_name_influx),
 	Config_Bool(ssl_influx),
 
 #undef Config_Bool
+#undef Config_Password
 #undef Config_String
 #undef Config_Int
 };

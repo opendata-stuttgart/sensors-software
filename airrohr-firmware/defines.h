@@ -8,14 +8,13 @@
 #define SSID_BASENAME "airRohr-"
 #define HOSTNAME_BASE "airRohr-"
 
+#define LEN_CFG_PASSWORD 65
+
 #define LEN_WLANSSID 35				// credentials for wifi connection
-#define LEN_WLANPWD 65
 
 #define LEN_WWW_USERNAME 65			// credentials for basic auth of server internal website
-#define LEN_WWW_PASSWORD 65
 
 #define LEN_FS_SSID 33				// credentials for sensor access point mode
-#define LEN_FS_PWD 65
 
 #define LEN_DNMS_CORRECTION 10
 
@@ -24,13 +23,11 @@
 #define LEN_HOST_INFLUX 100
 #define LEN_URL_INFLUX 100
 #define LEN_USER_INFLUX 65
-#define LEN_PWD_INFLUX 65
 #define LEN_MEASUREMENT_NAME_INFLUX 100
 
 #define LEN_HOST_CUSTOM 100
 #define LEN_URL_CUSTOM 100
 #define LEN_USER_CUSTOM 65
-#define LEN_PWD_CUSTOM 65
 
 #define MAX_PORT_DIGITS 5
 
