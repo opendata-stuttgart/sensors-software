@@ -354,6 +354,7 @@ String basic_auth_influx;
 String basic_auth_custom;
 
 long int sample_count = 0;
+bool htu21d_init_failed = false;
 bool bmp_init_failed = false;
 bool bmx280_init_failed = false;
 bool dnms_init_failed = false;
@@ -3947,8 +3948,11 @@ static void powerOnTestSensors() {
 	}
 
 	if (cfg::htu21d_read) {
-		htu21d.begin();										// Start HTU21D
 		debug_outln_info(F("Read HTU21D..."));
+		if (!htu21d.begin()) {
+			debug_outln_error(F("Check HTU21D wiring"));
+			htu21d_init_failed = true;
+		}
 	}
 
 	if (cfg::bmp_read) {
@@ -4324,7 +4328,7 @@ void loop(void) {
 			data += result;
 			sum_send_time += sendLuftdaten(result, DHT_API_PIN, FPSTR(SENSORS_DHT22), "DHT_");
 		}
-		if (cfg::htu21d_read) {
+		if (cfg::htu21d_read && (! htu21d_init_failed)) {
 			// getting temperature and humidity (optional)
 			fetchSensorHTU21D(result);
 			data += result;
