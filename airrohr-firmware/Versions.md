@@ -1,3 +1,6 @@
+NRZ-2019-124-B7
+* next beta version
+
 NRZ-2019-124-B6
 * noise sensor added
 * Sensirion SPS30 added
@@ -232,7 +235,7 @@ NRZ-2018-104-B3
 
 NRZ-2018-104-B2
 * sending signal strength to InfluxDB
-* optimizations in reading PM sensors 
+* optimizations in reading PM sensors
 * disable sending data to OpenSenseMap with 'default' BoxID
 * disable sending data to InfluxDB at Luftdaten.info (only used internally)
 * character ' in text input fields (i.e. wifi SSID) should be displayed correctly
