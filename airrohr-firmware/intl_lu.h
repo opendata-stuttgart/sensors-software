@@ -76,12 +76,12 @@ const char INTL_CURRENT_DATA[] PROGMEM = "Aktuell Wäerter";
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Späicheren a nei starten";
 #define INTL_FIRMWARE "Firmware"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Debug setzen op";
-const char INTL_NONE[] PROGMEM = "keng";
-const char INTL_ERROR[] PROGMEM = "fehler";
-const char INTL_WARNING[] PROGMEM = "warnung";
-const char INTL_MIN_INFO[] PROGMEM = "min. info";
-const char INTL_MED_INFO[] PROGMEM = "med. info";
-const char INTL_MAX_INFO[] PROGMEM = "max. info";
+#define INTL_NONE "keng"
+#define INTL_ERROR "fehler"
+#define INTL_WARNING "warnung"
+#define INTL_MIN_INFO "min. info"
+#define INTL_MED_INFO "med. info"
+#define INTL_MAX_INFO "max. info"
 #define INTL_CONFIG_DELETED "Config.json geläscht"
 #define INTL_CONFIG_CAN_NOT_BE_DELETED "Config.json konnt net geläscht ginn"
 #define INTL_CONFIG_NOT_FOUND "Config.json net fonnt"

@@ -76,12 +76,12 @@ const char INTL_CURRENT_DATA[] PROGMEM = "Текущи данни";
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Запис и рестарт";
 #define INTL_FIRMWARE "Софтуер версия"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Настройки дебъгването на";
-const char INTL_NONE[] PROGMEM = "изключено";
-const char INTL_ERROR[] PROGMEM = "само грешки";
-const char INTL_WARNING[] PROGMEM = "предупреждения";
-const char INTL_MIN_INFO[] PROGMEM = "минимална информация";
-const char INTL_MED_INFO[] PROGMEM = "средна информация";
-const char INTL_MAX_INFO[] PROGMEM = "пълна информация";
+#define INTL_NONE "изключено"
+#define INTL_ERROR "само грешки"
+#define INTL_WARNING "предупреждения"
+#define INTL_MIN_INFO "минимална информация"
+#define INTL_MED_INFO "средна информация"
+#define INTL_MAX_INFO "пълна информация"
 #define INTL_CONFIG_DELETED "Конфигурацията е изтрита"
 #define INTL_CONFIG_CAN_NOT_BE_DELETED "Конфигурацията не може да бъде изтрита"
 #define INTL_CONFIG_NOT_FOUND "Конфигурацията не е открита"

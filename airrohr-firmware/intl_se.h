@@ -76,12 +76,12 @@ const char INTL_CURRENT_DATA[] PROGMEM = "Aktuella mätvärden";
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Spara och starta om";
 #define INTL_FIRMWARE "Firmware"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Ställa in debug-läge";
-const char INTL_NONE[] PROGMEM = "none";
-const char INTL_ERROR[] PROGMEM = "error";
-const char INTL_WARNING[] PROGMEM = "warning";
-const char INTL_MIN_INFO[] PROGMEM = "min. info";
-const char INTL_MED_INFO[] PROGMEM = "med. info";
-const char INTL_MAX_INFO[] PROGMEM = "max. info";
+#define INTL_NONE "none"
+#define INTL_ERROR "error"
+#define INTL_WARNING "warning"
+#define INTL_MIN_INFO "min. info"
+#define INTL_MED_INFO "med. info"
+#define INTL_MAX_INFO "max. info"
 #define INTL_CONFIG_DELETED "Config.json borttagen"
 #define INTL_CONFIG_CAN_NOT_BE_DELETED "Config.json kunde inte tas bort"
 #define INTL_CONFIG_NOT_FOUND "Config.json kunde inte hittas"
