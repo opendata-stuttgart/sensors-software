@@ -1,5 +1,6 @@
-NRZ-2019-126-B1 
+NRZ-2019-126-B1
 * next beta version
+* Switch to Arduino Core 2.5.2
 
 NRZ-2019-125-B1
 * Revert unintentional default senseboxid change

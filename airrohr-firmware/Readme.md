@@ -50,7 +50,7 @@ Die Daten können als CSV via USB ausgegeben werden. Dafür sollte sowohl in ext
 ## Benötigte Software (in Klammern getestete Version und die Art der Lizenz):
 
 * [Arduino IDE](https://www.arduino.cc/en/Main/Software)  (Version 1.8.7) (GNU Lesser General Public License v2.1)
-* [ESP8266 für Arduino](http://arduino.esp8266.com/stable/package_esp8266com_index.json) (Version 2.4.2)
+* [ESP8266 für Arduino](http://arduino.esp8266.com/stable/package_esp8266com_index.json) (Version 2.5.2)
 
 
 ### Einstellungen Arduino IDE
@@ -59,7 +59,7 @@ Die Daten können als CSV via USB ausgegeben werden. Dafür sollte sowohl in ext
 * CPU Frequency: 160MHz
 * Flash Size: 4M (3M SPIFFS)
 
-Ab "ESP für Arduino 2.4.2":
+Ab "ESP für Arduino 2.5.2":
 * Debug Port: Disabled
 * Debug Level: NoAssert-NDEBUG
 * lwIP Variant: v2.0 Lower memory
@@ -104,14 +104,6 @@ Bis Version NRZ-2016-15:
   (`DHT.cpp` und `DHT.h` downloaden und in das Softwareverzeichnis kopieren)
 
 Ich hoffe, alle Bibliotheken erwischt zu haben. Falls beim Kompilieren eine Bibliothek fehlt, bitte als [Issue](https://github.com/opendata-stuttgart/sensors-software/issues/) melden. Ich trage dann die Infos nach.
-
-ACHTUNG: Die DHT sensor library hat ab Version 1.2 ein Problem auf den ESP8266. Daher unbedingt max. Version 1.1.1 benutzen
-Um Probleme zu vermeiden, haben wir die letzte funktionierende Version als lokale Kopie eingebunden.
-
-ACHTUNG: Um Over-The-Air Updates zu ermoeglichen (OTA) muss das resultierende Firmware Image weniger als 512kByte
-gross bleiben. Daher verwendet Airrrohr im Moment Arduino Core 2.4.2, da neuere Versionen einen zu grossen
-Footprint erzeugen. Siehe https://arduino-esp8266.readthedocs.io/en/latest/ota_updates/readme.html#update-process-memory-view fuer das memory layout das benoetigt wird.
-
 
 ## Anschluss der Sensoren
 

@@ -341,6 +341,7 @@ enum class PmSensorCmd {
 
 String basic_auth_influx;
 String basic_auth_custom;
+LoggerConfig loggerConfigs[LoggerCount];
 
 long int sample_count = 0;
 bool htu21d_init_failed = false;
@@ -1057,9 +1058,9 @@ void writeConfig() {
 }
 
 /*****************************************************************
- * Base64 encode user:password                                   *
+ * Prepare information for data Loggers                          *
  *****************************************************************/
-static void create_basic_auth_strings() {
+static void createLoggerConfigs() {
 	basic_auth_custom = "";
 	if (cfg::user_custom[0] != '\0' || cfg::pwd_custom[0] != '\0') {
 		basic_auth_custom = base64::encode(String(cfg::user_custom) + ':' + String(cfg::pwd_custom));
@@ -1067,6 +1068,30 @@ static void create_basic_auth_strings() {
 	basic_auth_influx = "";
 	if (cfg::user_influx[0] != '\0' || cfg::pwd_influx[0] != '\0') {
 		basic_auth_influx = base64::encode(String(cfg::user_influx) + ':' + String(cfg::pwd_influx));
+	}
+	if (cfg::send2dusti) {
+		loggerConfigs[LoggerSensorCommunity].destport = 80;
+		if (cfg::ssl_dusti) {
+			loggerConfigs[LoggerSensorCommunity].destport = 443;
+			loggerConfigs[LoggerSensorCommunity].session = new BearSSL::Session;
+		}
+	}
+	loggerConfigs[LoggerMadavi].destport = PORT_MADAVI;
+	if (cfg::send2madavi && cfg::ssl_madavi) {
+		loggerConfigs[LoggerMadavi].destport = 443;
+		loggerConfigs[LoggerMadavi].session = new BearSSL::Session;
+	}
+	loggerConfigs[LoggerSensemap].destport = PORT_SENSEMAP;
+	loggerConfigs[LoggerSensemap].session = new BearSSL::Session;
+	loggerConfigs[LoggerFSapp].destport = PORT_SENSEMAP;
+	loggerConfigs[Loggeraircms].destport = PORT_AIRCMS;
+	loggerConfigs[LoggerInflux].destport = cfg::port_influx;
+	if (cfg::send2influx && cfg::ssl_influx) {
+		loggerConfigs[LoggerInflux].session = new BearSSL::Session;
+	}
+	loggerConfigs[LoggerCustom].destport = cfg::port_custom;
+	if (cfg::send2custom && (cfg::ssl_custom || (cfg::port_custom == 443))) {
+		loggerConfigs[LoggerCustom].session = new BearSSL::Session;
 	}
 }
 
@@ -2273,11 +2298,32 @@ static void connectWifi() {
 /*****************************************************************
  * send data to rest api                                         *
  *****************************************************************/
-static unsigned long sendData(const String& data, const int pin, const char* host, const int httpPort, const char* url, const bool use_ssl, const char* basic_auth_string, const __FlashStringHelper* contentType) {
+static unsigned long sendData(const LoggerEntry logger, const String& data, const int pin, const char* host, const char* url) {
 
 	unsigned long start_send = millis();
+	const __FlashStringHelper* contentType;
+
 	String s_Host(FPSTR(host));
 	String s_url(FPSTR(url));
+
+	const char* basic_auth_string = nullptr;
+
+	switch(logger) {
+	case Loggeraircms:
+		contentType = FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN);
+		break;
+	case LoggerInflux:
+		basic_auth_string = basic_auth_influx.c_str();
+		contentType = FPSTR(TXT_CONTENT_TYPE_INFLUXDB);
+		break;
+	case LoggerCustom:
+		basic_auth_string = basic_auth_custom.c_str();
+		contentType = FPSTR(TXT_CONTENT_TYPE_JSON);
+		break;
+	default:
+		contentType = FPSTR(TXT_CONTENT_TYPE_JSON);
+		break;
+	}
 
 	debug_outln_info(F("Start sendData to "), s_Host);
 
@@ -2289,7 +2335,7 @@ static unsigned long sendData(const String& data, const int pin, const char* hos
 	buf += F("\r\nContent-Type: ");
 	buf += contentType;
 	buf += "\r\n";
-	if (strlen(basic_auth_string) != 0) {
+	if (basic_auth_string && *basic_auth_string) {
 		buf += F("Authorization: Basic ");
 		buf += String(basic_auth_string);
 		buf += "\r\n";
@@ -2304,8 +2350,13 @@ static unsigned long sendData(const String& data, const int pin, const char* hos
 
 	// Use WiFiClient class to create TCP connections
 	WiFiClient* _client;
-	if (use_ssl) {
-		_client = new axTLS::WiFiClientSecure;
+	if (loggerConfigs[logger].session) {
+		_client = new WiFiClientSecure;
+		static_cast<WiFiClientSecure*>(_client)->setSession(loggerConfigs[logger].session);
+		static_cast<WiFiClientSecure*>(_client)->setBufferSizes(1024, TCP_MSS > 1024 ? 2048 : 1024);
+		// TODO
+		static_cast<WiFiClientSecure*>(_client)->setInsecure();
+		static_cast<WiFiClientSecure*>(_client)->setCiphersLessSecure();
 	} else {
 		_client = new WiFiClient;
 	}
@@ -2313,7 +2364,7 @@ static unsigned long sendData(const String& data, const int pin, const char* hos
 
 	client->setTimeout(20000);
 
-	if (client->connect(s_Host, httpPort)) {
+	if (client->connect(s_Host, loggerConfigs[logger].destport)) {
 		debug_outln_info(F("Requesting URL: "), s_url);
 		debug_outln_verbose(esp_chipid);
 		debug_outln_verbose(data);
@@ -2387,10 +2438,7 @@ static unsigned long sendSensorCommunity(const String& data, const int pin, cons
 		data_sensorcommunity.remove(data_sensorcommunity.length() - 1);
 		data_sensorcommunity.replace(replace_str, empty_String);
 		data_sensorcommunity += "]}";
-		const int HTTP_PORT_SENSORCOMMUNITY = (cfg::ssl_dusti ? 443 : 80);
-		sum_send_time = sendData(data_sensorcommunity, pin, HOST_SENSORCOMMUNITY,
-						HTTP_PORT_SENSORCOMMUNITY, URL_SENSORCOMMUNITY, cfg::ssl_dusti,
-						"", FPSTR(TXT_CONTENT_TYPE_JSON));
+		sum_send_time = sendData(LoggerSensorCommunity, data_sensorcommunity, pin, HOST_SENSORCOMMUNITY, URL_SENSORCOMMUNITY);
 	}
 
 	return sum_send_time;
@@ -3360,7 +3408,8 @@ static bool fwDownloadStreamFile(const String& url, const String& fname) {
 				 String(cfg::current_lang) + ' ' + String(INTL_LANG) + ' ' +
 				 String(cfg::use_beta ? "BETA" : ""));
 
-	if (http.begin(FPSTR(FW_DOWNLOAD_HOST), 80, url)) {
+	WiFiClient client;
+	if (http.begin(client, FPSTR(FW_DOWNLOAD_HOST), 80, url)) {
 		if (http.GET() == HTTP_CODE_OK) {
 			File fwFile = SPIFFS.open(fname_new, "w+");
 			if (fwFile) {
@@ -3462,7 +3511,8 @@ static void twoStageAutoUpdate() {
 
 	// TODO: add MD5 verification also for 2nd stage
 	debug_outln("launching 2nd stage", DEBUG_MIN_INFO);
-	const HTTPUpdateResult ret = ESPhttpUpdate.update(FPSTR(FW_DOWNLOAD_HOST), 80,
+	WiFiClient client;
+	const HTTPUpdateResult ret = ESPhttpUpdate.update(client, FPSTR(FW_DOWNLOAD_HOST), 80,
 		"/airrohr/loader-002.bin", String("LOADER-002"));
 
 	String LastErrorString = ESPhttpUpdate.getLastErrorString().c_str();
@@ -4055,41 +4105,36 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 
 	if (cfg::send2madavi) {
 		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("madavi.de: "));
-		sum_send_time += sendData(data, 0, HOST_MADAVI, (cfg::ssl_madavi ? 443 : 80), URL_MADAVI, cfg::ssl_madavi, "", FPSTR(TXT_CONTENT_TYPE_JSON));
+		sum_send_time += sendData(LoggerMadavi, data, 0, HOST_MADAVI, URL_MADAVI);
 	}
 
 	if (cfg::send2sensemap && (cfg::senseboxid[0] != '\0')) {
 		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("opensensemap: "));
 		String sensemap_path(tmpl(FPSTR(URL_SENSEMAP), cfg::senseboxid));
-		sum_send_time += sendData(data, 0, HOST_SENSEMAP, PORT_SENSEMAP, sensemap_path.c_str(), true, "", FPSTR(TXT_CONTENT_TYPE_JSON));
+		sum_send_time += sendData(LoggerSensemap, data, 0, HOST_SENSEMAP, sensemap_path.c_str());
 	}
 
 	if (cfg::send2fsapp) {
 		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("Server FS App: "));
-		sum_send_time += sendData(data, 0, HOST_FSAPP, PORT_FSAPP, URL_FSAPP, false, "", FPSTR(TXT_CONTENT_TYPE_JSON));
+		sum_send_time += sendData(LoggerFSapp, data, 0, HOST_FSAPP, URL_FSAPP);
 	}
 
 	if (cfg::send2aircms) {
-		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F(" aircms.online: "));
+		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("aircms.online: "));
 		unsigned long ts = millis() / 1000;
 		String token = WiFi.macAddress();
 		String aircms_data = "L=" + esp_chipid + "&t=" + String(ts, DEC) + "&airrohr=" + data;
 		String aircms_url(FPSTR(URL_AIRCMS));
 		aircms_url += hmac1(sha1Hex(token), aircms_data + token);
 
-		sum_send_time += sendData(aircms_data, 0, HOST_AIRCMS, PORT_AIRCMS, aircms_url.c_str(), true, "", FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN));
+		sum_send_time += sendData(Loggeraircms, aircms_data, 0, HOST_AIRCMS, aircms_url.c_str());
 	}
 
 	if (cfg::send2influx) {
 		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("custom influx db: "));
 		RESERVE_STRING(data_4_influxdb, LARGE_STR);
 		create_influxdb_string_from_data(data_4_influxdb, data);
-		sum_send_time += sendData(data_4_influxdb, 0, cfg::host_influx, cfg::port_influx, cfg::url_influx, cfg::ssl_influx, basic_auth_influx.c_str(), FPSTR(TXT_CONTENT_TYPE_INFLUXDB));
-	}
-
-	if (cfg::send2csv) {
-		debug_outln_info(F("## Sending as csv: "));
-		send_csv(data);
+		sum_send_time += sendData(LoggerInflux, data_4_influxdb, 0, cfg::host_influx, cfg::url_influx);
 	}
 
 	if (cfg::send2custom) {
@@ -4100,8 +4145,14 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 		data_4_custom += "\", ";
 		data_4_custom += data_to_send;
 		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("custom api: "));
-		sum_send_time += sendData(data_4_custom, 0, cfg::host_custom, cfg::port_custom, cfg::url_custom, cfg::ssl_custom || (cfg::port_custom == 443), basic_auth_custom.c_str(), FPSTR(TXT_CONTENT_TYPE_JSON));
+		sum_send_time += sendData(LoggerCustom, data_4_custom, 0, cfg::host_custom, cfg::url_custom);
 	}
+
+	if (cfg::send2csv) {
+		debug_outln_info(F("## Sending as csv: "));
+		send_csv(data);
+	}
+
 	return sum_send_time;
 }
 
@@ -4149,7 +4200,7 @@ void setup(void) {
 	debug_outln_info(got_ntp ? FPSTR(DBG_TXT_FOUND) : FPSTR(DBG_TXT_NOT_FOUND));
 	twoStageAutoUpdate();
 	setup_webserver();
-	create_basic_auth_strings();
+	createLoggerConfigs();
 	debug_outln_info(F("\nChipId: "), esp_chipid);
 
 
