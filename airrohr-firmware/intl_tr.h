@@ -76,12 +76,12 @@ const char INTL_CURRENT_DATA[] PROGMEM = "Aktüel veriler";
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Kaydet ve yeniden bağlat";
 #define INTL_FIRMWARE "Firmware sürümü"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Debug ayarı ";
-const char INTL_NONE[] PROGMEM = "off";
-const char INTL_ERROR[] PROGMEM = "hatalar";
-const char INTL_WARNING[] PROGMEM = "uyarılar";
-const char INTL_MIN_INFO[] PROGMEM = "min. info";
-const char INTL_MED_INFO[] PROGMEM = "ortalama info";
-const char INTL_MAX_INFO[] PROGMEM = "maks. info";
+#define INTL_NONE "off"
+#define INTL_ERROR "hatalar"
+#define INTL_WARNING "uyarılar"
+#define INTL_MIN_INFO "min. info"
+#define INTL_MED_INFO "ortalama info"
+#define INTL_MAX_INFO "maks. info"
 #define INTL_CONFIG_DELETED "Konfigürasyon silindi"
 #define INTL_CONFIG_CAN_NOT_BE_DELETED "Konfigürasyon silinemiyor"
 #define INTL_CONFIG_NOT_FOUND "Konfigürasyon bulunamadı"

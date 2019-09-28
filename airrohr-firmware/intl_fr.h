@@ -76,12 +76,12 @@ const char INTL_CURRENT_DATA[] PROGMEM = "Données actuelles";
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Sauvegarder et redémarrer";
 #define INTL_FIRMWARE "Firmware"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Paramètres de débogage";
-const char INTL_NONE[] PROGMEM = "aucun";
-const char INTL_ERROR[] PROGMEM = "erreur";
-const char INTL_WARNING[] PROGMEM = "avertissement";
-const char INTL_MIN_INFO[] PROGMEM = "min. info";
-const char INTL_MED_INFO[] PROGMEM = "mid. info";
-const char INTL_MAX_INFO[] PROGMEM = "max. info";
+#define INTL_NONE "aucun"
+#define INTL_ERROR "erreur"
+#define INTL_WARNING "avertissement"
+#define INTL_MIN_INFO "min. info"
+#define INTL_MED_INFO "mid. info"
+#define INTL_MAX_INFO "max. info"
 #define INTL_CONFIG_DELETED "Le fichier config.json a été effacé."
 #define INTL_CONFIG_CAN_NOT_BE_DELETED "Le fichier config.json n\'a pas pu être effacé."
 #define INTL_CONFIG_NOT_FOUND "Le fichier config.json est introuvable."

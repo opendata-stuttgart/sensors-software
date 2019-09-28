@@ -76,12 +76,12 @@ const char INTL_CURRENT_DATA[] PROGMEM = "Dados atuais";
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Salvar e reiniciar";
 #define INTL_FIRMWARE "Versão do Firmware"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Ajustar Debug a ";
-const char INTL_NONE[] PROGMEM = "nenhum";
-const char INTL_ERROR[] PROGMEM = "erro";
-const char INTL_WARNING[] PROGMEM = "Advertência";
-const char INTL_MIN_INFO[] PROGMEM = "min. info";
-const char INTL_MED_INFO[] PROGMEM = "mid. info";
-const char INTL_MAX_INFO[] PROGMEM = "max. info";
+#define INTL_NONE "nenhum"
+#define INTL_ERROR "erro"
+#define INTL_WARNING "Advertência"
+#define INTL_MIN_INFO "min. info"
+#define INTL_MED_INFO "mid. info"
+#define INTL_MAX_INFO "max. info"
 #define INTL_CONFIG_DELETED "A configuração foi apagada"
 #define INTL_CONFIG_CAN_NOT_BE_DELETED "A configuração pode ser apagada"
 #define INTL_CONFIG_NOT_FOUND "Configuração não encontrada"

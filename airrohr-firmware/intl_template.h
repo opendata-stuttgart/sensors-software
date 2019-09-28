@@ -76,12 +76,12 @@ const char INTL_CURRENT_DATA[] PROGMEM = "";
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "";
 #define INTL_FIRMWARE ""
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "";
-const char INTL_NONE[] PROGMEM = "";
-const char INTL_ERROR[] PROGMEM = "";
-const char INTL_WARNING[] PROGMEM = "";
-const char INTL_MIN_INFO[] PROGMEM = "";
-const char INTL_MED_INFO[] PROGMEM = "";
-const char INTL_MAX_INFO[] PROGMEM = "";
+#define INTL_NONE ""
+#define INTL_ERROR ""
+#define INTL_WARNING ""
+#define INTL_MIN_INFO ""
+#define INTL_MED_INFO ""
+#define INTL_MAX_INFO ""
 #define INTL_CONFIG_DELETED ""
 #define INTL_CONFIG_CAN_NOT_BE_DELETED ""
 #define INTL_CONFIG_NOT_FOUND ""

@@ -76,12 +76,12 @@ const char INTL_CURRENT_DATA[] PROGMEM = "Aktuální hodnoty";
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Uložit a restartovat";
 #define INTL_FIRMWARE "Firmware verze"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Ladìní nastaveno na";
-const char INTL_NONE[] PROGMEM = "žádný";
-const char INTL_ERROR[] PROGMEM = "chyba";
-const char INTL_WARNING[] PROGMEM = "varování";
-const char INTL_MIN_INFO[] PROGMEM = "min. info";
-const char INTL_MED_INFO[] PROGMEM = "stø. info";
-const char INTL_MAX_INFO[] PROGMEM = "max. info";
+#define INTL_NONE "žádný"
+#define INTL_ERROR "chyba"
+#define INTL_WARNING "varování"
+#define INTL_MIN_INFO "min. info"
+#define INTL_MED_INFO "stø. info"
+#define INTL_MAX_INFO "max. info"
 #define INTL_CONFIG_DELETED "Config.json smazán"
 #define INTL_CONFIG_CAN_NOT_BE_DELETED "Config.json nemohl být smazán"
 #define INTL_CONFIG_NOT_FOUND "Config.json nenalezen"

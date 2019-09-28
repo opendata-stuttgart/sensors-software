@@ -76,12 +76,12 @@ const char INTL_CURRENT_DATA[] PROGMEM = "Текущие значения";
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Сохранить и перезапустить";
 #define INTL_FIRMWARE "Прошивка"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Настройки отладки";
-const char INTL_NONE[] PROGMEM = "отключена";
-const char INTL_ERROR[] PROGMEM = "только ошибки";
-const char INTL_WARNING[] PROGMEM = "предупреждения";
-const char INTL_MIN_INFO[] PROGMEM = "минимум информации";
-const char INTL_MED_INFO[] PROGMEM = "среднеинформативно";
-const char INTL_MAX_INFO[] PROGMEM = "максимум информации";
+#define INTL_NONE "отключена"
+#define INTL_ERROR "только ошибки"
+#define INTL_WARNING "предупреждения"
+#define INTL_MIN_INFO "минимум информации"
+#define INTL_MED_INFO "среднеинформативно"
+#define INTL_MAX_INFO "максимум информации"
 #define INTL_CONFIG_DELETED "Config.json удалён"
 #define INTL_CONFIG_CAN_NOT_BE_DELETED "Config.json нельзя удалить"
 #define INTL_CONFIG_NOT_FOUND "Config.json не найден"

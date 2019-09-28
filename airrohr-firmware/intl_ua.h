@@ -76,12 +76,12 @@ const char INTL_CURRENT_DATA[] PROGMEM = "Поточні показники";
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Зберегти та перезавантажити";
 #define INTL_FIRMWARE "Версія мікропрограми"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Зневадження: ";
-const char INTL_NONE[] PROGMEM = "вимкнено";
-const char INTL_ERROR[] PROGMEM = "лише помилки";
-const char INTL_WARNING[] PROGMEM = "попередження";
-const char INTL_MIN_INFO[] PROGMEM = "мінімум інформації";
-const char INTL_MED_INFO[] PROGMEM = "помірно інформації";
-const char INTL_MAX_INFO[] PROGMEM = "максимум інформації";
+#define INTL_NONE "вимкнено"
+#define INTL_ERROR "лише помилки"
+#define INTL_WARNING "попередження"
+#define INTL_MIN_INFO "мінімум інформації"
+#define INTL_MED_INFO "помірно інформації"
+#define INTL_MAX_INFO "максимум інформації"
 #define INTL_CONFIG_DELETED "Конфігурацію видалено"
 #define INTL_CONFIG_CAN_NOT_BE_DELETED "Конфігурацію не можна видалити"
 #define INTL_CONFIG_NOT_FOUND "Конфігурацію не знайдено"

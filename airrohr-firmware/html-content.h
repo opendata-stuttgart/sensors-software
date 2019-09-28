@@ -73,10 +73,10 @@ const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a href='/values'>{t}</a><br/>\
 <a href='/reset'>{restart}</a><br/>\
 <h4>{debug_setting}</h4><br/>\
 <table style='width:100%;'>\
-<tr><td style='width:25%;'><a href='/debug?lvl=0'>None</a></td>\
-<td style='width:25%;'><a href='/debug?lvl=1'>Error</a></td>\
-<td style='width:25%;'><a href='/debug?lvl=3'>Info</a></td>\
-<td style='width:25%;'><a href='/debug?lvl=5'>Verbose</a></td>\
+<tr><td style='width:25%;'><a href='/debug?lvl=0'>" INTL_NONE "</a></td>\
+<td style='width:25%;'><a href='/debug?lvl=1'>" INTL_ERROR "</a></td>\
+<td style='width:25%;'><a href='/debug?lvl=3'>" INTL_MIN_INFO "</a></td>\
+<td style='width:25%;'><a href='/debug?lvl=5'>" INTL_MAX_INFO "</a></td>\
 </tr><tr>\
 </tr>\
 </table>\
