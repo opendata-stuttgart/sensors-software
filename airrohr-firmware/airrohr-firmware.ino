@@ -251,15 +251,15 @@ namespace cfg {
 	// credentials for basic auth of internal web server
 	bool www_basicauth_enabled = WWW_BASICAUTH_ENABLED;
 	char www_username[LEN_WWW_USERNAME];
-	char www_password[LEN_WWW_PASSWORD];
+	char www_password[LEN_CFG_PASSWORD];
 
 	// wifi credentials
 	char wlanssid[LEN_WLANSSID];
-	char wlanpwd[LEN_WLANPWD];
+	char wlanpwd[LEN_CFG_PASSWORD];
 
 	// credentials of the sensor in access point mode
 	char fs_ssid[LEN_FS_SSID] = FS_SSID;
-	char fs_pwd[LEN_FS_PWD] = FS_PWD;
+	char fs_pwd[LEN_CFG_PASSWORD] = FS_PWD;
 
 	// (in)active sensors
 	bool dht_read = DHT_READ;
@@ -309,7 +309,7 @@ namespace cfg {
 	char url_influx[LEN_URL_INFLUX];
 	unsigned int port_influx = PORT_INFLUX;
 	char user_influx[LEN_USER_INFLUX] = USER_INFLUX;
-	char pwd_influx[LEN_PWD_INFLUX] = PWD_INFLUX;
+	char pwd_influx[LEN_CFG_PASSWORD] = PWD_INFLUX;
 	char measurement_name_influx[LEN_MEASUREMENT_NAME_INFLUX];
 	bool ssl_influx = SSL_INFLUX;
 
@@ -318,7 +318,7 @@ namespace cfg {
 	bool ssl_custom = SSL_CUSTOM;
 	unsigned int port_custom = PORT_CUSTOM;
 	char user_custom[LEN_USER_CUSTOM] = USER_CUSTOM;
-	char pwd_custom[LEN_PWD_CUSTOM] = PWD_CUSTOM;
+	char pwd_custom[LEN_CFG_PASSWORD] = PWD_CUSTOM;
 
 	void initNonTrivials(const char* id) {
 		strcpy(cfg::current_lang, CURRENT_LANG);
@@ -982,6 +982,7 @@ static void readConfig() {
 					*(c.cfg_val.as_uint) = json[cfg_key].as<unsigned int>();
 					break;
 				case Config_Type_String:
+				case Config_Type_Password:
 					strcpy(c.cfg_val.as_str, json[cfg_key].as<char*>());
 					break;
 			};
@@ -1031,6 +1032,7 @@ void writeConfig() {
 		case Config_Type_UInt:
 			json[cfg_key].set(*c.cfg_val.as_uint);
 			break;
+		case Config_Type_Password:
 		case Config_Type_String:
 			json[cfg_key].set(c.cfg_val.as_str);
 			break;
@@ -1387,7 +1389,7 @@ static void webserver_config_send_body_get(String& page_content) {
 		add_form_checkbox(page_content, "www_basicauth_enabled", FPSTR(INTL_BASICAUTH), www_basicauth_enabled);
 		page_content += FPSTR(TABLE_TAG_OPEN);
 		add_form_input(page_content, "www_username", FPSTR(INTL_USER), www_username, LEN_WWW_USERNAME);
-		page_content += form_password("www_password", FPSTR(INTL_PASSWORD), www_password, LEN_WWW_PASSWORD);
+		page_content += form_password("www_password", FPSTR(INTL_PASSWORD), www_password, LEN_CFG_PASSWORD-1);
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 
 		// Paginate page after ~ 1500 Bytes
@@ -1400,7 +1402,7 @@ static void webserver_config_send_body_get(String& page_content) {
 		page_content += FPSTR(BR_TAG);
 		page_content += FPSTR(TABLE_TAG_OPEN);
 		add_form_input(page_content, "fs_ssid", FPSTR(INTL_FS_WIFI_NAME), fs_ssid, LEN_FS_SSID);
-		page_content += form_password("fs_pwd", FPSTR(INTL_PASSWORD), fs_pwd, LEN_FS_PWD);
+		page_content += form_password("fs_pwd", FPSTR(INTL_PASSWORD), fs_pwd, LEN_CFG_PASSWORD-1);
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 
 		page_content += FPSTR(WEB_BR_LF_B);
@@ -1510,7 +1512,7 @@ static void webserver_config_send_body_get(String& page_content) {
 		add_form_input(page_content, "url_custom", FPSTR(INTL_PATH), url_custom, LEN_URL_CUSTOM);
 		add_form_input(page_content, "port_custom", FPSTR(INTL_PORT), String(port_custom), MAX_PORT_DIGITS);
 		add_form_input(page_content, "user_custom", FPSTR(INTL_USER), user_custom, LEN_USER_CUSTOM);
-		page_content += form_password("pwd_custom", FPSTR(INTL_PASSWORD), pwd_custom, LEN_PWD_CUSTOM);
+		page_content += form_password("pwd_custom", FPSTR(INTL_PASSWORD), pwd_custom, LEN_CFG_PASSWORD-1);
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 
 		page_content += FPSTR(BR_TAG);
@@ -1526,7 +1528,7 @@ static void webserver_config_send_body_get(String& page_content) {
 		add_form_input(page_content, "url_influx", FPSTR(INTL_PATH), url_influx, LEN_URL_INFLUX);
 		add_form_input(page_content, "port_influx", FPSTR(INTL_PORT), String(port_influx), MAX_PORT_DIGITS);
 		add_form_input(page_content, "user_influx", FPSTR(INTL_USER), user_influx, LEN_USER_INFLUX);
-		page_content += form_password("pwd_influx", FPSTR(INTL_PASSWORD), pwd_influx, LEN_PWD_INFLUX);
+		page_content += form_password("pwd_influx", FPSTR(INTL_PASSWORD), pwd_influx, LEN_CFG_PASSWORD-1);
 		add_form_input(page_content, "measurement_name_influx", F("Measurement"), measurement_name_influx, LEN_MEASUREMENT_NAME_INFLUX);
 		page_content += form_submit(FPSTR(INTL_SAVE_AND_RESTART));
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
@@ -1550,13 +1552,6 @@ static void webserver_config_send_body_post(String& page_content) {
 
 	using namespace cfg;
 
-#define readCharParam(param) { \
-		const String s_param(#param); \
-		if (server.hasArg(s_param)){ \
-			server.arg(s_param).toCharArray(param, sizeof(param)); \
-		} \
-	}
-
 #define readIntParam(param) \
 		{ \
 			int val = server.arg(#param).toInt(); \
@@ -1572,68 +1567,48 @@ static void webserver_config_send_body_post(String& page_content) {
 		} \
 	}
 
-#define readPasswdParam(param) { \
-		const String s_param(#param); \
-		if (server.hasArg(s_param)) { \
-			const String server_arg(server.arg(s_param)); \
-			masked_pwd = ""; \
-			for (uint8_t i=0;i<server_arg.length();i++) \
-				masked_pwd += '*'; \
-			if (masked_pwd != server_arg || !server_arg.length()) {\
-				server_arg.toCharArray(param, sizeof(param)); \
-			} \
-		} \
-	}
-
-	if (server.arg("wlanssid").length()) {
-		readCharParam(wlanssid);
-		readPasswdParam(wlanpwd);
-	}
 	if (! wificonfig_loop) {
-		readCharParam(current_lang);
-		readCharParam(fs_ssid);
-		String s_fs_pwd("fs_pwd");
-		if (server.hasArg(s_fs_pwd) && ((server.arg(s_fs_pwd).length() > 7) || (server.arg(s_fs_pwd).length() == 0))) {
-			readPasswdParam(fs_pwd);
-		}
-		readCharParam(dnms_correction);
-
 		readIntParam(debug);
 		readTimeParam(sending_intervall_ms);
 		readTimeParam(time_for_wifi_config);
-		readCharParam(senseboxid);
-
-		readCharParam(host_custom);
-		readCharParam(url_custom);
 		readIntParam(port_custom);
-		readCharParam(user_custom);
-		readPasswdParam(pwd_custom);
-
-		readCharParam(host_influx);
-		readCharParam(url_influx);
 		readIntParam(port_influx);
-		readCharParam(user_influx);
-		readPasswdParam(pwd_influx);
-		readCharParam(measurement_name_influx);
 	}
 
 	for (unsigned e = 0; e < sizeof(configShape)/sizeof(configShape[0]); ++e) {
 		ConfigShapeEntry c;
 		memcpy_P(&c, &configShape[e], sizeof(ConfigShapeEntry));
-		if (c.cfg_type == Config_Type_Bool && server.hasArg(c.cfg_key)) {
-			*(c.cfg_val.as_bool) = (server.arg(c.cfg_key) == "1");
+		const String s_param(c.cfg_key);
+
+		switch (c.cfg_type) {
+		case Config_Type_UInt:
+			break;
+		case Config_Type_Bool:
+			if (server.hasArg(c.cfg_key)) {
+				*(c.cfg_val.as_bool) = (server.arg(s_param) == "1");
+			}
+			break;
+		case Config_Type_String:
+			if (server.hasArg(s_param)) {
+				strcpy(c.cfg_val.as_str, server.arg(s_param).c_str());
+			}
+			break;
+		case Config_Type_Password:
+			if (server.hasArg(s_param)) {
+				const String server_arg(server.arg(s_param));
+				masked_pwd = "";
+				for (uint8_t i=0;i<server_arg.length();i++)
+					masked_pwd += '*';
+				if (masked_pwd != server_arg || !server_arg.length()) {
+					server_arg.toCharArray(c.cfg_val.as_str, LEN_CFG_PASSWORD);
+				}
+			}
+			break;
 		}
 	}
 
-	if (www_basicauth_enabled) {
-		readCharParam(www_username);
-		readPasswdParam(www_password);
-	}
-
-#undef readCharParam
 #undef readIntParam
 #undef readTimeParam
-#undef readPasswdParam
 
 	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("Luftdaten.info"), send2dusti);
 	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("Madavi"), send2madavi);
