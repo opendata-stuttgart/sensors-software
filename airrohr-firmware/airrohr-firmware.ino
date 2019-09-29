@@ -1468,6 +1468,11 @@ static void webserver_config_send_body_get(String& page_content) {
 	add_form_checkbox(page_content, "use_beta", FPSTR(INTL_USE_BETA), use_beta);
 	add_form_checkbox(page_content, "has_display", FPSTR(INTL_DISPLAY), has_display);
 	add_form_checkbox(page_content, "has_sh1106", FPSTR(INTL_SH1106), has_sh1106);
+
+	// Paginate page after ~ 1500 Bytes
+	server.sendContent(page_content);
+	page_content = empty_String;
+
 	add_form_checkbox(page_content, "has_flipped_display", FPSTR(INTL_FLIP_DISPLAY), has_flipped_display);
 	add_form_checkbox(page_content, "has_lcd1602_27", FPSTR(INTL_LCD1602_27), has_lcd1602_27);
 	add_form_checkbox(page_content, "has_lcd1602", FPSTR(INTL_LCD1602_3F), has_lcd1602);
