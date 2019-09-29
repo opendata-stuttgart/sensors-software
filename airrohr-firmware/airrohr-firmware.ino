@@ -390,7 +390,7 @@ LiquidCrystal_I2C lcd_2004_27(0x27, 20, 4);
  *****************************************************************/
 #if defined(ESP8266)
 SoftwareSerial serialSDS(PM_SERIAL_RX, PM_SERIAL_TX, false, 128);
-SoftwareSerial serialGPS(GPS_SERIAL_RX, GPS_SERIAL_TX, false, 512);
+SoftwareSerial* serialGPS;
 #endif
 #if defined(ESP32)
 #define serialSDS (Serial1)
@@ -919,12 +919,12 @@ static String SDS_version_date() {
  * disable unneeded NMEA sentences, TinyGPS++ needs GGA, RMC     *
  *****************************************************************/
 static void disable_unneeded_nmea() {
-	serialGPS.println(F("$PUBX,40,GLL,0,0,0,0*5C"));       // Geographic position, latitude / longitude
-//	serialGPS.println(F("$PUBX,40,GGA,0,0,0,0*5A"));       // Global Positioning System Fix Data
-	serialGPS.println(F("$PUBX,40,GSA,0,0,0,0*4E"));       // GPS DOP and active satellites
-//	serialGPS.println(F("$PUBX,40,RMC,0,0,0,0*47"));       // Recommended minimum specific GPS/Transit data
-	serialGPS.println(F("$PUBX,40,GSV,0,0,0,0*59"));       // GNSS satellites in view
-	serialGPS.println(F("$PUBX,40,VTG,0,0,0,0*5E"));       // Track made good and ground speed
+	serialGPS->println(F("$PUBX,40,GLL,0,0,0,0*5C"));       // Geographic position, latitude / longitude
+//	serialGPS->println(F("$PUBX,40,GGA,0,0,0,0*5A"));       // Global Positioning System Fix Data
+	serialGPS->println(F("$PUBX,40,GSA,0,0,0,0*4E"));       // GPS DOP and active satellites
+//	serialGPS->println(F("$PUBX,40,RMC,0,0,0,0*47"));       // Recommended minimum specific GPS/Transit data
+	serialGPS->println(F("$PUBX,40,GSV,0,0,0,0*59"));       // GNSS satellites in view
+	serialGPS->println(F("$PUBX,40,VTG,0,0,0,0*5E"));       // Track made good and ground speed
 }
 
 
@@ -3246,67 +3246,65 @@ static void fetchSensorGPS(String& s) {
 
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), "GPS");
 
-	while (serialGPS.available() > 0) {
-		if (gps.encode(serialGPS.read())) {
-			if (gps.location.isValid()) {
-				last_value_GPS_lat = gps.location.lat();
-				last_value_GPS_lon = gps.location.lng();
-				gps_lat = std::move(String(last_value_GPS_lat, 6));
-				gps_lon = std::move(String(last_value_GPS_lon, 6));
-			} else {
-				last_value_GPS_lat = -200;
-				last_value_GPS_lon = -200;
-				debug_outln_verbose(F("Lat/Lng INVALID"));
+	if (gps.location.isUpdated()) {
+		if (gps.location.isValid()) {
+			last_value_GPS_lat = gps.location.lat();
+			last_value_GPS_lon = gps.location.lng();
+			gps_lat = std::move(String(last_value_GPS_lat, 6));
+			gps_lon = std::move(String(last_value_GPS_lon, 6));
+		} else {
+			last_value_GPS_lat = -200;
+			last_value_GPS_lon = -200;
+			debug_outln_verbose(F("Lat/Lng INVALID"));
+		}
+		if (gps.altitude.isValid()) {
+			last_value_GPS_alt = gps.altitude.meters();
+			String gps_alt(last_value_GPS_lat);
+		} else {
+			last_value_GPS_alt = -1000;
+			debug_outln_verbose(F("Altitude INVALID"));
+		}
+		if (gps.date.isValid()) {
+			String gps_date;
+			if (gps.date.month() < 10) {
+				gps_date += '0';
 			}
-			if (gps.altitude.isValid()) {
-				last_value_GPS_alt = gps.altitude.meters();
-				String gps_alt(last_value_GPS_lat);
-			} else {
-				last_value_GPS_alt = -1000;
-				debug_outln_verbose(F("Altitude INVALID"));
+			gps_date += String(gps.date.month());
+			gps_date += '/';
+			if (gps.date.day() < 10) {
+				gps_date += '0';
 			}
-			if (gps.date.isValid()) {
-				String gps_date;
-				if (gps.date.month() < 10) {
-					gps_date += '0';
-				}
-				gps_date += String(gps.date.month());
-				gps_date += '/';
-				if (gps.date.day() < 10) {
-					gps_date += '0';
-				}
-				gps_date += String(gps.date.day());
-				gps_date += '/';
-				gps_date += String(gps.date.year());
-				last_value_GPS_date = gps_date;
-			} else {
-				debug_outln_verbose(F("Date INVALID"));
+			gps_date += String(gps.date.day());
+			gps_date += '/';
+			gps_date += String(gps.date.year());
+			last_value_GPS_date = gps_date;
+		} else {
+			debug_outln_verbose(F("Date INVALID"));
+		}
+		if (gps.time.isValid()) {
+			String gps_time;
+			if (gps.time.hour() < 10) {
+				gps_time += '0';
 			}
-			if (gps.time.isValid()) {
-				String gps_time;
-				if (gps.time.hour() < 10) {
-					gps_time += '0';
-				}
-				gps_time += String(gps.time.hour());
-				gps_time += ':';
-				if (gps.time.minute() < 10) {
-					gps_time += '0';
-				}
-				gps_time += String(gps.time.minute());
-				gps_time += ':';
-				if (gps.time.second() < 10) {
-					gps_time += '0';
-				}
-				gps_time += String(gps.time.second());
-				gps_time += '.';
-				if (gps.time.centisecond() < 10) {
-					gps_time += '0';
-				}
-				gps_time += String(gps.time.centisecond());
-				last_value_GPS_time = gps_time;
-			} else {
-				debug_outln_verbose(F("Time: INVALID"));
+			gps_time += String(gps.time.hour());
+			gps_time += ':';
+			if (gps.time.minute() < 10) {
+				gps_time += '0';
 			}
+			gps_time += String(gps.time.minute());
+			gps_time += ':';
+			if (gps.time.second() < 10) {
+				gps_time += '0';
+			}
+			gps_time += String(gps.time.second());
+			gps_time += '.';
+			if (gps.time.centisecond() < 10) {
+				gps_time += '0';
+			}
+			gps_time += String(gps.time.centisecond());
+			last_value_GPS_time = gps_time;
+		} else {
+			debug_outln_verbose(F("Time: INVALID"));
 		}
 	}
 
@@ -4133,11 +4131,12 @@ void setup(void) {
 
 
 	if (cfg::gps_read) {
+		serialGPS = new SoftwareSerial(GPS_SERIAL_RX, GPS_SERIAL_TX, false, 512);
 #if defined(ESP8266)
-		serialGPS.begin(9600);
+		serialGPS->begin(9600);
 #endif
 #if defined(ESP32)
-		serialGPS.begin(9600, SERIAL_8N1, GPS_SERIAL_RX, GPS_SERIAL_TX);
+		serialGPS->begin(9600, SERIAL_8N1, GPS_SERIAL_RX, GPS_SERIAL_TX);
 #endif
 		debug_outln_info(F("Read GPS..."));
 		disable_unneeded_nmea();
@@ -4252,10 +4251,17 @@ void loop(void) {
 		}
 	}
 
-	if (cfg::gps_read && !gps_init_failed && ((msSince(starttime_GPS) > SAMPLETIME_GPS_MS) || send_now)) {
-		// getting GPS coordinates
-		fetchSensorGPS(result_GPS);
-		starttime_GPS = act_milli;
+	if (cfg::gps_read && !gps_init_failed) {
+		// process serial GPS data..
+		while (serialGPS->available() > 0) {
+			gps.encode(serialGPS->read());
+		}
+
+		if ((msSince(starttime_GPS) > SAMPLETIME_GPS_MS) || send_now) {
+			// getting GPS coordinates
+			fetchSensorGPS(result_GPS);
+			starttime_GPS = act_milli;
+		}
 	}
 
 	if ((cfg::has_display || cfg::has_sh1106 || cfg::has_lcd2004_27 || cfg::has_lcd1602 ||
