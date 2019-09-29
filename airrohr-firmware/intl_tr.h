@@ -1,4 +1,4 @@
-﻿/*
+/*
  *	airRohr firmware
  *	Copyright (C) 2016-2018  Code for Stuttgart a.o.
  * 
@@ -103,6 +103,7 @@ const char INTL_TIME[] PROGMEM = "zaman";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "sinyal gücü";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "sinyal kalitesi";
 #define INTL_NUMBER_OF_MEASUREMENTS "Ölçümlerin sayısı:"
+#define INTL_TIME_SENDING_MS ""
 #define INTL_SENSOR "algılayıcı(Sensör)"
 #define INTL_PARAMETER "Parametre"
 #define INTL_VALUE "değer"

@@ -1898,6 +1898,11 @@ static void webserver_values() {
 		page_content += F("<tr><td colspan='2'>" INTL_NUMBER_OF_MEASUREMENTS "</td><td class='r'>");
 		page_content += count_sends;
 		page_content += F("</td></tr>");
+		page_content += F("<tr><td colspan='2'>" INTL_TIME_SENDING_MS "</td><td class='r'>");
+		page_content += String(sending_time);
+		page_content += F("&nbsp;ms");
+		page_content += F("</td></tr>");
+
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 		end_html_page(page_content);
 	}
