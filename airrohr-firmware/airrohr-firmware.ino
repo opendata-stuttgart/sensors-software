@@ -3817,7 +3817,7 @@ static void init_lcd() {
  * Init BMP280/BME280                                            *
  *****************************************************************/
 static bool initBMX280(char addr) {
-	debug_outln_info(F("Trying BMP280/BME280 sensor on "), String(addr, HEX));
+	debug_out(String(F("Trying BMP280/BME280 sensor on ")) + String(addr, HEX), DEBUG_MIN_INFO);
 
 	if (bmx280.begin(addr)) {
 		debug_outln_info(FPSTR(DBG_TXT_FOUND));
