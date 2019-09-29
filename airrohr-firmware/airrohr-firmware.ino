@@ -2398,10 +2398,8 @@ static unsigned long sendLuftdaten(const String& data, const int pin, const __Fl
 /*****************************************************************
  * send data to influxdb                                         *
  *****************************************************************/
-static String create_influxdb_string(const String& data) {
-	String data_4_influxdb;
-
-	debug_outln_info(F("Parse JSON for influx DB: "), data);
+static void create_influxdb_string_from_data(String& data_4_influxdb, const String& data) {
+	debug_outln_verbose(F("Parse JSON for influx DB: "), data);
 	DynamicJsonDocument json2data(JSON_BUFFER_SIZE);
 	DeserializationError err = deserializeJson(json2data, data);
 	if (!err) {
@@ -2422,7 +2420,6 @@ static String create_influxdb_string(const String& data) {
 	} else {
 		debug_outln_error(FPSTR(DBG_TXT_DATA_READ_FAILED));
 	}
-	return data_4_influxdb;
 }
 
 /*****************************************************************
@@ -4072,7 +4069,8 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 
 	if (cfg::send2influx) {
 		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("custom influx db: "));
-		const String data_4_influxdb = create_influxdb_string(data);
+		RESERVE_STRING(data_4_influxdb, LARGE_STR);
+		create_influxdb_string_from_data(data_4_influxdb, data);
 		sum_send_time += sendData(data_4_influxdb, 0, cfg::host_influx, cfg::port_influx, cfg::url_influx, cfg::ssl_influx, basic_auth_influx.c_str(), FPSTR(TXT_CONTENT_TYPE_INFLUXDB));
 	}
 
