@@ -1069,14 +1069,27 @@ static void create_basic_auth_strings() {
  * aircms.online helper functions                                *
  *****************************************************************/
 static String sha1Hex(const String& s) {
+	char sha1sum_output[20];
+
 #if defined(ESP8266)
-	return sha1(s);
+	br_sha1_context sc;
+
+	br_sha1_init(&sc);
+	br_sha1_update(&sc, s.c_str(), s.length());
+	br_sha1_out(&sc, sha1sum_output);
 #endif
 #if defined(ESP32)
-	char sha1sum_output[21];
 	esp_sha(SHA1, (const unsigned char*) s.c_str(), s.length(), (unsigned char*)sha1sum_output);
-	return String(sha1sum_output);
 #endif
+	String r;
+	for (unsigned i = 0; i < 20; ++i) {
+		String hex = String(sha1sum_output[i], HEX);
+		if (hex.length() < 2) {
+			r += '0';
+		}
+		r += hex;
+	}
+	return r;
 }
 
 static String hmac1(const String& secret, const String& s) {
