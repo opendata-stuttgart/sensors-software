@@ -103,6 +103,7 @@ const char INTL_TIME[] PROGMEM = "Дата";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Сила на сигнала";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Качество на сигнала";
 #define INTL_NUMBER_OF_MEASUREMENTS "Брой измервания"
+#define INTL_TIME_SENDING_MS ""
 #define INTL_SENSOR "Сензор"
 #define INTL_PARAMETER "Параметър"
 #define INTL_VALUE "Стойност"

@@ -1069,14 +1069,27 @@ static void create_basic_auth_strings() {
  * aircms.online helper functions                                *
  *****************************************************************/
 static String sha1Hex(const String& s) {
+	char sha1sum_output[20];
+
 #if defined(ESP8266)
-	return sha1(s);
+	br_sha1_context sc;
+
+	br_sha1_init(&sc);
+	br_sha1_update(&sc, s.c_str(), s.length());
+	br_sha1_out(&sc, sha1sum_output);
 #endif
 #if defined(ESP32)
-	char sha1sum_output[21];
 	esp_sha(SHA1, (const unsigned char*) s.c_str(), s.length(), (unsigned char*)sha1sum_output);
-	return String(sha1sum_output);
 #endif
+	String r;
+	for (unsigned i = 0; i < 20; ++i) {
+		String hex = String(sha1sum_output[i], HEX);
+		if (hex.length() < 2) {
+			r += '0';
+		}
+		r += hex;
+	}
+	return r;
 }
 
 static String hmac1(const String& secret, const String& s) {
@@ -1468,6 +1481,11 @@ static void webserver_config_send_body_get(String& page_content) {
 	add_form_checkbox(page_content, "use_beta", FPSTR(INTL_USE_BETA), use_beta);
 	add_form_checkbox(page_content, "has_display", FPSTR(INTL_DISPLAY), has_display);
 	add_form_checkbox(page_content, "has_sh1106", FPSTR(INTL_SH1106), has_sh1106);
+
+	// Paginate page after ~ 1500 Bytes
+	server.sendContent(page_content);
+	page_content = empty_String;
+
 	add_form_checkbox(page_content, "has_flipped_display", FPSTR(INTL_FLIP_DISPLAY), has_flipped_display);
 	add_form_checkbox(page_content, "has_lcd1602_27", FPSTR(INTL_LCD1602_27), has_lcd1602_27);
 	add_form_checkbox(page_content, "has_lcd1602", FPSTR(INTL_LCD1602_3F), has_lcd1602);
@@ -1893,6 +1911,11 @@ static void webserver_values() {
 		page_content += F("<tr><td colspan='2'>" INTL_NUMBER_OF_MEASUREMENTS "</td><td class='r'>");
 		page_content += count_sends;
 		page_content += F("</td></tr>");
+		page_content += F("<tr><td colspan='2'>" INTL_TIME_SENDING_MS "</td><td class='r'>");
+		page_content += String(sending_time);
+		page_content += F("&nbsp;ms");
+		page_content += F("</td></tr>");
+
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 		end_html_page(page_content);
 	}
@@ -2388,10 +2411,8 @@ static unsigned long sendLuftdaten(const String& data, const int pin, const __Fl
 /*****************************************************************
  * send data to influxdb                                         *
  *****************************************************************/
-static String create_influxdb_string(const String& data) {
-	String data_4_influxdb;
-
-	debug_outln_info(F("Parse JSON for influx DB: "), data);
+static void create_influxdb_string_from_data(String& data_4_influxdb, const String& data) {
+	debug_outln_verbose(F("Parse JSON for influx DB: "), data);
 	DynamicJsonDocument json2data(JSON_BUFFER_SIZE);
 	DeserializationError err = deserializeJson(json2data, data);
 	if (!err) {
@@ -2412,7 +2433,6 @@ static String create_influxdb_string(const String& data) {
 	} else {
 		debug_outln_error(FPSTR(DBG_TXT_DATA_READ_FAILED));
 	}
-	return data_4_influxdb;
 }
 
 /*****************************************************************
@@ -3810,7 +3830,7 @@ static void init_lcd() {
  * Init BMP280/BME280                                            *
  *****************************************************************/
 static bool initBMX280(char addr) {
-	debug_outln_info(F("Trying BMP280/BME280 sensor on "), String(addr, HEX));
+	debug_out(String(F("Trying BMP280/BME280 sensor on ")) + String(addr, HEX), DEBUG_MIN_INFO);
 
 	if (bmx280.begin(addr)) {
 		debug_outln_info(FPSTR(DBG_TXT_FOUND));
@@ -4060,7 +4080,8 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 
 	if (cfg::send2influx) {
 		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("custom influx db: "));
-		const String data_4_influxdb = create_influxdb_string(data);
+		RESERVE_STRING(data_4_influxdb, LARGE_STR);
+		create_influxdb_string_from_data(data_4_influxdb, data);
 		sum_send_time += sendData(data_4_influxdb, 0, cfg::host_influx, cfg::port_influx, cfg::url_influx, cfg::ssl_influx, basic_auth_influx.c_str(), FPSTR(TXT_CONTENT_TYPE_INFLUXDB));
 	}
 
@@ -4115,6 +4136,8 @@ void setup(void) {
 #endif
 	cfg::initNonTrivials(esp_chipid.c_str());
 	WiFi.persistent(false);
+
+	debug_outln_info(F("Airrohr: "), SOFTWARE_VERSION);
 
 	readConfig();
 	init_display();

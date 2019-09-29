@@ -103,6 +103,7 @@ const char INTL_TIME[] PROGMEM = "Zeit";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Signal";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Qualität";
 #define INTL_NUMBER_OF_MEASUREMENTS "Anzahl Messungen:"
+#define INTL_TIME_SENDING_MS "Dauer Messübertragung:"
 #define INTL_SENSOR "Sensor"
 #define INTL_PARAMETER "Parameter"
 #define INTL_VALUE "Wert"
