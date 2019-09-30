@@ -266,7 +266,7 @@ namespace cfg {
 	bool gps_read = GPS_READ;
 
 	// send to "APIs"
-	bool send2dusti = SEND2DUSTI;
+	bool send2dusti = SEND2SENSORCOMMUNITY;
 	bool send2madavi = SEND2MADAVI;
 	bool send2sensemap = SEND2SENSEMAP;
 	bool send2fsapp = SEND2FSAPP;
@@ -291,7 +291,7 @@ namespace cfg {
 
 	// API settings
 	bool ssl_madavi = SSL_MADAVI;
-	bool ssl_dusti = SSL_DUSTI;
+	bool ssl_dusti = SSL_SENSORCOMMUNITY;
 	char senseboxid[LEN_SENSEBOXID] = SENSEBOXID;
 
 	char host_influx[LEN_HOST_INFLUX];
@@ -2216,7 +2216,7 @@ static void wifiConfig() {
 	debug_outln_info_bool(F("BMP: "), cfg::bmp_read);
 	debug_outln_info_bool(F("DNMS: "), cfg::dnms_read);
 	debug_outln_info(F("----\nSend to ..."));
-	debug_outln_info_bool(F("Dusti: "), cfg::send2dusti);
+	debug_outln_info_bool(F("SensorCommunity: "), cfg::send2dusti);
 	debug_outln_info_bool(F("Madavi: "), cfg::send2madavi);
 	debug_outln_info_bool(F("CSV: "), cfg::send2csv);
 	debug_outln_info(F("----"));
@@ -2375,21 +2375,22 @@ static unsigned long sendData(const String& data, const int pin, const char* hos
 /*****************************************************************
  * send single sensor data to luftdaten.info api                 *
  *****************************************************************/
-static unsigned long sendLuftdaten(const String& data, const int pin, const __FlashStringHelper* sensorname, const char* replace_str) {
+static unsigned long sendSensorCommunity(const String& data, const int pin, const __FlashStringHelper* sensorname, const char* replace_str) {
 	unsigned long sum_send_time = 0;
 
 	if (cfg::send2dusti && data.length()) {
-		RESERVE_STRING(data_4_dusti, LARGE_STR);
-		data_4_dusti = FPSTR(data_first_part);
+		RESERVE_STRING(data_sensorcommunity, LARGE_STR);
+		data_sensorcommunity = FPSTR(data_first_part);
 
 		debug_outln_info(F("## Sending to Luftdaten.info - "), sensorname);
-		data_4_dusti += data;
-		data_4_dusti.remove(data_4_dusti.length() - 1);
-		data_4_dusti.replace(replace_str, empty_String);
-		data_4_dusti += "]}";
-		const int HTTP_PORT_DUSTI = (cfg::ssl_dusti ? 443 : 80);
-		sum_send_time = sendData(data_4_dusti, pin, HOST_DUSTI, HTTP_PORT_DUSTI, URL_DUSTI,
-						 cfg::ssl_dusti, "", FPSTR(TXT_CONTENT_TYPE_JSON));
+		data_sensorcommunity += data;
+		data_sensorcommunity.remove(data_sensorcommunity.length() - 1);
+		data_sensorcommunity.replace(replace_str, empty_String);
+		data_sensorcommunity += "]}";
+		const int HTTP_PORT_SENSORCOMMUNITY = (cfg::ssl_dusti ? 443 : 80);
+		sum_send_time = sendData(data_sensorcommunity, pin, HOST_SENSORCOMMUNITY,
+						HTTP_PORT_SENSORCOMMUNITY, URL_SENSORCOMMUNITY, cfg::ssl_dusti,
+						"", FPSTR(TXT_CONTENT_TYPE_JSON));
 	}
 
 	return sum_send_time;
@@ -4307,45 +4308,45 @@ void loop(void) {
 
 		if (cfg::ppd_read) {
 			data += result_PPD;
-			sum_send_time += sendLuftdaten(result_PPD, PPD_API_PIN, FPSTR(SENSORS_PPD42NS), "PPD_");
+			sum_send_time += sendSensorCommunity(result_PPD, PPD_API_PIN, FPSTR(SENSORS_PPD42NS), "PPD_");
 		}
 		if (cfg::sds_read) {
 			data += result_SDS;
-			sum_send_time += sendLuftdaten(result_SDS, SDS_API_PIN, FPSTR(SENSORS_SDS011), "SDS_");
+			sum_send_time += sendSensorCommunity(result_SDS, SDS_API_PIN, FPSTR(SENSORS_SDS011), "SDS_");
 		}
 		if (cfg::pms_read) {
 			data += result_PMS;
-			sum_send_time += sendLuftdaten(result_PMS, PMS_API_PIN, FPSTR(SENSORS_PMSx003), "PMS_");
+			sum_send_time += sendSensorCommunity(result_PMS, PMS_API_PIN, FPSTR(SENSORS_PMSx003), "PMS_");
 		}
 		if (cfg::hpm_read) {
 			data += result_HPM;
-			sum_send_time += sendLuftdaten(result_HPM, HPM_API_PIN, FPSTR(SENSORS_HPM), "HPM_");
+			sum_send_time += sendSensorCommunity(result_HPM, HPM_API_PIN, FPSTR(SENSORS_HPM), "HPM_");
 		}
 		if (cfg::sps30_read && (! sps30_init_failed)) {
 			fetchSensorSPS30(result);
 			data += result;
-			sum_send_time += sendLuftdaten(result, SPS30_API_PIN, FPSTR(SENSORS_SPS30), "SPS30_");
+			sum_send_time += sendSensorCommunity(result, SPS30_API_PIN, FPSTR(SENSORS_SPS30), "SPS30_");
 			result = empty_String;
 		}
 		if (cfg::dht_read) {
 			// getting temperature and humidity (optional)
 			fetchSensorDHT(result);
 			data += result;
-			sum_send_time += sendLuftdaten(result, DHT_API_PIN, FPSTR(SENSORS_DHT22), "DHT_");
+			sum_send_time += sendSensorCommunity(result, DHT_API_PIN, FPSTR(SENSORS_DHT22), "DHT_");
 			result = empty_String;
 		}
 		if (cfg::htu21d_read && (! htu21d_init_failed)) {
 			// getting temperature and humidity (optional)
 			fetchSensorHTU21D(result);
 			data += result;
-			sum_send_time += sendLuftdaten(result, HTU21D_API_PIN, FPSTR(SENSORS_HTU21D), "HTU21D_");
+			sum_send_time += sendSensorCommunity(result, HTU21D_API_PIN, FPSTR(SENSORS_HTU21D), "HTU21D_");
 			result = empty_String;
 		}
 		if (cfg::bmp_read && (! bmp_init_failed)) {
 			// getting temperature and pressure (optional)
 			fetchSensorBMP(result);
 			data += result;
-			sum_send_time += sendLuftdaten(result, BMP_API_PIN, FPSTR(SENSORS_BMP180), "BMP_");
+			sum_send_time += sendSensorCommunity(result, BMP_API_PIN, FPSTR(SENSORS_BMP180), "BMP_");
 			result = empty_String;
 		}
 		if (cfg::bmx280_read && (! bmx280_init_failed)) {
@@ -4353,9 +4354,9 @@ void loop(void) {
 			fetchSensorBMX280(result);
 			data += result;
 			if (bmx280.sensorID() == BME280_SENSOR_ID) {
-				sum_send_time += sendLuftdaten(result, BME280_API_PIN, FPSTR(SENSORS_BMX280), "BME280_");
+				sum_send_time += sendSensorCommunity(result, BME280_API_PIN, FPSTR(SENSORS_BMX280), "BME280_");
 			} else {
-				sum_send_time += sendLuftdaten(result, BMP280_API_PIN, FPSTR(SENSORS_BMX280), "BMP280_");
+				sum_send_time += sendSensorCommunity(result, BMP280_API_PIN, FPSTR(SENSORS_BMX280), "BMP280_");
 			}
 			result = empty_String;
 		}
@@ -4363,20 +4364,19 @@ void loop(void) {
 			// getting temperature (optional)
 			fetchSensorDS18B20(result);
 			data += result;
-			sum_send_time += sendLuftdaten(result, DS18B20_API_PIN, FPSTR(SENSORS_DS18B20), "DS18B20_");
+			sum_send_time += sendSensorCommunity(result, DS18B20_API_PIN, FPSTR(SENSORS_DS18B20), "DS18B20_");
 			result = empty_String;
 		}
 		if (cfg::dnms_read && (! dnms_init_failed)) {
 			// getting noise measurement values from dnms (optional)
 			fetchSensorDNMS(result);
 			data += result;
-			sum_send_time += sendLuftdaten(result, DNMS_API_PIN, FPSTR(SENSORS_DNMS), "DNMS_");
+			sum_send_time += sendSensorCommunity(result, DNMS_API_PIN, FPSTR(SENSORS_DNMS), "DNMS_");
 			result = empty_String;
 		}
 		if (cfg::gps_read) {
 			data += result_GPS;
-			sum_send_time += sendLuftdaten(result_GPS, GPS_API_PIN, F("GPS"), "GPS_");
-			result = empty_String;
+			sum_send_time += sendSensorCommunity(result_GPS, GPS_API_PIN, F("GPS"), "GPS_");
 		}
 		add_Value2Json(data, F("samples"), String(sample_count));
 		add_Value2Json(data, F("min_micro"), String(min_micro));

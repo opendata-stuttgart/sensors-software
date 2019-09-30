@@ -15,8 +15,8 @@ const char WWW_PASSWORD[] PROGMEM = "feinstaub";
 #define FS_PWD ""
 
 // Where to send the data?
-#define SEND2DUSTI 1
-#define SSL_DUSTI 0
+#define SEND2SENSORCOMMUNITY 1
+#define SSL_SENSORCOMMUNITY 0
 #define SEND2MADAVI 1
 #define SSL_MADAVI 0
 #define SEND2SENSEMAP 0
@@ -36,9 +36,9 @@ static const char HOST_MADAVI[] PROGMEM = "api-rrd.madavi.de";
 static const char URL_MADAVI[] PROGMEM = "/data.php";
 #define PORT_MADAVI 80
 
-static const char HOST_DUSTI[] PROGMEM = "api.sensor.community";
-static const char URL_DUSTI[] PROGMEM = "/v1/push-sensor-data/";
-#define PORT_DUSTI 80
+static const char HOST_SENSORCOMMUNITY[] PROGMEM = "api.sensor.community";
+static const char URL_SENSORCOMMUNITY[] PROGMEM = "/v1/push-sensor-data/";
+#define PORT_SENSORCOMMUNITY 80
 
 static const char HOST_SENSEMAP[] PROGMEM = "ingress.opensensemap.org";
 static const char URL_SENSEMAP[] PROGMEM = "/boxes/{v}/data?luftdaten=1";
@@ -65,7 +65,7 @@ static const char URL_CUSTOM[] PROGMEM = "/data.php";
 
 // define own InfluxDB
 static const char HOST_INFLUX[] PROGMEM = "influx.server";
-static const char URL_INFLUX[] PROGMEM = "/write?db=luftdaten";
+static const char URL_INFLUX[] PROGMEM = "/write?db=sensorcommunity";
 #define PORT_INFLUX 8086
 #define USER_INFLUX ""
 #define PWD_INFLUX ""
