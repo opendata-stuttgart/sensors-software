@@ -1226,7 +1226,7 @@ static String form_select_lang() {
 					"<option value='RU'>Русский (RU)</option>"
 					"<option value='SE'>Svenska (SE)</option>"
 					"<option value='TR'>Türkçe (TR)</option>"
-					"<option value='UA'>Мова (UA)</option>"
+					"<option value='UA'>український (UA)</option>"
 					"</select>"
 					"</td>"
 					"</tr>");
