@@ -527,13 +527,13 @@ bool sps30_init_failed = false;
 
 float last_value_PPD_P1 = -1.0;
 float last_value_PPD_P2 = -1.0;
-double last_value_SDS_P1 = -1.0;
-double last_value_SDS_P2 = -1.0;
-double last_value_PMS_P0 = -1.0;
-double last_value_PMS_P1 = -1.0;
-double last_value_PMS_P2 = -1.0;
-double last_value_HPM_P1 = -1.0;
-double last_value_HPM_P2 = -1.0;
+float last_value_SDS_P1 = -1.0;
+float last_value_SDS_P2 = -1.0;
+float last_value_PMS_P0 = -1.0;
+float last_value_PMS_P1 = -1.0;
+float last_value_PMS_P2 = -1.0;
+float last_value_HPM_P1 = -1.0;
+float last_value_HPM_P2 = -1.0;
 double last_value_GPS_lat = -200.0;
 double last_value_GPS_lon = -200.0;
 double last_value_GPS_alt = -1000.0;
@@ -2894,9 +2894,9 @@ static void fetchSensorPMS(String& s) {
 			pms_val_count = pms_val_count - 2;
 		}
 		if (pms_val_count > 0) {
-			last_value_PMS_P0 = double(pms_pm1_sum) / (pms_val_count * 1.0);
-			last_value_PMS_P1 = double(pms_pm10_sum) / (pms_val_count * 1.0);
-			last_value_PMS_P2 = double(pms_pm25_sum) / (pms_val_count * 1.0);
+			last_value_PMS_P0 = float(pms_pm1_sum) / float(pms_val_count);
+			last_value_PMS_P1 = float(pms_pm10_sum) / float(pms_val_count);
+			last_value_PMS_P2 = float(pms_pm25_sum) / float(pms_val_count);
 			debug_outln_info(F("PM1:   "), last_value_PMS_P0);
 			debug_outln_info(F("PM2.5: "), last_value_PMS_P2);
 			debug_outln_info(F("PM10:  "), last_value_PMS_P1);
@@ -3026,16 +3026,16 @@ static void fetchSensorHPM(String& s) {
 
 	}
 	if (send_now) {
-		last_value_HPM_P1 = -1;
-		last_value_HPM_P2 = -1;
+		last_value_HPM_P1 = -1.0f;
+		last_value_HPM_P2 = -1.0f;
 		if (hpm_val_count > 2) {
 			hpm_pm10_sum = hpm_pm10_sum - hpm_pm10_min - hpm_pm10_max;
 			hpm_pm25_sum = hpm_pm25_sum - hpm_pm25_min - hpm_pm25_max;
 			hpm_val_count = hpm_val_count - 2;
 		}
 		if (hpm_val_count > 0) {
-			last_value_HPM_P1 = double(hpm_pm10_sum) / (hpm_val_count * 1.0);
-			last_value_HPM_P2 = double(hpm_pm25_sum) / (hpm_val_count * 1.0);
+			last_value_HPM_P1 = float(hpm_pm10_sum) / float(hpm_val_count);
+			last_value_HPM_P2 = float(hpm_pm25_sum) / float(hpm_val_count);
 			debug_outln_info(F("PM2.5: "), last_value_HPM_P1);
 			debug_outln_info(F("PM10:  "), last_value_HPM_P2);
 			debug_outln_info(F("-------"));
@@ -3501,12 +3501,12 @@ static String displayGenerateFooter(unsigned int screen_count) {
 static void display_values() {
 	float t_value = -128.0;
 	float h_value = -1.0;
-	double p_value = -1.0;
+	float p_value = -1.0;
 	String t_sensor, h_sensor, p_sensor;
 	float pm010_value = -1.0;
 	float pm040_value = -1.0;
-	double pm10_value = -1.0;
-	double pm25_value = -1.0;
+	float pm10_value = -1.0;
+	float pm25_value = -1.0;
 	String pm10_sensor;
 	String pm25_sensor;
 	float nc005_value = -1.0;
