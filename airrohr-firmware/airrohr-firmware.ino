@@ -1571,13 +1571,35 @@ static void webserver_config_send_body_post(String& page_content) {
 
 	using namespace cfg;
 
-#define readIntParam(param) \
-		{ \
-			int val = server.arg(#param).toInt(); \
-			if (val != 0){ \
-				param = val; \
-			} \
+	for (unsigned e = 0; e < sizeof(configShape)/sizeof(configShape[0]); ++e) {
+		ConfigShapeEntry c;
+		memcpy_P(&c, &configShape[e], sizeof(ConfigShapeEntry));
+		const String s_param(c.cfg_key);
+		if (!server.hasArg(s_param)) {
+			continue;
 		}
+
+		switch (c.cfg_type) {
+		case Config_Type_UInt:
+			*(c.cfg_val.as_uint) = server.arg(s_param).toInt();
+			break;
+		case Config_Type_Bool:
+			*(c.cfg_val.as_bool) = (server.arg(s_param) == "1");
+			break;
+		case Config_Type_String:
+			strcpy(c.cfg_val.as_str, server.arg(s_param).c_str());
+			break;
+		case Config_Type_Password:
+			const String server_arg(server.arg(s_param));
+			masked_pwd = "";
+			for (uint8_t i=0;i<server_arg.length();i++)
+				masked_pwd += '*';
+			if (masked_pwd != server_arg || !server_arg.length()) {
+				server_arg.toCharArray(c.cfg_val.as_str, LEN_CFG_PASSWORD);
+			}
+			break;
+		}
+	}
 
 #define readTimeParam(param) { \
 		const String s_param(#param); \
@@ -1587,46 +1609,10 @@ static void webserver_config_send_body_post(String& page_content) {
 	}
 
 	if (! wificonfig_loop) {
-		readIntParam(debug);
 		readTimeParam(sending_intervall_ms);
 		readTimeParam(time_for_wifi_config);
-		readIntParam(port_custom);
-		readIntParam(port_influx);
 	}
 
-	for (unsigned e = 0; e < sizeof(configShape)/sizeof(configShape[0]); ++e) {
-		ConfigShapeEntry c;
-		memcpy_P(&c, &configShape[e], sizeof(ConfigShapeEntry));
-		const String s_param(c.cfg_key);
-
-		switch (c.cfg_type) {
-		case Config_Type_UInt:
-			break;
-		case Config_Type_Bool:
-			if (server.hasArg(c.cfg_key)) {
-				*(c.cfg_val.as_bool) = (server.arg(s_param) == "1");
-			}
-			break;
-		case Config_Type_String:
-			if (server.hasArg(s_param)) {
-				strcpy(c.cfg_val.as_str, server.arg(s_param).c_str());
-			}
-			break;
-		case Config_Type_Password:
-			if (server.hasArg(s_param)) {
-				const String server_arg(server.arg(s_param));
-				masked_pwd = "";
-				for (uint8_t i=0;i<server_arg.length();i++)
-					masked_pwd += '*';
-				if (masked_pwd != server_arg || !server_arg.length()) {
-					server_arg.toCharArray(c.cfg_val.as_str, LEN_CFG_PASSWORD);
-				}
-			}
-			break;
-		}
-	}
-
-#undef readIntParam
 #undef readTimeParam
 
 	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("Luftdaten.info"), send2dusti);
