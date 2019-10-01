@@ -199,6 +199,7 @@ const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 #include "defines.h"
 #include "ext_def.h"
 #include "html-content.h"
+#include "ca-root.h"
 
 /******************************************************************
  * Constants                                                      *
@@ -342,6 +343,7 @@ enum class PmSensorCmd {
 String basic_auth_influx;
 String basic_auth_custom;
 LoggerConfig loggerConfigs[LoggerCount];
+BearSSL::X509List x509_dst_root_ca(dst_root_ca_x3);
 
 long int sample_count = 0;
 bool htu21d_init_failed = false;
@@ -2307,18 +2309,22 @@ static unsigned long sendData(const LoggerEntry logger, const String& data, cons
 	String s_url(FPSTR(url));
 
 	const char* basic_auth_string = nullptr;
+	bool verify_trust = true;
 
 	switch(logger) {
 	case Loggeraircms:
 		contentType = FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN);
+		verify_trust = false;
 		break;
 	case LoggerInflux:
 		basic_auth_string = basic_auth_influx.c_str();
 		contentType = FPSTR(TXT_CONTENT_TYPE_INFLUXDB);
+		verify_trust = false;
 		break;
 	case LoggerCustom:
 		basic_auth_string = basic_auth_custom.c_str();
 		contentType = FPSTR(TXT_CONTENT_TYPE_JSON);
+		verify_trust = false;
 		break;
 	default:
 		contentType = FPSTR(TXT_CONTENT_TYPE_JSON);
@@ -2354,9 +2360,12 @@ static unsigned long sendData(const LoggerEntry logger, const String& data, cons
 		_client = new WiFiClientSecure;
 		static_cast<WiFiClientSecure*>(_client)->setSession(loggerConfigs[logger].session);
 		static_cast<WiFiClientSecure*>(_client)->setBufferSizes(1024, TCP_MSS > 1024 ? 2048 : 1024);
-		// TODO
-		static_cast<WiFiClientSecure*>(_client)->setInsecure();
-		static_cast<WiFiClientSecure*>(_client)->setCiphersLessSecure();
+		if ( verify_trust ) {
+			static_cast<WiFiClientSecure*>(_client)->setTrustAnchors(&x509_dst_root_ca);
+		} else {
+			static_cast<WiFiClientSecure*>(_client)->setInsecure();
+		}
+
 	} else {
 		_client = new WiFiClient;
 	}
@@ -2390,34 +2399,6 @@ static unsigned long sendData(const LoggerEntry logger, const String& data, cons
 		client->stop();
 		debug_outln_info(F("\nclosing connection\n----\n\n"));
 	}
-
-/*		WiFiClientSecure client_s;
-			if (verify) {
-				if (client_s.setCACert_P(dst_root_ca_x3_bin_crt, dst_root_ca_x3_bin_crt_len)) {
-					if (client_s.verifyCertChain(s_Host)) {
-						debug_outln_info(F("Server cert verified"));
-						doRequest(&client_s, request_head, data);
-					} else {
-						debug_outln_error(F("ERROR: cert verification failed!"));
-					}
-				} else {
-					debug_outln_error(F("Failed to load root CA cert!"));
-				}
-			} else {
-				doRequest(&client_s, request_head, data);
-			}
-*/
-/*		BearSSL::WiFiClientSecure client_s;
-		if (verify) {
-			BearSSLX509List cert(dst_root_ca_x3);
-			client_s.setTrustAnchors(&cert);
-		} else {
-			client_s.setInsecure();
-		}
-		if (doConnect(&client_s)) {
-			doRequest(&client_s, request_head, data);
-		}
-*/
 	debug_outln_info(F("End connecting to "), s_Host);
 
 	return millis() - start_send;
@@ -3408,8 +3389,11 @@ static bool fwDownloadStreamFile(const String& url, const String& fname) {
 				 String(cfg::current_lang) + ' ' + String(INTL_LANG) + ' ' +
 				 String(cfg::use_beta ? "BETA" : ""));
 
-	WiFiClient client;
-	if (http.begin(client, FPSTR(FW_DOWNLOAD_HOST), 80, url)) {
+	WiFiClientSecure client;
+	client.setBufferSizes(1024, TCP_MSS > 1024 ? 2048 : 1024);
+	client.setTrustAnchors(&x509_dst_root_ca);
+
+	if (http.begin(client, FPSTR(FW_DOWNLOAD_HOST), 443, url)) {
 		if (http.GET() == HTTP_CODE_OK) {
 			File fwFile = SPIFFS.open(fname_new, "w+");
 			if (fwFile) {
@@ -3511,8 +3495,10 @@ static void twoStageAutoUpdate() {
 
 	// TODO: add MD5 verification also for 2nd stage
 	debug_outln("launching 2nd stage", DEBUG_MIN_INFO);
-	WiFiClient client;
-	const HTTPUpdateResult ret = ESPhttpUpdate.update(client, FPSTR(FW_DOWNLOAD_HOST), 80,
+	WiFiClientSecure client;
+	client.setBufferSizes(1024, TCP_MSS > 1024 ? 2048 : 1024);
+	client.setTrustAnchors(&x509_dst_root_ca);
+	const HTTPUpdateResult ret = ESPhttpUpdate.update(client, FPSTR(FW_DOWNLOAD_HOST), 443,
 		"/airrohr/loader-002.bin", String("LOADER-002"));
 
 	String LastErrorString = ESPhttpUpdate.getLastErrorString().c_str();
