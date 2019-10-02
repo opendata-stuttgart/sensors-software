@@ -3450,6 +3450,7 @@ static void twoStageAutoUpdate() {
 	// Unmout Filesystem before reboot
 	SPIFFS.end();
 
+	// TODO: add MD5 verification also for 2nd stage
 	debug_outln("launching 2nd stage", DEBUG_MIN_INFO);
 	const HTTPUpdateResult ret = ESPhttpUpdate.update(FPSTR(FW_DOWNLOAD_HOST), 80,
 		"/airrohr/loader-002.bin", String("LOADER-002"));
