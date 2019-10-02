@@ -3412,7 +3412,7 @@ static bool fwDownloadStreamFile(const String& url, const String& fname) {
 	if (bytes_written > 0)
 		return true;
 
-	debug_outln_info("Download failed!");
+	debug_outln_error(F("Firmware download failed!"));
 	SPIFFS.remove(fname_new);
 	return false;
 }
@@ -3427,14 +3427,14 @@ static void twoStageAutoUpdate() {
 	String lang_variant(cfg::current_lang);
 	lang_variant.toLowerCase();
 
-	String fwprefix("/airrohr/update/latest_");
+	String fwprefix(F("/airrohr/update/latest_"));
 	if (cfg::use_beta) {
-		fwprefix = "/airrohr/beta/latest_";
+		fwprefix = F("/airrohr/beta/latest_");
 	}
 	fwprefix += lang_variant;
 
-	String firmware_md5("/firmware.bin.md5");
-	String fetch_md5_name = fwprefix + ".bin.md5";
+	String firmware_md5(F("/firmware.bin.md5"));
+	String fetch_md5_name = fwprefix + F(".bin.md5");
 	bool downloadSuccess = fwDownloadStreamFile(fetch_md5_name, firmware_md5);
 	if (!downloadSuccess)
 		return;
@@ -3454,12 +3454,12 @@ static void twoStageAutoUpdate() {
 	debug_outln_info(F("Sketch md5    : "), ESP.getSketchMD5());
 
 	if (newFwmd5 == ESP.getSketchMD5()) {
-		debug_outln_verbose("No newer version available.");
+		debug_outln_verbose(F("No newer version available."));
 		return;
 	}
 
-	String firmware_name("/firmware.bin");
-	String fetch_name = fwprefix + ".bin";
+	String firmware_name(F("/firmware.bin"));
+	String fetch_name = fwprefix + F(".bin");
 	downloadSuccess = fwDownloadStreamFile(fetch_name, firmware_name);
 
 	if (!downloadSuccess)
@@ -3494,12 +3494,12 @@ static void twoStageAutoUpdate() {
 	SPIFFS.end();
 
 	// TODO: add MD5 verification also for 2nd stage
-	debug_outln("launching 2nd stage", DEBUG_MIN_INFO);
+	debug_outln_info(F("launching 2nd stage"));
 	WiFiClientSecure client;
 	client.setBufferSizes(1024, TCP_MSS > 1024 ? 2048 : 1024);
 	client.setTrustAnchors(&x509_dst_root_ca);
 	const HTTPUpdateResult ret = ESPhttpUpdate.update(client, FPSTR(FW_DOWNLOAD_HOST), 443,
-		"/airrohr/loader-002.bin", String("LOADER-002"));
+		FPSTR(FW_2ND_LOADER_URL), SOFTWARE_VERSION);
 
 	String LastErrorString = ESPhttpUpdate.getLastErrorString().c_str();
 	switch(ret) {
@@ -4126,7 +4126,7 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 	if (cfg::send2custom) {
 		String data_to_send = data;
 		data_to_send.remove(0, 1);
-		String data_4_custom("{\"esp8266id\": \"");
+		String data_4_custom(F("{\"esp8266id\": \""));
 		data_4_custom += esp_chipid;
 		data_4_custom += "\", ";
 		data_4_custom += data_to_send;
