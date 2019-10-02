@@ -3415,6 +3415,7 @@ static void twoStageAutoUpdate() {
 
 	File fwFile = SPIFFS.open(firmware_md5, "r");
 	if (!fwFile || fwFile.size() >= 40) {
+		SPIFFS.remove(firmware_md5);
 		debug_outln_error(F("Failed reopening md5 file.."));
 		return;
 	}
@@ -3440,6 +3441,8 @@ static void twoStageAutoUpdate() {
 
 	fwFile = SPIFFS.open(firmware_name, "r");
 	if (!fwFile) {
+		SPIFFS.remove(firmware_name);
+		SPIFFS.remove(firmware_md5);
 		debug_outln_error(F("Failed reopening fw file.."));
 		return;
 	}
@@ -3475,6 +3478,8 @@ static void twoStageAutoUpdate() {
 		debug_outln_error(FPSTR(DBG_TXT_UPDATE_FAILED));
 		debug_outln(LastErrorString, DEBUG_ERROR);
 		display_debug(FPSTR(DBG_TXT_UPDATE), FPSTR(DBG_TXT_UPDATE_FAILED));
+		SPIFFS.remove(firmware_name);
+		SPIFFS.remove(firmware_md5);
 		break;
 	case HTTP_UPDATE_NO_UPDATES:
 		debug_outln_info(FPSTR(DBG_TXT_UPDATE), FPSTR(DBG_TXT_UPDATE_NO_UPDATE));
@@ -4180,7 +4185,7 @@ void setup(void) {
 #endif
 
 	starttime = millis();									// store the start time
-	time_point_device_start_ms = starttime;
+	last_update_attempt = time_point_device_start_ms = starttime;
 	starttime_SDS = starttime;
 	next_display_millis = starttime + DISPLAY_UPDATE_INTERVAL_MS;
 }
@@ -4221,6 +4226,7 @@ void loop(void) {
 
 	if (msSince(last_update_attempt) > PAUSE_BETWEEN_UPDATE_ATTEMPTS_MS) {
 		twoStageAutoUpdate();
+		last_update_attempt = act_milli;
 	}
 
 	if (cfg::sps30_read && ( !sps30_init_failed)) {
