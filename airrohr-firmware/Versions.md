@@ -3,6 +3,7 @@ NRZ-2019-126-B1
 * Switch to Arduino Core 2.5.2
 * Switch OTA updater to use TLS with server certificate verification
 * SSL server certificate verification for Madavi, Sensor Community and OpenSensemap
+* Update ESPSoftwareSerial to 5.0.4
 
 NRZ-2019-125-B1
 * Revert unintentional default senseboxid change
