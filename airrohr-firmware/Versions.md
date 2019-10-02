@@ -1,5 +1,5 @@
 NRZ-2019-124-B7
-* next beta version
+* Fix update checking interval
 
 NRZ-2019-124-B6
 * noise sensor added
