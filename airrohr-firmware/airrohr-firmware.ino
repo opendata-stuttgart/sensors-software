@@ -4414,7 +4414,8 @@ void loop(void) {
 
 		sum_send_time += sendDataToOptionalApis(data);
 
-		sending_time = (4 * sending_time + sum_send_time) / 5;
+		// https://en.wikipedia.org/wiki/Moving_average#Cumulative_moving_average
+		sending_time = (3 * sending_time + sum_send_time) / 4;
 		debug_outln_info(F("Time for sending data (ms): "), String(sending_time));
 
 		// reconnect to WiFi if disconnected
