@@ -1115,11 +1115,9 @@ static String sha1Hex(const String& s) {
 	esp_sha(SHA1, (const unsigned char*) s.c_str(), s.length(), (unsigned char*)sha1sum_output);
 #endif
 	String r;
-	for (unsigned i = 0; i < 20; ++i) {
-		String hex = String(sha1sum_output[i], HEX);
-		if (hex.length() < 2) {
-			r += '0';
-		}
+	for(uint16_t i = 0; i < 20; i++) {
+		char hex[3];
+		snprintf(hex, sizeof(hex), "%02x", sha1sum_output[i]);
 		r += hex;
 	}
 	return r;
@@ -3288,16 +3286,12 @@ static void fetchSensorDNMS(String& s) {
  * read GPS sensor values                                        *
  *****************************************************************/
 static void fetchSensorGPS(String& s) {
-	String gps_lat, gps_lon;
-
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), "GPS");
 
 	if (gps.location.isUpdated()) {
 		if (gps.location.isValid()) {
 			last_value_GPS_lat = gps.location.lat();
 			last_value_GPS_lon = gps.location.lng();
-			gps_lat = std::move(String(last_value_GPS_lat, 6));
-			gps_lon = std::move(String(last_value_GPS_lon, 6));
 		} else {
 			last_value_GPS_lat = -200;
 			last_value_GPS_lon = -200;
@@ -3311,43 +3305,17 @@ static void fetchSensorGPS(String& s) {
 			debug_outln_verbose(F("Altitude INVALID"));
 		}
 		if (gps.date.isValid()) {
-			String gps_date;
-			if (gps.date.month() < 10) {
-				gps_date += '0';
-			}
-			gps_date += String(gps.date.month());
-			gps_date += '/';
-			if (gps.date.day() < 10) {
-				gps_date += '0';
-			}
-			gps_date += String(gps.date.day());
-			gps_date += '/';
-			gps_date += String(gps.date.year());
+			char gps_date[16];
+			snprintf_P(gps_date, sizeof(gps_date), PSTR("%02d/%02d/%04d"),
+					gps.date.month(), gps.date.day(), gps.date.year());
 			last_value_GPS_date = gps_date;
 		} else {
 			debug_outln_verbose(F("Date INVALID"));
 		}
 		if (gps.time.isValid()) {
-			String gps_time;
-			if (gps.time.hour() < 10) {
-				gps_time += '0';
-			}
-			gps_time += String(gps.time.hour());
-			gps_time += ':';
-			if (gps.time.minute() < 10) {
-				gps_time += '0';
-			}
-			gps_time += String(gps.time.minute());
-			gps_time += ':';
-			if (gps.time.second() < 10) {
-				gps_time += '0';
-			}
-			gps_time += String(gps.time.second());
-			gps_time += '.';
-			if (gps.time.centisecond() < 10) {
-				gps_time += '0';
-			}
-			gps_time += String(gps.time.centisecond());
+			char gps_time[20];
+			snprintf_P(gps_time, sizeof(gps_time), PSTR("%02d:%02d:%02d.%02d"),
+				gps.time.hour(), gps.time.minute(), gps.time.second(), gps.time.centisecond());
 			last_value_GPS_time = gps_time;
 		} else {
 			debug_outln_verbose(F("Time: INVALID"));
