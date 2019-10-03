@@ -708,7 +708,8 @@ static void add_Value2Json(String& res, const __FlashStringHelper* type, const S
 	res += s;
 }
 
-static void add_Value2Json(String& res, const __FlashStringHelper* type, const float& value) {
+static void add_Value2Json(String& res, const __FlashStringHelper* type, const __FlashStringHelper* debug_type, const float& value) {
+	debug_outln_info(FPSTR(debug_type), value);
 	add_Value2Json(res, type, String(value));
 }
 
@@ -2251,7 +2252,7 @@ static void wifiConfig() {
 
 	debug_outln_info(F("---- Result Webconfig ----"));
 	debug_outln_info(F("WLANSSID: "), cfg::wlanssid);
-	debug_outln_info(F("----\nReading ..."));
+	debug_outln_info(FPSTR(DBG_TXT_SEP));
 	debug_outln_info_bool(F("PPD: "), cfg::ppd_read);
 	debug_outln_info_bool(F("SDS: "), cfg::sds_read);
 	debug_outln_info_bool(F("PMS: "), cfg::pms_read);
@@ -2262,11 +2263,11 @@ static void wifiConfig() {
 	debug_outln_info_bool(F("HTU21D: "), cfg::htu21d_read);
 	debug_outln_info_bool(F("BMP: "), cfg::bmp_read);
 	debug_outln_info_bool(F("DNMS: "), cfg::dnms_read);
-	debug_outln_info(F("----\nSend to ..."));
+	debug_outln_info(FPSTR(DBG_TXT_SEP));
 	debug_outln_info_bool(F("SensorCommunity: "), cfg::send2dusti);
 	debug_outln_info_bool(F("Madavi: "), cfg::send2madavi);
 	debug_outln_info_bool(F("CSV: "), cfg::send2csv);
-	debug_outln_info(F("----"));
+	debug_outln_info(FPSTR(DBG_TXT_SEP));
 	debug_outln_info_bool(F("Autoupdate: "), cfg::auto_update);
 	debug_outln_info_bool(F("Display: "), cfg::has_display);
 	debug_outln_info_bool(F("LCD 1602: "), cfg::has_lcd1602);
@@ -2533,15 +2534,13 @@ static void fetchSensorDHT(String& s) {
 		if (isnan(t) || isnan(h)) {
 			debug_outln_error(F("DHT11/DHT22 read failed"));
 		} else {
-			debug_outln_info(FPSTR(DBG_TXT_TEMPERATURE), t);
-			debug_outln_info(FPSTR(DBG_TXT_HUMIDITY), h);
 			last_value_DHT_T = t;
 			last_value_DHT_H = h;
-			add_Value2Json(s, F("temperature"), last_value_DHT_T);
-			add_Value2Json(s, F("humidity"), last_value_DHT_H);
+			add_Value2Json(s, F("temperature"), FPSTR(DBG_TXT_TEMPERATURE), last_value_DHT_T);
+			add_Value2Json(s, F("humidity"), FPSTR(DBG_TXT_HUMIDITY), last_value_DHT_H);
 		}
 	}
-	debug_outln_info(F("----"));
+	debug_outln_info(FPSTR(DBG_TXT_SEP));
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_DHT22));
 }
@@ -2559,14 +2558,12 @@ static void fetchSensorHTU21D(String& s) {
 		last_value_HTU21D_H = -1.0;
 		debug_outln_error(F("HTU21D read failed"));
 	} else {
-		debug_outln_info(FPSTR(DBG_TXT_TEMPERATURE), t);
-		debug_outln_info(FPSTR(DBG_TXT_HUMIDITY), h);
 		last_value_HTU21D_T = t;
 		last_value_HTU21D_H = h;
-		add_Value2Json(s, F("HTU21D_temperature"), last_value_HTU21D_T);
-		add_Value2Json(s, F("HTU21D_humidity"), last_value_HTU21D_H);
+		add_Value2Json(s, F("HTU21D_temperature"), FPSTR(DBG_TXT_TEMPERATURE), last_value_HTU21D_T);
+		add_Value2Json(s, F("HTU21D_humidity"), FPSTR(DBG_TXT_HUMIDITY), last_value_HTU21D_H);
 	}
-	debug_outln_info(F("----"));
+	debug_outln_info(FPSTR(DBG_TXT_SEP));
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_HTU21D));
 }
@@ -2584,15 +2581,12 @@ static void fetchSensorBMP(String& s) {
 		last_value_BMP_P = -1.0;
 		debug_outln_error(F("BMP180 read failed"));
 	} else {
-		debug_outln_info(FPSTR(DBG_TXT_TEMPERATURE), t);
-		debug_outln_info(FPSTR(DBG_TXT_PRESSURE), (p / 100.0f));
 		last_value_BMP_T = t;
 		last_value_BMP_P = p;
-		add_Value2Json(s, F("BMP_pressure"), last_value_BMP_P);
-		add_Value2Json(s, F("BMP_temperature"), last_value_BMP_T);
+		add_Value2Json(s, F("BMP_pressure"), FPSTR(DBG_TXT_PRESSURE), last_value_BMP_P);
+		add_Value2Json(s, F("BMP_temperature"), FPSTR(DBG_TXT_TEMPERATURE), last_value_BMP_T);
 	}
-	debug_outln_info(F("----"));
-
+	debug_outln_info(FPSTR(DBG_TXT_SEP));
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_BMP180));
 }
 
@@ -2609,15 +2603,12 @@ static void fetchSensorSHT3x(String& s) {
 		last_value_SHT3X_H = -1.0;
 		debug_outln_error(F("SHT3X read failed"));
 	} else {
-		debug_outln_info(FPSTR(DBG_TXT_TEMPERATURE), t);
-		debug_outln_info(FPSTR(DBG_TXT_HUMIDITY), h);
 		last_value_SHT3X_T = t;
 		last_value_SHT3X_H = h;
-		add_Value2Json(s, F("SHT3X_temperature"), last_value_SHT3X_T);
-		add_Value2Json(s, F("SHT3X_humidity"), last_value_SHT3X_H);
+		add_Value2Json(s, F("SHT3X_temperature"), FPSTR(DBG_TXT_TEMPERATURE), last_value_SHT3X_T);
+		add_Value2Json(s, F("SHT3X_humidity"), FPSTR(DBG_TXT_HUMIDITY), last_value_SHT3X_H);
 	}
-	debug_outln_info(F("----"));
-
+	debug_outln_info(FPSTR(DBG_TXT_SEP));
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_SHT3X));
 }
 
@@ -2637,23 +2628,19 @@ static void fetchSensorBMX280(String& s) {
 		last_value_BME280_H = -1.0;
 		debug_outln_error(F("BMP/BME280 read failed"));
 	} else {
-		debug_outln_info(FPSTR(DBG_TXT_TEMPERATURE), t);
-		debug_outln_info(FPSTR(DBG_TXT_PRESSURE), (p / 100.0f));
 		last_value_BMX280_T = t;
 		last_value_BMX280_P = p;
 		if (bmx280.sensorID() == BME280_SENSOR_ID) {
-			add_Value2Json(s, F("BME280_temperature"), last_value_BMX280_T);
-			add_Value2Json(s, F("BME280_pressure"), last_value_BMX280_P);
-			debug_outln_info(FPSTR(DBG_TXT_HUMIDITY), h);
+			add_Value2Json(s, F("BME280_temperature"), FPSTR(DBG_TXT_TEMPERATURE), last_value_BMX280_T);
+			add_Value2Json(s, F("BME280_pressure"), FPSTR(DBG_TXT_PRESSURE), last_value_BMX280_P);
 			last_value_BME280_H = h;
-			add_Value2Json(s, F("BME280_humidity"), last_value_BME280_H);
+			add_Value2Json(s, F("BME280_humidity"), FPSTR(DBG_TXT_HUMIDITY), last_value_BME280_H);
 		} else {
-			add_Value2Json(s, F("BMP280_pressure"), last_value_BMX280_P);
-			add_Value2Json(s, F("BMP280_temperature"), last_value_BMX280_T);
+			add_Value2Json(s, F("BMP280_pressure"), FPSTR(DBG_TXT_PRESSURE), last_value_BMX280_P);
+			add_Value2Json(s, F("BMP280_temperature"), FPSTR(DBG_TXT_TEMPERATURE), last_value_BMX280_T);
 		}
 	}
-	debug_outln_info(F("----"));
-
+	debug_outln_info(FPSTR(DBG_TXT_SEP));
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_BMX280));
 }
 
@@ -2680,11 +2667,10 @@ static void fetchSensorDS18B20(String& s) {
 		last_value_DS18B20_T = -128.0;
 		debug_outln_error(F("DS18B20 read failed"));
 	} else {
-		debug_outln_info(FPSTR(DBG_TXT_TEMPERATURE), t);
 		last_value_DS18B20_T = t;
-		add_Value2Json(s, F("DS18B20_temperature"), last_value_DS18B20_T);
+		add_Value2Json(s, F("DS18B20_temperature"), FPSTR(DBG_TXT_TEMPERATURE), last_value_DS18B20_T);
 	}
-	debug_outln_info(F("----"));
+	debug_outln_info(FPSTR(DBG_TXT_SEP));
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_DS18B20));
 }
 
@@ -2797,11 +2783,9 @@ static void fetchSensorSDS(String& s) {
 		if (sds_val_count > 0) {
 			last_value_SDS_P1 = float(sds_pm10_sum) / (sds_val_count * 10.0f);
 			last_value_SDS_P2 = float(sds_pm25_sum) / (sds_val_count * 10.0f);
-			debug_outln_info(F("PM10:  "), last_value_SDS_P1);
-			debug_outln_info(F("PM2.5: "), last_value_SDS_P2);
-			debug_outln_info(F("----"));
-			add_Value2Json(s, F("SDS_P1"), last_value_SDS_P1);
-			add_Value2Json(s, F("SDS_P2"), last_value_SDS_P2);
+			add_Value2Json(s, F("SDS_P1"), F("PM10:  "), last_value_SDS_P1);
+			add_Value2Json(s, F("SDS_P2"), F("PM2.5: "), last_value_SDS_P2);
+			debug_outln_info(FPSTR(DBG_TXT_SEP));
 		}
 		sds_pm10_sum = 0;
 		sds_pm25_sum = 0;
@@ -2964,13 +2948,10 @@ static void fetchSensorPMS(String& s) {
 			last_value_PMS_P0 = float(pms_pm1_sum) / float(pms_val_count);
 			last_value_PMS_P1 = float(pms_pm10_sum) / float(pms_val_count);
 			last_value_PMS_P2 = float(pms_pm25_sum) / float(pms_val_count);
-			debug_outln_info(F("PM1:   "), last_value_PMS_P0);
-			debug_outln_info(F("PM2.5: "), last_value_PMS_P2);
-			debug_outln_info(F("PM10:  "), last_value_PMS_P1);
-			debug_outln_info(F("-------"));
-			add_Value2Json(s, F("PMS_P0"), last_value_PMS_P0);
-			add_Value2Json(s, F("PMS_P1"), last_value_PMS_P1);
-			add_Value2Json(s, F("PMS_P2"), last_value_PMS_P2);
+			add_Value2Json(s, F("PMS_P0"), F("PM1:   "), last_value_PMS_P0);
+			add_Value2Json(s, F("PMS_P1"), F("PM10:  "), last_value_PMS_P1);
+			add_Value2Json(s, F("PMS_P2"), F("PM2.5: "), last_value_PMS_P2);
+			debug_outln_info(FPSTR(DBG_TXT_SEP));
 		}
 		pms_pm1_sum = 0;
 		pms_pm10_sum = 0;
@@ -3103,11 +3084,9 @@ static void fetchSensorHPM(String& s) {
 		if (hpm_val_count > 0) {
 			last_value_HPM_P1 = float(hpm_pm10_sum) / float(hpm_val_count);
 			last_value_HPM_P2 = float(hpm_pm25_sum) / float(hpm_val_count);
-			debug_outln_info(F("PM2.5: "), last_value_HPM_P1);
-			debug_outln_info(F("PM10:  "), last_value_HPM_P2);
-			debug_outln_info(F("-------"));
-			add_Value2Json(s, F("HPM_P1"), last_value_HPM_P1);
-			add_Value2Json(s, F("HPM_P2"), last_value_HPM_P2);
+			add_Value2Json(s, F("HPM_P1"), F("PM2.5: "), last_value_HPM_P1);
+			add_Value2Json(s, F("HPM_P2"), F("PM10:  "), last_value_HPM_P2);
+			debug_outln_info(FPSTR(DBG_TXT_SEP));
 		}
 		hpm_pm10_sum = 0;
 		hpm_pm25_sum = 0;
@@ -3169,33 +3148,23 @@ static void fetchSensorPPD(String& s) {
 		last_value_PPD_P2 = -1;
 		float ratio = lowpulseoccupancyP1 / (SAMPLETIME_MS * 10.0f);
 		float concentration = calcConcentration(ratio);
-		String s_lowpulseoccupancyP1(lowpulseoccupancyP1), s_lowpulseoccupancyP2(lowpulseoccupancyP2);
-
-		debug_outln_info(F("LPO P10    : "), s_lowpulseoccupancyP1);
-		debug_outln_info(F("Ratio PM10%: "), ratio);
-		debug_outln_info(F("PM10 Count : "), concentration);
 
 		// json for push to api / P1
 		last_value_PPD_P1 = concentration;
-		add_Value2Json(s, F("durP1"), s_lowpulseoccupancyP1);
-		add_Value2Json(s, F("ratioP1"), ratio);
-		add_Value2Json(s, F("P1"), last_value_PPD_P1);
+		add_Value2Json(s, F("durP1"), F("LPO P10    : "), lowpulseoccupancyP1);
+		add_Value2Json(s, F("ratioP1"), F("Ratio PM10%: "), ratio);
+		add_Value2Json(s, F("P1"), F("PM10 Count : "), last_value_PPD_P1);
 
 		ratio = lowpulseoccupancyP2 / (SAMPLETIME_MS * 10.0f);
 		concentration = calcConcentration(ratio);
 
-		// Begin printing
-		debug_outln_info(F("LPO PM25   : "), s_lowpulseoccupancyP2);
-		debug_outln_info(F("Ratio PM25%: "), ratio);
-		debug_outln_info(F("PM25 Count : "), concentration);
-
 		// json for push to api / P2
 		last_value_PPD_P2 = concentration;
-		add_Value2Json(s, F("durP2"), s_lowpulseoccupancyP2);
-		add_Value2Json(s, F("ratioP2"), ratio);
-		add_Value2Json(s, F("P2"), last_value_PPD_P2);
+		add_Value2Json(s, F("durP2"), F("LPO PM25   : "), lowpulseoccupancyP2);
+		add_Value2Json(s, F("ratioP2"), F("Ratio PM25%: "), ratio);
+		add_Value2Json(s, F("P2"), F("PM25 Count : "), last_value_PPD_P2);
 
-		debug_outln_info(F("----"));
+		debug_outln_info(FPSTR(DBG_TXT_SEP));
 	}
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_PPD42NS));
@@ -3218,27 +3187,16 @@ static void fetchSensorSPS30(String& s) {
 	last_value_SPS30_N10 = value_SPS30_N10 / SPS30_measurement_count;
 	last_value_SPS30_TS = value_SPS30_TS / SPS30_measurement_count;
 
-	debug_outln_info(F("PM1.0: "), last_value_SPS30_P0);
-	debug_outln_info(F("PM2.5: "), last_value_SPS30_P2);
-	debug_outln_info(F("PM4.0: "), last_value_SPS30_P4);
-	debug_outln_info(F("PM10:  "), last_value_SPS30_P1);
-	debug_outln_info(F("NC0.5: "), last_value_SPS30_N05);
-	debug_outln_info(F("NC1.0: "), last_value_SPS30_N1);
-	debug_outln_info(F("NC2.5: "), last_value_SPS30_N25);
-	debug_outln_info(F("NC4.0: "), last_value_SPS30_N4);
-	debug_outln_info(F("NC10:  "), last_value_SPS30_N10);
-	debug_outln_info(F("TPS:   "), last_value_SPS30_TS);
-
-	add_Value2Json(s, F("SPS30_P0"), last_value_SPS30_P0);
-	add_Value2Json(s, F("SPS30_P1"), last_value_SPS30_P1);
-	add_Value2Json(s, F("SPS30_P2"), last_value_SPS30_P2);
-	add_Value2Json(s, F("SPS30_P4"), last_value_SPS30_P4);
-	add_Value2Json(s, F("SPS30_N05"), last_value_SPS30_N05);
-	add_Value2Json(s, F("SPS30_N1"), last_value_SPS30_N1);
-	add_Value2Json(s, F("SPS30_N25"), last_value_SPS30_N25);
-	add_Value2Json(s, F("SPS30_N4"), last_value_SPS30_N4);
-	add_Value2Json(s, F("SPS30_N10"), last_value_SPS30_N10);
-	add_Value2Json(s, F("SPS30_TS"), last_value_SPS30_TS);
+	add_Value2Json(s, F("SPS30_P0"), F("PM1.0: "), last_value_SPS30_P0);
+	add_Value2Json(s, F("SPS30_P2"), F("PM2.5: "), last_value_SPS30_P2);
+	add_Value2Json(s, F("SPS30_P4"), F("PM4.0: "), last_value_SPS30_P4);
+	add_Value2Json(s, F("SPS30_P1"), F("PM 10: "), last_value_SPS30_P1);
+	add_Value2Json(s, F("SPS30_N05"), F("NC0.5: "), last_value_SPS30_N05);
+	add_Value2Json(s, F("SPS30_N1"), F("NC1.0: "), last_value_SPS30_N1);
+	add_Value2Json(s, F("SPS30_N25"), F("NC2.5: "), last_value_SPS30_N25);
+	add_Value2Json(s, F("SPS30_N4"), F("NC4.0: "), last_value_SPS30_N4);
+	add_Value2Json(s, F("SPS30_N10"), F("NC10:  "), last_value_SPS30_N10);
+	add_Value2Json(s, F("SPS30_TS"), F("TPS:   "), last_value_SPS30_TS);
 
 	debug_outln_info(F("SPS30 read counter: "), String(SPS30_read_counter));
 	debug_outln_info(F("SPS30 read error counter: "), String(SPS30_read_error_counter));
@@ -3257,7 +3215,7 @@ static void fetchSensorSPS30(String& s) {
 	value_SPS30_N10 = 0.0;
 	value_SPS30_TS = 0.0;
 
-	debug_outln_info(F("----"));
+	debug_outln_info(FPSTR(DBG_TXT_SEP));
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_SPS30));
 }
 
@@ -3313,15 +3271,11 @@ static void fetchSensorDNMS(String& s) {
 		dnms_reset(); // try to reset dnms
 		debug_outln_error(F("DNMS read failed"));
 	} else {
-		debug_outln_info(F("LAeq: "), last_value_dnms_laeq);
-		debug_outln_info(F("LA_MIN: "), last_value_dnms_la_min);
-		debug_outln_info(F("LA_MAX: "), last_value_dnms_la_max);
-
-		add_Value2Json(s, F("DNMS_noise_LAeq"), last_value_dnms_laeq);
-		add_Value2Json(s, F("DNMS_noise_LA_min"), last_value_dnms_la_min);
-		add_Value2Json(s, F("DNMS_noise_LA_max"), last_value_dnms_la_max);
+		add_Value2Json(s, F("DNMS_noise_LAeq"), F("LAeq: "), last_value_dnms_laeq);
+		add_Value2Json(s, F("DNMS_noise_LA_min"), F("LA_MIN: "), last_value_dnms_la_min);
+		add_Value2Json(s, F("DNMS_noise_LA_max"), F("LA_MAX: "), last_value_dnms_la_max);
 	}
-	debug_outln_info(F("----"));
+	debug_outln_info(FPSTR(DBG_TXT_SEP));
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_DNMS));
 }
 
@@ -3368,15 +3322,15 @@ static void fetchSensorGPS(String& s) {
 	if (send_now) {
 		debug_outln_info(F("Lat: "), String(last_value_GPS_lat, 6));
 		debug_outln_info(F("Lng: "), String(last_value_GPS_lon, 6));
-		debug_outln_info(F("Altitude: "), last_value_GPS_alt);
 		debug_outln_info(F("Date: "), last_value_GPS_date);
 		debug_outln_info(F("Time "), last_value_GPS_time);
-		debug_outln_info(F("----"));
+
 		add_Value2Json(s, F("GPS_lat"), String(last_value_GPS_lat, 6));
 		add_Value2Json(s, F("GPS_lon"), String(last_value_GPS_lon, 6));
-		add_Value2Json(s, F("GPS_height"), last_value_GPS_alt);
+		add_Value2Json(s, F("GPS_height"), F("Altitude: "), last_value_GPS_alt);
 		add_Value2Json(s, F("GPS_date"), last_value_GPS_date);
 		add_Value2Json(s, F("GPS_time"), last_value_GPS_time);
+		debug_outln_info(FPSTR(DBG_TXT_SEP));
 	}
 
 	if ( count_sends > 0 && gps.charsProcessed() < 10) {
@@ -3386,7 +3340,6 @@ static void fetchSensorGPS(String& s) {
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), "GPS");
 }
-
 
 /*****************************************************************
  * AutoUpdate                                                    *
@@ -4067,7 +4020,7 @@ static void logEnabledAPIs() {
 	if (cfg::send2influx) {
 		debug_outln_info(F("custom influx DB"));
 	}
-	debug_outln_info(F("----"));
+	debug_outln_info(FPSTR(DBG_TXT_SEP));
 	if (cfg::auto_update) {
 		debug_outln_info(F("Auto-Update active..."));
 	}
@@ -4369,7 +4322,7 @@ void loop(void) {
 		RESERVE_STRING(result, MED_STR);
 
 		debug_outln_info(F("WLAN signal strength (dBm): "), signal_strength);
-		debug_outln_info(F("----"));
+		debug_outln_info(FPSTR(DBG_TXT_SEP));
 
 		if (cfg::ppd_read) {
 			data += result_PPD;

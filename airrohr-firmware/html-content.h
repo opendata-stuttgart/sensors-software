@@ -20,6 +20,7 @@ const char DBG_TXT_SDS011_VERSION_DATE[] PROGMEM = "SDS011 version date";
 const char DBG_TXT_CONNECTING_TO[] PROGMEM = "Connecting to ";
 const char DBG_TXT_FOUND[] PROGMEM = " ... found";
 const char DBG_TXT_NOT_FOUND[] PROGMEM = " ... not found";
+const char DBG_TXT_SEP[] PROGMEM = "----";
 
 const char SENSORS_SDS011[] PROGMEM = "SDS011";
 const char SENSORS_PPD42NS[] PROGMEM = "PPD42NS";
