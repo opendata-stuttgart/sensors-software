@@ -182,7 +182,7 @@ Pinout:
 * SCL  ->  Pin D4 (GPIO2)
 * SDA  ->  Pin D3 (GPIO0)
 
-### HTU21D (I2C)
+### HTU21D / Sensirion SHT3x (I2C)
 * VCC  ->  Pin 3V3
 * GND  ->  Pin GND
 * SCL  ->  Pin D4 (GPIO2)

@@ -221,6 +221,10 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 #define BMP280_API_PIN 3
 #define BME280_API_PIN 11
 
+// SHT3x, temperature, pressure
+#define SHT3X_READ 0
+#define SHT3X_API_PIN 7
+
 // DS18B20, temperature
 #define DS18B20_READ 0
 #define DS18B20_API_PIN 13

@@ -153,6 +153,8 @@ const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 #include "./DHT.h"
 #include <Adafruit_HTU21DF.h>
 #include <Adafruit_BMP085.h>
+#include <Adafruit_SHT31.h>
+
 #include <DallasTemperature.h>
 #include <TinyGPS++.h>
 #include "./bmx280_i2c.h"
@@ -261,6 +263,7 @@ namespace cfg {
 	bool sps30_read = SPS30_READ;
 	bool bmp_read = BMP_READ;
 	bool bmx280_read = BMX280_READ;
+	bool sht3x_read = SHT3X_READ;
 	bool ds18b20_read = DS18B20_READ;
 	bool dnms_read = DNMS_READ;
 	char dnms_correction[LEN_DNMS_CORRECTION] = DNMS_CORRECTION;
@@ -349,6 +352,7 @@ long int sample_count = 0;
 bool htu21d_init_failed = false;
 bool bmp_init_failed = false;
 bool bmx280_init_failed = false;
+bool sht3x_init_failed = false;
 bool dnms_init_failed = false;
 bool gps_init_failed = false;
 
@@ -410,6 +414,11 @@ Adafruit_BMP085 bmp;
 BMX280 bmx280;
 
 /*****************************************************************
+ * SHT3x declaration                                             *
+ *****************************************************************/
+Adafruit_SHT31 sht3x;
+
+/*****************************************************************
  * DS18B20 declaration                                            *
  *****************************************************************/
 OneWire oneWire(ONEWIRE_PIN);
@@ -461,6 +470,8 @@ float last_value_DHT_H = -1.0;
 float last_value_DS18B20_T = -1.0;
 float last_value_HTU21D_T = -128.0;
 float last_value_HTU21D_H = -1.0;
+float last_value_SHT3X_T = -128.0;
+float last_value_SHT3X_H = -1.0;
 
 int sds_pm10_sum = 0;
 int sds_pm25_sum = 0;
@@ -1501,6 +1512,7 @@ static void webserver_config_send_body_get(String& page_content) {
 		add_form_checkbox_sensor(page_content, Config_htu21d_read, FPSTR(INTL_HTU21D));
 		add_form_checkbox_sensor(page_content, Config_bmp_read, FPSTR(INTL_BMP180));
 		add_form_checkbox_sensor(page_content, Config_bmx280_read, FPSTR(INTL_BMX280));
+		add_form_checkbox_sensor(page_content, Config_sht3x_read, FPSTR(INTL_SHT3X));
 		add_form_checkbox_sensor(page_content, Config_ds18b20_read, FPSTR(INTL_DS18B20));
 
 		// Paginate page after ~ 1500 Bytes
@@ -1660,6 +1672,7 @@ static void webserver_config_send_body_post(String& page_content) {
 	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_SPS30), sps30_read);
 	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_PPD42NS), ppd_read);
 	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_BMX280), bmx280_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_SHT3X), sht3x_read);
 	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_DS18B20), ds18b20_read);
 	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_DNMS), dnms_read);
 	add_line_value(page_content, FPSTR(INTL_DNMS_CORRECTION), String(dnms_correction));
@@ -1904,6 +1917,11 @@ static void webserver_values() {
 			if (bmx280.sensorID() == BME280_SENSOR_ID) {
 				add_table_row_from_value(page_content, FPSTR(SENSORS_BMX280), FPSTR(INTL_HUMIDITY), check_display_value(last_value_BME280_H, -1, 1, 0), unit_H);
 			}
+		}
+		if (cfg::sht3x_read) {
+			page_content += FPSTR(EMPTY_ROW);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_SHT3X), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_SHT3X_T, -128, 1, 0), unit_T);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_SHT3X), FPSTR(INTL_HUMIDITY), check_display_value(last_value_SHT3X_H, -1, 1, 0), unit_H);
 		}
 		if (cfg::ds18b20_read) {
 			page_content += FPSTR(EMPTY_ROW);
@@ -2505,12 +2523,12 @@ static void fetchSensorDHT(String& s) {
 	int count = 0;
 	const int MAX_ATTEMPTS = 5;
 	while ((count++ < MAX_ATTEMPTS) && (s == "")) {
-		auto h = dht.readHumidity();
 		auto t = dht.readTemperature();
+		auto h = dht.readHumidity();
 		if (isnan(t) || isnan(h)) {
 			delay(100);
-			h = dht.readHumidity();
 			t = dht.readTemperature(false);
+			h = dht.readHumidity();
 		}
 		if (isnan(t) || isnan(h)) {
 			debug_outln_error(F("DHT11/DHT22 read failed"));
@@ -2576,6 +2594,31 @@ static void fetchSensorBMP(String& s) {
 	debug_outln_info(F("----"));
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_BMP180));
+}
+
+/*****************************************************************
+ * read SHT3x sensor values                                      *
+ *****************************************************************/
+static void fetchSensorSHT3x(String& s) {
+	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_SHT3X));
+
+	const auto t = sht3x.readTemperature();
+	const auto h = sht3x.readHumidity();
+	if (isnan(h) || isnan(t)) {
+		last_value_SHT3X_T = -128.0;
+		last_value_SHT3X_H = -1.0;
+		debug_outln_error(F("SHT3X read failed"));
+	} else {
+		debug_outln_info(FPSTR(DBG_TXT_TEMPERATURE), t);
+		debug_outln_info(FPSTR(DBG_TXT_HUMIDITY), h);
+		last_value_SHT3X_T = t;
+		last_value_SHT3X_H = h;
+		add_Value2Json(s, F("SHT3X_temperature"), last_value_SHT3X_T);
+		add_Value2Json(s, F("SHT3X_humidity"), last_value_SHT3X_H);
+	}
+	debug_outln_info(F("----"));
+
+	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_SHT3X));
 }
 
 /*****************************************************************
@@ -3600,6 +3643,11 @@ static void display_values() {
 			h_value = last_value_BME280_H;
 		}
 	}
+	if (cfg::sht3x_read) {
+		h_sensor = t_sensor = FPSTR(SENSORS_SHT3X);
+		t_value = last_value_SHT3X_T;
+		h_value = last_value_SHT3X_H;
+	}
 	if (cfg::dnms_read) {
 		la_sensor = FPSTR(SENSORS_DNMS);
 		la_eq_value = last_value_dnms_laeq;
@@ -3617,7 +3665,7 @@ static void display_values() {
 	if (cfg::sps30_read) {
 		screens[screen_count++] = 2;
 	}
-	if (cfg::dht_read || cfg::ds18b20_read || cfg::htu21d_read || cfg::bmp_read || cfg::bmx280_read) {
+	if (cfg::dht_read || cfg::ds18b20_read || cfg::htu21d_read || cfg::bmp_read || cfg::bmx280_read || cfg::sht3x_read) {
 		screens[screen_count++] = 3;
 	}
 	if (cfg::gps_read) {
@@ -3971,6 +4019,14 @@ static void powerOnTestSensors() {
 		if (!initBMX280(0x76) && !initBMX280(0x77)) {
 			debug_outln_error(F("Check BMP280/BME280 wiring"));
 			bmx280_init_failed = 1;
+		}
+	}
+
+	if (cfg::sht3x_read) {
+		debug_outln_info(F("Read SHT3x..."));
+		if (!sht3x.begin()) {
+			debug_outln_error(F("Check SHT3x wiring"));
+			sht3x_init_failed = true;
 		}
 	}
 
@@ -4368,6 +4424,12 @@ void loop(void) {
 				sum_send_time += sendSensorCommunity(result, BMP280_API_PIN, FPSTR(SENSORS_BMX280), "BMP280_");
 			}
 			result = empty_String;
+		}
+		if (cfg::sht3x_read && (! sht3x_init_failed )) {
+			// getting temperature and humidity (optional)
+			fetchSensorSHT3x(result);
+			data += result;
+			sum_send_time += sendSensorCommunity(result, SHT3X_API_PIN, FPSTR(SENSORS_SHT3X), "SHT3X_");
 		}
 		if (cfg::ds18b20_read) {
 			// getting temperature (optional)

@@ -4,6 +4,7 @@ NRZ-2019-126-B1
 * Switch OTA updater to use TLS with server certificate verification
 * SSL server certificate verification for Madavi, Sensor Community and OpenSensemap
 * Update ESPSoftwareSerial to 5.0.4
+* Add support for Sensirion SHT3x Temperature/Humidity sensors
 
 NRZ-2019-125-B1
 * Revert unintentional default senseboxid change
