@@ -295,8 +295,7 @@ float BMX280::readTemperature(void) {
 
   t_fine = var1 + var2;
 
-  float T = (t_fine * 5 + 128) >> 8;
-  return T / 100;
+  return float(t_fine) / 5120.0f;
 }
 
 /*!
@@ -323,16 +322,17 @@ float BMX280::readPressure(void) {
   var1 =
       (((((int64_t)1) << 47) + var1)) * ((int64_t)dig_P1) >> 33;
 
+  // avoid exception caused by division by zero
   if (var1 == 0) {
-    return 0; // avoid exception caused by division by zero
+    return 30000.0f;
   }
   p = 1048576 - adc_P;
   p = (((p << 31) - var2) * 3125) / var1;
   var1 = (((int64_t)dig_P9) * (p >> 13) * (p >> 13)) >> 25;
   var2 = (((int64_t)dig_P8) * p) >> 19;
 
-  p = ((p + var1 + var2) >> 8) + (((int64_t)dig_P7) << 4);
-  return float(p >> 8);
+  int32_t ps = int32_t((p + var1 + var2) >> 8) + (((int32_t)dig_P7) << 4);
+  return float(ps >> 3) / 32.0f;
 }
 
 /*!
@@ -373,6 +373,5 @@ float BMX280::readHumidity(void) {
 
   v_x1_u32r = (v_x1_u32r < 0) ? 0 : v_x1_u32r;
   v_x1_u32r = (v_x1_u32r > 419430400) ? 419430400 : v_x1_u32r;
-  float h = (v_x1_u32r >> 12);
-  return h / 1024.0;
+  return float(v_x1_u32r >> 12) / 1024.0f;
 }

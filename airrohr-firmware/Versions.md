@@ -6,6 +6,7 @@ NRZ-2019-126-B1
 * Update ESPSoftwareSerial to 5.0.4
 * Add support for Sensirion SHT3x Temperature/Humidity sensors
 * Code size optimisations
+* Fix pressure precision of BMP/BME280
 
 NRZ-2019-125-B1
 * Revert unintentional default senseboxid change
