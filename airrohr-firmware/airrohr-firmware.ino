@@ -334,8 +334,6 @@ namespace cfg {
 
 #define JSON_BUFFER_SIZE 2300
 
-String empty_String;
-
 enum class PmSensorCmd {
 	Start,
 	Stop,
@@ -908,8 +906,8 @@ static String SDS_version_date() {
 			debug_outln_info(F("SDS device ID: "), device_id);
 			len = 0;
 			checksum_ok = 0;
-			version_date = "";
-			device_id = "";
+			version_date = emptyString;
+			device_id = emptyString;
 			checksum_is = 0;
 		}
 		yield();
@@ -1076,11 +1074,11 @@ void writeConfig() {
  * Prepare information for data Loggers                          *
  *****************************************************************/
 static void createLoggerConfigs() {
-	basic_auth_custom = "";
+	basic_auth_custom = emptyString;
 	if (cfg::user_custom[0] != '\0' || cfg::pwd_custom[0] != '\0') {
 		basic_auth_custom = base64::encode(String(cfg::user_custom) + ':' + String(cfg::pwd_custom));
 	}
-	basic_auth_influx = "";
+	basic_auth_influx = emptyString;
 	if (cfg::user_influx[0] != '\0' || cfg::pwd_influx[0] != '\0') {
 		basic_auth_influx = base64::encode(String(cfg::user_influx) + ':' + String(cfg::pwd_influx));
 	}
@@ -1161,7 +1159,7 @@ static void start_html_page(String& page_content, const String& title) {
 	if(title != " ") {
 		s.replace("{n}", F("&raquo;"));
 	} else {
-		s.replace("{n}", empty_String);
+		s.replace("{n}", emptyString);
 	}
 	s.replace("{id}", esp_chipid);
 	s.replace("{mac}", WiFi.macAddress());
@@ -1233,12 +1231,12 @@ static String form_checkbox(const ConfigShapeId cfgid, const String& info, const
 	if (*configShape[cfgid].cfg_val.as_bool) {
 		s.replace("{c}", F(" checked='checked'"));
 	} else {
-		s.replace("{c}", empty_String);
+		s.replace("{c}", emptyString);
 	};
 	s.replace("{i}", info);
 	s.replace("{n}", String(configShape[cfgid].cfg_key));
 	if (! linebreak) {
-		s.replace("<br/>", empty_String);
+		s.replace("<br/>", emptyString);
 	}
 	return s;
 }
@@ -1401,7 +1399,7 @@ static bool webserver_request_auth() {
 
 static void sendHttpRedirect() {
 	server.sendHeader(F("Location"), F("http://192.168.4.1/config"));
-	server.send(302, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), empty_String);
+	server.send(302, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), emptyString);
 }
 
 /*****************************************************************
@@ -1415,7 +1413,7 @@ static void webserver_root() {
 		{ return; }
 
 		RESERVE_STRING(page_content, XLARGE_STR);
-		start_html_page(page_content, empty_String);
+		start_html_page(page_content, emptyString);
 		debug_outln_info(F("ws: root ..."));
 
 		// Enable Pagination
@@ -1452,7 +1450,7 @@ static void webserver_config_send_body_get(String& page_content) {
 
 	// Paginate page after ~ 1500 Bytes
 	server.sendContent(page_content);
-	page_content = empty_String;
+	page_content = emptyString;
 
 	if (! wificonfig_loop) {
 		page_content += FPSTR(INTL_BASICAUTH);
@@ -1507,7 +1505,7 @@ static void webserver_config_send_body_get(String& page_content) {
 
 		// Paginate page after ~ 1500 Bytes
 		server.sendContent(page_content);
-		page_content = empty_String;
+		page_content = emptyString;
 
 		add_form_checkbox_sensor(page_content, Config_dht_read, FPSTR(INTL_DHT22));
 		add_form_checkbox_sensor(page_content, Config_htu21d_read, FPSTR(INTL_HTU21D));
@@ -1518,7 +1516,7 @@ static void webserver_config_send_body_get(String& page_content) {
 
 		// Paginate page after ~ 1500 Bytes
 		server.sendContent(page_content);
-		page_content = empty_String;
+		page_content = emptyString;
 
 		add_form_checkbox_sensor(page_content, Config_dnms_read, FPSTR(INTL_DNMS));
 		page_content += FPSTR(TABLE_TAG_OPEN);
@@ -1530,7 +1528,7 @@ static void webserver_config_send_body_get(String& page_content) {
 
 		// Paginate page after ~ 1500 Bytes
 		server.sendContent(page_content);
-		page_content = empty_String;
+		page_content = emptyString;
 	}
 
 	page_content += FPSTR(INTL_MORE_SETTINGS);
@@ -1542,7 +1540,7 @@ static void webserver_config_send_body_get(String& page_content) {
 
 	// Paginate page after ~ 1500 Bytes
 	server.sendContent(page_content);
-	page_content = empty_String;
+	page_content = emptyString;
 
 	add_form_checkbox(page_content, Config_has_flipped_display, FPSTR(INTL_FLIP_DISPLAY));
 	add_form_checkbox(page_content, Config_has_lcd1602_27, FPSTR(INTL_LCD1602_27));
@@ -1553,7 +1551,7 @@ static void webserver_config_send_body_get(String& page_content) {
 
 	// Paginate page after ~ 1500 Bytes
 	server.sendContent(page_content);
-	page_content = empty_String;
+	page_content = emptyString;
 
 	if (! wificonfig_loop) {
 		page_content += FPSTR(TABLE_TAG_OPEN);
@@ -1621,7 +1619,7 @@ static void webserver_config_send_body_get(String& page_content) {
 	}
 
 	server.sendContent(page_content);
-	page_content = empty_String;
+	page_content = emptyString;
 }
 
 static void webserver_config_send_body_post(String& page_content) {
@@ -1653,7 +1651,7 @@ static void webserver_config_send_body_post(String& page_content) {
 			break;
 		case Config_Type_Password:
 			const String server_arg(server.arg(s_param));
-			masked_pwd = "";
+			masked_pwd = emptyString;
 			for (uint8_t i=0;i<server_arg.length();i++)
 				masked_pwd += '*';
 			if (masked_pwd != server_arg || !server_arg.length()) {
@@ -1681,7 +1679,7 @@ static void webserver_config_send_body_post(String& page_content) {
 
 	// Paginate after ~ 1500 bytes
 	server.sendContent(page_content);
-	page_content = empty_String;
+	page_content = emptyString;
 
 	add_line_value_bool(page_content, FPSTR(INTL_AUTO_UPDATE), auto_update);
 	add_line_value_bool(page_content, FPSTR(INTL_USE_BETA), use_beta);
@@ -1703,7 +1701,7 @@ static void webserver_config_send_body_post(String& page_content) {
 
 	// Paginate after ~ 1500 bytes
 	server.sendContent(page_content);
-	page_content = empty_String;
+	page_content = emptyString;
 
 	page_content += F("<br/>senseBox-ID ");
 	page_content += senseboxid;
@@ -1727,7 +1725,7 @@ static void webserver_config_send_body_post(String& page_content) {
 	page_content += FPSTR(INTL_SENSOR_IS_REBOOTING);
 
 	server.sendContent(page_content);
-	page_content = empty_String;
+	page_content = emptyString;
 }
 
 static void webserver_config() {
@@ -1939,8 +1937,8 @@ static void webserver_values() {
 			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_LATITUDE), check_display_value(last_value_GPS_lat, -200.0, 6, 0), "°");
 			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_LONGITUDE), check_display_value(last_value_GPS_lon, -200.0, 6, 0), "°");
 			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_ALTITUDE), check_display_value(last_value_GPS_alt, -1000.0, 2, 0), "m");
-			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_DATE), last_value_GPS_date, empty_String);
-			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_TIME), last_value_GPS_time, empty_String);
+			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_DATE), last_value_GPS_date, emptyString);
+			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_TIME), last_value_GPS_time, emptyString);
 		}
 
 		server.sendContent(page_content);
@@ -2305,14 +2303,14 @@ static void connectWifi() {
 	}
 
 	waitForWifiToConnect(40);
-	debug_outln_info(empty_String);
+	debug_outln_info(emptyString);
 	if (WiFi.status() != WL_CONNECTED) {
 		String fss(cfg::fs_ssid);
 		display_debug(fss.substring(0, 16), fss.substring(16));
 		wifiConfig();
 		if (WiFi.status() != WL_CONNECTED) {
 			waitForWifiToConnect(20);
-			debug_outln_info(empty_String);
+			debug_outln_info(emptyString);
 		}
 	}
 	debug_outln_info(F("WiFi connected\nIP address: "), WiFi.localIP().toString());
@@ -2438,7 +2436,7 @@ static unsigned long sendSensorCommunity(const String& data, const int pin, cons
 		debug_outln_info(F("## Sending to Luftdaten.info - "), sensorname);
 		data_sensorcommunity += data;
 		data_sensorcommunity.remove(data_sensorcommunity.length() - 1);
-		data_sensorcommunity.replace(replace_str, empty_String);
+		data_sensorcommunity.replace(replace_str, emptyString);
 		data_sensorcommunity += "]}";
 		sum_send_time = sendData(LoggerSensorCommunity, data_sensorcommunity, pin, HOST_SENSORCOMMUNITY, URL_SENSORCOMMUNITY);
 	}
@@ -2523,7 +2521,7 @@ static void fetchSensorDHT(String& s) {
 
 	int count = 0;
 	const int MAX_ATTEMPTS = 5;
-	while ((count++ < MAX_ATTEMPTS) && (s == "")) {
+	while ((count++ < MAX_ATTEMPTS)) {
 		auto t = dht.readTemperature();
 		auto h = dht.readHumidity();
 		if (isnan(t) || isnan(h)) {
@@ -2538,6 +2536,7 @@ static void fetchSensorDHT(String& s) {
 			last_value_DHT_H = h;
 			add_Value2Json(s, F("temperature"), FPSTR(DBG_TXT_TEMPERATURE), last_value_DHT_T);
 			add_Value2Json(s, F("humidity"), FPSTR(DBG_TXT_HUMIDITY), last_value_DHT_H);
+			break;
 		}
 	}
 	debug_outln_info(FPSTR(DBG_TXT_SEP));
@@ -3644,7 +3643,7 @@ static void display_values() {
 			}
 			display_lines[0] = std::move(tmpl(F("PM2.5: {v} µg/m³"), check_display_value(pm25_value, -1, 1, 6)));
 			display_lines[1] = std::move(tmpl(F("PM10: {v} µg/m³"), check_display_value(pm10_value, -1, 1, 6)));
-			display_lines[2] = empty_String;
+			display_lines[2] = emptyString;
 			break;
 		case 2:
 			display_header = FPSTR(SENSORS_SPS30);
@@ -3654,16 +3653,16 @@ static void display_values() {
 			break;
 		case 3:
 			display_header = t_sensor;
-			if (h_sensor != "" && t_sensor != h_sensor) {
+			if (h_sensor && t_sensor != h_sensor) {
 				display_header += " / " + h_sensor;
 			}
-			if ((h_sensor != "" && p_sensor != "" && (h_sensor != p_sensor)) || (h_sensor == "" && p_sensor != "" && (t_sensor != p_sensor))) {
+			if ((h_sensor && p_sensor && (h_sensor != p_sensor)) || (h_sensor == "" && p_sensor && (t_sensor != p_sensor))) {
 				display_header += " / " + p_sensor;
 			}
 			if (t_sensor != "") { display_lines[line_count] = "Temp.: "; display_lines[line_count] += check_display_value(t_value, -128, 1, 6); display_lines[line_count++] += " °C"; }
 			if (h_sensor != "") { display_lines[line_count] = "Hum.:  "; display_lines[line_count] += check_display_value(h_value, -1, 1, 6); display_lines[line_count++] += " %"; }
 			if (p_sensor != "") { display_lines[line_count] = "Pres.: "; display_lines[line_count] += check_display_value(p_value / 100, (-1 / 100.0), 1, 6); display_lines[line_count++] += " hPa"; }
-			while (line_count < 3) { display_lines[line_count++] = empty_String; }
+			while (line_count < 3) { display_lines[line_count++] = emptyString; }
 			break;
 		case 4:
 			display_header = "NEO6M";
@@ -3722,9 +3721,9 @@ static void display_values() {
 		}
 		if (cfg::has_lcd2004_27) {
 			display_header = std::move(String((next_display_count % screen_count) + 1) + '/' + String(screen_count) + ' ' + display_header);
-			display_lines[0].replace(" µg/m³", empty_String);
+			display_lines[0].replace(" µg/m³", emptyString);
 			display_lines[0].replace("°", String(char(223)));
-			display_lines[1].replace(" µg/m³", empty_String);
+			display_lines[1].replace(" µg/m³", emptyString);
 			lcd_2004_27.clear();
 			lcd_2004_27.setCursor(0, 0);
 			lcd_2004_27.print(display_header);
@@ -4344,28 +4343,28 @@ void loop(void) {
 			fetchSensorSPS30(result);
 			data += result;
 			sum_send_time += sendSensorCommunity(result, SPS30_API_PIN, FPSTR(SENSORS_SPS30), "SPS30_");
-			result = empty_String;
+			result = emptyString;
 		}
 		if (cfg::dht_read) {
 			// getting temperature and humidity (optional)
 			fetchSensorDHT(result);
 			data += result;
 			sum_send_time += sendSensorCommunity(result, DHT_API_PIN, FPSTR(SENSORS_DHT22), "DHT_");
-			result = empty_String;
+			result = emptyString;
 		}
 		if (cfg::htu21d_read && (! htu21d_init_failed)) {
 			// getting temperature and humidity (optional)
 			fetchSensorHTU21D(result);
 			data += result;
 			sum_send_time += sendSensorCommunity(result, HTU21D_API_PIN, FPSTR(SENSORS_HTU21D), "HTU21D_");
-			result = empty_String;
+			result = emptyString;
 		}
 		if (cfg::bmp_read && (! bmp_init_failed)) {
 			// getting temperature and pressure (optional)
 			fetchSensorBMP(result);
 			data += result;
 			sum_send_time += sendSensorCommunity(result, BMP_API_PIN, FPSTR(SENSORS_BMP180), "BMP_");
-			result = empty_String;
+			result = emptyString;
 		}
 		if (cfg::bmx280_read && (! bmx280_init_failed)) {
 			// getting temperature, humidity and pressure (optional)
@@ -4376,31 +4375,33 @@ void loop(void) {
 			} else {
 				sum_send_time += sendSensorCommunity(result, BMP280_API_PIN, FPSTR(SENSORS_BMX280), "BMP280_");
 			}
-			result = empty_String;
+			result = emptyString;
 		}
 		if (cfg::sht3x_read && (! sht3x_init_failed )) {
 			// getting temperature and humidity (optional)
 			fetchSensorSHT3x(result);
 			data += result;
 			sum_send_time += sendSensorCommunity(result, SHT3X_API_PIN, FPSTR(SENSORS_SHT3X), "SHT3X_");
+			result = emptyString;
 		}
 		if (cfg::ds18b20_read) {
 			// getting temperature (optional)
 			fetchSensorDS18B20(result);
 			data += result;
 			sum_send_time += sendSensorCommunity(result, DS18B20_API_PIN, FPSTR(SENSORS_DS18B20), "DS18B20_");
-			result = empty_String;
+			result = emptyString;
 		}
 		if (cfg::dnms_read && (! dnms_init_failed)) {
 			// getting noise measurement values from dnms (optional)
 			fetchSensorDNMS(result);
 			data += result;
 			sum_send_time += sendSensorCommunity(result, DNMS_API_PIN, FPSTR(SENSORS_DNMS), "DNMS_");
-			result = empty_String;
+			result = emptyString;
 		}
 		if (cfg::gps_read) {
 			data += result_GPS;
 			sum_send_time += sendSensorCommunity(result_GPS, GPS_API_PIN, F("GPS"), "GPS_");
+			result = emptyString;
 		}
 		add_Value2Json(data, F("samples"), String(sample_count));
 		add_Value2Json(data, F("min_micro"), String(min_micro));
