@@ -6,6 +6,7 @@
 enum ConfigEntryType : unsigned short {
 	Config_Type_Bool,
 	Config_Type_UInt,
+	Config_Type_Time,
 	Config_Type_String,
 	Config_Type_Password
 };
@@ -181,8 +182,8 @@ static constexpr ConfigShapeEntry configShape[] PROGMEM = {
 	{ Config_Type_Bool, 0, FPSTR(CFG_KEY_DISPLAY_WIFI_INFO), &cfg::display_wifi_info },
 	{ Config_Type_Bool, 0, FPSTR(CFG_KEY_DISPLAY_DEVICE_INFO), &cfg::display_device_info },
 	{ Config_Type_UInt, 0, FPSTR(CFG_KEY_DEBUG), &cfg::debug },
-	{ Config_Type_UInt, 0, FPSTR(CFG_KEY_SENDING_INTERVALL_MS), &cfg::sending_intervall_ms },
-	{ Config_Type_UInt, 0, FPSTR(CFG_KEY_TIME_FOR_WIFI_CONFIG), &cfg::time_for_wifi_config },
+	{ Config_Type_Time, 0, FPSTR(CFG_KEY_SENDING_INTERVALL_MS), &cfg::sending_intervall_ms },
+	{ Config_Type_Time, 0, FPSTR(CFG_KEY_TIME_FOR_WIFI_CONFIG), &cfg::time_for_wifi_config },
 	{ Config_Type_String, sizeof(cfg::senseboxid)-1, FPSTR(CFG_KEY_SENSEBOXID), cfg::senseboxid },
 	{ Config_Type_Bool, 0, FPSTR(CFG_KEY_SEND2CUSTOM), &cfg::send2custom },
 	{ Config_Type_String, sizeof(cfg::host_custom)-1, FPSTR(CFG_KEY_HOST_CUSTOM), cfg::host_custom },

@@ -41,8 +41,8 @@ Bool		has_lcd2004_27
 Bool		display_wifi_info
 Bool		display_device_info
 UInt		debug
-UInt		sending_intervall_ms
-UInt		time_for_wifi_config
+Time		sending_intervall_ms
+Time		time_for_wifi_config
 String		senseboxid
 Bool		send2custom
 String		host_custom
@@ -70,6 +70,7 @@ with open("airrohr-cfg.h", "w") as h:
 enum ConfigEntryType : unsigned short {
 	Config_Type_Bool,
 	Config_Type_UInt,
+	Config_Type_Time,
 	Config_Type_String,
 	Config_Type_Password
 };
