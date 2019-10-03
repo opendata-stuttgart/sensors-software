@@ -75,9 +75,6 @@ public:
     STANDBY_MS_1000 = 0b101
   };
 
-  // constructors
-  BMX280();
-
   bool begin(uint8_t addr);
   bool init();
 
@@ -101,12 +98,10 @@ protected:
 
   void write8(byte reg, byte value);
   uint8_t read8(byte reg);
-  uint16_t read16(byte reg);
   uint32_t read24(byte reg);
   uint16_t read16_LE(byte reg); // little endian
   int16_t readS16_LE(byte reg); // little endian
 
-  uint8_t _i2caddr;  //!< I2C addr for the TwoWire interface
   int32_t _sensorID; //!< ID of the BME Sensor
   int32_t t_fine; //!< temperature with high resolution, stored as an attribute
                   //!< as this is used for temperature compensation reading
@@ -126,13 +121,14 @@ protected:
   int16_t dig_P8;  ///< pressure compensation value
   int16_t dig_P9;  ///< pressure compensation value
 
-  uint8_t dig_H1; ///< humidity compensation value
   int16_t dig_H2; ///< humidity compensation value
-  uint8_t dig_H3; ///< humidity compensation value
   int16_t dig_H4; ///< humidity compensation value
   int16_t dig_H5; ///< humidity compensation value
+  uint8_t dig_H1; ///< humidity compensation value
+  uint8_t dig_H3; ///< humidity compensation value
   int8_t dig_H6;  ///< humidity compensation value
 
+  uint8_t _i2caddr;  //!< I2C addr for the TwoWire interface
   /**************************************************************************/
   /*!
       @brief  config register
@@ -157,7 +153,6 @@ protected:
     /// @return combined config register
     unsigned int get() { return (t_sb << 5); }
   };
-  config _configReg; //!< config register object
 
   /**************************************************************************/
   /*!
@@ -215,7 +210,6 @@ protected:
     /// @return combined ctrl hum register
     unsigned int get() { return (osrs_h); }
   };
-  ctrl_hum _humReg; //!< hum register object
 };
 
 #endif
