@@ -2359,13 +2359,11 @@ static unsigned long sendData(const LoggerEntry logger, const String& data, cons
 	buf += s_Host;
 	buf += F("\r\nContent-Type: ");
 	buf += contentType;
-	buf += "\r\n";
 	if (basic_auth_string && *basic_auth_string) {
-		buf += F("Authorization: Basic ");
+		buf += F("\r\nAuthorization: Basic ");
 		buf += String(basic_auth_string);
-		buf += "\r\n";
 	}
-	buf += F("X-PIN: ");
+	buf += F("\r\nX-PIN: ");
 	buf += pin;
 	buf += F("\r\nX-Sensor: " SENSOR_BASENAME);
 	buf += esp_chipid;
