@@ -565,6 +565,7 @@ template<typename T, std::size_t N> constexpr std::size_t array_num_elements(con
 #define msSince(timestamp_before) (act_milli - (timestamp_before))
 
 const char data_first_part[] PROGMEM = "{\"software_version\": \"" SOFTWARE_VERSION_STR "\", \"sensordatavalues\":[";
+const char JSON_SENSOR_DATA_VALUES[] PROGMEM = "sensordatavalues";
 
 /*****************************************************************
  * Debug output                                                  *
@@ -925,10 +926,10 @@ static void disable_unneeded_nmea() {
  *****************************************************************/
 
 /* backward compatibility for the times when we stored booleans as strings */
-static bool boolFromJSON(const DynamicJsonDocument& json, const char* key)
+static bool boolFromJSON(const DynamicJsonDocument& json, const __FlashStringHelper* key)
 {
 	if (json[key].is<char*>()) {
-		return !strcmp(json[key].as<char*>(), "true");
+		return !strcmp_P(json[key].as<char*>(), PSTR("true"));
 	}
 	return json[key].as<bool>();
 }
@@ -965,20 +966,19 @@ static void readConfig() {
 		for (unsigned e = 0; e < sizeof(configShape)/sizeof(configShape[0]); ++e) {
 			ConfigShapeEntry c;
 			memcpy_P(&c, &configShape[e], sizeof(ConfigShapeEntry));
-			char* cfg_key = const_cast<char*>(c.cfg_key);
-			if (json[cfg_key].isNull()) {
+			if (json[c.cfg_key].isNull()) {
 				continue;
 			}
 			switch (c.cfg_type) {
 				case Config_Type_Bool:
-					*(c.cfg_val.as_bool) = boolFromJSON(json, cfg_key);
+					*(c.cfg_val.as_bool) = boolFromJSON(json, c.cfg_key);
 					break;
 				case Config_Type_UInt:
-					*(c.cfg_val.as_uint) = json[cfg_key].as<unsigned int>();
+					*(c.cfg_val.as_uint) = json[c.cfg_key].as<unsigned int>();
 					break;
 				case Config_Type_String:
 				case Config_Type_Password:
-					strncpy(c.cfg_val.as_str, json[cfg_key].as<char*>(), c.cfg_len);
+					strncpy(c.cfg_val.as_str, json[c.cfg_key].as<char*>(), c.cfg_len);
 					c.cfg_val.as_str[c.cfg_len] = '\0';
 					break;
 			};
@@ -1005,11 +1005,11 @@ static void readConfig() {
 			cfg::send2influx = false;
 			rewriteConfig = true;
 		}
-		if (boolFromJSON(json, "pm24_read") || boolFromJSON(json, "pms32_read")) {
+		if (boolFromJSON(json, F("pm24_read")) || boolFromJSON(json, F("pms32_read"))) {
 			cfg::pms_read = true;
 			rewriteConfig = true;
 		}
-		if (boolFromJSON(json, "bmp280_read") || boolFromJSON(json, "bme280_read")) {
+		if (boolFromJSON(json, F("bmp280_read")) || boolFromJSON(json, F("bme280_read"))) {
 			cfg::bmx280_read = true;
 			rewriteConfig = true;
 		}
@@ -1033,17 +1033,16 @@ void writeConfig() {
 	for (unsigned e = 0; e < sizeof(configShape)/sizeof(configShape[0]); ++e) {
 		ConfigShapeEntry c;
 		memcpy_P(&c, &configShape[e], sizeof(ConfigShapeEntry));
-		char* cfg_key = const_cast<char*>(c.cfg_key);
 		switch (c.cfg_type) {
 		case Config_Type_Bool:
-			json[cfg_key].set(*c.cfg_val.as_bool);
+			json[c.cfg_key].set(*c.cfg_val.as_bool);
 			break;
 		case Config_Type_UInt:
-			json[cfg_key].set(*c.cfg_val.as_uint);
+			json[c.cfg_key].set(*c.cfg_val.as_uint);
 			break;
 		case Config_Type_Password:
 		case Config_Type_String:
-			json[cfg_key].set(c.cfg_val.as_str);
+			json[c.cfg_key].set(c.cfg_val.as_str);
 			break;
 		};
 	}
@@ -1164,7 +1163,7 @@ static void end_html_page(String& page_content) {
 	server.sendContent_P(WEB_PAGE_FOOTER);
 }
 
-static void add_form_input(String& page_content, const char* name, const __FlashStringHelper* info, const String& value, const int length) {
+static void add_form_input(String& page_content, const ConfigShapeId cfgid, const __FlashStringHelper* info, const String& value, const int length) {
 	RESERVE_STRING(s, MED_STR);
 	s = F(	"<tr>"
 					"<td>{i} </td>"
@@ -1175,13 +1174,13 @@ static void add_form_input(String& page_content, const char* name, const __Flash
 	String t_value = value;
 	t_value.replace("'", "&#39;");
 	s.replace("{i}", info);
-	s.replace("{n}", String(name));
+	s.replace("{n}", String(configShape[cfgid].cfg_key));
 	s.replace("{v}", t_value);
 	s.replace("{l}", String(length));
 	page_content += s;
 }
 
-static void add_form_password(String& page_content, const char* name, const String& info, const String& value) {
+static void add_form_password(String& page_content, const ConfigShapeId cfgid, const String& info, const String& value) {
 	String s = F(	"<tr>"
 					"<td>{i} </td>"
 					"<td style='width:90%;'>"
@@ -1193,13 +1192,13 @@ static void add_form_password(String& page_content, const char* name, const Stri
 		password += '*';
 	}
 	s.replace("{i}", info);
-	s.replace("{n}", name);
+	s.replace("{n}", String(configShape[cfgid].cfg_key));
 	s.replace("{v}", password);
 	s.replace("{l}", String(LEN_CFG_PASSWORD-1));
 	page_content += s;
 }
 
-static String form_checkbox(const char* name, const String& info, const bool checked, const bool linebreak) {
+static String form_checkbox(const ConfigShapeId cfgid, const String& info, const bool checked, const bool linebreak) {
 	RESERVE_STRING(s, MED_STR);
 	s = F("<label for='{n}'>"
 	"<input type='checkbox' name='{n}' value='1' id='{n}' {c}/>"
@@ -1211,19 +1210,19 @@ static String form_checkbox(const char* name, const String& info, const bool che
 		s.replace("{c}", empty_String);
 	};
 	s.replace("{i}", info);
-	s.replace("{n}", name);
+	s.replace("{n}", String(configShape[cfgid].cfg_key));
 	if (! linebreak) {
 		s.replace("<br/>", empty_String);
 	}
 	return s;
 }
 
-static void add_form_checkbox(String& page_content, const char* name, const String& info, const bool checked) {
-	page_content += form_checkbox(name, info, checked, true);
+static void add_form_checkbox(String& page_content, const ConfigShapeId cfgid, const String& info, const bool checked) {
+	page_content += form_checkbox(cfgid, info, checked, true);
 }
 
-static void add_form_checkbox_sensor(String& page_content, const char* name, const __FlashStringHelper* info, const bool checked) {
-	add_form_checkbox(page_content, name, add_sensor_type(info), checked);
+static void add_form_checkbox_sensor(String& page_content, const ConfigShapeId cfgid, const __FlashStringHelper* info, const bool checked) {
+	add_form_checkbox(page_content, cfgid, add_sensor_type(info), checked);
 }
 
 static String form_submit(const String& value) {
@@ -1417,8 +1416,8 @@ static void webserver_config_send_body_get(String& page_content) {
 		page_content += F("<div id='wifilist'>" INTL_WIFI_NETWORKS "</div><br/>");
 	}
 	page_content += FPSTR(TABLE_TAG_OPEN);
-	add_form_input(page_content, "wlanssid", FPSTR(INTL_FS_WIFI_NAME), wlanssid, LEN_WLANSSID-1);
-	add_form_password(page_content, "wlanpwd", FPSTR(INTL_PASSWORD), wlanpwd);
+	add_form_input(page_content, Config_wlanssid, FPSTR(INTL_FS_WIFI_NAME), wlanssid, LEN_WLANSSID-1);
+	add_form_password(page_content, Config_wlanpwd, FPSTR(INTL_PASSWORD), wlanpwd);
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 	page_content += F("<hr/>\n<br/><b>");
 
@@ -1432,10 +1431,10 @@ static void webserver_config_send_body_get(String& page_content) {
 	if (! wificonfig_loop) {
 		page_content += FPSTR(INTL_BASICAUTH);
 		page_content += FPSTR(WEB_B_BR);
-		add_form_checkbox(page_content, "www_basicauth_enabled", FPSTR(INTL_BASICAUTH), www_basicauth_enabled);
+		add_form_checkbox(page_content, Config_www_basicauth_enabled, FPSTR(INTL_BASICAUTH), www_basicauth_enabled);
 		page_content += FPSTR(TABLE_TAG_OPEN);
-		add_form_input(page_content, "www_username", FPSTR(INTL_USER), www_username, LEN_WWW_USERNAME-1);
-		add_form_password(page_content, "www_password", FPSTR(INTL_PASSWORD), www_password);
+		add_form_input(page_content, Config_www_username, FPSTR(INTL_USER), www_username, LEN_WWW_USERNAME-1);
+		add_form_password(page_content, Config_www_password, FPSTR(INTL_PASSWORD), www_password);
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 
 		// Paginate page after ~ 1500 Bytes
@@ -1447,8 +1446,8 @@ static void webserver_config_send_body_get(String& page_content) {
 		page_content += FPSTR(INTL_FS_WIFI_DESCRIPTION);
 		page_content += FPSTR(BR_TAG);
 		page_content += FPSTR(TABLE_TAG_OPEN);
-		add_form_input(page_content, "fs_ssid", FPSTR(INTL_FS_WIFI_NAME), fs_ssid, LEN_FS_SSID-1);
-		add_form_password(page_content, "fs_pwd", FPSTR(INTL_PASSWORD), fs_pwd);
+		add_form_input(page_content, Config_fs_ssid, FPSTR(INTL_FS_WIFI_NAME), fs_ssid, LEN_FS_SSID-1);
+		add_form_password(page_content, Config_fs_pwd, FPSTR(INTL_PASSWORD), fs_pwd);
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 
 		page_content += FPSTR(WEB_BR_LF_B);
@@ -1458,13 +1457,13 @@ static void webserver_config_send_body_get(String& page_content) {
 
 		// Paginate page after ~ 1500 Bytes
 		server.sendContent(page_content);
-		page_content = form_checkbox("send2dusti", F("API Luftdaten.info"), send2dusti, false);
+		page_content = form_checkbox(Config_send2dusti, F("API Luftdaten.info"), send2dusti, false);
 		page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
-		page_content += form_checkbox("ssl_dusti", FPSTR(WEB_HTTPS), ssl_dusti, false);
+		page_content += form_checkbox(Config_ssl_dusti, FPSTR(WEB_HTTPS), ssl_dusti, false);
 		page_content += FPSTR(WEB_BRACE_BR);
-		page_content += form_checkbox("send2madavi", F("API Madavi.de"), send2madavi, false);
+		page_content += form_checkbox(Config_send2madavi, F("API Madavi.de"), send2madavi, false);
 		page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
-		page_content += form_checkbox("ssl_madavi", FPSTR(WEB_HTTPS), ssl_madavi, false);
+		page_content += form_checkbox(Config_ssl_madavi, FPSTR(WEB_HTTPS), ssl_madavi, false);
 		page_content += FPSTR(WEB_BRACE_BR);
 
 		page_content += FPSTR(WEB_BR_LF_B);
@@ -1474,31 +1473,31 @@ static void webserver_config_send_body_get(String& page_content) {
 		page_content = FPSTR(INTL_SENSORS);
 
 		page_content += FPSTR(WEB_B_BR);
-		add_form_checkbox_sensor(page_content, "sds_read", FPSTR(INTL_SDS011), sds_read);
-		add_form_checkbox_sensor(page_content, "pms_read", FPSTR(INTL_PMS), pms_read);
-		add_form_checkbox_sensor(page_content, "hpm_read", FPSTR(INTL_HPM), hpm_read);
-		add_form_checkbox_sensor(page_content, "sps30_read", FPSTR(INTL_SPS30), sps30_read);
-		add_form_checkbox_sensor(page_content, "ppd_read", FPSTR(INTL_PPD42NS), ppd_read);
+		add_form_checkbox_sensor(page_content, Config_sds_read, FPSTR(INTL_SDS011), sds_read);
+		add_form_checkbox_sensor(page_content, Config_pms_read, FPSTR(INTL_PMS), pms_read);
+		add_form_checkbox_sensor(page_content, Config_hpm_read, FPSTR(INTL_HPM), hpm_read);
+		add_form_checkbox_sensor(page_content, Config_sps30_read, FPSTR(INTL_SPS30), sps30_read);
+		add_form_checkbox_sensor(page_content, Config_ppd_read, FPSTR(INTL_PPD42NS), ppd_read);
 
 		// Paginate page after ~ 1500 Bytes
 		server.sendContent(page_content);
 		page_content = empty_String;
 
-		add_form_checkbox_sensor(page_content, "dht_read", FPSTR(INTL_DHT22), dht_read);
-		add_form_checkbox_sensor(page_content, "htu21d_read", FPSTR(INTL_HTU21D), htu21d_read);
-		add_form_checkbox_sensor(page_content, "bmp_read", FPSTR(INTL_BMP180), bmp_read);
-		add_form_checkbox_sensor(page_content, "bmx280_read", FPSTR(INTL_BMX280), bmx280_read);
-		add_form_checkbox_sensor(page_content, "ds18b20_read", FPSTR(INTL_DS18B20), ds18b20_read);
+		add_form_checkbox_sensor(page_content, Config_dht_read, FPSTR(INTL_DHT22), dht_read);
+		add_form_checkbox_sensor(page_content, Config_htu21d_read, FPSTR(INTL_HTU21D), htu21d_read);
+		add_form_checkbox_sensor(page_content, Config_bmp_read, FPSTR(INTL_BMP180), bmp_read);
+		add_form_checkbox_sensor(page_content, Config_bmx280_read, FPSTR(INTL_BMX280), bmx280_read);
+		add_form_checkbox_sensor(page_content, Config_ds18b20_read, FPSTR(INTL_DS18B20), ds18b20_read);
 
 		// Paginate page after ~ 1500 Bytes
 		server.sendContent(page_content);
 		page_content = empty_String;
 
-		add_form_checkbox_sensor(page_content, "dnms_read", FPSTR(INTL_DNMS), dnms_read);
+		add_form_checkbox_sensor(page_content, Config_dnms_read, FPSTR(INTL_DNMS), dnms_read);
 		page_content += FPSTR(TABLE_TAG_OPEN);
-		add_form_input(page_content, "dnms_correction", FPSTR(INTL_DNMS_CORRECTION), dnms_correction, LEN_DNMS_CORRECTION);
+		add_form_input(page_content, Config_dnms_correction, FPSTR(INTL_DNMS_CORRECTION), dnms_correction, LEN_DNMS_CORRECTION);
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-		add_form_checkbox(page_content, "gps_read", FPSTR(INTL_NEO6M), gps_read);
+		add_form_checkbox(page_content, Config_gps_read, FPSTR(INTL_NEO6M), gps_read);
 
 		page_content += FPSTR(WEB_BR_LF_B);
 
@@ -1509,21 +1508,21 @@ static void webserver_config_send_body_get(String& page_content) {
 
 	page_content += FPSTR(INTL_MORE_SETTINGS);
 	page_content += FPSTR(WEB_B_BR);
-	add_form_checkbox(page_content, "auto_update", FPSTR(INTL_AUTO_UPDATE), auto_update);
-	add_form_checkbox(page_content, "use_beta", FPSTR(INTL_USE_BETA), use_beta);
-	add_form_checkbox(page_content, "has_display", FPSTR(INTL_DISPLAY), has_display);
-	add_form_checkbox(page_content, "has_sh1106", FPSTR(INTL_SH1106), has_sh1106);
+	add_form_checkbox(page_content, Config_auto_update, FPSTR(INTL_AUTO_UPDATE), auto_update);
+	add_form_checkbox(page_content, Config_use_beta, FPSTR(INTL_USE_BETA), use_beta);
+	add_form_checkbox(page_content, Config_has_display, FPSTR(INTL_DISPLAY), has_display);
+	add_form_checkbox(page_content, Config_has_sh1106, FPSTR(INTL_SH1106), has_sh1106);
 
 	// Paginate page after ~ 1500 Bytes
 	server.sendContent(page_content);
 	page_content = empty_String;
 
-	add_form_checkbox(page_content, "has_flipped_display", FPSTR(INTL_FLIP_DISPLAY), has_flipped_display);
-	add_form_checkbox(page_content, "has_lcd1602_27", FPSTR(INTL_LCD1602_27), has_lcd1602_27);
-	add_form_checkbox(page_content, "has_lcd1602", FPSTR(INTL_LCD1602_3F), has_lcd1602);
-	add_form_checkbox(page_content, "has_lcd2004_27", FPSTR(INTL_LCD2004_27), has_lcd2004_27);
-	add_form_checkbox(page_content, "display_wifi_info", FPSTR(INTL_DISPLAY_WIFI_INFO), display_wifi_info);
-	add_form_checkbox(page_content, "display_device_info", FPSTR(INTL_DISPLAY_DEVICE_INFO), display_device_info);
+	add_form_checkbox(page_content, Config_has_flipped_display, FPSTR(INTL_FLIP_DISPLAY), has_flipped_display);
+	add_form_checkbox(page_content, Config_has_lcd1602_27, FPSTR(INTL_LCD1602_27), has_lcd1602_27);
+	add_form_checkbox(page_content, Config_has_lcd1602, FPSTR(INTL_LCD1602_3F), has_lcd1602);
+	add_form_checkbox(page_content, Config_has_lcd2004_27, FPSTR(INTL_LCD2004_27), has_lcd2004_27);
+	add_form_checkbox(page_content, Config_display_wifi_info, FPSTR(INTL_DISPLAY_WIFI_INFO), display_wifi_info);
+	add_form_checkbox(page_content, Config_display_device_info, FPSTR(INTL_DISPLAY_DEVICE_INFO), display_device_info);
 
 	// Paginate page after ~ 1500 Bytes
 	server.sendContent(page_content);
@@ -1532,9 +1531,9 @@ static void webserver_config_send_body_get(String& page_content) {
 	if (! wificonfig_loop) {
 		page_content += FPSTR(TABLE_TAG_OPEN);
 		page_content += form_select_lang();
-		add_form_input(page_content, "debug", FPSTR(INTL_DEBUG_LEVEL), String(debug), 1);
-		add_form_input(page_content, "sending_intervall_ms", FPSTR(INTL_MEASUREMENT_INTERVAL), String(sending_intervall_ms / 1000), 5);
-		add_form_input(page_content, "time_for_wifi_config", FPSTR(INTL_DURATION_ROUTER_MODE), String(time_for_wifi_config / 1000), 5);
+		add_form_input(page_content, Config_debug, FPSTR(INTL_DEBUG_LEVEL), String(debug), 1);
+		add_form_input(page_content, Config_sending_intervall_ms, FPSTR(INTL_MEASUREMENT_INTERVAL), String(sending_intervall_ms / 1000), 5);
+		add_form_input(page_content, Config_time_for_wifi_config, FPSTR(INTL_DURATION_ROUTER_MODE), String(time_for_wifi_config / 1000), 5);
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 		page_content += FPSTR(WEB_BR_LF_B);
 
@@ -1542,45 +1541,45 @@ static void webserver_config_send_body_get(String& page_content) {
 		page_content = FPSTR(INTL_MORE_APIS);
 
 		page_content += FPSTR(WEB_B_BR);
-		add_form_checkbox(page_content, "send2csv", tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_CSV)), send2csv);
-		add_form_checkbox(page_content, "send2fsapp", tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_FEINSTAUB_APP)), send2fsapp);
-		add_form_checkbox(page_content, "send2aircms", tmpl(FPSTR(INTL_SEND_TO), F("aircms.online")), send2aircms);
-		add_form_checkbox(page_content, "send2sensemap", tmpl(FPSTR(INTL_SEND_TO), F("OpenSenseMap")), send2sensemap);
+		add_form_checkbox(page_content, Config_send2csv, tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_CSV)), send2csv);
+		add_form_checkbox(page_content, Config_send2fsapp, tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_FEINSTAUB_APP)), send2fsapp);
+		add_form_checkbox(page_content, Config_send2aircms, tmpl(FPSTR(INTL_SEND_TO), F("aircms.online")), send2aircms);
+		add_form_checkbox(page_content, Config_send2sensemap, tmpl(FPSTR(INTL_SEND_TO), F("OpenSenseMap")), send2sensemap);
 		page_content += FPSTR(TABLE_TAG_OPEN);
-		add_form_input(page_content, "senseboxid", F("senseBox&nbsp;ID: "), senseboxid, LEN_SENSEBOXID);
+		add_form_input(page_content, Config_senseboxid, F("senseBox&nbsp;ID: "), senseboxid, LEN_SENSEBOXID);
 
 		server.sendContent(page_content);
 		page_content = FPSTR(TABLE_TAG_CLOSE_BR);
 		page_content += FPSTR(BR_TAG);
-		page_content += form_checkbox("send2custom", FPSTR(INTL_SEND_TO_OWN_API), send2custom, false);
+		page_content += form_checkbox(Config_send2custom, FPSTR(INTL_SEND_TO_OWN_API), send2custom, false);
 		page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
-		page_content += form_checkbox("ssl_custom", FPSTR(WEB_HTTPS), ssl_custom, false);
+		page_content += form_checkbox(Config_ssl_custom, FPSTR(WEB_HTTPS), ssl_custom, false);
 		page_content += FPSTR(WEB_BRACE_BR);
 
 		server.sendContent(page_content);
 		page_content = FPSTR(TABLE_TAG_OPEN);
-		add_form_input(page_content, "host_custom", FPSTR(INTL_SERVER), host_custom, LEN_HOST_CUSTOM-1);
-		add_form_input(page_content, "url_custom", FPSTR(INTL_PATH), url_custom, LEN_URL_CUSTOM-1);
-		add_form_input(page_content, "port_custom", FPSTR(INTL_PORT), String(port_custom), MAX_PORT_DIGITS);
-		add_form_input(page_content, "user_custom", FPSTR(INTL_USER), user_custom, LEN_USER_CUSTOM-1);
-		add_form_password(page_content, "pwd_custom", FPSTR(INTL_PASSWORD), pwd_custom);
+		add_form_input(page_content, Config_host_custom, FPSTR(INTL_SERVER), host_custom, LEN_HOST_CUSTOM-1);
+		add_form_input(page_content, Config_url_custom, FPSTR(INTL_PATH), url_custom, LEN_URL_CUSTOM-1);
+		add_form_input(page_content, Config_port_custom, FPSTR(INTL_PORT), String(port_custom), MAX_PORT_DIGITS);
+		add_form_input(page_content, Config_user_custom, FPSTR(INTL_USER), user_custom, LEN_USER_CUSTOM-1);
+		add_form_password(page_content, Config_pwd_custom, FPSTR(INTL_PASSWORD), pwd_custom);
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 
 		page_content += FPSTR(BR_TAG);
 
 		server.sendContent(page_content);
-		page_content = form_checkbox("send2influx", tmpl(FPSTR(INTL_SEND_TO), F("InfluxDB")), send2influx, false);
+		page_content = form_checkbox(Config_send2influx, tmpl(FPSTR(INTL_SEND_TO), F("InfluxDB")), send2influx, false);
 
 		page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
-		page_content += form_checkbox("ssl_influx", FPSTR(WEB_HTTPS), ssl_influx, false);
+		page_content += form_checkbox(Config_ssl_influx, FPSTR(WEB_HTTPS), ssl_influx, false);
 		page_content += FPSTR(WEB_BRACE_BR);
 		page_content += FPSTR(TABLE_TAG_OPEN);
-		add_form_input(page_content, "host_influx", FPSTR(INTL_SERVER), host_influx, LEN_HOST_INFLUX-1);
-		add_form_input(page_content, "url_influx", FPSTR(INTL_PATH), url_influx, LEN_URL_INFLUX-1);
-		add_form_input(page_content, "port_influx", FPSTR(INTL_PORT), String(port_influx), MAX_PORT_DIGITS);
-		add_form_input(page_content, "user_influx", FPSTR(INTL_USER), user_influx, LEN_USER_INFLUX-1);
-		add_form_password(page_content, "pwd_influx", FPSTR(INTL_PASSWORD), pwd_influx);
-		add_form_input(page_content, "measurement_name_influx", F("Measurement"), measurement_name_influx, LEN_MEASUREMENT_NAME_INFLUX-1);
+		add_form_input(page_content, Config_host_influx, FPSTR(INTL_SERVER), host_influx, LEN_HOST_INFLUX-1);
+		add_form_input(page_content, Config_url_influx, FPSTR(INTL_PATH), url_influx, LEN_URL_INFLUX-1);
+		add_form_input(page_content, Config_port_influx, FPSTR(INTL_PORT), String(port_influx), MAX_PORT_DIGITS);
+		add_form_input(page_content, Config_user_influx, FPSTR(INTL_USER), user_influx, LEN_USER_INFLUX-1);
+		add_form_password(page_content, Config_pwd_influx, FPSTR(INTL_PASSWORD), pwd_influx);
+		add_form_input(page_content, Config_measurement_name_influx, F("Measurement"), measurement_name_influx, LEN_MEASUREMENT_NAME_INFLUX);
 		page_content += form_submit(FPSTR(INTL_SAVE_AND_RESTART));
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 		page_content += FPSTR(BR_TAG);
@@ -1650,16 +1649,16 @@ static void webserver_config_send_body_post(String& page_content) {
 
 	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("Luftdaten.info"), send2dusti);
 	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("Madavi"), send2madavi);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("DHT"), dht_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("HTU21D"), htu21d_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("SDS"), sds_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("PMS(1,3,5,6,7)003"), pms_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("HPM"), hpm_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("SPS30"), sps30_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("PPD"), ppd_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_HTU21D), dht_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_HTU21D), htu21d_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_SDS011), sds_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_PMSx003), pms_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_HPM), hpm_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_SPS30), sps30_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_PPD42NS), ppd_read);
 	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_BMX280), bmx280_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("DS18B20"), ds18b20_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("DNMS"), dnms_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_DS18B20), ds18b20_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_DNMS), dnms_read);
 	add_line_value_bool(page_content, FPSTR(INTL_DNMS_CORRECTION), String(dnms_correction));
 	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("GPS"), gps_read);
 
@@ -2067,7 +2066,7 @@ static void webserver_prometheus_endpoint() {
 	DynamicJsonDocument json2data(JSON_BUFFER_SIZE);
 	DeserializationError err = deserializeJson(json2data, last_data_string);
 	if (!err) {
-		for (JsonObject measurement : json2data["sensordatavalues"].as<JsonArray>()) {
+		for (JsonObject measurement : json2data[FPSTR(JSON_SENSOR_DATA_VALUES)].as<JsonArray>()) {
 			data_4_prometheus += measurement["value_type"].as<char*>();
 			data_4_prometheus += '{';
 			data_4_prometheus += id;
@@ -2441,7 +2440,7 @@ static void create_influxdb_string_from_data(String& data_4_influxdb, const Stri
 		data_4_influxdb += cfg::measurement_name_influx;
 		data_4_influxdb += F(",node=" SENSOR_BASENAME);
 		data_4_influxdb += esp_chipid + " ";
-		for (JsonObject measurement : json2data["sensordatavalues"].as<JsonArray>()) {
+		for (JsonObject measurement : json2data[FPSTR(JSON_SENSOR_DATA_VALUES)].as<JsonArray>()) {
 			data_4_influxdb += measurement["value_type"].as<char*>();
 			data_4_influxdb += '=';
 			data_4_influxdb += measurement["value"].as<char*>();
@@ -2467,7 +2466,7 @@ static void send_csv(const String& data) {
 	if (!err) {
 		String headline = F("Timestamp_ms;");
 		String valueline = String(act_milli) + ';';
-		for (JsonObject measurement : json2data["sensordatavalues"].as<JsonArray>()) {
+		for (JsonObject measurement : json2data[FPSTR(JSON_SENSOR_DATA_VALUES)].as<JsonArray>()) {
 			headline += measurement["value_type"].as<char*>();
 			headline += ';';
 			valueline += measurement["value"].as<char*>();
@@ -3422,7 +3421,7 @@ static void twoStageAutoUpdate() {
 	if (!cfg::auto_update) return;
 
 #if defined(ESP8266)
-	debug_outln(F("twoStageAutoUpdate"), DEBUG_MIN_INFO);
+	debug_outln_info(F("twoStageAutoUpdate"));
 
 	String lang_variant(cfg::current_lang);
 	lang_variant.toLowerCase();
@@ -3489,7 +3488,7 @@ static void twoStageAutoUpdate() {
 		SPIFFS.remove(firmware_md5);
 		return;
 	}
-	debug_outln("success!", DEBUG_MIN_INFO);
+	debug_outln_info(F("success!"));
 	// Unmout Filesystem before reboot
 	SPIFFS.end();
 
