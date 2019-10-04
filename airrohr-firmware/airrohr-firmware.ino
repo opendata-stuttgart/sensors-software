@@ -4169,7 +4169,7 @@ void setup(void) {
 
 
 	if (cfg::gps_read) {
-		serialGPS = new SoftwareSerial(GPS_SERIAL_RX, GPS_SERIAL_TX, false, 512);
+		serialGPS = new SoftwareSerial(GPS_SERIAL_RX, GPS_SERIAL_TX, false, 128);
 #if defined(ESP8266)
 		serialGPS->begin(9600);
 #endif
