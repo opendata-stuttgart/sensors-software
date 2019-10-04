@@ -44,6 +44,7 @@ enum LoggerEntry {
 
 struct LoggerConfig {
     uint16_t destport;
+    uint16_t _unused;
     BearSSL::Session* session;
 };
 

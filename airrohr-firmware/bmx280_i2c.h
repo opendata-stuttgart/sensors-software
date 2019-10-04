@@ -144,14 +144,16 @@ protected:
     // 101 = 1000 ms
     // 110 = 10 ms
     // 111 = 20 ms
-    unsigned int t_sb : 3; ///< inactive duration (standby time) in normal mode
+    uint8_t t_sb : 3; ///< inactive duration (standby time) in normal mode
 
     // unused - don't set
-    unsigned int none : 1;     ///< unused - don't set
-    unsigned int spi3w_en : 1; ///< unused - don't set
+    uint8_t none : 1;     ///< unused - don't set
+    uint8_t spi3w_en : 1; ///< unused - don't set
+
+    uint8_t _unused : 3;
 
     /// @return combined config register
-    unsigned int get() { return (t_sb << 5); }
+    uint8_t get() { return (t_sb << 5); }
   };
 
   /**************************************************************************/
@@ -167,7 +169,7 @@ protected:
     // 011 = x4
     // 100 = x8
     // 101 and above = x16
-    unsigned int osrs_t : 3; ///< temperature oversampling
+    uint8_t osrs_t : 3; ///< temperature oversampling
 
     // pressure oversampling
     // 000 = skipped
@@ -176,16 +178,16 @@ protected:
     // 011 = x4
     // 100 = x8
     // 101 and above = x16
-    unsigned int osrs_p : 3; ///< pressure oversampling
+    uint8_t osrs_p : 3; ///< pressure oversampling
 
     // device mode
     // 00       = sleep
     // 01 or 10 = forced
     // 11       = normal
-    unsigned int mode : 2; ///< device mode
+    uint8_t mode : 2; ///< device mode
 
     /// @return combined ctrl register
-    unsigned int get() { return (osrs_t << 5) | (osrs_p << 2) | mode; }
+    uint8_t get() { return (osrs_t << 5) | (osrs_p << 2) | mode; }
   };
   ctrl_meas _measReg; //!< measurement register object
 
@@ -196,7 +198,7 @@ protected:
   /**************************************************************************/
   struct ctrl_hum {
     /// unused - don't set
-    unsigned int none : 5;
+    uint8_t none : 5;
 
     // pressure oversampling
     // 000 = skipped
@@ -205,10 +207,10 @@ protected:
     // 011 = x4
     // 100 = x8
     // 101 and above = x16
-    unsigned int osrs_h : 3; ///< pressure oversampling
+    uint8_t osrs_h : 3; ///< pressure oversampling
 
     /// @return combined ctrl hum register
-    unsigned int get() { return (osrs_h); }
+    uint8_t get() { return (osrs_h); }
   };
 };
 
