@@ -2318,14 +2318,21 @@ static unsigned long sendData(const String& data, const int pin, const char* hos
 		client->flush();
 
 		// Wait and read reply from server and print them
-		while (client->connected()) {
+		int retries = 100;
+		while (retries && client->connected()) {
+			int r;
 
-			if (client->available()) {
-				int r = client->read((uint8_t*) buf.begin(), buf.length()-1);
-				if (r > 0) {
-					buf[r] = '\0';
-				}
+			if ((r = client->available()) > 0) {
+				uint8_t charbuf[64];
+				r = client->read(charbuf, std::min((size_t)r, sizeof(charbuf)-1));
+				// server closed connection?
+				if (r <= 0) break;
+				charbuf[r] = '\0';
+				// TODO: avoid temporary string creation..
+				buf = (const char*)charbuf;
 				debug_out(buf, DEBUG_MED_INFO);
+			} else if (retries--) {
+				delay(20);
 			}
 
 			yield();
