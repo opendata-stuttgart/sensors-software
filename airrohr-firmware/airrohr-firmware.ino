@@ -143,7 +143,6 @@ const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 #endif
 
 // includes common to ESP8266 and ESP32 (especially external libraries)
-#include <base64.h>
 #include "./oledfont.h"				// avoids including the default Arial font, needs to be included before SSD1306.h
 #include <SSD1306.h>
 #include <SH1106.h>
@@ -341,8 +340,6 @@ enum class PmSensorCmd {
 	VersionDate
 };
 
-String basic_auth_influx;
-String basic_auth_custom;
 LoggerConfig loggerConfigs[LoggerCount];
 BearSSL::X509List x509_dst_root_ca(dst_root_ca_x3);
 
@@ -1074,14 +1071,6 @@ void writeConfig() {
  * Prepare information for data Loggers                          *
  *****************************************************************/
 static void createLoggerConfigs() {
-	basic_auth_custom = emptyString;
-	if (cfg::user_custom[0] != '\0' || cfg::pwd_custom[0] != '\0') {
-		basic_auth_custom = base64::encode(String(cfg::user_custom) + ':' + String(cfg::pwd_custom));
-	}
-	basic_auth_influx = emptyString;
-	if (cfg::user_influx[0] != '\0' || cfg::pwd_influx[0] != '\0') {
-		basic_auth_influx = base64::encode(String(cfg::user_influx) + ':' + String(cfg::pwd_influx));
-	}
 	if (cfg::send2dusti) {
 		loggerConfigs[LoggerSensorCommunity].destport = 80;
 		if (cfg::ssl_dusti) {
@@ -2316,6 +2305,29 @@ static void connectWifi() {
 	debug_outln_info(F("WiFi connected\nIP address: "), WiFi.localIP().toString());
 }
 
+static WiFiClient* getNewLoggerWiFiClient(const LoggerEntry logger) {
+
+	WiFiClient* _client;
+	if (loggerConfigs[logger].session) {
+		_client = new WiFiClientSecure;
+		static_cast<WiFiClientSecure*>(_client)->setSession(loggerConfigs[logger].session);
+		static_cast<WiFiClientSecure*>(_client)->setBufferSizes(1024, TCP_MSS > 1024 ? 2048 : 1024);
+		switch(logger) {
+		case Loggeraircms:
+		case LoggerInflux:
+		case LoggerCustom:
+			static_cast<WiFiClientSecure*>(_client)->setInsecure();
+			break;
+		default:
+			static_cast<WiFiClientSecure*>(_client)->setTrustAnchors(&x509_dst_root_ca);
+		}
+	} else {
+		_client = new WiFiClient;
+	}
+	_client->setTimeout(20000);
+	return _client;
+}
+
 /*****************************************************************
  * send data to rest api                                         *
  *****************************************************************/
@@ -2327,103 +2339,47 @@ static unsigned long sendData(const LoggerEntry logger, const String& data, cons
 	String s_Host(FPSTR(host));
 	String s_url(FPSTR(url));
 
-	const char* basic_auth_string = nullptr;
-	bool verify_trust = true;
-
 	switch(logger) {
 	case Loggeraircms:
 		contentType = FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN);
-		verify_trust = false;
 		break;
 	case LoggerInflux:
-		basic_auth_string = basic_auth_influx.c_str();
 		contentType = FPSTR(TXT_CONTENT_TYPE_INFLUXDB);
-		verify_trust = false;
-		break;
-	case LoggerCustom:
-		basic_auth_string = basic_auth_custom.c_str();
-		contentType = FPSTR(TXT_CONTENT_TYPE_JSON);
-		verify_trust = false;
 		break;
 	default:
 		contentType = FPSTR(TXT_CONTENT_TYPE_JSON);
 		break;
 	}
 
-	debug_outln_info(F("Start sendData to "), s_Host);
+	std::unique_ptr<WiFiClient> client(getNewLoggerWiFiClient(logger));
 
-	RESERVE_STRING(buf, LARGE_STR);
-	buf = F("POST ");
-	buf += s_url;
-	buf += F(" HTTP/1.1\r\nHost: ");
-	buf += s_Host;
-	buf += F("\r\nContent-Type: ");
-	buf += contentType;
-	if (basic_auth_string && *basic_auth_string) {
-		buf += F("\r\nAuthorization: Basic ");
-		buf += String(basic_auth_string);
+	HTTPClient http;
+	http.setTimeout(20 * 1000);
+	http.setUserAgent(SOFTWARE_VERSION + '/' + esp_chipid);
+	if (logger == LoggerCustom && (*cfg::user_custom || *cfg::pwd_custom)) {
+		http.setAuthorization(cfg::user_custom, cfg::pwd_custom);
 	}
-	buf += F("\r\nX-PIN: ");
-	buf += pin;
-	buf += F("\r\nX-Sensor: " SENSOR_BASENAME);
-	buf += esp_chipid;
-	buf += F("\r\nContent-Length: ");
-	buf += String(data.length(), DEC);
-	buf += F("\r\nConnection: close\r\n\r\n");
-
-	// Use WiFiClient class to create TCP connections
-	WiFiClient* _client;
-	if (loggerConfigs[logger].session) {
-		_client = new WiFiClientSecure;
-		static_cast<WiFiClientSecure*>(_client)->setSession(loggerConfigs[logger].session);
-		static_cast<WiFiClientSecure*>(_client)->setBufferSizes(1024, TCP_MSS > 1024 ? 2048 : 1024);
-		if ( verify_trust ) {
-			static_cast<WiFiClientSecure*>(_client)->setTrustAnchors(&x509_dst_root_ca);
-		} else {
-			static_cast<WiFiClientSecure*>(_client)->setInsecure();
+	if (logger == LoggerInflux && (*cfg::user_influx || *cfg::pwd_influx)) {
+		http.setAuthorization(cfg::user_influx, cfg::pwd_influx);
+	}
+	if (http.begin(*client, s_Host, loggerConfigs[logger].destport, s_url, !!loggerConfigs[logger].session)) {
+		http.addHeader(F("Content-Type"), contentType);
+		http.addHeader(F("X-Sensor"), String(F(SENSOR_BASENAME)) + esp_chipid);
+		if (pin) {
+			http.addHeader(F("X-PIN"), String(pin));
 		}
+		int result = http.POST(data);
+		http.end();
 
+		if (result >= HTTP_CODE_OK && result <= HTTP_CODE_ALREADY_REPORTED) {
+			debug_outln_info(F("Succeeded - "), s_Host);
+		} else if (result >= HTTP_CODE_BAD_REQUEST) {
+			debug_outln_info(F("Request failed with error: "), String(result));
+			debug_outln_info(F("Details:"), http.getString());
+		}
 	} else {
-		_client = new WiFiClient;
+		debug_outln_info(F("Failed connecting to "), s_Host);
 	}
-	std::unique_ptr<WiFiClient> client(_client);
-
-	client->setTimeout(20000);
-
-	if (client->connect(s_Host, loggerConfigs[logger].destport)) {
-		debug_outln_info(F("Requesting URL: "), s_url);
-		debug_outln_verbose(esp_chipid);
-		debug_outln_verbose(data);
-
-		// send request to the server
-		client->print(buf);
-		client->println(data);
-		client->flush();
-
-		// Wait and read reply from server and print them
-		int retries = 100;
-		while (retries && client->connected()) {
-			int r;
-
-			if ((r = client->available()) > 0) {
-				uint8_t charbuf[64];
-				r = client->read(charbuf, std::min((size_t)r, sizeof(charbuf)-1));
-				// server closed connection?
-				if (r <= 0) break;
-				charbuf[r] = '\0';
-				// TODO: avoid temporary string creation..
-				buf = (const char*)charbuf;
-				debug_out(buf, DEBUG_MED_INFO);
-			} else if (retries--) {
-				delay(20);
-			}
-
-			yield();
-		}
-		client->stop();
-		debug_outln_info(F("\nclosing connection\n----\n\n"));
-	}
-	debug_outln_info(F("End connecting to "), s_Host);
 
 	return millis() - start_send;
 }
