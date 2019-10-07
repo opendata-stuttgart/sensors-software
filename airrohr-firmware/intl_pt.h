@@ -30,7 +30,7 @@ const char INTL_BMP180[] PROGMEM = "BMP180 ({t}, {p})";
 const char INTL_BMX280[] PROGMEM = "BMP280/BME280 ({t}, {h}, {p})";
 const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
-const char INTL_DNMS_CORRECTION[] PROGMEM ="";
+const char INTL_DNMS_CORRECTION[] PROGMEM ="Valor de correção em dB(A)";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Autorização";
 const char INTL_FS_WIFI[] PROGMEM = "Sensor WiFi";
@@ -41,12 +41,12 @@ const char INTL_AUTO_UPDATE[] PROGMEM = "Atualização automática do Firmware";
 const char INTL_USE_BETA[] PROGMEM = "Carregar Firmware Beta";
 const char INTL_DISPLAY[] PROGMEM = "OLED SSD1306";
 const char INTL_SH1106[] PROGMEM = "OLED SH1106";
-const char INTL_FLIP_DISPLAY[] PROGMEM = "";
+const char INTL_FLIP_DISPLAY[] PROGMEM = "Girar a tela OLED de 180°";
 const char INTL_LCD1602_27[] PROGMEM = "LCD 1602 (I2C: 0x27)";
 const char INTL_LCD1602_3F[] PROGMEM = "LCD 1602 (I2C: 0x3F)";
 const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
-const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "";
-const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "";
+const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Mostrar informações WiFi";
+const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Mostrar informações do dispositivo";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;Level";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Intervalo de medição";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Duração&nbsp;Modo roteador";
@@ -103,7 +103,7 @@ const char INTL_TIME[] PROGMEM = "Hora";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Intensidade do Sinal";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Qualidade do Sinal";
 #define INTL_NUMBER_OF_MEASUREMENTS "Quantidade de medições:"
-#define INTL_TIME_SENDING_MS ""
+#define INTL_TIME_SENDING_MS "Duração da transmissão das medições"
 #define INTL_SENSOR "Sensor"
 #define INTL_PARAMETER "Parâmetro"
 #define INTL_VALUE "Valor"
