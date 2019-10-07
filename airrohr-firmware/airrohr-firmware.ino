@@ -4318,24 +4318,28 @@ void loop(void) {
 			fetchSensorSPS30(result);
 			data += result;
 			sum_send_time += sendLuftdaten(result, SPS30_API_PIN, FPSTR(SENSORS_SPS30), "SPS30_");
+			result = empty_String;
 		}
 		if (cfg::dht_read) {
 			// getting temperature and humidity (optional)
 			fetchSensorDHT(result);
 			data += result;
 			sum_send_time += sendLuftdaten(result, DHT_API_PIN, FPSTR(SENSORS_DHT22), "DHT_");
+			result = empty_String;
 		}
 		if (cfg::htu21d_read && (! htu21d_init_failed)) {
 			// getting temperature and humidity (optional)
 			fetchSensorHTU21D(result);
 			data += result;
 			sum_send_time += sendLuftdaten(result, HTU21D_API_PIN, FPSTR(SENSORS_HTU21D), "HTU21D_");
+			result = empty_String;
 		}
 		if (cfg::bmp_read && (! bmp_init_failed)) {
 			// getting temperature and pressure (optional)
 			fetchSensorBMP(result);
 			data += result;
 			sum_send_time += sendLuftdaten(result, BMP_API_PIN, FPSTR(SENSORS_BMP180), "BMP_");
+			result = empty_String;
 		}
 		if (cfg::bmx280_read && (! bmx280_init_failed)) {
 			// getting temperature, humidity and pressure (optional)
@@ -4346,22 +4350,26 @@ void loop(void) {
 			} else {
 				sum_send_time += sendLuftdaten(result, BMP280_API_PIN, FPSTR(SENSORS_BMX280), "BMP280_");
 			}
+			result = empty_String;
 		}
 		if (cfg::ds18b20_read) {
 			// getting temperature (optional)
 			fetchSensorDS18B20(result);
 			data += result;
 			sum_send_time += sendLuftdaten(result, DS18B20_API_PIN, FPSTR(SENSORS_DS18B20), "DS18B20_");
+			result = empty_String;
 		}
 		if (cfg::dnms_read && (! dnms_init_failed)) {
 			// getting noise measurement values from dnms (optional)
 			fetchSensorDNMS(result);
 			data += result;
 			sum_send_time += sendLuftdaten(result, DNMS_API_PIN, FPSTR(SENSORS_DNMS), "DNMS_");
+			result = empty_String;
 		}
 		if (cfg::gps_read) {
 			data += result_GPS;
 			sum_send_time += sendLuftdaten(result_GPS, GPS_API_PIN, F("GPS"), "GPS_");
+			result = empty_String;
 		}
 		add_Value2Json(data, F("samples"), String(sample_count));
 		add_Value2Json(data, F("min_micro"), String(min_micro));
