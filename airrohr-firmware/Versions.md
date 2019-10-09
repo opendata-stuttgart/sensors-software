@@ -1,3 +1,7 @@
+NRZ-2019-124-B8
+* bug fixes
+* translation updates
+
 NRZ-2019-124-B7
 * Fix update checking interval
 
