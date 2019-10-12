@@ -1,3 +1,7 @@
+NRZ-2019-124-B9
+* Handle Si7021 for HTU21d replacement
+* Fix GPS regression
+
 NRZ-2019-124-B8
 * bug fixes
 * translation updates
