@@ -3328,7 +3328,7 @@ static void fetchSensorGPS(String& s) {
 		add_Value2Json(s, F("GPS_time"), last_value_GPS_time);
 	}
 
-	if ( gps.charsProcessed() < 10) {
+	if ( count_sends > 0 && gps.charsProcessed() < 10) {
 		debug_outln_error(F("No GPS data received: check wiring"));
 		gps_init_failed = true;
 	}
