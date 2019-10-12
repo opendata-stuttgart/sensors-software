@@ -3934,7 +3934,9 @@ static void powerOnTestSensors() {
 
 	if (cfg::htu21d_read) {
 		debug_outln_info(F("Read HTU21D..."));
-		if (!htu21d.begin()) {
+		// begin() might return false when using Si7021
+		// so validate reading via Humidity (will return 0.0 when failed)
+		if (!htu21d.begin() && htu21d.readHumidity() < 1.0f) {
 			debug_outln_error(F("Check HTU21D wiring"));
 			htu21d_init_failed = true;
 		}
