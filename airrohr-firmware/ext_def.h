@@ -74,7 +74,7 @@ static const char URL_AIRCMS[] PROGMEM = "/php/sensors.php?h=";
 static const char FW_DOWNLOAD_HOST[] PROGMEM = "firmware.sensor.community";
 #define FW_DOWNLOAD_PORT 80
 
-static const char FW_2ND_LOADER_URL[] PROGMEM = "/airrohr/loader-002.bin";
+static const char FW_2ND_LOADER_URL[] PROGMEM = OTA_BASENAME "/loader-002.bin";
 
 // define own API
 static const char HOST_CUSTOM[] PROGMEM = "192.168.234.1";

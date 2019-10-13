@@ -3355,9 +3355,9 @@ static void twoStageAutoUpdate() {
 	String lang_variant(cfg::current_lang);
 	lang_variant.toLowerCase();
 
-	String fwprefix(F("/airrohr/update/latest_"));
+	String fwprefix(F(OTA_BASENAME "/update/latest_"));
 	if (cfg::use_beta) {
-		fwprefix = F("/airrohr/beta/latest_");
+		fwprefix = F(OTA_BASENAME "/beta/latest_");
 	}
 	fwprefix += lang_variant;
 
