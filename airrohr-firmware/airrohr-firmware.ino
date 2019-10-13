@@ -105,7 +105,7 @@
  *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2019-124-B8"
+#define SOFTWARE_VERSION_STR "NRZ-2019-124-B9"
 const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -128,6 +128,7 @@ const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 #if defined(ESP8266)
 #include <FS.h>                     // must be first
+#include <WiFiClientSecureAxTLS.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
@@ -3935,8 +3936,17 @@ static void powerOnTestSensors() {
 	if (cfg::htu21d_read) {
 		debug_outln_info(F("Read HTU21D..."));
 		if (!htu21d.begin()) {
-			debug_outln_error(F("Check HTU21D wiring"));
-			htu21d_init_failed = true;
+      debug_outln_info(F("Read Si7021 replacement for HTU21D ..."));
+      Wire.beginTransmission(HTU21DF_I2CADDR);
+      Wire.write(HTU21DF_READREG);
+      Wire.endTransmission();
+      Wire.requestFrom(HTU21DF_I2CADDR, 1);
+      if( Wire.read() == 0x3A){
+         debug_outln_error(F("Found Si7120 instead of HTU21D"));
+      } else {
+        debug_outln_error(F("Check HTU21D wiring"));
+			  htu21d_init_failed = true;
+      }
 		}
 	}
 

@@ -1,3 +1,6 @@
+NRZ-2019-124-B9
+* Fix for #513 : checking if Si7021 is present in case HTU21D is not detected
+
 NRZ-2019-124-B8
 * bug fixes
 * translation updates
