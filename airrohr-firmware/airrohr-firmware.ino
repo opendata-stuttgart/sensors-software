@@ -105,7 +105,7 @@
  *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2019-124-B8"
+#define SOFTWARE_VERSION_STR "NRZ-2019-124-B9"
 const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -3328,7 +3328,7 @@ static void fetchSensorGPS(String& s) {
 		add_Value2Json(s, F("GPS_time"), last_value_GPS_time);
 	}
 
-	if ( gps.charsProcessed() < 10) {
+	if ( count_sends > 0 && gps.charsProcessed() < 10) {
 		debug_outln_error(F("No GPS data received: check wiring"));
 		gps_init_failed = true;
 	}
@@ -3934,7 +3934,9 @@ static void powerOnTestSensors() {
 
 	if (cfg::htu21d_read) {
 		debug_outln_info(F("Read HTU21D..."));
-		if (!htu21d.begin()) {
+		// begin() might return false when using Si7021
+		// so validate reading via Humidity (will return 0.0 when failed)
+		if (!htu21d.begin() && htu21d.readHumidity() < 1.0f) {
 			debug_outln_error(F("Check HTU21D wiring"));
 			htu21d_init_failed = true;
 		}
