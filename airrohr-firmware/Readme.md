@@ -162,7 +162,7 @@ Pinout PMS7003:
 
 * Pin  1/2 (VCC) -> VU
 * Pin  3/4 (GND) -> GND
-* Pin  5 (RESET) -> GND
+* Pin  5 (RESET) -> unused
 * Pin  6 (NC)    -> unused
 * Pin  7 (RX)    -> Pin D2 (GPIO4)
 * Pin  8 (NC)    -> unused
