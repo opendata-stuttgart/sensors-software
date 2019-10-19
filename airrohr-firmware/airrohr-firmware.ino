@@ -577,7 +577,7 @@ const char JSON_SENSOR_DATA_VALUES[] PROGMEM = "sensordatavalues";
  * Debug output                                                  *
  *****************************************************************/
 
-#define debug_level_check(level) if(level > cfg::debug) return;
+#define debug_level_check(level) if (level > cfg::debug) return;
 
 static void debug_out(const String& text, unsigned int level) {
 	debug_level_check(level); Serial.print(text);
@@ -1114,7 +1114,7 @@ static String sha1Hex(const String& s) {
 	esp_sha(SHA1, (const unsigned char*) s.c_str(), s.length(), (unsigned char*)sha1sum_output);
 #endif
 	String r;
-	for(uint16_t i = 0; i < 20; i++) {
+	for (uint16_t i = 0; i < 20; i++) {
 		char hex[3];
 		snprintf(hex, sizeof(hex), "%02x", sha1sum_output[i]);
 		r += hex;
@@ -1145,7 +1145,7 @@ static void start_html_page(String& page_content, const String& title) {
 
 	s = FPSTR(WEB_PAGE_HEADER_BODY);
 	s.replace("{t}", title);
-	if(title != " ") {
+	if (title != " ") {
 		s.replace("{n}", F("&raquo;"));
 	} else {
 		s.replace("{n}", emptyString);
@@ -1173,7 +1173,7 @@ static void add_form_input(String& page_content, const ConfigShapeId cfgid, cons
 	String t_value;
 	ConfigShapeEntry c;
 	memcpy_P(&c, &configShape[cfgid], sizeof(ConfigShapeEntry));
-	switch(c.cfg_type) {
+	switch (c.cfg_type) {
 	case Config_Type_UInt:
 		t_value = String(*c.cfg_val.as_uint);
 		break;
@@ -1795,7 +1795,7 @@ static void webserver_wifi() {
 		page_content += FPSTR(BR_TAG);
 		page_content += FPSTR(BR_TAG);
 		page_content += FPSTR(TABLE_TAG_OPEN);
-		//if(n > 30) n=30;
+		//if (n > 30) n=30;
 		for (int i = 0; i < count_wifiInfo; ++i) {
 			if (indices[i] == -1
  #if defined (ESP8266)
@@ -2312,7 +2312,7 @@ static WiFiClient* getNewLoggerWiFiClient(const LoggerEntry logger) {
 		_client = new WiFiClientSecure;
 		static_cast<WiFiClientSecure*>(_client)->setSession(loggerConfigs[logger].session);
 		static_cast<WiFiClientSecure*>(_client)->setBufferSizes(1024, TCP_MSS > 1024 ? 2048 : 1024);
-		switch(logger) {
+		switch (logger) {
 		case Loggeraircms:
 		case LoggerInflux:
 		case LoggerCustom:
@@ -2339,7 +2339,7 @@ static unsigned long sendData(const LoggerEntry logger, const String& data, cons
 	String s_Host(FPSTR(host));
 	String s_url(FPSTR(url));
 
-	switch(logger) {
+	switch (logger) {
 	case Loggeraircms:
 		contentType = FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN);
 		break;
@@ -3075,7 +3075,7 @@ static void fetchSensorPPD(String& s) {
 		boolean valP1 = digitalRead(PPD_PIN_PM1);
 		boolean valP2 = digitalRead(PPD_PIN_PM2);
 
-		if(valP1 == LOW && trigP1 == false) {
+		if (valP1 == LOW && trigP1 == false) {
 			trigP1 = true;
 			trigOnP1 = act_micro;
 		}
@@ -3085,7 +3085,7 @@ static void fetchSensorPPD(String& s) {
 			trigP1 = false;
 		}
 
-		if(valP2 == LOW && trigP2 == false) {
+		if (valP2 == LOW && trigP2 == false) {
 			trigP2 = true;
 			trigOnP2 = act_micro;
 		}
@@ -3430,7 +3430,7 @@ static void twoStageAutoUpdate() {
 		FPSTR(FW_2ND_LOADER_URL), SOFTWARE_VERSION);
 
 	String LastErrorString = ESPhttpUpdate.getLastErrorString().c_str();
-	switch(ret) {
+	switch (ret) {
 	case HTTP_UPDATE_FAILED:
 		debug_outln_error(FPSTR(DBG_TXT_UPDATE));
 		debug_outln_error(FPSTR(DBG_TXT_UPDATE_FAILED));
