@@ -3871,7 +3871,7 @@ static void initSPS30() {
    Init DNMS - Digital Noise Measurement Sensor
  *****************************************************************/
 static void initDNMS() {
-	char dnms_version[DNMS_MAX_VERSION_LEN];
+	char dnms_version[DNMS_MAX_VERSION_LEN + 1];
 
 	debug_out(F("Trying DNMS sensor on 0x55H "), DEBUG_MIN_INFO);
 	dnms_reset();
@@ -3881,7 +3881,8 @@ static void initDNMS() {
 		debug_outln_error(F("Check DNMS wiring"));
 		dnms_init_failed = 1;
 	} else {
-		debug_outln_info(FPSTR(DBG_TXT_FOUND), String(dnms_version));
+		dnms_version[DNMS_MAX_VERSION_LEN] = 0;
+		debug_outln_info(FPSTR(DBG_TXT_FOUND), String(": ") + String(dnms_version)); 
 	}
 }
 
