@@ -84,12 +84,6 @@
  *                                                                      *
  ************************************************************************
  *
- * Attention:
- * the driver for the Sensirion PM Sensor SPS30 needs I²C lransmission of 64 Bytes
- *
- * in Wire.h set BUFFER_LENGTH to 64 !!!!
- *
- * #define BUFFER_LENGTH 64
  *
  *
  ************************************************************************/

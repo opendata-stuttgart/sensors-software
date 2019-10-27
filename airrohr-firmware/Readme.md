@@ -70,8 +70,6 @@ Ab "ESP für Arduino 2.5.2":
   ändern in
   'build.float='
 
-* in Wire.h muss bei Verwendung des Sensirion SPS30 noch BUFFER_LENGTH auf 64 gesetzt werden
-
 ### Verwendete Bibliotheken (für ESP8266):
 
 In Arduino enthalten:
