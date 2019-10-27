@@ -1423,7 +1423,7 @@ static void webserver_config_send_body_get(String& page_content) {
 		page_content += F("<div id='wifilist'>" INTL_WIFI_NETWORKS "</div><br/>");
 	}
 	page_content += FPSTR(TABLE_TAG_OPEN);
-	add_form_input(page_content, Config_wlanssid, FPSTR(INTL_FS_WIFI_NAME), LEN_WLANSSID);
+	add_form_input(page_content, Config_wlanssid, FPSTR(INTL_FS_WIFI_NAME), LEN_WLANSSID-1);
 	add_form_password(page_content, Config_wlanpwd, FPSTR(INTL_PASSWORD));
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 	page_content += F("<hr/>\n<br/><b>");
@@ -1503,7 +1503,7 @@ static void webserver_config_send_body_get(String& page_content) {
 
 		add_form_checkbox_sensor(page_content, Config_dnms_read, FPSTR(INTL_DNMS));
 		page_content += FPSTR(TABLE_TAG_OPEN);
-		add_form_input(page_content, Config_dnms_correction, FPSTR(INTL_DNMS_CORRECTION), LEN_DNMS_CORRECTION);
+		add_form_input(page_content, Config_dnms_correction, FPSTR(INTL_DNMS_CORRECTION), LEN_DNMS_CORRECTION-1);
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 		add_form_checkbox(page_content, Config_gps_read, FPSTR(INTL_NEO6M));
 
@@ -1554,7 +1554,7 @@ static void webserver_config_send_body_get(String& page_content) {
 		add_form_checkbox(page_content, Config_send2aircms, tmpl(FPSTR(INTL_SEND_TO), F("aircms.online")));
 		add_form_checkbox(page_content, Config_send2sensemap, tmpl(FPSTR(INTL_SEND_TO), F("OpenSenseMap")));
 		page_content += FPSTR(TABLE_TAG_OPEN);
-		add_form_input(page_content, Config_senseboxid, F("senseBox&nbsp;ID: "), LEN_SENSEBOXID);
+		add_form_input(page_content, Config_senseboxid, F("senseBox&nbsp;ID: "), LEN_SENSEBOXID-1);
 
 		server.sendContent(page_content);
 		page_content = FPSTR(TABLE_TAG_CLOSE_BR);
@@ -1587,7 +1587,7 @@ static void webserver_config_send_body_get(String& page_content) {
 		add_form_input(page_content, Config_port_influx, FPSTR(INTL_PORT), MAX_PORT_DIGITS);
 		add_form_input(page_content, Config_user_influx, FPSTR(INTL_USER), LEN_USER_INFLUX-1);
 		add_form_password(page_content, Config_pwd_influx, FPSTR(INTL_PASSWORD));
-		add_form_input(page_content, Config_measurement_name_influx, F("Measurement"), LEN_MEASUREMENT_NAME_INFLUX);
+		add_form_input(page_content, Config_measurement_name_influx, F("Measurement"), LEN_MEASUREMENT_NAME_INFLUX-1);
 		page_content += form_submit(FPSTR(INTL_SAVE_AND_RESTART));
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 		page_content += FPSTR(BR_TAG);
