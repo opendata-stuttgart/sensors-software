@@ -307,7 +307,7 @@ namespace cfg {
 
 	char host_influx[LEN_HOST_INFLUX];
 	char url_influx[LEN_URL_INFLUX];
-	unsigned int port_influx = PORT_INFLUX;
+	unsigned port_influx = PORT_INFLUX;
 	char user_influx[LEN_USER_INFLUX] = USER_INFLUX;
 	char pwd_influx[LEN_CFG_PASSWORD] = PWD_INFLUX;
 	char measurement_name_influx[LEN_MEASUREMENT_NAME_INFLUX];
@@ -316,7 +316,7 @@ namespace cfg {
 	char host_custom[LEN_HOST_CUSTOM];
 	char url_custom[LEN_URL_CUSTOM];
 	bool ssl_custom = SSL_CUSTOM;
-	unsigned int port_custom = PORT_CUSTOM;
+	unsigned port_custom = PORT_CUSTOM;
 	char user_custom[LEN_USER_CUSTOM] = USER_CUSTOM;
 	char pwd_custom[LEN_CFG_PASSWORD] = PWD_CUSTOM;
 
@@ -1165,7 +1165,7 @@ static void add_form_input(String& page_content, const char* name, const __Flash
 	page_content += s;
 }
 
-static String form_password(const char* name, const String& info, const String& value, const int length) {
+static void add_form_password(String& page_content, const char* name, const String& info, const String& value) {
 	String s = F(	"<tr>"
 					"<td>{i} </td>"
 					"<td style='width:90%;'>"
@@ -1179,8 +1179,8 @@ static String form_password(const char* name, const String& info, const String& 
 	s.replace("{i}", info);
 	s.replace("{n}", name);
 	s.replace("{v}", password);
-	s.replace("{l}", String(length));
-	return s;
+	s.replace("{l}", String(LEN_CFG_PASSWORD-1));
+	page_content += s;
 }
 
 static String form_checkbox(const char* name, const String& info, const bool checked, const bool linebreak) {
@@ -1401,8 +1401,8 @@ static void webserver_config_send_body_get(String& page_content) {
 		page_content += F("<div id='wifilist'>" INTL_WIFI_NETWORKS "</div><br/>");
 	}
 	page_content += FPSTR(TABLE_TAG_OPEN);
-	add_form_input(page_content, "wlanssid", FPSTR(INTL_FS_WIFI_NAME), wlanssid, LEN_WLANSSID);
-	page_content += form_password("wlanpwd", FPSTR(INTL_PASSWORD), wlanpwd, LEN_WLANSSID);
+	add_form_input(page_content, "wlanssid", FPSTR(INTL_FS_WIFI_NAME), wlanssid, LEN_WLANSSID-1);
+	add_form_password(page_content, "wlanpwd", FPSTR(INTL_PASSWORD), wlanpwd);
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 	page_content += F("<hr/>\n<br/><b>");
 
@@ -1418,8 +1418,8 @@ static void webserver_config_send_body_get(String& page_content) {
 		page_content += FPSTR(WEB_B_BR);
 		add_form_checkbox(page_content, "www_basicauth_enabled", FPSTR(INTL_BASICAUTH), www_basicauth_enabled);
 		page_content += FPSTR(TABLE_TAG_OPEN);
-		add_form_input(page_content, "www_username", FPSTR(INTL_USER), www_username, LEN_WWW_USERNAME);
-		page_content += form_password("www_password", FPSTR(INTL_PASSWORD), www_password, LEN_CFG_PASSWORD-1);
+		add_form_input(page_content, "www_username", FPSTR(INTL_USER), www_username, LEN_WWW_USERNAME-1);
+		add_form_password(page_content, "www_password", FPSTR(INTL_PASSWORD), www_password);
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 
 		// Paginate page after ~ 1500 Bytes
@@ -1431,8 +1431,8 @@ static void webserver_config_send_body_get(String& page_content) {
 		page_content += FPSTR(INTL_FS_WIFI_DESCRIPTION);
 		page_content += FPSTR(BR_TAG);
 		page_content += FPSTR(TABLE_TAG_OPEN);
-		add_form_input(page_content, "fs_ssid", FPSTR(INTL_FS_WIFI_NAME), fs_ssid, LEN_FS_SSID);
-		page_content += form_password("fs_pwd", FPSTR(INTL_PASSWORD), fs_pwd, LEN_CFG_PASSWORD-1);
+		add_form_input(page_content, "fs_ssid", FPSTR(INTL_FS_WIFI_NAME), fs_ssid, LEN_FS_SSID-1);
+		add_form_password(page_content, "fs_pwd", FPSTR(INTL_PASSWORD), fs_pwd);
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 
 		page_content += FPSTR(WEB_BR_LF_B);
@@ -1543,11 +1543,11 @@ static void webserver_config_send_body_get(String& page_content) {
 
 		server.sendContent(page_content);
 		page_content = FPSTR(TABLE_TAG_OPEN);
-		add_form_input(page_content, "host_custom", FPSTR(INTL_SERVER), host_custom, LEN_HOST_CUSTOM);
-		add_form_input(page_content, "url_custom", FPSTR(INTL_PATH), url_custom, LEN_URL_CUSTOM);
+		add_form_input(page_content, "host_custom", FPSTR(INTL_SERVER), host_custom, LEN_HOST_CUSTOM-1);
+		add_form_input(page_content, "url_custom", FPSTR(INTL_PATH), url_custom, LEN_URL_CUSTOM-1);
 		add_form_input(page_content, "port_custom", FPSTR(INTL_PORT), String(port_custom), MAX_PORT_DIGITS);
-		add_form_input(page_content, "user_custom", FPSTR(INTL_USER), user_custom, LEN_USER_CUSTOM);
-		page_content += form_password("pwd_custom", FPSTR(INTL_PASSWORD), pwd_custom, LEN_CFG_PASSWORD-1);
+		add_form_input(page_content, "user_custom", FPSTR(INTL_USER), user_custom, LEN_USER_CUSTOM-1);
+		add_form_password(page_content, "pwd_custom", FPSTR(INTL_PASSWORD), pwd_custom);
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 
 		page_content += FPSTR(BR_TAG);
@@ -1559,12 +1559,12 @@ static void webserver_config_send_body_get(String& page_content) {
 		page_content += form_checkbox("ssl_influx", FPSTR(WEB_HTTPS), ssl_influx, false);
 		page_content += FPSTR(WEB_BRACE_BR);
 		page_content += FPSTR(TABLE_TAG_OPEN);
-		add_form_input(page_content, "host_influx", FPSTR(INTL_SERVER), host_influx, LEN_HOST_INFLUX);
-		add_form_input(page_content, "url_influx", FPSTR(INTL_PATH), url_influx, LEN_URL_INFLUX);
+		add_form_input(page_content, "host_influx", FPSTR(INTL_SERVER), host_influx, LEN_HOST_INFLUX-1);
+		add_form_input(page_content, "url_influx", FPSTR(INTL_PATH), url_influx, LEN_URL_INFLUX-1);
 		add_form_input(page_content, "port_influx", FPSTR(INTL_PORT), String(port_influx), MAX_PORT_DIGITS);
-		add_form_input(page_content, "user_influx", FPSTR(INTL_USER), user_influx, LEN_USER_INFLUX);
-		page_content += form_password("pwd_influx", FPSTR(INTL_PASSWORD), pwd_influx, LEN_CFG_PASSWORD-1);
-		add_form_input(page_content, "measurement_name_influx", F("Measurement"), measurement_name_influx, LEN_MEASUREMENT_NAME_INFLUX);
+		add_form_input(page_content, "user_influx", FPSTR(INTL_USER), user_influx, LEN_USER_INFLUX-1);
+		add_form_password(page_content, "pwd_influx", FPSTR(INTL_PASSWORD), pwd_influx);
+		add_form_input(page_content, "measurement_name_influx", F("Measurement"), measurement_name_influx, LEN_MEASUREMENT_NAME_INFLUX-1);
 		page_content += form_submit(FPSTR(INTL_SAVE_AND_RESTART));
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 		page_content += FPSTR(BR_TAG);
