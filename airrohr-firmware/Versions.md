@@ -1,3 +1,6 @@
+NRZ-2019-124-B10
+* Persist Wifi configuration in flash
+
 NRZ-2019-124-B9
 * Handle Si7021 for HTU21d replacement
 * Fix GPS regression

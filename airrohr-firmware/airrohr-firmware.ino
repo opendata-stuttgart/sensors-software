@@ -105,7 +105,7 @@
  *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2019-124-B9"
+#define SOFTWARE_VERSION_STR "NRZ-2019-124-B10"
 const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -3882,7 +3882,7 @@ static void initDNMS() {
 		dnms_init_failed = 1;
 	} else {
 		dnms_version[DNMS_MAX_VERSION_LEN] = 0;
-		debug_outln_info(FPSTR(DBG_TXT_FOUND), String(": ") + String(dnms_version)); 
+		debug_outln_info(FPSTR(DBG_TXT_FOUND), String(": ") + String(dnms_version));
 	}
 }
 
