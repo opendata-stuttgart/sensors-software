@@ -4047,7 +4047,7 @@ static bool acquireNetworkTime() {
 	WiFi.gatewayIP().toString().toCharArray(ntpServer1, sizeof(ntpServer1));
 	String(String(INTL_LANG) + ".pool.ntp.org").toCharArray(ntpServer2, sizeof(ntpServer2));
 	configTime(0, 0, ntpServer1, ntpServer2);
-	for (int retryCount = 0; retryCount++ < 20; ++retryCount) {
+	for (int retryCount = 0; retryCount < 20; ++retryCount) {
 		if (sntp_time_is_set) {
 			now = time(nullptr);
 			debug_outln_info(ctime(&now));
