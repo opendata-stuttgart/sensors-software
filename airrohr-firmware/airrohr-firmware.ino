@@ -942,6 +942,8 @@ static bool boolFromJSON(const DynamicJsonDocument& json, const char* key)
 }
 
 static void readConfig() {
+	bool rewriteConfig = false;
+
 	debug_outln_info(F("mounting FS..."));
 
 #if defined(ESP32)
@@ -984,33 +986,47 @@ static void readConfig() {
 					break;
 				case Config_Type_String:
 				case Config_Type_Password:
+					// buffer overflow alert!
 					strcpy(c.cfg_val.as_str, json[cfg_key].as<char*>());
 					break;
 			};
 		}
-
+		String writtenVersion(json["SOFTWARE_VERSION"].as<char*>());
+		if (writtenVersion.length() && writtenVersion[0] == 'N' && SOFTWARE_VERSION != writtenVersion) {
+			debug_outln_info(F("Rewriting old config from: "), writtenVersion);
+			// would like to do that, but this would wipe firmware.old which the two stage loader
+			// might still need
+			// SPIFFS.format();
+			rewriteConfig = true;
+		}
 		if (strcmp_P(cfg::senseboxid, PSTR("00112233445566778899aabb")) == 0) {
 			cfg::senseboxid[0] = '\0';
 			cfg::send2sensemap = false;
+			rewriteConfig = true;
 		}
 		if (strlen(cfg::measurement_name_influx) == 0) {
 			strcpy_P(cfg::measurement_name_influx, MEASUREMENT_NAME_INFLUX);
+			rewriteConfig = true;
 		}
 		if (strcmp_P(cfg::host_influx, PSTR("api.luftdaten.info")) == 0) {
 			cfg::host_influx[0] = '\0';
 			cfg::send2influx = false;
+			rewriteConfig = true;
 		}
 		if (boolFromJSON(json, "pm24_read") || boolFromJSON(json, "pms32_read")) {
 			cfg::pms_read = true;
-			writeConfig();
+			rewriteConfig = true;
 		}
 		if (boolFromJSON(json, "bmp280_read") || boolFromJSON(json, "bme280_read")) {
 			cfg::bmx280_read = true;
-			writeConfig();
+			rewriteConfig = true;
 		}
-
 	} else {
 		debug_outln_error(F("failed to load json config"));
+	}
+
+	if (rewriteConfig) {
+		writeConfig();
 	}
 }
 
