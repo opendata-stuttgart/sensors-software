@@ -243,8 +243,8 @@ const unsigned long DURATION_BEFORE_FORCED_RESTART_MS = ONE_DAY_IN_MS * 28;	// f
 namespace cfg {
 	unsigned debug = DEBUG;
 
-	unsigned int time_for_wifi_config = 600000;
-	unsigned int sending_intervall_ms = 145000;
+	unsigned time_for_wifi_config = 600000;
+	unsigned sending_intervall_ms = 145000;
 
 	char current_lang[3];
 
@@ -332,7 +332,7 @@ namespace cfg {
 		strcpy_P(url_influx, URL_INFLUX);
 		strcpy_P(measurement_name_influx, MEASUREMENT_NAME_INFLUX);
 
-		if (fs_ssid[0] == '\0') {
+		if (!*fs_ssid) {
 			strcpy(fs_ssid, SSID_BASENAME);
 			strcat(fs_ssid, id);
 		}
@@ -986,8 +986,8 @@ static void readConfig() {
 					break;
 				case Config_Type_String:
 				case Config_Type_Password:
-					// buffer overflow alert!
-					strcpy(c.cfg_val.as_str, json[cfg_key].as<char*>());
+					strncpy(c.cfg_val.as_str, json[cfg_key].as<char*>(), c.cfg_len);
+					c.cfg_val.as_str[c.cfg_len] = '\0';
 					break;
 			};
 		}
@@ -1603,7 +1603,8 @@ static void webserver_config_send_body_post(String& page_content) {
 			*(c.cfg_val.as_bool) = (server.arg(s_param) == "1");
 			break;
 		case Config_Type_String:
-			strcpy(c.cfg_val.as_str, server.arg(s_param).c_str());
+			strncpy(c.cfg_val.as_str, server.arg(s_param).c_str(), c.cfg_len);
+			c.cfg_val.as_str[c.cfg_len] = '\0';
 			break;
 		case Config_Type_Password:
 			const String server_arg(server.arg(s_param));
