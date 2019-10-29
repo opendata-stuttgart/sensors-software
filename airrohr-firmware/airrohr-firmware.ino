@@ -84,7 +84,13 @@
  *                                                                      *
  ************************************************************************
  *
+ * latest mit lib 2.4.2
+ * Der Sketch verwendet 505504 Bytes (48%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
+ * Globale Variablen verwenden 37128 Bytes (45%) des dynamischen Speichers, 44792 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
  *
+ * latest mit lib 2.5.2
+ * DATA:    [====      ]  39.5% (used 32340 bytes from 81920 bytes)
+ * PROGRAM: [=====     ]  48.7% (used 508376 bytes from 1044464 bytes)
  *
  ************************************************************************/
 // increment on change
