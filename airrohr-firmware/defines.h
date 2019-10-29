@@ -8,6 +8,7 @@
 #define SSID_BASENAME "airRohr-"
 #define HOSTNAME_BASE "airRohr-"
 
+#define LEN_CFG_STRING 65
 #define LEN_CFG_PASSWORD 65
 
 #define LEN_WLANSSID 35				// credentials for wifi connection

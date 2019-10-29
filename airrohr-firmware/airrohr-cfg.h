@@ -1,5 +1,5 @@
 
-enum ConfigEntryType {
+enum ConfigEntryType : unsigned short {
 	Config_Type_Bool,
 	Config_Type_UInt,
 	Config_Type_String,
@@ -8,6 +8,7 @@ enum ConfigEntryType {
 
 struct ConfigShapeEntry {
 	ConfigEntryType cfg_type;
+	unsigned short cfg_len;
 	const char* cfg_key;
 	union {
 		void* as_void;
@@ -18,10 +19,10 @@ struct ConfigShapeEntry {
 };
 
 static constexpr ConfigShapeEntry configShape[] PROGMEM = {
-#define Config_Bool(varname) { Config_Type_Bool, #varname, &cfg::varname }
-#define Config_String(varname) { Config_Type_String, #varname, cfg::varname }
-#define Config_Password(varname) { Config_Type_Password, #varname, cfg::varname }
-#define Config_UInt(varname) { Config_Type_UInt, #varname, &cfg::varname }
+#define Config_Bool(varname) { Config_Type_Bool, 0, #varname, &cfg::varname }
+#define Config_String(varname) { Config_Type_String, sizeof(cfg::varname)-1, #varname, cfg::varname }
+#define Config_Password(varname) { Config_Type_Password, sizeof(cfg::varname)-1, #varname, cfg::varname }
+#define Config_UInt(varname) { Config_Type_UInt, 0, #varname, &cfg::varname }
 	Config_String(current_lang),
 	Config_String(wlanssid),
 	Config_Password(wlanpwd),
@@ -84,6 +85,6 @@ static constexpr ConfigShapeEntry configShape[] PROGMEM = {
 #undef Config_Bool
 #undef Config_Password
 #undef Config_String
-#undef Config_Int
+#undef Config_UInt
 };
 
