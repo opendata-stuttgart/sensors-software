@@ -28,21 +28,15 @@
  *                                                                      *
  *                                                                      *
  ************************************************************************
- *                                                                      *
- * 06.07.2018
- * Der Sketch verwendet 459607 Bytes (44%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
- * Globale Variablen verwenden 48736 Bytes (59%) des dynamischen Speichers, 33184 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
- *
- * first version with esp8266 lib 2.4.2
- * Der Sketch verwendet 491364 Bytes (47%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
- * Globale Variablen verwenden 37172 Bytes (45%) des dynamischen Speichers, 44748 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
- *
- * Der Sketch verwendet 489152 Bytes (46%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
- * Globale Variablen verwenden 37160 Bytes (45%) des dynamischen Speichers, 44760 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
- *
- * 06.09.2019: Using SPIFFS for update
- * DATA:    [===       ]  32.9% (used 26960 bytes from 81920 bytes)
- * PROGRAM: [===       ]  26.2% (used 273848 bytes from 1044464 bytes)
+
+ * 8.10.2019 (Arduino Core 2.4.2):
+ * DATA:    [===       ]  34.0% (used 27876 bytes from 81920 bytes)
+ * PROGRAM: [===       ]  25.6% (used 267072 bytes from 1044464 bytes)
+
+ * 28.10.2019 (Arduino Core 2.5.2):
+ * DATA:    [===       ]  32.9% (used 26964 bytes from 81920 bytes)
+ * PROGRAM: [===       ]  26.9% (used 280588 bytes from 1044464 bytes)
+
  ************************************************************************/
 // increment on change
 #define SOFTWARE_VERSION "LOADER-002"
@@ -78,7 +72,7 @@ namespace cfg {
  * Debug output                                                  *
  *****************************************************************/
 
-#define debug_level_check(level) if(level > cfg::debug) return;
+#define debug_level_check(level) if (level > cfg::debug) return;
 
 static void debug_outln_info(const __FlashStringHelper* text) {
 	debug_level_check(DEBUG_MIN_INFO); Serial.println(text);
@@ -134,7 +128,7 @@ static bool SPIFFSAutoUpdate() {
 			md5File.close();
 		}
 	}
-	if(Update.writeStream(updateFile) != updateFile.size()) {
+	if (Update.writeStream(updateFile) != updateFile.size()) {
 		StreamString error;
 		Update.printError(error);
 
@@ -188,7 +182,7 @@ void loop() {
 		debug_outln_error(F("Please upload the latest firmware as '/firmware.bin' on SPIFSS to recover."));
 
 		for (int j = 0; j < 3; ++j) {
-			for(int i = 0; i < 3; ++i) {
+			for (int i = 0; i < 3; ++i) {
 				digitalWrite(LED_BUILTIN, HIGH);
 				delay(60);
 				digitalWrite(LED_BUILTIN, LOW);
