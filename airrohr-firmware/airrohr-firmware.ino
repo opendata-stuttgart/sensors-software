@@ -2039,7 +2039,7 @@ static void webserver_data_json() {
  *****************************************************************/
 static void webserver_prometheus_endpoint() {
 	debug_outln_info(F("ws: prometheus endpoint..."));
-	String data_4_prometheus = F("software_version{version=\"" SOFTWARE_VERSION_STR "\",node=\"" SENSOR_BASENAME "-{id}\"} 1\nuptime_ms{{id}} {up}\nsending_intervall_ms{{id}} {si}\nnumber_of_measurements{{id}} {cs}\n");
+	String data_4_prometheus = F("software_version{version=\"" SOFTWARE_VERSION_STR "\",node=\"-{id}\"} 1\nuptime_ms{{id}} {up}\nsending_intervall_ms{{id}} {si}\nnumber_of_measurements{{id}} {cs}\n");
 	debug_outln_info(F("Parse JSON for Prometheus"));
 	String id(F("node=\"" SENSOR_BASENAME));
 	id += esp_chipid + "\"";
