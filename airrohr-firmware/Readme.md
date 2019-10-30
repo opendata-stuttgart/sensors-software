@@ -15,13 +15,16 @@ ToDo's:
 * neue Sensoren
 
 Dateien in diesem Verzeichnis:
-airrohr-firmware.ino	-	Sourcecode der eigentlichen Firmware
-ext_dev.h				-	grundsätzliche Konfiguration der Parameter (WLAN, Sensoren, APIs)
-html-content.h			-	allgemeine HTML-Sourcen und Bilder für HTML- und Text-Ausgaben
-intl_xx.h				-	Dateien mit übersetzten Texten für die Internationalisierung, 'xx' ist der 2 letter ISO code der 'Sprache'
-intl_template.h			-	Vorlage für Übersetzungen
-astyle.rc				-	Formatierungsvorlage für Astyle
-ppd42ns-wificonfig-ppd-sds-dht.spiffs.bin	-	Binary mit leerem Dateisystem, zum Löschen der Konfiguration, siehe Anleitung im Wiki
+
+| Dateiname                                 | Beschreibung                                                                                               |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| airrohr-firmware.ino                      | Sourcecode der eigentlichen Firmware                                                                       |
+| ext_def.h                                 | grundsätzliche Konfiguration der Parameter (WLAN, Sensoren, APIs)                                          |
+| html-content.h                            | allgemeine HTML-Sourcen und Bilder für HTML- und Text-Ausgaben                                             |
+| intl_xx.h                                 | Dateien mit übersetzten Texten für die Internationalisierung, 'xx' ist der 2 letter ISO code der 'Sprache' |
+| intl_template.h                           | Vorlage für Übersetzungen                                                                                  |
+| astyle.rc                                 | Formatierungsvorlage für Astyle                                                                            |
+| ppd42ns-wificonfig-ppd-sds-dht.spiffs.bin | Binary mit leerem Dateisystem, zum Löschen der Konfiguration, siehe Anleitung im Wiki                      |
 
 ## WLAN Konfiguration
 siehe auch Wiki-Seite auf Github [Konfiguration der Sensoren](https://github.com/opendata-stuttgart/meta/wiki/Konfiguration-der-Sensoren)
