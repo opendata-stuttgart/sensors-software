@@ -2,6 +2,7 @@ NRZ-2019-124-B10
 * Persist Wifi configuration in flash
 * Rewrite config using current format when version changes
 * Fix truncation of wifi password
+* prometheus endpoint: esp prefix was missing
 
 NRZ-2019-124-B9
 * Handle Si7021 for HTU21d replacement
