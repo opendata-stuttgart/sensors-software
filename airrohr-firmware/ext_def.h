@@ -15,8 +15,8 @@ const char WWW_PASSWORD[] PROGMEM = "feinstaub";
 #define FS_PWD ""
 
 // Where to send the data?
-#define SEND2DUSTI 1
-#define SSL_DUSTI 0
+#define SEND2SENSORCOMMUNITY 1
+#define SSL_SENSORCOMMUNITY 0
 #define SEND2MADAVI 1
 #define SSL_MADAVI 0
 #define SEND2SENSEMAP 0
@@ -31,14 +31,31 @@ const char WWW_PASSWORD[] PROGMEM = "feinstaub";
 // OpenSenseMap
 #define SENSEBOXID ""
 
+enum LoggerEntry {
+    LoggerSensorCommunity,
+    LoggerMadavi,
+    LoggerSensemap,
+    LoggerFSapp,
+    Loggeraircms,
+    LoggerInflux,
+    LoggerCustom,
+    LoggerCount
+};
+
+struct LoggerConfig {
+    uint16_t destport;
+    uint16_t _unused;
+    BearSSL::Session* session;
+};
+
 // IMPORTANT: NO MORE CHANGES TO VARIABLE NAMES NEEDED FOR EXTERNAL APIS
 static const char HOST_MADAVI[] PROGMEM = "api-rrd.madavi.de";
 static const char URL_MADAVI[] PROGMEM = "/data.php";
 #define PORT_MADAVI 80
 
-static const char HOST_DUSTI[] PROGMEM = "api.sensor.community";
-static const char URL_DUSTI[] PROGMEM = "/v1/push-sensor-data/";
-#define PORT_DUSTI 80
+static const char HOST_SENSORCOMMUNITY[] PROGMEM = "api.sensor.community";
+static const char URL_SENSORCOMMUNITY[] PROGMEM = "/v1/push-sensor-data/";
+#define PORT_SENSORCOMMUNITY 80
 
 static const char HOST_SENSEMAP[] PROGMEM = "ingress.opensensemap.org";
 static const char URL_SENSEMAP[] PROGMEM = "/boxes/{v}/data?luftdaten=1";
@@ -50,10 +67,14 @@ static const char URL_FSAPP[] PROGMEM = "/data.php";
 
 static const char HOST_AIRCMS[] PROGMEM = "doiot.ru";
 static const char URL_AIRCMS[] PROGMEM = "/php/sensors.php?h=";
-#define PORT_AIRCMS 443
+// As of 2019/09 uses invalid certifiates on ssl/port 443 and does not support Maximum Fragment Length Negotiation (MFLN)
+// So we can not use SSL
+#define PORT_AIRCMS 80
 
 static const char FW_DOWNLOAD_HOST[] PROGMEM = "firmware.sensor.community";
 #define FW_DOWNLOAD_PORT 80
+
+static const char FW_2ND_LOADER_URL[] PROGMEM = OTA_BASENAME "/loader-002.bin";
 
 // define own API
 static const char HOST_CUSTOM[] PROGMEM = "192.168.234.1";
@@ -65,7 +86,7 @@ static const char URL_CUSTOM[] PROGMEM = "/data.php";
 
 // define own InfluxDB
 static const char HOST_INFLUX[] PROGMEM = "influx.server";
-static const char URL_INFLUX[] PROGMEM = "/write?db=luftdaten";
+static const char URL_INFLUX[] PROGMEM = "/write?db=sensorcommunity";
 #define PORT_INFLUX 8086
 #define USER_INFLUX ""
 #define PWD_INFLUX ""
@@ -200,6 +221,10 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 #define BMX280_READ 0
 #define BMP280_API_PIN 3
 #define BME280_API_PIN 11
+
+// SHT3x, temperature, pressure
+#define SHT3X_READ 0
+#define SHT3X_API_PIN 7
 
 // DS18B20, temperature
 #define DS18B20_READ 0
