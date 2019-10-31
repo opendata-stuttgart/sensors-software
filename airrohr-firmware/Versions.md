@@ -1,9 +1,12 @@
 NRZ-2019-126-B1 
 * next beta version
 
+NRZ-2019-125-B1
+* Revert unintentional default senseboxid change
+
 NRZ-2019-125
 online since 2019-10-31
-* same as NRZ-2018-124-B10
+* same as NRZ-2019-124-B10
   (+ renaming PM value names for SDS30)
 
 NRZ-2019-124-B10

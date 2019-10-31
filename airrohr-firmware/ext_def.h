@@ -2,8 +2,8 @@
 #define CURRENT_LANG INTL_LANG
 
 // Wifi config
-const char WLANSSID[] PROGMEM = "dreamworks";
-const char WLANPWD[] PROGMEM = "nhRRHEcn";
+const char WLANSSID[] PROGMEM = "Freifunk-disabled";
+const char WLANPWD[] PROGMEM = "";
 
 // BasicAuth config
 const char WWW_USERNAME[] PROGMEM = "admin";
@@ -29,7 +29,7 @@ const char WWW_PASSWORD[] PROGMEM = "feinstaub";
 #define SEND2CUSTOM 0
 
 // OpenSenseMap
-#define SENSEBOXID "5b2fe36f1fef04001bfd0762"
+#define SENSEBOXID ""
 
 // IMPORTANT: NO MORE CHANGES TO VARIABLE NAMES NEEDED FOR EXTERNAL APIS
 static const char HOST_MADAVI[] PROGMEM = "api-rrd.madavi.de";
