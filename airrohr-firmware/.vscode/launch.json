@@ -1,0 +1,78 @@
+// AUTOMATICALLY GENERATED FILE. PLEASE DO NOT MODIFY IT MANUALLY
+
+// PIO Unified Debugger
+//
+// Documentation: https://docs.platformio.org/page/plus/debugging.html
+// Configuration: https://docs.platformio.org/page/projectconf/section_env_debug.html
+
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            // some notes to get debugging working:
+            // 1. use 'build_flags = -g -Og -fno-inline' to work around debugger crashes, for details see
+            //    https://github.com/espressif/openocd-esp32/issues/62#issuecomment-451663916
+            // 2. use the correct openocd board script, especially for the flash voltage (MTDI configuration)
+            //    e.g. board/esp32_s2-wrover.cfg uses 1.8V whereas the older module
+            //    board/esp32-wrover.cfg uses 3.3V
+            // 3. use the correct setting for the "-c 'set ESP32_RTOS none'" openocd command line
+            //    option, normally you should not set it
+            "type": "gdb",
+            "request": "launch",
+            "name": "Launch gdb (esp32-wrover module)",
+            "target": "${workspaceFolder}/.pio/build/lolin_d32_pro_debug/firmware.elf",
+            "cwd": "${workspaceFolder}", 
+            //"gdbpath": "${env:HOME}/esp/xtensa-esp32-elf/bin/xtensa-esp32-elf-gdb",
+            "gdbpath": "${env:HOME}/.platformio/packages/toolchain-xtensa32/bin/xtensa-esp32-elf-gdb",
+            //"printCalls": true, "showDevDebugOutput": true,
+            "autorun": [
+                "set remotetimeout 60",
+                "set remote hardware-watchpoint-limit 2",
+                "target remote | ${env:HOME}/esp/openocd-esp32-git2/src/openocd -c \"gdb_port pipe; log_output openocd.log\" --search ${env:HOME}/esp/openocd-esp32-git2/tcl -f interface/jlink.cfg -f board/esp32-wrover.cfg -c \"debug_level 2;init\"",
+                //"target remote | ${env:HOME}/esp/openocd-esp32-git2/src/openocd -c \"gdb_port pipe; log_output openocd.log\" --search ${env:HOME}/esp/openocd-esp32-git2/tcl -f interface/jlink.cfg -f board/esp32-wrover.cfg -c \"debug_level 2;init\"",
+                //"target remote | ${env:HOME}/esp/openocd-esp32-git2/src/openocd -c \"gdb_port pipe; log_output openocd.log\" --search ${env:HOME}/esp/openocd-esp32-git2/tcl -f interface/jlink.cfg -c 'set ESP32_RTOS none' -f board/esp32-wrover.cfg -c \"debug_level 2;init\"",
+                //"target remote | ${env:HOME}/esp/openocd-esp32/bin/openocd -c \"gdb_port pipe; log_output openocd.log\" --search ${env:HOME}/esp/openocd-esp32/share/openocd/scripts -f interface/jlink.cfg -f board/esp32-wrover.cfg -c \"debug_level 2;init\"",
+                //"target remote | ${env:HOME}/esp/openocd-esp32/bin/openocd -c \"gdb_port pipe\" --search ${env:HOME}/esp/openocd-esp32/share/openocd/scripts -f interface/jlink.cfg -f board/esp32-wrover.cfg -c \"debug_level 2;init\"",
+                "mon reset halt",
+                "flushregs",
+                //"thb setup",
+                "sb setup",
+                "c",
+            ],
+        },
+        {
+            "type": "gdb",
+            "request": "launch",
+            "name": "Launch gdb (esp32_s2-wrover module)",
+            "target": "${workspaceFolder}/.pio/build/lolin_d32_pro_debug/firmware.elf",
+            "cwd": "${workspaceFolder}", 
+            "gdbpath": "${env:HOME}/.platformio/packages/toolchain-xtensa32/bin/xtensa-esp32-elf-gdb",
+            "autorun": [
+                "set remotetimeout 60",
+                "set remote hardware-watchpoint-limit 2",
+                "target remote | ${env:HOME}/esp/openocd-esp32-git2/src/openocd -c \"gdb_port pipe; log_output openocd.log\" --search ${env:HOME}/esp/openocd-esp32-git2/tcl -f interface/jlink.cfg -f board/esp32_s2-wrover.cfg -c \"debug_level 2;init\"",
+                "mon reset halt",
+                "flushregs",
+                "thb setup",
+                "c",
+            ],
+        },
+        {
+            "type": "gdb",
+            "request": "launch",
+            "name": "Launch gdb (esp-wroom-32 module)",
+            "target": "${workspaceFolder}/.pio/build/heltec_wifi_lora_32_V2/firmware.elf",
+            "cwd": "${workspaceFolder}", 
+            "gdbpath": "${env:HOME}/.platformio/packages/toolchain-xtensa32/bin/xtensa-esp32-elf-gdb",
+            "autorun": [
+                "set remotetimeout 60",
+                "set remote hardware-watchpoint-limit 2",
+                "target remote | ${env:HOME}/esp/openocd-esp32-git2/src/openocd -c \"gdb_port pipe; log_output openocd.log\" --search ${env:HOME}/esp/openocd-esp32-git2/tcl -f interface/jlink.cfg -f board/esp-wroom-32.cfg -c \"debug_level 2;init\"",
+                "mon reset halt",
+                "flushregs",
+                "thb setup",
+                "c",
+            ],
+        }
+    ]
+}

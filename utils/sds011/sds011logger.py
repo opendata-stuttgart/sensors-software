@@ -12,7 +12,7 @@ class SDS011(object):
     sleep_time = 0.01
     device     = None
     
-    def __init__(self,serialdevice="/dev/ttyUSB0"):
+    def __init__(self,serialdevice="/dev/cu.wchusbserial1420"):
         self.device=serial.Serial(serialdevice, baudrate=9600, stopbits=1, parity="N",  timeout=2)
 
     def read(self):
@@ -51,16 +51,17 @@ class SDS011(object):
         return (pm10 , pm25)
 
 def main():
-    serialdevice="/dev/ttyUSB0"
+    serialdevice="/dev/cu.wchusbserial1420"
     if len(sys.argv) > 1:
         serialdevice=sys.argv[1]
     sdslog=SDS011(serialdevice)
     # init datetime object
     dt=datetime.datetime.now()
+    print ("%s\tPM10\tPM2.5"%(dt.utcnow()))
     while True:
         try:
-            pm25,pm10=sdslog.read()
-            print ("%s\t%.1f\t%.1f"%(dt.utcnow(),pm25,pm10))
+            pm10,pm25=sdslog.read()
+            print ("%s\t%.1f\t%.1f"%(dt.utcnow(),pm10,pm25))
         except Exception as e:
             print (e.message)
 if __name__ == '__main__':

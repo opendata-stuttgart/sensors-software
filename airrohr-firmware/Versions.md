@@ -1,3 +1,64 @@
+NRZ-2019-125
+online since 2019-10-31
+* same as NRZ-2018-124-B10
+  (+ renaming PM value names for SDS30)
+
+NRZ-2019-124-B10
+* Persist Wifi configuration in flash
+* Rewrite config using current format when version changes
+* Fix truncation of wifi password
+* prometheus endpoint: esp prefix was missing
+
+NRZ-2019-124-B9
+* Handle Si7021 for HTU21d replacement
+* Fix GPS regression
+
+NRZ-2019-124-B8
+* bug fixes
+* translation updates
+
+NRZ-2019-124-B7
+* Fix update checking interval
+
+NRZ-2019-124-B6
+* noise sensor added
+* Sensirion SPS30 added
+* option to flip OLED output
+* Fix crash on selecting available networks in AP mode
+* add options to disable display of wifi and device infos
+* Code size optimisations
+* Serve config pages incrementally to avoid running out of memory
+* Write more compliant config JSON
+* Advertise as http://airrohr-$espid.local/ in AP mode
+* BMP280/BME280 sensors are merged into one implementation
+* Switch OTA updater two a two-Stage implemenation allowing more than 512kb of sketch size
+* Fix memory corruption when using displays
+* Reduce memory consumption in data sending which allows keeping the HTTP server available
+
+NRZ-2019-124-B5
+* some comments removed
+* Var2Json casts optimized
+* new name "airRohr"
+* new logo (license CC0)
+
+NRZ-2019-124-B4
+* wrong variable use in PMSx003 function
+* showing text on wrong LCD display
+
+NRZ-2019-124-B4
+* SSL options for custom and influxdb added
+
+NRZ-2019-124-B3
+* merged changes for aircms support
+* some optimizations of html code
+* changes for support of ESP32 (not working completely until now)
+
+NRZ-2018-124-B2
+* redefine function overload
+
+NRZ-2018-124-B1
+* code cleanup
+
 NRZ-2018-123
 online since 2018-12-23
 * set CPUFreqency to 160MHz (for faster TLS handling)
@@ -193,7 +254,7 @@ NRZ-2018-104-B3
 
 NRZ-2018-104-B2
 * sending signal strength to InfluxDB
-* optimizations in reading PM sensors 
+* optimizations in reading PM sensors
 * disable sending data to OpenSenseMap with 'default' BoxID
 * disable sending data to InfluxDB at Luftdaten.info (only used internally)
 * character ' in text input fields (i.e. wifi SSID) should be displayed correctly

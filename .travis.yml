@@ -17,3 +17,4 @@ install:
 
 script:
     - cd airrohr-firmware && pwd && ls -l && platformio run && ls -l builds/
+    - cd ../airrohr-update-loader && pwd && ls -l && platformio run && ls -l builds/
