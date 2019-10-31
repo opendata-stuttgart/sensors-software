@@ -1746,11 +1746,16 @@ static void webserver_config() {
 	if (server.method() == HTTP_POST) {
 		display_debug(F("Writing config"), F("and restarting"));
 		writeConfig();
+		sensor_restart();
+	}
+}
+
+static void sensor_restart() {
 		delay(100);
 		SPIFFS.end();
+		debug_outln_info(F("Restart."));
 		delay(500);
 		ESP.restart();
-	}
 }
 
 /*****************************************************************
@@ -2023,7 +2028,7 @@ static void webserver_reset() {
 	if (server.method() == HTTP_GET) {
 		page_content += FPSTR(WEB_RESET_CONTENT);
 	} else {
-		ESP.restart();
+		sensor_restart();
 	}
 	end_html_page(page_content);
 }
@@ -4194,7 +4199,7 @@ void loop(void) {
 	last_micro = act_micro;
 
 	if (msSince(time_point_device_start_ms) > DURATION_BEFORE_FORCED_RESTART_MS) {
-		ESP.restart();
+		sensor_restart();
 	}
 
 	if (msSince(last_update_attempt) > PAUSE_BETWEEN_UPDATE_ATTEMPTS_MS) {
