@@ -105,7 +105,7 @@
  *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2019-124-B10"
+#define SOFTWARE_VERSION_STR "NRZ-2019-125"
 const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -500,22 +500,22 @@ int hpm_pm25_min = 20000;
 float last_value_SPS30_P0 = -1.0;
 float last_value_SPS30_P1 = -1.0;
 float last_value_SPS30_P2 = -1.0;
-float last_value_SPS30_P3 = -1.0;
-float last_value_SPS30_N0 = -1.0;
+float last_value_SPS30_P4 = -1.0;
+float last_value_SPS30_N05 = -1.0;
 float last_value_SPS30_N1 = -1.0;
-float last_value_SPS30_N2 = -1.0;
-float last_value_SPS30_N3 = -1.0;
+float last_value_SPS30_N25 = -1.0;
 float last_value_SPS30_N4 = -1.0;
+float last_value_SPS30_N10 = -1.0;
 float last_value_SPS30_TS = -1.0;
 float value_SPS30_P0 = 0.0;
 float value_SPS30_P1 = 0.0;
 float value_SPS30_P2 = 0.0;
-float value_SPS30_P3 = 0.0;
-float value_SPS30_N0 = 0.0;
+float value_SPS30_P4 = 0.0;
+float value_SPS30_N05 = 0.0;
 float value_SPS30_N1 = 0.0;
-float value_SPS30_N2 = 0.0;
-float value_SPS30_N3 = 0.0;
+float value_SPS30_N25 = 0.0;
 float value_SPS30_N4 = 0.0;
+float value_SPS30_N10 = 0.0;
 float value_SPS30_TS = 0.0;
 
 
@@ -1853,14 +1853,14 @@ static void webserver_values() {
 		if (cfg::sps30_read) {
 			page_content += FPSTR(EMPTY_ROW);
 			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_PM1), check_display_value(last_value_SPS30_P0, -1, 1, 0), unit_PM);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_PM25), check_display_value(last_value_SPS30_P1, -1, 1, 0), unit_PM);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_PM4), check_display_value(last_value_SPS30_P2, -1, 1, 0), unit_PM);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_PM10), check_display_value(last_value_SPS30_P3, -1, 1, 0), unit_PM);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_NC0k5), check_display_value(last_value_SPS30_N0, -1, 0, 0), unit_NC);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_PM25), check_display_value(last_value_SPS30_P2, -1, 1, 0), unit_PM);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_PM4), check_display_value(last_value_SPS30_P4, -1, 1, 0), unit_PM);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_PM10), check_display_value(last_value_SPS30_P1, -1, 1, 0), unit_PM);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_NC0k5), check_display_value(last_value_SPS30_N05, -1, 0, 0), unit_NC);
 			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_NC1k0), check_display_value(last_value_SPS30_N1, -1, 0, 0), unit_NC);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_NC2k5), check_display_value(last_value_SPS30_N2, -1, 0, 0), unit_NC);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_NC4k0), check_display_value(last_value_SPS30_N3, -1, 0, 0), unit_NC);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_NC10), check_display_value(last_value_SPS30_N4, -1, 0, 0), unit_NC);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_NC2k5), check_display_value(last_value_SPS30_N25, -1, 0, 0), unit_NC);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_NC4k0), check_display_value(last_value_SPS30_N4, -1, 0, 0), unit_NC);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_NC10), check_display_value(last_value_SPS30_N10, -1, 0, 0), unit_NC);
 			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_TPS), check_display_value(last_value_SPS30_TS, -1, 1, 0), unit_TS);
 		}
 
@@ -3144,36 +3144,36 @@ static void fetchSensorSPS30(String& s) {
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_SPS30));
 
 	last_value_SPS30_P0 = value_SPS30_P0 / SPS30_measurement_count;
-	last_value_SPS30_P1 = value_SPS30_P1 / SPS30_measurement_count;
 	last_value_SPS30_P2 = value_SPS30_P2 / SPS30_measurement_count;
-	last_value_SPS30_P3 = value_SPS30_P3 / SPS30_measurement_count;
-	last_value_SPS30_N0 = value_SPS30_N0 / SPS30_measurement_count;
+	last_value_SPS30_P4 = value_SPS30_P4 / SPS30_measurement_count;
+	last_value_SPS30_P1 = value_SPS30_P1 / SPS30_measurement_count;
+	last_value_SPS30_N05 = value_SPS30_N05 / SPS30_measurement_count;
 	last_value_SPS30_N1 = value_SPS30_N1 / SPS30_measurement_count;
-	last_value_SPS30_N2 = value_SPS30_N2 / SPS30_measurement_count;
-	last_value_SPS30_N3 = value_SPS30_N3 / SPS30_measurement_count;
+	last_value_SPS30_N25 = value_SPS30_N25 / SPS30_measurement_count;
 	last_value_SPS30_N4 = value_SPS30_N4 / SPS30_measurement_count;
+	last_value_SPS30_N10 = value_SPS30_N10 / SPS30_measurement_count;
 	last_value_SPS30_TS = value_SPS30_TS / SPS30_measurement_count;
 
 	debug_outln_info(F("PM1.0: "), last_value_SPS30_P0);
-	debug_outln_info(F("PM2.5: "), last_value_SPS30_P1);
-	debug_outln_info(F("PM4.0: "), last_value_SPS30_P2);
-	debug_outln_info(F("PM10:  "), last_value_SPS30_P3);
-	debug_outln_info(F("NC0.5: "), last_value_SPS30_N0);
+	debug_outln_info(F("PM2.5: "), last_value_SPS30_P2);
+	debug_outln_info(F("PM4.0: "), last_value_SPS30_P4);
+	debug_outln_info(F("PM10:  "), last_value_SPS30_P1);
+	debug_outln_info(F("NC0.5: "), last_value_SPS30_N05);
 	debug_outln_info(F("NC1.0: "), last_value_SPS30_N1);
-	debug_outln_info(F("NC2.5: "), last_value_SPS30_N2);
-	debug_outln_info(F("NC4.0: "), last_value_SPS30_N3);
-	debug_outln_info(F("NC10:  "), last_value_SPS30_N4);
+	debug_outln_info(F("NC2.5: "), last_value_SPS30_N25);
+	debug_outln_info(F("NC4.0: "), last_value_SPS30_N4);
+	debug_outln_info(F("NC10:  "), last_value_SPS30_N10);
 	debug_outln_info(F("TPS:   "), last_value_SPS30_TS);
 
 	add_Value2Json(s, F("SPS30_P0"), last_value_SPS30_P0);
 	add_Value2Json(s, F("SPS30_P1"), last_value_SPS30_P1);
 	add_Value2Json(s, F("SPS30_P2"), last_value_SPS30_P2);
-	add_Value2Json(s, F("SPS30_P3"), last_value_SPS30_P3);
-	add_Value2Json(s, F("SPS30_N0"), last_value_SPS30_N0);
+	add_Value2Json(s, F("SPS30_P4"), last_value_SPS30_P4);
+	add_Value2Json(s, F("SPS30_N05"), last_value_SPS30_N05);
 	add_Value2Json(s, F("SPS30_N1"), last_value_SPS30_N1);
-	add_Value2Json(s, F("SPS30_N2"), last_value_SPS30_N2);
-	add_Value2Json(s, F("SPS30_N3"), last_value_SPS30_N3);
+	add_Value2Json(s, F("SPS30_N25"), last_value_SPS30_N25);
 	add_Value2Json(s, F("SPS30_N4"), last_value_SPS30_N4);
+	add_Value2Json(s, F("SPS30_N10"), last_value_SPS30_N10);
 	add_Value2Json(s, F("SPS30_TS"), last_value_SPS30_TS);
 
 	debug_outln_info(F("SPS30 read counter: "), String(SPS30_read_counter));
@@ -3183,14 +3183,14 @@ static void fetchSensorSPS30(String& s) {
 	SPS30_read_counter = 0;
 	SPS30_read_error_counter = 0;
 	value_SPS30_P0 = 0.0;
-	value_SPS30_P1 = 0.0;
 	value_SPS30_P2 = 0.0;
-	value_SPS30_P3 = 0.0;
-	value_SPS30_N0 = 0.0;
+	value_SPS30_P4 = 0.0;
+	value_SPS30_P1 = 0.0;
+	value_SPS30_N05 = 0.0;
 	value_SPS30_N1 = 0.0;
-	value_SPS30_N2 = 0.0;
-	value_SPS30_N3 = 0.0;
+	value_SPS30_N25 = 0.0;
 	value_SPS30_N4 = 0.0;
+	value_SPS30_N10 = 0.0;
 	value_SPS30_TS = 0.0;
 
 	debug_outln_info(F("----"));
@@ -3512,8 +3512,8 @@ static void display_values() {
 	float h_value = -1.0;
 	float p_value = -1.0;
 	String t_sensor, h_sensor, p_sensor;
-	float pm010_value = -1.0;
-	float pm040_value = -1.0;
+	float pm01_value = -1.0;
+	float pm04_value = -1.0;
 	float pm10_value = -1.0;
 	float pm25_value = -1.0;
 	String pm10_sensor;
@@ -3558,15 +3558,15 @@ static void display_values() {
 	if (cfg::sps30_read) {
 		pm10_sensor = FPSTR(SENSORS_SPS30);
 		pm25_sensor = FPSTR(SENSORS_SPS30);
-		pm010_value = last_value_SPS30_P0;
-		pm25_value = last_value_SPS30_P1;
-		pm040_value = last_value_SPS30_P2;
-		pm10_value = last_value_SPS30_P3;
-		nc005_value = last_value_SPS30_N0;
+		pm01_value = last_value_SPS30_P0;
+		pm25_value = last_value_SPS30_P2;
+		pm04_value = last_value_SPS30_P4;
+		pm10_value = last_value_SPS30_P1;
+		nc005_value = last_value_SPS30_N05;
 		nc010_value = last_value_SPS30_N1;
-		nc025_value = last_value_SPS30_N2;
-		nc040_value = last_value_SPS30_N3;
-		nc100_value = last_value_SPS30_N4;
+		nc025_value = last_value_SPS30_N25;
+		nc040_value = last_value_SPS30_N4;
+		nc100_value = last_value_SPS30_N10;
 		tps_value = last_value_SPS30_TS;
 	}
 	if (cfg::sds_read) {
@@ -3649,7 +3649,7 @@ static void display_values() {
 			break;
 		case 2:
 			display_header = FPSTR(SENSORS_SPS30);
-			display_lines[0] = "PM: " + check_display_value(pm010_value, -1, 1, 4) + " " + check_display_value(pm25_value, -1, 1, 4) + " " + check_display_value(pm040_value, -1, 1, 4) + " " + check_display_value(pm10_value, -1, 1, 4);
+			display_lines[0] = "PM: " + check_display_value(pm01_value, -1, 1, 4) + " " + check_display_value(pm25_value, -1, 1, 4) + " " + check_display_value(pm04_value, -1, 1, 4) + " " + check_display_value(pm10_value, -1, 1, 4);
 			display_lines[1] = "NC: " + check_display_value(nc005_value, -1, 0, 3) + " " + check_display_value(nc010_value, -1, 0, 3) + " " + check_display_value(nc025_value, -1, 0, 3) + " " + check_display_value(nc040_value, -1, 0, 3) + " " + check_display_value(nc100_value, -1, 0, 3);
 			display_lines[2] = std::move(tmpl(F("TPS: {v} µm"), check_display_value(tps_value, -1, 2, 5)));
 			break;
@@ -3753,9 +3753,9 @@ static void display_values() {
 			break;
 		case 2:
 			display_lines[0] = "PM1.0: ";
-			display_lines[0] += check_display_value(pm010_value, -1, 1, 4);
+			display_lines[0] += check_display_value(pm01_value, -1, 1, 4);
 			display_lines[1] = "PM4: ";
-			display_lines[1] += check_display_value(pm040_value, -1, 1, 4);
+			display_lines[1] += check_display_value(pm04_value, -1, 1, 4);
 			break;
 		case 3:
 			display_lines[0] = std::move(tmpl(F("T: {v} °C"), check_display_value(t_value, -128, 1, 6)));
@@ -4252,14 +4252,14 @@ void loop(void) {
 					SPS30_read_error_counter++;
 				}
 				value_SPS30_P0 += sps30_values.mc_1p0;
-				value_SPS30_P1 += sps30_values.mc_2p5;
-				value_SPS30_P2 += sps30_values.mc_4p0;
-				value_SPS30_P3 += sps30_values.mc_10p0;
-				value_SPS30_N0 += sps30_values.nc_0p5;
+				value_SPS30_P2 += sps30_values.mc_2p5;
+				value_SPS30_P4 += sps30_values.mc_4p0;
+				value_SPS30_P1 += sps30_values.mc_10p0;
+				value_SPS30_N05 += sps30_values.nc_0p5;
 				value_SPS30_N1 += sps30_values.nc_1p0;
-				value_SPS30_N2 += sps30_values.nc_2p5;
-				value_SPS30_N3 += sps30_values.nc_4p0;
-				value_SPS30_N4 += sps30_values.nc_10p0;
+				value_SPS30_N25 += sps30_values.nc_2p5;
+				value_SPS30_N4 += sps30_values.nc_4p0;
+				value_SPS30_N10 += sps30_values.nc_10p0;
 				value_SPS30_TS += sps30_values.tps;
 				++SPS30_measurement_count;
 			}

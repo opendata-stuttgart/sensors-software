@@ -1,3 +1,8 @@
+NRZ-2019-125
+online since 2019-10-31
+* same as NRZ-2018-124-B10
+  (+ renaming PM value names for SDS30)
+
 NRZ-2019-124-B10
 * Persist Wifi configuration in flash
 * Rewrite config using current format when version changes
