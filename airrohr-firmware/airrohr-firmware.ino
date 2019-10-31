@@ -84,16 +84,6 @@
  *                                                                      *
  ************************************************************************
  *
- * latest mit lib 2.4.2
- * Der Sketch verwendet 511608 Bytes (48%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
- * Globale Variablen verwenden 37264 Bytes (45%) des dynamischen Speichers, 44656 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
- *
- * Der Sketch verwendet 506304 Bytes (48%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
- * Globale Variablen verwenden 37128 Bytes (45%) des dynamischen Speichers, 44792 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
- *
- * Der Sketch verwendet 505504 Bytes (48%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
- * Globale Variablen verwenden 37128 Bytes (45%) des dynamischen Speichers, 44792 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
- *
  * Attention:
  * the driver for the Sensirion PM Sensor SPS30 needs I²C lransmission of 64 Bytes
  *
@@ -102,10 +92,9 @@
  * #define BUFFER_LENGTH 64
  *
  *
- *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2019-125"
+#define SOFTWARE_VERSION_STR "NRZ-2019-126-B1"
 const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
