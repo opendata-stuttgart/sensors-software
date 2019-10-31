@@ -94,7 +94,7 @@
  *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2019-126-B1"
+#define SOFTWARE_VERSION_STR "NRZ-2019-126-B2"
 const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
