@@ -3366,10 +3366,10 @@ static void twoStageAutoUpdate() {
 	}
 	fwprefix += lang_variant;
 
+	// ### TODO: store bin.md5 in a StreamString so that we don't wear out the flash
 	String firmware_md5(F("/firmware.bin.md5"));
 	String fetch_md5_name = fwprefix + F(".bin.md5");
-	bool downloadSuccess = fwDownloadStreamFile(fetch_md5_name, firmware_md5);
-	if (!downloadSuccess)
+	if (!fwDownloadStreamFile(fetch_md5_name, firmware_md5))
 		return;
 
 	File fwFile = SPIFFS.open(firmware_md5, "r");
@@ -3383,19 +3383,17 @@ static void twoStageAutoUpdate() {
 	newFwmd5.trim();
 	fwFile.close();
 
-	debug_outln_info(F("NewFW md5: "), newFwmd5);
-	debug_outln_info(F("Sketch md5    : "), ESP.getSketchMD5());
-
 	if (newFwmd5 == ESP.getSketchMD5()) {
 		debug_outln_verbose(F("No newer version available."));
 		return;
 	}
 
+	debug_outln_info(F("Update md5: "), newFwmd5);
+	debug_outln_info(F("Sketch md5: "), ESP.getSketchMD5());
+
 	String firmware_name(F("/firmware.bin"));
 	String fetch_name = fwprefix + F(".bin");
-	downloadSuccess = fwDownloadStreamFile(fetch_name, firmware_name);
-
-	if (!downloadSuccess)
+	if (!fwDownloadStreamFile(fetch_name, firmware_name))
 		return;
 
 	fwFile = SPIFFS.open(firmware_name, "r");
@@ -3415,8 +3413,8 @@ static void twoStageAutoUpdate() {
 
 	String md5String = md5.toString();
 
-	// Firmware is always at least 64 and padded to 16 bytes
-	if (fwSize < (1<<16) || (fwSize % 16 != 0) || newFwmd5 != md5String) {
+	// Firmware is always at least 128 kB and padded to 16 bytes
+	if (fwSize < (1<<17) || (fwSize % 16 != 0) || newFwmd5 != md5String) {
 		debug_outln_info(F("FW download failed validation.. deleting"));
 		SPIFFS.remove(firmware_name);
 		SPIFFS.remove(firmware_md5);
