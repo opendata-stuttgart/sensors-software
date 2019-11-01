@@ -941,25 +941,21 @@ static bool boolFromJSON(const DynamicJsonDocument& json, const __FlashStringHel
 	return json[key].as<bool>();
 }
 
-static void readConfig() {
+static void readConfig(bool oldconfig = false) {
 	bool rewriteConfig = false;
 
-	debug_outln_info(F("mounting FS..."));
-
-#if defined(ESP32)
-	bool spiffs_begin_ok = SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED);
-#else
-	bool spiffs_begin_ok = SPIFFS.begin();
-#endif
-
-	if (!spiffs_begin_ok) {
-		debug_outln_error(F("failed to mount FS"));
-		return;
+	String cfgName(F("/config.json"));
+	if (oldconfig) {
+		cfgName += F(".old");
 	}
 
-	File configFile = SPIFFS.open("/config.json", "r");
+	File configFile = SPIFFS.open(cfgName, "r");
 	if (!configFile) {
-		debug_outln_error(F("config file not found ..."));
+		if (!oldconfig) {
+			return readConfig(true /* oldconfig */);
+		}
+
+		debug_outln_error(F("failed to open config file."));
 		return;
 	}
 
@@ -1023,6 +1019,10 @@ static void readConfig() {
 		}
 	} else {
 		debug_outln_error(F("failed to load json config"));
+
+		if (!oldconfig) {
+			return readConfig(true /* oldconfig */);
+		}
 	}
 
 	if (rewriteConfig) {
@@ -1030,10 +1030,26 @@ static void readConfig() {
 	}
 }
 
+static void init_config() {
+
+	debug_outln_info(F("mounting FS..."));
+#if defined(ESP32)
+	bool spiffs_begin_ok = SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED);
+#else
+	bool spiffs_begin_ok = SPIFFS.begin();
+#endif
+
+	if (!spiffs_begin_ok) {
+		debug_outln_error(F("failed to mount FS"));
+		return;
+	}
+	readConfig();
+}
+
 /*****************************************************************
  * write config to spiffs                                        *
  *****************************************************************/
-void writeConfig() {
+static void writeConfig() {
 	DynamicJsonDocument json(JSON_BUFFER_SIZE);
 	debug_outln_info(F("Saving config..."));
 	json["SOFTWARE_VERSION"] = SOFTWARE_VERSION;
@@ -1056,9 +1072,11 @@ void writeConfig() {
 		};
 	}
 
-	File configFile = SPIFFS.open("/config.json", "w");
+	SPIFFS.remove(F("/config.json.old"));
+	SPIFFS.rename(F("/config.json"), F("/config.json.old"));
+
+	File configFile = SPIFFS.open(F("/config.json"), "w");
 	if (configFile) {
-		debug_outln_info(F("Before writing config.."));
 		serializeJson(json, configFile);
 		configFile.close();
 		debug_outln_info(F("Config written successfully."));
@@ -4120,7 +4138,7 @@ void setup(void) {
 	cfg::initNonTrivials(esp_chipid.c_str());
 	debug_outln_info(F("Airrohr: "), SOFTWARE_VERSION);
 
-	readConfig();
+	init_config();
 	init_display();
 	init_lcd();
 	display_debug(F("Connecting to"), String(cfg::wlanssid));
