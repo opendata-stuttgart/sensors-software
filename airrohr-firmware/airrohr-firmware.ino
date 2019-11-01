@@ -822,7 +822,7 @@ static String SDS_version_date() {
 	int len = 0;
 	String s, version_date, device_id;
 	int checksum_is = 0;
-	int checksum_ok = 0;
+	bool checksum_ok = false;
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(DBG_TXT_SDS011_VERSION_DATE));
 
@@ -884,7 +884,7 @@ static String SDS_version_date() {
 			debug_outln_verbose(FPSTR(DBG_TXT_CHECKSUM_IS), String(checksum_is % 256));
 			debug_outln_verbose(FPSTR(DBG_TXT_CHECKSUM_SHOULD), String(value));
 			if (value == (checksum_is % 256)) {
-				checksum_ok = 1;
+				checksum_ok = true;
 			} else {
 				len = -1;
 			};
@@ -897,12 +897,12 @@ static String SDS_version_date() {
 		}
 		if (len > 2) { checksum_is += value; }
 		len++;
-		if (len == 10 && checksum_ok == 1) {
+		if (len == 10 && checksum_ok) {
 			s = version_date + '(' + device_id + ')';
 			debug_outln_info(F("SDS version date : "), version_date);
 			debug_outln_info(F("SDS device ID: "), device_id);
 			len = 0;
-			checksum_ok = 0;
+			checksum_ok = false;
 			version_date = emptyString;
 			device_id = emptyString;
 			checksum_is = 0;
@@ -2649,7 +2649,7 @@ static void fetchSensorSDS(String& s) {
 	int pm10_serial = 0;
 	int pm25_serial = 0;
 	int checksum_is = 0;
-	int checksum_ok = 0;
+	bool checksum_ok = false;
 
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_SDS011));
 	if (msSince(starttime) < (cfg::sending_intervall_ms - (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS))) {
@@ -2694,7 +2694,7 @@ static void fetchSensorSDS(String& s) {
 				debug_outln_verbose(FPSTR(DBG_TXT_CHECKSUM_IS), String(checksum_is % 256));
 				debug_outln_verbose(FPSTR(DBG_TXT_CHECKSUM_SHOULD), String(value));
 				if (value == (checksum_is % 256)) {
-					checksum_ok = 1;
+					checksum_ok = true;
 				} else {
 					len = -1;
 				};
@@ -2707,7 +2707,7 @@ static void fetchSensorSDS(String& s) {
 			}
 			if (len > 2) { checksum_is += value; }
 			len++;
-			if (len == 10 && checksum_ok == 1 && (msSince(starttime) > (cfg::sending_intervall_ms - READINGTIME_SDS_MS))) {
+			if (len == 10 && checksum_ok && (msSince(starttime) > (cfg::sending_intervall_ms - READINGTIME_SDS_MS))) {
 				if ((! isnan(pm10_serial)) && (! isnan(pm25_serial))) {
 					sds_pm10_sum += pm10_serial;
 					sds_pm25_sum += pm25_serial;
@@ -2728,7 +2728,7 @@ static void fetchSensorSDS(String& s) {
 					sds_val_count++;
 				}
 				len = 0;
-				checksum_ok = 0;
+				checksum_ok = false;
 				pm10_serial = 0;
 				pm25_serial = 0;
 				checksum_is = 0;
@@ -2779,7 +2779,7 @@ static void fetchSensorPMS(String& s) {
 	int pm25_serial = 0;
 	int checksum_is = 0;
 	int checksum_should = 0;
-	int checksum_ok = 0;
+	bool checksum_ok = false;
 	int frame_len = 24;				// min. frame length
 
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_PMSx003));
@@ -2855,11 +2855,11 @@ static void fetchSensorPMS(String& s) {
 				debug_outln_verbose(FPSTR(DBG_TXT_CHECKSUM_IS), String(checksum_is + 143));
 				debug_outln_verbose(FPSTR(DBG_TXT_CHECKSUM_SHOULD), String(checksum_should));
 				if (checksum_should == (checksum_is + 143)) {
-					checksum_ok = 1;
+					checksum_ok = true;
 				} else {
 					len = 0;
 				};
-				if (checksum_ok == 1 && (msSince(starttime) > (cfg::sending_intervall_ms - READINGTIME_SDS_MS))) {
+				if (checksum_ok && (msSince(starttime) > (cfg::sending_intervall_ms - READINGTIME_SDS_MS))) {
 					if ((! isnan(pm1_serial)) && (! isnan(pm10_serial)) && (! isnan(pm25_serial))) {
 						pms_pm1_sum += pm1_serial;
 						pms_pm10_sum += pm10_serial;
@@ -2888,7 +2888,7 @@ static void fetchSensorPMS(String& s) {
 						pms_val_count++;
 					}
 					len = 0;
-					checksum_ok = 0;
+					checksum_ok = false;
 					pm1_serial = 0;
 					pm10_serial = 0;
 					pm25_serial = 0;
@@ -2947,7 +2947,7 @@ static void fetchSensorHPM(String& s) {
 	int pm25_serial = 0;
 	int checksum_is = 0;
 	int checksum_should = 0;
-	int checksum_ok = 0;
+	bool checksum_ok = false;
 
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_HPM));
 	if (msSince(starttime) < (cfg::sending_intervall_ms - (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS))) {
@@ -3003,11 +3003,11 @@ static void fetchSensorHPM(String& s) {
 				debug_outln_verbose(FPSTR(DBG_TXT_CHECKSUM_IS), String(checksum_is + 143));
 				debug_outln_verbose(FPSTR(DBG_TXT_CHECKSUM_SHOULD), String(checksum_should));
 				if (checksum_should == (checksum_is + 143)) {
-					checksum_ok = 1;
+					checksum_ok = true;
 				} else {
 					len = 0;
 				};
-				if (checksum_ok == 1 && (long(msSince(starttime)) > (long(cfg::sending_intervall_ms) - long(READINGTIME_SDS_MS)))) {
+				if (checksum_ok && (long(msSince(starttime)) > (long(cfg::sending_intervall_ms) - long(READINGTIME_SDS_MS)))) {
 					if ((! isnan(pm10_serial)) && (! isnan(pm25_serial))) {
 						hpm_pm10_sum += pm10_serial;
 						hpm_pm25_sum += pm25_serial;
@@ -3028,7 +3028,7 @@ static void fetchSensorHPM(String& s) {
 						hpm_val_count++;
 					}
 					len = 0;
-					checksum_ok = 0;
+					checksum_ok = false;
 					pm10_serial = 0;
 					pm25_serial = 0;
 					checksum_is = 0;
@@ -3763,7 +3763,7 @@ static void display_values() {
 		}
 	}
 	yield();
-	next_display_count += 1;
+	next_display_count++;
 	next_display_millis = millis() + DISPLAY_UPDATE_INTERVAL_MS;
 }
 
@@ -3858,7 +3858,7 @@ static void initDNMS() {
 	if (dnms_read_version(dnms_version) != 0) {
 		debug_outln_info(FPSTR(DBG_TXT_NOT_FOUND));
 		debug_outln_error(F("Check DNMS wiring"));
-		dnms_init_failed = 1;
+		dnms_init_failed = true;
 	} else {
 		dnms_version[DNMS_MAX_VERSION_LEN] = 0;
 		debug_outln_info(FPSTR(DBG_TXT_FOUND), String(": ") + String(dnms_version));
@@ -3926,7 +3926,7 @@ static void powerOnTestSensors() {
 		debug_outln_info(F("Read BMP..."));
 		if (!bmp.begin()) {
 			debug_outln_error(F("No valid BMP085 sensor, check wiring!"));
-			bmp_init_failed = 1;
+			bmp_init_failed = true;
 		}
 	}
 
@@ -3934,7 +3934,7 @@ static void powerOnTestSensors() {
 		debug_outln_info(F("Read BMP280/BME280..."));
 		if (!initBMX280(0x76) && !initBMX280(0x77)) {
 			debug_outln_error(F("Check BMP280/BME280 wiring"));
-			bmx280_init_failed = 1;
+			bmx280_init_failed = true;
 		}
 	}
 
@@ -4401,7 +4401,7 @@ void loop(void) {
 		sum_send_time = 0;
 		starttime = millis();								// store the start time
 		first_cycle = false;
-		count_sends += 1;
+		count_sends++;
 	}
 	yield();
 #if defined(ESP8266)

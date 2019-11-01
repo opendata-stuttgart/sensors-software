@@ -73,7 +73,7 @@ float DHT::readHumidity(bool force) {
   return f;
 }
 
-boolean DHT::read(bool force) {
+bool DHT::read(bool force) {
   // Check if sensor was read less than two seconds ago and return early
   // to use last reading.
   uint32_t currenttime = millis();

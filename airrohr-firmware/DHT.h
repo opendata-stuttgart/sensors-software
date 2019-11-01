@@ -41,7 +41,7 @@ class DHT {
    void begin(void);
    float readTemperature(bool force=false);
    float readHumidity(bool force=false);
-   boolean read(bool force=false);
+   bool read(bool force=false);
 
  private:
   uint8_t data[5];
