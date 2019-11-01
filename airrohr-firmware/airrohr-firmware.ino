@@ -84,13 +84,9 @@
  *                                                                      *
  ************************************************************************
  *
- * latest mit lib 2.4.2
- * Der Sketch verwendet 505504 Bytes (48%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
- * Globale Variablen verwenden 37128 Bytes (45%) des dynamischen Speichers, 44792 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
- *
  * latest mit lib 2.5.2
- * DATA:    [====      ]  39.5% (used 32340 bytes from 81920 bytes)
- * PROGRAM: [=====     ]  48.7% (used 508376 bytes from 1044464 bytes)
+ * DATA:    [====      ]  39.4% (used 32304 bytes from 81920 bytes)
+ * PROGRAM: [=====     ]  48.3% (used 504812 bytes from 1044464 bytes)
  *
  ************************************************************************/
 // increment on change
@@ -117,10 +113,10 @@ const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 #if defined(ESP8266)
 #include <FS.h>                     // must be first
+#include <ESP8266HTTPClient.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
-#include <ESP8266httpUpdate.h>
 #include <SoftwareSerial.h>
 #include <Hash.h>
 #include <time.h>
@@ -137,7 +133,6 @@ const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 #include <WiFiClientSecure.h>
 #include <HardwareSerial.h>
 #include <hwcrypto/sha.h>
-#include <HTTPUpdate.h>
 #include <WebServer.h>
 #include <ESPmDNS.h>
 #endif
@@ -153,7 +148,7 @@ const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 #include <Adafruit_HTU21DF.h>
 #include <Adafruit_BMP085.h>
 #include <Adafruit_SHT31.h>
-
+#include <StreamString.h>
 #include <DallasTemperature.h>
 #include <TinyGPS++.h>
 #include "./bmx280_i2c.h"
@@ -3325,37 +3320,27 @@ static void fetchSensorGPS(String& s) {
 }
 
 /*****************************************************************
- * AutoUpdate                                                    *
+ * OTAUpdate                                                     *
  *****************************************************************/
 
-static bool fwDownloadStreamFile(const String& url, const String& fname) {
+static bool fwDownloadStream(WiFiClientSecure& client, const String& url, Stream* ostream) {
 
 	HTTPClient http;
-	String fname_new(fname + ".new");
 	int bytes_written = -1;
 
 	http.setTimeout(20 * 1000);
 	const String SDS_version = cfg::sds_read ? SDS_version_date() : "";
 	http.setUserAgent(SOFTWARE_VERSION + ' ' + esp_chipid + ' ' + SDS_version + ' ' +
-				 String(cfg::current_lang) + ' ' + String(INTL_LANG) + ' ' +
+				 String(cfg::current_lang) + ' ' + String(CURRENT_LANG) + ' ' +
 				 String(cfg::use_beta ? "BETA" : ""));
 
-	WiFiClientSecure client;
-	client.setBufferSizes(1024, TCP_MSS > 1024 ? 2048 : 1024);
-	client.setTrustAnchors(&x509_dst_root_ca);
+	debug_outln_verbose(F("HTTP GET: "), String(FPSTR(FW_DOWNLOAD_HOST)) + ':' + String(FW_DOWNLOAD_PORT) + url);
 
-	if (http.begin(client, FPSTR(FW_DOWNLOAD_HOST), 443, url)) {
-		if (http.GET() == HTTP_CODE_OK) {
-			File fwFile = SPIFFS.open(fname_new, "w+");
-			if (fwFile) {
-				bytes_written = http.writeToStream(&fwFile);
-				fwFile.close();
-				if (bytes_written > 0) {
-					SPIFFS.remove(fname);
-					SPIFFS.rename(fname_new, fname);
-					debug_outln_info(F("Success downloading: "), url);
-				}
-			}
+	if (http.begin(client, FPSTR(FW_DOWNLOAD_HOST), FW_DOWNLOAD_PORT, url)) {
+		int r = http.GET();
+		debug_outln_verbose(F("GET r: "), String(r));
+		if (r == HTTP_CODE_OK) {
+			bytes_written = http.writeToStream(ostream);
 		}
 		http.end();
 	}
@@ -3363,45 +3348,97 @@ static bool fwDownloadStreamFile(const String& url, const String& fname) {
 	if (bytes_written > 0)
 		return true;
 
-	debug_outln_error(F("Firmware download failed!"));
+	return false;
+}
+
+static bool fwDownloadStreamFile(WiFiClientSecure& client, const String& url, const String& fname) {
+
+	String fname_new(fname);
+	fname_new += F(".new");
+	bool downloadSuccess = false;
+
+	File fwFile = SPIFFS.open(fname_new, "w");
+	if (fwFile) {
+		downloadSuccess = fwDownloadStream(client, url, &fwFile);
+		fwFile.close();
+		if (downloadSuccess) {
+			SPIFFS.remove(fname);
+			SPIFFS.rename(fname_new, fname);
+			debug_outln_info(F("Success downloading: "), url);
+		}
+	}
+
+	if (downloadSuccess)
+		return true;
+
 	SPIFFS.remove(fname_new);
 	return false;
 }
 
-static void twoStageAutoUpdate() {
+static bool launchUpdateLoader(const String& md5) {
+
+	File loaderFile = SPIFFS.open(F("/loader.bin"), "r");
+	if (!loaderFile) {
+		return false;
+	}
+
+	if (!Update.begin(loaderFile.size(), U_FLASH)) {
+		return false;
+	}
+
+	if (md5.length() && !Update.setMD5(md5.c_str())) {
+		return false;
+	}
+
+	if (Update.writeStream(loaderFile) != loaderFile.size()) {
+		return false;
+	}
+	loaderFile.close();
+
+	if (!Update.end()) {
+		return false;
+	}
+
+	sensor_restart();
+	return true;
+}
+
+static void twoStageOTAUpdate() {
 
 	if (!cfg::auto_update) return;
 
 #if defined(ESP8266)
-	debug_outln_info(F("twoStageAutoUpdate"));
+	debug_outln_info(F("twoStageOTAUpdate"));
 
 	String lang_variant(cfg::current_lang);
+	if (lang_variant.length() != 2) {
+		lang_variant = CURRENT_LANG;
+	}
 	lang_variant.toLowerCase();
 
-	String fwprefix(F(OTA_BASENAME "/update/latest_"));
+	String fetch_name(F(OTA_BASENAME "/update/latest_"));
 	if (cfg::use_beta) {
-		fwprefix = F(OTA_BASENAME "/beta/latest_");
+		fetch_name = F(OTA_BASENAME "/beta/latest_");
 	}
-	fwprefix += lang_variant;
+	fetch_name += lang_variant;
+	fetch_name += F(".bin");
 
-	// ### TODO: store bin.md5 in a StreamString so that we don't wear out the flash
-	String firmware_md5(F("/firmware.bin.md5"));
-	String fetch_md5_name = fwprefix + F(".bin.md5");
-	if (!fwDownloadStreamFile(fetch_md5_name, firmware_md5))
+	WiFiClientSecure client;
+	BearSSL::Session clientSession;
+
+	client.setBufferSizes(1024, TCP_MSS > 1024 ? 2048 : 1024);
+	client.setSession(&clientSession);
+	client.setTrustAnchors(&x509_dst_root_ca);
+
+	String fetch_md5_name = fetch_name + F(".md5");
+
+	StreamString newFwmd5;
+	if (!fwDownloadStream(client, fetch_md5_name, &newFwmd5))
 		return;
 
-	File fwFile = SPIFFS.open(firmware_md5, "r");
-	if (!fwFile || fwFile.size() >= 40) {
-		SPIFFS.remove(firmware_md5);
-		debug_outln_error(F("Failed reopening md5 file.."));
-		return;
-	}
-
-	String newFwmd5 = fwFile.readString();
 	newFwmd5.trim();
-	fwFile.close();
-
 	if (newFwmd5 == ESP.getSketchMD5()) {
+		display_debug(FPSTR(DBG_TXT_UPDATE), FPSTR(DBG_TXT_UPDATE_NO_UPDATE));
 		debug_outln_verbose(F("No newer version available."));
 		return;
 	}
@@ -3410,25 +3447,28 @@ static void twoStageAutoUpdate() {
 	debug_outln_info(F("Sketch md5: "), ESP.getSketchMD5());
 
 	String firmware_name(F("/firmware.bin"));
-	String fetch_name = fwprefix + F(".bin");
-	if (!fwDownloadStreamFile(fetch_name, firmware_name))
+	String firmware_md5(F("/firmware.bin.md5"));
+	String loader_name(F("/loader.bin"));
+	if (!fwDownloadStreamFile(client, fetch_name, firmware_name))
+		return;
+	if (!fwDownloadStreamFile(client, fetch_md5_name, firmware_md5))
+		return;
+	if (!fwDownloadStreamFile(client, FPSTR(FW_2ND_LOADER_URL), loader_name))
 		return;
 
-	fwFile = SPIFFS.open(firmware_name, "r");
+	File fwFile = SPIFFS.open(firmware_name, "r");
 	if (!fwFile) {
 		SPIFFS.remove(firmware_name);
 		SPIFFS.remove(firmware_md5);
 		debug_outln_error(F("Failed reopening fw file.."));
 		return;
 	}
-
 	size_t fwSize = fwFile.size();
 	MD5Builder md5;
 	md5.begin();
 	md5.addStream(fwFile, fwSize);
 	md5.calculate();
 	fwFile.close();
-
 	String md5String = md5.toString();
 
 	// Firmware is always at least 128 kB and padded to 16 bytes
@@ -3438,35 +3478,20 @@ static void twoStageAutoUpdate() {
 		SPIFFS.remove(firmware_md5);
 		return;
 	}
-	debug_outln_info(F("success!"));
-	// Unmout Filesystem before reboot
-	SPIFFS.end();
 
-	// TODO: add MD5 verification also for 2nd stage
+	StreamString loaderMD5;
+	if (!fwDownloadStream(client, String(FPSTR(FW_2ND_LOADER_URL)) + F(".md5"), &loaderMD5))
+		return;
+
+	loaderMD5.trim();
+
 	debug_outln_info(F("launching 2nd stage"));
-	WiFiClientSecure client;
-	client.setBufferSizes(1024, TCP_MSS > 1024 ? 2048 : 1024);
-	client.setTrustAnchors(&x509_dst_root_ca);
-	const HTTPUpdateResult ret = ESPhttpUpdate.update(client, FPSTR(FW_DOWNLOAD_HOST), 443,
-		FPSTR(FW_2ND_LOADER_URL), SOFTWARE_VERSION);
-
-	String LastErrorString = ESPhttpUpdate.getLastErrorString().c_str();
-	switch (ret) {
-	case HTTP_UPDATE_FAILED:
-		debug_outln_error(FPSTR(DBG_TXT_UPDATE));
+	if (!launchUpdateLoader(loaderMD5)) {
 		debug_outln_error(FPSTR(DBG_TXT_UPDATE_FAILED));
-		debug_outln(LastErrorString, DEBUG_ERROR);
 		display_debug(FPSTR(DBG_TXT_UPDATE), FPSTR(DBG_TXT_UPDATE_FAILED));
 		SPIFFS.remove(firmware_name);
 		SPIFFS.remove(firmware_md5);
-		break;
-	case HTTP_UPDATE_NO_UPDATES:
-		debug_outln_info(FPSTR(DBG_TXT_UPDATE), FPSTR(DBG_TXT_UPDATE_NO_UPDATE));
-		display_debug(FPSTR(DBG_TXT_UPDATE), FPSTR(DBG_TXT_UPDATE_NO_UPDATE));
-		break;
-	case HTTP_UPDATE_OK:
-		// may not called we reboot the ESP
-		break;
+		return;
 	}
 #endif
 }
@@ -4146,7 +4171,7 @@ void setup(void) {
 	bool got_ntp = acquireNetworkTime();
 	debug_out(F("\nNTP time "), DEBUG_MIN_INFO);
 	debug_outln_info(got_ntp ? FPSTR(DBG_TXT_FOUND) : FPSTR(DBG_TXT_NOT_FOUND));
-	twoStageAutoUpdate();
+	twoStageOTAUpdate();
 	setup_webserver();
 	createLoggerConfigs();
 	debug_outln_info(F("\nChipId: "), esp_chipid);
@@ -4219,7 +4244,7 @@ void loop(void) {
 	}
 
 	if (msSince(last_update_attempt) > PAUSE_BETWEEN_UPDATE_ATTEMPTS_MS) {
-		twoStageAutoUpdate();
+		twoStageOTAUpdate();
 		last_update_attempt = act_milli;
 	}
 
