@@ -346,7 +346,7 @@ float BMX280::readHumidity(void) {
   readTemperature(); // must be done first to get t_fine
 
   uint16_t raw_h = read16_LE(BMX280_REGISTER_HUMIDDATA);
-  int32_t adc_H = (int16_t) ((raw_h >> 8) | (raw_h << 8));
+  int32_t adc_H = (uint16_t) ((raw_h >> 8) | (raw_h << 8));
   if (adc_H == 0x8000) // value in case humidity measurement was disabled
     return NAN;
 

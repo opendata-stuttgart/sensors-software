@@ -2,6 +2,7 @@ NRZ-2019-126-B3
 * OTA updater validates loader checksums prior update
 * Maintain config setting backups and fall back if current version is corrupt
 * Code cleanups
+* Fix regression in Humidity Reading of BME280
 
 NRZ-2019-126-B2
 * Switch to Arduino Core 2.5.2
