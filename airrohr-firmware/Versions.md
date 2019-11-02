@@ -1,3 +1,8 @@
+NRZ-2019-126-B3
+* OTA updater validates loader checksums prior update
+* Maintain config setting backups and fall back if current version is corrupt
+* Code cleanups
+
 NRZ-2019-126-B2
 * Switch to Arduino Core 2.5.2
 * Switch OTA updater to use TLS with server certificate verification

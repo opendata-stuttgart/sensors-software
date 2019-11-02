@@ -1,7 +1,7 @@
 IMPORTANT: All pull requests should be made to the beta branch. The master branch is for the actual stable version. 
 
 
-# Version für Sensoren PPD42NS, SDS011, DHT22, BMP180, NEO-6M und weitere (siehe Konfigurationsseite)
+# Version für Sensoren PPD42NS, SDS011, DHT22, BMP180, BMP/E 280, NEO-6M und weitere (siehe Konfigurationsseite)
 
 Features:
 * gleichzeitiger Betrieb mehrerer Sensoren
@@ -79,7 +79,7 @@ In ESP8266 für Arduino IDE enthalten:
 * FS (GNU Lesser Public License >=2.1)
 * ESP8266WiFi (GNU Lesser Public License >=2.1)
 * ESP8266WebServer (GNU Lesser Public License >=2.1)
-* ESP8266httpUpdate (1.1.0) (GNU Lesser Public License >=2.1)
+* ESP8266HTTPClient (GNU Lesser Public License >=2.1)
 * DNSServer (GNU Lesser Public License >=2.1)
 * SoftwareSerial (GNU Lesser Public License >=2.1). Don't install additional library!!!
 

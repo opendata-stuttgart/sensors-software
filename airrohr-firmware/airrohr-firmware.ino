@@ -84,17 +84,13 @@
  *                                                                      *
  ************************************************************************
  *
- * latest mit lib 2.4.2
- * Der Sketch verwendet 505504 Bytes (48%) des Programmspeicherplatzes. Das Maximum sind 1044464 Bytes.
- * Globale Variablen verwenden 37128 Bytes (45%) des dynamischen Speichers, 44792 Bytes für lokale Variablen verbleiben. Das Maximum sind 81920 Bytes.
- *
  * latest mit lib 2.5.2
- * DATA:    [====      ]  39.5% (used 32340 bytes from 81920 bytes)
- * PROGRAM: [=====     ]  48.7% (used 508376 bytes from 1044464 bytes)
+ * DATA:    [====      ]  39.4% (used 32304 bytes from 81920 bytes)
+ * PROGRAM: [=====     ]  48.3% (used 504812 bytes from 1044464 bytes)
  *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2019-126-B2"
+#define SOFTWARE_VERSION_STR "NRZ-2019-126-B3"
 const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -117,10 +113,10 @@ const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 #if defined(ESP8266)
 #include <FS.h>                     // must be first
+#include <ESP8266HTTPClient.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
-#include <ESP8266httpUpdate.h>
 #include <SoftwareSerial.h>
 #include <Hash.h>
 #include <time.h>
@@ -137,7 +133,6 @@ const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 #include <WiFiClientSecure.h>
 #include <HardwareSerial.h>
 #include <hwcrypto/sha.h>
-#include <HTTPUpdate.h>
 #include <WebServer.h>
 #include <ESPmDNS.h>
 #endif
@@ -153,7 +148,7 @@ const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 #include <Adafruit_HTU21DF.h>
 #include <Adafruit_BMP085.h>
 #include <Adafruit_SHT31.h>
-
+#include <StreamString.h>
 #include <DallasTemperature.h>
 #include <TinyGPS++.h>
 #include "./bmx280_i2c.h"
@@ -822,7 +817,7 @@ static String SDS_version_date() {
 	int len = 0;
 	String s, version_date, device_id;
 	int checksum_is = 0;
-	int checksum_ok = 0;
+	bool checksum_ok = false;
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(DBG_TXT_SDS011_VERSION_DATE));
 
@@ -884,7 +879,7 @@ static String SDS_version_date() {
 			debug_outln_verbose(FPSTR(DBG_TXT_CHECKSUM_IS), String(checksum_is % 256));
 			debug_outln_verbose(FPSTR(DBG_TXT_CHECKSUM_SHOULD), String(value));
 			if (value == (checksum_is % 256)) {
-				checksum_ok = 1;
+				checksum_ok = true;
 			} else {
 				len = -1;
 			};
@@ -897,12 +892,12 @@ static String SDS_version_date() {
 		}
 		if (len > 2) { checksum_is += value; }
 		len++;
-		if (len == 10 && checksum_ok == 1) {
+		if (len == 10 && checksum_ok) {
 			s = version_date + '(' + device_id + ')';
 			debug_outln_info(F("SDS version date : "), version_date);
 			debug_outln_info(F("SDS device ID: "), device_id);
 			len = 0;
-			checksum_ok = 0;
+			checksum_ok = false;
 			version_date = emptyString;
 			device_id = emptyString;
 			checksum_is = 0;
@@ -941,25 +936,21 @@ static bool boolFromJSON(const DynamicJsonDocument& json, const __FlashStringHel
 	return json[key].as<bool>();
 }
 
-static void readConfig() {
+static void readConfig(bool oldconfig = false) {
 	bool rewriteConfig = false;
 
-	debug_outln_info(F("mounting FS..."));
-
-#if defined(ESP32)
-	bool spiffs_begin_ok = SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED);
-#else
-	bool spiffs_begin_ok = SPIFFS.begin();
-#endif
-
-	if (!spiffs_begin_ok) {
-		debug_outln_error(F("failed to mount FS"));
-		return;
+	String cfgName(F("/config.json"));
+	if (oldconfig) {
+		cfgName += F(".old");
 	}
 
-	File configFile = SPIFFS.open("/config.json", "r");
+	File configFile = SPIFFS.open(cfgName, "r");
 	if (!configFile) {
-		debug_outln_error(F("config file not found ..."));
+		if (!oldconfig) {
+			return readConfig(true /* oldconfig */);
+		}
+
+		debug_outln_error(F("failed to open config file."));
 		return;
 	}
 
@@ -1023,6 +1014,10 @@ static void readConfig() {
 		}
 	} else {
 		debug_outln_error(F("failed to load json config"));
+
+		if (!oldconfig) {
+			return readConfig(true /* oldconfig */);
+		}
 	}
 
 	if (rewriteConfig) {
@@ -1030,10 +1025,26 @@ static void readConfig() {
 	}
 }
 
+static void init_config() {
+
+	debug_outln_info(F("mounting FS..."));
+#if defined(ESP32)
+	bool spiffs_begin_ok = SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED);
+#else
+	bool spiffs_begin_ok = SPIFFS.begin();
+#endif
+
+	if (!spiffs_begin_ok) {
+		debug_outln_error(F("failed to mount FS"));
+		return;
+	}
+	readConfig();
+}
+
 /*****************************************************************
  * write config to spiffs                                        *
  *****************************************************************/
-void writeConfig() {
+static void writeConfig() {
 	DynamicJsonDocument json(JSON_BUFFER_SIZE);
 	debug_outln_info(F("Saving config..."));
 	json["SOFTWARE_VERSION"] = SOFTWARE_VERSION;
@@ -1056,9 +1067,11 @@ void writeConfig() {
 		};
 	}
 
-	File configFile = SPIFFS.open("/config.json", "w");
+	SPIFFS.remove(F("/config.json.old"));
+	SPIFFS.rename(F("/config.json"), F("/config.json.old"));
+
+	File configFile = SPIFFS.open(F("/config.json"), "w");
 	if (configFile) {
-		debug_outln_info(F("Before writing config.."));
 		serializeJson(json, configFile);
 		configFile.close();
 		debug_outln_info(F("Config written successfully."));
@@ -2649,7 +2662,7 @@ static void fetchSensorSDS(String& s) {
 	int pm10_serial = 0;
 	int pm25_serial = 0;
 	int checksum_is = 0;
-	int checksum_ok = 0;
+	bool checksum_ok = false;
 
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_SDS011));
 	if (msSince(starttime) < (cfg::sending_intervall_ms - (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS))) {
@@ -2694,7 +2707,7 @@ static void fetchSensorSDS(String& s) {
 				debug_outln_verbose(FPSTR(DBG_TXT_CHECKSUM_IS), String(checksum_is % 256));
 				debug_outln_verbose(FPSTR(DBG_TXT_CHECKSUM_SHOULD), String(value));
 				if (value == (checksum_is % 256)) {
-					checksum_ok = 1;
+					checksum_ok = true;
 				} else {
 					len = -1;
 				};
@@ -2707,7 +2720,7 @@ static void fetchSensorSDS(String& s) {
 			}
 			if (len > 2) { checksum_is += value; }
 			len++;
-			if (len == 10 && checksum_ok == 1 && (msSince(starttime) > (cfg::sending_intervall_ms - READINGTIME_SDS_MS))) {
+			if (len == 10 && checksum_ok && (msSince(starttime) > (cfg::sending_intervall_ms - READINGTIME_SDS_MS))) {
 				if ((! isnan(pm10_serial)) && (! isnan(pm25_serial))) {
 					sds_pm10_sum += pm10_serial;
 					sds_pm25_sum += pm25_serial;
@@ -2728,7 +2741,7 @@ static void fetchSensorSDS(String& s) {
 					sds_val_count++;
 				}
 				len = 0;
-				checksum_ok = 0;
+				checksum_ok = false;
 				pm10_serial = 0;
 				pm25_serial = 0;
 				checksum_is = 0;
@@ -2779,7 +2792,7 @@ static void fetchSensorPMS(String& s) {
 	int pm25_serial = 0;
 	int checksum_is = 0;
 	int checksum_should = 0;
-	int checksum_ok = 0;
+	bool checksum_ok = false;
 	int frame_len = 24;				// min. frame length
 
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_PMSx003));
@@ -2855,11 +2868,11 @@ static void fetchSensorPMS(String& s) {
 				debug_outln_verbose(FPSTR(DBG_TXT_CHECKSUM_IS), String(checksum_is + 143));
 				debug_outln_verbose(FPSTR(DBG_TXT_CHECKSUM_SHOULD), String(checksum_should));
 				if (checksum_should == (checksum_is + 143)) {
-					checksum_ok = 1;
+					checksum_ok = true;
 				} else {
 					len = 0;
 				};
-				if (checksum_ok == 1 && (msSince(starttime) > (cfg::sending_intervall_ms - READINGTIME_SDS_MS))) {
+				if (checksum_ok && (msSince(starttime) > (cfg::sending_intervall_ms - READINGTIME_SDS_MS))) {
 					if ((! isnan(pm1_serial)) && (! isnan(pm10_serial)) && (! isnan(pm25_serial))) {
 						pms_pm1_sum += pm1_serial;
 						pms_pm10_sum += pm10_serial;
@@ -2888,7 +2901,7 @@ static void fetchSensorPMS(String& s) {
 						pms_val_count++;
 					}
 					len = 0;
-					checksum_ok = 0;
+					checksum_ok = false;
 					pm1_serial = 0;
 					pm10_serial = 0;
 					pm25_serial = 0;
@@ -2947,7 +2960,7 @@ static void fetchSensorHPM(String& s) {
 	int pm25_serial = 0;
 	int checksum_is = 0;
 	int checksum_should = 0;
-	int checksum_ok = 0;
+	bool checksum_ok = false;
 
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_HPM));
 	if (msSince(starttime) < (cfg::sending_intervall_ms - (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS))) {
@@ -3003,11 +3016,11 @@ static void fetchSensorHPM(String& s) {
 				debug_outln_verbose(FPSTR(DBG_TXT_CHECKSUM_IS), String(checksum_is + 143));
 				debug_outln_verbose(FPSTR(DBG_TXT_CHECKSUM_SHOULD), String(checksum_should));
 				if (checksum_should == (checksum_is + 143)) {
-					checksum_ok = 1;
+					checksum_ok = true;
 				} else {
 					len = 0;
 				};
-				if (checksum_ok == 1 && (long(msSince(starttime)) > (long(cfg::sending_intervall_ms) - long(READINGTIME_SDS_MS)))) {
+				if (checksum_ok && (long(msSince(starttime)) > (long(cfg::sending_intervall_ms) - long(READINGTIME_SDS_MS)))) {
 					if ((! isnan(pm10_serial)) && (! isnan(pm25_serial))) {
 						hpm_pm10_sum += pm10_serial;
 						hpm_pm25_sum += pm25_serial;
@@ -3028,7 +3041,7 @@ static void fetchSensorHPM(String& s) {
 						hpm_val_count++;
 					}
 					len = 0;
-					checksum_ok = 0;
+					checksum_ok = false;
 					pm10_serial = 0;
 					pm25_serial = 0;
 					checksum_is = 0;
@@ -3307,37 +3320,27 @@ static void fetchSensorGPS(String& s) {
 }
 
 /*****************************************************************
- * AutoUpdate                                                    *
+ * OTAUpdate                                                     *
  *****************************************************************/
 
-static bool fwDownloadStreamFile(const String& url, const String& fname) {
+static bool fwDownloadStream(WiFiClientSecure& client, const String& url, Stream* ostream) {
 
 	HTTPClient http;
-	String fname_new(fname + ".new");
 	int bytes_written = -1;
 
 	http.setTimeout(20 * 1000);
 	const String SDS_version = cfg::sds_read ? SDS_version_date() : "";
 	http.setUserAgent(SOFTWARE_VERSION + ' ' + esp_chipid + ' ' + SDS_version + ' ' +
-				 String(cfg::current_lang) + ' ' + String(INTL_LANG) + ' ' +
+				 String(cfg::current_lang) + ' ' + String(CURRENT_LANG) + ' ' +
 				 String(cfg::use_beta ? "BETA" : ""));
 
-	WiFiClientSecure client;
-	client.setBufferSizes(1024, TCP_MSS > 1024 ? 2048 : 1024);
-	client.setTrustAnchors(&x509_dst_root_ca);
+	debug_outln_verbose(F("HTTP GET: "), String(FPSTR(FW_DOWNLOAD_HOST)) + ':' + String(FW_DOWNLOAD_PORT) + url);
 
-	if (http.begin(client, FPSTR(FW_DOWNLOAD_HOST), 443, url)) {
-		if (http.GET() == HTTP_CODE_OK) {
-			File fwFile = SPIFFS.open(fname_new, "w+");
-			if (fwFile) {
-				bytes_written = http.writeToStream(&fwFile);
-				fwFile.close();
-				if (bytes_written > 0) {
-					SPIFFS.remove(fname);
-					SPIFFS.rename(fname_new, fname);
-					debug_outln_info(F("Success downloading: "), url);
-				}
-			}
+	if (http.begin(client, FPSTR(FW_DOWNLOAD_HOST), FW_DOWNLOAD_PORT, url)) {
+		int r = http.GET();
+		debug_outln_verbose(F("GET r: "), String(r));
+		if (r == HTTP_CODE_OK) {
+			bytes_written = http.writeToStream(ostream);
 		}
 		http.end();
 	}
@@ -3345,45 +3348,97 @@ static bool fwDownloadStreamFile(const String& url, const String& fname) {
 	if (bytes_written > 0)
 		return true;
 
-	debug_outln_error(F("Firmware download failed!"));
+	return false;
+}
+
+static bool fwDownloadStreamFile(WiFiClientSecure& client, const String& url, const String& fname) {
+
+	String fname_new(fname);
+	fname_new += F(".new");
+	bool downloadSuccess = false;
+
+	File fwFile = SPIFFS.open(fname_new, "w");
+	if (fwFile) {
+		downloadSuccess = fwDownloadStream(client, url, &fwFile);
+		fwFile.close();
+		if (downloadSuccess) {
+			SPIFFS.remove(fname);
+			SPIFFS.rename(fname_new, fname);
+			debug_outln_info(F("Success downloading: "), url);
+		}
+	}
+
+	if (downloadSuccess)
+		return true;
+
 	SPIFFS.remove(fname_new);
 	return false;
 }
 
-static void twoStageAutoUpdate() {
+static bool launchUpdateLoader(const String& md5) {
+
+	File loaderFile = SPIFFS.open(F("/loader.bin"), "r");
+	if (!loaderFile) {
+		return false;
+	}
+
+	if (!Update.begin(loaderFile.size(), U_FLASH)) {
+		return false;
+	}
+
+	if (md5.length() && !Update.setMD5(md5.c_str())) {
+		return false;
+	}
+
+	if (Update.writeStream(loaderFile) != loaderFile.size()) {
+		return false;
+	}
+	loaderFile.close();
+
+	if (!Update.end()) {
+		return false;
+	}
+
+	sensor_restart();
+	return true;
+}
+
+static void twoStageOTAUpdate() {
 
 	if (!cfg::auto_update) return;
 
 #if defined(ESP8266)
-	debug_outln_info(F("twoStageAutoUpdate"));
+	debug_outln_info(F("twoStageOTAUpdate"));
 
 	String lang_variant(cfg::current_lang);
+	if (lang_variant.length() != 2) {
+		lang_variant = CURRENT_LANG;
+	}
 	lang_variant.toLowerCase();
 
-	String fwprefix(F(OTA_BASENAME "/update/latest_"));
+	String fetch_name(F(OTA_BASENAME "/update/latest_"));
 	if (cfg::use_beta) {
-		fwprefix = F(OTA_BASENAME "/beta/latest_");
+		fetch_name = F(OTA_BASENAME "/beta/latest_");
 	}
-	fwprefix += lang_variant;
+	fetch_name += lang_variant;
+	fetch_name += F(".bin");
 
-	// ### TODO: store bin.md5 in a StreamString so that we don't wear out the flash
-	String firmware_md5(F("/firmware.bin.md5"));
-	String fetch_md5_name = fwprefix + F(".bin.md5");
-	if (!fwDownloadStreamFile(fetch_md5_name, firmware_md5))
+	WiFiClientSecure client;
+	BearSSL::Session clientSession;
+
+	client.setBufferSizes(1024, TCP_MSS > 1024 ? 2048 : 1024);
+	client.setSession(&clientSession);
+	client.setTrustAnchors(&x509_dst_root_ca);
+
+	String fetch_md5_name = fetch_name + F(".md5");
+
+	StreamString newFwmd5;
+	if (!fwDownloadStream(client, fetch_md5_name, &newFwmd5))
 		return;
 
-	File fwFile = SPIFFS.open(firmware_md5, "r");
-	if (!fwFile || fwFile.size() >= 40) {
-		SPIFFS.remove(firmware_md5);
-		debug_outln_error(F("Failed reopening md5 file.."));
-		return;
-	}
-
-	String newFwmd5 = fwFile.readString();
 	newFwmd5.trim();
-	fwFile.close();
-
 	if (newFwmd5 == ESP.getSketchMD5()) {
+		display_debug(FPSTR(DBG_TXT_UPDATE), FPSTR(DBG_TXT_UPDATE_NO_UPDATE));
 		debug_outln_verbose(F("No newer version available."));
 		return;
 	}
@@ -3392,25 +3447,28 @@ static void twoStageAutoUpdate() {
 	debug_outln_info(F("Sketch md5: "), ESP.getSketchMD5());
 
 	String firmware_name(F("/firmware.bin"));
-	String fetch_name = fwprefix + F(".bin");
-	if (!fwDownloadStreamFile(fetch_name, firmware_name))
+	String firmware_md5(F("/firmware.bin.md5"));
+	String loader_name(F("/loader.bin"));
+	if (!fwDownloadStreamFile(client, fetch_name, firmware_name))
+		return;
+	if (!fwDownloadStreamFile(client, fetch_md5_name, firmware_md5))
+		return;
+	if (!fwDownloadStreamFile(client, FPSTR(FW_2ND_LOADER_URL), loader_name))
 		return;
 
-	fwFile = SPIFFS.open(firmware_name, "r");
+	File fwFile = SPIFFS.open(firmware_name, "r");
 	if (!fwFile) {
 		SPIFFS.remove(firmware_name);
 		SPIFFS.remove(firmware_md5);
 		debug_outln_error(F("Failed reopening fw file.."));
 		return;
 	}
-
 	size_t fwSize = fwFile.size();
 	MD5Builder md5;
 	md5.begin();
 	md5.addStream(fwFile, fwSize);
 	md5.calculate();
 	fwFile.close();
-
 	String md5String = md5.toString();
 
 	// Firmware is always at least 128 kB and padded to 16 bytes
@@ -3420,35 +3478,20 @@ static void twoStageAutoUpdate() {
 		SPIFFS.remove(firmware_md5);
 		return;
 	}
-	debug_outln_info(F("success!"));
-	// Unmout Filesystem before reboot
-	SPIFFS.end();
 
-	// TODO: add MD5 verification also for 2nd stage
+	StreamString loaderMD5;
+	if (!fwDownloadStream(client, String(FPSTR(FW_2ND_LOADER_URL)) + F(".md5"), &loaderMD5))
+		return;
+
+	loaderMD5.trim();
+
 	debug_outln_info(F("launching 2nd stage"));
-	WiFiClientSecure client;
-	client.setBufferSizes(1024, TCP_MSS > 1024 ? 2048 : 1024);
-	client.setTrustAnchors(&x509_dst_root_ca);
-	const HTTPUpdateResult ret = ESPhttpUpdate.update(client, FPSTR(FW_DOWNLOAD_HOST), 443,
-		FPSTR(FW_2ND_LOADER_URL), SOFTWARE_VERSION);
-
-	String LastErrorString = ESPhttpUpdate.getLastErrorString().c_str();
-	switch (ret) {
-	case HTTP_UPDATE_FAILED:
-		debug_outln_error(FPSTR(DBG_TXT_UPDATE));
+	if (!launchUpdateLoader(loaderMD5)) {
 		debug_outln_error(FPSTR(DBG_TXT_UPDATE_FAILED));
-		debug_outln(LastErrorString, DEBUG_ERROR);
 		display_debug(FPSTR(DBG_TXT_UPDATE), FPSTR(DBG_TXT_UPDATE_FAILED));
 		SPIFFS.remove(firmware_name);
 		SPIFFS.remove(firmware_md5);
-		break;
-	case HTTP_UPDATE_NO_UPDATES:
-		debug_outln_info(FPSTR(DBG_TXT_UPDATE), FPSTR(DBG_TXT_UPDATE_NO_UPDATE));
-		display_debug(FPSTR(DBG_TXT_UPDATE), FPSTR(DBG_TXT_UPDATE_NO_UPDATE));
-		break;
-	case HTTP_UPDATE_OK:
-		// may not called we reboot the ESP
-		break;
+		return;
 	}
 #endif
 }
@@ -3763,7 +3806,7 @@ static void display_values() {
 		}
 	}
 	yield();
-	next_display_count += 1;
+	next_display_count++;
 	next_display_millis = millis() + DISPLAY_UPDATE_INTERVAL_MS;
 }
 
@@ -3858,7 +3901,7 @@ static void initDNMS() {
 	if (dnms_read_version(dnms_version) != 0) {
 		debug_outln_info(FPSTR(DBG_TXT_NOT_FOUND));
 		debug_outln_error(F("Check DNMS wiring"));
-		dnms_init_failed = 1;
+		dnms_init_failed = true;
 	} else {
 		dnms_version[DNMS_MAX_VERSION_LEN] = 0;
 		debug_outln_info(FPSTR(DBG_TXT_FOUND), String(": ") + String(dnms_version));
@@ -3926,7 +3969,7 @@ static void powerOnTestSensors() {
 		debug_outln_info(F("Read BMP..."));
 		if (!bmp.begin()) {
 			debug_outln_error(F("No valid BMP085 sensor, check wiring!"));
-			bmp_init_failed = 1;
+			bmp_init_failed = true;
 		}
 	}
 
@@ -3934,7 +3977,7 @@ static void powerOnTestSensors() {
 		debug_outln_info(F("Read BMP280/BME280..."));
 		if (!initBMX280(0x76) && !initBMX280(0x77)) {
 			debug_outln_error(F("Check BMP280/BME280 wiring"));
-			bmx280_init_failed = 1;
+			bmx280_init_failed = true;
 		}
 	}
 
@@ -4120,7 +4163,7 @@ void setup(void) {
 	cfg::initNonTrivials(esp_chipid.c_str());
 	debug_outln_info(F("Airrohr: "), SOFTWARE_VERSION);
 
-	readConfig();
+	init_config();
 	init_display();
 	init_lcd();
 	display_debug(F("Connecting to"), String(cfg::wlanssid));
@@ -4128,7 +4171,7 @@ void setup(void) {
 	bool got_ntp = acquireNetworkTime();
 	debug_out(F("\nNTP time "), DEBUG_MIN_INFO);
 	debug_outln_info(got_ntp ? FPSTR(DBG_TXT_FOUND) : FPSTR(DBG_TXT_NOT_FOUND));
-	twoStageAutoUpdate();
+	twoStageOTAUpdate();
 	setup_webserver();
 	createLoggerConfigs();
 	debug_outln_info(F("\nChipId: "), esp_chipid);
@@ -4201,7 +4244,7 @@ void loop(void) {
 	}
 
 	if (msSince(last_update_attempt) > PAUSE_BETWEEN_UPDATE_ATTEMPTS_MS) {
-		twoStageAutoUpdate();
+		twoStageOTAUpdate();
 		last_update_attempt = act_milli;
 	}
 
@@ -4401,7 +4444,7 @@ void loop(void) {
 		sum_send_time = 0;
 		starttime = millis();								// store the start time
 		first_cycle = false;
-		count_sends += 1;
+		count_sends++;
 	}
 	yield();
 #if defined(ESP8266)

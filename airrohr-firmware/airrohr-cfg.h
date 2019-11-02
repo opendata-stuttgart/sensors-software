@@ -12,7 +12,7 @@ enum ConfigEntryType : unsigned short {
 };
 
 struct ConfigShapeEntry {
-	ConfigEntryType cfg_type;
+	enum ConfigEntryType cfg_type;
 	unsigned short cfg_len;
 	const __FlashStringHelper* cfg_key;
 	union {
