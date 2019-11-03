@@ -161,7 +161,7 @@ void BMX280::setSampling(sensor_mode mode,
  *   @param reg the register address to write to
  *   @param value the value to write to the register
  */
-void BMX280::write8(byte reg, byte value) {
+void BMX280::write8(uint8_t reg, uint8_t value) {
   _wire->beginTransmission((uint8_t)_i2caddr);
   _wire->write((uint8_t)reg);
   _wire->write((uint8_t)value);
@@ -173,20 +173,24 @@ void BMX280::write8(byte reg, byte value) {
  *   @param reg the register address to read from
  *   @returns the data byte read from the device
  */
-uint8_t BMX280::read8(byte reg) {
+uint8_t BMX280::read8(uint8_t reg) {
   _wire->beginTransmission((uint8_t)_i2caddr);
   _wire->write((uint8_t)reg);
   _wire->endTransmission();
-  _wire->requestFrom((uint8_t)_i2caddr, (byte)1);
+  _wire->requestFrom((uint8_t)_i2caddr, (uint8_t)1);
   return _wire->read();
 }
 
-uint16_t BMX280::read16_LE(byte reg) {
+uint16_t BMX280::read16_LE(uint8_t reg) {
+  uint16_t value;
+
   _wire->beginTransmission((uint8_t)_i2caddr);
   _wire->write((uint8_t)reg);
   _wire->endTransmission();
-  _wire->requestFrom((uint8_t)_i2caddr, (byte)2);
-  return _wire->read() | (_wire->read() << 8);
+  _wire->requestFrom((uint8_t)_i2caddr, (uint8_t)2);
+  value = _wire->read();
+  value |= (uint16_t) _wire->read() << 8;
+  return value;
 }
 
 /*!
@@ -194,7 +198,7 @@ uint16_t BMX280::read16_LE(byte reg) {
  *   @param reg the register address to read from
  *   @returns the 16 bit data value read from the device
  */
-int16_t BMX280::readS16_LE(byte reg) {
+int16_t BMX280::readS16_LE(uint8_t reg) {
   return (int16_t)read16_LE(reg);
 }
 
@@ -203,13 +207,13 @@ int16_t BMX280::readS16_LE(byte reg) {
  *   @param reg the register address to read from
  *   @returns the 24 bit data value read from the device
  */
-uint32_t BMX280::read24(byte reg) {
+uint32_t BMX280::read24(uint8_t reg) {
   uint32_t value;
 
   _wire->beginTransmission((uint8_t)_i2caddr);
   _wire->write((uint8_t)reg);
   _wire->endTransmission();
-  _wire->requestFrom((uint8_t)_i2caddr, (byte)3);
+  _wire->requestFrom((uint8_t)_i2caddr, (uint8_t)3);
 
   value = _wire->read();
   value <<= 8;
@@ -346,7 +350,7 @@ float BMX280::readHumidity(void) {
   readTemperature(); // must be done first to get t_fine
 
   uint16_t raw_h = read16_LE(BMX280_REGISTER_HUMIDDATA);
-  int32_t adc_H = (int16_t) ((raw_h >> 8) | (raw_h << 8));
+  int32_t adc_H = (uint16_t) ((raw_h >> 8) | (raw_h << 8));
   if (adc_H == 0x8000) // value in case humidity measurement was disabled
     return NAN;
 

@@ -96,11 +96,11 @@ protected:
   void readCoefficients(void);
   bool isReadingCalibration(void);
 
-  void write8(byte reg, byte value);
-  uint8_t read8(byte reg);
-  uint32_t read24(byte reg);
-  uint16_t read16_LE(byte reg); // little endian
-  int16_t readS16_LE(byte reg); // little endian
+  void write8(uint8_t reg, uint8_t value);
+  uint8_t read8(uint8_t reg);
+  uint32_t read24(uint8_t reg);
+  uint16_t read16_LE(uint8_t reg); // little endian
+  int16_t readS16_LE(uint8_t reg); // little endian
 
   int32_t _sensorID; //!< ID of the BME Sensor
   int32_t t_fine; //!< temperature with high resolution, stored as an attribute
