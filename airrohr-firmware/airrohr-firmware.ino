@@ -1098,7 +1098,7 @@ static void createLoggerConfigs() {
 	}
 	loggerConfigs[LoggerSensemap].destport = PORT_SENSEMAP;
 	loggerConfigs[LoggerSensemap].session = new BearSSL::Session;
-	loggerConfigs[LoggerFSapp].destport = PORT_SENSEMAP;
+	loggerConfigs[LoggerFSapp].destport = PORT_FSAPP;
 	loggerConfigs[Loggeraircms].destport = PORT_AIRCMS;
 	loggerConfigs[LoggerInflux].destport = cfg::port_influx;
 	if (cfg::send2influx && cfg::ssl_influx) {
