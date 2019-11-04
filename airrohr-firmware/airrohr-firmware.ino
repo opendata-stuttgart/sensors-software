@@ -533,6 +533,7 @@ double last_value_GPS_alt = -1000.0;
 String last_value_GPS_date;
 String last_value_GPS_time;
 String last_data_string;
+int last_signal_strength;
 
 String esp_chipid;
 
@@ -1854,7 +1855,7 @@ static void webserver_values() {
 		const String unit_TS = "µm";
 		const String unit_LA = "dB(A)";
 
-		const int signal_quality = calcWiFiSignalQuality(WiFi.RSSI());
+		const int signal_quality = calcWiFiSignalQuality(last_signal_strength);
 		debug_outln_info(F("ws: values ..."));
 		if (first_cycle) {
 			page_content += F("<b style='color:red'>");
@@ -2322,6 +2323,7 @@ static void connectWifi() {
 		}
 	}
 	debug_outln_info(F("WiFi connected, IP is: "), WiFi.localIP().toString());
+	last_signal_strength = WiFi.RSSI();
 }
 
 static void configureCACertTrustAnchor(WiFiClientSecure* client) {
@@ -3705,7 +3707,7 @@ static void display_values() {
 			display_header = F("Wifi info");
 			display_lines[0] = "IP: "; display_lines[0] += WiFi.localIP().toString();
 			display_lines[1] = "SSID: "; display_lines[1] += WiFi.SSID();
-			display_lines[2] = std::move(tmpl(F("Signal: {v} %"), String(calcWiFiSignalQuality(WiFi.RSSI()))));
+			display_lines[2] = std::move(tmpl(F("Signal: {v} %"), String(calcWiFiSignalQuality(last_signal_strength))));
 			break;
 		case 7:
 			display_header = F("Device Info");
@@ -4338,13 +4340,10 @@ void loop(void) {
 
 	if (send_now) {
 		debug_outln_info(F("Creating data string:"));
-		String signal_strength(WiFi.RSSI());
+		last_signal_strength = WiFi.RSSI();
 		RESERVE_STRING(data, LARGE_STR);
 		data = FPSTR(data_first_part);
 		RESERVE_STRING(result, MED_STR);
-
-		debug_outln_info(F("WLAN signal strength (dBm): "), signal_strength);
-		debug_outln_info(FPSTR(DBG_TXT_SEP));
 
 		if (cfg::ppd_read) {
 			data += result_PPD;
@@ -4429,7 +4428,7 @@ void loop(void) {
 		add_Value2Json(data, F("samples"), String(sample_count));
 		add_Value2Json(data, F("min_micro"), String(min_micro));
 		add_Value2Json(data, F("max_micro"), String(max_micro));
-		add_Value2Json(data, F("signal"), signal_strength);
+		add_Value2Json(data, F("signal"), String(last_signal_strength));
 
 		if ((unsigned)(data.lastIndexOf(',') + 1) == data.length()) {
 			data.remove(data.length() - 1);
