@@ -1,6 +1,7 @@
 NRZ-2019-126-B4
 * Try to configure system time from 3 different NTP sources
 * When system time is invalid, disable TLS verification
+* Use TLS for Feinstaub-App reporting
 
 NRZ-2019-126-B3
 * OTA updater validates loader checksums prior update
