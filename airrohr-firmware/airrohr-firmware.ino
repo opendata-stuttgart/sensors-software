@@ -90,7 +90,7 @@
  *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2019-126-B3"
+#define SOFTWARE_VERSION_STR "NRZ-2019-126-B4"
 const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -2320,7 +2320,21 @@ static void connectWifi() {
 			debug_outln_info(emptyString);
 		}
 	}
-	debug_outln_info(F("WiFi connected\nIP address: "), WiFi.localIP().toString());
+	debug_outln_info(F("WiFi connected, IP is: "), WiFi.localIP().toString());
+}
+
+static void configureCACertTrustAnchor(WiFiClientSecure* client) {
+	constexpr time_t fw_built_year = (__DATE__[ 7] - '0') * 1000 + \
+							  (__DATE__[ 8] - '0') *  100 + \
+							  (__DATE__[ 9] - '0') *   10 + \
+							  (__DATE__[10] - '0');
+	if (time(nullptr) < (fw_built_year - 1970) * 365 * 24 * 3600) {
+		debug_outln_info(F("Time incorrect; Disabling CA verification."));
+		client->setInsecure();
+	}
+	else {
+		client->setTrustAnchors(&x509_dst_root_ca);
+	}
 }
 
 static WiFiClient* getNewLoggerWiFiClient(const LoggerEntry logger) {
@@ -2337,7 +2351,7 @@ static WiFiClient* getNewLoggerWiFiClient(const LoggerEntry logger) {
 			static_cast<WiFiClientSecure*>(_client)->setInsecure();
 			break;
 		default:
-			static_cast<WiFiClientSecure*>(_client)->setTrustAnchors(&x509_dst_root_ca);
+			configureCACertTrustAnchor(static_cast<WiFiClientSecure*>(_client));
 		}
 	} else {
 		_client = new WiFiClient;
@@ -3428,7 +3442,7 @@ static void twoStageOTAUpdate() {
 
 	client.setBufferSizes(1024, TCP_MSS > 1024 ? 2048 : 1024);
 	client.setSession(&clientSession);
-	client.setTrustAnchors(&x509_dst_root_ca);
+	configureCACertTrustAnchor(&client);
 
 	String fetch_md5_name = fetch_name + F(".md5");
 
@@ -4051,25 +4065,26 @@ static void time_is_set (void) {
 static bool acquireNetworkTime() {
 	// server name ptrs must be persisted after the call to configTime because internally
 	// the pointers are stored see implementation of lwip sntp_setservername()
-	static char ntpServer1[16], ntpServer2[16];
+	static char ntpServer1[18], ntpServer2[18], ntpServer3[18];
 	debug_outln_info(F("Setting time using SNTP"));
-	time_t now = time(nullptr);
-	debug_outln_info(ctime(&now));
 #if defined(ESP8266)
 	settimeofday_cb(time_is_set);
 #endif
-	WiFi.gatewayIP().toString().toCharArray(ntpServer1, sizeof(ntpServer1));
-	String(String(INTL_LANG) + ".pool.ntp.org").toCharArray(ntpServer2, sizeof(ntpServer2));
-	configTime(0, 0, ntpServer1, ntpServer2);
-	for (int retryCount = 0; retryCount < 20; ++retryCount) {
+	strcpy_P(ntpServer1, NTP_SERVER_1);
+	strcpy_P(ntpServer2, NTP_SERVER_2);
+	strcpy_P(ntpServer3, NTP_SERVER_3);
+	configTime(0, 0, ntpServer1, ntpServer2, ntpServer3);
+	for (int retryCount = 0; retryCount < 5 + 3 * 30; ++retryCount) {
 		if (sntp_time_is_set) {
-			now = time(nullptr);
+			time_t now = time(nullptr);
 			debug_outln_info(ctime(&now));
 			return true;
 		}
 		delay(500);
 		debug_out(".", DEBUG_MIN_INFO);
 	}
+	time_t now = time(nullptr);
+	debug_outln_info(ctime(&now));
 	return false;
 }
 
