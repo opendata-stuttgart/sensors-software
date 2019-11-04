@@ -63,7 +63,7 @@ static const char URL_SENSEMAP[] PROGMEM = "/boxes/{v}/data?luftdaten=1";
 
 static const char HOST_FSAPP[] PROGMEM = "h2801469.stratoserver.net";
 static const char URL_FSAPP[] PROGMEM = "/data.php";
-#define PORT_FSAPP 80
+#define PORT_FSAPP 443
 
 static const char HOST_AIRCMS[] PROGMEM = "doiot.ru";
 static const char URL_AIRCMS[] PROGMEM = "/php/sensors.php?h=";
@@ -75,6 +75,10 @@ static const char FW_DOWNLOAD_HOST[] PROGMEM = "firmware.sensor.community";
 #define FW_DOWNLOAD_PORT 443
 
 static const char FW_2ND_LOADER_URL[] PROGMEM = OTA_BASENAME "/loader-002.bin";
+
+static const char NTP_SERVER_1[] PROGMEM = "0.pool.ntp.org";
+static const char NTP_SERVER_2[] PROGMEM = "1.pool.ntp.org";
+static const char NTP_SERVER_3[] PROGMEM = "2.pool.ntp.org";
 
 // define own API
 static const char HOST_CUSTOM[] PROGMEM = "192.168.234.1";

@@ -90,7 +90,7 @@
  *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2019-126-B3"
+#define SOFTWARE_VERSION_STR "NRZ-2019-126-B4"
 const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -533,6 +533,7 @@ double last_value_GPS_alt = -1000.0;
 String last_value_GPS_date;
 String last_value_GPS_time;
 String last_data_string;
+int last_signal_strength;
 
 String esp_chipid;
 
@@ -1099,6 +1100,7 @@ static void createLoggerConfigs() {
 	loggerConfigs[LoggerSensemap].destport = PORT_SENSEMAP;
 	loggerConfigs[LoggerSensemap].session = new BearSSL::Session;
 	loggerConfigs[LoggerFSapp].destport = PORT_FSAPP;
+	loggerConfigs[LoggerFSapp].session = new BearSSL::Session;
 	loggerConfigs[Loggeraircms].destport = PORT_AIRCMS;
 	loggerConfigs[LoggerInflux].destport = cfg::port_influx;
 	if (cfg::send2influx && cfg::ssl_influx) {
@@ -1853,7 +1855,7 @@ static void webserver_values() {
 		const String unit_TS = "µm";
 		const String unit_LA = "dB(A)";
 
-		const int signal_quality = calcWiFiSignalQuality(WiFi.RSSI());
+		const int signal_quality = calcWiFiSignalQuality(last_signal_strength);
 		debug_outln_info(F("ws: values ..."));
 		if (first_cycle) {
 			page_content += F("<b style='color:red'>");
@@ -2320,7 +2322,22 @@ static void connectWifi() {
 			debug_outln_info(emptyString);
 		}
 	}
-	debug_outln_info(F("WiFi connected\nIP address: "), WiFi.localIP().toString());
+	debug_outln_info(F("WiFi connected, IP is: "), WiFi.localIP().toString());
+	last_signal_strength = WiFi.RSSI();
+}
+
+static void configureCACertTrustAnchor(WiFiClientSecure* client) {
+	constexpr time_t fw_built_year = (__DATE__[ 7] - '0') * 1000 + \
+							  (__DATE__[ 8] - '0') *  100 + \
+							  (__DATE__[ 9] - '0') *   10 + \
+							  (__DATE__[10] - '0');
+	if (time(nullptr) < (fw_built_year - 1970) * 365 * 24 * 3600) {
+		debug_outln_info(F("Time incorrect; Disabling CA verification."));
+		client->setInsecure();
+	}
+	else {
+		client->setTrustAnchors(&x509_dst_root_ca);
+	}
 }
 
 static WiFiClient* getNewLoggerWiFiClient(const LoggerEntry logger) {
@@ -2337,7 +2354,7 @@ static WiFiClient* getNewLoggerWiFiClient(const LoggerEntry logger) {
 			static_cast<WiFiClientSecure*>(_client)->setInsecure();
 			break;
 		default:
-			static_cast<WiFiClientSecure*>(_client)->setTrustAnchors(&x509_dst_root_ca);
+			configureCACertTrustAnchor(static_cast<WiFiClientSecure*>(_client));
 		}
 	} else {
 		_client = new WiFiClient;
@@ -3428,7 +3445,7 @@ static void twoStageOTAUpdate() {
 
 	client.setBufferSizes(1024, TCP_MSS > 1024 ? 2048 : 1024);
 	client.setSession(&clientSession);
-	client.setTrustAnchors(&x509_dst_root_ca);
+	configureCACertTrustAnchor(&client);
 
 	String fetch_md5_name = fetch_name + F(".md5");
 
@@ -3690,7 +3707,7 @@ static void display_values() {
 			display_header = F("Wifi info");
 			display_lines[0] = "IP: "; display_lines[0] += WiFi.localIP().toString();
 			display_lines[1] = "SSID: "; display_lines[1] += WiFi.SSID();
-			display_lines[2] = std::move(tmpl(F("Signal: {v} %"), String(calcWiFiSignalQuality(WiFi.RSSI()))));
+			display_lines[2] = std::move(tmpl(F("Signal: {v} %"), String(calcWiFiSignalQuality(last_signal_strength))));
 			break;
 		case 7:
 			display_header = F("Device Info");
@@ -4051,25 +4068,26 @@ static void time_is_set (void) {
 static bool acquireNetworkTime() {
 	// server name ptrs must be persisted after the call to configTime because internally
 	// the pointers are stored see implementation of lwip sntp_setservername()
-	static char ntpServer1[16], ntpServer2[16];
+	static char ntpServer1[18], ntpServer2[18], ntpServer3[18];
 	debug_outln_info(F("Setting time using SNTP"));
-	time_t now = time(nullptr);
-	debug_outln_info(ctime(&now));
 #if defined(ESP8266)
 	settimeofday_cb(time_is_set);
 #endif
-	WiFi.gatewayIP().toString().toCharArray(ntpServer1, sizeof(ntpServer1));
-	String(String(INTL_LANG) + ".pool.ntp.org").toCharArray(ntpServer2, sizeof(ntpServer2));
-	configTime(0, 0, ntpServer1, ntpServer2);
-	for (int retryCount = 0; retryCount < 20; ++retryCount) {
+	strcpy_P(ntpServer1, NTP_SERVER_1);
+	strcpy_P(ntpServer2, NTP_SERVER_2);
+	strcpy_P(ntpServer3, NTP_SERVER_3);
+	configTime(0, 0, ntpServer1, ntpServer2, ntpServer3);
+	for (int retryCount = 0; retryCount < 5 + 3 * 30; ++retryCount) {
 		if (sntp_time_is_set) {
-			now = time(nullptr);
+			time_t now = time(nullptr);
 			debug_outln_info(ctime(&now));
 			return true;
 		}
 		delay(500);
 		debug_out(".", DEBUG_MIN_INFO);
 	}
+	time_t now = time(nullptr);
+	debug_outln_info(ctime(&now));
 	return false;
 }
 
@@ -4322,13 +4340,10 @@ void loop(void) {
 
 	if (send_now) {
 		debug_outln_info(F("Creating data string:"));
-		String signal_strength(WiFi.RSSI());
+		last_signal_strength = WiFi.RSSI();
 		RESERVE_STRING(data, LARGE_STR);
 		data = FPSTR(data_first_part);
 		RESERVE_STRING(result, MED_STR);
-
-		debug_outln_info(F("WLAN signal strength (dBm): "), signal_strength);
-		debug_outln_info(FPSTR(DBG_TXT_SEP));
 
 		if (cfg::ppd_read) {
 			data += result_PPD;
@@ -4413,7 +4428,7 @@ void loop(void) {
 		add_Value2Json(data, F("samples"), String(sample_count));
 		add_Value2Json(data, F("min_micro"), String(min_micro));
 		add_Value2Json(data, F("max_micro"), String(max_micro));
-		add_Value2Json(data, F("signal"), signal_strength);
+		add_Value2Json(data, F("signal"), String(last_signal_strength));
 
 		if ((unsigned)(data.lastIndexOf(',') + 1) == data.length()) {
 			data.remove(data.length() - 1);
