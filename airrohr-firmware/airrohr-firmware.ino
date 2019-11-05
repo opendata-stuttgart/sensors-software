@@ -1766,11 +1766,14 @@ static void webserver_config() {
 }
 
 static void sensor_restart() {
+		WiFi.forceSleepBegin();
 		delay(100);
 		SPIFFS.end();
 		debug_outln_info(F("Restart."));
 		delay(500);
 		ESP.restart();
+		// should not be reached
+		while(1) { yield(); }
 }
 
 /*****************************************************************
@@ -3462,6 +3465,11 @@ static void twoStageOTAUpdate() {
 
 	debug_outln_info(F("Update md5: "), newFwmd5);
 	debug_outln_info(F("Sketch md5: "), ESP.getSketchMD5());
+
+	// We're entering update phase, kill off everything else
+	WiFiUDP::stopAll();
+	WiFiClient::stopAllExcept(&client);
+	delay(100);
 
 	String firmware_name(F("/firmware.bin"));
 	String firmware_md5(F("/firmware.bin.md5"));
