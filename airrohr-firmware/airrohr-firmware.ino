@@ -1486,7 +1486,7 @@ static void webserver_config_send_body_get(String& page_content) {
 
 		// Paginate page after ~ 1500 Bytes
 		server.sendContent(page_content);
-		page_content = form_checkbox(Config_send2dusti, F("API Luftdaten.info"), false);
+		page_content = form_checkbox(Config_send2dusti, F("API Sensor.Community"), false);
 		page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
 		page_content += form_checkbox(Config_ssl_dusti, FPSTR(WEB_HTTPS), false);
 		page_content += FPSTR(WEB_BRACE_BR);
@@ -1666,7 +1666,7 @@ static void webserver_config_send_body_post(String& page_content) {
 		}
 	}
 
-	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("Luftdaten.info"), send2dusti);
+	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("Sensor.Community"), send2dusti);
 	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("Madavi"), send2madavi);
 	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_DHT22), dht_read);
 	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_HTU21D), htu21d_read);
@@ -2424,7 +2424,7 @@ static unsigned long sendData(const LoggerEntry logger, const String& data, cons
 }
 
 /*****************************************************************
- * send single sensor data to luftdaten.info api                 *
+ * send single sensor data to sensor.community api                *
  *****************************************************************/
 static unsigned long sendSensorCommunity(const String& data, const int pin, const __FlashStringHelper* sensorname, const char* replace_str) {
 	unsigned long sum_send_time = 0;
@@ -2433,7 +2433,7 @@ static unsigned long sendSensorCommunity(const String& data, const int pin, cons
 		RESERVE_STRING(data_sensorcommunity, LARGE_STR);
 		data_sensorcommunity = FPSTR(data_first_part);
 
-		debug_outln_info(F("## Sending to Luftdaten.info - "), sensorname);
+		debug_outln_info(F("## Sending to sensor.community - "), sensorname);
 		data_sensorcommunity += data;
 		data_sensorcommunity.remove(data_sensorcommunity.length() - 1);
 		data_sensorcommunity.replace(replace_str, emptyString);
@@ -4030,7 +4030,7 @@ static void powerOnTestSensors() {
 static void logEnabledAPIs() {
 	debug_outln_info(F("Send to :"));
 	if (cfg::send2dusti) {
-		debug_outln_info(F("luftdaten.info"));
+		debug_outln_info(F("sensor.community"));
 	}
 
 	if (cfg::send2madavi) {
