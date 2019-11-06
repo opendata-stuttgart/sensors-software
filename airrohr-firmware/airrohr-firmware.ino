@@ -90,7 +90,7 @@
  *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2019-126-B4"
+#define SOFTWARE_VERSION_STR "NRZ-2019-126-B5"
 const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -2299,9 +2299,15 @@ static void waitForWifiToConnect(int maxRetries) {
  * WiFi auto connecting script                                   *
  *****************************************************************/
 static void connectWifi() {
+	WiFi.persistent(false);
+	WiFi.mode(WIFI_OFF);
+	delay(100);
 #if defined(ESP8266)
+	// Enforce Rx/Tx calibration
+	system_phy_set_powerup_option(1);
 	WiFi.setOutputPower(20.5f);
 	WiFi.setPhyMode(WIFI_PHY_MODE_11N);
+	delay(100);
 #endif
 	WiFi.mode(WIFI_STA);
 	WiFi.begin(cfg::wlanssid, cfg::wlanpwd); // Start WiFI

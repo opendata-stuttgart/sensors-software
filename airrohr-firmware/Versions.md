@@ -2,6 +2,7 @@ NRZ-2019-126-B5
 * Rename Luftdaten.info to Sensors.Community everywhere
 * Report the submitted wifi signal quality level in the web UI
 * Keep WiFi information persistent over restarts
+* Perform WiFi Tx power calibration on boot
 
 NRZ-2019-126-B4
 * Try to configure system time from 3 different NTP sources
