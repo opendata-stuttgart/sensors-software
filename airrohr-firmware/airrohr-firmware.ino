@@ -2299,8 +2299,6 @@ static void waitForWifiToConnect(int maxRetries) {
  * WiFi auto connecting script                                   *
  *****************************************************************/
 static void connectWifi() {
-	debug_outln(String(WiFi.status()), DEBUG_MIN_INFO);
-	WiFi.disconnect();
 #if defined(ESP8266)
 	WiFi.setOutputPower(20.5f);
 	WiFi.setPhyMode(WIFI_PHY_MODE_11N);
