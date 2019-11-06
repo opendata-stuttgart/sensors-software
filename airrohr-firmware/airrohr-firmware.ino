@@ -1329,11 +1329,12 @@ static void add_table_row_from_value(String& page_content, const __FlashStringHe
 }
 
 static int32_t calcWiFiSignalQuality(int32_t rssi) {
+	// Treat 0 or positive values as 0%
+	if (rssi >= 0 || rssi < -100) {
+		rssi = -100;
+	}
 	if (rssi > -50) {
 		rssi = -50;
-	}
-	if (rssi < -100) {
-		rssi = -100;
 	}
 	return (rssi + 100) * 2;
 }
