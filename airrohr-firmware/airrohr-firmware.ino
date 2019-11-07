@@ -90,7 +90,7 @@
  *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2019-126-B4"
+#define SOFTWARE_VERSION_STR "NRZ-2019-126-B5"
 const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -1329,11 +1329,12 @@ static void add_table_row_from_value(String& page_content, const __FlashStringHe
 }
 
 static int32_t calcWiFiSignalQuality(int32_t rssi) {
+	// Treat 0 or positive values as 0%
+	if (rssi >= 0 || rssi < -100) {
+		rssi = -100;
+	}
 	if (rssi > -50) {
 		rssi = -50;
-	}
-	if (rssi < -100) {
-		rssi = -100;
 	}
 	return (rssi + 100) * 2;
 }
@@ -1485,7 +1486,7 @@ static void webserver_config_send_body_get(String& page_content) {
 
 		// Paginate page after ~ 1500 Bytes
 		server.sendContent(page_content);
-		page_content = form_checkbox(Config_send2dusti, F("API Luftdaten.info"), false);
+		page_content = form_checkbox(Config_send2dusti, F("API Sensor.Community"), false);
 		page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
 		page_content += form_checkbox(Config_ssl_dusti, FPSTR(WEB_HTTPS), false);
 		page_content += FPSTR(WEB_BRACE_BR);
@@ -1665,7 +1666,7 @@ static void webserver_config_send_body_post(String& page_content) {
 		}
 	}
 
-	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("Luftdaten.info"), send2dusti);
+	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("Sensor.Community"), send2dusti);
 	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("Madavi"), send2madavi);
 	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_DHT22), dht_read);
 	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_HTU21D), htu21d_read);
@@ -1955,7 +1956,7 @@ static void webserver_values() {
 
 		server.sendContent(page_content);
 		page_content = FPSTR(EMPTY_ROW);
-		add_table_row_from_value(page_content, F("WiFi"), FPSTR(INTL_SIGNAL_STRENGTH), String(WiFi.RSSI()), "dBm");
+		add_table_row_from_value(page_content, F("WiFi"), FPSTR(INTL_SIGNAL_STRENGTH), String(last_signal_strength), "dBm");
 		add_table_row_from_value(page_content, F("WiFi"), FPSTR(INTL_SIGNAL_QUALITY), String(signal_quality), "%");
 		page_content += FPSTR(EMPTY_ROW);
 		page_content += F("<tr><td colspan='2'>" INTL_NUMBER_OF_MEASUREMENTS "</td><td class='r'>");
@@ -2298,11 +2299,15 @@ static void waitForWifiToConnect(int maxRetries) {
  * WiFi auto connecting script                                   *
  *****************************************************************/
 static void connectWifi() {
-	debug_outln(String(WiFi.status()), DEBUG_MIN_INFO);
-	WiFi.disconnect();
+	WiFi.persistent(false);
+	WiFi.mode(WIFI_OFF);
+	delay(100);
 #if defined(ESP8266)
+	// Enforce Rx/Tx calibration
+	system_phy_set_powerup_option(1);
 	WiFi.setOutputPower(20.5f);
 	WiFi.setPhyMode(WIFI_PHY_MODE_11N);
+	delay(100);
 #endif
 	WiFi.mode(WIFI_STA);
 	WiFi.begin(cfg::wlanssid, cfg::wlanpwd); // Start WiFI
@@ -2423,7 +2428,7 @@ static unsigned long sendData(const LoggerEntry logger, const String& data, cons
 }
 
 /*****************************************************************
- * send single sensor data to luftdaten.info api                 *
+ * send single sensor data to sensor.community api                *
  *****************************************************************/
 static unsigned long sendSensorCommunity(const String& data, const int pin, const __FlashStringHelper* sensorname, const char* replace_str) {
 	unsigned long sum_send_time = 0;
@@ -2432,7 +2437,7 @@ static unsigned long sendSensorCommunity(const String& data, const int pin, cons
 		RESERVE_STRING(data_sensorcommunity, LARGE_STR);
 		data_sensorcommunity = FPSTR(data_first_part);
 
-		debug_outln_info(F("## Sending to Luftdaten.info - "), sensorname);
+		debug_outln_info(F("## Sending to sensor.community - "), sensorname);
 		data_sensorcommunity += data;
 		data_sensorcommunity.remove(data_sensorcommunity.length() - 1);
 		data_sensorcommunity.replace(replace_str, emptyString);
@@ -4029,7 +4034,7 @@ static void powerOnTestSensors() {
 static void logEnabledAPIs() {
 	debug_outln_info(F("Send to :"));
 	if (cfg::send2dusti) {
-		debug_outln_info(F("luftdaten.info"));
+		debug_outln_info(F("sensor.community"));
 	}
 
 	if (cfg::send2madavi) {
