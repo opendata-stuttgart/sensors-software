@@ -2359,6 +2359,7 @@ static WiFiClient* getNewLoggerWiFiClient(const LoggerEntry logger) {
 		case Loggeraircms:
 		case LoggerInflux:
 		case LoggerCustom:
+		case LoggerFSapp:
 			static_cast<WiFiClientSecure*>(_client)->setInsecure();
 			break;
 		default:
@@ -4035,6 +4036,10 @@ static void logEnabledAPIs() {
 	debug_outln_info(F("Send to :"));
 	if (cfg::send2dusti) {
 		debug_outln_info(F("sensor.community"));
+	}
+
+	if (cfg::send2fsapp) {
+		debug_outln_info(F("Feinstaub-App"));
 	}
 
 	if (cfg::send2madavi) {
