@@ -1180,7 +1180,7 @@ static void end_html_page(String& page_content) {
 static void add_form_input(String& page_content, const ConfigShapeId cfgid, const __FlashStringHelper* info, const int length) {
 	RESERVE_STRING(s, MED_STR);
 	s = F(	"<tr>"
-					"<td>{i} </td>"
+					"<td title='[&lt;= {l}]'>{i}:&nbsp;</td>"
 					"<td style='width:90%;'>"
 					"<input type='text' name='{n}' id='{n}' placeholder='{i}' value='{v}' maxlength='{l}'/>"
 					"</td>"
@@ -1208,7 +1208,7 @@ static void add_form_input(String& page_content, const ConfigShapeId cfgid, cons
 
 static void add_form_password(String& page_content, const ConfigShapeId cfgid, const String& info) {
 	String s = F(	"<tr>"
-					"<td>{i} </td>"
+					"<td title='[&lt;= {l}]'>{i}:&nbsp;</td>"
 					"<td style='width:90%;'>"
 					"<input type='password' name='{n}' id='{n}' placeholder='{i}' value='{v}' maxlength='{l}'/>"
 					"</td>"
@@ -1267,7 +1267,7 @@ static String form_submit(const String& value) {
 static String form_select_lang() {
 	String s_select = F(" selected='selected'");
 	String s = F(	"<tr>"
-					"<td>" INTL_LANGUAGE "</td>"
+					"<td>" INTL_LANGUAGE ":&nbsp;</td>"
 					"<td>"
 					"<select name='current_lang'>"
 					"<option value='DE'>Deutsch (DE)</option>"
@@ -1576,7 +1576,7 @@ static void webserver_config_send_body_get(String& page_content) {
 		add_form_checkbox(page_content, Config_send2aircms, tmpl(FPSTR(INTL_SEND_TO), F("aircms.online")));
 		add_form_checkbox(page_content, Config_send2sensemap, tmpl(FPSTR(INTL_SEND_TO), F("OpenSenseMap")));
 		page_content += FPSTR(TABLE_TAG_OPEN);
-		add_form_input(page_content, Config_senseboxid, F("senseBox&nbsp;ID: "), LEN_SENSEBOXID-1);
+		add_form_input(page_content, Config_senseboxid, F("senseBox&nbsp;ID"), LEN_SENSEBOXID-1);
 
 		server.sendContent(page_content);
 		page_content = FPSTR(TABLE_TAG_CLOSE_BR);
