@@ -2011,6 +2011,8 @@ static void webserver_removeConfig() {
 		page_content += FPSTR(WEB_REMOVE_CONFIG_CONTENT);
 
 	} else {
+		// Silently remove the desaster backup
+		SPIFFS.remove(F("/config.json.old"));
 		if (SPIFFS.exists("/config.json")) {	//file exists
 			debug_outln_info(F("removing config.json..."));
 			if (SPIFFS.remove("/config.json")) {
