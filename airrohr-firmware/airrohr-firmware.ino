@@ -4202,6 +4202,8 @@ void setup(void) {
 	esp_chipid += String((uint32_t)chipid_num, HEX);
 #endif
 	cfg::initNonTrivials(esp_chipid.c_str());
+	WiFi.persistent(false);
+
 	debug_outln_info(F("Airrohr: "), SOFTWARE_VERSION);
 
 	init_config();
