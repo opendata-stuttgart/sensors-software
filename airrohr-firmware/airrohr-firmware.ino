@@ -2776,9 +2776,8 @@ static void fetchSensorSDS(String& s) {
 				pm25_serial = 0;
 				checksum_is = 0;
 			}
-			yield();
 		}
-
+		yield();
 	}
 	if (send_now) {
 		last_value_SDS_P1 = -1;
@@ -2938,10 +2937,10 @@ static void fetchSensorPMS(String& s) {
 					checksum_is = 0;
 				}
 			}
-			yield();
 		}
-
+		yield();
 	}
+
 	if (send_now) {
 		last_value_PMS_P0 = -1;
 		last_value_PMS_P1 = -1;
@@ -3077,8 +3076,8 @@ static void fetchSensorHPM(String& s) {
 					checksum_is = 0;
 				}
 			}
-			yield();
 		}
+		yield();
 
 	}
 	if (send_now) {
