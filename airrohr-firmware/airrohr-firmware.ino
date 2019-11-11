@@ -90,7 +90,7 @@
  *
  ************************************************************************/
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2019-126-B5"
+#define SOFTWARE_VERSION_STR "NRZ-2019-126-B6"
 const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -537,6 +537,7 @@ String last_data_string;
 int last_signal_strength;
 
 String esp_chipid;
+String last_value_SDS_version;
 
 unsigned long last_page_load = millis();
 
@@ -817,9 +818,12 @@ static String SDS_version_date() {
 	char buffer;
 	int value;
 	int len = 0;
-	String s, version_date, device_id;
+	String version_date, device_id;
+	String s(last_value_SDS_version);
 	int checksum_is = 0;
 	bool checksum_ok = false;
+
+	if (!cfg::sds_read || s.length()) return s;
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(DBG_TXT_SDS011_VERSION_DATE));
 
@@ -895,7 +899,7 @@ static String SDS_version_date() {
 		if (len > 2) { checksum_is += value; }
 		len++;
 		if (len == 10 && checksum_ok) {
-			s = version_date + '(' + device_id + ')';
+			s = last_value_SDS_version = version_date + '(' + device_id + ')';
 			debug_outln_info(F("SDS version date : "), version_date);
 			debug_outln_info(F("SDS device ID: "), device_id);
 			len = 0;
@@ -3354,8 +3358,7 @@ static bool fwDownloadStream(WiFiClientSecure& client, const String& url, Stream
 	int bytes_written = -1;
 
 	http.setTimeout(20 * 1000);
-	const String SDS_version = cfg::sds_read ? SDS_version_date() : "";
-	http.setUserAgent(SOFTWARE_VERSION + ' ' + esp_chipid + ' ' + SDS_version + ' ' +
+	http.setUserAgent(SOFTWARE_VERSION + ' ' + esp_chipid + ' ' + SDS_version_date() + ' ' +
 				 String(cfg::current_lang) + ' ' + String(CURRENT_LANG) + ' ' +
 				 String(cfg::use_beta ? "BETA" : ""));
 
