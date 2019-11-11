@@ -827,10 +827,10 @@ static String SDS_version_date() {
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(DBG_TXT_SDS011_VERSION_DATE));
 
+	delay(100);
 	is_SDS_running = SDS_cmd(PmSensorCmd::Start);
 
 	delay(100);
-
 	is_SDS_running = SDS_cmd(PmSensorCmd::VersionDate);
 
 	delay(500);
@@ -3958,6 +3958,8 @@ static void powerOnTestSensors() {
 		delay(100);
 		debug_outln_info(F("Stopping SDS011..."));
 		is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
+		delay(100);
+		serialSDS.flush();
 	}
 
 	if (cfg::pms_read) {
@@ -3968,6 +3970,8 @@ static void powerOnTestSensors() {
 		delay(100);
 		debug_outln_info(F("Stopping PMS..."));
 		is_PMS_running = PMS_cmd(PmSensorCmd::Stop);
+		delay(100);
+		serialSDS.flush();
 	}
 
 	if (cfg::hpm_read) {
@@ -3978,6 +3982,8 @@ static void powerOnTestSensors() {
 		delay(100);
 		debug_outln_info(F("Stopping HPM..."));
 		is_HPM_running = HPM_cmd(PmSensorCmd::Stop);
+		delay(100);
+		serialSDS.flush();
 	}
 
 	if (cfg::sps30_read) {
