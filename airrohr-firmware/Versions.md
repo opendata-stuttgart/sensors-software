@@ -1,5 +1,6 @@
 NRZ-2019-126-B6
 * Read SDS011 version once on startup
+* Put software serial edge detection work within loop
 
 NRZ-2019-126-B5
 * Rename Luftdaten.info to Sensors.Community everywhere

@@ -4486,6 +4486,7 @@ void loop(void) {
 	yield();
 #if defined(ESP8266)
 	MDNS.update();
+	serialSDS.perform_work();
 #endif
 
 	if (sample_count % 500 == 0) {
