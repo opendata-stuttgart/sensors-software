@@ -2415,8 +2415,8 @@ static unsigned long sendData(const LoggerEntry logger, const String& data, cons
 		if (pin) {
 			http.addHeader(F("X-PIN"), String(pin));
 		}
+
 		int result = http.POST(data);
-		http.end();
 
 		if (result >= HTTP_CODE_OK && result <= HTTP_CODE_ALREADY_REPORTED) {
 			debug_outln_info(F("Succeeded - "), s_Host);
@@ -2424,6 +2424,7 @@ static unsigned long sendData(const LoggerEntry logger, const String& data, cons
 			debug_outln_info(F("Request failed with error: "), String(result));
 			debug_outln_info(F("Details:"), http.getString());
 		}
+		http.end();
 	} else {
 		debug_outln_info(F("Failed connecting to "), s_Host);
 	}
