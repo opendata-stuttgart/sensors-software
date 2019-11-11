@@ -127,6 +127,7 @@ const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 #if defined(ESP32)
 #define FORMAT_SPIFFS_IF_FAILED true
 #include <FS.h>
+#include <HTTPClient.h>
 #include <SPIFFS.h>
 #include <WiFi.h>
 #include <WiFiClient.h>
@@ -380,7 +381,7 @@ SoftwareSerial* serialGPS;
 #endif
 #if defined(ESP32)
 #define serialSDS (Serial1)
-#define serialGPS (Serial2)
+#define serialGPS (&(Serial2))
 #endif
 
 /*****************************************************************
@@ -1761,8 +1762,10 @@ static void webserver_config() {
 }
 
 static void sensor_restart() {
+#if defined(ESP8266)
 		WiFi.forceSleepBegin();
 		delay(100);
+#endif
 		SPIFFS.end();
 		debug_outln_info(F("Restart."));
 		delay(500);
@@ -3397,6 +3400,7 @@ static bool fwDownloadStreamFile(WiFiClientSecure& client, const String& url, co
 	return false;
 }
 
+#if defined(ESP8266)
 static bool launchUpdateLoader(const String& md5) {
 
 	File loaderFile = SPIFFS.open(F("/loader.bin"), "r");
@@ -3424,6 +3428,7 @@ static bool launchUpdateLoader(const String& md5) {
 	sensor_restart();
 	return true;
 }
+#endif
 
 static void twoStageOTAUpdate() {
 
@@ -4210,8 +4215,8 @@ void setup(void) {
 
 
 	if (cfg::gps_read) {
-		serialGPS = new SoftwareSerial(GPS_SERIAL_RX, GPS_SERIAL_TX, false, 128);
 #if defined(ESP8266)
+		serialGPS = new SoftwareSerial(GPS_SERIAL_RX, GPS_SERIAL_TX, false, 128);
 		serialGPS->begin(9600);
 #endif
 #if defined(ESP32)
