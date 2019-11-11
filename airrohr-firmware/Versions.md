@@ -3,6 +3,7 @@ NRZ-2019-126-B6
 * Put software serial edge detection work within loop
 * Discard power-on self-test dust sensor measurements
 * Do not store WiFi station credentials in SDK protected flash
+* Switch to ArduinoJson 6.13
 
 NRZ-2019-126-B5
 * Rename Luftdaten.info to Sensors.Community everywhere
