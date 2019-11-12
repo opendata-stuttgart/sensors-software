@@ -1888,6 +1888,7 @@ static void webserver_values() {
 			page_content += FPSTR(EMPTY_ROW);
 			add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), FPSTR(WEB_PM25), check_display_value(last_value_SDS_P2, -1, 1, 0), unit_PM);
 			add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), FPSTR(WEB_PM10), check_display_value(last_value_SDS_P1, -1, 1, 0), unit_PM);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), F("Version"), SDS_version_date(), emptyString);
 		}
 		if (cfg::pms_read) {
 			page_content += FPSTR(EMPTY_ROW);
