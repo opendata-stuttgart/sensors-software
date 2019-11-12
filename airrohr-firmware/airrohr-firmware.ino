@@ -337,7 +337,6 @@ enum class PmSensorCmd {
 };
 
 LoggerConfig loggerConfigs[LoggerCount];
-BearSSL::X509List x509_dst_root_ca(dst_root_ca_x3);
 
 long int sample_count = 0;
 bool htu21d_init_failed = false;
@@ -1092,30 +1091,35 @@ static void writeConfig() {
  * Prepare information for data Loggers                          *
  *****************************************************************/
 static void createLoggerConfigs() {
+#if defined(ESP8266)
+	auto new_session = []() { return new BearSSL::Session; };
+#else
+	auto new_session = []() { return nullptr; };
+#endif
 	if (cfg::send2dusti) {
 		loggerConfigs[LoggerSensorCommunity].destport = 80;
 		if (cfg::ssl_dusti) {
 			loggerConfigs[LoggerSensorCommunity].destport = 443;
-			loggerConfigs[LoggerSensorCommunity].session = new BearSSL::Session;
+			loggerConfigs[LoggerSensorCommunity].session = new_session();
 		}
 	}
 	loggerConfigs[LoggerMadavi].destport = PORT_MADAVI;
 	if (cfg::send2madavi && cfg::ssl_madavi) {
 		loggerConfigs[LoggerMadavi].destport = 443;
-		loggerConfigs[LoggerMadavi].session = new BearSSL::Session;
+		loggerConfigs[LoggerMadavi].session = new_session();
 	}
 	loggerConfigs[LoggerSensemap].destport = PORT_SENSEMAP;
-	loggerConfigs[LoggerSensemap].session = new BearSSL::Session;
+	loggerConfigs[LoggerSensemap].session = new_session();
 	loggerConfigs[LoggerFSapp].destport = PORT_FSAPP;
-	loggerConfigs[LoggerFSapp].session = new BearSSL::Session;
+	loggerConfigs[LoggerFSapp].session = new_session();
 	loggerConfigs[Loggeraircms].destport = PORT_AIRCMS;
 	loggerConfigs[LoggerInflux].destport = cfg::port_influx;
 	if (cfg::send2influx && cfg::ssl_influx) {
-		loggerConfigs[LoggerInflux].session = new BearSSL::Session;
+		loggerConfigs[LoggerInflux].session = new_session();
 	}
 	loggerConfigs[LoggerCustom].destport = cfg::port_custom;
 	if (cfg::send2custom && (cfg::ssl_custom || (cfg::port_custom == 443))) {
-		loggerConfigs[LoggerCustom].session = new BearSSL::Session;
+		loggerConfigs[LoggerCustom].session = new_session();
 	}
 }
 
@@ -2339,6 +2343,9 @@ static void connectWifi() {
 	last_signal_strength = WiFi.RSSI();
 }
 
+#if defined(ESP8266)
+BearSSL::X509List x509_dst_root_ca(dst_root_ca_x3);
+
 static void configureCACertTrustAnchor(WiFiClientSecure* client) {
 	constexpr time_t fw_built_year = (__DATE__[ 7] - '0') * 1000 + \
 							  (__DATE__[ 8] - '0') *  100 + \
@@ -2352,12 +2359,14 @@ static void configureCACertTrustAnchor(WiFiClientSecure* client) {
 		client->setTrustAnchors(&x509_dst_root_ca);
 	}
 }
+#endif
 
 static WiFiClient* getNewLoggerWiFiClient(const LoggerEntry logger) {
 
 	WiFiClient* _client;
 	if (loggerConfigs[logger].session) {
 		_client = new WiFiClientSecure;
+#if defined(ESP8266)
 		static_cast<WiFiClientSecure*>(_client)->setSession(loggerConfigs[logger].session);
 		static_cast<WiFiClientSecure*>(_client)->setBufferSizes(1024, TCP_MSS > 1024 ? 2048 : 1024);
 		switch (logger) {
@@ -2370,6 +2379,7 @@ static WiFiClient* getNewLoggerWiFiClient(const LoggerEntry logger) {
 		default:
 			configureCACertTrustAnchor(static_cast<WiFiClientSecure*>(_client));
 		}
+#endif
 	} else {
 		_client = new WiFiClient;
 	}
