@@ -337,7 +337,6 @@ enum class PmSensorCmd {
 };
 
 LoggerConfig loggerConfigs[LoggerCount];
-BearSSL::X509List x509_dst_root_ca(dst_root_ca_x3);
 
 long int sample_count = 0;
 bool htu21d_init_failed = false;
@@ -717,7 +716,8 @@ static bool SDS_cmd(PmSensorCmd cmd) {
 		0xAA, 0xB4, 0x06, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x05, 0xAB
 	};
 	static constexpr uint8_t continuous_mode_cmd[] PROGMEM = {
-		0xAA, 0xB4, 0x08, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x07, 0xAB
+		0xAA, 0xB4, 0x08, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x07, 0xAB,
+		0xAA, 0xB4, 0x02, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x01, 0xAB
 	};
 	static constexpr uint8_t version_cmd[] PROGMEM = {
 		0xAA, 0xB4, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x05, 0xAB
@@ -739,6 +739,7 @@ static bool SDS_cmd(PmSensorCmd cmd) {
 		memcpy_P(buf, version_cmd, cmd_len);
 		break;
 	}
+	delay(100);
 	serialSDS.write(buf, cmd_len);
 	return cmd != PmSensorCmd::Stop;
 }
@@ -827,10 +828,10 @@ static String SDS_version_date() {
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(DBG_TXT_SDS011_VERSION_DATE));
 
+	delay(100);
 	is_SDS_running = SDS_cmd(PmSensorCmd::Start);
 
 	delay(100);
-
 	is_SDS_running = SDS_cmd(PmSensorCmd::VersionDate);
 
 	delay(500);
@@ -1090,30 +1091,35 @@ static void writeConfig() {
  * Prepare information for data Loggers                          *
  *****************************************************************/
 static void createLoggerConfigs() {
+#if defined(ESP8266)
+	auto new_session = []() { return new BearSSL::Session; };
+#else
+	auto new_session = []() { return nullptr; };
+#endif
 	if (cfg::send2dusti) {
 		loggerConfigs[LoggerSensorCommunity].destport = 80;
 		if (cfg::ssl_dusti) {
 			loggerConfigs[LoggerSensorCommunity].destport = 443;
-			loggerConfigs[LoggerSensorCommunity].session = new BearSSL::Session;
+			loggerConfigs[LoggerSensorCommunity].session = new_session();
 		}
 	}
 	loggerConfigs[LoggerMadavi].destport = PORT_MADAVI;
 	if (cfg::send2madavi && cfg::ssl_madavi) {
 		loggerConfigs[LoggerMadavi].destport = 443;
-		loggerConfigs[LoggerMadavi].session = new BearSSL::Session;
+		loggerConfigs[LoggerMadavi].session = new_session();
 	}
 	loggerConfigs[LoggerSensemap].destport = PORT_SENSEMAP;
-	loggerConfigs[LoggerSensemap].session = new BearSSL::Session;
+	loggerConfigs[LoggerSensemap].session = new_session();
 	loggerConfigs[LoggerFSapp].destport = PORT_FSAPP;
-	loggerConfigs[LoggerFSapp].session = new BearSSL::Session;
+	loggerConfigs[LoggerFSapp].session = new_session();
 	loggerConfigs[Loggeraircms].destport = PORT_AIRCMS;
 	loggerConfigs[LoggerInflux].destport = cfg::port_influx;
 	if (cfg::send2influx && cfg::ssl_influx) {
-		loggerConfigs[LoggerInflux].session = new BearSSL::Session;
+		loggerConfigs[LoggerInflux].session = new_session();
 	}
 	loggerConfigs[LoggerCustom].destport = cfg::port_custom;
 	if (cfg::send2custom && (cfg::ssl_custom || (cfg::port_custom == 443))) {
-		loggerConfigs[LoggerCustom].session = new BearSSL::Session;
+		loggerConfigs[LoggerCustom].session = new_session();
 	}
 }
 
@@ -1882,6 +1888,7 @@ static void webserver_values() {
 			page_content += FPSTR(EMPTY_ROW);
 			add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), FPSTR(WEB_PM25), check_display_value(last_value_SDS_P2, -1, 1, 0), unit_PM);
 			add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), FPSTR(WEB_PM10), check_display_value(last_value_SDS_P1, -1, 1, 0), unit_PM);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), F("Version"), SDS_version_date(), emptyString);
 		}
 		if (cfg::pms_read) {
 			page_content += FPSTR(EMPTY_ROW);
@@ -2337,6 +2344,9 @@ static void connectWifi() {
 	last_signal_strength = WiFi.RSSI();
 }
 
+#if defined(ESP8266)
+BearSSL::X509List x509_dst_root_ca(dst_root_ca_x3);
+
 static void configureCACertTrustAnchor(WiFiClientSecure* client) {
 	constexpr time_t fw_built_year = (__DATE__[ 7] - '0') * 1000 + \
 							  (__DATE__[ 8] - '0') *  100 + \
@@ -2350,12 +2360,14 @@ static void configureCACertTrustAnchor(WiFiClientSecure* client) {
 		client->setTrustAnchors(&x509_dst_root_ca);
 	}
 }
+#endif
 
 static WiFiClient* getNewLoggerWiFiClient(const LoggerEntry logger) {
 
 	WiFiClient* _client;
 	if (loggerConfigs[logger].session) {
 		_client = new WiFiClientSecure;
+#if defined(ESP8266)
 		static_cast<WiFiClientSecure*>(_client)->setSession(loggerConfigs[logger].session);
 		static_cast<WiFiClientSecure*>(_client)->setBufferSizes(1024, TCP_MSS > 1024 ? 2048 : 1024);
 		switch (logger) {
@@ -2368,6 +2380,7 @@ static WiFiClient* getNewLoggerWiFiClient(const LoggerEntry logger) {
 		default:
 			configureCACertTrustAnchor(static_cast<WiFiClientSecure*>(_client));
 		}
+#endif
 	} else {
 		_client = new WiFiClient;
 	}
@@ -2415,8 +2428,8 @@ static unsigned long sendData(const LoggerEntry logger, const String& data, cons
 		if (pin) {
 			http.addHeader(F("X-PIN"), String(pin));
 		}
+
 		int result = http.POST(data);
-		http.end();
 
 		if (result >= HTTP_CODE_OK && result <= HTTP_CODE_ALREADY_REPORTED) {
 			debug_outln_info(F("Succeeded - "), s_Host);
@@ -2424,6 +2437,7 @@ static unsigned long sendData(const LoggerEntry logger, const String& data, cons
 			debug_outln_info(F("Request failed with error: "), String(result));
 			debug_outln_info(F("Details:"), http.getString());
 		}
+		http.end();
 	} else {
 		debug_outln_info(F("Failed connecting to "), s_Host);
 	}
@@ -2775,9 +2789,8 @@ static void fetchSensorSDS(String& s) {
 				pm25_serial = 0;
 				checksum_is = 0;
 			}
-			yield();
 		}
-
+		yield();
 	}
 	if (send_now) {
 		last_value_SDS_P1 = -1;
@@ -2937,10 +2950,10 @@ static void fetchSensorPMS(String& s) {
 					checksum_is = 0;
 				}
 			}
-			yield();
 		}
-
+		yield();
 	}
+
 	if (send_now) {
 		last_value_PMS_P0 = -1;
 		last_value_PMS_P1 = -1;
@@ -3076,8 +3089,8 @@ static void fetchSensorHPM(String& s) {
 					checksum_is = 0;
 				}
 			}
-			yield();
 		}
+		yield();
 
 	}
 	if (send_now) {
@@ -3958,6 +3971,8 @@ static void powerOnTestSensors() {
 		delay(100);
 		debug_outln_info(F("Stopping SDS011..."));
 		is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
+		delay(100);
+		serialSDS.flush();
 	}
 
 	if (cfg::pms_read) {
@@ -3968,6 +3983,8 @@ static void powerOnTestSensors() {
 		delay(100);
 		debug_outln_info(F("Stopping PMS..."));
 		is_PMS_running = PMS_cmd(PmSensorCmd::Stop);
+		delay(100);
+		serialSDS.flush();
 	}
 
 	if (cfg::hpm_read) {
@@ -3978,6 +3995,8 @@ static void powerOnTestSensors() {
 		delay(100);
 		debug_outln_info(F("Stopping HPM..."));
 		is_HPM_running = HPM_cmd(PmSensorCmd::Stop);
+		delay(100);
+		serialSDS.flush();
 	}
 
 	if (cfg::sps30_read) {
@@ -4201,6 +4220,8 @@ void setup(void) {
 	esp_chipid += String((uint32_t)chipid_num, HEX);
 #endif
 	cfg::initNonTrivials(esp_chipid.c_str());
+	WiFi.persistent(false);
+
 	debug_outln_info(F("Airrohr: "), SOFTWARE_VERSION);
 
 	init_config();

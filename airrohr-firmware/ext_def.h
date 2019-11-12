@@ -45,7 +45,11 @@ enum LoggerEntry {
 struct LoggerConfig {
     uint16_t destport;
     uint16_t _unused;
+#if defined(ESP8266)
     BearSSL::Session* session;
+#else
+    void* session;
+#endif
 };
 
 // IMPORTANT: NO MORE CHANGES TO VARIABLE NAMES NEEDED FOR EXTERNAL APIS
