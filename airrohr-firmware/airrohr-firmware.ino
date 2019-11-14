@@ -1773,7 +1773,8 @@ static void webserver_config() {
 
 static void sensor_restart() {
 #if defined(ESP8266)
-		WiFi.forceSleepBegin();
+		WiFi.disconnect();
+		WiFi.mode(WIFI_OFF);
 		delay(100);
 #endif
 		SPIFFS.end();
