@@ -1,6 +1,5 @@
 NRZ-2019-126-B6
 * Read SDS011 version once on startup
-* Put software serial edge detection work within loop
 * Discard power-on self-test dust sensor measurements
 * Do not store WiFi station credentials in SDK protected flash
 * Switch to ArduinoJson 6.13
