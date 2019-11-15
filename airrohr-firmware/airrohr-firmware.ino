@@ -2316,7 +2316,9 @@ static void connectWifi() {
 #if defined(ESP8266)
 	// Enforce Rx/Tx calibration
 	system_phy_set_powerup_option(1);
-	WiFi.setOutputPower(20.5f);
+    // 20dBM == 100mW == max tx power allowed in europe
+	WiFi.setOutputPower(20.0f);
+	WiFi.setSleepMode(WIFI_NONE_SLEEP);
 	WiFi.setPhyMode(WIFI_PHY_MODE_11N);
 	delay(100);
 #endif
