@@ -4107,13 +4107,17 @@ static void logEnabledDisplays() {
 
 static void time_is_set (void) {
 	sntp_time_is_set = true;
+
+	time_t now = time(nullptr);
+	debug_outln_info(F("SNTP sync finished: "), ctime(&now));
+	twoStageOTAUpdate();
+	last_update_attempt = millis();
 }
 
-static bool acquireNetworkTime() {
+static void setupNetworkTime() {
 	// server name ptrs must be persisted after the call to configTime because internally
 	// the pointers are stored see implementation of lwip sntp_setservername()
 	static char ntpServer1[18], ntpServer2[18], ntpServer3[18];
-	debug_outln_info(F("Setting time using SNTP"));
 #if defined(ESP8266)
 	settimeofday_cb(time_is_set);
 #endif
@@ -4121,18 +4125,6 @@ static bool acquireNetworkTime() {
 	strcpy_P(ntpServer2, NTP_SERVER_2);
 	strcpy_P(ntpServer3, NTP_SERVER_3);
 	configTime(0, 0, ntpServer1, ntpServer2, ntpServer3);
-	for (int retryCount = 0; retryCount < 5 + 3 * 30; ++retryCount) {
-		if (sntp_time_is_set) {
-			time_t now = time(nullptr);
-			debug_outln_info(ctime(&now));
-			return true;
-		}
-		delay(500);
-		debug_out(".", DEBUG_MIN_INFO);
-	}
-	time_t now = time(nullptr);
-	debug_outln_info(ctime(&now));
-	return false;
 }
 
 static unsigned long sendDataToOptionalApis(const String &data) {
@@ -4231,15 +4223,11 @@ void setup(void) {
 	init_display();
 	init_lcd();
 	display_debug(F("Connecting to"), String(cfg::wlanssid));
+	setupNetworkTime();
 	connectWifi();
-	bool got_ntp = acquireNetworkTime();
-	debug_out(F("\nNTP time "), DEBUG_MIN_INFO);
-	debug_outln_info(got_ntp ? FPSTR(DBG_TXT_FOUND) : FPSTR(DBG_TXT_NOT_FOUND));
-	twoStageOTAUpdate();
 	setup_webserver();
 	createLoggerConfigs();
 	debug_outln_info(F("\nChipId: "), esp_chipid);
-
 
 	if (cfg::gps_read) {
 #if defined(ESP8266)
@@ -4281,6 +4269,15 @@ void loop(void) {
 	String result_GPS, result_DNMS;
 
 	unsigned sum_send_time = 0;
+	static unsigned sntpWaitTimes = 0;
+
+	// Wait with operations until NTP is set
+	if (!sntp_time_is_set) {
+		if (sntpWaitTimes++ < 5 + 3 * 30) {
+			delay(50);
+			return;
+		}
+	}
 
 	act_micro = micros();
 	act_milli = millis();
