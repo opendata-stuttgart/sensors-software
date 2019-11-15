@@ -84,6 +84,10 @@
  *                                                                      *
  ************************************************************************
  *
+ * latest mit lib 2.6.1
+ * DATA:    [====      ]  40.7% (used 33316 bytes from 81920 bytes)
+ * PROGRAM: [=====     ]  49.3% (used 514788 bytes from 1044464 bytes)
+
  * latest mit lib 2.5.2
  * DATA:    [====      ]  39.4% (used 32304 bytes from 81920 bytes)
  * PROGRAM: [=====     ]  48.3% (used 504812 bytes from 1044464 bytes)

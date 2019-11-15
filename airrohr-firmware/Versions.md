@@ -4,6 +4,7 @@ NRZ-2019-126-B6
 * Do not store WiFi station credentials in SDK protected flash
 * Switch to ArduinoJson 6.13
 * show SDS011 manufacturing date in values HTML page
+* Update to Arduino Core 2.6.1, including many fixes for SSL, WiFi and SoftwareSerial
 
 NRZ-2019-126-B5
 * Rename Luftdaten.info to Sensors.Community everywhere
