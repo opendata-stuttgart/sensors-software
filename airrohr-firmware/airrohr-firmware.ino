@@ -4110,12 +4110,14 @@ static void logEnabledDisplays() {
 }
 
 static void time_is_set (void) {
-	sntp_time_is_set = true;
+	if (!sntp_time_is_set) {
+		sntp_time_is_set = true;
 
-	time_t now = time(nullptr);
-	debug_outln_info(F("SNTP sync finished: "), ctime(&now));
-	twoStageOTAUpdate();
-	last_update_attempt = millis();
+		time_t now = time(nullptr);
+		debug_outln_info(F("SNTP sync finished: "), ctime(&now));
+		twoStageOTAUpdate();
+		last_update_attempt = millis();
+	}
 }
 
 static void setupNetworkTime() {
@@ -4273,15 +4275,11 @@ void loop(void) {
 	String result_GPS, result_DNMS;
 
 	unsigned sum_send_time = 0;
-	static unsigned sntpWaitTimes = 0;
 
-	// Wait with operations until NTP is set
-	if (!sntp_time_is_set) {
-		if (sntpWaitTimes++ < 5 + 3 * 30) {
-			delay(50);
-			return;
-		}
-	}
+	// Wait at least 30s for each NTP server to sync
+	if (!sntp_time_is_set &&
+			msSince(time_point_device_start_ms) < 1000 * 2 * 30 + 5000)
+		return;
 
 	act_micro = micros();
 	act_milli = millis();
