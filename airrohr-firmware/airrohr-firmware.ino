@@ -379,7 +379,7 @@ LiquidCrystal_I2C lcd_2004_27(0x27, 20, 4);
  * SDS011 declarations                                           *
  *****************************************************************/
 #if defined(ESP8266)
-SoftwareSerial serialSDS(PM_SERIAL_RX, PM_SERIAL_TX, false, 128);
+SoftwareSerial serialSDS;
 SoftwareSerial* serialGPS;
 #endif
 #if defined(ESP32)
@@ -4196,7 +4196,7 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 void setup(void) {
 	Serial.begin(9600);					// Output to Serial at 9600 baud
 #if defined(ESP8266)
-	serialSDS.begin(9600);
+	serialSDS.begin(9600, SWSERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX, false, 128);
 #endif
 #if defined(ESP32)
 	serialSDS.begin(9600, SERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX);
@@ -4237,8 +4237,8 @@ void setup(void) {
 
 	if (cfg::gps_read) {
 #if defined(ESP8266)
-		serialGPS = new SoftwareSerial(GPS_SERIAL_RX, GPS_SERIAL_TX, false, 128);
-		serialGPS->begin(9600);
+		serialGPS = new SoftwareSerial;
+		serialGPS->begin(9600, SWSERIAL_8N1, GPS_SERIAL_RX, GPS_SERIAL_TX, false, 128);
 #endif
 #if defined(ESP32)
 		serialGPS->begin(9600, SERIAL_8N1, GPS_SERIAL_RX, GPS_SERIAL_TX);

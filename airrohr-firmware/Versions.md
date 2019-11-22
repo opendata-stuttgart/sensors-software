@@ -5,6 +5,7 @@ NRZ-2019-126-B6
 * Switch to ArduinoJson 6.13
 * show SDS011 manufacturing date in values HTML page
 * Update to Arduino Core 2.6.1, including many fixes for SSL, WiFi and SoftwareSerial
+* Update SHT3.x to 1.1.5
 
 NRZ-2019-126-B5
 * Rename Luftdaten.info to Sensors.Community everywhere
