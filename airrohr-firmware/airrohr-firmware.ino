@@ -712,39 +712,43 @@ static void add_Value2Json(String& res, const __FlashStringHelper* type, const _
 /*****************************************************************
  * send SDS011 command (start, stop, continuous mode, version    *
  *****************************************************************/
-static bool SDS_cmd(PmSensorCmd cmd) {
-	static constexpr uint8_t start_cmd[] PROGMEM = {
-		0xAA, 0xB4, 0x06, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x06, 0xAB
-	};
-	static constexpr uint8_t stop_cmd[] PROGMEM = {
-		0xAA, 0xB4, 0x06, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x05, 0xAB
-	};
-	static constexpr uint8_t continuous_mode_cmd[] PROGMEM = {
-		0xAA, 0xB4, 0x08, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x07, 0xAB,
-		0xAA, 0xB4, 0x02, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x01, 0xAB
-	};
-	static constexpr uint8_t version_cmd[] PROGMEM = {
-		0xAA, 0xB4, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x05, 0xAB
-	};
-	constexpr uint8_t cmd_len = array_num_elements(start_cmd);
+
+static void SDS_rawcmd(const uint8_t cmd_head1, const uint8_t cmd_head2, const uint8_t cmd_head3) {
+	constexpr uint8_t cmd_len = 19;
 
 	uint8_t buf[cmd_len];
+	buf[0] = 0xAA;
+	buf[1] = 0xB4;
+	buf[2] = cmd_head1;
+	buf[3] = cmd_head2;
+	buf[4] = cmd_head3;
+	for (unsigned i = 5; i < 15; ++i)
+		buf[i] = 0x00;
+	buf[15] = 0xFF;
+	buf[16] = 0xFF;
+	buf[17] = cmd_head1 + cmd_head2 + cmd_head3 - 2;
+	buf[18] = 0xAB;
+	serialSDS.write(buf, cmd_len);
+}
+
+static bool SDS_cmd(PmSensorCmd cmd) {
 	switch (cmd) {
 	case PmSensorCmd::Start:
-		memcpy_P(buf, start_cmd, cmd_len);
+		SDS_rawcmd(0x06, 0x01, 0x01);
 		break;
 	case PmSensorCmd::Stop:
-		memcpy_P(buf, stop_cmd, cmd_len);
+		SDS_rawcmd(0x06, 0x01, 0x00);
 		break;
 	case PmSensorCmd::ContinuousMode:
-		memcpy_P(buf, continuous_mode_cmd, cmd_len);
+		// TODO: Check mode first before (re-)setting it
+		SDS_rawcmd(0x08, 0x01, 0x00);
+		SDS_rawcmd(0x02, 0x01, 0x00);
 		break;
 	case PmSensorCmd::VersionDate:
-		memcpy_P(buf, version_cmd, cmd_len);
+		SDS_rawcmd(0x07, 0x00, 0x00);
 		break;
 	}
-	delay(100);
-	serialSDS.write(buf, cmd_len);
+
 	return cmd != PmSensorCmd::Stop;
 }
 
@@ -1782,6 +1786,7 @@ static void sensor_restart() {
 		delay(100);
 #endif
 		SPIFFS.end();
+		serialSDS.end();
 		debug_outln_info(F("Restart."));
 		delay(500);
 		ESP.restart();
