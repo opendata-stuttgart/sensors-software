@@ -1,3 +1,6 @@
+NRZ-2019-126-B7
+* Updated italian translations - thanks stewecar
+
 NRZ-2019-126-B6
 * Read SDS011 version once on startup
 * Discard power-on self-test dust sensor measurements
