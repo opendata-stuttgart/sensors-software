@@ -31,12 +31,12 @@ const char INTL_BMX280[] PROGMEM = "BMP280/BME280 ({t}, {h}, {p})";
 const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
 const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
-const char INTL_DNMS_CORRECTION[] PROGMEM ="";
+const char INTL_DNMS_CORRECTION[] PROGMEM ="correzione in dB(A)";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Autorizzazione";
-const char INTL_FS_WIFI[] PROGMEM = "";
-const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "";
-const char INTL_FS_WIFI_NAME[] PROGMEM = "";
+const char INTL_FS_WIFI[] PROGMEM = "Sensore WiFi";
+const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "Sensore WiFi in modalità configurazione";
+const char INTL_FS_WIFI_NAME[] PROGMEM = "Nome";
 const char INTL_MORE_SETTINGS[] PROGMEM ="Altre configurazioni";
 const char INTL_AUTO_UPDATE[] PROGMEM = "Aggiornamento automatico firmware";
 const char INTL_USE_BETA[] PROGMEM = "";
@@ -87,7 +87,7 @@ const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Imposta debug su";
 #define INTL_CONFIG_CAN_NOT_BE_DELETED "Impossibile cancellare la configurazione"
 #define INTL_CONFIG_NOT_FOUND "Configurazione non trovata"
 const char INTL_TIME_TO_FIRST_MEASUREMENT[] PROGMEM = "Altri {v} secondi per la prima misurazione.";
-const char INTL_TIME_SINCE_LAST_MEASUREMENT[] PROGMEM = "";
+const char INTL_TIME_SINCE_LAST_MEASUREMENT[] PROGMEM = "secondi dall'ultima misurazione";
 const char INTL_PARTICLES_PER_LITER[] PROGMEM = "Particelle / litro";
 const char INTL_PARTICULATE_MATTER[] PROGMEM = "polveri sottili";
 const char INTL_TEMPERATURE[] PROGMEM = "Temperatura";
@@ -103,8 +103,8 @@ const char INTL_DATE[] PROGMEM = "";
 const char INTL_TIME[] PROGMEM = "";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Potenza del segnale";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Qualità del segnale";
-#define INTL_NUMBER_OF_MEASUREMENTS ""
-#define INTL_TIME_SENDING_MS ""
+#define INTL_NUMBER_OF_MEASUREMENTS "Numero di misurazioni"
+#define INTL_TIME_SENDING_MS "Tempo impiegato per l'invio"
 #define INTL_SENSOR "Sensore"
 #define INTL_PARAMETER "Parametro"
 #define INTL_VALUE "Valore"
