@@ -96,11 +96,11 @@ const char INTL_PRESSURE[] PROGMEM = "Pressione dell'aria";
 const char INTL_LEQ_A[] PROGMEM = "LAeq";
 const char INTL_LA_MIN[] PROGMEM = "LA min";
 const char INTL_LA_MAX[] PROGMEM = "LA max";
-const char INTL_LATITUDE[] PROGMEM = "";
-const char INTL_LONGITUDE[] PROGMEM = "";
-const char INTL_ALTITUDE[] PROGMEM = "";
-const char INTL_DATE[] PROGMEM = "";
-const char INTL_TIME[] PROGMEM = "";
+const char INTL_LATITUDE[] PROGMEM = "Latitudine";
+const char INTL_LONGITUDE[] PROGMEM = "Longitudine";
+const char INTL_ALTITUDE[] PROGMEM = "Altitudine";
+const char INTL_DATE[] PROGMEM = "Data";
+const char INTL_TIME[] PROGMEM = "Ora";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Potenza del segnale";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Qualità del segnale";
 #define INTL_NUMBER_OF_MEASUREMENTS ""
