@@ -102,8 +102,8 @@ const char INTL_DATE[] PROGMEM = "Datum";
 const char INTL_TIME[] PROGMEM = "Vreme";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "jačina signala";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "kvalitet signala";
-#define INTL_NUMBER_OF_MEASUREMENTS "Broj merenja:"
-#define INTL_TIME_SENDING_MS "Vreme utrošeno za slanje:"
+#define INTL_NUMBER_OF_MEASUREMENTS "Broj merenja"
+#define INTL_TIME_SENDING_MS "Vreme utrošeno za slanje"
 #define INTL_SENSOR "Senzor"
 #define INTL_PARAMETER "Parametar"
 #define INTL_VALUE "Vrednost"
