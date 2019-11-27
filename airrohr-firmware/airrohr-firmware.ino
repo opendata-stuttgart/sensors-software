@@ -112,7 +112,7 @@ const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 #include <ESP8266mDNS.h>
 #include <SoftwareSerial.h>
 #include <Hash.h>
-#include <time.h>
+#include <ctime>
 #include <coredecls.h>
 #endif
 
@@ -198,7 +198,7 @@ constexpr unsigned MED_STR = 256-1;
 constexpr unsigned LARGE_STR = 512-1;
 constexpr unsigned XLARGE_STR = 1024-1;
 
-#define RESERVE_STRING(name, size) String name((const char*)nullptr); name.reserve(size);
+#define RESERVE_STRING(name, size) String name((const char*)nullptr); name.reserve(size)
 
 const unsigned long SAMPLETIME_MS = 30000;									// time between two measurements of the PPD42NS
 const unsigned long SAMPLETIME_SDS_MS = 1000;								// time between two measurements of the SDS011, PMSx003, Honeywell PM sensor
@@ -565,7 +565,7 @@ const char JSON_SENSOR_DATA_VALUES[] PROGMEM = "sensordatavalues";
  * Debug output                                                  *
  *****************************************************************/
 
-#define debug_level_check(level) if (level > cfg::debug) return;
+#define debug_level_check(level) { if (level > cfg::debug) return; }
 
 static void debug_out(const String& text, unsigned int level) {
 	debug_level_check(level); Serial.print(text);
@@ -3971,7 +3971,7 @@ static void logEnabledDisplays() {
 	}
 }
 
-static void time_is_set (void) {
+static void time_is_set () {
 	if (!sntp_time_is_set) {
 		sntp_time_is_set = true;
 
