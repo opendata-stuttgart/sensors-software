@@ -93,27 +93,16 @@
  * PROGRAM: [=====     ]  48.3% (used 504812 bytes from 1044464 bytes)
  *
  ************************************************************************/
+#include <WString.h>
+#include <pgmspace.h>
+
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2019-126-B6"
+#define SOFTWARE_VERSION_STR "NRZ-2019-126-B7"
 const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
  * Includes                                                      *
  *****************************************************************/
-
-// Workaround for FPSTR bug in espressif32 versions < 1.0.3-rc2
-// see https://github.com/espressif/arduino-esp32/issues/1371
-//     https://github.com/bxparks/arduino-esp32/commit/0906aedcf9fe8df3969cd336117c1219b507be14
-// TODO: Workaround can be removed once using a espressif32 version newer than 1.0.3-rc2.
-// Make sure the includes Wstring.h and pgmspace.h are already loaded before the #define is redefined!
-#include <WString.h>
-#include <pgmspace.h>
-#if defined(ESP32)
-#undef FPSTR
-#define FPSTR(pstr_pointer) (reinterpret_cast<const __FlashStringHelper *>(pstr_pointer))
-#undef F
-#define F(string_literal) (FPSTR(PSTR(string_literal)))
-#endif
 
 #if defined(ESP8266)
 #include <FS.h>                     // must be first
@@ -123,9 +112,8 @@ const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 #include <ESP8266mDNS.h>
 #include <SoftwareSerial.h>
 #include <Hash.h>
-#include <time.h>
+#include <ctime>
 #include <coredecls.h>
-#include <assert.h>
 #endif
 
 #if defined(ESP32)
@@ -210,7 +198,7 @@ constexpr unsigned MED_STR = 256-1;
 constexpr unsigned LARGE_STR = 512-1;
 constexpr unsigned XLARGE_STR = 1024-1;
 
-#define RESERVE_STRING(name, size) String name((const char*)nullptr); name.reserve(size);
+#define RESERVE_STRING(name, size) String name((const char*)nullptr); name.reserve(size)
 
 const unsigned long SAMPLETIME_MS = 30000;									// time between two measurements of the PPD42NS
 const unsigned long SAMPLETIME_SDS_MS = 1000;								// time between two measurements of the SDS011, PMSx003, Honeywell PM sensor
@@ -336,8 +324,7 @@ namespace cfg {
 enum class PmSensorCmd {
 	Start,
 	Stop,
-	ContinuousMode,
-	VersionDate
+	ContinuousMode
 };
 
 LoggerConfig loggerConfigs[LoggerCount];
@@ -467,13 +454,13 @@ float last_value_HTU21D_H = -1.0;
 float last_value_SHT3X_T = -128.0;
 float last_value_SHT3X_H = -1.0;
 
-int sds_pm10_sum = 0;
-int sds_pm25_sum = 0;
-int sds_val_count = 0;
-int sds_pm10_max = 0;
-int sds_pm10_min = 20000;
-int sds_pm25_max = 0;
-int sds_pm25_min = 20000;
+uint32_t sds_pm10_sum = 0;
+uint32_t sds_pm25_sum = 0;
+uint32_t sds_val_count = 0;
+uint32_t sds_pm10_max = 0;
+uint32_t sds_pm10_min = 20000;
+uint32_t sds_pm25_max = 0;
+uint32_t sds_pm25_min = 20000;
 
 int pms_pm1_sum = 0;
 int pms_pm10_sum = 0;
@@ -578,7 +565,7 @@ const char JSON_SENSOR_DATA_VALUES[] PROGMEM = "sensordatavalues";
  * Debug output                                                  *
  *****************************************************************/
 
-#define debug_level_check(level) if (level > cfg::debug) return;
+#define debug_level_check(level) { if (level > cfg::debug) return; }
 
 static void debug_out(const String& text, unsigned int level) {
 	debug_level_check(level); Serial.print(text);
@@ -713,6 +700,14 @@ static void add_Value2Json(String& res, const __FlashStringHelper* type, const _
  * send SDS011 command (start, stop, continuous mode, version    *
  *****************************************************************/
 
+static bool SDS_checksum_valid(const uint8_t (&data)[8]) {
+    uint8_t checksum_is = 0;
+    for (unsigned i = 0; i < 6; ++i) {
+        checksum_is += data[i];
+    }
+    return (data[7] == 0xAB && checksum_is == data[6]);
+}
+
 static void SDS_rawcmd(const uint8_t cmd_head1, const uint8_t cmd_head2, const uint8_t cmd_head3) {
 	constexpr uint8_t cmd_len = 19;
 
@@ -722,8 +717,9 @@ static void SDS_rawcmd(const uint8_t cmd_head1, const uint8_t cmd_head2, const u
 	buf[2] = cmd_head1;
 	buf[3] = cmd_head2;
 	buf[4] = cmd_head3;
-	for (unsigned i = 5; i < 15; ++i)
+	for (unsigned i = 5; i < 15; ++i) {
 		buf[i] = 0x00;
+	}
 	buf[15] = 0xFF;
 	buf[16] = 0xFF;
 	buf[17] = cmd_head1 + cmd_head2 + cmd_head3 - 2;
@@ -743,9 +739,6 @@ static bool SDS_cmd(PmSensorCmd cmd) {
 		// TODO: Check mode first before (re-)setting it
 		SDS_rawcmd(0x08, 0x01, 0x00);
 		SDS_rawcmd(0x02, 0x01, 0x00);
-		break;
-	case PmSensorCmd::VersionDate:
-		SDS_rawcmd(0x07, 0x00, 0x00);
 		break;
 	}
 
@@ -778,9 +771,6 @@ static bool PMS_cmd(PmSensorCmd cmd) {
 	case PmSensorCmd::ContinuousMode:
 		memcpy_P(buf, continuous_mode_cmd, cmd_len);
 		break;
-	case PmSensorCmd::VersionDate:
-		assert(false && "not supported by this sensor");
-		break;
 	}
 	serialSDS.write(buf, cmd_len);
 	return cmd != PmSensorCmd::Stop;
@@ -812,9 +802,6 @@ static bool HPM_cmd(PmSensorCmd cmd) {
 	case PmSensorCmd::ContinuousMode:
 		memcpy_P(buf, continuous_mode_cmd, cmd_len);
 		break;
-	case PmSensorCmd::VersionDate:
-		assert(false && "not supported by this sensor");
-		break;
 	}
 	serialSDS.write(buf, cmd_len);
 	return cmd != PmSensorCmd::Stop;
@@ -824,105 +811,32 @@ static bool HPM_cmd(PmSensorCmd cmd) {
  * read SDS011 sensor serial and firmware date                   *
  *****************************************************************/
 static String SDS_version_date() {
-	char buffer;
-	int value;
-	int len = 0;
-	String version_date, device_id;
-	String s(last_value_SDS_version);
-	int checksum_is = 0;
-	bool checksum_ok = false;
 
-	if (!cfg::sds_read || s.length()) return s;
+	if (cfg::sds_read && !last_value_SDS_version.length()) {
+		debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(DBG_TXT_SDS011_VERSION_DATE));
+		is_SDS_running = SDS_cmd(PmSensorCmd::Start);
+		serialSDS.flush();
+		delay(100);
+		// Query Version/Date
+		SDS_rawcmd(0x07, 0x00, 0x00);
+		delay(1250);
 
-	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(DBG_TXT_SDS011_VERSION_DATE));
-
-	delay(100);
-	is_SDS_running = SDS_cmd(PmSensorCmd::Start);
-
-	delay(100);
-	is_SDS_running = SDS_cmd(PmSensorCmd::VersionDate);
-
-	delay(500);
-
-	while (serialSDS.available() > 0) {
-		buffer = serialSDS.read();
-		debug_outln(String(len) + " - " + String(buffer, DEC) + " - " + String(buffer, HEX) + " - " + int(buffer) + " .", DEBUG_MED_INFO);
-//		"aa" = 170, "ab" = 171, "c0" = 192
-		value = int(buffer);
-		switch (len) {
-		case 0:
-			if (value != 170) {
-				len = -1;
-			};
-			break;
-		case 1:
-			if (value != 197) {
-				len = -1;
-			};
-			break;
-		case 2:
-			if (value != 7) {
-				len = -1;
-			};
-			checksum_is = 7;
-			break;
-		case 3:
-			version_date = String(value);
-			break;
-		case 4:
-			version_date += '-';
-			version_date += String(value);
-			break;
-		case 5:
-			version_date += '-';
-			version_date += String(value);
-			break;
-		case 6:
-			if (value < 0x10) {
-				device_id = "0" + String(value, HEX);
-			} else {
-				device_id = String(value, HEX);
-			};
-			break;
-		case 7:
-			if (value < 0x10) {
-				device_id += '0';
-			};
-			device_id += String(value, HEX);
-			break;
-		case 8:
-			debug_outln_verbose(FPSTR(DBG_TXT_CHECKSUM_IS), String(checksum_is % 256));
-			debug_outln_verbose(FPSTR(DBG_TXT_CHECKSUM_SHOULD), String(value));
-			if (value == (checksum_is % 256)) {
-				checksum_ok = true;
-			} else {
-				len = -1;
-			};
-			break;
-		case 9:
-			if (value != 171) {
-				len = -1;
-			};
-			break;
+		const uint8_t resp[2] = { 0xAA, 0xC5 };
+		while (serialSDS.find(resp, sizeof(resp))) {
+			uint8_t data[8];
+			bool read_ok = (sizeof(data) == serialSDS.readBytes(data, sizeof(data)));
+			if (read_ok && data[0] == 0x07 && SDS_checksum_valid(data)) {
+				char tmp[20];
+				snprintf_P(tmp, sizeof(tmp), PSTR("%02d-%02d-%02d(%02x%02x)"),
+					data[1], data[2], data[3], data[4], data[5]);
+				last_value_SDS_version = tmp;
+				break;
+			}
 		}
-		if (len > 2) { checksum_is += value; }
-		len++;
-		if (len == 10 && checksum_ok) {
-			s = last_value_SDS_version = version_date + '(' + device_id + ')';
-			debug_outln_info(F("SDS version date : "), version_date);
-			debug_outln_info(F("SDS device ID: "), device_id);
-			len = 0;
-			checksum_ok = false;
-			version_date = emptyString;
-			device_id = emptyString;
-			checksum_is = 0;
-		}
-		yield();
+		debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(DBG_TXT_SDS011_VERSION_DATE));
 	}
 
-	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(DBG_TXT_SDS011_VERSION_DATE));
-
-	return s;
+	return last_value_SDS_version;
 }
 
 /*****************************************************************
@@ -1791,7 +1705,7 @@ static void sensor_restart() {
 		delay(500);
 		ESP.restart();
 		// should not be reached
-		while(1) { yield(); }
+		while(true) { yield(); }
 }
 
 /*****************************************************************
@@ -2711,15 +2625,9 @@ static void fetchSensorDS18B20(String& s) {
  * read SDS011 sensor values                                     *
  *****************************************************************/
 static void fetchSensorSDS(String& s) {
-	char buffer;
-	int value;
-	int len = 0;
-	int pm10_serial = 0;
-	int pm25_serial = 0;
-	int checksum_is = 0;
-	bool checksum_ok = false;
 
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_SDS011));
+
 	if (msSince(starttime) < (cfg::sending_intervall_ms - (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS))) {
 		if (is_SDS_running) {
 			is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
@@ -2729,54 +2637,17 @@ static void fetchSensorSDS(String& s) {
 			is_SDS_running = SDS_cmd(PmSensorCmd::Start);
 		}
 
-		while (serialSDS.available() > 0) {
-			buffer = serialSDS.read();
-			debug_outln(String(len) + " - " + String(buffer, DEC) + " - " + String(buffer, HEX) + " - " + int(buffer) + " .", DEBUG_MAX_INFO);
-//			"aa" = 170, "ab" = 171, "c0" = 192
-			value = int(buffer);
-			switch (len) {
-			case 0:
-				if (value != 170) {
-					len = -1;
-				};
-				break;
-			case 1:
-				if (value != 192) {
-					len = -1;
-				};
-				break;
-			case 2:
-				pm25_serial = value;
-				checksum_is = value;
-				break;
-			case 3:
-				pm25_serial += (value << 8);
-				break;
-			case 4:
-				pm10_serial = value;
-				break;
-			case 5:
-				pm10_serial += (value << 8);
-				break;
-			case 8:
-				debug_outln_verbose(FPSTR(DBG_TXT_CHECKSUM_IS), String(checksum_is % 256));
-				debug_outln_verbose(FPSTR(DBG_TXT_CHECKSUM_SHOULD), String(value));
-				if (value == (checksum_is % 256)) {
-					checksum_ok = true;
-				} else {
-					len = -1;
-				};
-				break;
-			case 9:
-				if (value != 171) {
-					len = -1;
-				};
-				break;
-			}
-			if (len > 2) { checksum_is += value; }
-			len++;
-			if (len == 10 && checksum_ok && (msSince(starttime) > (cfg::sending_intervall_ms - READINGTIME_SDS_MS))) {
-				if ((! isnan(pm10_serial)) && (! isnan(pm25_serial))) {
+		const uint8_t constexpr header_measurement[2] = { 0xAA, 0xC0 };
+
+		while (serialSDS.available() >= 10 &&
+					serialSDS.find(header_measurement, sizeof(header_measurement))) {
+			uint8_t data[8];
+			bool read_ok = (sizeof(data) == serialSDS.readBytes(data, sizeof(data)));
+			if (read_ok && SDS_checksum_valid(data)) {
+				uint32_t pm25_serial = data[0] | (data[1] << 8);
+				uint32_t pm10_serial = data[2] | (data[3] << 8);
+
+				if (msSince(starttime) > (cfg::sending_intervall_ms - READINGTIME_SDS_MS)) {
 					sds_pm10_sum += pm10_serial;
 					sds_pm25_sum += pm25_serial;
 					if (sds_pm10_min > pm10_serial) {
@@ -2795,14 +2666,8 @@ static void fetchSensorSDS(String& s) {
 					debug_outln_verbose(F("PM2.5 (sec.): "), String(pm25_serial / 10.0f));
 					sds_val_count++;
 				}
-				len = 0;
-				checksum_ok = false;
-				pm10_serial = 0;
-				pm25_serial = 0;
-				checksum_is = 0;
 			}
 		}
-		yield();
 	}
 	if (send_now) {
 		last_value_SDS_P1 = -1;
@@ -3976,15 +3841,11 @@ static void powerOnTestSensors() {
 	}
 
 	if (cfg::sds_read) {
-		debug_outln_info(F("Read SDS..."));
-		SDS_cmd(PmSensorCmd::Start);
-		delay(100);
+		debug_outln_info(F("Read SDS...: "), SDS_version_date());
 		SDS_cmd(PmSensorCmd::ContinuousMode);
 		delay(100);
 		debug_outln_info(F("Stopping SDS011..."));
 		is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
-		delay(100);
-		serialSDS.flush();
 	}
 
 	if (cfg::pms_read) {
@@ -3995,8 +3856,6 @@ static void powerOnTestSensors() {
 		delay(100);
 		debug_outln_info(F("Stopping PMS..."));
 		is_PMS_running = PMS_cmd(PmSensorCmd::Stop);
-		delay(100);
-		serialSDS.flush();
 	}
 
 	if (cfg::hpm_read) {
@@ -4007,8 +3866,6 @@ static void powerOnTestSensors() {
 		delay(100);
 		debug_outln_info(F("Stopping HPM..."));
 		is_HPM_running = HPM_cmd(PmSensorCmd::Stop);
-		delay(100);
-		serialSDS.flush();
 	}
 
 	if (cfg::sps30_read) {
@@ -4114,7 +3971,7 @@ static void logEnabledDisplays() {
 	}
 }
 
-static void time_is_set (void) {
+static void time_is_set () {
 	if (!sntp_time_is_set) {
 		sntp_time_is_set = true;
 
@@ -4201,11 +4058,12 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 void setup(void) {
 	Serial.begin(9600);					// Output to Serial at 9600 baud
 #if defined(ESP8266)
-	serialSDS.begin(9600, SWSERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX, false, 128);
+	serialSDS.begin(9600, SWSERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX);
 #endif
 #if defined(ESP32)
 	serialSDS.begin(9600, SERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX);
 #endif
+	serialSDS.setTimeout(300);
 
 #if defined(WIFI_LoRa_32_V2)
 	// reset the OLED display, e.g. of the heltec_wifi_lora_32 board
@@ -4283,8 +4141,9 @@ void loop(void) {
 
 	// Wait at least 30s for each NTP server to sync
 	if (!sntp_time_is_set &&
-			msSince(time_point_device_start_ms) < 1000 * 2 * 30 + 5000)
+			msSince(time_point_device_start_ms) < 1000 * 2 * 30 + 5000) {
 		return;
+	}
 
 	act_micro = micros();
 	act_milli = millis();
@@ -4514,6 +4373,7 @@ void loop(void) {
 	yield();
 #if defined(ESP8266)
 	MDNS.update();
+	serialSDS.perform_work();
 #endif
 
 	if (sample_count % 500 == 0) {
