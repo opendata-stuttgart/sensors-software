@@ -103,7 +103,7 @@ const char INTL_DATE[] PROGMEM = "Datum";
 const char INTL_TIME[] PROGMEM = "Èas";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Síla signálu";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Kvalita signálu";
-#define INTL_NUMBER_OF_MEASUREMENTS "Poèet mìøení:"
+#define INTL_NUMBER_OF_MEASUREMENTS "Poèet mìøení"
 #define INTL_TIME_SENDING_MS ""
 #define INTL_SENSOR "Modul"
 #define INTL_PARAMETER "Parametr"
