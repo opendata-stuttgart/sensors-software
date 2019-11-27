@@ -24,7 +24,7 @@ def after_build(source, target, env):
     os.mkdir("./builds")
 
   configName = b64decode(ARGUMENTS.get("PIOENV"))
-  sectionName = 'env:' + configName
+  sectionName = 'env:' + configName.decode('utf-8')
   lang = config.get(sectionName, "lang")
   target_name = lang
   shutil.copy(target[0].path, "./builds/latest_"+target_name.lower()+".bin")
