@@ -28,6 +28,7 @@ const char INTL_DHT22[] PROGMEM = "DHT22 ({t}, {h})";
 const char INTL_HTU21D[] PROGMEM = "HTU21D ({t}, {h})";
 const char INTL_BMP180[] PROGMEM = "BMP180 ({t}, {p})";
 const char INTL_BMX280[] PROGMEM = "BMP280/BME280 ({t}, {h}, {p})";
+const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
 const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM ="";
@@ -102,7 +103,7 @@ const char INTL_DATE[] PROGMEM = "Datum";
 const char INTL_TIME[] PROGMEM = "Èas";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Síla signálu";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Kvalita signálu";
-#define INTL_NUMBER_OF_MEASUREMENTS "Poèet mìøení:"
+#define INTL_NUMBER_OF_MEASUREMENTS "Poèet mìøení"
 #define INTL_TIME_SENDING_MS ""
 #define INTL_SENSOR "Modul"
 #define INTL_PARAMETER "Parametr"

@@ -1,3 +1,46 @@
+NRZ-2019-126-B7
+* Updated italian translations - thanks stewecar
+* Fix instabilities in SDS011 measurement decoding
+
+NRZ-2019-126-B6
+* Read SDS011 version once on startup
+* Discard power-on self-test dust sensor measurements
+* Do not store WiFi station credentials in SDK protected flash
+* Switch to ArduinoJson 6.13
+* show SDS011 manufacturing date in values HTML page
+* Update to Arduino Core 2.6.1, including many fixes for SSL, WiFi and SoftwareSerial
+* Update SHT3.x to 1.1.5
+
+NRZ-2019-126-B5
+* Rename Luftdaten.info to Sensors.Community everywhere
+* Report the submitted wifi signal quality level in the web UI
+* Keep WiFi information persistent over restarts
+* Perform WiFi Tx power calibration on boot
+
+NRZ-2019-126-B4
+* Try to configure system time from 3 different NTP sources
+* When system time is invalid, disable TLS verification
+* Use TLS for Feinstaub-App reporting
+
+NRZ-2019-126-B3
+* OTA updater validates loader checksums prior update
+* Maintain config setting backups and fall back if current version is corrupt
+* Code cleanups
+* Fix regression in Humidity Reading of BME280
+* Fix regression in logging to Feinstaub App
+
+NRZ-2019-126-B2
+* Switch to Arduino Core 2.5.2
+* Switch OTA updater to use TLS with server certificate verification
+* SSL server certificate verification for Madavi, Sensor Community and OpenSensemap
+* Update ESPSoftwareSerial to 5.0.4
+* Add support for Sensirion SHT3x Temperature/Humidity sensors
+* Code size optimisations
+* Fix pressure precision of BMP/BME280
+
+NRZ-2019-126-B1
+* next beta version
+
 NRZ-2019-125-B1
 * Revert unintentional default senseboxid change
 

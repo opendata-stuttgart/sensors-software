@@ -75,9 +75,6 @@ public:
     STANDBY_MS_1000 = 0b101
   };
 
-  // constructors
-  BMX280();
-
   bool begin(uint8_t addr);
   bool init();
 
@@ -99,14 +96,12 @@ protected:
   void readCoefficients(void);
   bool isReadingCalibration(void);
 
-  void write8(byte reg, byte value);
-  uint8_t read8(byte reg);
-  uint16_t read16(byte reg);
-  uint32_t read24(byte reg);
-  uint16_t read16_LE(byte reg); // little endian
-  int16_t readS16_LE(byte reg); // little endian
+  void write8(uint8_t reg, uint8_t value);
+  uint8_t read8(uint8_t reg);
+  uint32_t read24(uint8_t reg);
+  uint16_t read16_LE(uint8_t reg); // little endian
+  int16_t readS16_LE(uint8_t reg); // little endian
 
-  uint8_t _i2caddr;  //!< I2C addr for the TwoWire interface
   int32_t _sensorID; //!< ID of the BME Sensor
   int32_t t_fine; //!< temperature with high resolution, stored as an attribute
                   //!< as this is used for temperature compensation reading
@@ -126,13 +121,14 @@ protected:
   int16_t dig_P8;  ///< pressure compensation value
   int16_t dig_P9;  ///< pressure compensation value
 
-  uint8_t dig_H1; ///< humidity compensation value
   int16_t dig_H2; ///< humidity compensation value
-  uint8_t dig_H3; ///< humidity compensation value
   int16_t dig_H4; ///< humidity compensation value
   int16_t dig_H5; ///< humidity compensation value
+  uint8_t dig_H1; ///< humidity compensation value
+  uint8_t dig_H3; ///< humidity compensation value
   int8_t dig_H6;  ///< humidity compensation value
 
+  uint8_t _i2caddr;  //!< I2C addr for the TwoWire interface
   /**************************************************************************/
   /*!
       @brief  config register
@@ -148,16 +144,17 @@ protected:
     // 101 = 1000 ms
     // 110 = 10 ms
     // 111 = 20 ms
-    unsigned int t_sb : 3; ///< inactive duration (standby time) in normal mode
+    uint8_t t_sb : 3; ///< inactive duration (standby time) in normal mode
 
     // unused - don't set
-    unsigned int none : 1;     ///< unused - don't set
-    unsigned int spi3w_en : 1; ///< unused - don't set
+    uint8_t none : 1;     ///< unused - don't set
+    uint8_t spi3w_en : 1; ///< unused - don't set
+
+    uint8_t _unused : 3;
 
     /// @return combined config register
-    unsigned int get() { return (t_sb << 5); }
+    uint8_t get() { return (t_sb << 5); }
   };
-  config _configReg; //!< config register object
 
   /**************************************************************************/
   /*!
@@ -172,7 +169,7 @@ protected:
     // 011 = x4
     // 100 = x8
     // 101 and above = x16
-    unsigned int osrs_t : 3; ///< temperature oversampling
+    uint8_t osrs_t : 3; ///< temperature oversampling
 
     // pressure oversampling
     // 000 = skipped
@@ -181,16 +178,16 @@ protected:
     // 011 = x4
     // 100 = x8
     // 101 and above = x16
-    unsigned int osrs_p : 3; ///< pressure oversampling
+    uint8_t osrs_p : 3; ///< pressure oversampling
 
     // device mode
     // 00       = sleep
     // 01 or 10 = forced
     // 11       = normal
-    unsigned int mode : 2; ///< device mode
+    uint8_t mode : 2; ///< device mode
 
     /// @return combined ctrl register
-    unsigned int get() { return (osrs_t << 5) | (osrs_p << 2) | mode; }
+    uint8_t get() { return (osrs_t << 5) | (osrs_p << 2) | mode; }
   };
   ctrl_meas _measReg; //!< measurement register object
 
@@ -201,7 +198,7 @@ protected:
   /**************************************************************************/
   struct ctrl_hum {
     /// unused - don't set
-    unsigned int none : 5;
+    uint8_t none : 5;
 
     // pressure oversampling
     // 000 = skipped
@@ -210,12 +207,11 @@ protected:
     // 011 = x4
     // 100 = x8
     // 101 and above = x16
-    unsigned int osrs_h : 3; ///< pressure oversampling
+    uint8_t osrs_h : 3; ///< pressure oversampling
 
     /// @return combined ctrl hum register
-    unsigned int get() { return (osrs_h); }
+    uint8_t get() { return (osrs_h); }
   };
-  ctrl_hum _humReg; //!< hum register object
 };
 
 #endif

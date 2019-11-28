@@ -37,11 +37,11 @@ written by Adafruit Industries
 
 class DHT {
   public:
-   DHT(uint8_t pin, uint8_t type, uint8_t count=6);
+   DHT(uint8_t pin, uint8_t type);
    void begin(void);
    float readTemperature(bool force=false);
    float readHumidity(bool force=false);
-   boolean read(bool force=false);
+   bool read(bool force=false);
 
  private:
   uint8_t data[5];
