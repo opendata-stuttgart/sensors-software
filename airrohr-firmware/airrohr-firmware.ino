@@ -529,6 +529,8 @@ int last_signal_strength;
 String esp_chipid;
 String last_value_SDS_version;
 
+unsigned long SDS_error_count;
+
 unsigned long last_page_load = millis();
 
 bool wificonfig_loop = false;
@@ -1798,7 +1800,10 @@ static void webserver_values() {
 			page_content += FPSTR(EMPTY_ROW);
 			add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), FPSTR(WEB_PM25), check_display_value(last_value_SDS_P2, -1, 1, 0), unit_PM);
 			add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), FPSTR(WEB_PM10), check_display_value(last_value_SDS_P1, -1, 1, 0), unit_PM);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), F("Version"), SDS_version_date(), emptyString);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), F(INTL_FIRMWARE), last_value_SDS_version, emptyString);
+			if (SDS_error_count > 0) {
+				add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), F(INTL_ERROR), String(SDS_error_count), emptyString);
+			}
 		}
 		if (cfg::pms_read) {
 			page_content += FPSTR(EMPTY_ROW);
@@ -2669,6 +2674,9 @@ static void fetchSensorSDS(String& s) {
 			add_Value2Json(s, F("SDS_P1"), F("PM10:  "), last_value_SDS_P1);
 			add_Value2Json(s, F("SDS_P2"), F("PM2.5: "), last_value_SDS_P2);
 			debug_outln_info(FPSTR(DBG_TXT_SEP));
+		}
+		else {
+			SDS_error_count++;
 		}
 		sds_pm10_sum = 0;
 		sds_pm25_sum = 0;
