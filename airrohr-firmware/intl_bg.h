@@ -31,7 +31,7 @@ const char INTL_BMX280[] PROGMEM = "BMP280/BME280 ({t}, {h}, {p})";
 const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
-const char INTL_DNMS_CORRECTION[] PROGMEM ="";
+const char INTL_DNMS_CORRECTION[] PROGMEM ="корекция в dB (A)";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Оторизация";
 const char INTL_FS_WIFI[] PROGMEM = "WiFi сензор";
@@ -42,12 +42,12 @@ const char INTL_AUTO_UPDATE[] PROGMEM = "Автоматична актуализ
 const char INTL_USE_BETA[] PROGMEM = "Зареждане на бета актуализация";
 const char INTL_DISPLAY[] PROGMEM = "OLED SSD1306";
 const char INTL_SH1106[] PROGMEM = "OLED SH1106";
-const char INTL_FLIP_DISPLAY[] PROGMEM = "";
+const char INTL_FLIP_DISPLAY[] PROGMEM = "OLED дисплей обръщане";
 const char INTL_LCD1602_27[] PROGMEM = "LCD 1602 (I2C: 0x27)";
 const char INTL_LCD1602_3F[] PROGMEM = "LCD 1602 (I2C: 0x3F)";
 const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
-const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "";
-const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "";
+const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Показване на WiFi информация";
+const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Информация за устройството на дисплея";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;Level";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Интервал на измерване";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Продължителност като рутер";
@@ -60,7 +60,7 @@ const char INTL_USER[] PROGMEM = "Потребител";
 const char INTL_PASSWORD[] PROGMEM = "Парола"; 
 const char INTL_SEND_TO[] PROGMEM = "Изпрати до {v}"; 
 const char INTL_READ_FROM[] PROGMEM = "Получено от {v}";
-const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "";
+const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Сензорът се рестартира.";
 const char INTL_RESTART_DEVICE[] PROGMEM = "Рестартирайте устройството";
 const char INTL_DELETE_CONFIG[] PROGMEM = "Изтриване на Конфигурацията";
 const char INTL_RESTART_SENSOR[] PROGMEM = "Рестартиране на сензора";
@@ -104,7 +104,7 @@ const char INTL_TIME[] PROGMEM = "Дата";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Сила на сигнала";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Качество на сигнала";
 #define INTL_NUMBER_OF_MEASUREMENTS "Брой измервания"
-#define INTL_TIME_SENDING_MS ""
+#define INTL_TIME_SENDING_MS "Време, прекарано в изпращане"
 #define INTL_SENSOR "Сензор"
 #define INTL_PARAMETER "Параметър"
 #define INTL_VALUE "Стойност"

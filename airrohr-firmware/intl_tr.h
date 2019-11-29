@@ -31,7 +31,7 @@ const char INTL_BMX280[] PROGMEM = "BMP280/BME280 ({t}, {h}, {p})";
 const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
 const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
-const char INTL_DNMS_CORRECTION[] PROGMEM ="";
+const char INTL_DNMS_CORRECTION[] PROGMEM ="dB (A) 'da düzeltme";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "yetkilendirme";
 const char INTL_FS_WIFI[] PROGMEM = "WiFi Sensörü";
@@ -42,12 +42,12 @@ const char INTL_AUTO_UPDATE[] PROGMEM = "Yazılımı (Firmware) Otomatik güncel
 const char INTL_USE_BETA[] PROGMEM = "Beta Yazılımı(Firmware) yükle";
 const char INTL_DISPLAY[] PROGMEM = "OLED SSD1306";
 const char INTL_SH1106[] PROGMEM = "OLED SH1106";
-const char INTL_FLIP_DISPLAY[] PROGMEM = "";
+const char INTL_FLIP_DISPLAY[] PROGMEM = "OLED ekranını çevirin";
 const char INTL_LCD1602_27[] PROGMEM = "LCD 1602 (I2C: 0x27)";
 const char INTL_LCD1602_3F[] PROGMEM = "LCD 1602 (I2C: 0x3F)";
 const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
-const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "";
-const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "";
+const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "WiFi Bilgilerini Görüntüle";
+const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Cihaz Bilgilerini Görüntüle";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;seviye";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = " Ölçüm aralığı";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Süre yönlendirici(Router) modu";
@@ -104,7 +104,7 @@ const char INTL_TIME[] PROGMEM = "zaman";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "sinyal gücü";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "sinyal kalitesi";
 #define INTL_NUMBER_OF_MEASUREMENTS "Ölçümlerin sayısı"
-#define INTL_TIME_SENDING_MS ""
+#define INTL_TIME_SENDING_MS "Göndermede harcanan süre"
 #define INTL_SENSOR "algılayıcı(Sensör)"
 #define INTL_PARAMETER "Parametre"
 #define INTL_VALUE "değer"

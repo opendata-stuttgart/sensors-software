@@ -31,7 +31,7 @@ const char INTL_BMX280[] PROGMEM = "BMP280/BME280 ({t}, {h}, {p})";
 const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
 const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
-const char INTL_DNMS_CORRECTION[] PROGMEM ="";
+const char INTL_DNMS_CORRECTION[] PROGMEM ="korrektion i dB (A)";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Aktiver BasicAuth";
 const char INTL_FS_WIFI[] PROGMEM = "Wi-Fi sensor";
@@ -42,12 +42,12 @@ const char INTL_AUTO_UPDATE[] PROGMEM = "Automatisk opdatering";
 const char INTL_USE_BETA[] PROGMEM = "Brug beta-versioner";
 const char INTL_DISPLAY[] PROGMEM = "OLED SSD1306";
 const char INTL_SH1106[] PROGMEM = "OLED SH1106";
-const char INTL_FLIP_DISPLAY[] PROGMEM = "";
+const char INTL_FLIP_DISPLAY[] PROGMEM = "OLED display flip";
 const char INTL_LCD1602_27[] PROGMEM = "LCD 1602 (I2C: 0x27)";
 const char INTL_LCD1602_3F[] PROGMEM = "LCD 1602 (I2C: 0x3F)";
 const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
-const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "";
-const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "";
+const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Vis WiFi-info";
+const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Vis enhedsinfo";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;level";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Målinterval";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Permanent&nbsp;router-mode";
@@ -103,8 +103,8 @@ const char INTL_DATE[] PROGMEM = "Dato";
 const char INTL_TIME[] PROGMEM = "Tid";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Signal";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Kvalitet";
-#define INTL_NUMBER_OF_MEASUREMENTS ""
-#define INTL_TIME_SENDING_MS ""
+#define INTL_NUMBER_OF_MEASUREMENTS "Antal målinger"
+#define INTL_TIME_SENDING_MS "Tid brugt på afsendelse"
 #define INTL_SENSOR "Sensor"
 #define INTL_PARAMETER "Parameter"
 #define INTL_VALUE "Værdi"

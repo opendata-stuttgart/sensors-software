@@ -1,3 +1,6 @@
+NRZ-2019-126-B8
+* Updated translations
+
 NRZ-2019-126-B7
 * Updated italian translations - thanks stewecar
 * Fix instabilities in SDS011 measurement decoding

@@ -100,17 +100,16 @@ bool BMX280::init() {
   write8(BMX280_REGISTER_SOFTRESET, 0xB6);
 
   // wait for chip to wake up.
-  delay(300);
+  delay(30);
 
   // if chip is still reading calibration, delay
-  while (isReadingCalibration())
-    delay(100);
+  unsigned attempts = 50;
+  while (--attempts && isReadingCalibration())
+    delay(10);
 
   readCoefficients(); // read trimming parameters, see DS 4.2.2
 
   setSampling(); // use defaults
-
-  delay(100);
 
   return true;
 }
@@ -152,8 +151,8 @@ void BMX280::setSampling(sensor_mode mode,
     // DS 5.4.3)
     write8(BMX280_REGISTER_CONTROLHUMID, _humReg.get());
   }
-  write8(BMX280_REGISTER_CONFIG, _configReg.get());
   write8(BMX280_REGISTER_CONTROL, _measReg.get());
+  write8(BMX280_REGISTER_CONFIG, _configReg.get());
 }
 
 /*!
