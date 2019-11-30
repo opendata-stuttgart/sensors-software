@@ -530,6 +530,8 @@ String esp_chipid;
 String last_value_SDS_version;
 
 unsigned long SDS_error_count;
+unsigned long sendData_error_count;
+unsigned long WiFi_error_count;
 
 unsigned long last_page_load = millis();
 
@@ -1879,16 +1881,28 @@ static void webserver_values() {
 
 		server.sendContent(page_content);
 		page_content = FPSTR(EMPTY_ROW);
+
 		add_table_row_from_value(page_content, F("WiFi"), FPSTR(INTL_SIGNAL_STRENGTH), String(last_signal_strength), "dBm");
 		add_table_row_from_value(page_content, F("WiFi"), FPSTR(INTL_SIGNAL_QUALITY), String(signal_quality), "%");
-		page_content += FPSTR(EMPTY_ROW);
-		page_content += F("<tr><td colspan='2'>" INTL_NUMBER_OF_MEASUREMENTS "</td><td class='r'>");
-		page_content += count_sends;
-		page_content += F("</td></tr>");
-		page_content += F("<tr><td colspan='2'>" INTL_TIME_SENDING_MS "</td><td class='r'>");
-		page_content += String(sending_time);
-		page_content += F("&nbsp;ms");
-		page_content += F("</td></tr>");
+		if (WiFi_error_count > 0) {
+			add_table_row_from_value(page_content, F("WiFi"), FPSTR(INTL_ERROR), String(WiFi_error_count), emptyString);
+		}
+
+		if (count_sends > 0) {
+			page_content += FPSTR(EMPTY_ROW);
+			page_content += F("<tr><td colspan='2'>" INTL_NUMBER_OF_MEASUREMENTS "</td><td class='r'>");
+			page_content += count_sends;
+			page_content += F("</td></tr>");
+			if (sending_time > 0) {
+				page_content += F("<tr><td colspan='2'>" INTL_TIME_SENDING_MS "</td><td class='r'>");
+				page_content += String(sending_time);
+				page_content += F("&nbsp;ms");
+				page_content += F("</td></tr>");
+			}
+			if (sendData_error_count > 0) {
+				add_table_row_from_value(page_content, F(INTL_SENSOR), F(INTL_ERROR), String(sendData_error_count), emptyString);
+			}
+		}
 
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 		end_html_page(page_content);
@@ -2333,6 +2347,7 @@ static unsigned long sendData(const LoggerEntry logger, const String& data, cons
 	HTTPClient http;
 	http.setTimeout(20 * 1000);
 	http.setUserAgent(SOFTWARE_VERSION + '/' + esp_chipid);
+	bool send_success = false;
 	if (logger == LoggerCustom && (*cfg::user_custom || *cfg::pwd_custom)) {
 		http.setAuthorization(cfg::user_custom, cfg::pwd_custom);
 	}
@@ -2350,6 +2365,7 @@ static unsigned long sendData(const LoggerEntry logger, const String& data, cons
 
 		if (result >= HTTP_CODE_OK && result <= HTTP_CODE_ALREADY_REPORTED) {
 			debug_outln_info(F("Succeeded - "), s_Host);
+			send_success = true;
 		} else if (result >= HTTP_CODE_BAD_REQUEST) {
 			debug_outln_info(F("Request failed with error: "), String(result));
 			debug_outln_info(F("Details:"), http.getString());
@@ -2357,6 +2373,10 @@ static unsigned long sendData(const LoggerEntry logger, const String& data, cons
 		http.end();
 	} else {
 		debug_outln_info(F("Failed connecting to "), s_Host);
+	}
+
+	if (!send_success) {
+		sendData_error_count++;
 	}
 
 	return millis() - start_send;
@@ -4057,6 +4077,7 @@ void setup(void) {
 #if defined(ESP32)
 	serialSDS.begin(9600, SERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX);
 #endif
+	serialSDS.enableIntTx(false);
 	serialSDS.setTimeout(300);
 
 #if defined(WIFI_LoRa_32_V2)
@@ -4347,6 +4368,7 @@ void loop(void) {
 		// reconnect to WiFi if disconnected
 		if (WiFi.status() != WL_CONNECTED) {
 			debug_outln_info(F("Connection lost, reconnecting "));
+			WiFi_error_count++;
 			WiFi.reconnect();
 			waitForWifiToConnect(20);
 		}

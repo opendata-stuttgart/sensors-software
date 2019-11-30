@@ -1,5 +1,6 @@
 NRZ-2019-126-B8
 * Updated translations
+* Collect error counters
 
 NRZ-2019-126-B7
 * Updated italian translations - thanks stewecar
