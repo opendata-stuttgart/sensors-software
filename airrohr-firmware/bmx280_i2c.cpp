@@ -68,13 +68,8 @@ enum {
   BMX280_REGISTER_PRESSUREDATA = 0xF7,
   BMX280_REGISTER_TEMPDATA = 0xFA,
   BMX280_REGISTER_HUMIDDATA = 0xFD,
+
 };
-
-
-/*!
- *  @brief  class constructor
- */
-BMX280::BMX280() {}
 
 /*!
  *   @brief  Initialise sensor with given parameters / settings
@@ -105,17 +100,16 @@ bool BMX280::init() {
   write8(BMX280_REGISTER_SOFTRESET, 0xB6);
 
   // wait for chip to wake up.
-  delay(300);
+  delay(30);
 
   // if chip is still reading calibration, delay
-  while (isReadingCalibration())
-    delay(100);
+  unsigned attempts = 50;
+  while (--attempts && isReadingCalibration())
+    delay(10);
 
   readCoefficients(); // read trimming parameters, see DS 4.2.2
 
   setSampling(); // use defaults
-
-  delay(100);
 
   return true;
 }
@@ -136,11 +130,15 @@ void BMX280::setSampling(sensor_mode mode,
                                   sensor_sampling pressSampling,
                                   sensor_sampling humSampling,
                                   standby_duration duration) {
+
   _measReg.mode = mode;
   _measReg.osrs_t = tempSampling;
   _measReg.osrs_p = pressSampling;
 
+  ctrl_hum _humReg;
   _humReg.osrs_h = humSampling;
+
+  config _configReg;
   _configReg.t_sb = duration;
 
   // making sure sensor is in sleep mode before setting configuration
@@ -153,16 +151,16 @@ void BMX280::setSampling(sensor_mode mode,
     // DS 5.4.3)
     write8(BMX280_REGISTER_CONTROLHUMID, _humReg.get());
   }
-  write8(BMX280_REGISTER_CONFIG, _configReg.get());
   write8(BMX280_REGISTER_CONTROL, _measReg.get());
+  write8(BMX280_REGISTER_CONFIG, _configReg.get());
 }
 
 /*!
- *   @brief  Writes an 8 bit value over I2C or SPI
+ *   @brief  Writes an 8 bit value over I2C
  *   @param reg the register address to write to
  *   @param value the value to write to the register
  */
-void BMX280::write8(byte reg, byte value) {
+void BMX280::write8(uint8_t reg, uint8_t value) {
   _wire->beginTransmission((uint8_t)_i2caddr);
   _wire->write((uint8_t)reg);
   _wire->write((uint8_t)value);
@@ -170,46 +168,28 @@ void BMX280::write8(byte reg, byte value) {
 }
 
 /*!
- *   @brief  Reads an 8 bit value over I2C or SPI
+ *   @brief  Reads an 8 bit value over I2C
  *   @param reg the register address to read from
  *   @returns the data byte read from the device
  */
-uint8_t BMX280::read8(byte reg) {
-  uint8_t value;
-
+uint8_t BMX280::read8(uint8_t reg) {
   _wire->beginTransmission((uint8_t)_i2caddr);
   _wire->write((uint8_t)reg);
   _wire->endTransmission();
-  _wire->requestFrom((uint8_t)_i2caddr, (byte)1);
-  value = _wire->read();
-  return value;
+  _wire->requestFrom((uint8_t)_i2caddr, (uint8_t)1);
+  return _wire->read();
 }
 
-/*!
- *   @brief  Reads a 16 bit value over I2C or SPI
- *   @param reg the register address to read from
- *   @returns the 16 bit data value read from the device
- */
-uint16_t BMX280::read16(byte reg) {
+uint16_t BMX280::read16_LE(uint8_t reg) {
   uint16_t value;
 
   _wire->beginTransmission((uint8_t)_i2caddr);
   _wire->write((uint8_t)reg);
   _wire->endTransmission();
-  _wire->requestFrom((uint8_t)_i2caddr, (byte)2);
-  value = (_wire->read() << 8) | _wire->read();
-
+  _wire->requestFrom((uint8_t)_i2caddr, (uint8_t)2);
+  value = _wire->read();
+  value |= (uint16_t) _wire->read() << 8;
   return value;
-}
-
-/*!
- *   @brief  Reads a signed 16 bit little endian value over I2C or SPI
- *   @param reg the register address to read from
- *   @returns the 16 bit data value read from the device
- */
-uint16_t BMX280::read16_LE(byte reg) {
-  uint16_t temp = read16(reg);
-  return (temp >> 8) | (temp << 8);
 }
 
 /*!
@@ -217,7 +197,7 @@ uint16_t BMX280::read16_LE(byte reg) {
  *   @param reg the register address to read from
  *   @returns the 16 bit data value read from the device
  */
-int16_t BMX280::readS16_LE(byte reg) {
+int16_t BMX280::readS16_LE(uint8_t reg) {
   return (int16_t)read16_LE(reg);
 }
 
@@ -226,13 +206,13 @@ int16_t BMX280::readS16_LE(byte reg) {
  *   @param reg the register address to read from
  *   @returns the 24 bit data value read from the device
  */
-uint32_t BMX280::read24(byte reg) {
+uint32_t BMX280::read24(uint8_t reg) {
   uint32_t value;
 
   _wire->beginTransmission((uint8_t)_i2caddr);
   _wire->write((uint8_t)reg);
   _wire->endTransmission();
-  _wire->requestFrom((uint8_t)_i2caddr, (byte)3);
+  _wire->requestFrom((uint8_t)_i2caddr, (uint8_t)3);
 
   value = _wire->read();
   value <<= 8;
@@ -247,18 +227,12 @@ uint32_t BMX280::read24(byte reg) {
  *  @brief  Take a new measurement (only possible in forced mode)
  */
 void BMX280::takeForcedMeasurement() {
-  // If we are in forced mode, the BME sensor goes back to sleep after each
-  // measurement and we need to set it to forced mode once at this point, so
-  // it will take the next measurement and then return to sleep again.
-  // In normal mode simply does new measurements periodically.
-  if (_measReg.mode == MODE_FORCED) {
-    // set to forced mode, i.e. "take next measurement"
-    write8(BMX280_REGISTER_CONTROL, _measReg.get());
-    // wait until measurement has been completed, otherwise we would read
-    // the values from the last measurement
-    while (read8(BMX280_REGISTER_STATUS) & 0x08)
-      delay(1);
-  }
+  // set to forced mode, i.e. "take next measurement"
+  write8(BMX280_REGISTER_CONTROL, _measReg.get());
+  // wait until measurement has been completed, otherwise we would read
+  // the values from the last measurement
+  while (read8(BMX280_REGISTER_STATUS) & 0x08)
+    delay(1);
 }
 
 /*!
@@ -285,8 +259,7 @@ void BMX280::readCoefficients(void) {
     dig_H3 = read8(BME280_REGISTER_DIG_H3);
     dig_H4 = (read8(BME280_REGISTER_DIG_H4) << 4) |
                            (read8(BME280_REGISTER_DIG_H4 + 1) & 0xF);
-    dig_H5 = (read8(BME280_REGISTER_DIG_H5 + 1) << 4) |
-                           (read8(BME280_REGISTER_DIG_H5) >> 4);
+    dig_H5 = readS16_LE(BME280_REGISTER_DIG_H5) >> 4;
     dig_H6 = (int8_t)read8(BME280_REGISTER_DIG_H6);
   }
 }
@@ -325,8 +298,7 @@ float BMX280::readTemperature(void) {
 
   t_fine = var1 + var2;
 
-  float T = (t_fine * 5 + 128) >> 8;
-  return T / 100;
+  return float(t_fine) / 5120.0f;
 }
 
 /*!
@@ -353,16 +325,17 @@ float BMX280::readPressure(void) {
   var1 =
       (((((int64_t)1) << 47) + var1)) * ((int64_t)dig_P1) >> 33;
 
+  // avoid exception caused by division by zero
   if (var1 == 0) {
-    return 0; // avoid exception caused by division by zero
+    return 30000.0f;
   }
   p = 1048576 - adc_P;
   p = (((p << 31) - var2) * 3125) / var1;
   var1 = (((int64_t)dig_P9) * (p >> 13) * (p >> 13)) >> 25;
   var2 = (((int64_t)dig_P8) * p) >> 19;
 
-  p = ((p + var1 + var2) >> 8) + (((int64_t)dig_P7) << 4);
-  return float(p >> 8);
+  int32_t ps = int32_t((p + var1 + var2) >> 8) + (((int32_t)dig_P7) << 4);
+  return float(ps >> 3) / 32.0f;
 }
 
 /*!
@@ -375,7 +348,8 @@ float BMX280::readHumidity(void) {
 
   readTemperature(); // must be done first to get t_fine
 
-  int32_t adc_H = read16(BMX280_REGISTER_HUMIDDATA);
+  uint16_t raw_h = read16_LE(BMX280_REGISTER_HUMIDDATA);
+  int32_t adc_H = (uint16_t) ((raw_h >> 8) | (raw_h << 8));
   if (adc_H == 0x8000) // value in case humidity measurement was disabled
     return NAN;
 
@@ -402,6 +376,5 @@ float BMX280::readHumidity(void) {
 
   v_x1_u32r = (v_x1_u32r < 0) ? 0 : v_x1_u32r;
   v_x1_u32r = (v_x1_u32r > 419430400) ? 419430400 : v_x1_u32r;
-  float h = (v_x1_u32r >> 12);
-  return h / 1024.0;
+  return float(v_x1_u32r >> 12) / 1024.0f;
 }
