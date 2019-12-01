@@ -97,7 +97,7 @@
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2019-126-B8"
+#define SOFTWARE_VERSION_STR "NRZ-2019-126-B9"
 const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -2709,7 +2709,10 @@ static void fetchSensorSDS(String& s) {
 		sds_pm25_max = 0;
 		sds_pm25_min = 20000;
 		if ((cfg::sending_intervall_ms > (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS))) {
-			is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
+
+			if (is_SDS_running) {
+				is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
+			}
 		}
 	}
 
@@ -4080,8 +4083,8 @@ void setup(void) {
 #if defined(ESP32)
 	serialSDS.begin(9600, SERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX);
 #endif
-	serialSDS.enableIntTx(false);
-	serialSDS.setTimeout(300);
+	serialSDS.enableIntTx(true);
+	serialSDS.setTimeout((12 * 9 * 1000) / 9600);
 
 #if defined(WIFI_LoRa_32_V2)
 	// reset the OLED display, e.g. of the heltec_wifi_lora_32 board
@@ -4266,7 +4269,6 @@ void loop(void) {
 	yield();
 
 	if (send_now) {
-		debug_outln_info(F("Creating data string:"));
 		last_signal_strength = WiFi.RSSI();
 		RESERVE_STRING(data, LARGE_STR);
 		data = FPSTR(data_first_part);
@@ -4362,11 +4364,15 @@ void loop(void) {
 		}
 		data += "]}";
 
+		yield();
+
 		sum_send_time += sendDataToOptionalApis(data);
 
 		// https://en.wikipedia.org/wiki/Moving_average#Cumulative_moving_average
 		sending_time = (3 * sending_time + sum_send_time) / 4;
-		debug_outln_info(F("Time for sending data (ms): "), String(sending_time));
+		if (sum_send_time > 0) {
+			debug_outln_info(F("Time for Sending (ms): "), String(sending_time));
+		}
 
 		// reconnect to WiFi if disconnected
 		if (WiFi.status() != WL_CONNECTED) {

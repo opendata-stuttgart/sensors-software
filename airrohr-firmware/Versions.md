@@ -1,6 +1,10 @@
+NRZ-2019-126-B9
+* Update to Arduino Core 2.6.2 to fix WiFi stability issues
+
 NRZ-2019-126-B8
 * Updated translations
 * Collect error counters
+* Serbian localization added
 
 NRZ-2019-126-B7
 * Updated italian translations - thanks stewecar
