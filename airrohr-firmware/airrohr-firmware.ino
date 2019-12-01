@@ -172,6 +172,8 @@ const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 #include "intl_pl.h"
 #elif defined(INTL_PT)
 #include "intl_pt.h"
+#elif defined(INTL_RS)
+#include "intl_rs.h"
 #elif defined(INTL_RU)
 #include "intl_ru.h"
 #elif defined(INTL_SE)
@@ -1205,6 +1207,7 @@ static String form_select_lang() {
 					"<option value='NL'>Nederlands (NL)</option>"
 					"<option value='PL'>Polski (PL)</option>"
 					"<option value='PT'>Português (PT)</option>"
+					"<option value='RS'>Srpski (RS)</option>"
 					"<option value='RU'>Русский (RU)</option>"
 					"<option value='SE'>Svenska (SE)</option>"
 					"<option value='TR'>Türkçe (TR)</option>"
