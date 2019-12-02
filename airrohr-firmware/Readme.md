@@ -49,8 +49,8 @@ Die Daten können als CSV via USB ausgegeben werden. Dafür sollte sowohl in ext
 
 ## Benötigte Software (in Klammern getestete Version und die Art der Lizenz):
 
-* [Arduino IDE](https://www.arduino.cc/en/Main/Software)  (Version 1.8.7) (GNU Lesser General Public License v2.1)
-* [ESP8266 für Arduino](http://arduino.esp8266.com/stable/package_esp8266com_index.json) (Version 2.5.2)
+* [Arduino IDE](https://www.arduino.cc/en/Main/Software)  (Version 1.8.10) (GNU Lesser General Public License v2.1)
+* [ESP8266 für Arduino](http://arduino.esp8266.com/stable/package_esp8266com_index.json) (Version 2.6.2)
 
 
 ### Einstellungen Arduino IDE
@@ -81,20 +81,18 @@ In ESP8266 für Arduino IDE enthalten:
 * ESP8266WebServer (GNU Lesser Public License >=2.1)
 * ESP8266HTTPClient (GNU Lesser Public License >=2.1)
 * DNSServer (GNU Lesser Public License >=2.1)
-* SoftwareSerial (GNU Lesser Public License >=2.1). Don't install additional library!!!
 
 Installierbar über Arduino IDE (Menü Sketch -> Bibliothek einbinden -> Bibliotheken verwalten, in Klammern die getestete Version und die Art der Lizenz):
-* [ArduinoJson](https://github.com/bblanchon/ArduinoJson) (6.12.0) (MIT)
-* [Adafruit Unified Sensor](https://github.com/adafruit/Adafruit_Sensor) (1.0.3) (Apache)
+* [ArduinoJson](https://github.com/bblanchon/ArduinoJson) (6.13.0) (MIT)
 * [Adafruit BMP085 library](https://github.com/adafruit/Adafruit-BMP085-Library) (1.0.1) (BSD)
-* [Adafruit HTU21DF library](https://github.com/adafruit/Adafruit_HTU21DF_Library) (1.0.1) (BSD)
+* [Adafruit HTU21DF library](https://github.com/adafruit/Adafruit_HTU21DF_Library) (1.0.2) (BSD)
 * [DallasTemperature](https://github.com/milesburton/Arduino-Temperature-Control-Library) (3.8.0)
-* [ESP8266 and ESP32 Oled driver for SSD1306 display](https://github.com/squix78/esp8266-oled-ssd1306) (4.0.0) (MIT)
+* [ESP8266 and ESP32 Oled driver for SSD1306 display](https://github.com/squix78/esp8266-oled-ssd1306) (4.1.0) (MIT)
 * [OneWire](www.pjrc.com/teensy/td_libs_OneWire.html) (2.3.4)
 * [LiquidCrystal I2C](https://github.com/marcoschwartz/LiquidCrystal_I2C) (1.1.2)
-
+* [EspSoftwareSerial](https://github.com/plerup/espsoftwareserial)(6.3.0)
 Manuell zu installieren:
-* [TinyGPS++](http://arduiniana.org/libraries/tinygpsplus/) (0.95) (GNU Lesser Public License >=2.1)
+* [TinyGPS++](http://arduiniana.org/libraries/tinygpsplus/) (1.0.2) (GNU Lesser Public License >=2.1)
 
 
 Bis Version NRZ-2016-15:
