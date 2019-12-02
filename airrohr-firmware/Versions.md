@@ -1,3 +1,7 @@
+NRZ-2019-127
+online since 2019-12-02
+* same as NRZ-2019-126-B9
+
 NRZ-2019-126-B9
 * Update to Arduino Core 2.6.2 to fix WiFi stability issues
 
