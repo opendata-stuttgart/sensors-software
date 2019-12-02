@@ -1,3 +1,6 @@
+NRZ-2019-128-B1
+* next beta version
+
 NRZ-2019-127
 online since 2019-12-02
 * same as NRZ-2019-126-B9
