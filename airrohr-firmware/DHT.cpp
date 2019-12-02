@@ -8,7 +8,7 @@ written by Adafruit Industries
 
 #define MIN_INTERVAL 2000
 
-DHT::DHT(uint8_t pin, uint8_t type, uint8_t count) {
+DHT::DHT(uint8_t pin, uint8_t type) {
   _pin = pin;
   _type = type;
   #ifdef __AVR
@@ -56,7 +56,7 @@ float DHT::readTemperature(bool force) {
 
 float DHT::readHumidity(bool force) {
   float f = NAN;
-  if (read()) {
+  if (read(force)) {
     switch (_type) {
     case DHT11:
       f = data[0];
@@ -73,7 +73,7 @@ float DHT::readHumidity(bool force) {
   return f;
 }
 
-boolean DHT::read(bool force) {
+bool DHT::read(bool force) {
   // Check if sensor was read less than two seconds ago and return early
   // to use last reading.
   uint32_t currenttime = millis();

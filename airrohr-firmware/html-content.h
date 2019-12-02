@@ -20,6 +20,7 @@ const char DBG_TXT_SDS011_VERSION_DATE[] PROGMEM = "SDS011 version date";
 const char DBG_TXT_CONNECTING_TO[] PROGMEM = "Connecting to ";
 const char DBG_TXT_FOUND[] PROGMEM = " ... found";
 const char DBG_TXT_NOT_FOUND[] PROGMEM = " ... not found";
+const char DBG_TXT_SEP[] PROGMEM = "----";
 
 const char SENSORS_SDS011[] PROGMEM = "SDS011";
 const char SENSORS_PPD42NS[] PROGMEM = "PPD42NS";
@@ -29,6 +30,7 @@ const char SENSORS_SPS30[] PROGMEM = "Sensirion SPS30";
 const char SENSORS_DHT22[] PROGMEM = "DHT22";
 const char SENSORS_DS18B20[] PROGMEM = "DS18B20";
 const char SENSORS_HTU21D[] PROGMEM = "HTU21D";
+const char SENSORS_SHT3X[] PROGMEM = "SHT3x";
 const char SENSORS_BMP180[] PROGMEM = "BMP180";
 const char SENSORS_BMX280[] PROGMEM = "BMP/E280";
 const char SENSORS_DNMS[] PROGMEM = "DNMS";
@@ -67,7 +69,7 @@ const char WEB_PAGE_FOOTER[] PROGMEM = "<br/><br/><a href='/' style='display:inl
                 "<a href='https://codefor.de/stuttgart/' target='_blank' rel='noreferrer' style='display:inline;background:none;color:black;'>&copy; Open Knowledge Lab Stuttgart a.o. (Code for Germany)</a></div></body></html>\r\n";
 
 const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a href='/values'>{t}</a><br/>\
-<a href='https://maps.luftdaten.info/' target='_blank' rel='noreferrer'>" INTL_ACTIVE_SENSORS_MAP "</a><br/>\
+<a href='https://maps.sensor.community/' target='_blank' rel='noreferrer'>" INTL_ACTIVE_SENSORS_MAP "</a><br/>\
 <a href='/config'>{conf}</a><br/>\
 <a href='/removeConfig'>" INTL_CONFIGURATION_DELETE "</a><br/>\
 <a href='/reset'>{restart}</a><br/>\

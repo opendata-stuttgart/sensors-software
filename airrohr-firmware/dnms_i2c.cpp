@@ -111,22 +111,15 @@ int16_t dnms_i2c_read_cmd(uint8_t address, uint16_t cmd, uint16_t *data_words, u
 
 
 int8_t dnms_i2c_read(uint8_t address, uint8_t* data, uint16_t count) {
-  uint8_t readData[count];
   uint8_t rxByteCount = 0;
-  uint16_t i;
 
   // 2 bytes RH, 1 CRC, 2 bytes T, 1 CRC
   Wire.requestFrom(address, (uint8_t)count);
   while (Wire.available()) { // wait till all arrive
-    readData[rxByteCount++] = Wire.read();
+    data[rxByteCount++] = Wire.read();
     if (rxByteCount >= count) {
       break;
     }
-  }
-  memcpy(data, readData, count);
-  for ( i = 0; i < count; i++) {   
-  }
-  for ( i = 0; i < count; i++) {  
   }
   return 0;
 }

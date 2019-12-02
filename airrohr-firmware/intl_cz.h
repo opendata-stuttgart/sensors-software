@@ -28,9 +28,10 @@ const char INTL_DHT22[] PROGMEM = "DHT22 ({t}, {h})";
 const char INTL_HTU21D[] PROGMEM = "HTU21D ({t}, {h})";
 const char INTL_BMP180[] PROGMEM = "BMP180 ({t}, {p})";
 const char INTL_BMX280[] PROGMEM = "BMP280/BME280 ({t}, {h}, {p})";
+const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
 const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
-const char INTL_DNMS_CORRECTION[] PROGMEM ="";
+const char INTL_DNMS_CORRECTION[] PROGMEM ="korekce v dB (A)";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Pøihlášení (heslem)";
 const char INTL_FS_WIFI[] PROGMEM = "Wi-Fi modul";
@@ -41,12 +42,12 @@ const char INTL_AUTO_UPDATE[] PROGMEM = "Autom. aktualizace";
 const char INTL_USE_BETA[] PROGMEM = "Nahrát betaverzi";
 const char INTL_DISPLAY[] PROGMEM = "OLED SSD1306";
 const char INTL_SH1106[] PROGMEM = "OLED SH1106";
-const char INTL_FLIP_DISPLAY[] PROGMEM = "";
+const char INTL_FLIP_DISPLAY[] PROGMEM = "OLED displej flip";
 const char INTL_LCD1602_27[] PROGMEM = "LCD 1602 (I2C: 0x27)";
 const char INTL_LCD1602_3F[] PROGMEM = "LCD 1602 (I2C: 0x3F)";
 const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
-const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "";
-const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "";
+const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Zobrazit informace o WiFi";
+const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Zobrazit informace o zařízení";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Ladìní&nbsp;Úroveò";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Interval mìøení";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Trvání&nbsp;Mód routeru";
@@ -102,8 +103,8 @@ const char INTL_DATE[] PROGMEM = "Datum";
 const char INTL_TIME[] PROGMEM = "Èas";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Síla signálu";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Kvalita signálu";
-#define INTL_NUMBER_OF_MEASUREMENTS "Poèet mìøení:"
-#define INTL_TIME_SENDING_MS ""
+#define INTL_NUMBER_OF_MEASUREMENTS "Počet měření"
+#define INTL_TIME_SENDING_MS "Poèet mìøení"
 #define INTL_SENSOR "Modul"
 #define INTL_PARAMETER "Parametr"
 #define INTL_VALUE "Hodnota"
