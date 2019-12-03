@@ -1,3 +1,6 @@
+NRZ-2019-128-B2
+* Initialize MDNS after wifi to restore functionality
+
 NRZ-2019-128-B1
 * next beta version
 
