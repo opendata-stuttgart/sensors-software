@@ -2033,7 +2033,8 @@ static void webserver_prometheus_endpoint() {
 	String data_4_prometheus = F("software_version{version=\"" SOFTWARE_VERSION_STR "\",{id}} 1\nuptime_ms{{id}} {up}\nsending_intervall_ms{{id}} {si}\nnumber_of_measurements{{id}} {cs}\n");
 	debug_outln_info(F("Parse JSON for Prometheus"));
 	String id(F("node=\"" SENSOR_BASENAME));
-	id += esp_chipid + "\"";
+	id += esp_chipid;
+	id += '\"';
 	data_4_prometheus.replace("{id}", id);
 	data_4_prometheus.replace("{up}", String(msSince(time_point_device_start_ms)));
 	data_4_prometheus.replace("{si}", String(cfg::sending_intervall_ms));
