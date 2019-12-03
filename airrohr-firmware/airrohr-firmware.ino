@@ -2258,11 +2258,6 @@ static void connectWifi() {
 
 	debug_outln_info(FPSTR(DBG_TXT_CONNECTING_TO), cfg::wlanssid);
 
-	if (MDNS.begin(cfg::fs_ssid)) {
-		MDNS.addService("http", "tcp", 80);
-		MDNS.addServiceTxt("http", "tcp", "PATH", "/config");
-	}
-
 	waitForWifiToConnect(40);
 	debug_outln_info(emptyString);
 	if (WiFi.status() != WL_CONNECTED) {
@@ -2276,6 +2271,11 @@ static void connectWifi() {
 	}
 	debug_outln_info(F("WiFi connected, IP is: "), WiFi.localIP().toString());
 	last_signal_strength = WiFi.RSSI();
+
+	if (MDNS.begin(cfg::fs_ssid)) {
+		MDNS.addService("http", "tcp", 80);
+		MDNS.addServiceTxt("http", "tcp", "PATH", "/config");
+	}
 }
 
 #if defined(ESP8266)
