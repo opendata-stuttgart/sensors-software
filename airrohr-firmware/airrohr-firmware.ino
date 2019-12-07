@@ -97,7 +97,7 @@
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2019-127"
+#define SOFTWARE_VERSION_STR "NRZ-2019-127-1"
 const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -2033,7 +2033,8 @@ static void webserver_prometheus_endpoint() {
 	String data_4_prometheus = F("software_version{version=\"" SOFTWARE_VERSION_STR "\",{id}} 1\nuptime_ms{{id}} {up}\nsending_intervall_ms{{id}} {si}\nnumber_of_measurements{{id}} {cs}\n");
 	debug_outln_info(F("Parse JSON for Prometheus"));
 	String id(F("node=\"" SENSOR_BASENAME));
-	id += esp_chipid + "\"";
+	id += esp_chipid;
+	id += '\"';
 	data_4_prometheus.replace("{id}", id);
 	data_4_prometheus.replace("{up}", String(msSince(time_point_device_start_ms)));
 	data_4_prometheus.replace("{si}", String(cfg::sending_intervall_ms));
@@ -2258,11 +2259,6 @@ static void connectWifi() {
 
 	debug_outln_info(FPSTR(DBG_TXT_CONNECTING_TO), cfg::wlanssid);
 
-	if (MDNS.begin(cfg::fs_ssid)) {
-		MDNS.addService("http", "tcp", 80);
-		MDNS.addServiceTxt("http", "tcp", "PATH", "/config");
-	}
-
 	waitForWifiToConnect(40);
 	debug_outln_info(emptyString);
 	if (WiFi.status() != WL_CONNECTED) {
@@ -2276,6 +2272,11 @@ static void connectWifi() {
 	}
 	debug_outln_info(F("WiFi connected, IP is: "), WiFi.localIP().toString());
 	last_signal_strength = WiFi.RSSI();
+
+	if (MDNS.begin(cfg::fs_ssid)) {
+		MDNS.addService("http", "tcp", 80);
+		MDNS.addServiceTxt("http", "tcp", "PATH", "/config");
+	}
 }
 
 #if defined(ESP8266)
