@@ -1,3 +1,6 @@
+NRZ-2019-128-B3
+* Fix startup hang on wifis without NTP access (#580)
+
 NRZ-2019-127-1 (intermediate version)
 online since 2019-12-03
 * same as NRZ-2019-127-B2
