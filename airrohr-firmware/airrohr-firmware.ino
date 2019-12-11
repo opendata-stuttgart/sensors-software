@@ -97,7 +97,7 @@
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2019-127-1"
+#define SOFTWARE_VERSION_STR "NRZ-2019-128-B3"
 const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -4161,15 +4161,17 @@ void loop(void) {
 
 	unsigned sum_send_time = 0;
 
-	// Wait at least 30s for each NTP server to sync
-	if (!sntp_time_is_set &&
-			msSince(time_point_device_start_ms) < 1000 * 2 * 30 + 5000) {
-		return;
-	}
-
 	act_micro = micros();
 	act_milli = millis();
 	send_now = msSince(starttime) > cfg::sending_intervall_ms;
+	// Wait at least 30s for each NTP server to sync
+
+	if (!sntp_time_is_set && send_now &&
+			msSince(time_point_device_start_ms) < 1000 * 2 * 30 + 5000) {
+		debug_outln_info(F("NTP sync not finished yet, skipping send"));
+		send_now = false;
+		starttime = act_milli;
+	}
 
 	sample_count++;
 
