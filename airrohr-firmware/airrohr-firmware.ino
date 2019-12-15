@@ -2712,6 +2712,9 @@ static void fetchSensorSDS(String& s) {
 			add_Value2Json(s, F("SDS_P1"), F("PM10:  "), last_value_SDS_P1);
 			add_Value2Json(s, F("SDS_P2"), F("PM2.5: "), last_value_SDS_P2);
 			debug_outln_info(FPSTR(DBG_TXT_SEP));
+			if (sds_val_count < 3) {
+				SDS_error_count++;
+			}
 		}
 		else {
 			SDS_error_count++;
