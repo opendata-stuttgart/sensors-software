@@ -813,6 +813,18 @@ static bool HPM_cmd(PmSensorCmd cmd) {
 	return cmd != PmSensorCmd::Stop;
 }
 
+// workaround for https://github.com/plerup/espsoftwareserial/issues/127
+static void yield_for_serial_buffer(size_t length) {
+	unsigned long startMillis = millis();
+	unsigned long yield_timeout = length * 9 * 1000 / 9600;
+
+	while (serialSDS.available() < (int) length &&
+				millis() - startMillis < yield_timeout) {
+		yield();
+		serialSDS.perform_work();
+	}
+}
+
 /*****************************************************************
  * read SDS011 sensor serial and firmware date                   *
  *****************************************************************/
@@ -821,17 +833,18 @@ static String SDS_version_date() {
 	if (cfg::sds_read && !last_value_SDS_version.length()) {
 		debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(DBG_TXT_SDS011_VERSION_DATE));
 		is_SDS_running = SDS_cmd(PmSensorCmd::Start);
+		delay(250);
+		serialSDS.perform_work();
 		serialSDS.flush();
-		delay(100);
 		// Query Version/Date
 		SDS_rawcmd(0x07, 0x00, 0x00);
-		delay(1250);
-
-		const uint8_t resp[2] = { 0xAA, 0xC5 };
-		while (serialSDS.find(resp, sizeof(resp))) {
+		delay(400);
+		const constexpr uint8_t header_cmd_response[2] = { 0xAA, 0xC5 };
+		while (serialSDS.find(header_cmd_response, sizeof(header_cmd_response))) {
 			uint8_t data[8];
-			bool read_ok = (sizeof(data) == serialSDS.readBytes(data, sizeof(data)));
-			if (read_ok && data[0] == 0x07 && SDS_checksum_valid(data)) {
+			yield_for_serial_buffer(sizeof(data));
+			unsigned r = serialSDS.readBytes(data, sizeof(data));
+			if (r == sizeof(data) && data[0] == 0x07 && SDS_checksum_valid(data)) {
 				char tmp[20];
 				snprintf_P(tmp, sizeof(tmp), PSTR("%02d-%02d-%02d(%02x%02x)"),
 					data[1], data[2], data[3], data[4], data[5]);
@@ -2657,8 +2670,9 @@ static void fetchSensorSDS(String& s) {
 		while (serialSDS.available() >= 10 &&
 					serialSDS.find(header_measurement, sizeof(header_measurement))) {
 			uint8_t data[8];
-			bool read_ok = (sizeof(data) == serialSDS.readBytes(data, sizeof(data)));
-			if (read_ok && SDS_checksum_valid(data)) {
+			yield_for_serial_buffer(sizeof(data));
+			unsigned r = serialSDS.readBytes(data, sizeof(data));
+			if (r == sizeof(data) && SDS_checksum_valid(data)) {
 				uint32_t pm25_serial = data[0] | (data[1] << 8);
 				uint32_t pm10_serial = data[2] | (data[3] << 8);
 
