@@ -4125,7 +4125,7 @@ void setup(void) {
 	cfg::initNonTrivials(esp_chipid.c_str());
 	WiFi.persistent(false);
 
-	debug_outln_info(F("Airrohr: "), SOFTWARE_VERSION);
+	debug_outln_info(F("Airrohr: " SOFTWARE_VERSION_STR "/"), String(CURRENT_LANG));
 
 	init_config();
 	init_display();
