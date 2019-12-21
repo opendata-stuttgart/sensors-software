@@ -2268,6 +2268,7 @@ static void connectWifi() {
 	delay(100);
 #endif
 	WiFi.mode(WIFI_STA);
+	WiFi.hostname(cfg::fs_ssid);
 	WiFi.begin(cfg::wlanssid, cfg::wlanpwd); // Start WiFI
 
 	debug_outln_info(FPSTR(DBG_TXT_CONNECTING_TO), cfg::wlanssid);
