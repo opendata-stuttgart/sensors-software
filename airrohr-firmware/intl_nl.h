@@ -67,6 +67,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "Herstart sensor";
 #define INTL_HOME "Home"
 #define INTL_BACK_TO_HOME "Terug naar homepagina"
 const char INTL_CURRENT_DATA[] PROGMEM = "Huidige data";
+const char INTL_DEVICE_STATUS[] PROGMEM = "Apparaatstatus";
 #define INTL_ACTIVE_SENSORS_MAP "Actieve sensors kaart (externe link)"
 #define INTL_CONFIGURATION_DELETE "Configuratie verwijderen"
 #define INTL_CONFIGURATION_REALLY_DELETE "Bent u zeker dat u de configuratie wilt verwijderen?"

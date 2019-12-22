@@ -67,6 +67,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "Рестартиране на сен
 #define INTL_HOME "Начало"
 #define INTL_BACK_TO_HOME "Обратно към начало"
 const char INTL_CURRENT_DATA[] PROGMEM = "Текущи данни";
+const char INTL_DEVICE_STATUS[] PROGMEM = "Карам статус";
 #define INTL_ACTIVE_SENSORS_MAP "Карта на активните сензори (външен линк)"
 #define INTL_CONFIGURATION_DELETE "Изтриване на Конфигурацията"
 #define INTL_CONFIGURATION_REALLY_DELETE "Наистина ли искате да изтриете конфигурацията?"

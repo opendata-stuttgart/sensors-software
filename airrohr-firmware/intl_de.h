@@ -67,6 +67,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "Sensor neu starten";
 #define INTL_HOME "Übersicht"
 #define INTL_BACK_TO_HOME "Zurück zur Startseite"
 const char INTL_CURRENT_DATA[] PROGMEM = "Aktuelle Werte";
+const char INTL_DEVICE_STATUS[] PROGMEM = "Gerätestatus";
 #define INTL_ACTIVE_SENSORS_MAP "Karte der aktiven Sensoren (externer Link)"
 #define INTL_CONFIGURATION_DELETE "Konfiguration löschen"
 #define INTL_CONFIGURATION_REALLY_DELETE "Konfiguration wirklich löschen?"
@@ -77,12 +78,12 @@ const char INTL_CURRENT_DATA[] PROGMEM = "Aktuelle Werte";
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Speichern und neu starten";
 #define INTL_FIRMWARE "Firmware"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Setze Debug auf";
-#define INTL_NONE "none"
-#define INTL_ERROR "error"
-#define INTL_WARNING "warning"
-#define INTL_MIN_INFO "min. info"
-#define INTL_MED_INFO "med. info"
-#define INTL_MAX_INFO "max. info"
+#define INTL_NONE "Keine"
+#define INTL_ERROR "Fehler"
+#define INTL_WARNING "Warnungen"
+#define INTL_MIN_INFO "min. Info"
+#define INTL_MED_INFO "mttl. Info"
+#define INTL_MAX_INFO "max. Info"
 #define INTL_CONFIG_DELETED "Config.json gelöscht"
 #define INTL_CONFIG_CAN_NOT_BE_DELETED "Config.json konnte nicht gelöscht werden"
 #define INTL_CONFIG_NOT_FOUND "Config.json nicht gefunden"

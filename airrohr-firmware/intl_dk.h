@@ -67,6 +67,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "Genstart sensor";
 #define INTL_HOME "Oversigt"
 #define INTL_BACK_TO_HOME "Tilbage til oversigten"
 const char INTL_CURRENT_DATA[] PROGMEM = "Aktuelle målværdier";
+const char INTL_DEVICE_STATUS[] PROGMEM = "Enhedsstatus";
 #define INTL_ACTIVE_SENSORS_MAP "Kort over aktive sensorer (ekstern link)"
 #define INTL_CONFIGURATION_DELETE "Slet opsætningen"
 #define INTL_CONFIGURATION_REALLY_DELETE "Skal opsætningen virkelig slettes?"

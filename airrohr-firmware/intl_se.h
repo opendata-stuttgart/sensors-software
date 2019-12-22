@@ -67,6 +67,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "Starta om sensor";
 #define INTL_HOME "Översikt"
 #define INTL_BACK_TO_HOME "Tillbaka till översikten"
 const char INTL_CURRENT_DATA[] PROGMEM = "Aktuella mätvärden";
+const char INTL_DEVICE_STATUS[] PROGMEM = "Enhetsstatus";
 #define INTL_ACTIVE_SENSORS_MAP "Karta över aktiva sensorer (extern länk)"
 #define INTL_CONFIGURATION_DELETE "Ta bort konfiguration"
 #define INTL_CONFIGURATION_REALLY_DELETE "Ska konfigurationen tas bort?"

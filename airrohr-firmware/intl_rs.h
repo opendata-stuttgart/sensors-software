@@ -2,7 +2,7 @@
  *	airRohr firmware
  *	Copyright (C) 2016-2018  Code for Stuttgart a.o.
  *
- *  English translations
+ *  Serbian translations
  *
  *	Texts should be as short as possible
  *	We only have 512 kB for the entire firmware
@@ -67,6 +67,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "Restartuj senzor";
 #define INTL_HOME "Naslovna"
 #define INTL_BACK_TO_HOME "Povratak na naslovnu stranicu"
 const char INTL_CURRENT_DATA[] PROGMEM = "Trenutni podaci";
+const char INTL_DEVICE_STATUS[] PROGMEM = "Status уређаја";
 #define INTL_ACTIVE_SENSORS_MAP "Mapa aktivnih senzora (spoljni link)"
 #define INTL_CONFIGURATION_DELETE "Izbriši konfiguraciju"
 #define INTL_CONFIGURATION_REALLY_DELETE "Jeste li sigurni da želite da izbrišete konfiguraciju?"

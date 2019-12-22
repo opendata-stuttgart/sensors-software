@@ -67,6 +67,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "sensörü yeniden bağlat ";
 #define INTL_HOME "genel bakış"
 #define INTL_BACK_TO_HOME "Ana sayfaya geri dön"
 const char INTL_CURRENT_DATA[] PROGMEM = "Aktüel veriler";
+const char INTL_DEVICE_STATUS[] PROGMEM = "Cihaz durumu";
 #define INTL_ACTIVE_SENSORS_MAP "Aktif sensörler haritası(external link)"
 #define INTL_CONFIGURATION_DELETE "Konfigürasyonu sil"
 #define INTL_CONFIGURATION_REALLY_DELETE "Konfigürasyonu silmek istediğinizden emin misiniz??"

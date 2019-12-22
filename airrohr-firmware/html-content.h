@@ -69,6 +69,7 @@ const char WEB_PAGE_FOOTER[] PROGMEM = "<br/><br/><a href='/' style='display:inl
                 "<a href='https://codefor.de/stuttgart/' target='_blank' rel='noreferrer' style='display:inline;background:none;color:black;'>&copy; Open Knowledge Lab Stuttgart a.o. (Code for Germany)</a></div></body></html>\r\n";
 
 const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a href='/values'>{t}</a><br/>\
+<a href='/status'>{s}</a><br/>\
 <a href='https://maps.sensor.community/' target='_blank' rel='noreferrer'>" INTL_ACTIVE_SENSORS_MAP "</a><br/>\
 <a href='/config'>{conf}</a><br/>\
 <a href='/removeConfig'>" INTL_CONFIGURATION_DELETE "</a><br/>\

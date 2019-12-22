@@ -67,6 +67,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "Restart senzoru";
 #define INTL_HOME "Hlavní stránka"
 #define INTL_BACK_TO_HOME "Zpìt na hlavní stránku"
 const char INTL_CURRENT_DATA[] PROGMEM = "Aktuální hodnoty";
+const char INTL_DEVICE_STATUS[] PROGMEM = "stav pohonu";
 #define INTL_ACTIVE_SENSORS_MAP "Mapa aktivních senzorù (externí odkaz)"
 #define INTL_CONFIGURATION_DELETE "Smazat konfiguraci"
 #define INTL_CONFIGURATION_REALLY_DELETE "Opravdu smazat konfiguraci?"

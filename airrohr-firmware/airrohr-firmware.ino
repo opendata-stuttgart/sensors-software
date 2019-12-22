@@ -552,6 +552,7 @@ struct struct_wifiInfo {
 	int32_t channel;
 #if defined(ESP8266)
 	bool isHidden;
+	uint8_t unused[3];
 #endif
 };
 
@@ -678,7 +679,7 @@ static void display_debug(const String& text1, const String& text2) {
  *****************************************************************/
 static String check_display_value(double value, double undef, uint8_t len, uint8_t str_len) {
 	RESERVE_STRING(s, 15);
-	s = (value != undef ? String(value, len) : "-");
+	s = (value != undef ? String(value, len) : String("-"));
 	while (s.length() < str_len) {
 		s = " " + s;
 	}
@@ -1267,6 +1268,15 @@ static void add_table_row_from_value(String& page_content, const __FlashStringHe
 	page_content += s;
 }
 
+static void add_table_row_from_value(String& page_content, const __FlashStringHelper* param, const String& value, const char* unit = nullptr) {
+	RESERVE_STRING(s, MED_STR);
+	s = F("<tr><td>{p}</td><td class='r'>{v}&nbsp;{u}</td></tr>");
+	s.replace("{p}", param);
+	s.replace("{v}", value);
+	s.replace("{u}", String(unit));
+	page_content += s;
+}
+
 static int32_t calcWiFiSignalQuality(int32_t rssi) {
 	// Treat 0 or positive values as 0%
 	if (rssi >= 0 || rssi < -100) {
@@ -1363,6 +1373,7 @@ static void webserver_root() {
 		// Enable Pagination
 		page_content += FPSTR(WEB_ROOT_PAGE_CONTENT);
 		page_content.replace(F("{t}"), FPSTR(INTL_CURRENT_DATA));
+		page_content.replace(F("{s}"), FPSTR(INTL_DEVICE_STATUS));
 		page_content.replace(F("{conf}"), FPSTR(INTL_CONFIGURATION));
 		page_content.replace(F("{restart}"), FPSTR(INTL_RESTART_SENSOR));
 		page_content.replace(F("{debug_setting}"), FPSTR(INTL_DEBUG_SETTING_TO));
@@ -1788,13 +1799,14 @@ static void webserver_values() {
 	} else {
 		RESERVE_STRING(page_content, XLARGE_STR);
 		start_html_page(page_content, FPSTR(INTL_CURRENT_DATA));
-		const String unit_PM = "µg/m³";
-		const String unit_T = "°C";
-		const String unit_H = "%";
-		const String unit_P = "hPa";
-		const String unit_NC = "#/cm³";
-		const String unit_TS = "µm";
-		const String unit_LA = "dB(A)";
+		const String unit_PM("µg/m³");
+		const String unit_Deg("°");
+		const String unit_T("°C");
+		const String unit_H("%");
+		const String unit_P("hPa");
+		const String unit_NC(F("#/cm³"));
+		const String unit_TS("µm");
+		const String unit_LA(F("dB(A)"));
 
 		const int signal_quality = calcWiFiSignalQuality(last_signal_strength);
 		debug_outln_info(F("ws: values ..."));
@@ -1818,10 +1830,6 @@ static void webserver_values() {
 			page_content += FPSTR(EMPTY_ROW);
 			add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), FPSTR(WEB_PM25), check_display_value(last_value_SDS_P2, -1, 1, 0), unit_PM);
 			add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), FPSTR(WEB_PM10), check_display_value(last_value_SDS_P1, -1, 1, 0), unit_PM);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), F(INTL_FIRMWARE), last_value_SDS_version, emptyString);
-			if (SDS_error_count > 0) {
-				add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), F(INTL_ERROR), String(SDS_error_count), emptyString);
-			}
 		}
 		if (cfg::pms_read) {
 			page_content += FPSTR(EMPTY_ROW);
@@ -1888,8 +1896,8 @@ static void webserver_values() {
 		}
 		if (cfg::gps_read) {
 			page_content += FPSTR(EMPTY_ROW);
-			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_LATITUDE), check_display_value(last_value_GPS_lat, -200.0, 6, 0), "°");
-			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_LONGITUDE), check_display_value(last_value_GPS_lon, -200.0, 6, 0), "°");
+			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_LATITUDE), check_display_value(last_value_GPS_lat, -200.0, 6, 0), unit_Deg);
+			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_LONGITUDE), check_display_value(last_value_GPS_lon, -200.0, 6, 0), unit_Deg);
 			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_ALTITUDE), check_display_value(last_value_GPS_alt, -1000.0, 2, 0), "m");
 			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_DATE), last_value_GPS_date, emptyString);
 			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_TIME), last_value_GPS_time, emptyString);
@@ -1900,29 +1908,96 @@ static void webserver_values() {
 
 		add_table_row_from_value(page_content, F("WiFi"), FPSTR(INTL_SIGNAL_STRENGTH), String(last_signal_strength), "dBm");
 		add_table_row_from_value(page_content, F("WiFi"), FPSTR(INTL_SIGNAL_QUALITY), String(signal_quality), "%");
-		if (WiFi_error_count > 0) {
-			add_table_row_from_value(page_content, F("WiFi"), FPSTR(INTL_ERROR), String(WiFi_error_count), emptyString);
-		}
 
-		if (count_sends > 0) {
-			page_content += FPSTR(EMPTY_ROW);
-			page_content += F("<tr><td colspan='2'>" INTL_NUMBER_OF_MEASUREMENTS "</td><td class='r'>");
-			page_content += count_sends;
-			page_content += F("</td></tr>");
-			if (sending_time > 0) {
-				page_content += F("<tr><td colspan='2'>" INTL_TIME_SENDING_MS "</td><td class='r'>");
-				page_content += String(sending_time);
-				page_content += F("&nbsp;ms");
-				page_content += F("</td></tr>");
-			}
-			if (sendData_error_count > 0) {
-				add_table_row_from_value(page_content, F(INTL_SENSOR), F(INTL_ERROR), String(sendData_error_count), emptyString);
-			}
-		}
-
+		page_content += FPSTR(EMPTY_ROW);
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 		end_html_page(page_content);
 	}
+}
+
+static String delayToString(unsigned time_ms) {
+
+	char buf[64];
+	String s;
+
+	if (time_ms > 2 * 1000 * 60 * 60 * 24) {
+		sprintf_P(buf, PSTR("%d days, "), time_ms / (1000 * 60 * 60 * 24));
+		s += buf;
+		time_ms %= 1000 * 60 * 60 * 24;
+	}
+
+	if (time_ms > 2 * 1000 * 60 * 60) {
+		sprintf_P(buf, PSTR("%d hours, "), time_ms / (1000 * 60 * 60));
+		s += buf;
+		time_ms %= 1000 * 60 * 60;
+	}
+
+	if (time_ms > 2 * 1000 * 60) {
+		sprintf_P(buf, PSTR("%d min, "), time_ms / (1000 * 60));
+		s += buf;
+		time_ms %= 1000 * 60;
+	}
+
+	if (time_ms > 2 * 1000) {
+		sprintf_P(buf, PSTR("%ds, "), time_ms / 1000);
+		s += buf;
+	}
+
+	if (s.length() > 2) {
+		s = s.substring(0, s.length() - 2);
+	}
+
+	return s;
+}
+
+/*****************************************************************
+ * Webserver root: show device status
+ *****************************************************************/
+static void webserver_status() {
+	if (WiFi.status() != WL_CONNECTED) {
+		sendHttpRedirect();
+		return;
+	}
+
+	RESERVE_STRING(page_content, XLARGE_STR);
+	start_html_page(page_content, FPSTR(INTL_DEVICE_STATUS));
+
+	debug_outln_info(F("ws: status ..."));
+	server.sendContent(page_content);
+	page_content = F("<table cellspacing='0' border='1' cellpadding='5'>\n"
+			  "<tr><th> " INTL_PARAMETER "</th><th>" INTL_VALUE "</th></tr>");
+	add_table_row_from_value(page_content, FPSTR(INTL_FIRMWARE), SOFTWARE_VERSION);
+	String versionHtml(ESP.getFullVersion());
+	versionHtml.replace("/", BR_TAG);
+	add_table_row_from_value(page_content, F("Arduino Version"), versionHtml);
+	add_table_row_from_value(page_content, F("Free Memory"), String(ESP.getFreeHeap()));
+	add_table_row_from_value(page_content, F("Heap Fragmentation"), String(ESP.getHeapFragmentation()), "%");
+	add_table_row_from_value(page_content, F("Uptime"), delayToString(millis() - time_point_device_start_ms));
+	if (cfg::sds_read) {
+		page_content += FPSTR(EMPTY_ROW);
+		add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), last_value_SDS_version);
+	}
+
+	page_content += FPSTR(EMPTY_ROW);
+	page_content += F("<tr><td colspan='2'><b>" INTL_ERROR "</b></td></tr>");
+	add_table_row_from_value(page_content, F("WiFi"), String(WiFi_error_count));
+	add_table_row_from_value(page_content, F("Data Send"), String(sendData_error_count));
+	add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), String(SDS_error_count));
+	add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), String(SPS30_read_error_counter));
+
+	server.sendContent(page_content);
+	page_content = emptyString;
+
+	if (count_sends > 0) {
+		page_content += FPSTR(EMPTY_ROW);
+		add_table_row_from_value(page_content, F(INTL_NUMBER_OF_MEASUREMENTS), String(count_sends));
+		if (sending_time > 0) {
+			add_table_row_from_value(page_content, F(INTL_TIME_SENDING_MS), String(sending_time), "ms");
+		}
+	}
+
+	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+	end_html_page(page_content);
 }
 
 /*****************************************************************
@@ -2115,6 +2190,7 @@ static void setup_webserver() {
 	server.on(F("/config"), webserver_config);
 	server.on(F("/wifi"), webserver_wifi);
 	server.on(F("/values"), webserver_values);
+	server.on(F("/status"), webserver_status);
 	server.on(F("/generate_204"), webserver_config);
 	server.on(F("/fwlink"), webserver_config);
 	server.on(F("/debug"), webserver_debug_level);
@@ -2365,6 +2441,7 @@ static unsigned long sendData(const LoggerEntry logger, const String& data, cons
 	HTTPClient http;
 	http.setTimeout(20 * 1000);
 	http.setUserAgent(SOFTWARE_VERSION + '/' + esp_chipid);
+    http.setReuse(false);
 	bool send_success = false;
 	if (logger == LoggerCustom && (*cfg::user_custom || *cfg::pwd_custom)) {
 		http.setAuthorization(cfg::user_custom, cfg::pwd_custom);
@@ -2462,7 +2539,8 @@ static void send_csv(const String& data) {
 	debug_outln_info(F("CSV Output: "), data);
 	if (!err) {
 		String headline = F("Timestamp_ms;");
-		String valueline = String(act_milli) + ';';
+		String valueline(act_milli);
+		valueline += ';';
 		for (JsonObject measurement : json2data[FPSTR(JSON_SENSOR_DATA_VALUES)].as<JsonArray>()) {
 			headline += measurement["value_type"].as<char*>();
 			headline += ';';
@@ -3290,6 +3368,7 @@ static bool fwDownloadStream(WiFiClientSecure& client, const String& url, Stream
 	http.setUserAgent(SOFTWARE_VERSION + ' ' + esp_chipid + ' ' + SDS_version_date() + ' ' +
 				 String(cfg::current_lang) + ' ' + String(CURRENT_LANG) + ' ' +
 				 String(cfg::use_beta ? "BETA" : ""));
+    http.setReuse(false);
 
 	debug_outln_verbose(F("HTTP GET: "), String(FPSTR(FW_DOWNLOAD_HOST)) + ':' + String(FW_DOWNLOAD_PORT) + url);
 
@@ -3389,7 +3468,8 @@ static void twoStageOTAUpdate() {
 	client.setSession(&clientSession);
 	configureCACertTrustAnchor(&client);
 
-	String fetch_md5_name = fetch_name + F(".md5");
+	String fetch_md5_name(fetch_name);
+	fetch_md5_name += F(".md5");
 
 	StreamString newFwmd5;
 	if (!fwDownloadStream(client, fetch_md5_name, &newFwmd5))
@@ -4057,7 +4137,12 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("aircms.online: "));
 		unsigned long ts = millis() / 1000;
 		String token = WiFi.macAddress();
-		String aircms_data = "L=" + esp_chipid + "&t=" + String(ts, DEC) + "&airrohr=" + data;
+		String aircms_data("L=");
+		aircms_data += esp_chipid;
+		aircms_data += "&t=";
+		aircms_data += String(ts, DEC);
+		aircms_data += "&airrohr=";
+		aircms_data += data;
 		String aircms_url(FPSTR(URL_AIRCMS));
 		aircms_url += hmac1(sha1Hex(token), aircms_data + token);
 

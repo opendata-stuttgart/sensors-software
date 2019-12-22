@@ -67,6 +67,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "Перезапустить устр�
 #define INTL_HOME "Меню"
 #define INTL_BACK_TO_HOME "Вернуться в основное меню"
 const char INTL_CURRENT_DATA[] PROGMEM = "Текущие значения";
+const char INTL_DEVICE_STATUS[] PROGMEM = "состояние устройства";
 #define INTL_ACTIVE_SENSORS_MAP "Карта активных датчиков (внешняя ссылка)"
 #define INTL_CONFIGURATION_DELETE "Удалить конфигурацию"
 #define INTL_CONFIGURATION_REALLY_DELETE "Подтвердите удаление конфигурации!"

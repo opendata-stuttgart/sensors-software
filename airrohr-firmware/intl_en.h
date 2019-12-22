@@ -67,6 +67,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "Restart sensor";
 #define INTL_HOME "Home"
 #define INTL_BACK_TO_HOME "Back to home page"
 const char INTL_CURRENT_DATA[] PROGMEM = "Current data";
+const char INTL_DEVICE_STATUS[] PROGMEM = "Device status";
 #define INTL_ACTIVE_SENSORS_MAP "Active sensors map(external link)"
 #define INTL_CONFIGURATION_DELETE "Configuration delete"
 #define INTL_CONFIGURATION_REALLY_DELETE "Are you sure you want to delete the configuration?"

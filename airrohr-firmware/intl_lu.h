@@ -67,6 +67,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "Sensor nei starten";
 #define INTL_HOME "Iwwersiicht"
 #define INTL_BACK_TO_HOME "Zréck op d'Haaptsäit"
 const char INTL_CURRENT_DATA[] PROGMEM = "Aktuell Wäerter";
+const char INTL_DEVICE_STATUS[] PROGMEM = "Apparat Status";
 #define INTL_ACTIVE_SENSORS_MAP "Kaart vun den aktive Sensoren (externen Link)"
 #define INTL_CONFIGURATION_DELETE "Konfiguratioun läschen"
 #define INTL_CONFIGURATION_REALLY_DELETE "Konfiguratioun wierklech läschen?"
