@@ -1,9 +1,9 @@
 /*
  *	airRohr firmware
  *	Copyright (C) 2016-2018  Code for Stuttgart a.o.
- * 
+ *
  *  Turkish translations
- * 
+ *
  *	Texts should be as short as possible
  *	We only have 512 kB for the entire firmware
  */
@@ -53,12 +53,12 @@ const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = " Ölçüm aralığı";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Süre yönlendirici(Router) modu";
 const char INTL_MORE_APIS[] PROGMEM = "Daha fazla uygulama programlama arayüzü (API)";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "uygulama programlama arayüzüne (API)veri gönder";
-const char INTL_SERVER[] PROGMEM = "Sunucu"; 
-const char INTL_PATH[] PROGMEM = "Yol"; 
-const char INTL_PORT[] PROGMEM = "kapı"; 
-const char INTL_USER[] PROGMEM = "kullanıcı"; 
-const char INTL_PASSWORD[] PROGMEM = "parola"; 
-const char INTL_SEND_TO[] PROGMEM = "Gönder {v}"; 
+const char INTL_SERVER[] PROGMEM = "Sunucu";
+const char INTL_PATH[] PROGMEM = "Yol";
+const char INTL_PORT[] PROGMEM = "kapı";
+const char INTL_USER[] PROGMEM = "kullanıcı";
+const char INTL_PASSWORD[] PROGMEM = "parola";
+const char INTL_SEND_TO[] PROGMEM = "Gönder {v}";
 const char INTL_READ_FROM[] PROGMEM = "Oku {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "sistem yeniden yükleniyor";
 const char INTL_RESTART_DEVICE[] PROGMEM = "Cihazı yeniden bağlat";

@@ -1,9 +1,9 @@
 /*
  *	airRohr firmware
  *	Copyright (C) 2016-2018  Code for Stuttgart a.o.
- * 
+ *
  *  Translation template
- * 
+ *
  *	Texts should be as short as possible
  *	We only have 512 kB for the entire firmware
  */
@@ -53,12 +53,12 @@ const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "";
 const char INTL_MORE_APIS[] PROGMEM = "";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "";
-const char INTL_SERVER[] PROGMEM = ""; 
-const char INTL_PATH[] PROGMEM = ""; 
-const char INTL_PORT[] PROGMEM = ""; 
-const char INTL_USER[] PROGMEM = ""; 
-const char INTL_PASSWORD[] PROGMEM = ""; 
-const char INTL_SEND_TO[] PROGMEM = ""; 
+const char INTL_SERVER[] PROGMEM = "";
+const char INTL_PATH[] PROGMEM = "";
+const char INTL_PORT[] PROGMEM = "";
+const char INTL_USER[] PROGMEM = "";
+const char INTL_PASSWORD[] PROGMEM = "";
+const char INTL_SEND_TO[] PROGMEM = "";
 const char INTL_READ_FROM[] PROGMEM = "";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "";
 const char INTL_RESTART_DEVICE[] PROGMEM = "";
