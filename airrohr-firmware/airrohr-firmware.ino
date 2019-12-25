@@ -277,6 +277,7 @@ namespace cfg {
 	bool has_flipped_display = HAS_FLIPPED_DISPLAY;
 	bool has_lcd1602 = HAS_LCD1602;
 	bool has_lcd1602_27 = HAS_LCD1602_27;
+	bool has_lcd2004 = HAS_LCD2004;
 	bool has_lcd2004_27 = HAS_LCD2004_27;
 
 	bool display_wifi_info = DISPLAY_WIFI_INFO;
@@ -360,9 +361,8 @@ float last_value_dnms_la_max = -1.0;
  *****************************************************************/
 SSD1306 display(0x3c, I2C_PIN_SDA, I2C_PIN_SCL);
 SH1106 display_sh1106(0x3c, I2C_PIN_SDA, I2C_PIN_SCL);
-LiquidCrystal_I2C lcd_1602_27(0x27, 16, 2);
-LiquidCrystal_I2C lcd_1602_3f(0x3F, 16, 2);
-LiquidCrystal_I2C lcd_2004_27(0x27, 20, 4);
+LiquidCrystal_I2C* lcd_1602 = nullptr;
+LiquidCrystal_I2C* lcd_2004 = nullptr;
 
 /*****************************************************************
  * SDS011 declarations                                           *
@@ -542,7 +542,7 @@ bool first_cycle = true;
 bool sntp_time_is_set = false;
 
 unsigned long count_sends = 0;
-unsigned long next_display_millis = 0;
+unsigned long last_display_millis = 0;
 uint8_t next_display_count = 0;
 
 struct struct_wifiInfo {
@@ -651,26 +651,19 @@ static void display_debug(const String& text1, const String& text2) {
 		display_sh1106.drawString(0, 24, text2);
 		display_sh1106.display();
 	}
-	if (cfg::has_lcd1602) {
-		lcd_1602_3f.clear();
-		lcd_1602_3f.setCursor(0, 0);
-		lcd_1602_3f.print(text1);
-		lcd_1602_3f.setCursor(0, 1);
-		lcd_1602_3f.print(text2);
+	if (lcd_1602) {
+		lcd_1602->clear();
+		lcd_1602->setCursor(0, 0);
+		lcd_1602->print(text1);
+		lcd_1602->setCursor(0, 1);
+		lcd_1602->print(text2);
 	}
-	if (cfg::has_lcd1602_27) {
-		lcd_1602_27.clear();
-		lcd_1602_27.setCursor(0, 0);
-		lcd_1602_27.print(text1);
-		lcd_1602_27.setCursor(0, 1);
-		lcd_1602_27.print(text2);
-	}
-	if (cfg::has_lcd2004_27) {
-		lcd_2004_27.clear();
-		lcd_2004_27.setCursor(0, 0);
-		lcd_2004_27.print(text1);
-		lcd_2004_27.setCursor(0, 1);
-		lcd_2004_27.print(text2);
+	if (lcd_2004) {
+		lcd_2004->clear();
+		lcd_2004->setCursor(0, 0);
+		lcd_2004->print(text1);
+		lcd_2004->setCursor(0, 1);
+		lcd_2004->print(text2);
 	}
 }
 
@@ -1501,6 +1494,7 @@ static void webserver_config_send_body_get(String& page_content) {
 	add_form_checkbox(page_content, Config_has_lcd1602_27, FPSTR(INTL_LCD1602_27));
 	add_form_checkbox(page_content, Config_has_lcd1602, FPSTR(INTL_LCD1602_3F));
 	add_form_checkbox(page_content, Config_has_lcd2004_27, FPSTR(INTL_LCD2004_27));
+	add_form_checkbox(page_content, Config_has_lcd2004, FPSTR(INTL_LCD2004_3F));
 	add_form_checkbox(page_content, Config_display_wifi_info, FPSTR(INTL_DISPLAY_WIFI_INFO));
 	add_form_checkbox(page_content, Config_display_device_info, FPSTR(INTL_DISPLAY_DEVICE_INFO));
 
@@ -1638,6 +1632,7 @@ static void webserver_config_send_body_post(String& page_content) {
 	add_line_value_bool(page_content, FPSTR(INTL_LCD1602_27), has_lcd1602_27);
 	add_line_value_bool(page_content, FPSTR(INTL_LCD1602_3F), has_lcd1602);
 	add_line_value_bool(page_content, FPSTR(INTL_LCD2004_27), has_lcd2004_27);
+	add_line_value_bool(page_content, FPSTR(INTL_LCD2004_3F), has_lcd2004);
 	add_line_value_bool(page_content, FPSTR(INTL_DISPLAY_WIFI_INFO), display_wifi_info);
 	add_line_value_bool(page_content, FPSTR(INTL_DISPLAY_DEVICE_INFO), display_device_info);
 	add_line_value(page_content, FPSTR(INTL_DEBUG_LEVEL), String(debug));
@@ -2313,7 +2308,7 @@ static void wifiConfig() {
 	debug_outln_info(FPSTR(DBG_TXT_SEP));
 	debug_outln_info_bool(F("Autoupdate: "), cfg::auto_update);
 	debug_outln_info_bool(F("Display: "), cfg::has_display);
-	debug_outln_info_bool(F("LCD 1602: "), cfg::has_lcd1602);
+	debug_outln_info_bool(F("LCD 1602: "), !!lcd_1602);
 	debug_outln_info(F("Debug: "), String(cfg::debug));
 	wificonfig_loop = false;
 }
@@ -3685,7 +3680,7 @@ static void display_values() {
 	}
 	// update size of "screens" when adding more screens!
 
-	if (cfg::has_display || cfg::has_sh1106 || cfg::has_lcd2004_27) {
+	if (cfg::has_display || cfg::has_sh1106 || lcd_2004) {
 		switch (screens[next_display_count % screen_count]) {
 		case 1:
 			display_header = pm25_sensor;
@@ -3770,20 +3765,20 @@ static void display_values() {
 			display_sh1106.drawString(64, 52, displayGenerateFooter(screen_count));
 			display_sh1106.display();
 		}
-		if (cfg::has_lcd2004_27) {
+		if (lcd_2004) {
 			display_header = std::move(String((next_display_count % screen_count) + 1) + '/' + String(screen_count) + ' ' + display_header);
 			display_lines[0].replace(" µg/m³", emptyString);
 			display_lines[0].replace("°", String(char(223)));
 			display_lines[1].replace(" µg/m³", emptyString);
-			lcd_2004_27.clear();
-			lcd_2004_27.setCursor(0, 0);
-			lcd_2004_27.print(display_header);
-			lcd_2004_27.setCursor(0, 1);
-			lcd_2004_27.print(display_lines[0]);
-			lcd_2004_27.setCursor(0, 2);
-			lcd_2004_27.print(display_lines[1]);
-			lcd_2004_27.setCursor(0, 3);
-			lcd_2004_27.print(display_lines[2]);
+			lcd_2004->clear();
+			lcd_2004->setCursor(0, 0);
+			lcd_2004->print(display_header);
+			lcd_2004->setCursor(0, 1);
+			lcd_2004->print(display_lines[0]);
+			lcd_2004->setCursor(0, 2);
+			lcd_2004->print(display_lines[1]);
+			lcd_2004->setCursor(0, 3);
+			lcd_2004->print(display_lines[2]);
 		}
 	}
 
@@ -3792,7 +3787,7 @@ static void display_values() {
 // T/H: -10.0°C/100.0%
 // T/P: -10.0°C/1000hPa
 
-	if (cfg::has_lcd1602 || cfg::has_lcd1602_27 ) {
+	if (lcd_1602) {
 		switch (screens[next_display_count % screen_count]) {
 		case 1:
 			display_lines[0] = "PM2.5: ";
@@ -3834,24 +3829,14 @@ static void display_values() {
 
 		display_lines[0].replace("°", String(char(223)));
 
-		if (cfg::has_lcd1602_27) {
-			lcd_1602_27.clear();
-			lcd_1602_27.setCursor(0, 0);
-			lcd_1602_27.print(display_lines[0]);
-			lcd_1602_27.setCursor(0, 1);
-			lcd_1602_27.print(display_lines[1]);
-		}
-		if (cfg::has_lcd1602) {
-			lcd_1602_3f.clear();
-			lcd_1602_3f.setCursor(0, 0);
-			lcd_1602_3f.print(display_lines[0]);
-			lcd_1602_3f.setCursor(0, 1);
-			lcd_1602_3f.print(display_lines[1]);
-		}
+		lcd_1602->clear();
+		lcd_1602->setCursor(0, 0);
+		lcd_1602->print(display_lines[0]);
+		lcd_1602->setCursor(0, 1);
+		lcd_1602->print(display_lines[1]);
 	}
 	yield();
 	next_display_count++;
-	next_display_millis = millis() + DISPLAY_UPDATE_INTERVAL_MS;
 }
 
 /*****************************************************************
@@ -3870,17 +3855,26 @@ static void init_display() {
  * Init LCD display                                              *
  *****************************************************************/
 static void init_lcd() {
-	if (cfg::has_lcd1602_27) {
-		lcd_1602_27.init();
-		lcd_1602_27.backlight();
+    if (cfg::has_lcd1602) {
+        lcd_1602 = new LiquidCrystal_I2C(0x3f, 16, 2);
+    }
+	else if (cfg::has_lcd1602_27) {
+        lcd_1602 = new LiquidCrystal_I2C(0x27, 16, 2);
 	}
-	if (cfg::has_lcd1602) {
-		lcd_1602_3f.init();
-		lcd_1602_3f.backlight();
+    if (lcd_1602) {
+		lcd_1602->init();
+		lcd_1602->backlight();
 	}
-	if (cfg::has_lcd2004_27) {
-		lcd_2004_27.init();
-		lcd_2004_27.backlight();
+
+	if (cfg::has_lcd2004) {
+		lcd_2004 = new LiquidCrystal_I2C(0x3f, 20, 4);
+	}
+	else if (cfg::has_lcd2004_27) {
+		lcd_2004 = new LiquidCrystal_I2C(0x27, 20, 4);
+	}
+	if (lcd_2004) {
+		lcd_2004->init();
+		lcd_2004->backlight();
 	}
 }
 
@@ -4082,10 +4076,10 @@ static void logEnabledDisplays() {
 	if (cfg::has_display || cfg::has_sh1106) {
 		debug_outln_info(F("Show on OLED..."));
 	}
-	if (cfg::has_lcd1602 || cfg::has_lcd1602_27) {
+	if (lcd_1602) {
 		debug_outln_info(F("Show on LCD 1602 ..."));
 	}
-	if (cfg::has_lcd2004_27) {
+	if (lcd_2004) {
 		debug_outln_info(F("Show on LCD 2004 ..."));
 	}
 }
@@ -4251,8 +4245,7 @@ void setup(void) {
 
 	starttime = millis();									// store the start time
 	last_update_attempt = time_point_device_start_ms = starttime;
-	starttime_SDS = starttime;
-	next_display_millis = starttime + DISPLAY_UPDATE_INTERVAL_MS;
+	last_display_millis = starttime_SDS = starttime;
 }
 
 /*****************************************************************
@@ -4366,9 +4359,10 @@ void loop(void) {
 		}
 	}
 
-	if ((cfg::has_display || cfg::has_sh1106 || cfg::has_lcd2004_27 || cfg::has_lcd1602 ||
-			cfg::has_lcd1602_27) && (act_milli > next_display_millis)) {
+	if ((msSince(last_display_millis) > DISPLAY_UPDATE_INTERVAL_MS) &&
+			(cfg::has_display || cfg::has_sh1106 || lcd_1602 || lcd_2004)) {
 		display_values();
+		last_display_millis = act_milli;
 	}
 
 	server.handleClient();
