@@ -51,9 +51,11 @@ input[type='text']{width:100%;}\
 input[type='password']{width:100%;}\
 input[type='submit']{border-radius:5px;font-size:medium;padding:5px;}\
 .s_green{padding:9px !important;width:100%;border-style:none;background:#3ba;color:white;text-align:left;}\
+.s_red{padding:9px !important;width:100%;border-style:none;background:#D44;color:white;text-align:left;}\
+.s_red:hover {background:#E33;}\
 </style>\
 </head><body>\
-<div style='min-height:120px;background-color:#3ba;margin-bottom:20px'>\
+<div style='min-height:129px;background-color:#3ba;margin-bottom:20px'>\
 <a href='/' style='background:none;display:inline'><img src='/images?name=luftdaten_logo' style='float:left;margin:20px' width='100' height='89'/></a>";
 
 const char WEB_PAGE_HEADER_BODY[] PROGMEM = "<h3 style='margin:0'>" INTL_PM_SENSOR "</h3>\
@@ -92,13 +94,13 @@ function load_wifi_list(){var x=new XMLHttpRequest();x.open('GET','/wifi');x.onl
 
 const char WEB_REMOVE_CONFIG_CONTENT[] PROGMEM = "<h3>" INTL_CONFIGURATION_REALLY_DELETE "</h3>\
 <table><tr><td><form method='POST' action='/removeConfig'>\
-<input type='submit' class='s_green' name='submit' value='" INTL_DELETE "'/></form></td>\
+<input type='submit' class='s_red' name='submit' value='" INTL_DELETE "'/></form></td>\
 <td><a href='/'>" INTL_CANCEL "</a></td></tr></table>\
 ";
 
 const char WEB_RESET_CONTENT[] PROGMEM = "<h3>" INTL_REALLY_RESTART_SENSOR "</h3>" \
 "<table><tr><td><form method='POST' action'/reset'>" \
-"<input type='submit' class='s_green' name='submit' value='" INTL_RESTART "'/>"\
+"<input type='submit' class='s_red' name='submit' value='" INTL_RESTART "'/>"\
 "</form></td><td><a href='/'>" INTL_CANCEL "</a></td></tr></table>";
 
 const char WEB_IOS_REDIRECT[] PROGMEM = "<html><body>Redirecting...\
