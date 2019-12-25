@@ -21,7 +21,7 @@ const char INTL_SAVE[] PROGMEM = "Zapisz";
 const char INTL_SENSORS[] PROGMEM = "Sensory";
 const char INTL_SDS011[] PROGMEM = "SDS011 ({pm})";
 const char INTL_PMS[] PROGMEM = "Plantower PMS(1,3,5,6,7)003 ({pm})";
-const char INTL_HPM[] PROGMEM = "Honeywell czujnik pyłu zawieszonego";
+const char INTL_HPM[] PROGMEM = "Honeywell ({pm})";
 const char INTL_SPS30[] PROGMEM = "Sensirion SPS30 ({pm})";
 const char INTL_PPD42NS[] PROGMEM = "PPD42NS ({pm})";
 const char INTL_DHT22[] PROGMEM = "DHT22 ({t}, {h})";
@@ -77,7 +77,7 @@ const char INTL_DEVICE_STATUS[] PROGMEM = "Stan urządzenia";
 #define INTL_RESTART "Uruchom ponownie"
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Zapisz i zrestartuj";
 #define INTL_FIRMWARE "Wersja firmware"
-const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Ustaw poziom debugowania na ";
+const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Ustawiono poziom debugowania na ";
 #define INTL_NONE "wyłączony"
 #define INTL_ERROR "tylko błędy"
 #define INTL_WARNING "ostrzeżenia"
