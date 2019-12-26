@@ -151,8 +151,8 @@ void BMX280::setSampling(sensor_mode mode,
     // DS 5.4.3)
     write8(BMX280_REGISTER_CONTROLHUMID, _humReg.get());
   }
-  write8(BMX280_REGISTER_CONTROL, _measReg.get());
   write8(BMX280_REGISTER_CONFIG, _configReg.get());
+  write8(BMX280_REGISTER_CONTROL, _measReg.get());
 }
 
 /*!
