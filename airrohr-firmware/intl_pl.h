@@ -1,9 +1,9 @@
 /*
  *	airRohr firmware
  *	Copyright (C) 2016-2018  Code for Stuttgart a.o.
- * 
+ *
  *  Polish translations
- * 
+ *
  *	Texts should be as short as possible
  *	We only have 512 kB for the entire firmware
  */
@@ -21,7 +21,7 @@ const char INTL_SAVE[] PROGMEM = "Zapisz";
 const char INTL_SENSORS[] PROGMEM = "Sensory";
 const char INTL_SDS011[] PROGMEM = "SDS011 ({pm})";
 const char INTL_PMS[] PROGMEM = "Plantower PMS(1,3,5,6,7)003 ({pm})";
-const char INTL_HPM[] PROGMEM = "Honeywell czujnik pyłu zawieszonego";
+const char INTL_HPM[] PROGMEM = "Honeywell ({pm})";
 const char INTL_SPS30[] PROGMEM = "Sensirion SPS30 ({pm})";
 const char INTL_PPD42NS[] PROGMEM = "PPD42NS ({pm})";
 const char INTL_DHT22[] PROGMEM = "DHT22 ({t}, {h})";
@@ -46,6 +46,7 @@ const char INTL_FLIP_DISPLAY[] PROGMEM = "Obrót ekranu OLED";
 const char INTL_LCD1602_27[] PROGMEM = "LCD 1602 (I2C: 0x27)";
 const char INTL_LCD1602_3F[] PROGMEM = "LCD 1602 (I2C: 0x3F)";
 const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
+const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Wyświetl info o WiFi";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Wyświetl info o urządzeniu";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Poziom&nbsp;debugowania";
@@ -53,12 +54,12 @@ const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Czas między pomiarami (sek.)"
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Czas trwania w trybie routera (sek.)";
 const char INTL_MORE_APIS[] PROGMEM = "Kolejne API";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Wysyłaj dane do własnego API";
-const char INTL_SERVER[] PROGMEM = "Adres serwera"; 
-const char INTL_PATH[] PROGMEM = "Ścieżka"; 
-const char INTL_PORT[] PROGMEM = "Port"; 
-const char INTL_USER[] PROGMEM = "Nazwa użytkownika"; 
-const char INTL_PASSWORD[] PROGMEM = "Hasło"; 
-const char INTL_SEND_TO[] PROGMEM = "Wysyłaj dane do {v}"; 
+const char INTL_SERVER[] PROGMEM = "Adres serwera";
+const char INTL_PATH[] PROGMEM = "Ścieżka";
+const char INTL_PORT[] PROGMEM = "Port";
+const char INTL_USER[] PROGMEM = "Nazwa użytkownika";
+const char INTL_PASSWORD[] PROGMEM = "Hasło";
+const char INTL_SEND_TO[] PROGMEM = "Wysyłaj dane do {v}";
 const char INTL_READ_FROM[] PROGMEM = "Czytaj z {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Ponowne uruchamianie czujnika.";
 const char INTL_RESTART_DEVICE[] PROGMEM = "Uruchom ponownie urządzenie";
@@ -67,6 +68,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "Uruchom ponownie czujnik";
 #define INTL_HOME "Strona startowa"
 #define INTL_BACK_TO_HOME "Powrót do strony startowej"
 const char INTL_CURRENT_DATA[] PROGMEM = "Obecne wskazania";
+const char INTL_DEVICE_STATUS[] PROGMEM = "Stan urządzenia";
 #define INTL_ACTIVE_SENSORS_MAP "Mapa aktywnych czujników (link zewnętrzny)"
 #define INTL_CONFIGURATION_DELETE "Usunięcie konfiguracji"
 #define INTL_CONFIGURATION_REALLY_DELETE "Czy na pewno chcesz usunąć konfigurację?"
@@ -76,7 +78,7 @@ const char INTL_CURRENT_DATA[] PROGMEM = "Obecne wskazania";
 #define INTL_RESTART "Uruchom ponownie"
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Zapisz i zrestartuj";
 #define INTL_FIRMWARE "Wersja firmware"
-const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Ustaw poziom debugowania na ";
+const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Ustawiono poziom debugowania na ";
 #define INTL_NONE "wyłączony"
 #define INTL_ERROR "tylko błędy"
 #define INTL_WARNING "ostrzeżenia"

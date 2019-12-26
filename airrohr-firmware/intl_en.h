@@ -1,9 +1,9 @@
 /*
  *	airRohr firmware
  *	Copyright (C) 2016-2018  Code for Stuttgart a.o.
- * 
+ *
  *  English translations
- * 
+ *
  *	Texts should be as short as possible
  *	We only have 512 kB for the entire firmware
  */
@@ -46,6 +46,7 @@ const char INTL_FLIP_DISPLAY[] PROGMEM = "OLED display flip";
 const char INTL_LCD1602_27[] PROGMEM = "LCD 1602 (I2C: 0x27)";
 const char INTL_LCD1602_3F[] PROGMEM = "LCD 1602 (I2C: 0x3F)";
 const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
+const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Display Wifi info";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Display device info";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;Level";
@@ -53,12 +54,12 @@ const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Measuring interval";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Duration router mode";
 const char INTL_MORE_APIS[] PROGMEM = "More APIs";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Send data to own API";
-const char INTL_SERVER[] PROGMEM = "Server"; 
-const char INTL_PATH[] PROGMEM = "Path"; 
-const char INTL_PORT[] PROGMEM = "Port"; 
-const char INTL_USER[] PROGMEM = "User"; 
-const char INTL_PASSWORD[] PROGMEM = "Password"; 
-const char INTL_SEND_TO[] PROGMEM = "Send to {v}"; 
+const char INTL_SERVER[] PROGMEM = "Server";
+const char INTL_PATH[] PROGMEM = "Path";
+const char INTL_PORT[] PROGMEM = "Port";
+const char INTL_USER[] PROGMEM = "User";
+const char INTL_PASSWORD[] PROGMEM = "Password";
+const char INTL_SEND_TO[] PROGMEM = "Send to {v}";
 const char INTL_READ_FROM[] PROGMEM = "Read from {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Sensor is rebooting.";
 const char INTL_RESTART_DEVICE[] PROGMEM = "Restart device";
@@ -67,6 +68,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "Restart sensor";
 #define INTL_HOME "Home"
 #define INTL_BACK_TO_HOME "Back to home page"
 const char INTL_CURRENT_DATA[] PROGMEM = "Current data";
+const char INTL_DEVICE_STATUS[] PROGMEM = "Device status";
 #define INTL_ACTIVE_SENSORS_MAP "Active sensors map(external link)"
 #define INTL_CONFIGURATION_DELETE "Configuration delete"
 #define INTL_CONFIGURATION_REALLY_DELETE "Are you sure you want to delete the configuration?"

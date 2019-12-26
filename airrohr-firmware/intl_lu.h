@@ -1,9 +1,9 @@
 /*
  *	airRohr firmware
  *	Copyright (C) 2016-2018  Code for Stuttgart a.o.
- * 
+ *
  *  Luxembourgish translations
- * 
+ *
  *	Texts should be as short as possible
  *	We only have 512 kB for the entire firmware
  */
@@ -46,6 +46,7 @@ const char INTL_FLIP_DISPLAY[] PROGMEM = "OLED Display em 180° dréien";
 const char INTL_LCD1602_27[] PROGMEM = "LCD 1602 (I2C: 0x27)";
 const char INTL_LCD1602_3F[] PROGMEM = "LCD 1602 (I2C: 0x3F)";
 const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
+const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "WiFi Info uweisen";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Apparat Info uweisen";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug Niveau";
@@ -53,12 +54,12 @@ const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Mooss-intervall";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Zait&nbsp;Routermodus";
 const char INTL_MORE_APIS[] PROGMEM = "Aner APIs";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Un eegen API schécken";
-const char INTL_SERVER[] PROGMEM = "Server"; 
-const char INTL_PATH[] PROGMEM = "Wee"; 
-const char INTL_PORT[] PROGMEM = "Port"; 
-const char INTL_USER[] PROGMEM = "Benotzer"; 
-const char INTL_PASSWORD[] PROGMEM = "Passwuert"; 
-const char INTL_SEND_TO[] PROGMEM = "Schécken op {v}"; 
+const char INTL_SERVER[] PROGMEM = "Server";
+const char INTL_PATH[] PROGMEM = "Wee";
+const char INTL_PORT[] PROGMEM = "Port";
+const char INTL_USER[] PROGMEM = "Benotzer";
+const char INTL_PASSWORD[] PROGMEM = "Passwuert";
+const char INTL_SEND_TO[] PROGMEM = "Schécken op {v}";
 const char INTL_READ_FROM[] PROGMEM = "Liesen {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "De Sensor gëtt neigestart.";
 const char INTL_RESTART_DEVICE[] PROGMEM = "Apparat nei starten";
@@ -67,6 +68,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "Sensor nei starten";
 #define INTL_HOME "Iwwersiicht"
 #define INTL_BACK_TO_HOME "Zréck op d'Haaptsäit"
 const char INTL_CURRENT_DATA[] PROGMEM = "Aktuell Wäerter";
+const char INTL_DEVICE_STATUS[] PROGMEM = "Apparat Status";
 #define INTL_ACTIVE_SENSORS_MAP "Kaart vun den aktive Sensoren (externen Link)"
 #define INTL_CONFIGURATION_DELETE "Konfiguratioun läschen"
 #define INTL_CONFIGURATION_REALLY_DELETE "Konfiguratioun wierklech läschen?"

@@ -1,9 +1,9 @@
 /*
  *	airRohr firmware
  *	Copyright (C) 2016-2018  Code for Stuttgart a.o.
- * 
+ *
  *  Swedish translations
- * 
+ *
  *	Texts should be as short as possible
  *	We only have 512 kB for the entire firmware
  */
@@ -46,6 +46,7 @@ const char INTL_FLIP_DISPLAY[] PROGMEM = "Vänd OLED-display";
 const char INTL_LCD1602_27[] PROGMEM = "LCD 1602 (I2C: 0x27)";
 const char INTL_LCD1602_3F[] PROGMEM = "LCD 1602 (I2C: 0x3F)";
 const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
+const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Visa WiFi-information";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Visa enhetsinfo";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;level";
@@ -53,12 +54,12 @@ const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Mätintervall";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Permanent&nbsp;router-modus";
 const char INTL_MORE_APIS[] PROGMEM = "Ytterligare APIer";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Skicka till eget API";
-const char INTL_SERVER[] PROGMEM = "Server"; 
-const char INTL_PATH[] PROGMEM = "Sökväg (path)"; 
-const char INTL_PORT[] PROGMEM = "Port"; 
-const char INTL_USER[] PROGMEM = "Användarnamn"; 
-const char INTL_PASSWORD[] PROGMEM = "Lösenord"; 
-const char INTL_SEND_TO[] PROGMEM = "Skicka till {v}"; 
+const char INTL_SERVER[] PROGMEM = "Server";
+const char INTL_PATH[] PROGMEM = "Sökväg (path)";
+const char INTL_PORT[] PROGMEM = "Port";
+const char INTL_USER[] PROGMEM = "Användarnamn";
+const char INTL_PASSWORD[] PROGMEM = "Lösenord";
+const char INTL_SEND_TO[] PROGMEM = "Skicka till {v}";
 const char INTL_READ_FROM[] PROGMEM = "Hämta {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Sensor startas om.";
 const char INTL_RESTART_DEVICE[] PROGMEM = "Starta om enhet";
@@ -67,6 +68,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "Starta om sensor";
 #define INTL_HOME "Översikt"
 #define INTL_BACK_TO_HOME "Tillbaka till översikten"
 const char INTL_CURRENT_DATA[] PROGMEM = "Aktuella mätvärden";
+const char INTL_DEVICE_STATUS[] PROGMEM = "Enhetsstatus";
 #define INTL_ACTIVE_SENSORS_MAP "Karta över aktiva sensorer (extern länk)"
 #define INTL_CONFIGURATION_DELETE "Ta bort konfiguration"
 #define INTL_CONFIGURATION_REALLY_DELETE "Ska konfigurationen tas bort?"

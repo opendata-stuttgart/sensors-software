@@ -1,9 +1,9 @@
 /*
  *	airRohr firmware
  *	Copyright (C) 2016-2018  Code for Stuttgart a.o.
- * 
+ *
  *  Ukrainian translations
- * 
+ *
  *	Texts should be as short as possible
  *	We only have 512 kB for the entire firmware
  */
@@ -46,6 +46,7 @@ const char INTL_FLIP_DISPLAY[] PROGMEM = "Перевернути OLED-диспл
 const char INTL_LCD1602_27[] PROGMEM = "LCD 1602 (I2C: 0x27)";
 const char INTL_LCD1602_3F[] PROGMEM = "LCD 1602 (I2C: 0x3F)";
 const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
+const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Відобразити інформацію про Wi-Fi";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Відобразити інформацію про пристрій";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Рівень&nbsp;Зневадження";
@@ -53,12 +54,12 @@ const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Інтервал між вим
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Тривалість режиму роутера";
 const char INTL_MORE_APIS[] PROGMEM = "Додаткові API";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Відправляти дані на власний API";
-const char INTL_SERVER[] PROGMEM = "Сервер"; 
-const char INTL_PATH[] PROGMEM = "Шлях"; 
-const char INTL_PORT[] PROGMEM = "Порт"; 
-const char INTL_USER[] PROGMEM = "Користувач"; 
-const char INTL_PASSWORD[] PROGMEM = "Пароль"; 
-const char INTL_SEND_TO[] PROGMEM = "Відправляти до {v}"; 
+const char INTL_SERVER[] PROGMEM = "Сервер";
+const char INTL_PATH[] PROGMEM = "Шлях";
+const char INTL_PORT[] PROGMEM = "Порт";
+const char INTL_USER[] PROGMEM = "Користувач";
+const char INTL_PASSWORD[] PROGMEM = "Пароль";
+const char INTL_SEND_TO[] PROGMEM = "Відправляти до {v}";
 const char INTL_READ_FROM[] PROGMEM = "Читати з {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Сенсор перезавантажується.";
 const char INTL_RESTART_DEVICE[] PROGMEM = "Перезапустити пристрій";
@@ -67,6 +68,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "Перезапустити сенс�
 #define INTL_HOME "Головна"
 #define INTL_BACK_TO_HOME "На головну сторінку"
 const char INTL_CURRENT_DATA[] PROGMEM = "Поточні показники";
+const char INTL_DEVICE_STATUS[] PROGMEM = "стан пристрою";
 #define INTL_ACTIVE_SENSORS_MAP "Мапа активних сенсорів(зовнішнє посилання)"
 #define INTL_CONFIGURATION_DELETE "Видалити конфігурацію"
 #define INTL_CONFIGURATION_REALLY_DELETE "Ви точно хочете видалити конфігурацію?"
