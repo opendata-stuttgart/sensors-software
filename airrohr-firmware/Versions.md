@@ -1,3 +1,25 @@
+NRZ-2019-128-B4
+* perfom blocking reads on SDS011 serial responses
+* Add Device Status webpage
+* Set DHCP hostname to the firmware config wifi name (Fixes #595)
+* Polish translation fixes
+* Mark potentially destructive actions with red highlight (idea from nettigo FW)
+* Add support for LCD 2004 on I2C 0x3F address
+
+NRZ-2019-128-B3
+* Fix startup hang on wifis without NTP access (#580)
+* Update SHT3.x to 1.1.6
+
+NRZ-2019-127-1 (intermediate version)
+online since 2019-12-03
+* same as NRZ-2019-127-B2
+
+NRZ-2019-128-B2
+* Initialize MDNS after wifi to restore functionality
+
+NRZ-2019-128-B1
+* next beta version
+
 NRZ-2019-127
 online since 2019-12-02
 * same as NRZ-2019-126-B9

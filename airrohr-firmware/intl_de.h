@@ -1,9 +1,9 @@
 /*
  *	airRohr firmware
  *	Copyright (C) 2016-2018  Code for Stuttgart a.o.
- * 
+ *
  *  German translations
- * 
+ *
  *	Texts should be as short as possible
  *	We only have 512 kB for the entire firmware
  */
@@ -46,6 +46,7 @@ const char INTL_FLIP_DISPLAY[] PROGMEM = "OLED Display um 180° drehen";
 const char INTL_LCD1602_27[] PROGMEM = "LCD 1602 (I2C: 0x27)";
 const char INTL_LCD1602_3F[] PROGMEM = "LCD 1602 (I2C: 0x3F)";
 const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
+const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Zeige WiFi Info";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Zeige Geräteinfo";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;Level";
@@ -53,12 +54,12 @@ const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Messintervall";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Dauer&nbsp;Routermodus";
 const char INTL_MORE_APIS[] PROGMEM = "Weitere APIs";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "An eigene API senden";
-const char INTL_SERVER[] PROGMEM = "Server"; 
-const char INTL_PATH[] PROGMEM = "Pfad"; 
-const char INTL_PORT[] PROGMEM = "Port"; 
-const char INTL_USER[] PROGMEM = "Benutzer"; 
-const char INTL_PASSWORD[] PROGMEM = "Passwort"; 
-const char INTL_SEND_TO[] PROGMEM = "Senden an {v}"; 
+const char INTL_SERVER[] PROGMEM = "Server";
+const char INTL_PATH[] PROGMEM = "Pfad";
+const char INTL_PORT[] PROGMEM = "Port";
+const char INTL_USER[] PROGMEM = "Benutzer";
+const char INTL_PASSWORD[] PROGMEM = "Passwort";
+const char INTL_SEND_TO[] PROGMEM = "Senden an {v}";
 const char INTL_READ_FROM[] PROGMEM = "Lese {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Sensor wird neu gestartet.";
 const char INTL_RESTART_DEVICE[] PROGMEM = "Gerät neu starten";
@@ -67,6 +68,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "Sensor neu starten";
 #define INTL_HOME "Übersicht"
 #define INTL_BACK_TO_HOME "Zurück zur Startseite"
 const char INTL_CURRENT_DATA[] PROGMEM = "Aktuelle Werte";
+const char INTL_DEVICE_STATUS[] PROGMEM = "Gerätestatus";
 #define INTL_ACTIVE_SENSORS_MAP "Karte der aktiven Sensoren (externer Link)"
 #define INTL_CONFIGURATION_DELETE "Konfiguration löschen"
 #define INTL_CONFIGURATION_REALLY_DELETE "Konfiguration wirklich löschen?"
@@ -77,12 +79,12 @@ const char INTL_CURRENT_DATA[] PROGMEM = "Aktuelle Werte";
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Speichern und neu starten";
 #define INTL_FIRMWARE "Firmware"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Setze Debug auf";
-#define INTL_NONE "none"
-#define INTL_ERROR "error"
-#define INTL_WARNING "warning"
-#define INTL_MIN_INFO "min. info"
-#define INTL_MED_INFO "med. info"
-#define INTL_MAX_INFO "max. info"
+#define INTL_NONE "Keine"
+#define INTL_ERROR "Fehler"
+#define INTL_WARNING "Warnungen"
+#define INTL_MIN_INFO "min. Info"
+#define INTL_MED_INFO "mttl. Info"
+#define INTL_MAX_INFO "max. Info"
 #define INTL_CONFIG_DELETED "Config.json gelöscht"
 #define INTL_CONFIG_CAN_NOT_BE_DELETED "Config.json konnte nicht gelöscht werden"
 #define INTL_CONFIG_NOT_FOUND "Config.json nicht gefunden"

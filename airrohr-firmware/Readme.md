@@ -86,11 +86,13 @@ Installierbar über Arduino IDE (Menü Sketch -> Bibliothek einbinden -> Bibliot
 * [ArduinoJson](https://github.com/bblanchon/ArduinoJson) (6.13.0) (MIT)
 * [Adafruit BMP085 library](https://github.com/adafruit/Adafruit-BMP085-Library) (1.0.1) (BSD)
 * [Adafruit HTU21DF library](https://github.com/adafruit/Adafruit_HTU21DF_Library) (1.0.2) (BSD)
+* [Adafruit SHT31 library](https://github.com/adafruit/Adafruit_SHT31)(1.1.5) (BSD)
 * [DallasTemperature](https://github.com/milesburton/Arduino-Temperature-Control-Library) (3.8.0)
 * [ESP8266 and ESP32 Oled driver for SSD1306 display](https://github.com/squix78/esp8266-oled-ssd1306) (4.1.0) (MIT)
 * [OneWire](www.pjrc.com/teensy/td_libs_OneWire.html) (2.3.4)
 * [LiquidCrystal I2C](https://github.com/marcoschwartz/LiquidCrystal_I2C) (1.1.2)
 * [EspSoftwareSerial](https://github.com/plerup/espsoftwareserial)(6.3.0)
+
 Manuell zu installieren:
 * [TinyGPS++](http://arduiniana.org/libraries/tinygpsplus/) (1.0.2) (GNU Lesser Public License >=2.1)
 

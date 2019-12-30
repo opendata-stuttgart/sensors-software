@@ -271,6 +271,9 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 // LCD Display LCD1602 (0x27) connected?
 #define HAS_LCD1602_27 0
 
+// LCD Display LCD2004 connected?
+#define HAS_LCD2004 0
+
 // LCD Display LCD2004 (0x27) connected?
 #define HAS_LCD2004_27 0
 

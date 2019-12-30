@@ -1,9 +1,9 @@
 /*
  *	airRohr firmware
  *	Copyright (C) 2016-2018  Code for Stuttgart a.o.
- * 
+ *
  *  Russian translations
- * 
+ *
  *	Texts should be as short as possible
  *	We only have 512 kB for the entire firmware
  */
@@ -46,19 +46,20 @@ const char INTL_FLIP_DISPLAY[] PROGMEM = "Перевернуть OLED экран
 const char INTL_LCD1602_27[] PROGMEM = "LCD 1602 (I2C: 0x27)";
 const char INTL_LCD1602_3F[] PROGMEM = "LCD 1602 (I2C: 0x3F)";
 const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
+const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Отображать информацию о WiFi";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Отображать информацию об устройстве";
-const char INTL_DEBUG_LEVEL[] PROGMEM = "Уровень отладки";
+const char INTL_DEBUG_LEVEL[] PROGMEM = "Уровень&nbsp;отладки";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Измерительный интервал";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Длительность режима маршрутизатора";
 const char INTL_MORE_APIS[] PROGMEM = "Другие API";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Отправить в свой собственный API";
-const char INTL_SERVER[] PROGMEM = "Сервер"; 
-const char INTL_PATH[] PROGMEM = "Путь"; 
-const char INTL_PORT[] PROGMEM = "Порт"; 
-const char INTL_USER[] PROGMEM = "Пользователь"; 
-const char INTL_PASSWORD[] PROGMEM = "Пароль"; 
-const char INTL_SEND_TO[] PROGMEM = "Отправлять в {v}"; 
+const char INTL_SERVER[] PROGMEM = "Сервер";
+const char INTL_PATH[] PROGMEM = "Путь";
+const char INTL_PORT[] PROGMEM = "Порт";
+const char INTL_USER[] PROGMEM = "Пользователь";
+const char INTL_PASSWORD[] PROGMEM = "Пароль";
+const char INTL_SEND_TO[] PROGMEM = "Отправлять в {v}";
 const char INTL_READ_FROM[] PROGMEM = "Считывать с {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Устройство перезапускается...";
 const char INTL_RESTART_DEVICE[] PROGMEM = "Перезапустить устройство";
@@ -67,6 +68,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "Перезапустить устр�
 #define INTL_HOME "Меню"
 #define INTL_BACK_TO_HOME "Вернуться в основное меню"
 const char INTL_CURRENT_DATA[] PROGMEM = "Текущие значения";
+const char INTL_DEVICE_STATUS[] PROGMEM = "состояние устройства";
 #define INTL_ACTIVE_SENSORS_MAP "Карта активных датчиков (внешняя ссылка)"
 #define INTL_CONFIGURATION_DELETE "Удалить конфигурацию"
 #define INTL_CONFIGURATION_REALLY_DELETE "Подтвердите удаление конфигурации!"

@@ -1,9 +1,9 @@
 /*
  *	airRohr firmware
  *	Copyright (C) 2016-2018  Code for Stuttgart a.o.
- * 
+ *
  *  Danish translations
- * 
+ *
  *	Texts should be as short as possible
  *	We only have 512 kB for the entire firmware
  */
@@ -46,6 +46,7 @@ const char INTL_FLIP_DISPLAY[] PROGMEM = "OLED display flip";
 const char INTL_LCD1602_27[] PROGMEM = "LCD 1602 (I2C: 0x27)";
 const char INTL_LCD1602_3F[] PROGMEM = "LCD 1602 (I2C: 0x3F)";
 const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
+const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Vis WiFi-info";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Vis enhedsinfo";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;level";
@@ -53,12 +54,12 @@ const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Målinterval";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Permanent&nbsp;router-mode";
 const char INTL_MORE_APIS[] PROGMEM = "Yderligere APIer";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Send til eget API";
-const char INTL_SERVER[] PROGMEM = "Server"; 
-const char INTL_PATH[] PROGMEM = "Sti (path)"; 
-const char INTL_PORT[] PROGMEM = "Port"; 
-const char INTL_USER[] PROGMEM = "Brugernavn"; 
-const char INTL_PASSWORD[] PROGMEM = "Kodeord"; 
-const char INTL_SEND_TO[] PROGMEM = "Send til {v}"; 
+const char INTL_SERVER[] PROGMEM = "Server";
+const char INTL_PATH[] PROGMEM = "Sti (path)";
+const char INTL_PORT[] PROGMEM = "Port";
+const char INTL_USER[] PROGMEM = "Brugernavn";
+const char INTL_PASSWORD[] PROGMEM = "Kodeord";
+const char INTL_SEND_TO[] PROGMEM = "Send til {v}";
 const char INTL_READ_FROM[] PROGMEM = "Hent fra {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Sensor genstartes.";
 const char INTL_RESTART_DEVICE[] PROGMEM = "Genstart enhed";
@@ -67,6 +68,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "Genstart sensor";
 #define INTL_HOME "Oversigt"
 #define INTL_BACK_TO_HOME "Tilbage til oversigten"
 const char INTL_CURRENT_DATA[] PROGMEM = "Aktuelle målværdier";
+const char INTL_DEVICE_STATUS[] PROGMEM = "Enhedsstatus";
 #define INTL_ACTIVE_SENSORS_MAP "Kort over aktive sensorer (ekstern link)"
 #define INTL_CONFIGURATION_DELETE "Slet opsætningen"
 #define INTL_CONFIGURATION_REALLY_DELETE "Skal opsætningen virkelig slettes?"

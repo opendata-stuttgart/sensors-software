@@ -1,9 +1,9 @@
 /*
  *	airRohr firmware
  *	Copyright (C) 2016-2018  Code for Stuttgart a.o.
- * 
+ *
  *  Bulgarian translations
- * 
+ *
  *	Texts should be as short as possible
  *	We only have 512 kB for the entire firmware
  */
@@ -46,6 +46,7 @@ const char INTL_FLIP_DISPLAY[] PROGMEM = "OLED дисплей обръщане";
 const char INTL_LCD1602_27[] PROGMEM = "LCD 1602 (I2C: 0x27)";
 const char INTL_LCD1602_3F[] PROGMEM = "LCD 1602 (I2C: 0x3F)";
 const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
+const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Показване на WiFi информация";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Информация за устройството на дисплея";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;Level";
@@ -53,12 +54,12 @@ const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Интервал на изме
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Продължителност като рутер";
 const char INTL_MORE_APIS[] PROGMEM = "Още API";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Изпращане към собствено API";
-const char INTL_SERVER[] PROGMEM = "Сървър"; 
-const char INTL_PATH[] PROGMEM = "Път"; 
-const char INTL_PORT[] PROGMEM = "Порт"; 
-const char INTL_USER[] PROGMEM = "Потребител"; 
-const char INTL_PASSWORD[] PROGMEM = "Парола"; 
-const char INTL_SEND_TO[] PROGMEM = "Изпрати до {v}"; 
+const char INTL_SERVER[] PROGMEM = "Сървър";
+const char INTL_PATH[] PROGMEM = "Път";
+const char INTL_PORT[] PROGMEM = "Порт";
+const char INTL_USER[] PROGMEM = "Потребител";
+const char INTL_PASSWORD[] PROGMEM = "Парола";
+const char INTL_SEND_TO[] PROGMEM = "Изпрати до {v}";
 const char INTL_READ_FROM[] PROGMEM = "Получено от {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Сензорът се рестартира.";
 const char INTL_RESTART_DEVICE[] PROGMEM = "Рестартирайте устройството";
@@ -67,6 +68,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "Рестартиране на сен
 #define INTL_HOME "Начало"
 #define INTL_BACK_TO_HOME "Обратно към начало"
 const char INTL_CURRENT_DATA[] PROGMEM = "Текущи данни";
+const char INTL_DEVICE_STATUS[] PROGMEM = "Карам статус";
 #define INTL_ACTIVE_SENSORS_MAP "Карта на активните сензори (външен линк)"
 #define INTL_CONFIGURATION_DELETE "Изтриване на Конфигурацията"
 #define INTL_CONFIGURATION_REALLY_DELETE "Наистина ли искате да изтриете конфигурацията?"

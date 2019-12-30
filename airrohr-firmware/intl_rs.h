@@ -2,7 +2,7 @@
  *	airRohr firmware
  *	Copyright (C) 2016-2018  Code for Stuttgart a.o.
  *
- *  English translations
+ *  Serbian translations
  *
  *	Texts should be as short as possible
  *	We only have 512 kB for the entire firmware
@@ -46,9 +46,10 @@ const char INTL_FLIP_DISPLAY[] PROGMEM = "Rotiraj OLED displej (180°)";
 const char INTL_LCD1602_27[] PROGMEM = "LCD 1602 (I2C: 0x27)";
 const char INTL_LCD1602_3F[] PROGMEM = "LCD 1602 (I2C: 0x3F)";
 const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
+const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Prikaži WiFi podatke";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Pokaži informacije o uređaju";
-const char INTL_DEBUG_LEVEL[] PROGMEM = "Nivo korekcije";
+const char INTL_DEBUG_LEVEL[] PROGMEM = "Nivo&nbsp;korekcije";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Merni interval";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Trajanje ruter režima";
 const char INTL_MORE_APIS[] PROGMEM = "Više API-ja";
@@ -67,6 +68,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "Restartuj senzor";
 #define INTL_HOME "Naslovna"
 #define INTL_BACK_TO_HOME "Povratak na naslovnu stranicu"
 const char INTL_CURRENT_DATA[] PROGMEM = "Trenutni podaci";
+const char INTL_DEVICE_STATUS[] PROGMEM = "Status уређаја";
 #define INTL_ACTIVE_SENSORS_MAP "Mapa aktivnih senzora (spoljni link)"
 #define INTL_CONFIGURATION_DELETE "Izbriši konfiguraciju"
 #define INTL_CONFIGURATION_REALLY_DELETE "Jeste li sigurni da želite da izbrišete konfiguraciju?"

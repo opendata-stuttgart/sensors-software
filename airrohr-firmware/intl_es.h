@@ -1,9 +1,9 @@
 /*
  *	airRohr firmware
  *	Copyright (C) 2016-2018  Code for Stuttgart a.o.
- * 
+ *
  *  Spanish translations
- * 
+ *
  *	Texts should be as short as possible
  *	We only have 512 kB for the entire firmware
  */
@@ -46,6 +46,7 @@ const char INTL_FLIP_DISPLAY[] PROGMEM = "Pantalla OLED flip";
 const char INTL_LCD1602_27[] PROGMEM = "LCD 1602 (I2C: 0x27)";
 const char INTL_LCD1602_3F[] PROGMEM = "LCD 1602 (I2C: 0x3F)";
 const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
+const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Mostrar información de WiFi";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Mostrar información del dispositivo";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;Level";
@@ -67,6 +68,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "Reiniciar sensor";
 #define INTL_HOME "Visión general"
 #define INTL_BACK_TO_HOME "Volver al inicio"
 const char INTL_CURRENT_DATA[] PROGMEM = "Datos actuales";
+const char INTL_DEVICE_STATUS[] PROGMEM = "El estado del dispositivo";
 #define INTL_ACTIVE_SENSORS_MAP "Mapa de sensores activos (enlace externo)"
 #define INTL_CONFIGURATION_DELETE "Borrar configuración"
 #define INTL_CONFIGURATION_REALLY_DELETE "Estas seguro que quieres borrar la configuración?"
