@@ -1978,8 +1978,12 @@ static void webserver_status() {
 	page_content += F("<tr><td colspan='2'><b>" INTL_ERROR "</b></td></tr>");
 	add_table_row_from_value(page_content, F("WiFi"), String(WiFi_error_count));
 	add_table_row_from_value(page_content, F("Data Send"), String(sendData_error_count));
-	add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), String(SDS_error_count));
-	add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), String(SPS30_read_error_counter));
+	if (cfg::sds_read) {
+		add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), String(SDS_error_count));
+	}
+	if (cfg::sps30_read) {
+		add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), String(SPS30_read_error_counter));
+	}
 
 	server.sendContent(page_content);
 	page_content = emptyString;
