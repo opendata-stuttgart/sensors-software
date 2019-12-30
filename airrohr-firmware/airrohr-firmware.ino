@@ -97,7 +97,7 @@
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2019-128-B4"
+#define SOFTWARE_VERSION_STR "NRZ-2019-128-B5"
 const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -1968,6 +1968,7 @@ static void webserver_status() {
 	add_table_row_from_value(page_content, F("Free Memory"), String(ESP.getFreeHeap()));
 	add_table_row_from_value(page_content, F("Heap Fragmentation"), String(ESP.getHeapFragmentation()), "%");
 	add_table_row_from_value(page_content, F("Uptime"), delayToString(millis() - time_point_device_start_ms));
+	add_table_row_from_value(page_content, F("Reset Reason"), ESP.getResetReason());
 	if (cfg::sds_read) {
 		page_content += FPSTR(EMPTY_ROW);
 		add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), last_value_SDS_version);
@@ -1977,8 +1978,12 @@ static void webserver_status() {
 	page_content += F("<tr><td colspan='2'><b>" INTL_ERROR "</b></td></tr>");
 	add_table_row_from_value(page_content, F("WiFi"), String(WiFi_error_count));
 	add_table_row_from_value(page_content, F("Data Send"), String(sendData_error_count));
-	add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), String(SDS_error_count));
-	add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), String(SPS30_read_error_counter));
+	if (cfg::sds_read) {
+		add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), String(SDS_error_count));
+	}
+	if (cfg::sps30_read) {
+		add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), String(SPS30_read_error_counter));
+	}
 
 	server.sendContent(page_content);
 	page_content = emptyString;
@@ -2326,18 +2331,21 @@ static void waitForWifiToConnect(int maxRetries) {
  * WiFi auto connecting script                                   *
  *****************************************************************/
 static void connectWifi() {
-	WiFi.persistent(false);
-	WiFi.mode(WIFI_OFF);
-	delay(100);
 #if defined(ESP8266)
 	// Enforce Rx/Tx calibration
 	system_phy_set_powerup_option(1);
-    // 20dBM == 100mW == max tx power allowed in europe
+	// 20dBM == 100mW == max tx power allowed in europe
 	WiFi.setOutputPower(20.0f);
 	WiFi.setSleepMode(WIFI_NONE_SLEEP);
 	WiFi.setPhyMode(WIFI_PHY_MODE_11N);
 	delay(100);
 #endif
+	if (WiFi.getAutoConnect()) {
+		WiFi.setAutoConnect(false);
+	}
+	if (!WiFi.getAutoReconnect()) {
+		WiFi.setAutoReconnect(true);
+	}
 	WiFi.mode(WIFI_STA);
 	WiFi.hostname(cfg::fs_ssid);
 	WiFi.begin(cfg::wlanssid, cfg::wlanpwd); // Start WiFI

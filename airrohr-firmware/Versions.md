@@ -1,3 +1,6 @@
+NRZ-2019-128-B5
+* Avoid calling wifi off on startup which seems to cause some issues (Fixes #598)
+
 NRZ-2019-128-B4
 * perfom blocking reads on SDS011 serial responses
 * Add Device Status webpage
