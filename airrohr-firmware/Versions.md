@@ -1,3 +1,6 @@
+NRZ-2019-128-B6
+* Fix crash on device status page in some locales
+
 NRZ-2019-128-B5
 * Avoid calling wifi off on startup which seems to cause some issues (Fixes #598)
 
