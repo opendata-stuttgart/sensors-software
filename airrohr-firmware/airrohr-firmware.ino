@@ -97,7 +97,7 @@
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2019-128-B5"
+#define SOFTWARE_VERSION_STR "NRZ-2019-128-B6"
 const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -1963,7 +1963,7 @@ static void webserver_status() {
 			  "<tr><th> " INTL_PARAMETER "</th><th>" INTL_VALUE "</th></tr>");
 	add_table_row_from_value(page_content, FPSTR(INTL_FIRMWARE), SOFTWARE_VERSION);
 	String versionHtml(ESP.getFullVersion());
-	versionHtml.replace("/", BR_TAG);
+	versionHtml.replace("/", FPSTR(BR_TAG));
 	add_table_row_from_value(page_content, F("Arduino Version"), versionHtml);
 	add_table_row_from_value(page_content, F("Free Memory"), String(ESP.getFreeHeap()));
 	add_table_row_from_value(page_content, F("Heap Fragmentation"), String(ESP.getHeapFragmentation()), "%");
