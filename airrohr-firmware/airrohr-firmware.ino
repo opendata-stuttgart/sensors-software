@@ -442,6 +442,8 @@ bool is_HPM_running = true;
 
 unsigned long sending_time = 0;
 unsigned long last_update_attempt;
+int last_update_returncode;
+int last_sendData_returncode;
 
 float last_value_BMP_T = -128.0;
 float last_value_BMP_P = -1.0;
@@ -1967,6 +1969,11 @@ static void webserver_status() {
 	add_table_row_from_value(page_content, F("Arduino Version"), versionHtml);
 	add_table_row_from_value(page_content, F("Free Memory"), String(ESP.getFreeHeap()));
 	add_table_row_from_value(page_content, F("Heap Fragmentation"), String(ESP.getHeapFragmentation()), "%");
+	if (cfg::auto_update) {
+		add_table_row_from_value(page_content, F("Last OTA"), delayToString(millis() - last_update_attempt));
+	}
+	time_t now = time(nullptr);
+	add_table_row_from_value(page_content, FPSTR(INTL_TIME), ctime(&now));
 	add_table_row_from_value(page_content, F("Uptime"), delayToString(millis() - time_point_device_start_ms));
 	add_table_row_from_value(page_content, F("Reset Reason"), ESP.getResetReason());
 	if (cfg::sds_read) {
@@ -1977,7 +1984,15 @@ static void webserver_status() {
 	page_content += FPSTR(EMPTY_ROW);
 	page_content += F("<tr><td colspan='2'><b>" INTL_ERROR "</b></td></tr>");
 	add_table_row_from_value(page_content, F("WiFi"), String(WiFi_error_count));
+	if (last_update_returncode != 0) {
+		add_table_row_from_value(page_content, F("OTA Return"),
+			last_update_returncode > 0 ? String(last_update_returncode) : HTTPClient::errorToString(last_update_returncode));
+	}
 	add_table_row_from_value(page_content, F("Data Send"), String(sendData_error_count));
+	if (last_sendData_returncode != 0) {
+		add_table_row_from_value(page_content, F("Data Send Return"),
+			last_sendData_returncode > 0 ? String(last_sendData_returncode) : HTTPClient::errorToString(last_sendData_returncode));
+	}
 	if (cfg::sds_read) {
 		add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), String(SDS_error_count));
 	}
@@ -2440,6 +2455,7 @@ static unsigned long sendData(const LoggerEntry logger, const String& data, cons
 
 	unsigned long start_send = millis();
 	const __FlashStringHelper* contentType;
+	int result = 0;
 
 	String s_Host(FPSTR(host));
 	String s_url(FPSTR(url));
@@ -2476,7 +2492,7 @@ static unsigned long sendData(const LoggerEntry logger, const String& data, cons
 			http.addHeader(F("X-PIN"), String(pin));
 		}
 
-		int result = http.POST(data);
+		result = http.POST(data);
 
 		if (result >= HTTP_CODE_OK && result <= HTTP_CODE_ALREADY_REPORTED) {
 			debug_outln_info(F("Succeeded - "), s_Host);
@@ -2490,8 +2506,9 @@ static unsigned long sendData(const LoggerEntry logger, const String& data, cons
 		debug_outln_info(F("Failed connecting to "), s_Host);
 	}
 
-	if (!send_success) {
+	if (!send_success && result != 0) {
 		sendData_error_count++;
+		last_sendData_returncode = result;
 	}
 
 	return millis() - start_send;
@@ -3395,6 +3412,7 @@ static bool fwDownloadStream(WiFiClientSecure& client, const String& url, Stream
 	if (http.begin(client, FPSTR(FW_DOWNLOAD_HOST), FW_DOWNLOAD_PORT, url)) {
 		int r = http.GET();
 		debug_outln_verbose(F("GET r: "), String(r));
+		last_update_returncode = r;
 		if (r == HTTP_CODE_OK) {
 			bytes_written = http.writeToStream(ostream);
 		}
