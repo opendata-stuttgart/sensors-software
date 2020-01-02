@@ -2019,11 +2019,28 @@ static void webserver_debug_level() {
 			page_content += FPSTR(INTL_DEBUG_SETTING_TO);
 			page_content += ' ';
 
-			static constexpr const char * lvlText[6] PROGMEM = {
-				INTL_NONE, INTL_ERROR, INTL_WARNING, INTL_MIN_INFO, INTL_MED_INFO, INTL_MAX_INFO
-			};
+			const __FlashStringHelper* lvlText;
+			switch (lvl) {
+			case DEBUG_ERROR:
+				lvlText = F(INTL_ERROR);
+				break;
+			case DEBUG_WARNING:
+				lvlText = F(INTL_WARNING);
+				break;
+			case DEBUG_MIN_INFO:
+				lvlText = F(INTL_MIN_INFO);
+				break;
+			case DEBUG_MED_INFO:
+				lvlText = F(INTL_MED_INFO);
+				break;
+			case DEBUG_MAX_INFO:
+				lvlText = F(INTL_MAX_INFO);
+				break;
+			default:
+				lvlText = F(INTL_NONE);
+			}
 
-			page_content += FPSTR(lvlText[lvl]);
+			page_content += lvlText;
 			page_content += F(".</h3>");
 		}
 	}
@@ -2047,9 +2064,9 @@ static void webserver_removeConfig() {
 	} else {
 		// Silently remove the desaster backup
 		SPIFFS.remove(F("/config.json.old"));
-		if (SPIFFS.exists("/config.json")) {	//file exists
+		if (SPIFFS.exists(F("/config.json"))) {	//file exists
 			debug_outln_info(F("removing config.json..."));
-			if (SPIFFS.remove("/config.json")) {
+			if (SPIFFS.remove(F("/config.json"))) {
 				page_content += F("<h3>" INTL_CONFIG_DELETED ".</h3>");
 			} else {
 				page_content += F("<h3>" INTL_CONFIG_CAN_NOT_BE_DELETED ".</h3>");
@@ -3370,7 +3387,7 @@ static bool fwDownloadStream(WiFiClientSecure& client, const String& url, Stream
 	http.setTimeout(20 * 1000);
 	http.setUserAgent(SOFTWARE_VERSION + ' ' + esp_chipid + ' ' + SDS_version_date() + ' ' +
 				 String(cfg::current_lang) + ' ' + String(CURRENT_LANG) + ' ' +
-				 String(cfg::use_beta ? "BETA" : ""));
+				 String(cfg::use_beta ? F("BETA") : F("")));
     http.setReuse(false);
 
 	debug_outln_verbose(F("HTTP GET: "), String(FPSTR(FW_DOWNLOAD_HOST)) + ':' + String(FW_DOWNLOAD_PORT) + url);
@@ -3743,7 +3760,7 @@ static void display_values() {
 			display_header = F("Device Info");
 			display_lines[0] = "ID: "; display_lines[0] += esp_chipid;
 			display_lines[1] = "FW: "; display_lines[1] += SOFTWARE_VERSION;
-			display_lines[2] = "Measurements: "; display_lines[2] += String(count_sends);
+			display_lines[2] = F("Measurements: "); display_lines[2] += String(count_sends);
 			break;
 		}
 
@@ -4143,7 +4160,7 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 		aircms_data += esp_chipid;
 		aircms_data += "&t=";
 		aircms_data += String(ts, DEC);
-		aircms_data += "&airrohr=";
+		aircms_data += F("&airrohr=");
 		aircms_data += data;
 		String aircms_url(FPSTR(URL_AIRCMS));
 		aircms_url += hmac1(sha1Hex(token), aircms_data + token);
