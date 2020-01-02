@@ -1203,7 +1203,7 @@ static String form_select_lang() {
 	String s = F(	"<tr>"
 					"<td>" INTL_LANGUAGE ":&nbsp;</td>"
 					"<td>"
-					"<select name='current_lang'>"
+					"<select id='current_lang' name='current_lang'>"
 					"<option value='BG'>Bulgarian (BG)</option>"
 					"<option value='CZ'>Český (CZ)</option>"
 					"<option value='DE'>Deutsch (DE)</option>"
@@ -1475,47 +1475,57 @@ static void webserver_config_send_body_get(String& page_content) {
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 	add_form_checkbox(page_content, Config_gps_read, FPSTR(INTL_NEO6M));
 
-	page_content += FPSTR(WEB_BR_LF_B);
-
 	// Paginate page after ~ 1500 Bytes
 	server.sendContent(page_content);
-	page_content = emptyString;
-
-	page_content += FPSTR(INTL_MORE_SETTINGS);
-	page_content += FPSTR(WEB_B_BR);
+	page_content = FPSTR(WEB_BR_LF_B);
+	page_content += F(INTL_FIRMWARE "</b>&nbsp;");
 	add_form_checkbox(page_content, Config_auto_update, FPSTR(INTL_AUTO_UPDATE));
 	add_form_checkbox(page_content, Config_use_beta, FPSTR(INTL_USE_BETA));
+
+	page_content += FPSTR(TABLE_TAG_OPEN);
+	page_content += form_select_lang();
+	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+
+	page_content += F("<script>"
+	    "var $ = function(e) { return document.getElementById(e); };"
+	    "function updateOTAOptions() { "
+		"$('current_lang').disabled = $('use_beta').disabled = !$('auto_update').checked; "
+		"}; updateOTAOptions(); $('auto_update').onchange = updateOTAOptions;"
+		"</script>");
+
+	server.sendContent(page_content);
+	page_content = FPSTR(WEB_BR_LF_B);;
+	page_content += FPSTR(INTL_MORE_SETTINGS);
+	page_content += FPSTR(WEB_B_BR);
+
 	add_form_checkbox(page_content, Config_has_display, FPSTR(INTL_DISPLAY));
 	add_form_checkbox(page_content, Config_has_sh1106, FPSTR(INTL_SH1106));
-
-	// Paginate page after ~ 1500 Bytes
-	server.sendContent(page_content);
-	page_content = emptyString;
-
 	add_form_checkbox(page_content, Config_has_flipped_display, FPSTR(INTL_FLIP_DISPLAY));
 	add_form_checkbox(page_content, Config_has_lcd1602_27, FPSTR(INTL_LCD1602_27));
 	add_form_checkbox(page_content, Config_has_lcd1602, FPSTR(INTL_LCD1602_3F));
+
+	// Paginate page after ~ 1500 Bytes
+	server.sendContent(page_content);
+	page_content = emptyString;
+
 	add_form_checkbox(page_content, Config_has_lcd2004_27, FPSTR(INTL_LCD2004_27));
 	add_form_checkbox(page_content, Config_has_lcd2004, FPSTR(INTL_LCD2004_3F));
 	add_form_checkbox(page_content, Config_display_wifi_info, FPSTR(INTL_DISPLAY_WIFI_INFO));
 	add_form_checkbox(page_content, Config_display_device_info, FPSTR(INTL_DISPLAY_DEVICE_INFO));
 
-	// Paginate page after ~ 1500 Bytes
-	server.sendContent(page_content);
-	page_content = emptyString;
-
 	page_content += FPSTR(TABLE_TAG_OPEN);
-	page_content += form_select_lang();
 	add_form_input(page_content, Config_debug, FPSTR(INTL_DEBUG_LEVEL), 1);
 	add_form_input(page_content, Config_sending_intervall_ms, FPSTR(INTL_MEASUREMENT_INTERVAL), 5);
 	add_form_input(page_content, Config_time_for_wifi_config, FPSTR(INTL_DURATION_ROUTER_MODE), 5);
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-	page_content += FPSTR(WEB_BR_LF_B);
 
+	// Paginate page after ~ 1500 Bytes
 	server.sendContent(page_content);
-	page_content = FPSTR(INTL_MORE_APIS);
 
+	page_content = FPSTR(WEB_BR_LF_B);
+	page_content += FPSTR(INTL_MORE_APIS);
 	page_content += FPSTR(WEB_B_BR);
+
 	add_form_checkbox(page_content, Config_send2csv, tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_CSV)));
 	add_form_checkbox(page_content, Config_send2fsapp, tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_FEINSTAUB_APP)));
 	add_form_checkbox(page_content, Config_send2aircms, tmpl(FPSTR(INTL_SEND_TO), F("aircms.online")));
@@ -1626,8 +1636,6 @@ static void webserver_config_send_body_post(String& page_content) {
 	server.sendContent(page_content);
 	page_content = emptyString;
 
-	add_line_value_bool(page_content, FPSTR(INTL_AUTO_UPDATE), auto_update);
-	add_line_value_bool(page_content, FPSTR(INTL_USE_BETA), use_beta);
 	add_line_value_bool(page_content, FPSTR(INTL_DISPLAY), has_display);
 	add_line_value_bool(page_content, FPSTR(INTL_SH1106), has_sh1106);
 	add_line_value_bool(page_content, FPSTR(INTL_FLIP_DISPLAY), has_flipped_display);
@@ -1637,6 +1645,8 @@ static void webserver_config_send_body_post(String& page_content) {
 	add_line_value_bool(page_content, FPSTR(INTL_LCD2004_3F), has_lcd2004);
 	add_line_value_bool(page_content, FPSTR(INTL_DISPLAY_WIFI_INFO), display_wifi_info);
 	add_line_value_bool(page_content, FPSTR(INTL_DISPLAY_DEVICE_INFO), display_device_info);
+	add_line_value_bool(page_content, FPSTR(INTL_AUTO_UPDATE), auto_update);
+	add_line_value_bool(page_content, FPSTR(INTL_USE_BETA), use_beta);
 	add_line_value(page_content, FPSTR(INTL_DEBUG_LEVEL), String(debug));
 	add_line_value(page_content, FPSTR(INTL_MEASUREMENT_INTERVAL), String(sending_intervall_ms));
 	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("Feinstaub-App"), send2fsapp);
