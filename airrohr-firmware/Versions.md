@@ -1,3 +1,8 @@
+NRZ-2019-128-B7
+* More introspection status for OTA and sending errors
+* Resorting Language selection alphabetically
+* Disable language and beta selector when OTA is disabled
+
 NRZ-2019-128-B6
 * Fix crash on device status page in some locales
 
