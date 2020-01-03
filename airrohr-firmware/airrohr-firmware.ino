@@ -1396,29 +1396,27 @@ static void webserver_config_send_body_get(String& page_content) {
 	page_content += F("<hr/>\n<br/><b>");
 
 	page_content += FPSTR(INTL_AB_HIER_NUR_ANDERN);
-	page_content += F("</b><br/><br/>\n<b>");
+	page_content += FPSTR(WEB_B_BR);
+	page_content += FPSTR(BR_TAG);
 
 	// Paginate page after ~ 1500 Bytes
 	server.sendContent(page_content);
 	page_content = emptyString;
 
-	page_content += FPSTR(INTL_BASICAUTH);
-	page_content += FPSTR(WEB_B_BR);
 	add_form_checkbox(page_content, Config_www_basicauth_enabled, FPSTR(INTL_BASICAUTH));
 	page_content += FPSTR(TABLE_TAG_OPEN);
 	add_form_input(page_content, Config_www_username, FPSTR(INTL_USER), LEN_WWW_USERNAME-1);
 	add_form_input(page_content, Config_www_password, FPSTR(INTL_PASSWORD), LEN_CFG_PASSWORD-1);
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+	page_content += FPSTR(BR_TAG);
 
 	// Paginate page after ~ 1500 Bytes
 	server.sendContent(page_content);
-	page_content = FPSTR(WEB_BR_LF_B);
 
 	if (! wificonfig_loop) {
-		page_content += FPSTR(INTL_FS_WIFI);
-		page_content += FPSTR(WEB_B_BR);
-		page_content += FPSTR(INTL_FS_WIFI_DESCRIPTION);
+		page_content = FPSTR(INTL_FS_WIFI_DESCRIPTION);
 		page_content += FPSTR(BR_TAG);
+
 		page_content += FPSTR(TABLE_TAG_OPEN);
 		add_form_input(page_content, Config_fs_ssid, FPSTR(INTL_FS_WIFI_NAME), LEN_FS_SSID-1);
 		add_form_input(page_content, Config_fs_pwd, FPSTR(INTL_PASSWORD), LEN_CFG_PASSWORD-1);
@@ -1440,13 +1438,11 @@ static void webserver_config_send_body_get(String& page_content) {
 		page_content += form_checkbox(Config_ssl_madavi, FPSTR(WEB_HTTPS), false);
 		page_content += FPSTR(WEB_BRACE_BR);
 
-		page_content += FPSTR(WEB_BR_LF_B);
-
 		// Paginate page after ~ 1500 Bytes
 		server.sendContent(page_content);
 	}
-	page_content = FPSTR(INTL_SENSORS);
-
+	page_content = FPSTR(WEB_BR_LF_B);
+	page_content += FPSTR(INTL_SENSORS);
 	page_content += FPSTR(WEB_B_BR);
 	add_form_checkbox_sensor(page_content, Config_sds_read, FPSTR(INTL_SDS011));
 	add_form_checkbox_sensor(page_content, Config_pms_read, FPSTR(INTL_PMS));

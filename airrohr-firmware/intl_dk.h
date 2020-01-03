@@ -34,7 +34,7 @@ const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM ="korrektion i dB (A)";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Aktiver BasicAuth";
-const char INTL_FS_WIFI[] PROGMEM = "Wi-Fi sensor";
+
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "Wi-Fi sensor i opsætningsmode";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Sensorens Wi-Fi navn";
 const char INTL_MORE_SETTINGS[] PROGMEM ="Avancerede indstillinger";
