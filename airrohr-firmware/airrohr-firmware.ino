@@ -1969,10 +1969,11 @@ static void webserver_status() {
 	server.sendContent(page_content);
 	page_content = F("<table cellspacing='0' border='1' cellpadding='5'>\n"
 			  "<tr><th> " INTL_PARAMETER "</th><th>" INTL_VALUE "</th></tr>");
-	add_table_row_from_value(page_content, FPSTR(INTL_FIRMWARE), SOFTWARE_VERSION);
-	String versionHtml(ESP.getFullVersion());
+	String versionHtml(SOFTWARE_VERSION);
+	versionHtml += '/';
+	versionHtml += ESP.getFullVersion();
 	versionHtml.replace("/", FPSTR(BR_TAG));
-	add_table_row_from_value(page_content, F("Arduino Version"), versionHtml);
+	add_table_row_from_value(page_content, FPSTR(INTL_FIRMWARE), versionHtml);
 	add_table_row_from_value(page_content, F("Free Memory"), String(ESP.getFreeHeap()));
 	add_table_row_from_value(page_content, F("Heap Fragmentation"), String(ESP.getHeapFragmentation()), "%");
 	if (cfg::auto_update) {
