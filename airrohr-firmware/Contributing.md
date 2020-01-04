@@ -8,6 +8,20 @@ All new development changes should be done as pull requests against the **beta**
 The default **master** branch is only used as a source reference for the
 currently active (enrolled) firmware version.
 
+
+## Reporting bugs
+
+Before creating bug reports, please check [this list](#before-submitting-a-bug-report) as you might find out that you don't need to create one. When you are creating a bug report, please include as many details as possible in literal form (e.g. copy, don't interpret).
+
+**Note:** If you find a **Closed** issue that seems like it is the same thing that you're experiencing, open a new issue and include a link to the original issue in the body of your new one.
+
+
+### Before Submitting A Bug Report
+
+* **Check the [FAQs on luftdaten.info](https://luftdaten.info/faq/)** for a list of common questions and problems.
+* **Perform a [cursory search](https://github.com/search?utf8=%E2%9C%93&q=+is%3Aissue+user%3Aopendata-stuttgart+repo%3Asensors-software&type=)** to see if the problem has already been reported. If it has **and the issue is still open**, add a comment to the existing issue instead of opening a new one.
+
+
 ## Build Instrutions
 
 ### Recommended Build using PlatformIO
