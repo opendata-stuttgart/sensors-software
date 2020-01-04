@@ -34,7 +34,7 @@ const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM ="dB (A) 'da düzeltme";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "yetkilendirme";
-const char INTL_FS_WIFI[] PROGMEM = "WiFi Sensörü";
+
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "WiFi Sensörü Yapılandırma modunda";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Isim";
 const char INTL_MORE_SETTINGS[] PROGMEM ="Daha fazla ayar";

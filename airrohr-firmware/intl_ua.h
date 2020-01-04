@@ -34,7 +34,7 @@ const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM ="корекція в дБ (А)";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Авторизація";
-const char INTL_FS_WIFI[] PROGMEM = "WiFi сенсор";
+
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "WiFi сенсор в режимі конфігурації";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Ім'я";
 const char INTL_MORE_SETTINGS[] PROGMEM ="Додаткові параметри";

@@ -97,7 +97,7 @@
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2019-128-B6"
+#define SOFTWARE_VERSION_STR "NRZ-2019-128-B7"
 const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -442,6 +442,8 @@ bool is_HPM_running = true;
 
 unsigned long sending_time = 0;
 unsigned long last_update_attempt;
+int last_update_returncode;
+int last_sendData_returncode;
 
 float last_value_BMP_T = -128.0;
 float last_value_BMP_P = -1.0;
@@ -1201,10 +1203,10 @@ static String form_select_lang() {
 	String s = F(	"<tr>"
 					"<td>" INTL_LANGUAGE ":&nbsp;</td>"
 					"<td>"
-					"<select name='current_lang'>"
-					"<option value='DE'>Deutsch (DE)</option>"
+					"<select id='current_lang' name='current_lang'>"
 					"<option value='BG'>Bulgarian (BG)</option>"
 					"<option value='CZ'>Český (CZ)</option>"
+					"<option value='DE'>Deutsch (DE)</option>"
 					"<option value='DK'>Dansk (DK)</option>"
 					"<option value='EN'>English (EN)</option>"
 					"<option value='ES'>Español (ES)</option>"
@@ -1394,29 +1396,27 @@ static void webserver_config_send_body_get(String& page_content) {
 	page_content += F("<hr/>\n<br/><b>");
 
 	page_content += FPSTR(INTL_AB_HIER_NUR_ANDERN);
-	page_content += F("</b><br/><br/>\n<b>");
+	page_content += FPSTR(WEB_B_BR);
+	page_content += FPSTR(BR_TAG);
 
 	// Paginate page after ~ 1500 Bytes
 	server.sendContent(page_content);
 	page_content = emptyString;
 
-	page_content += FPSTR(INTL_BASICAUTH);
-	page_content += FPSTR(WEB_B_BR);
 	add_form_checkbox(page_content, Config_www_basicauth_enabled, FPSTR(INTL_BASICAUTH));
 	page_content += FPSTR(TABLE_TAG_OPEN);
 	add_form_input(page_content, Config_www_username, FPSTR(INTL_USER), LEN_WWW_USERNAME-1);
 	add_form_input(page_content, Config_www_password, FPSTR(INTL_PASSWORD), LEN_CFG_PASSWORD-1);
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+	page_content += FPSTR(BR_TAG);
 
 	// Paginate page after ~ 1500 Bytes
 	server.sendContent(page_content);
-	page_content = FPSTR(WEB_BR_LF_B);
 
 	if (! wificonfig_loop) {
-		page_content += FPSTR(INTL_FS_WIFI);
-		page_content += FPSTR(WEB_B_BR);
-		page_content += FPSTR(INTL_FS_WIFI_DESCRIPTION);
+		page_content = FPSTR(INTL_FS_WIFI_DESCRIPTION);
 		page_content += FPSTR(BR_TAG);
+
 		page_content += FPSTR(TABLE_TAG_OPEN);
 		add_form_input(page_content, Config_fs_ssid, FPSTR(INTL_FS_WIFI_NAME), LEN_FS_SSID-1);
 		add_form_input(page_content, Config_fs_pwd, FPSTR(INTL_PASSWORD), LEN_CFG_PASSWORD-1);
@@ -1438,13 +1438,11 @@ static void webserver_config_send_body_get(String& page_content) {
 		page_content += form_checkbox(Config_ssl_madavi, FPSTR(WEB_HTTPS), false);
 		page_content += FPSTR(WEB_BRACE_BR);
 
-		page_content += FPSTR(WEB_BR_LF_B);
-
 		// Paginate page after ~ 1500 Bytes
 		server.sendContent(page_content);
 	}
-	page_content = FPSTR(INTL_SENSORS);
-
+	page_content = FPSTR(WEB_BR_LF_B);
+	page_content += FPSTR(INTL_SENSORS);
 	page_content += FPSTR(WEB_B_BR);
 	add_form_checkbox_sensor(page_content, Config_sds_read, FPSTR(INTL_SDS011));
 	add_form_checkbox_sensor(page_content, Config_pms_read, FPSTR(INTL_PMS));
@@ -1473,47 +1471,57 @@ static void webserver_config_send_body_get(String& page_content) {
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 	add_form_checkbox(page_content, Config_gps_read, FPSTR(INTL_NEO6M));
 
-	page_content += FPSTR(WEB_BR_LF_B);
-
 	// Paginate page after ~ 1500 Bytes
 	server.sendContent(page_content);
-	page_content = emptyString;
-
-	page_content += FPSTR(INTL_MORE_SETTINGS);
-	page_content += FPSTR(WEB_B_BR);
+	page_content = FPSTR(WEB_BR_LF_B);
+	page_content += F(INTL_FIRMWARE "</b>&nbsp;");
 	add_form_checkbox(page_content, Config_auto_update, FPSTR(INTL_AUTO_UPDATE));
 	add_form_checkbox(page_content, Config_use_beta, FPSTR(INTL_USE_BETA));
+
+	page_content += FPSTR(TABLE_TAG_OPEN);
+	page_content += form_select_lang();
+	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+
+	page_content += F("<script>"
+	    "var $ = function(e) { return document.getElementById(e); };"
+	    "function updateOTAOptions() { "
+		"$('current_lang').disabled = $('use_beta').disabled = !$('auto_update').checked; "
+		"}; updateOTAOptions(); $('auto_update').onchange = updateOTAOptions;"
+		"</script>");
+
+	server.sendContent(page_content);
+	page_content = FPSTR(WEB_BR_LF_B);;
+	page_content += FPSTR(INTL_MORE_SETTINGS);
+	page_content += FPSTR(WEB_B_BR);
+
 	add_form_checkbox(page_content, Config_has_display, FPSTR(INTL_DISPLAY));
 	add_form_checkbox(page_content, Config_has_sh1106, FPSTR(INTL_SH1106));
-
-	// Paginate page after ~ 1500 Bytes
-	server.sendContent(page_content);
-	page_content = emptyString;
-
 	add_form_checkbox(page_content, Config_has_flipped_display, FPSTR(INTL_FLIP_DISPLAY));
 	add_form_checkbox(page_content, Config_has_lcd1602_27, FPSTR(INTL_LCD1602_27));
 	add_form_checkbox(page_content, Config_has_lcd1602, FPSTR(INTL_LCD1602_3F));
+
+	// Paginate page after ~ 1500 Bytes
+	server.sendContent(page_content);
+	page_content = emptyString;
+
 	add_form_checkbox(page_content, Config_has_lcd2004_27, FPSTR(INTL_LCD2004_27));
 	add_form_checkbox(page_content, Config_has_lcd2004, FPSTR(INTL_LCD2004_3F));
 	add_form_checkbox(page_content, Config_display_wifi_info, FPSTR(INTL_DISPLAY_WIFI_INFO));
 	add_form_checkbox(page_content, Config_display_device_info, FPSTR(INTL_DISPLAY_DEVICE_INFO));
 
-	// Paginate page after ~ 1500 Bytes
-	server.sendContent(page_content);
-	page_content = emptyString;
-
 	page_content += FPSTR(TABLE_TAG_OPEN);
-	page_content += form_select_lang();
 	add_form_input(page_content, Config_debug, FPSTR(INTL_DEBUG_LEVEL), 1);
 	add_form_input(page_content, Config_sending_intervall_ms, FPSTR(INTL_MEASUREMENT_INTERVAL), 5);
 	add_form_input(page_content, Config_time_for_wifi_config, FPSTR(INTL_DURATION_ROUTER_MODE), 5);
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-	page_content += FPSTR(WEB_BR_LF_B);
 
+	// Paginate page after ~ 1500 Bytes
 	server.sendContent(page_content);
-	page_content = FPSTR(INTL_MORE_APIS);
 
+	page_content = FPSTR(WEB_BR_LF_B);
+	page_content += FPSTR(INTL_MORE_APIS);
 	page_content += FPSTR(WEB_B_BR);
+
 	add_form_checkbox(page_content, Config_send2csv, tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_CSV)));
 	add_form_checkbox(page_content, Config_send2fsapp, tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_FEINSTAUB_APP)));
 	add_form_checkbox(page_content, Config_send2aircms, tmpl(FPSTR(INTL_SEND_TO), F("aircms.online")));
@@ -1624,8 +1632,6 @@ static void webserver_config_send_body_post(String& page_content) {
 	server.sendContent(page_content);
 	page_content = emptyString;
 
-	add_line_value_bool(page_content, FPSTR(INTL_AUTO_UPDATE), auto_update);
-	add_line_value_bool(page_content, FPSTR(INTL_USE_BETA), use_beta);
 	add_line_value_bool(page_content, FPSTR(INTL_DISPLAY), has_display);
 	add_line_value_bool(page_content, FPSTR(INTL_SH1106), has_sh1106);
 	add_line_value_bool(page_content, FPSTR(INTL_FLIP_DISPLAY), has_flipped_display);
@@ -1635,6 +1641,8 @@ static void webserver_config_send_body_post(String& page_content) {
 	add_line_value_bool(page_content, FPSTR(INTL_LCD2004_3F), has_lcd2004);
 	add_line_value_bool(page_content, FPSTR(INTL_DISPLAY_WIFI_INFO), display_wifi_info);
 	add_line_value_bool(page_content, FPSTR(INTL_DISPLAY_DEVICE_INFO), display_device_info);
+	add_line_value_bool(page_content, FPSTR(INTL_AUTO_UPDATE), auto_update);
+	add_line_value_bool(page_content, FPSTR(INTL_USE_BETA), use_beta);
 	add_line_value(page_content, FPSTR(INTL_DEBUG_LEVEL), String(debug));
 	add_line_value(page_content, FPSTR(INTL_MEASUREMENT_INTERVAL), String(sending_intervall_ms));
 	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("Feinstaub-App"), send2fsapp);
@@ -1961,12 +1969,19 @@ static void webserver_status() {
 	server.sendContent(page_content);
 	page_content = F("<table cellspacing='0' border='1' cellpadding='5'>\n"
 			  "<tr><th> " INTL_PARAMETER "</th><th>" INTL_VALUE "</th></tr>");
-	add_table_row_from_value(page_content, FPSTR(INTL_FIRMWARE), SOFTWARE_VERSION);
-	String versionHtml(ESP.getFullVersion());
+	String versionHtml(SOFTWARE_VERSION);
+	versionHtml += '/';
+	versionHtml += ESP.getFullVersion();
 	versionHtml.replace("/", FPSTR(BR_TAG));
-	add_table_row_from_value(page_content, F("Arduino Version"), versionHtml);
+	add_table_row_from_value(page_content, FPSTR(INTL_FIRMWARE), versionHtml);
 	add_table_row_from_value(page_content, F("Free Memory"), String(ESP.getFreeHeap()));
 	add_table_row_from_value(page_content, F("Heap Fragmentation"), String(ESP.getHeapFragmentation()), "%");
+	if (cfg::auto_update) {
+		add_table_row_from_value(page_content, F("Last OTA"), delayToString(millis() - last_update_attempt));
+	}
+	add_table_row_from_value(page_content, F("NTP Sync"), String(sntp_time_is_set));
+	time_t now = time(nullptr);
+	add_table_row_from_value(page_content, FPSTR(INTL_TIME), ctime(&now));
 	add_table_row_from_value(page_content, F("Uptime"), delayToString(millis() - time_point_device_start_ms));
 	add_table_row_from_value(page_content, F("Reset Reason"), ESP.getResetReason());
 	if (cfg::sds_read) {
@@ -1977,7 +1992,15 @@ static void webserver_status() {
 	page_content += FPSTR(EMPTY_ROW);
 	page_content += F("<tr><td colspan='2'><b>" INTL_ERROR "</b></td></tr>");
 	add_table_row_from_value(page_content, F("WiFi"), String(WiFi_error_count));
+	if (last_update_returncode != 0) {
+		add_table_row_from_value(page_content, F("OTA Return"),
+			last_update_returncode > 0 ? String(last_update_returncode) : HTTPClient::errorToString(last_update_returncode));
+	}
 	add_table_row_from_value(page_content, F("Data Send"), String(sendData_error_count));
+	if (last_sendData_returncode != 0) {
+		add_table_row_from_value(page_content, F("Data Send Return"),
+			last_sendData_returncode > 0 ? String(last_sendData_returncode) : HTTPClient::errorToString(last_sendData_returncode));
+	}
 	if (cfg::sds_read) {
 		add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), String(SDS_error_count));
 	}
@@ -2019,11 +2042,28 @@ static void webserver_debug_level() {
 			page_content += FPSTR(INTL_DEBUG_SETTING_TO);
 			page_content += ' ';
 
-			static constexpr const char * lvlText[6] PROGMEM = {
-				INTL_NONE, INTL_ERROR, INTL_WARNING, INTL_MIN_INFO, INTL_MED_INFO, INTL_MAX_INFO
-			};
+			const __FlashStringHelper* lvlText;
+			switch (lvl) {
+			case DEBUG_ERROR:
+				lvlText = F(INTL_ERROR);
+				break;
+			case DEBUG_WARNING:
+				lvlText = F(INTL_WARNING);
+				break;
+			case DEBUG_MIN_INFO:
+				lvlText = F(INTL_MIN_INFO);
+				break;
+			case DEBUG_MED_INFO:
+				lvlText = F(INTL_MED_INFO);
+				break;
+			case DEBUG_MAX_INFO:
+				lvlText = F(INTL_MAX_INFO);
+				break;
+			default:
+				lvlText = F(INTL_NONE);
+			}
 
-			page_content += FPSTR(lvlText[lvl]);
+			page_content += lvlText;
 			page_content += F(".</h3>");
 		}
 	}
@@ -2047,9 +2087,9 @@ static void webserver_removeConfig() {
 	} else {
 		// Silently remove the desaster backup
 		SPIFFS.remove(F("/config.json.old"));
-		if (SPIFFS.exists("/config.json")) {	//file exists
+		if (SPIFFS.exists(F("/config.json"))) {	//file exists
 			debug_outln_info(F("removing config.json..."));
-			if (SPIFFS.remove("/config.json")) {
+			if (SPIFFS.remove(F("/config.json"))) {
 				page_content += F("<h3>" INTL_CONFIG_DELETED ".</h3>");
 			} else {
 				page_content += F("<h3>" INTL_CONFIG_CAN_NOT_BE_DELETED ".</h3>");
@@ -2423,6 +2463,7 @@ static unsigned long sendData(const LoggerEntry logger, const String& data, cons
 
 	unsigned long start_send = millis();
 	const __FlashStringHelper* contentType;
+	int result = 0;
 
 	String s_Host(FPSTR(host));
 	String s_url(FPSTR(url));
@@ -2459,7 +2500,7 @@ static unsigned long sendData(const LoggerEntry logger, const String& data, cons
 			http.addHeader(F("X-PIN"), String(pin));
 		}
 
-		int result = http.POST(data);
+		result = http.POST(data);
 
 		if (result >= HTTP_CODE_OK && result <= HTTP_CODE_ALREADY_REPORTED) {
 			debug_outln_info(F("Succeeded - "), s_Host);
@@ -2473,8 +2514,9 @@ static unsigned long sendData(const LoggerEntry logger, const String& data, cons
 		debug_outln_info(F("Failed connecting to "), s_Host);
 	}
 
-	if (!send_success) {
+	if (!send_success && result != 0) {
 		sendData_error_count++;
+		last_sendData_returncode = result;
 	}
 
 	return millis() - start_send;
@@ -3370,7 +3412,7 @@ static bool fwDownloadStream(WiFiClientSecure& client, const String& url, Stream
 	http.setTimeout(20 * 1000);
 	http.setUserAgent(SOFTWARE_VERSION + ' ' + esp_chipid + ' ' + SDS_version_date() + ' ' +
 				 String(cfg::current_lang) + ' ' + String(CURRENT_LANG) + ' ' +
-				 String(cfg::use_beta ? "BETA" : ""));
+				 String(cfg::use_beta ? F("BETA") : F("")));
     http.setReuse(false);
 
 	debug_outln_verbose(F("HTTP GET: "), String(FPSTR(FW_DOWNLOAD_HOST)) + ':' + String(FW_DOWNLOAD_PORT) + url);
@@ -3378,6 +3420,7 @@ static bool fwDownloadStream(WiFiClientSecure& client, const String& url, Stream
 	if (http.begin(client, FPSTR(FW_DOWNLOAD_HOST), FW_DOWNLOAD_PORT, url)) {
 		int r = http.GET();
 		debug_outln_verbose(F("GET r: "), String(r));
+		last_update_returncode = r;
 		if (r == HTTP_CODE_OK) {
 			bytes_written = http.writeToStream(ostream);
 		}
@@ -3743,7 +3786,7 @@ static void display_values() {
 			display_header = F("Device Info");
 			display_lines[0] = "ID: "; display_lines[0] += esp_chipid;
 			display_lines[1] = "FW: "; display_lines[1] += SOFTWARE_VERSION;
-			display_lines[2] = "Measurements: "; display_lines[2] += String(count_sends);
+			display_lines[2] = F("Measurements: "); display_lines[2] += String(count_sends);
 			break;
 		}
 
@@ -4143,7 +4186,7 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 		aircms_data += esp_chipid;
 		aircms_data += "&t=";
 		aircms_data += String(ts, DEC);
-		aircms_data += "&airrohr=";
+		aircms_data += F("&airrohr=");
 		aircms_data += data;
 		String aircms_url(FPSTR(URL_AIRCMS));
 		aircms_url += hmac1(sha1Hex(token), aircms_data + token);
