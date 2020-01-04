@@ -1191,7 +1191,7 @@ static String form_submit(const String& value) {
 	String s = F(	"<tr>"
 					"<td>&nbsp;</td>"
 					"<td>"
-					"<input type='submit' name='submit' value='{v}' />"
+					"<input type='submit' class='s_red' name='submit' value='{v}' />"
 					"</td>"
 					"</tr>");
 	s.replace("{v}", value);
@@ -1561,8 +1561,8 @@ static void webserver_config_send_body_get(String& page_content) {
 	add_form_input(page_content, Config_user_influx, FPSTR(INTL_USER), LEN_USER_INFLUX-1);
 	add_form_input(page_content, Config_pwd_influx, FPSTR(INTL_PASSWORD), LEN_CFG_PASSWORD-1);
 	add_form_input(page_content, Config_measurement_name_influx, F("Measurement"), LEN_MEASUREMENT_NAME_INFLUX-1);
-	page_content += form_submit(FPSTR(INTL_SAVE_AND_RESTART));
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+	page_content += form_submit(FPSTR(INTL_SAVE_AND_RESTART));
 	page_content += FPSTR(BR_TAG);
 	page_content += FPSTR(WEB_BR_FORM);
 	if (wificonfig_loop) {  // scan for wlan ssids
