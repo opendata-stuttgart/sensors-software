@@ -1446,10 +1446,8 @@ static void webserver_config_send_body_get(String& page_content) {
 	page_content += FPSTR(INTL_SENSORS);
 	page_content += FPSTR(WEB_B_BR);
 	add_form_checkbox_sensor(page_content, Config_sds_read, FPSTR(INTL_SDS011));
-	add_form_checkbox_sensor(page_content, Config_pms_read, FPSTR(INTL_PMS));
 	add_form_checkbox_sensor(page_content, Config_hpm_read, FPSTR(INTL_HPM));
 	add_form_checkbox_sensor(page_content, Config_sps30_read, FPSTR(INTL_SPS30));
-	add_form_checkbox_sensor(page_content, Config_ppd_read, FPSTR(INTL_PPD42NS));
 
 	// Paginate page after ~ 1500 Bytes
 	server.sendContent(page_content);
@@ -1457,7 +1455,6 @@ static void webserver_config_send_body_get(String& page_content) {
 
 	add_form_checkbox_sensor(page_content, Config_dht_read, FPSTR(INTL_DHT22));
 	add_form_checkbox_sensor(page_content, Config_htu21d_read, FPSTR(INTL_HTU21D));
-	add_form_checkbox_sensor(page_content, Config_bmp_read, FPSTR(INTL_BMP180));
 	add_form_checkbox_sensor(page_content, Config_bmx280_read, FPSTR(INTL_BMX280));
 	add_form_checkbox_sensor(page_content, Config_sht3x_read, FPSTR(INTL_SHT3X));
 	add_form_checkbox_sensor(page_content, Config_ds18b20_read, FPSTR(INTL_DS18B20));
@@ -1470,7 +1467,6 @@ static void webserver_config_send_body_get(String& page_content) {
 	page_content += FPSTR(TABLE_TAG_OPEN);
 	add_form_input(page_content, Config_dnms_correction, FPSTR(INTL_DNMS_CORRECTION), LEN_DNMS_CORRECTION-1);
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-	add_form_checkbox(page_content, Config_gps_read, FPSTR(INTL_NEO6M));
 
 	// Paginate page after ~ 1500 Bytes
 	server.sendContent(page_content);
@@ -1491,7 +1487,18 @@ static void webserver_config_send_body_get(String& page_content) {
 		"</script>");
 
 	server.sendContent(page_content);
-	page_content = FPSTR(WEB_BR_LF_B);;
+
+	page_content = FPSTR(WEB_BR_LF_B);
+	page_content += FPSTR(INTL_MORE_SENSORS);
+	page_content += FPSTR(WEB_B_BR);
+
+	add_form_checkbox_sensor(page_content, Config_pms_read, FPSTR(INTL_PMS));
+	add_form_checkbox_sensor(page_content, Config_ppd_read, FPSTR(INTL_PPD42NS));
+	add_form_checkbox_sensor(page_content, Config_bmp_read, FPSTR(INTL_BMP180));
+	add_form_checkbox(page_content, Config_gps_read, FPSTR(INTL_NEO6M));
+
+	server.sendContent(page_content);
+	page_content = FPSTR(WEB_BR_LF_B);
 	page_content += FPSTR(INTL_MORE_SETTINGS);
 	page_content += FPSTR(WEB_B_BR);
 

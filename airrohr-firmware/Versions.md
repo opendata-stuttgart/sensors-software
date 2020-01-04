@@ -5,6 +5,7 @@ NRZ-2019-128-B8
 * Erase SDK config on OTA restart (Fixes #590)
 * Add link to report an issue to web ui
 * Add self-test
+* Split less recommended sensors into a subsection of config page (Fixes #171)
 
 NRZ-2019-128-B7
 * More introspection status for OTA and sending errors

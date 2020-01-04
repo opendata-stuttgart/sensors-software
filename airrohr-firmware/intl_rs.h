@@ -19,6 +19,7 @@ const char INTL_NETWORKS_FOUND[] PROGMEM = "Pronađene mreže: ";
 const char INTL_AB_HIER_NUR_ANDERN[] PROGMEM = "Napredna podešavanja (samo ako znate šta radite)";
 const char INTL_SAVE[] PROGMEM = "Sačuvaj";
 const char INTL_SENSORS[] PROGMEM = "Senzori";
+const char INTL_MORE_SENSORS[] PROGMEM = "More Sensors";
 const char INTL_SDS011[] PROGMEM = "SDS011 ({pm})";
 const char INTL_PMS[] PROGMEM = "Plantower PMS(1,3,5,6,7)003 ({pm})";
 const char INTL_HPM[] PROGMEM = "Honeywell PM ({pm})";

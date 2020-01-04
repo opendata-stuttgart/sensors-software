@@ -19,6 +19,7 @@ const char INTL_NETWORKS_FOUND[] PROGMEM = "Netzwerke gefunden: ";
 const char INTL_AB_HIER_NUR_ANDERN[] PROGMEM = "Ab hier nur ändern, wenn Sie wirklich wissen, was Sie tun";
 const char INTL_SAVE[] PROGMEM = "Speichern";
 const char INTL_SENSORS[] PROGMEM = "Sensoren";
+const char INTL_MORE_SENSORS[] PROGMEM = "Weitere Sensoren";
 const char INTL_SDS011[] PROGMEM = "SDS011 ({pm})";
 const char INTL_PMS[] PROGMEM = "Plantower PMS(1,3,5,6,7)003 ({pm})";
 const char INTL_HPM[] PROGMEM = "Honeywell PM ({pm})";

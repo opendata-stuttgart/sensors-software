@@ -19,6 +19,7 @@ const char INTL_NETWORKS_FOUND[] PROGMEM = "Dostupné sítì: ";
 const char INTL_AB_HIER_NUR_ANDERN[] PROGMEM = "Rozšíøené nastavení (jen pokud víte jistì, co dìláte)";
 const char INTL_SAVE[] PROGMEM = "Uložit";
 const char INTL_SENSORS[] PROGMEM = "Moduly (èidla)";
+const char INTL_MORE_SENSORS[] PROGMEM = "More Moduly (èidla)";
 const char INTL_SDS011[] PROGMEM = "SDS011 (modul {pm})";
 const char INTL_PMS[] PROGMEM = "Plantower PMS(1,3,5,6,7)003 (modul {pm})";
 const char INTL_HPM[] PROGMEM = "Honeywell PM ({pm})";
