@@ -1,3 +1,11 @@
+NRZ-2019-128-B8
+* Improve NTP handling and status reporting
+* Fix weird placement of "save and restart" button in config
+* Fix handling of short intervals with SDS011 (Fixes #426)
+* Erase SDK config on OTA restart (Fixes #590)
+* Add link to report an issue to web ui
+* Add self-test
+
 NRZ-2019-128-B7
 * More introspection status for OTA and sending errors
 * Resorting Language selection alphabetically
