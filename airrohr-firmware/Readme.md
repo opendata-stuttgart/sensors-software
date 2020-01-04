@@ -30,6 +30,16 @@ Configurable is
 The unencrypted Access Point for initial configuration will turn itself off after about
 10 minutes. In order to reactivate please power cycle the board.
 
+## DHT22 Humidity Reporting
+
+The DHT22 sensor is originally an Indoor sensor. For outdoor use it appears to be rather
+sensitive to water condensation after 100% rel.Humidity that keep it for very long time
+(sometimes forever) at 99.9% value. Also it appears to be sensitive to high UV light,
+which tends to cause the sensor to crash until hard power-loss restarted.
+
+Better experiences have been made with a BME280 or SHT3x sensor, so consider those instead.
+
+
 ## Debug via USB-Serial
 
 Connecting/Powering via a computer USB will provide USB serial with the settings 9600 baud 8N1.
