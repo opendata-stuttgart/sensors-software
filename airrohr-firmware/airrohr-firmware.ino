@@ -2798,7 +2798,8 @@ static void fetchSensorSDS(String& s) {
 
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_SDS011));
 
-	if (msSince(starttime) < (cfg::sending_intervall_ms - (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS))) {
+	if (cfg::sending_intervall_ms > (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS) &&
+		msSince(starttime) < (cfg::sending_intervall_ms - (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS))) {
 		if (is_SDS_running) {
 			is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
 		}
