@@ -3501,6 +3501,9 @@ static bool launchUpdateLoader(const String& md5) {
 		return false;
 	}
 
+	debug_outln_info(F("Erasing SDK config."));
+	ESP.eraseConfig();
+
 	sensor_restart();
 	return true;
 }
