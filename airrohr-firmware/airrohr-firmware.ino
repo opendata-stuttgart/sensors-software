@@ -114,6 +114,7 @@ const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 #include <Hash.h>
 #include <ctime>
 #include <coredecls.h>
+#include <sntp.h>
 #endif
 
 #if defined(ESP32)
@@ -540,8 +541,7 @@ unsigned long WiFi_error_count;
 unsigned long last_page_load = millis();
 
 bool wificonfig_loop = false;
-bool first_cycle = true;
-bool sntp_time_is_set = false;
+uint8_t sntp_time_set;
 
 unsigned long count_sends = 0;
 unsigned long last_display_millis = 0;
@@ -1813,7 +1813,7 @@ static void webserver_values() {
 
 		const int signal_quality = calcWiFiSignalQuality(last_signal_strength);
 		debug_outln_info(F("ws: values ..."));
-		if (first_cycle) {
+		if (!count_sends) {
 			page_content += F("<b style='color:red'>");
 			add_warning_first_cycle(page_content);
 			page_content += FPSTR(WEB_B_BR_BR);
@@ -1979,7 +1979,24 @@ static void webserver_status() {
 	if (cfg::auto_update) {
 		add_table_row_from_value(page_content, F("Last OTA"), delayToString(millis() - last_update_attempt));
 	}
-	add_table_row_from_value(page_content, F("NTP Sync"), String(sntp_time_is_set));
+#if defined(ESP8266)
+    add_table_row_from_value(page_content, F("NTP Sync"), String(sntp_time_set));
+	StreamString ntpinfo;
+
+	for (unsigned i = 0; i < SNTP_MAX_SERVERS; i++) {
+		const ip_addr_t* sntp = sntp_getserver(i);
+		if (sntp && !ip_addr_isany(sntp)) {
+			const char* name = sntp_getservername(i);
+			if (!ntpinfo.isEmpty()) {
+				ntpinfo.print(FPSTR(BR_TAG));
+			}
+			ntpinfo.printf_P(PSTR("%s (%s)"), IPAddress(*sntp).toString().c_str(), name ? name : "?");
+			ntpinfo.printf_P(PSTR(" reachable: %s"), sntp_getreachability(i) ? "Yes" : "No");
+		}
+	}
+	add_table_row_from_value(page_content, F("NTP Info"), ntpinfo);
+#endif
+
 	time_t now = time(nullptr);
 	add_table_row_from_value(page_content, FPSTR(INTL_TIME), ctime(&now));
 	add_table_row_from_value(page_content, F("Uptime"), delayToString(millis() - time_point_device_start_ms));
@@ -2130,7 +2147,7 @@ static void webserver_data_json() {
 	unsigned long age = 0;
 
 	debug_outln_info(F("ws: data json..."));
-	if (first_cycle) {
+	if (!count_sends) {
 		s1 = FPSTR(data_first_part);
 		s1 += "]}";
 		age = cfg::sending_intervall_ms - msSince(starttime);
@@ -2371,6 +2388,7 @@ static void waitForWifiToConnect(int maxRetries) {
  * WiFi auto connecting script                                   *
  *****************************************************************/
 static void connectWifi() {
+	display_debug(F("Connecting to"), String(cfg::wlanssid));
 #if defined(ESP8266)
 	// Enforce Rx/Tx calibration
 	system_phy_set_powerup_option(1);
@@ -4135,27 +4153,23 @@ static void logEnabledDisplays() {
 	}
 }
 
-static void time_is_set () {
-	if (!sntp_time_is_set) {
-		sntp_time_is_set = true;
-
-		time_t now = time(nullptr);
-		debug_outln_info(F("SNTP sync finished: "), ctime(&now));
-		twoStageOTAUpdate();
-		last_update_attempt = millis();
-	}
-}
-
 static void setupNetworkTime() {
 	// server name ptrs must be persisted after the call to configTime because internally
 	// the pointers are stored see implementation of lwip sntp_setservername()
 	static char ntpServer1[18], ntpServer2[18], ntpServer3[18];
 #if defined(ESP8266)
-	settimeofday_cb(time_is_set);
+	settimeofday_cb([]() {
+		if (!sntp_time_set) {
+			time_t now = time(nullptr);
+			debug_outln_info(F("SNTP synced: "), ctime(&now));
+			twoStageOTAUpdate();
+			last_update_attempt = millis();
+		}
+		sntp_time_set++;
+	});
 #endif
 	strcpy_P(ntpServer1, NTP_SERVER_1);
 	strcpy_P(ntpServer2, NTP_SERVER_2);
-	strcpy_P(ntpServer3, NTP_SERVER_3);
 	configTime(0, 0, ntpServer1, ntpServer2, ntpServer3);
 }
 
@@ -4261,7 +4275,6 @@ void setup(void) {
 	init_config();
 	init_display();
 	init_lcd();
-	display_debug(F("Connecting to"), String(cfg::wlanssid));
 	setupNetworkTime();
 	connectWifi();
 	setup_webserver();
@@ -4313,7 +4326,7 @@ void loop(void) {
 	send_now = msSince(starttime) > cfg::sending_intervall_ms;
 	// Wait at least 30s for each NTP server to sync
 
-	if (!sntp_time_is_set && send_now &&
+	if (!sntp_time_set && send_now &&
 			msSince(time_point_device_start_ms) < 1000 * 2 * 30 + 5000) {
 		debug_outln_info(F("NTP sync not finished yet, skipping send"));
 		send_now = false;
@@ -4543,7 +4556,6 @@ void loop(void) {
 		max_micro = 0;
 		sum_send_time = 0;
 		starttime = millis();								// store the start time
-		first_cycle = false;
 		count_sends++;
 	}
 	yield();
