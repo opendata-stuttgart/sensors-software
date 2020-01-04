@@ -97,8 +97,8 @@
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2019-128-B7"
-const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
+#define SOFTWARE_VERSION_STR "NRZ-2019-128-B8"
+String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
  * Includes                                                      *
@@ -340,6 +340,7 @@ bool bmx280_init_failed = false;
 bool sht3x_init_failed = false;
 bool dnms_init_failed = false;
 bool gps_init_failed = false;
+bool airrohr_selftest_failed = false;
 
 #if defined(ESP8266)
 ESP8266WebServer server(80);
@@ -1970,6 +1971,8 @@ static void webserver_status() {
 	page_content = F("<table cellspacing='0' border='1' cellpadding='5'>\n"
 			  "<tr><th> " INTL_PARAMETER "</th><th>" INTL_VALUE "</th></tr>");
 	String versionHtml(SOFTWARE_VERSION);
+	versionHtml += F("/ST:");
+	versionHtml += String(!airrohr_selftest_failed);
 	versionHtml += '/';
 	versionHtml += ESP.getFullVersion();
 	versionHtml.replace("/", FPSTR(BR_TAG));
@@ -4274,7 +4277,11 @@ void setup(void) {
 	cfg::initNonTrivials(esp_chipid.c_str());
 	WiFi.persistent(false);
 
-	debug_outln_info(F("Airrohr: " SOFTWARE_VERSION_STR "/"), String(CURRENT_LANG));
+	debug_outln_info(F("airRohr: " SOFTWARE_VERSION_STR "/"), String(CURRENT_LANG));
+	if ((airrohr_selftest_failed = !ESP.checkFlashConfig(true) /* after 2.7.0 update: || !ESP.checkFlashCRC() */)) {
+		debug_outln_error(F("ERROR: SELF TEST FAILED!"));
+		SOFTWARE_VERSION += F("-STF");
+	}
 
 	init_config();
 	init_display();
