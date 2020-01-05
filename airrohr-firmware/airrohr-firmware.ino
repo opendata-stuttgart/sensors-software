@@ -3018,8 +3018,8 @@ static void fetchSensorPMS(String& s) {
 					checksum_is = 0;
 				}
 			}
+			yield();
 		}
-		yield();
 	}
 
 	if (send_now) {
@@ -3157,8 +3157,8 @@ static void fetchSensorHPM(String& s) {
 					checksum_is = 0;
 				}
 			}
+			yield();
 		}
-		yield();
 
 	}
 	if (send_now) {
