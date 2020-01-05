@@ -1,4 +1,4 @@
-# airRohr Sensor Firmware for PPD42NS, SDS011, DHT22, BMP180, BMP/E 280, NEO-6M and many more
+# airRohr Sensor Firmware for SPS30, SDS011, DHT22, BMP180, BMP/E 280, NEO-6M and many more
 
 ## Features:
 * many environmental and air quality sensors can be used concurrently
@@ -67,13 +67,6 @@ Please refer to the [Pinout of NodeMCU v2 and v3](https://github.com/opendata-st
 * Pin 4 (2.5m) -> unused
 * Pin 5 (5V)   -> VU
 * Pin 6 (1m)   -> unused
-
-### PPD42NS
-* Pin 1 => GND
-* Pin 2 => Pin D5 (GPIO14)
-* Pin 3 => VU
-* Pin 4 => Pin D6 (GPIO12)
-* Pin 5 => unused
 
 ### DHT22
 * Pin 1 => 3V3
@@ -171,7 +164,6 @@ will use by default when selecting the correct sensor model.
 
 * HPM/PMS/SDS011/SPS30 => Pin 1
 * BMP180/BMP280 => Pin 3
-* PPD42NS => Pin 5
 * DHT22/HTU21D/SHT3x => Pin 7
 * GPS(Neo-6M) => Pin 9
 * BME280 => Pin 11
