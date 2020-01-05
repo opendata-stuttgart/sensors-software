@@ -1,4 +1,4 @@
-# airRohr Sensor Firmware for PPD42NS, SDS011, DHT22, BMP180, BMP/E 280, NEO-6M and many more
+# airRohr Sensor Firmware for SPS30, SDS011, DHT22, BMP180, BMP/E 280, NEO-6M and many more
 
 ## Features:
 * many environmental and air quality sensors can be used concurrently
@@ -30,6 +30,16 @@ Configurable is
 The unencrypted Access Point for initial configuration will turn itself off after about
 10 minutes. In order to reactivate please power cycle the board.
 
+## DHT22 Humidity Reporting
+
+The DHT22 sensor is originally an Indoor sensor. For outdoor use it appears to be rather
+sensitive to water condensation after 100% rel.Humidity that keep it for very long time
+(sometimes forever) at 99.9% value. Also it appears to be sensitive to high UV light,
+which tends to cause the sensor to crash until hard power-loss restarted.
+
+Better experiences have been made with a BME280 or SHT3x sensor, so consider those instead.
+
+
 ## Debug via USB-Serial
 
 Connecting/Powering via a computer USB will provide USB serial with the settings 9600 baud 8N1.
@@ -57,13 +67,6 @@ Please refer to the [Pinout of NodeMCU v2 and v3](https://github.com/opendata-st
 * Pin 4 (2.5m) -> unused
 * Pin 5 (5V)   -> VU
 * Pin 6 (1m)   -> unused
-
-### PPD42NS
-* Pin 1 => GND
-* Pin 2 => Pin D5 (GPIO14)
-* Pin 3 => VU
-* Pin 4 => Pin D6 (GPIO12)
-* Pin 5 => unused
 
 ### DHT22
 * Pin 1 => 3V3
@@ -161,7 +164,6 @@ will use by default when selecting the correct sensor model.
 
 * HPM/PMS/SDS011/SPS30 => Pin 1
 * BMP180/BMP280 => Pin 3
-* PPD42NS => Pin 5
 * DHT22/HTU21D/SHT3x => Pin 7
 * GPS(Neo-6M) => Pin 9
 * BME280 => Pin 11

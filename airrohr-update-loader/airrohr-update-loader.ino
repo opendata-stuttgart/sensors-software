@@ -151,6 +151,10 @@ static bool SPIFFSAutoUpdate() {
 	SPIFFS.remove(firmware_md5_filename);
 	SPIFFS.rename(firmware_filename, prev_firmware_filename);
 	SPIFFS.end();
+
+	debug_outln_info(F("Erasing SDK config."));
+	ESP.eraseConfig();
+
 	debug_outln_info(F("Finished successfully.. Rebooting!"));
 	delay(500);
 	ESP.restart();

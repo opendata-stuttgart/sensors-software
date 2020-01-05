@@ -6,7 +6,8 @@
  ************************************************************************
  *                                                                      *
  *    airRohr firmware                                                  *
- *    Copyright (C) 2016-2018  Code for Stuttgart a.o.                  *
+ *    Copyright (C) 2016-2020  Code for Stuttgart a.o.                  *
+ *    Copyright (C) 2019-2020  Dirk Mueller                             *
  *                                                                      *
  * This program is free software: you can redistribute it and/or modify *
  * it under the terms of the GNU General Public License as published by *
@@ -27,56 +28,18 @@
  *      - Nova SDS0111                                                  *
  *  http://inovafitness.com/en/Laser-PM2-5-Sensor-SDS011-35.html        *
  *                                                                      *
- * Wiring Instruction:                                                  *
- *      - SDS011 Pin 1  (TX)   -> Pin D1 / GPIO5                        *
- *      - SDS011 Pin 2  (RX)   -> Pin D2 / GPIO4                        *
- *      - SDS011 Pin 3  (GND)  -> GND                                   *
- *      - SDS011 Pin 4  (2.5m) -> unused                                *
- *      - SDS011 Pin 5  (5V)   -> VU                                    *
- *      - SDS011 Pin 6  (1m)   -> unused                                *
+ * Wiring Instruction see included Readme.md                            *
  *                                                                      *
  ************************************************************************
  *                                                                      *
  * Alternative                                                          *
  *      - nodemcu-LoLin board                                           *
- *      - Shinyei PPD42NS                                               *
- *      http://www.sca-shinyei.com/pdf/PPD42NS.pdf                      *
  *                                                                      *
  * Wiring Instruction:                                                  *
  *      Pin 2 of dust sensor PM2.5 -> Digital 6 (PWM)                   *
  *      Pin 3 of dust sensor       -> +5V                               *
  *      Pin 4 of dust sensor PM1   -> Digital 3 (PMW)                   *
  *                                                                      *
- *      - PPD42NS Pin 1 (grey or green)  => GND                         *
- *      - PPD42NS Pin 2 (green or white)) => Pin D5 /GPIO14             *
- *        counts particles PM25                                         *
- *      - PPD42NS Pin 3 (black or yellow) => Vin                        *
- *      - PPD42NS Pin 4 (white or black) => Pin D6 / GPIO12             *
- *        counts particles PM10                                         *
- *      - PPD42NS Pin 5 (red)   => unused                               *
- *                                                                      *
- ************************************************************************
- * Extension: DHT22 (AM2303)                                            *
- *  http://www.aosong.com/en/products/details.asp?id=117                *
- *                                                                      *
- * DHT22 Wiring Instruction                                             *
- * (left to right, front is perforated side):                           *
- *      - DHT22 Pin 1 (VDD)     -> Pin 3V3 (3.3V)                       *
- *      - DHT22 Pin 2 (DATA)    -> Pin D7 (GPIO13)                      *
- *      - DHT22 Pin 3 (NULL)    -> unused                               *
- *      - DHT22 Pin 4 (GND)     -> Pin GND                              *
- *                                                                      *
- ************************************************************************
- * Extensions connected via I2C:                                        *
- * HTU21D (https://www.sparkfun.com/products/13763),                    *
- * BMP180, BMP280, BME280, OLED Display with SSD1306 (128x64 px)        *
- *                                                                      *
- * Wiring Instruction                                                   *
- * (see labels on display or sensor board)                              *
- *      VCC       ->     Pin 3V3                                        *
- *      GND       ->     Pin GND                                        *
- *      SCL       ->     Pin D4 (GPIO2)                                 *
- *      SDA       ->     Pin D3 (GPIO0)                                 *
  *                                                                      *
  ************************************************************************
  *                                                                      *
@@ -97,8 +60,8 @@
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2019-128-B7"
-const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
+#define SOFTWARE_VERSION_STR "NRZ-2019-128-B8"
+String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
  * Includes                                                      *
@@ -114,6 +77,7 @@ const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 #include <Hash.h>
 #include <ctime>
 #include <coredecls.h>
+#include <sntp.h>
 #endif
 
 #if defined(ESP32)
@@ -339,6 +303,7 @@ bool bmx280_init_failed = false;
 bool sht3x_init_failed = false;
 bool dnms_init_failed = false;
 bool gps_init_failed = false;
+bool airrohr_selftest_failed = false;
 
 #if defined(ESP8266)
 ESP8266WebServer server(80);
@@ -540,8 +505,7 @@ unsigned long WiFi_error_count;
 unsigned long last_page_load = millis();
 
 bool wificonfig_loop = false;
-bool first_cycle = true;
-bool sntp_time_is_set = false;
+uint8_t sntp_time_set;
 
 unsigned long count_sends = 0;
 unsigned long last_display_millis = 0;
@@ -1191,7 +1155,7 @@ static String form_submit(const String& value) {
 	String s = F(	"<tr>"
 					"<td>&nbsp;</td>"
 					"<td>"
-					"<input type='submit' name='submit' value='{v}' />"
+					"<input type='submit' class='s_red' name='submit' value='{v}' />"
 					"</td>"
 					"</tr>");
 	s.replace("{v}", value);
@@ -1445,10 +1409,8 @@ static void webserver_config_send_body_get(String& page_content) {
 	page_content += FPSTR(INTL_SENSORS);
 	page_content += FPSTR(WEB_B_BR);
 	add_form_checkbox_sensor(page_content, Config_sds_read, FPSTR(INTL_SDS011));
-	add_form_checkbox_sensor(page_content, Config_pms_read, FPSTR(INTL_PMS));
 	add_form_checkbox_sensor(page_content, Config_hpm_read, FPSTR(INTL_HPM));
 	add_form_checkbox_sensor(page_content, Config_sps30_read, FPSTR(INTL_SPS30));
-	add_form_checkbox_sensor(page_content, Config_ppd_read, FPSTR(INTL_PPD42NS));
 
 	// Paginate page after ~ 1500 Bytes
 	server.sendContent(page_content);
@@ -1456,7 +1418,6 @@ static void webserver_config_send_body_get(String& page_content) {
 
 	add_form_checkbox_sensor(page_content, Config_dht_read, FPSTR(INTL_DHT22));
 	add_form_checkbox_sensor(page_content, Config_htu21d_read, FPSTR(INTL_HTU21D));
-	add_form_checkbox_sensor(page_content, Config_bmp_read, FPSTR(INTL_BMP180));
 	add_form_checkbox_sensor(page_content, Config_bmx280_read, FPSTR(INTL_BMX280));
 	add_form_checkbox_sensor(page_content, Config_sht3x_read, FPSTR(INTL_SHT3X));
 	add_form_checkbox_sensor(page_content, Config_ds18b20_read, FPSTR(INTL_DS18B20));
@@ -1469,7 +1430,6 @@ static void webserver_config_send_body_get(String& page_content) {
 	page_content += FPSTR(TABLE_TAG_OPEN);
 	add_form_input(page_content, Config_dnms_correction, FPSTR(INTL_DNMS_CORRECTION), LEN_DNMS_CORRECTION-1);
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-	add_form_checkbox(page_content, Config_gps_read, FPSTR(INTL_NEO6M));
 
 	// Paginate page after ~ 1500 Bytes
 	server.sendContent(page_content);
@@ -1490,7 +1450,18 @@ static void webserver_config_send_body_get(String& page_content) {
 		"</script>");
 
 	server.sendContent(page_content);
-	page_content = FPSTR(WEB_BR_LF_B);;
+
+	page_content = FPSTR(WEB_BR_LF_B);
+	page_content += FPSTR(INTL_MORE_SENSORS);
+	page_content += FPSTR(WEB_B_BR);
+
+	add_form_checkbox_sensor(page_content, Config_pms_read, FPSTR(INTL_PMS));
+	add_form_checkbox_sensor(page_content, Config_ppd_read, FPSTR(INTL_PPD42NS));
+	add_form_checkbox_sensor(page_content, Config_bmp_read, FPSTR(INTL_BMP180));
+	add_form_checkbox(page_content, Config_gps_read, FPSTR(INTL_NEO6M));
+
+	server.sendContent(page_content);
+	page_content = FPSTR(WEB_BR_LF_B);
 	page_content += FPSTR(INTL_MORE_SETTINGS);
 	page_content += FPSTR(WEB_B_BR);
 
@@ -1561,8 +1532,8 @@ static void webserver_config_send_body_get(String& page_content) {
 	add_form_input(page_content, Config_user_influx, FPSTR(INTL_USER), LEN_USER_INFLUX-1);
 	add_form_input(page_content, Config_pwd_influx, FPSTR(INTL_PASSWORD), LEN_CFG_PASSWORD-1);
 	add_form_input(page_content, Config_measurement_name_influx, F("Measurement"), LEN_MEASUREMENT_NAME_INFLUX-1);
-	page_content += form_submit(FPSTR(INTL_SAVE_AND_RESTART));
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+	page_content += form_submit(FPSTR(INTL_SAVE_AND_RESTART));
 	page_content += FPSTR(BR_TAG);
 	page_content += FPSTR(WEB_BR_FORM);
 	if (wificonfig_loop) {  // scan for wlan ssids
@@ -1813,7 +1784,7 @@ static void webserver_values() {
 
 		const int signal_quality = calcWiFiSignalQuality(last_signal_strength);
 		debug_outln_info(F("ws: values ..."));
-		if (first_cycle) {
+		if (!count_sends) {
 			page_content += F("<b style='color:red'>");
 			add_warning_first_cycle(page_content);
 			page_content += FPSTR(WEB_B_BR_BR);
@@ -1970,6 +1941,8 @@ static void webserver_status() {
 	page_content = F("<table cellspacing='0' border='1' cellpadding='5'>\n"
 			  "<tr><th> " INTL_PARAMETER "</th><th>" INTL_VALUE "</th></tr>");
 	String versionHtml(SOFTWARE_VERSION);
+	versionHtml += F("/ST:");
+	versionHtml += String(!airrohr_selftest_failed);
 	versionHtml += '/';
 	versionHtml += ESP.getFullVersion();
 	versionHtml.replace("/", FPSTR(BR_TAG));
@@ -1979,7 +1952,24 @@ static void webserver_status() {
 	if (cfg::auto_update) {
 		add_table_row_from_value(page_content, F("Last OTA"), delayToString(millis() - last_update_attempt));
 	}
-	add_table_row_from_value(page_content, F("NTP Sync"), String(sntp_time_is_set));
+#if defined(ESP8266)
+    add_table_row_from_value(page_content, F("NTP Sync"), String(sntp_time_set));
+	StreamString ntpinfo;
+
+	for (unsigned i = 0; i < SNTP_MAX_SERVERS; i++) {
+		const ip_addr_t* sntp = sntp_getserver(i);
+		if (sntp && !ip_addr_isany(sntp)) {
+			const char* name = sntp_getservername(i);
+			if (!ntpinfo.isEmpty()) {
+				ntpinfo.print(FPSTR(BR_TAG));
+			}
+			ntpinfo.printf_P(PSTR("%s (%s)"), IPAddress(*sntp).toString().c_str(), name ? name : "?");
+			ntpinfo.printf_P(PSTR(" reachable: %s"), sntp_getreachability(i) ? "Yes" : "No");
+		}
+	}
+	add_table_row_from_value(page_content, F("NTP Info"), ntpinfo);
+#endif
+
 	time_t now = time(nullptr);
 	add_table_row_from_value(page_content, FPSTR(INTL_TIME), ctime(&now));
 	add_table_row_from_value(page_content, F("Uptime"), delayToString(millis() - time_point_device_start_ms));
@@ -2130,7 +2120,7 @@ static void webserver_data_json() {
 	unsigned long age = 0;
 
 	debug_outln_info(F("ws: data json..."));
-	if (first_cycle) {
+	if (!count_sends) {
 		s1 = FPSTR(data_first_part);
 		s1 += "]}";
 		age = cfg::sending_intervall_ms - msSince(starttime);
@@ -2371,6 +2361,7 @@ static void waitForWifiToConnect(int maxRetries) {
  * WiFi auto connecting script                                   *
  *****************************************************************/
 static void connectWifi() {
+	display_debug(F("Connecting to"), String(cfg::wlanssid));
 #if defined(ESP8266)
 	// Enforce Rx/Tx calibration
 	system_phy_set_powerup_option(1);
@@ -2780,7 +2771,8 @@ static void fetchSensorSDS(String& s) {
 
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_SDS011));
 
-	if (msSince(starttime) < (cfg::sending_intervall_ms - (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS))) {
+	if (cfg::sending_intervall_ms > (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS) &&
+		msSince(starttime) < (cfg::sending_intervall_ms - (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS))) {
 		if (is_SDS_running) {
 			is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
 		}
@@ -2989,8 +2981,8 @@ static void fetchSensorPMS(String& s) {
 					checksum_is = 0;
 				}
 			}
+			yield();
 		}
-		yield();
 	}
 
 	if (send_now) {
@@ -3128,8 +3120,8 @@ static void fetchSensorHPM(String& s) {
 					checksum_is = 0;
 				}
 			}
+			yield();
 		}
-		yield();
 
 	}
 	if (send_now) {
@@ -3481,6 +3473,9 @@ static bool launchUpdateLoader(const String& md5) {
 	if (!Update.end()) {
 		return false;
 	}
+
+	debug_outln_info(F("Erasing SDK config."));
+	ESP.eraseConfig();
 
 	sensor_restart();
 	return true;
@@ -4135,27 +4130,23 @@ static void logEnabledDisplays() {
 	}
 }
 
-static void time_is_set () {
-	if (!sntp_time_is_set) {
-		sntp_time_is_set = true;
-
-		time_t now = time(nullptr);
-		debug_outln_info(F("SNTP sync finished: "), ctime(&now));
-		twoStageOTAUpdate();
-		last_update_attempt = millis();
-	}
-}
-
 static void setupNetworkTime() {
 	// server name ptrs must be persisted after the call to configTime because internally
 	// the pointers are stored see implementation of lwip sntp_setservername()
 	static char ntpServer1[18], ntpServer2[18], ntpServer3[18];
 #if defined(ESP8266)
-	settimeofday_cb(time_is_set);
+	settimeofday_cb([]() {
+		if (!sntp_time_set) {
+			time_t now = time(nullptr);
+			debug_outln_info(F("SNTP synced: "), ctime(&now));
+			twoStageOTAUpdate();
+			last_update_attempt = millis();
+		}
+		sntp_time_set++;
+	});
 #endif
 	strcpy_P(ntpServer1, NTP_SERVER_1);
 	strcpy_P(ntpServer2, NTP_SERVER_2);
-	strcpy_P(ntpServer3, NTP_SERVER_3);
 	configTime(0, 0, ntpServer1, ntpServer2, ntpServer3);
 }
 
@@ -4256,12 +4247,15 @@ void setup(void) {
 	cfg::initNonTrivials(esp_chipid.c_str());
 	WiFi.persistent(false);
 
-	debug_outln_info(F("Airrohr: " SOFTWARE_VERSION_STR "/"), String(CURRENT_LANG));
+	debug_outln_info(F("airRohr: " SOFTWARE_VERSION_STR "/"), String(CURRENT_LANG));
+	if ((airrohr_selftest_failed = !ESP.checkFlashConfig(true) /* after 2.7.0 update: || !ESP.checkFlashCRC() */)) {
+		debug_outln_error(F("ERROR: SELF TEST FAILED!"));
+		SOFTWARE_VERSION += F("-STF");
+	}
 
 	init_config();
 	init_display();
 	init_lcd();
-	display_debug(F("Connecting to"), String(cfg::wlanssid));
 	setupNetworkTime();
 	connectWifi();
 	setup_webserver();
@@ -4313,7 +4307,7 @@ void loop(void) {
 	send_now = msSince(starttime) > cfg::sending_intervall_ms;
 	// Wait at least 30s for each NTP server to sync
 
-	if (!sntp_time_is_set && send_now &&
+	if (!sntp_time_set && send_now &&
 			msSince(time_point_device_start_ms) < 1000 * 2 * 30 + 5000) {
 		debug_outln_info(F("NTP sync not finished yet, skipping send"));
 		send_now = false;
@@ -4543,7 +4537,6 @@ void loop(void) {
 		max_micro = 0;
 		sum_send_time = 0;
 		starttime = millis();								// store the start time
-		first_cycle = false;
 		count_sends++;
 	}
 	yield();
