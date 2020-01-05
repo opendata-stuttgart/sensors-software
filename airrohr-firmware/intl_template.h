@@ -1,9 +1,9 @@
 /*
  *	airRohr firmware
  *	Copyright (C) 2016-2018  Code for Stuttgart a.o.
- * 
+ *
  *  Translation template
- * 
+ *
  *	Texts should be as short as possible
  *	We only have 512 kB for the entire firmware
  */
@@ -34,7 +34,7 @@ const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM ="";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "";
-const char INTL_FS_WIFI[] PROGMEM = "";
+
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "";
 const char INTL_MORE_SETTINGS[] PROGMEM ="";
@@ -46,6 +46,7 @@ const char INTL_FLIP_DISPLAY[] PROGMEM = "OLED Display Flip";
 const char INTL_LCD1602_27[] PROGMEM = "LCD 1602 (I2C: 0x27)";
 const char INTL_LCD1602_3F[] PROGMEM = "LCD 1602 (I2C: 0x3F)";
 const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
+const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "";
@@ -53,12 +54,12 @@ const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "";
 const char INTL_MORE_APIS[] PROGMEM = "";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "";
-const char INTL_SERVER[] PROGMEM = ""; 
-const char INTL_PATH[] PROGMEM = ""; 
-const char INTL_PORT[] PROGMEM = ""; 
-const char INTL_USER[] PROGMEM = ""; 
-const char INTL_PASSWORD[] PROGMEM = ""; 
-const char INTL_SEND_TO[] PROGMEM = ""; 
+const char INTL_SERVER[] PROGMEM = "";
+const char INTL_PATH[] PROGMEM = "";
+const char INTL_PORT[] PROGMEM = "";
+const char INTL_USER[] PROGMEM = "";
+const char INTL_PASSWORD[] PROGMEM = "";
+const char INTL_SEND_TO[] PROGMEM = "";
 const char INTL_READ_FROM[] PROGMEM = "";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "";
 const char INTL_RESTART_DEVICE[] PROGMEM = "";
@@ -67,6 +68,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "";
 #define INTL_HOME ""
 #define INTL_BACK_TO_HOME ""
 const char INTL_CURRENT_DATA[] PROGMEM = "";
+const char INTL_DEVICE_STATUS[] PROGMEM = "";
 #define INTL_ACTIVE_SENSORS_MAP ""
 #define INTL_CONFIGURATION_DELETE ""
 #define INTL_CONFIGURATION_REALLY_DELETE ""

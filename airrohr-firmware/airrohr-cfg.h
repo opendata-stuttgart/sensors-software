@@ -61,6 +61,7 @@ enum ConfigShapeId {
 	Config_has_flipped_display,
 	Config_has_lcd1602,
 	Config_has_lcd1602_27,
+	Config_has_lcd2004,
 	Config_has_lcd2004_27,
 	Config_display_wifi_info,
 	Config_display_device_info,
@@ -121,6 +122,7 @@ const char CFG_KEY_HAS_SH1106[] PROGMEM = "has_sh1106";
 const char CFG_KEY_HAS_FLIPPED_DISPLAY[] PROGMEM = "has_flipped_display";
 const char CFG_KEY_HAS_LCD1602[] PROGMEM = "has_lcd1602";
 const char CFG_KEY_HAS_LCD1602_27[] PROGMEM = "has_lcd1602_27";
+const char CFG_KEY_HAS_LCD2004[] PROGMEM = "has_lcd2004";
 const char CFG_KEY_HAS_LCD2004_27[] PROGMEM = "has_lcd2004_27";
 const char CFG_KEY_DISPLAY_WIFI_INFO[] PROGMEM = "display_wifi_info";
 const char CFG_KEY_DISPLAY_DEVICE_INFO[] PROGMEM = "display_device_info";
@@ -181,6 +183,7 @@ static constexpr ConfigShapeEntry configShape[] PROGMEM = {
 	{ Config_Type_Bool, 0, FPSTR(CFG_KEY_HAS_FLIPPED_DISPLAY), &cfg::has_flipped_display },
 	{ Config_Type_Bool, 0, FPSTR(CFG_KEY_HAS_LCD1602), &cfg::has_lcd1602 },
 	{ Config_Type_Bool, 0, FPSTR(CFG_KEY_HAS_LCD1602_27), &cfg::has_lcd1602_27 },
+	{ Config_Type_Bool, 0, FPSTR(CFG_KEY_HAS_LCD2004), &cfg::has_lcd2004 },
 	{ Config_Type_Bool, 0, FPSTR(CFG_KEY_HAS_LCD2004_27), &cfg::has_lcd2004_27 },
 	{ Config_Type_Bool, 0, FPSTR(CFG_KEY_DISPLAY_WIFI_INFO), &cfg::display_wifi_info },
 	{ Config_Type_Bool, 0, FPSTR(CFG_KEY_DISPLAY_DEVICE_INFO), &cfg::display_device_info },

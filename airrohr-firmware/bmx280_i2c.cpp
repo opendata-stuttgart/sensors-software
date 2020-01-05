@@ -100,17 +100,16 @@ bool BMX280::init() {
   write8(BMX280_REGISTER_SOFTRESET, 0xB6);
 
   // wait for chip to wake up.
-  delay(300);
+  delay(30);
 
   // if chip is still reading calibration, delay
-  while (isReadingCalibration())
-    delay(100);
+  unsigned attempts = 50;
+  while (--attempts && isReadingCalibration())
+    delay(10);
 
   readCoefficients(); // read trimming parameters, see DS 4.2.2
 
   setSampling(); // use defaults
-
-  delay(100);
 
   return true;
 }

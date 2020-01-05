@@ -2,6 +2,7 @@
 .pioenvs
 .piolibdeps
 .pio/
+.vscode/
 examples
 keywords.txt
 library.json

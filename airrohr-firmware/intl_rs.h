@@ -1,9 +1,9 @@
 /*
  *	airRohr firmware
  *	Copyright (C) 2016-2018  Code for Stuttgart a.o.
- * 
- *  English translations
- * 
+ *
+ *  Serbian translations
+ *
  *	Texts should be as short as possible
  *	We only have 512 kB for the entire firmware
  */
@@ -28,12 +28,13 @@ const char INTL_DHT22[] PROGMEM = "DHT22 ({t}, {h})";
 const char INTL_HTU21D[] PROGMEM = "HTU21D ({t}, {h})";
 const char INTL_BMP180[] PROGMEM = "BMP180 ({t}, {p})";
 const char INTL_BMX280[] PROGMEM = "BMP280/BME280 ({t}, {h}, {p})";
+const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
 const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM ="Korekcija u dB(A)";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Autorizacija";
-const char INTL_FS_WIFI[] PROGMEM = "WiFi senzor";
+
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "WiFi senzor u konfiguracionom režimu";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Naziv";
 const char INTL_MORE_SETTINGS[] PROGMEM ="Više podešavanja";
@@ -45,19 +46,20 @@ const char INTL_FLIP_DISPLAY[] PROGMEM = "Rotiraj OLED displej (180°)";
 const char INTL_LCD1602_27[] PROGMEM = "LCD 1602 (I2C: 0x27)";
 const char INTL_LCD1602_3F[] PROGMEM = "LCD 1602 (I2C: 0x3F)";
 const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
+const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Prikaži WiFi podatke";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Pokaži informacije o uređaju";
-const char INTL_DEBUG_LEVEL[] PROGMEM = "Nivo korekcije";
+const char INTL_DEBUG_LEVEL[] PROGMEM = "Nivo&nbsp;korekcije";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Merni interval";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Trajanje ruter režima";
 const char INTL_MORE_APIS[] PROGMEM = "Više API-ja";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Pošalji podatke mom API-ju";
-const char INTL_SERVER[] PROGMEM = "Server"; 
-const char INTL_PATH[] PROGMEM = "Putanja"; 
-const char INTL_PORT[] PROGMEM = "Port"; 
-const char INTL_USER[] PROGMEM = "Korisnik"; 
-const char INTL_PASSWORD[] PROGMEM = "Lozinka"; 
-const char INTL_SEND_TO[] PROGMEM = "Pošalji na {v}"; 
+const char INTL_SERVER[] PROGMEM = "Server";
+const char INTL_PATH[] PROGMEM = "Putanja";
+const char INTL_PORT[] PROGMEM = "Port";
+const char INTL_USER[] PROGMEM = "Korisnik";
+const char INTL_PASSWORD[] PROGMEM = "Lozinka";
+const char INTL_SEND_TO[] PROGMEM = "Pošalji na {v}";
 const char INTL_READ_FROM[] PROGMEM = "Pročitaj iz {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Senzor se restartuje.";
 const char INTL_RESTART_DEVICE[] PROGMEM = "Restartuj uređaj";
@@ -66,6 +68,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "Restartuj senzor";
 #define INTL_HOME "Naslovna"
 #define INTL_BACK_TO_HOME "Povratak na naslovnu stranicu"
 const char INTL_CURRENT_DATA[] PROGMEM = "Trenutni podaci";
+const char INTL_DEVICE_STATUS[] PROGMEM = "Status уређаја";
 #define INTL_ACTIVE_SENSORS_MAP "Mapa aktivnih senzora (spoljni link)"
 #define INTL_CONFIGURATION_DELETE "Izbriši konfiguraciju"
 #define INTL_CONFIGURATION_REALLY_DELETE "Jeste li sigurni da želite da izbrišete konfiguraciju?"
@@ -102,8 +105,8 @@ const char INTL_DATE[] PROGMEM = "Datum";
 const char INTL_TIME[] PROGMEM = "Vreme";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "jačina signala";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "kvalitet signala";
-#define INTL_NUMBER_OF_MEASUREMENTS "Broj merenja:"
-#define INTL_TIME_SENDING_MS "Vreme utrošeno za slanje:"
+#define INTL_NUMBER_OF_MEASUREMENTS "Broj merenja"
+#define INTL_TIME_SENDING_MS "Vreme utrošeno za slanje"
 #define INTL_SENSOR "Senzor"
 #define INTL_PARAMETER "Parametar"
 #define INTL_VALUE "Vrednost"

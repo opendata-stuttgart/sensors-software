@@ -1,3 +1,61 @@
+NRZ-2019-128-B7
+* More introspection status for OTA and sending errors
+* Resorting Language selection alphabetically
+* Disable language and beta selector when OTA is disabled
+
+NRZ-2019-128-B6
+* Fix crash on device status page in some locales
+
+NRZ-2019-128-B5
+* Avoid calling wifi off on startup which seems to cause some issues (Fixes #598)
+
+NRZ-2019-128-B4
+* perfom blocking reads on SDS011 serial responses
+* Add Device Status webpage
+* Set DHCP hostname to the firmware config wifi name (Fixes #595)
+* Polish translation fixes
+* Mark potentially destructive actions with red highlight (idea from nettigo FW)
+* Add support for LCD 2004 on I2C 0x3F address
+
+NRZ-2019-128-B3
+* Fix startup hang on wifis without NTP access (#580)
+* Update SHT3.x to 1.1.6
+
+NRZ-2019-127-1 (intermediate version)
+online since 2019-12-03
+* same as NRZ-2019-127-B2
+
+NRZ-2019-128-B2
+* Initialize MDNS after wifi to restore functionality
+
+NRZ-2019-128-B1
+* next beta version
+
+NRZ-2019-127
+online since 2019-12-02
+* same as NRZ-2019-126-B9
+
+NRZ-2019-126-B9
+* Update to Arduino Core 2.6.2 to fix WiFi stability issues
+
+NRZ-2019-126-B8
+* Updated translations
+* Collect error counters
+* Serbian localization added
+
+NRZ-2019-126-B7
+* Updated italian translations - thanks stewecar
+* Fix instabilities in SDS011 measurement decoding
+
+NRZ-2019-126-B6
+* Read SDS011 version once on startup
+* Discard power-on self-test dust sensor measurements
+* Do not store WiFi station credentials in SDK protected flash
+* Switch to ArduinoJson 6.13
+* show SDS011 manufacturing date in values HTML page
+* Update to Arduino Core 2.6.1, including many fixes for SSL, WiFi and SoftwareSerial
+* Update SHT3.x to 1.1.5
+
 NRZ-2019-126-B5
 * Rename Luftdaten.info to Sensors.Community everywhere
 * Report the submitted wifi signal quality level in the web UI

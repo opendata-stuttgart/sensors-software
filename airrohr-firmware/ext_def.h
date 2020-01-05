@@ -45,7 +45,11 @@ enum LoggerEntry {
 struct LoggerConfig {
     uint16_t destport;
     uint16_t _unused;
+#if defined(ESP8266)
     BearSSL::Session* session;
+#else
+    void* session;
+#endif
 };
 
 // IMPORTANT: NO MORE CHANGES TO VARIABLE NAMES NEEDED FOR EXTERNAL APIS
@@ -266,6 +270,9 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 
 // LCD Display LCD1602 (0x27) connected?
 #define HAS_LCD1602_27 0
+
+// LCD Display LCD2004 connected?
+#define HAS_LCD2004 0
 
 // LCD Display LCD2004 (0x27) connected?
 #define HAS_LCD2004_27 0

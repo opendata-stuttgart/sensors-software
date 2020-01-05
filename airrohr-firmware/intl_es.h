@@ -1,9 +1,9 @@
 /*
  *	airRohr firmware
  *	Copyright (C) 2016-2018  Code for Stuttgart a.o.
- * 
+ *
  *  Spanish translations
- * 
+ *
  *	Texts should be as short as possible
  *	We only have 512 kB for the entire firmware
  */
@@ -31,23 +31,24 @@ const char INTL_BMX280[] PROGMEM = "BMP280/BME280 ({t}, {h}, {p})";
 const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
 const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
-const char INTL_DNMS_CORRECTION[] PROGMEM ="";
+const char INTL_DNMS_CORRECTION[] PROGMEM = "corrección en dB (A)";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Autorización";
-const char INTL_FS_WIFI[] PROGMEM = "";
-const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "";
-const char INTL_FS_WIFI_NAME[] PROGMEM = "";
+
+const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "Sensor iFi en modo de configuración";
+const char INTL_FS_WIFI_NAME[] PROGMEM = "Nombre";
 const char INTL_MORE_SETTINGS[] PROGMEM ="Otras configruaciones";
 const char INTL_AUTO_UPDATE[] PROGMEM = "Actualización automática del Firmware";
-const char INTL_USE_BETA[] PROGMEM = "";
+const char INTL_USE_BETA[] PROGMEM = "Cargar del firmware beta";
 const char INTL_DISPLAY[] PROGMEM = "OLED SSD1306";
 const char INTL_SH1106[] PROGMEM = "OLED SH1106";
-const char INTL_FLIP_DISPLAY[] PROGMEM = "";
+const char INTL_FLIP_DISPLAY[] PROGMEM = "Pantalla OLED flip";
 const char INTL_LCD1602_27[] PROGMEM = "LCD 1602 (I2C: 0x27)";
 const char INTL_LCD1602_3F[] PROGMEM = "LCD 1602 (I2C: 0x3F)";
 const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
-const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "";
-const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "";
+const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
+const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Mostrar información de WiFi";
+const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Mostrar información del dispositivo";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;Level";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Intervalo de medición";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Duración del modo enrutador";
@@ -60,13 +61,14 @@ const char INTL_USER[] PROGMEM = "Usuario";
 const char INTL_PASSWORD[] PROGMEM = "Contraseña";
 const char INTL_SEND_TO[] PROGMEM = "Enviar a {v}";
 const char INTL_READ_FROM[] PROGMEM = "Leer {v}";
-const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "";
+const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "El sensor se está reiniciando.";
 const char INTL_RESTART_DEVICE[] PROGMEM = "Reiniciar dispositivo";
 const char INTL_DELETE_CONFIG[] PROGMEM = "Borrar configruación actual";
 const char INTL_RESTART_SENSOR[] PROGMEM = "Reiniciar sensor";
 #define INTL_HOME "Visión general"
 #define INTL_BACK_TO_HOME "Volver al inicio"
 const char INTL_CURRENT_DATA[] PROGMEM = "Datos actuales";
+const char INTL_DEVICE_STATUS[] PROGMEM = "El estado del dispositivo";
 #define INTL_ACTIVE_SENSORS_MAP "Mapa de sensores activos (enlace externo)"
 #define INTL_CONFIGURATION_DELETE "Borrar configuración"
 #define INTL_CONFIGURATION_REALLY_DELETE "Estas seguro que quieres borrar la configuración?"
@@ -87,7 +89,7 @@ const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Ajustar Debug a ";
 #define INTL_CONFIG_CAN_NOT_BE_DELETED "Configuración no puede ser borrada"
 #define INTL_CONFIG_NOT_FOUND "Configuración no encontrada"
 const char INTL_TIME_TO_FIRST_MEASUREMENT[] PROGMEM = "Otros {v} segundos a la primera medición.";
-const char INTL_TIME_SINCE_LAST_MEASUREMENT[] PROGMEM = "";
+const char INTL_TIME_SINCE_LAST_MEASUREMENT[] PROGMEM = "segundos desde la última medición.";
 const char INTL_PARTICLES_PER_LITER[] PROGMEM = "Partículas/litro";
 const char INTL_PARTICULATE_MATTER[] PROGMEM = "partículas finas";
 const char INTL_TEMPERATURE[] PROGMEM = "Temperatura";
@@ -103,8 +105,8 @@ const char INTL_DATE[] PROGMEM = "Fecha";
 const char INTL_TIME[] PROGMEM = "Tiempo";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Intensidad de Señal";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Calidad de Señal";
-#define INTL_NUMBER_OF_MEASUREMENTS ""
-#define INTL_TIME_SENDING_MS ""
+#define INTL_NUMBER_OF_MEASUREMENTS "Numero de mediciones"
+#define INTL_TIME_SENDING_MS "Tiempo empleado para enviar"
 #define INTL_SENSOR "Sensor"
 #define INTL_PARAMETER "Parámetro"
 #define INTL_VALUE "Valor"

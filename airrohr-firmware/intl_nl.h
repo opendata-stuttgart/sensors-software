@@ -1,9 +1,9 @@
 /*
  *	airRohr firmware
  *	Copyright (C) 2016-2018  Code for Stuttgart a.o.
- * 
+ *
  *  Dutch translations
- * 
+ *
  *	Texts should be as short as possible
  *	We only have 512 kB for the entire firmware
  */
@@ -21,7 +21,7 @@ const char INTL_SAVE[] PROGMEM = "Opslaan";
 const char INTL_SENSORS[] PROGMEM = "Sensors";
 const char INTL_SDS011[] PROGMEM = "SDS011 ({pm})";
 const char INTL_PMS[] PROGMEM = "Plantower PMS(1,3,5,6,7)003 ({pm})";
-const char INTL_HPM[] PROGMEM = "Honeywell fijnstofsensor";
+const char INTL_HPM[] PROGMEM = "Honeywell PM ({pm})";
 const char INTL_SPS30[] PROGMEM = "Sensirion SPS30 ({pm})";
 const char INTL_PPD42NS[] PROGMEM = "PPD42NS ({pm})";
 const char INTL_DHT22[] PROGMEM = "DHT22 ({t}, {h})";
@@ -31,10 +31,10 @@ const char INTL_BMX280[] PROGMEM = "BMP280/BME280 ({t}, {h}, {p})";
 const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
 const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
-const char INTL_DNMS_CORRECTION[] PROGMEM ="";
+const char INTL_DNMS_CORRECTION[] PROGMEM ="correctie in dB(A)";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Beperk toegang";
-const char INTL_FS_WIFI[] PROGMEM = "Instellingen voor rechtstreekse WiFi-verbinding";
+
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "Netwerknaam en -wachtwoord van de fijnstofsensor";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Naam (SSID)";
 const char INTL_MORE_SETTINGS[] PROGMEM ="Meer instellingen";
@@ -42,12 +42,13 @@ const char INTL_AUTO_UPDATE[] PROGMEM = "Firmware automatisch bijwerken";
 const char INTL_USE_BETA[] PROGMEM = "Installeer beta-firmwares";
 const char INTL_DISPLAY[] PROGMEM = "OLED SSD1306";
 const char INTL_SH1106[] PROGMEM = "OLED SH1106";
-const char INTL_FLIP_DISPLAY[] PROGMEM = "";
+const char INTL_FLIP_DISPLAY[] PROGMEM = "OLED display omdraaien";
 const char INTL_LCD1602_27[] PROGMEM = "LCD 1602 (I2C: 0x27)";
 const char INTL_LCD1602_3F[] PROGMEM = "LCD 1602 (I2C: 0x3F)";
 const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
-const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "";
-const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "";
+const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
+const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Toon WiFi info";
+const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Toon apparaatinfo";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debugniveau";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Meetinterval";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Tijdsduur routermodus";
@@ -67,6 +68,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "Herstart sensor";
 #define INTL_HOME "Home"
 #define INTL_BACK_TO_HOME "Terug naar homepagina"
 const char INTL_CURRENT_DATA[] PROGMEM = "Huidige data";
+const char INTL_DEVICE_STATUS[] PROGMEM = "Apparaatstatus";
 #define INTL_ACTIVE_SENSORS_MAP "Actieve sensors kaart (externe link)"
 #define INTL_CONFIGURATION_DELETE "Configuratie verwijderen"
 #define INTL_CONFIGURATION_REALLY_DELETE "Bent u zeker dat u de configuratie wilt verwijderen?"
@@ -103,8 +105,8 @@ const char INTL_DATE[] PROGMEM = "Datum";
 const char INTL_TIME[] PROGMEM = "Tijd";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Signaalsterkte";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Signaalkwaliteit";
-#define INTL_NUMBER_OF_MEASUREMENTS "Aantal metingen:"
-#define INTL_TIME_SENDING_MS ""
+#define INTL_NUMBER_OF_MEASUREMENTS "Aantal metingen"
+#define INTL_TIME_SENDING_MS "Tijdsduur opsturen metingen"
 #define INTL_SENSOR "Sensor"
 #define INTL_PARAMETER "Parameter"
 #define INTL_VALUE "Waarde"
