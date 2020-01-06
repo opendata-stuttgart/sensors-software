@@ -214,7 +214,7 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 #define HPM_READ 0
 #define HPM_API_PIN 1
 
-// Sensirion SPS30 PM Sensor I2C connection
+// Sensirion SPS30, the more expensive version of the particle sensor
 #define SPS30_READ 0
 #define SPS30_API_PIN 1
 #define SPS30_WAITING_AFTER_LAST_READ 11000   // waiting time after last reading mesurement data in ms

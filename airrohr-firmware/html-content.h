@@ -45,17 +45,16 @@ body{font-family:Arial;margin:0}\
 .content{margin:10px}\
 .r{text-align:right}\
 td{vertical-align:top;}\
-a{text-decoration:none;padding:10px;background:#3ba;color:white;display:block;width:auto;border-radius:5px;}\
+a{text-decoration:none;padding:10px;background:#3ba;color:white;display:block;width:auto;border-radius:5px;box-shadow:0px 2px 2px #3ba;}\
 .wifi{background:none;color:blue;padding:5px;display:inline;}\
 input[type='text']{width:100%;}\
 input[type='password']{width:100%;}\
-input[type='submit']{border-radius:5px;font-size:medium;padding:5px;}\
+input[type='submit']{color:white;text-align:left;border-radius:5px;font-size:medium;background:#b33;box-shadow:0px 2px 2px #b33;padding:9px !important;width:100%;border-style:none;}\
+input[type='submit']:hover {background:#d44} \
 .s_green{padding:9px !important;width:100%;border-style:none;background:#3ba;color:white;text-align:left;}\
-.s_red{padding:9px !important;width:100%;border-style:none;background:#D44;color:white;text-align:left;}\
-.s_red:hover {background:#E33;}\
 </style>\
 </head><body>\
-<div style='min-height:129px;background-color:#3ba;margin-bottom:20px'>\
+<div style='min-height:129px;background-color:#3ba;margin-bottom:20px;box-shadow:0px 4px 6px #3ba'>\
 <a href='/' style='background:none;display:inline'><img src='/images?name=luftdaten_logo' style='float:left;margin:20px' width='100' height='89'/></a>";
 
 const char WEB_PAGE_HEADER_BODY[] PROGMEM = "<h3 style='margin:0'>" INTL_PM_SENSOR "</h3>\
@@ -70,7 +69,7 @@ const char EMPTY_ROW[] PROGMEM = "<tr><td colspan='3'>&nbsp;</td></tr>";
 
 const char WEB_PAGE_FOOTER[] PROGMEM = "<br/><br/><a href='/' style='display:inline;'>" INTL_BACK_TO_HOME "</a>"\
                 "<br/><br/><br/>"
-                "<a href='https://codefor.de/stuttgart/' target='_blank' rel='noreferrer' style='display:inline;background:none;color:black;'>&copy; Open Knowledge Lab Stuttgart a.o. (Code for Germany)</a></div></body></html>\r\n";
+                "<a href='https://codefor.de/stuttgart/' target='_blank' rel='noreferrer' style='display:inline;background:none;color:black;box-shadow:none'>&copy; Open Knowledge Lab Stuttgart a.o. (Code for Germany)</a></div></body></html>\r\n";
 
 const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a href='/values'>{t}</a><br/>\
 <a href='/status'>{s}</a><br/>\
