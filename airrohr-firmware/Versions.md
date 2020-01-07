@@ -1,3 +1,6 @@
+NRZ-2020-130-B1
+* next beta version
+
 NRZ-2020-129
 online since 2020-01-07
 * same as NRZ-2019-128-B8 (+build date is shown in header)
