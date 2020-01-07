@@ -1,3 +1,7 @@
+NRZ-2020-129
+online since 2020-01-07
+* same as NRZ-2019-128-B8 (+build date is shown in header)
+
 NRZ-2019-128-B8
 * Improve NTP handling and status reporting
 * Fix weird placement of "save and restart" button in config
