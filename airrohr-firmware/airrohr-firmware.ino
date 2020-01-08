@@ -4326,14 +4326,6 @@ void loop(void) {
 	}
 	last_micro = act_micro;
 
-	if (msSince(time_point_device_start_ms) > DURATION_BEFORE_FORCED_RESTART_MS) {
-		sensor_restart();
-	}
-
-	if (msSince(last_update_attempt) > PAUSE_BETWEEN_UPDATE_ATTEMPTS_MS) {
-		twoStageOTAUpdate();
-		last_update_attempt = act_milli;
-	}
 
 	if (cfg::sps30_read && ( !sps30_init_failed)) {
 		if ((msSince(starttime) - SPS30_read_timer) > SPS30_WAITING_AFTER_LAST_READ) {
@@ -4520,6 +4512,17 @@ void loop(void) {
 			WiFi_error_count++;
 			WiFi.reconnect();
 			waitForWifiToConnect(20);
+		}
+
+		// only do a restart after finishing sending
+		if (msSince(time_point_device_start_ms) > DURATION_BEFORE_FORCED_RESTART_MS) {
+			sensor_restart();
+		}
+
+		// time for a OTA attempt?
+		if (msSince(last_update_attempt) > PAUSE_BETWEEN_UPDATE_ATTEMPTS_MS) {
+			twoStageOTAUpdate();
+			last_update_attempt = act_milli;
 		}
 
 		// Resetting for next sampling
