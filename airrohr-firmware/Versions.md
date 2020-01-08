@@ -1,6 +1,11 @@
+NRZ-2020-130-B2
+* Avoid crash on WiFi network scan failure (Related to #615)
+* Only do OTA after sensor measurements are finished
+* Remove uninitialized memory read in NTP handling
+* Accept larger flash sizes also as compatible
+
 NRZ-2020-130-B1
 * next beta version
-* Avoid crash on WiFi network scan failure (Related to #615)
 
 NRZ-2020-129
 online since 2020-01-07
