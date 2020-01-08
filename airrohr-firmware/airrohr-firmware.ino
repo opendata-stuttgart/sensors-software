@@ -4128,7 +4128,7 @@ static void logEnabledDisplays() {
 static void setupNetworkTime() {
 	// server name ptrs must be persisted after the call to configTime because internally
 	// the pointers are stored see implementation of lwip sntp_setservername()
-	static char ntpServer1[18], ntpServer2[18], ntpServer3[18];
+	static char ntpServer1[18], ntpServer2[18];
 #if defined(ESP8266)
 	settimeofday_cb([]() {
 		if (!sntp_time_set) {
@@ -4142,7 +4142,7 @@ static void setupNetworkTime() {
 #endif
 	strcpy_P(ntpServer1, NTP_SERVER_1);
 	strcpy_P(ntpServer2, NTP_SERVER_2);
-	configTime(0, 0, ntpServer1, ntpServer2, ntpServer3);
+	configTime(0, 0, ntpServer1, ntpServer2);
 }
 
 static unsigned long sendDataToOptionalApis(const String &data) {
