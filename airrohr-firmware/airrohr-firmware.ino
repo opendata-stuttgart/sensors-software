@@ -1348,8 +1348,23 @@ static void webserver_config_send_body_get(String& page_content) {
 	};
 
 	debug_outln_info(F("begin webserver_config_body_get ..."));
-	page_content += F("<form method='POST' action='/config' style='width:100%;'>\n<b>" INTL_WIFI_SETTINGS "</b><br/>");
-	debug_outln_info(F("ws: config page 1"));
+	page_content += F("<form method='POST' action='/config' style='width:100%;'>\n"
+	"<input class='radio' id='one' name='group' type='radio' checked>"
+    "<input class='radio' id='two' name='group' type='radio'>"
+    "<input class='radio' id='three' name='group' type='radio'>"
+    "<input class='radio' id='four' name='group' type='radio'>"
+    "<div class='tabs'>"
+	"<label class='tab' id='tab1' for='one'>" INTL_WIFI_SETTINGS "</label>"
+	"<label class='tab' id='tab2' for='two'>");
+	page_content += FPSTR(INTL_MORE_SETTINGS);
+	page_content += F("</label>"
+		"<label class='tab' id='tab3' for='three'>");
+	page_content += FPSTR(INTL_SENSORS);
+	page_content += F("</label>"
+		"<label class='tab' id='tab4' for='four'>APIs"
+		"</label></div><div class='panels'>"
+		"<div class='panel' id='panel1'>");
+
 	if (wificonfig_loop) {  // scan for wlan ssids
 		page_content += F("<div id='wifilist'>" INTL_WIFI_NETWORKS "</div><br/>");
 	}
@@ -1389,6 +1404,25 @@ static void webserver_config_send_body_get(String& page_content) {
 		// Paginate page after ~ 1500 Bytes
 		server.sendContent(page_content);
 	}
+
+	page_content = tmpl(FPSTR(WEB_DIV_PANEL), String(2));
+
+	add_form_checkbox(Config_has_display, FPSTR(INTL_DISPLAY));
+	add_form_checkbox(Config_has_sh1106, FPSTR(INTL_SH1106));
+	add_form_checkbox(Config_has_flipped_display, FPSTR(INTL_FLIP_DISPLAY));
+	add_form_checkbox(Config_has_lcd1602_27, FPSTR(INTL_LCD1602_27));
+	add_form_checkbox(Config_has_lcd1602, FPSTR(INTL_LCD1602_3F));
+
+	// Paginate page after ~ 1500 Bytes
+	server.sendContent(page_content);
+	page_content = emptyString;
+
+	add_form_checkbox(Config_has_lcd2004_27, FPSTR(INTL_LCD2004_27));
+	add_form_checkbox(Config_has_lcd2004, FPSTR(INTL_LCD2004_3F));
+	add_form_checkbox(Config_display_wifi_info, FPSTR(INTL_DISPLAY_WIFI_INFO));
+	add_form_checkbox(Config_display_device_info, FPSTR(INTL_DISPLAY_DEVICE_INFO));
+
+	server.sendContent(page_content);
 	page_content = FPSTR(WEB_BR_LF_B);
 	page_content += F(INTL_FIRMWARE "</b>&nbsp;");
 	add_form_checkbox(Config_auto_update, FPSTR(INTL_AUTO_UPDATE));
@@ -1412,29 +1446,8 @@ static void webserver_config_send_body_get(String& page_content) {
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 
 	server.sendContent(page_content);
-	page_content = FPSTR(WEB_BR_LF_B);
-	page_content += FPSTR(INTL_MORE_SETTINGS);
-	page_content += FPSTR(WEB_B_BR);
 
-	add_form_checkbox(Config_has_display, FPSTR(INTL_DISPLAY));
-	add_form_checkbox(Config_has_sh1106, FPSTR(INTL_SH1106));
-	add_form_checkbox(Config_has_flipped_display, FPSTR(INTL_FLIP_DISPLAY));
-	add_form_checkbox(Config_has_lcd1602_27, FPSTR(INTL_LCD1602_27));
-	add_form_checkbox(Config_has_lcd1602, FPSTR(INTL_LCD1602_3F));
-
-	// Paginate page after ~ 1500 Bytes
-	server.sendContent(page_content);
-	page_content = emptyString;
-
-	add_form_checkbox(Config_has_lcd2004_27, FPSTR(INTL_LCD2004_27));
-	add_form_checkbox(Config_has_lcd2004, FPSTR(INTL_LCD2004_3F));
-	add_form_checkbox(Config_display_wifi_info, FPSTR(INTL_DISPLAY_WIFI_INFO));
-	add_form_checkbox(Config_display_device_info, FPSTR(INTL_DISPLAY_DEVICE_INFO));
-
-	server.sendContent(page_content);
-	page_content = FPSTR(WEB_BR_LF_B);
-	page_content += FPSTR(INTL_SENSORS);
-	page_content += FPSTR(WEB_B_BR);
+	page_content = tmpl(FPSTR(WEB_DIV_PANEL), String(3));
 	add_form_checkbox_sensor(Config_sds_read, FPSTR(INTL_SDS011));
 	add_form_checkbox_sensor(Config_hpm_read, FPSTR(INTL_HPM));
 	add_form_checkbox_sensor(Config_sps30_read, FPSTR(INTL_SPS30));
@@ -1447,7 +1460,6 @@ static void webserver_config_send_body_get(String& page_content) {
 	add_form_checkbox_sensor(Config_htu21d_read, FPSTR(INTL_HTU21D));
 	add_form_checkbox_sensor(Config_bmx280_read, FPSTR(INTL_BMX280));
 	add_form_checkbox_sensor(Config_sht3x_read, FPSTR(INTL_SHT3X));
-	add_form_checkbox_sensor(Config_ds18b20_read, FPSTR(INTL_DS18B20));
 
 	// Paginate page after ~ 1500 Bytes
 	server.sendContent(page_content);
@@ -1462,17 +1474,16 @@ static void webserver_config_send_body_get(String& page_content) {
 	page_content += FPSTR(INTL_MORE_SENSORS);
 	page_content += FPSTR(WEB_B_BR);
 
+	add_form_checkbox_sensor(Config_ds18b20_read, FPSTR(INTL_DS18B20));
 	add_form_checkbox_sensor(Config_pms_read, FPSTR(INTL_PMS));
 	add_form_checkbox_sensor(Config_bmp_read, FPSTR(INTL_BMP180));
 	add_form_checkbox(Config_gps_read, FPSTR(INTL_NEO6M));
 
-	page_content += FPSTR(WEB_BR_LF_B);
-	page_content += F("APIs");
-	page_content += FPSTR(WEB_B_BR);
 	// Paginate page after ~ 1500 Bytes
 	server.sendContent(page_content);
+	page_content = tmpl(FPSTR(WEB_DIV_PANEL), String(4));
 
-	page_content = form_checkbox(Config_send2dusti, F("API Sensor.Community"), false);
+	page_content += form_checkbox(Config_send2dusti, F("API Sensor.Community"), false);
 	page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
 	page_content += form_checkbox(Config_ssl_dusti, FPSTR(WEB_HTTPS), false);
 	page_content += FPSTR(WEB_BRACE_BR);
@@ -1520,6 +1531,7 @@ static void webserver_config_send_body_get(String& page_content) {
 	add_form_input(page_content, Config_pwd_influx, FPSTR(INTL_PASSWORD), LEN_CFG_PASSWORD-1);
 	add_form_input(page_content, Config_measurement_name_influx, F("Measurement"), LEN_MEASUREMENT_NAME_INFLUX-1);
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+	page_content += F("</div></div>");
 	page_content += form_submit(FPSTR(INTL_SAVE_AND_RESTART));
 	page_content += FPSTR(BR_TAG);
 	page_content += FPSTR(WEB_BR_FORM);

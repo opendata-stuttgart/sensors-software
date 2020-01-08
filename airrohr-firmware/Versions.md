@@ -3,6 +3,7 @@ NRZ-2020-130-B2
 * Only do OTA after sensor measurements are finished
 * Remove uninitialized memory read in NTP handling
 * Accept larger flash sizes also as compatible
+* Switch to a tab based configuration page
 
 NRZ-2020-130-B1
 * next beta version

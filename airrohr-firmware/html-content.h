@@ -44,14 +44,20 @@ const char WEB_PAGE_HEADER_HEAD[] PROGMEM = "<meta name='viewport' content='widt
 body{font-family:Arial;margin:0}\
 .content{margin:10px}\
 .r{text-align:right}\
-td{vertical-align:top;}\
-a{text-decoration:none;padding:10px;background:#3ba;color:white;display:block;width:auto;border-radius:5px;box-shadow:0px 2px 2px #3ba;}\
-.wifi{background:none;color:blue;padding:5px;display:inline;}\
-input[type='text']{width:100%;}\
-input[type='password']{width:100%;}\
-input[type='submit']{color:white;text-align:left;border-radius:5px;font-size:medium;background:#b33;box-shadow:0px 2px 2px #b33;padding:9px !important;width:100%;border-style:none;}\
-input[type='submit']:hover {background:#d44} \
-.s_green{padding:9px !important;width:100%;border-style:none;background:#3ba;color:white;text-align:left;}\
+td{vertical-align:top}\
+a{text-decoration:none;padding:10px;background:#3ba;color:#fff;display:block;width:auto;border-radius:5px;box-shadow:0 2px 2px #3ba}\
+.wifi{background:0 0;color:#00f;padding:5px;display:inline;border:0;box-shadow:none}\
+input[type=text]{width:100%}\
+input[type=password]{width:100%}\
+input[type=submit]{color:#fff;text-align:left;border-radius:5px;font-size:medium;background:#b33;box-shadow:0 2px 2px #b33;padding:9px!important;width:100%;border-style:none}\
+input[type=submit]:hover{background:#d44}\
+.s_green{padding:9px !important;width:100%;border-style:none;background:#3ba;color:#fff;text-align:left}\
+.tabs{display:flex;flex-direction:row;align-items:stretch;align-content:flex-end;justify-content:flex-start}\
+.tab{padding:10px 20px;display:inline-block;color:#333;margin:0 20px}\
+.panels{min-height:200px;overflow:hidden;padding:20px;border:2px solid #3ba;margin-bottom:1em;box-shadow:0 4px 4px #3ba}\
+.radio{display:none}.panel{display:none}\
+#four:checked~.panels>#panel4,#one:checked~.panels>#panel1,#three:checked~.panels>#panel3,#two:checked~.panels>#panel2{display:block}\
+#four:checked~.tabs>#tab4,#one:checked~.tabs>#tab1,#three:checked~.tabs>#tab3,#two:checked~.tabs>#tab2{background:#3ba;color:#fff}\
 </style>\
 </head><body>\
 <div style='min-height:129px;background-color:#3ba;margin-bottom:20px;box-shadow:0px 4px 6px #3ba'>\
@@ -63,6 +69,7 @@ const char WEB_PAGE_HEADER_BODY[] PROGMEM = "<h3 style='margin:0'>" INTL_PM_SENS
 </small></div><div class='content'><h4>" INTL_HOME " {n} {t}</h4>";
 
 const char BR_TAG[] PROGMEM = "<br/>";
+const char WEB_DIV_PANEL[] PROGMEM = "</div><div class='panel' id='panel{v}'>";
 const char TABLE_TAG_OPEN[] PROGMEM = "<table>";
 const char TABLE_TAG_CLOSE_BR[] PROGMEM = "</table>";
 const char EMPTY_ROW[] PROGMEM = "<tr><td colspan='3'>&nbsp;</td></tr>";
