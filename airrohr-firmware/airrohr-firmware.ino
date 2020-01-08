@@ -4243,7 +4243,7 @@ void setup(void) {
 	WiFi.persistent(false);
 
 	debug_outln_info(F("airRohr: " SOFTWARE_VERSION_STR "/"), String(CURRENT_LANG));
-	if ((airrohr_selftest_failed = !ESP.checkFlashConfig(true) /* after 2.7.0 update: || !ESP.checkFlashCRC() */)) {
+	if ((airrohr_selftest_failed = !ESP.checkFlashConfig() /* after 2.7.0 update: || !ESP.checkFlashCRC() */)) {
 		debug_outln_error(F("ERROR: SELF TEST FAILED!"));
 		SOFTWARE_VERSION += F("-STF");
 	}
