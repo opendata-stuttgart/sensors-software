@@ -1,5 +1,6 @@
 NRZ-2020-130-B1
 * next beta version
+* Avoid crash on WiFi network scan failure (Related to #615)
 
 NRZ-2020-129
 online since 2020-01-07

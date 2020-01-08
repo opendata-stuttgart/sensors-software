@@ -2253,11 +2253,19 @@ static void wifiConfig() {
 
 	WiFi.disconnect(true);
 	debug_outln_info(F("scan for wifi networks..."));
-	count_wifiInfo = WiFi.scanNetworks(false /* scan async */, true /* show hidden networks */);
-	delete [] wifiInfo;
-	wifiInfo = new struct_wifiInfo[count_wifiInfo];
+	int8_t scanReturnCode = WiFi.scanNetworks(false /* scan async */, true /* show hidden networks */);
+	if (scanReturnCode < 0) {
+		debug_outln_error(F("WiFi scan failed. Treating as empty. "));
+		count_wifiInfo = 0;
+	}
+	else {
+		count_wifiInfo = (uint8_t) scanReturnCode;
+	}
 
-	for (int i = 0; i < count_wifiInfo; i++) {
+	delete [] wifiInfo;
+	wifiInfo = new struct_wifiInfo[std::max(count_wifiInfo, (uint8_t) 1)];
+
+	for (unsigned i = 0; i < count_wifiInfo; i++) {
 		String SSID;
 		uint8_t* BSSID;
 
