@@ -4,6 +4,7 @@ NRZ-2020-130-B2
 * Remove uninitialized memory read in NTP handling
 * Accept larger flash sizes also as compatible
 * Switch to a tab based configuration page
+* Skip initialization of display's when not configured
 
 NRZ-2020-130-B1
 * next beta version

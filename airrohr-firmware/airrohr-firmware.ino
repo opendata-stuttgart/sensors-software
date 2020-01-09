@@ -3893,21 +3893,21 @@ static void display_values() {
 }
 
 /*****************************************************************
- * Init OLED display                                             *
+ * Init LCD/OLED display                                         *
  *****************************************************************/
 static void init_display() {
-	display.init();
-	display_sh1106.init();
-	if (cfg::has_flipped_display) {
-		display.flipScreenVertically();
-		display_sh1106.flipScreenVertically();
-	}
-}
-
-/*****************************************************************
- * Init LCD display                                              *
- *****************************************************************/
-static void init_lcd() {
+    if (cfg::has_display) {
+        display.init();
+        if (cfg::has_flipped_display) {
+            display.flipScreenVertically();
+        }
+    }
+    if (cfg::has_sh1106) {
+        display_sh1106.init();
+        if (cfg::has_flipped_display) {
+            display_sh1106.flipScreenVertically();
+        }
+    }
     if (cfg::has_lcd1602) {
         lcd_1602 = new LiquidCrystal_I2C(0x3f, 16, 2);
     }
@@ -4262,7 +4262,6 @@ void setup(void) {
 
 	init_config();
 	init_display();
-	init_lcd();
 	setupNetworkTime();
 	connectWifi();
 	setup_webserver();
