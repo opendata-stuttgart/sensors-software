@@ -369,7 +369,7 @@ Adafruit_SHT31 sht3x;
 /*****************************************************************
  * DS18B20 declaration                                            *
  *****************************************************************/
-OneWire oneWire(ONEWIRE_PIN);
+OneWire oneWire;
 DallasTemperature ds18b20(&oneWire);
 
 /*****************************************************************
@@ -4079,6 +4079,7 @@ static void powerOnTestSensors() {
 	}
 
 	if (cfg::ds18b20_read) {
+		oneWire.begin(ONEWIRE_PIN);
 		ds18b20.begin();									// Start DS18B20
 		debug_outln_info(F("Read DS18B20..."));
 	}

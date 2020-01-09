@@ -5,6 +5,7 @@ NRZ-2020-130-B2
 * Accept larger flash sizes also as compatible
 * Switch to a tab based configuration page
 * Skip initialization of display's when not configured
+* Delay OneWire initialization until configured
 
 NRZ-2020-130-B1
 * next beta version
