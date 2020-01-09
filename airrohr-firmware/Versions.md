@@ -6,6 +6,7 @@ NRZ-2020-130-B2
 * Switch to a tab based configuration page
 * Skip initialization of display's when not configured
 * Delay OneWire initialization until configured
+* Fix bulgarian translation error (Fixes #622)
 
 NRZ-2020-130-B1
 * next beta version
