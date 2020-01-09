@@ -1,9 +1,9 @@
 /*
  *	airRohr firmware
  *	Copyright (C) 2016-2018  Code for Stuttgart a.o.
- * 
+ *
  *  Spanish translations
- * 
+ *
  *	Texts should be as short as possible
  *	We only have 512 kB for the entire firmware
  */
@@ -19,6 +19,7 @@ const char INTL_NETWORKS_FOUND[] PROGMEM = "Redes encontradas: ";
 const char INTL_AB_HIER_NUR_ANDERN[] PROGMEM = "Configuración avanzada (solo si sabes que lo que estas haciendo)";
 const char INTL_SAVE[] PROGMEM = "Guardar";
 const char INTL_SENSORS[] PROGMEM = "Sensores";
+const char INTL_MORE_SENSORS[] PROGMEM = "More Sensores";
 const char INTL_SDS011[] PROGMEM = "SDS011 ({pm})";
 const char INTL_PMS[] PROGMEM = "Plantower PMS(1,3,5,6,7)003 ({pm})";
 const char INTL_HPM[] PROGMEM = "Honeywell sensor de partículas finas";
@@ -34,7 +35,7 @@ const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "corrección en dB (A)";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Autorización";
-const char INTL_FS_WIFI[] PROGMEM = "Sensor WiFi";
+
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "Sensor iFi en modo de configuración";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Nombre";
 const char INTL_MORE_SETTINGS[] PROGMEM ="Otras configruaciones";
@@ -46,6 +47,7 @@ const char INTL_FLIP_DISPLAY[] PROGMEM = "Pantalla OLED flip";
 const char INTL_LCD1602_27[] PROGMEM = "LCD 1602 (I2C: 0x27)";
 const char INTL_LCD1602_3F[] PROGMEM = "LCD 1602 (I2C: 0x3F)";
 const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
+const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Mostrar información de WiFi";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Mostrar información del dispositivo";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;Level";
@@ -67,6 +69,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "Reiniciar sensor";
 #define INTL_HOME "Visión general"
 #define INTL_BACK_TO_HOME "Volver al inicio"
 const char INTL_CURRENT_DATA[] PROGMEM = "Datos actuales";
+const char INTL_DEVICE_STATUS[] PROGMEM = "El estado del dispositivo";
 #define INTL_ACTIVE_SENSORS_MAP "Mapa de sensores activos (enlace externo)"
 #define INTL_CONFIGURATION_DELETE "Borrar configuración"
 #define INTL_CONFIGURATION_REALLY_DELETE "Estas seguro que quieres borrar la configuración?"

@@ -1,9 +1,9 @@
 /*
  *	airRohr firmware
  *	Copyright (C) 2016-2018  Code for Stuttgart a.o.
- * 
+ *
  *  Dutch translations
- * 
+ *
  *	Texts should be as short as possible
  *	We only have 512 kB for the entire firmware
  */
@@ -19,6 +19,7 @@ const char INTL_NETWORKS_FOUND[] PROGMEM = "Netwerk gevonden: ";
 const char INTL_AB_HIER_NUR_ANDERN[] PROGMEM = "Geavanceerde instellingen (enkel als je weet wat je doet)";
 const char INTL_SAVE[] PROGMEM = "Opslaan";
 const char INTL_SENSORS[] PROGMEM = "Sensors";
+const char INTL_MORE_SENSORS[] PROGMEM = "More Sensors";
 const char INTL_SDS011[] PROGMEM = "SDS011 ({pm})";
 const char INTL_PMS[] PROGMEM = "Plantower PMS(1,3,5,6,7)003 ({pm})";
 const char INTL_HPM[] PROGMEM = "Honeywell PM ({pm})";
@@ -34,7 +35,7 @@ const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM ="correctie in dB(A)";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Beperk toegang";
-const char INTL_FS_WIFI[] PROGMEM = "Instellingen voor rechtstreekse WiFi-verbinding";
+
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "Netwerknaam en -wachtwoord van de fijnstofsensor";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Naam (SSID)";
 const char INTL_MORE_SETTINGS[] PROGMEM ="Meer instellingen";
@@ -46,6 +47,7 @@ const char INTL_FLIP_DISPLAY[] PROGMEM = "OLED display omdraaien";
 const char INTL_LCD1602_27[] PROGMEM = "LCD 1602 (I2C: 0x27)";
 const char INTL_LCD1602_3F[] PROGMEM = "LCD 1602 (I2C: 0x3F)";
 const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
+const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Toon WiFi info";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Toon apparaatinfo";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debugniveau";
@@ -67,6 +69,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "Herstart sensor";
 #define INTL_HOME "Home"
 #define INTL_BACK_TO_HOME "Terug naar homepagina"
 const char INTL_CURRENT_DATA[] PROGMEM = "Huidige data";
+const char INTL_DEVICE_STATUS[] PROGMEM = "Apparaatstatus";
 #define INTL_ACTIVE_SENSORS_MAP "Actieve sensors kaart (externe link)"
 #define INTL_CONFIGURATION_DELETE "Configuratie verwijderen"
 #define INTL_CONFIGURATION_REALLY_DELETE "Bent u zeker dat u de configuratie wilt verwijderen?"

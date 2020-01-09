@@ -82,7 +82,6 @@ static const char FW_2ND_LOADER_URL[] PROGMEM = OTA_BASENAME "/loader-002.bin";
 
 static const char NTP_SERVER_1[] PROGMEM = "0.pool.ntp.org";
 static const char NTP_SERVER_2[] PROGMEM = "1.pool.ntp.org";
-static const char NTP_SERVER_3[] PROGMEM = "2.pool.ntp.org";
 
 // define own API
 static const char HOST_CUSTOM[] PROGMEM = "192.168.234.1";
@@ -215,7 +214,7 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 #define HPM_READ 0
 #define HPM_API_PIN 1
 
-// Sensirion SPS30 PM Sensor I2C connection
+// Sensirion SPS30, the more expensive version of the particle sensor
 #define SPS30_READ 0
 #define SPS30_API_PIN 1
 #define SPS30_WAITING_AFTER_LAST_READ 11000   // waiting time after last reading mesurement data in ms
@@ -270,6 +269,9 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 
 // LCD Display LCD1602 (0x27) connected?
 #define HAS_LCD1602_27 0
+
+// LCD Display LCD2004 connected?
+#define HAS_LCD2004 0
 
 // LCD Display LCD2004 (0x27) connected?
 #define HAS_LCD2004_27 0

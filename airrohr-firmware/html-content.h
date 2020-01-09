@@ -45,19 +45,22 @@ body{font-family:Arial;margin:0}\
 .content{margin:10px}\
 .r{text-align:right}\
 td{vertical-align:top;}\
-a{text-decoration:none;padding:10px;background:#3ba;color:white;display:block;width:auto;border-radius:5px;}\
+a{text-decoration:none;padding:10px;background:#3ba;color:white;display:block;width:auto;border-radius:5px;box-shadow:0px 2px 2px #3ba;}\
 .wifi{background:none;color:blue;padding:5px;display:inline;}\
 input[type='text']{width:100%;}\
 input[type='password']{width:100%;}\
-input[type='submit']{border-radius:5px;font-size:medium;padding:5px;}\
+input[type='submit']{color:white;text-align:left;border-radius:5px;font-size:medium;background:#b33;box-shadow:0px 2px 2px #b33;padding:9px !important;width:100%;border-style:none;}\
+input[type='submit']:hover {background:#d44} \
 .s_green{padding:9px !important;width:100%;border-style:none;background:#3ba;color:white;text-align:left;}\
 </style>\
 </head><body>\
-<div style='min-height:120px;background-color:#3ba;margin-bottom:20px'>\
+<div style='min-height:129px;background-color:#3ba;margin-bottom:20px;box-shadow:0px 4px 6px #3ba'>\
 <a href='/' style='background:none;display:inline'><img src='/images?name=luftdaten_logo' style='float:left;margin:20px' width='100' height='89'/></a>";
 
 const char WEB_PAGE_HEADER_BODY[] PROGMEM = "<h3 style='margin:0'>" INTL_PM_SENSOR "</h3>\
-<small>ID: {id}<br/>MAC: {mac}<br/>" INTL_FIRMWARE ": " SOFTWARE_VERSION_STR "</small></div><div class='content'><h4>" INTL_HOME " {n} {t}</h4>";
+<small>ID: {id}<br/>MAC: {mac}<br/>" INTL_FIRMWARE ": " SOFTWARE_VERSION_STR "<br/>(" __DATE__ " " __TIME__ ")<br/>\
+<a href='https://github.com/opendata-stuttgart/sensors-software/labels/bug' target='_blank' rel='noreferrer'>Report an issue</a>\
+</small></div><div class='content'><h4>" INTL_HOME " {n} {t}</h4>";
 
 const char BR_TAG[] PROGMEM = "<br/>";
 const char TABLE_TAG_OPEN[] PROGMEM = "<table>";
@@ -66,9 +69,10 @@ const char EMPTY_ROW[] PROGMEM = "<tr><td colspan='3'>&nbsp;</td></tr>";
 
 const char WEB_PAGE_FOOTER[] PROGMEM = "<br/><br/><a href='/' style='display:inline;'>" INTL_BACK_TO_HOME "</a>"\
                 "<br/><br/><br/>"
-                "<a href='https://codefor.de/stuttgart/' target='_blank' rel='noreferrer' style='display:inline;background:none;color:black;'>&copy; Open Knowledge Lab Stuttgart a.o. (Code for Germany)</a></div></body></html>\r\n";
+                "<a href='https://codefor.de/stuttgart/' target='_blank' rel='noreferrer' style='display:inline;background:none;color:black;box-shadow:none'>&copy; Open Knowledge Lab Stuttgart a.o. (Code for Germany)</a></div></body></html>\r\n";
 
 const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a href='/values'>{t}</a><br/>\
+<a href='/status'>{s}</a><br/>\
 <a href='https://maps.sensor.community/' target='_blank' rel='noreferrer'>" INTL_ACTIVE_SENSORS_MAP "</a><br/>\
 <a href='/config'>{conf}</a><br/>\
 <a href='/removeConfig'>" INTL_CONFIGURATION_DELETE "</a><br/>\
@@ -91,13 +95,13 @@ function load_wifi_list(){var x=new XMLHttpRequest();x.open('GET','/wifi');x.onl
 
 const char WEB_REMOVE_CONFIG_CONTENT[] PROGMEM = "<h3>" INTL_CONFIGURATION_REALLY_DELETE "</h3>\
 <table><tr><td><form method='POST' action='/removeConfig'>\
-<input type='submit' class='s_green' name='submit' value='" INTL_DELETE "'/></form></td>\
+<input type='submit' class='s_red' name='submit' value='" INTL_DELETE "'/></form></td>\
 <td><a href='/'>" INTL_CANCEL "</a></td></tr></table>\
 ";
 
 const char WEB_RESET_CONTENT[] PROGMEM = "<h3>" INTL_REALLY_RESTART_SENSOR "</h3>" \
 "<table><tr><td><form method='POST' action'/reset'>" \
-"<input type='submit' class='s_green' name='submit' value='" INTL_RESTART "'/>"\
+"<input type='submit' class='s_red' name='submit' value='" INTL_RESTART "'/>"\
 "</form></td><td><a href='/'>" INTL_CANCEL "</a></td></tr></table>";
 
 const char WEB_IOS_REDIRECT[] PROGMEM = "<html><body>Redirecting...\

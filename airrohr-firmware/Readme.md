@@ -1,126 +1,72 @@
-IMPORTANT: All pull requests should be made to the beta branch. The master branch is for the actual stable version. 
+# airRohr Sensor Firmware for SPS30, SDS011, DHT22, BMP180, BMP/E 280, NEO-6M and many more
+
+## Features:
+* many environmental and air quality sensors can be used concurrently
+* Integration in Sensor.Community (formerly Luftdaten.Info)
+* Configuration via HTTP in local WiFi or with a Sensor-as Access-Point
+* Support for OLED- and LCD-Displays (SSD1306, SH1106 and LCD1602, LCD2004)
+* Wide selection of API integrations for measurement reporting
+* Ability to print measurements as CSV via USB-serial
+* Used with ESP8266 (NodeMCU v2/v3 and compatible) and ESP32 (experimental)
+
+## Contributing
+
+Please refer to [Contributing README](./Contributing.md) for details.
+
+## WiFi configuration
+For German Version see: [Konfiguration der Sensoren](https://github.com/opendata-stuttgart/meta/wiki/Konfiguration-der-Sensoren)
+
+If a (previously) configured WiFi is not reachable within 20 seconds after power-on,
+the firmware flips itself into AP mode and creates a WiFi network in the form `airRohr-\[Sensor-ID\]`.
+
+This WiFi network is by default unencrypted. When a client connects to this, it will get
+redirected to the sensors web server `http://192.168.4.1/` which allows initial configuration.
+
+Configurable is
+* WiFi Access Point to use
+* Options for measurements (Sensors to poll, intervals..)
+* APIs to send the measurements
+
+The unencrypted Access Point for initial configuration will turn itself off after about
+10 minutes. In order to reactivate please power cycle the board.
+
+## DHT22 Humidity Reporting
+
+The DHT22 sensor is originally an Indoor sensor. For outdoor use it appears to be rather
+sensitive to water condensation after 100% rel.Humidity that keep it for very long time
+(sometimes forever) at 99.9% value. Also it appears to be sensitive to high UV light,
+which tends to cause the sensor to crash until hard power-loss restarted.
+
+Better experiences have been made with a BME280 or SHT3x sensor, so consider those instead.
 
 
-# Version für Sensoren PPD42NS, SDS011, DHT22, BMP180, BMP/E 280, NEO-6M und weitere (siehe Konfigurationsseite)
+## Debug via USB-Serial
 
-Features:
-* gleichzeitiger Betrieb mehrerer Sensoren
-* Konfiguration über WLAN (Sensor als Access Point) möglich
-* Unterstützung von OLED-Displays mit SSD1306, SH1106 und LCD1602, LCD2004
-* Auswahl der API(s), an welche die Daten gesendet werden, inklusive der Möglichkeit, die Daten als CSV über USB auszugeben
-* nutzbar mit ESP8266 (NodeMCU und kompatible Boards)
+Connecting/Powering via a computer USB will provide USB serial with the settings 9600 baud 8N1.
+By default the sensor will provide human readable debug information of configurable granularity
+there.
 
-ToDo's:
-* Optimierungen (eigentlich immer)
-* neue Sensoren
+## Save as CSV
 
-Dateien in diesem Verzeichnis:
+All measurements can also be read as CSV via USB-Serial when using the USB port in the
+settings 9600 Baud 8N1. In order to avoid interfering of debug options (see earlier section)
+set debug to None in the configuration.
 
-| Dateiname                                 | Beschreibung                                                                                               |
-| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| airrohr-firmware.ino                      | Sourcecode der eigentlichen Firmware                                                                       |
-| ext_def.h                                 | grundsätzliche Konfiguration der Parameter (WLAN, Sensoren, APIs)                                          |
-| html-content.h                            | allgemeine HTML-Sourcen und Bilder für HTML- und Text-Ausgaben                                             |
-| intl_xx.h                                 | Dateien mit übersetzten Texten für die Internationalisierung, 'xx' ist der 2 letter ISO code der 'Sprache' |
-| intl_template.h                           | Vorlage für Übersetzungen                                                                                  |
-| astyle.rc                                 | Formatierungsvorlage für Astyle                                                                            |
-| ppd42ns-wificonfig-ppd-sds-dht.spiffs.bin | Binary mit leerem Dateisystem, zum Löschen der Konfiguration, siehe Anleitung im Wiki                      |
-
-## WLAN Konfiguration
-siehe auch Wiki-Seite auf Github [Konfiguration der Sensoren](https://github.com/opendata-stuttgart/meta/wiki/Konfiguration-der-Sensoren)
-
-Wenn das vorgegebene WLAN nach 20 Sekunden nicht erreichbar ist, wird ein Access-Point eingerichtet, der über "Feinstaubsensor-\[Sensor-ID\]" erreichbar ist. Nach dem Verbinden zu diesem Accesspoint sollten alle Anfragen auf die Konfigurationsseite umgeleitet werden. Direkte Adresse der Seite ist http://192.168.4.1/ .
-
-Konfigurierbar sind:
-* WLAN-Name und Passwort
-* Auszulesende Sensoren
-* Ziele für den Versand der Daten
-
-Nach 10 Minuten sollte der Access-Point wieder deaktiviert werden (funktioniert zur Zeit noch nicht stabil).
-
-
-## Speichern als CSV
-
-Die Daten können als CSV via USB ausgegeben werden. Dafür sollte sowohl in ext_def.h als auch in der WLAN-Konfiguration Debug auf 0 gesetzt werden, damit die ausgegebenen Daten nur noch die Sensordaten sind. Beim Neustart des ESP8266 erscheinen dann nur noch ein paar wenige Zeichen, die den Startzustand darstellen.
 
 ## Wiring
 
-* SDS and DHT wiring: [https://raw.githubusercontent.com/opendata-stuttgart/meta/master/files/nodemcu-v3-schaltplan-sds011.jpg](https://raw.githubusercontent.com/opendata-stuttgart/meta/master/files/nodemcu-v3-schaltplan-sds011.jpg)
+![https://raw.githubusercontent.com/opendata-stuttgart/meta/master/files/nodemcu-v3-schaltplan-sds011.jpg](https://raw.githubusercontent.com/opendata-stuttgart/meta/master/files/nodemcu-v3-schaltplan-sds011.jpg)
 
-## Benötigte Software (in Klammern getestete Version und die Art der Lizenz):
+Please refer to the [Pinout of NodeMCU v2 and v3](https://github.com/opendata-stuttgart/meta/wiki/Pinouts-NodeMCU-v2,-v3) for much more detailed information about the individual pin functions.
 
-* [Arduino IDE](https://www.arduino.cc/en/Main/Software)  (Version 1.8.10) (GNU Lesser General Public License v2.1)
-* [ESP8266 für Arduino](http://arduino.esp8266.com/stable/package_esp8266com_index.json) (Version 2.6.2)
-
-
-### Einstellungen Arduino IDE
-
-* Board: NodeMCU 1.0 (ESP-12E Module)
-* CPU Frequency: 160MHz
-* Flash Size: 4M (3M SPIFFS)
-
-Ab "ESP für Arduino 2.5.2":
-* Debug Port: Disabled
-* Debug Level: NoAssert-NDEBUG
-* lwIP Variant: v2.0 Lower memory
-* VTables. Flash
-* Erase Flash: Only Sketch
-* in der Datei platform.txt die Zeile
-  'build.float=-u _printf_float -u _scanf_float'
-  ändern in
-  'build.float='
-
-### Verwendete Bibliotheken (für ESP8266):
-
-In Arduino enthalten:
-* Wire (GNU Lesser General Public License v2.1)
-
-In ESP8266 für Arduino IDE enthalten:
-* FS (GNU Lesser Public License >=2.1)
-* ESP8266WiFi (GNU Lesser Public License >=2.1)
-* ESP8266WebServer (GNU Lesser Public License >=2.1)
-* ESP8266HTTPClient (GNU Lesser Public License >=2.1)
-* DNSServer (GNU Lesser Public License >=2.1)
-
-Installierbar über Arduino IDE (Menü Sketch -> Bibliothek einbinden -> Bibliotheken verwalten, in Klammern die getestete Version und die Art der Lizenz):
-* [ArduinoJson](https://github.com/bblanchon/ArduinoJson) (6.13.0) (MIT)
-* [Adafruit BMP085 library](https://github.com/adafruit/Adafruit-BMP085-Library) (1.0.1) (BSD)
-* [Adafruit HTU21DF library](https://github.com/adafruit/Adafruit_HTU21DF_Library) (1.0.2) (BSD)
-* [Adafruit SHT31 library](https://github.com/adafruit/Adafruit_SHT31)(1.1.5) (BSD)
-* [DallasTemperature](https://github.com/milesburton/Arduino-Temperature-Control-Library) (3.8.0)
-* [ESP8266 and ESP32 Oled driver for SSD1306 display](https://github.com/squix78/esp8266-oled-ssd1306) (4.1.0) (MIT)
-* [OneWire](www.pjrc.com/teensy/td_libs_OneWire.html) (2.3.4)
-* [LiquidCrystal I2C](https://github.com/marcoschwartz/LiquidCrystal_I2C) (1.1.2)
-* [EspSoftwareSerial](https://github.com/plerup/espsoftwareserial)(6.3.0)
-
-Manuell zu installieren:
-* [TinyGPS++](http://arduiniana.org/libraries/tinygpsplus/) (1.0.2) (GNU Lesser Public License >=2.1)
-
-
-Bis Version NRZ-2016-15:
-* [DHT](https://github.com/adafruit/DHT-sensor-library)
-  (`DHT.cpp` und `DHT.h` downloaden und in das Softwareverzeichnis kopieren)
-
-Ich hoffe, alle Bibliotheken erwischt zu haben. Falls beim Kompilieren eine Bibliothek fehlt, bitte als [Issue](https://github.com/opendata-stuttgart/sensors-software/issues/) melden. Ich trage dann die Infos nach.
-
-## Anschluss der Sensoren
-
-Beim Anschluss von Sensoren mit 5V bitte die Board-Version beachten. NodeMCU v3 liefert 5V an `VU`, Version 2 fehlt dieser Anschluss und `VIN` kann dafür genutzt werden.
-
-### SDS011
-* Pin 1 (TX)   -> Pin D1 (GPIO5)
-* Pin 2 (RX)   -> Pin D2 (GPIO4)
+### SDS011 (serial)
+**Note**: Serial connections are always crossed (RX on one side is connected with TX on other side)
+* Pin 1 (TX)   -> (RX) Pin D1 (GPIO5)
+* Pin 2 (RX)   -> (TX) Pin D2 (GPIO4)
 * Pin 3 (GND)  -> GND
 * Pin 4 (2.5m) -> unused
 * Pin 5 (5V)   -> VU
 * Pin 6 (1m)   -> unused
-
-### PPD42NS
-* Pin 1 => GND
-* Pin 2 => Pin D5 (GPIO14)
-* Pin 3 => VU
-* Pin 4 => Pin D6 (GPIO12)
-* Pin 5 => unused
 
 ### DHT22
 * Pin 1 => 3V3
@@ -174,17 +120,20 @@ Pinout:
 * Pin 7	(RX)     -> Pin D2 (GPIO4)
 * Pin 8 (GND)    -> GND
 
-### BMP180 / BMP280 / BME280 (I2C)
+### BMP180 / BMP280 / BME280 / HTU21D / SHT3x (I2C)
 * VCC  ->  Pin 3V3
 * GND  ->  Pin GND
 * SCL  ->  Pin D4 (GPIO2)
 * SDA  ->  Pin D3 (GPIO0)
 
-### HTU21D / Sensirion SHT3x (I2C)
-* VCC  ->  Pin 3V3
-* GND  ->  Pin GND
-* SCL  ->  Pin D4 (GPIO2)
-* SDA  ->  Pin D3 (GPIO0)
+### SPS30 (I2C, 5V)
+Pinout:
+   1 2 3 4 5
+* Pin 1 (5V)     -> Pin VU/VIN
+* Pin 2 (SDA)    -> Pin D3 (GPIO0)
+* Pin 3 (SCL)    -> Pin D4 (GPIO2)
+* Pin 4 (SEL)    -> Pin GND
+* Pin 5 (GND)    -> Pin GND
 
 ### LCD1602 (I2C, 5V - check your version)
 * VCC  ->  Pin VU
@@ -198,24 +147,25 @@ Pinout:
 * SCL  ->  Pin D4 (GPIO2)
 * SDA  ->  Pin D3 (GPIO0)
 
-### GPS NEO 6M (seriell) ACHTUNG: Läuft sehr instabil
-Strom und Masse vom Board. (GND und üblicherweise 3,3v, vorher prüfen/Anleitung, Beschreibung GPS!) 
-TX (senden) und RX (empfangen) werden gekreuzt verkabelt! 
+### GPS NEO 6M (serial)
+VCC and GND can be provided by board board (use 3.3v!)
+
+**Note**: Serial connections are always crossed (RX on one side is connected with TX on other side)
+
 * TX von Neo -> Pin D5 (RX) 
 * RX von Neo -> Pin D6 (TX) 
 
-### Luftdaten.info API "Pins"
-Bei Aktivierung von mehreren Sensoren, z.B. "gleichzeitig" DHT22 und PPD42NS, benötigt die API zur Zuordnung der Sensorwerte die Angabe eines Pins, an dem der Sensor (virtuell) angeschlossen ist.
-Diese Firmware definiert die Pins für die verschiedenenen Sensoren wie folgt:
-* PPD42NS => Pin 5
-* DHT22 => Pin 7
-* SDS011 => Pin 1
-* BMP180 => Pin 3
-* BMP280 => Pin 3
-* BME280 => Pin 11
+## Luftdaten.info API "Pins"
+
+For use of multiple sensors with Luftdaten.info, you need to specify a *virtual* API Pin
+for the use of Luftdaten.info in the Luftdaten.info sensor registration. The firmware
+uses the following API pins hardcoded. These match what the Luftdaten.info expect and
+will use by default when selecting the correct sensor model.
+
+* HPM/PMS/SDS011/SPS30 => Pin 1
+* BMP180/BMP280 => Pin 3
+* DHT22/HTU21D/SHT3x => Pin 7
 * GPS(Neo-6M) => Pin 9
-
-
-## Translations
-For new translations copy the file intl_template.h and rename it to intl_<2-letter-code>.h, where <2-letter-code> is the ISO-3166-2 2 letter country code. This file contains all strings used for output seen by normal users. Only debug output is (or better should be) English by default.  
-Please take look at the existing translations. This should show you how it works ;-)
+* BME280 => Pin 11
+* DS18B20 => Pin 13
+* DNMS +> Pin 15

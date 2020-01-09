@@ -1,9 +1,9 @@
 /*
  *	airRohr firmware
  *	Copyright (C) 2016-2018  Code for Stuttgart a.o.
- * 
+ *
  *  Italian translations
- * 
+ *
  *	Texts should be as short as possible
  *	We only have 512 kB for the entire firmware
  */
@@ -19,6 +19,7 @@ const char INTL_NETWORKS_FOUND[] PROGMEM = "Reti trovate: ";
 const char INTL_AB_HIER_NUR_ANDERN[] PROGMEM = "Impostazioni avanzate (solo se sai quello che stai facendo)";
 const char INTL_SAVE[] PROGMEM = "Salvare";
 const char INTL_SENSORS[] PROGMEM = "Sensori";
+const char INTL_MORE_SENSORS[] PROGMEM = "More Sensori";
 const char INTL_SDS011[] PROGMEM = "SDS011 ({pm})";
 const char INTL_PMS[] PROGMEM = "Plantower PMS(1,3,5,6,7)003 ({pm})";
 const char INTL_HPM[] PROGMEM = "Honeywell sensore polveri sottili";
@@ -34,7 +35,7 @@ const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM ="correzione in dB(A)";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Autorizzazione";
-const char INTL_FS_WIFI[] PROGMEM = "Sensore WiFi";
+
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "Sensore WiFi in modalità configurazione";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Nome";
 const char INTL_MORE_SETTINGS[] PROGMEM ="Altre configurazioni";
@@ -46,6 +47,7 @@ const char INTL_FLIP_DISPLAY[] PROGMEM = "Ruota il display OLED di 180°";
 const char INTL_LCD1602_27[] PROGMEM = "LCD 1602 (I2C: 0x27)";
 const char INTL_LCD1602_3F[] PROGMEM = "LCD 1602 (I2C: 0x3F)";
 const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
+const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Visualizza informazioni del wi-fi";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Visualizza informazioni del dispositivo";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;Level";
@@ -53,12 +55,12 @@ const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "intervallo di misura";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Durata della modalità router";
 const char INTL_MORE_APIS[] PROGMEM = "Altre API";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Invia i dati alla propria API";
-const char INTL_SERVER[] PROGMEM = "Server"; 
-const char INTL_PATH[] PROGMEM = "Percorso"; 
-const char INTL_PORT[] PROGMEM = "Porta"; 
-const char INTL_USER[] PROGMEM = "Utente"; 
-const char INTL_PASSWORD[] PROGMEM = "Password"; 
-const char INTL_SEND_TO[] PROGMEM = "Spedire a {v}"; 
+const char INTL_SERVER[] PROGMEM = "Server";
+const char INTL_PATH[] PROGMEM = "Percorso";
+const char INTL_PORT[] PROGMEM = "Porta";
+const char INTL_USER[] PROGMEM = "Utente";
+const char INTL_PASSWORD[] PROGMEM = "Password";
+const char INTL_SEND_TO[] PROGMEM = "Spedire a {v}";
 const char INTL_READ_FROM[] PROGMEM = "Leggi da {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Riavvio dispositivo.";
 const char INTL_RESTART_DEVICE[] PROGMEM = "Riavvia dispositivo";
@@ -67,6 +69,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "Riavvio sensore";
 #define INTL_HOME "Home"
 #define INTL_BACK_TO_HOME "Torna alla home page"
 const char INTL_CURRENT_DATA[] PROGMEM = "Dati attuali";
+const char INTL_DEVICE_STATUS[] PROGMEM = "Stato del dispositivo";
 #define INTL_ACTIVE_SENSORS_MAP "Mappa dei sensori attivi (link esterno)"
 #define INTL_CONFIGURATION_DELETE "Elimina configurazione"
 #define INTL_CONFIGURATION_REALLY_DELETE "Sei sicuro di voler eliminare la configurazione?"

@@ -1,3 +1,35 @@
+NRZ-2020-129
+online since 2020-01-07
+* same as NRZ-2019-128-B8 (+build date is shown in header)
+
+NRZ-2019-128-B8
+* Improve NTP handling and status reporting
+* Fix weird placement of "save and restart" button in config
+* Fix handling of short intervals with SDS011 (Fixes #426)
+* Erase SDK config on OTA restart (Fixes #590)
+* Add link to report an issue to web ui
+* Add self-test
+* Split less recommended sensors into a subsection of config page (Fixes #171)
+
+NRZ-2019-128-B7
+* More introspection status for OTA and sending errors
+* Resorting Language selection alphabetically
+* Disable language and beta selector when OTA is disabled
+
+NRZ-2019-128-B6
+* Fix crash on device status page in some locales
+
+NRZ-2019-128-B5
+* Avoid calling wifi off on startup which seems to cause some issues (Fixes #598)
+
+NRZ-2019-128-B4
+* perfom blocking reads on SDS011 serial responses
+* Add Device Status webpage
+* Set DHCP hostname to the firmware config wifi name (Fixes #595)
+* Polish translation fixes
+* Mark potentially destructive actions with red highlight (idea from nettigo FW)
+* Add support for LCD 2004 on I2C 0x3F address
+
 NRZ-2019-128-B3
 * Fix startup hang on wifis without NTP access (#580)
 * Update SHT3.x to 1.1.6

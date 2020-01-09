@@ -6,7 +6,8 @@
  ************************************************************************
  *                                                                      *
  *    airRohr firmware                                                  *
- *    Copyright (C) 2016-2018  Code for Stuttgart a.o.                  *
+ *    Copyright (C) 2016-2020  Code for Stuttgart a.o.                  *
+ *    Copyright (C) 2019-2020  Dirk Mueller                             *
  *                                                                      *
  * This program is free software: you can redistribute it and/or modify *
  * it under the terms of the GNU General Public License as published by *
@@ -27,56 +28,18 @@
  *      - Nova SDS0111                                                  *
  *  http://inovafitness.com/en/Laser-PM2-5-Sensor-SDS011-35.html        *
  *                                                                      *
- * Wiring Instruction:                                                  *
- *      - SDS011 Pin 1  (TX)   -> Pin D1 / GPIO5                        *
- *      - SDS011 Pin 2  (RX)   -> Pin D2 / GPIO4                        *
- *      - SDS011 Pin 3  (GND)  -> GND                                   *
- *      - SDS011 Pin 4  (2.5m) -> unused                                *
- *      - SDS011 Pin 5  (5V)   -> VU                                    *
- *      - SDS011 Pin 6  (1m)   -> unused                                *
+ * Wiring Instruction see included Readme.md                            *
  *                                                                      *
  ************************************************************************
  *                                                                      *
  * Alternative                                                          *
  *      - nodemcu-LoLin board                                           *
- *      - Shinyei PPD42NS                                               *
- *      http://www.sca-shinyei.com/pdf/PPD42NS.pdf                      *
  *                                                                      *
  * Wiring Instruction:                                                  *
  *      Pin 2 of dust sensor PM2.5 -> Digital 6 (PWM)                   *
  *      Pin 3 of dust sensor       -> +5V                               *
  *      Pin 4 of dust sensor PM1   -> Digital 3 (PMW)                   *
  *                                                                      *
- *      - PPD42NS Pin 1 (grey or green)  => GND                         *
- *      - PPD42NS Pin 2 (green or white)) => Pin D5 /GPIO14             *
- *        counts particles PM25                                         *
- *      - PPD42NS Pin 3 (black or yellow) => Vin                        *
- *      - PPD42NS Pin 4 (white or black) => Pin D6 / GPIO12             *
- *        counts particles PM10                                         *
- *      - PPD42NS Pin 5 (red)   => unused                               *
- *                                                                      *
- ************************************************************************
- * Extension: DHT22 (AM2303)                                            *
- *  http://www.aosong.com/en/products/details.asp?id=117                *
- *                                                                      *
- * DHT22 Wiring Instruction                                             *
- * (left to right, front is perforated side):                           *
- *      - DHT22 Pin 1 (VDD)     -> Pin 3V3 (3.3V)                       *
- *      - DHT22 Pin 2 (DATA)    -> Pin D7 (GPIO13)                      *
- *      - DHT22 Pin 3 (NULL)    -> unused                               *
- *      - DHT22 Pin 4 (GND)     -> Pin GND                              *
- *                                                                      *
- ************************************************************************
- * Extensions connected via I2C:                                        *
- * HTU21D (https://www.sparkfun.com/products/13763),                    *
- * BMP180, BMP280, BME280, OLED Display with SSD1306 (128x64 px)        *
- *                                                                      *
- * Wiring Instruction                                                   *
- * (see labels on display or sensor board)                              *
- *      VCC       ->     Pin 3V3                                        *
- *      GND       ->     Pin GND                                        *
- *      SCL       ->     Pin D4 (GPIO2)                                 *
- *      SDA       ->     Pin D3 (GPIO0)                                 *
  *                                                                      *
  ************************************************************************
  *                                                                      *
@@ -97,8 +60,8 @@
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2019-128-B3"
-const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
+#define SOFTWARE_VERSION_STR "NRZ-2020-129"
+String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
  * Includes                                                      *
@@ -114,6 +77,7 @@ const String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 #include <Hash.h>
 #include <ctime>
 #include <coredecls.h>
+#include <sntp.h>
 #endif
 
 #if defined(ESP32)
@@ -277,6 +241,7 @@ namespace cfg {
 	bool has_flipped_display = HAS_FLIPPED_DISPLAY;
 	bool has_lcd1602 = HAS_LCD1602;
 	bool has_lcd1602_27 = HAS_LCD1602_27;
+	bool has_lcd2004 = HAS_LCD2004;
 	bool has_lcd2004_27 = HAS_LCD2004_27;
 
 	bool display_wifi_info = DISPLAY_WIFI_INFO;
@@ -338,6 +303,7 @@ bool bmx280_init_failed = false;
 bool sht3x_init_failed = false;
 bool dnms_init_failed = false;
 bool gps_init_failed = false;
+bool airrohr_selftest_failed = false;
 
 #if defined(ESP8266)
 ESP8266WebServer server(80);
@@ -360,9 +326,8 @@ float last_value_dnms_la_max = -1.0;
  *****************************************************************/
 SSD1306 display(0x3c, I2C_PIN_SDA, I2C_PIN_SCL);
 SH1106 display_sh1106(0x3c, I2C_PIN_SDA, I2C_PIN_SCL);
-LiquidCrystal_I2C lcd_1602_27(0x27, 16, 2);
-LiquidCrystal_I2C lcd_1602_3f(0x3F, 16, 2);
-LiquidCrystal_I2C lcd_2004_27(0x27, 20, 4);
+LiquidCrystal_I2C* lcd_1602 = nullptr;
+LiquidCrystal_I2C* lcd_2004 = nullptr;
 
 /*****************************************************************
  * SDS011 declarations                                           *
@@ -442,6 +407,8 @@ bool is_HPM_running = true;
 
 unsigned long sending_time = 0;
 unsigned long last_update_attempt;
+int last_update_returncode;
+int last_sendData_returncode;
 
 float last_value_BMP_T = -128.0;
 float last_value_BMP_P = -1.0;
@@ -538,11 +505,10 @@ unsigned long WiFi_error_count;
 unsigned long last_page_load = millis();
 
 bool wificonfig_loop = false;
-bool first_cycle = true;
-bool sntp_time_is_set = false;
+uint8_t sntp_time_set;
 
 unsigned long count_sends = 0;
-unsigned long next_display_millis = 0;
+unsigned long last_display_millis = 0;
 uint8_t next_display_count = 0;
 
 struct struct_wifiInfo {
@@ -552,6 +518,7 @@ struct struct_wifiInfo {
 	int32_t channel;
 #if defined(ESP8266)
 	bool isHidden;
+	uint8_t unused[3];
 #endif
 };
 
@@ -650,26 +617,19 @@ static void display_debug(const String& text1, const String& text2) {
 		display_sh1106.drawString(0, 24, text2);
 		display_sh1106.display();
 	}
-	if (cfg::has_lcd1602) {
-		lcd_1602_3f.clear();
-		lcd_1602_3f.setCursor(0, 0);
-		lcd_1602_3f.print(text1);
-		lcd_1602_3f.setCursor(0, 1);
-		lcd_1602_3f.print(text2);
+	if (lcd_1602) {
+		lcd_1602->clear();
+		lcd_1602->setCursor(0, 0);
+		lcd_1602->print(text1);
+		lcd_1602->setCursor(0, 1);
+		lcd_1602->print(text2);
 	}
-	if (cfg::has_lcd1602_27) {
-		lcd_1602_27.clear();
-		lcd_1602_27.setCursor(0, 0);
-		lcd_1602_27.print(text1);
-		lcd_1602_27.setCursor(0, 1);
-		lcd_1602_27.print(text2);
-	}
-	if (cfg::has_lcd2004_27) {
-		lcd_2004_27.clear();
-		lcd_2004_27.setCursor(0, 0);
-		lcd_2004_27.print(text1);
-		lcd_2004_27.setCursor(0, 1);
-		lcd_2004_27.print(text2);
+	if (lcd_2004) {
+		lcd_2004->clear();
+		lcd_2004->setCursor(0, 0);
+		lcd_2004->print(text1);
+		lcd_2004->setCursor(0, 1);
+		lcd_2004->print(text2);
 	}
 }
 
@@ -678,7 +638,7 @@ static void display_debug(const String& text1, const String& text2) {
  *****************************************************************/
 static String check_display_value(double value, double undef, uint8_t len, uint8_t str_len) {
 	RESERVE_STRING(s, 15);
-	s = (value != undef ? String(value, len) : "-");
+	s = (value != undef ? String(value, len) : String("-"));
 	while (s.length() < str_len) {
 		s = " " + s;
 	}
@@ -813,6 +773,18 @@ static bool HPM_cmd(PmSensorCmd cmd) {
 	return cmd != PmSensorCmd::Stop;
 }
 
+// workaround for https://github.com/plerup/espsoftwareserial/issues/127
+static void yield_for_serial_buffer(size_t length) {
+	unsigned long startMillis = millis();
+	unsigned long yield_timeout = length * 9 * 1000 / 9600;
+
+	while (serialSDS.available() < (int) length &&
+				millis() - startMillis < yield_timeout) {
+		yield();
+		serialSDS.perform_work();
+	}
+}
+
 /*****************************************************************
  * read SDS011 sensor serial and firmware date                   *
  *****************************************************************/
@@ -821,17 +793,18 @@ static String SDS_version_date() {
 	if (cfg::sds_read && !last_value_SDS_version.length()) {
 		debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(DBG_TXT_SDS011_VERSION_DATE));
 		is_SDS_running = SDS_cmd(PmSensorCmd::Start);
+		delay(250);
+		serialSDS.perform_work();
 		serialSDS.flush();
-		delay(100);
 		// Query Version/Date
 		SDS_rawcmd(0x07, 0x00, 0x00);
-		delay(1250);
-
-		const uint8_t resp[2] = { 0xAA, 0xC5 };
-		while (serialSDS.find(resp, sizeof(resp))) {
+		delay(400);
+		const constexpr uint8_t header_cmd_response[2] = { 0xAA, 0xC5 };
+		while (serialSDS.find(header_cmd_response, sizeof(header_cmd_response))) {
 			uint8_t data[8];
-			bool read_ok = (sizeof(data) == serialSDS.readBytes(data, sizeof(data)));
-			if (read_ok && data[0] == 0x07 && SDS_checksum_valid(data)) {
+			yield_for_serial_buffer(sizeof(data));
+			unsigned r = serialSDS.readBytes(data, sizeof(data));
+			if (r == sizeof(data) && data[0] == 0x07 && SDS_checksum_valid(data)) {
 				char tmp[20];
 				snprintf_P(tmp, sizeof(tmp), PSTR("%02d-%02d-%02d(%02x%02x)"),
 					data[1], data[2], data[3], data[4], data[5]);
@@ -1170,14 +1143,6 @@ static String form_checkbox(const ConfigShapeId cfgid, const String& info, const
 	return s;
 }
 
-static void add_form_checkbox(String& page_content, const ConfigShapeId cfgid, const String& info) {
-	page_content += form_checkbox(cfgid, info, true);
-}
-
-static void add_form_checkbox_sensor(String& page_content, const ConfigShapeId cfgid, const __FlashStringHelper* info) {
-	add_form_checkbox(page_content, cfgid, add_sensor_type(info));
-}
-
 static String form_submit(const String& value) {
 	String s = F(	"<tr>"
 					"<td>&nbsp;</td>"
@@ -1194,10 +1159,10 @@ static String form_select_lang() {
 	String s = F(	"<tr>"
 					"<td>" INTL_LANGUAGE ":&nbsp;</td>"
 					"<td>"
-					"<select name='current_lang'>"
-					"<option value='DE'>Deutsch (DE)</option>"
+					"<select id='current_lang' name='current_lang'>"
 					"<option value='BG'>Bulgarian (BG)</option>"
 					"<option value='CZ'>Český (CZ)</option>"
+					"<option value='DE'>Deutsch (DE)</option>"
 					"<option value='DK'>Dansk (DK)</option>"
 					"<option value='EN'>English (EN)</option>"
 					"<option value='ES'>Español (ES)</option>"
@@ -1251,6 +1216,15 @@ static void add_table_row_from_value(String& page_content, const __FlashStringHe
 	s.replace("{p}", param);
 	s.replace("{v}", value);
 	s.replace("{u}", unit);
+	page_content += s;
+}
+
+static void add_table_row_from_value(String& page_content, const __FlashStringHelper* param, const String& value, const char* unit = nullptr) {
+	RESERVE_STRING(s, MED_STR);
+	s = F("<tr><td>{p}</td><td class='r'>{v}&nbsp;{u}</td></tr>");
+	s.replace("{p}", param);
+	s.replace("{v}", value);
+	s.replace("{u}", String(unit));
 	page_content += s;
 }
 
@@ -1350,6 +1324,7 @@ static void webserver_root() {
 		// Enable Pagination
 		page_content += FPSTR(WEB_ROOT_PAGE_CONTENT);
 		page_content.replace(F("{t}"), FPSTR(INTL_CURRENT_DATA));
+		page_content.replace(F("{s}"), FPSTR(INTL_DEVICE_STATUS));
 		page_content.replace(F("{conf}"), FPSTR(INTL_CONFIGURATION));
 		page_content.replace(F("{restart}"), FPSTR(INTL_RESTART_SENSOR));
 		page_content.replace(F("{debug_setting}"), FPSTR(INTL_DEBUG_SETTING_TO));
@@ -1364,6 +1339,14 @@ static void webserver_root() {
 static void webserver_config_send_body_get(String& page_content) {
 	using namespace cfg;
 
+	auto add_form_checkbox = [&page_content](const ConfigShapeId cfgid, const String& info) {
+		page_content += form_checkbox(cfgid, info, true);
+	};
+
+	auto add_form_checkbox_sensor = [&add_form_checkbox](const ConfigShapeId cfgid, __const __FlashStringHelper* info) {
+		add_form_checkbox(cfgid, add_sensor_type(info));
+	};
+
 	debug_outln_info(F("begin webserver_config_body_get ..."));
 	page_content += F("<form method='POST' action='/config' style='width:100%;'>\n<b>" INTL_WIFI_SETTINGS "</b><br/>");
 	debug_outln_info(F("ws: config page 1"));
@@ -1377,129 +1360,130 @@ static void webserver_config_send_body_get(String& page_content) {
 	page_content += F("<hr/>\n<br/><b>");
 
 	page_content += FPSTR(INTL_AB_HIER_NUR_ANDERN);
-	page_content += F("</b><br/><br/>\n<b>");
+	page_content += FPSTR(WEB_B_BR);
+	page_content += FPSTR(BR_TAG);
 
 	// Paginate page after ~ 1500 Bytes
 	server.sendContent(page_content);
 	page_content = emptyString;
 
-	page_content += FPSTR(INTL_BASICAUTH);
-	page_content += FPSTR(WEB_B_BR);
-	add_form_checkbox(page_content, Config_www_basicauth_enabled, FPSTR(INTL_BASICAUTH));
+	add_form_checkbox(Config_www_basicauth_enabled, FPSTR(INTL_BASICAUTH));
 	page_content += FPSTR(TABLE_TAG_OPEN);
 	add_form_input(page_content, Config_www_username, FPSTR(INTL_USER), LEN_WWW_USERNAME-1);
 	add_form_input(page_content, Config_www_password, FPSTR(INTL_PASSWORD), LEN_CFG_PASSWORD-1);
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+	page_content += FPSTR(BR_TAG);
 
 	// Paginate page after ~ 1500 Bytes
 	server.sendContent(page_content);
-	page_content = FPSTR(WEB_BR_LF_B);
 
 	if (! wificonfig_loop) {
-		page_content += FPSTR(INTL_FS_WIFI);
-		page_content += FPSTR(WEB_B_BR);
-		page_content += FPSTR(INTL_FS_WIFI_DESCRIPTION);
+		page_content = FPSTR(INTL_FS_WIFI_DESCRIPTION);
 		page_content += FPSTR(BR_TAG);
+
 		page_content += FPSTR(TABLE_TAG_OPEN);
 		add_form_input(page_content, Config_fs_ssid, FPSTR(INTL_FS_WIFI_NAME), LEN_FS_SSID-1);
 		add_form_input(page_content, Config_fs_pwd, FPSTR(INTL_PASSWORD), LEN_CFG_PASSWORD-1);
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 
-		page_content += FPSTR(WEB_BR_LF_B);
-
-		page_content += F("APIs");
-		page_content += FPSTR(WEB_B_BR);
-
-		// Paginate page after ~ 1500 Bytes
-		server.sendContent(page_content);
-		page_content = form_checkbox(Config_send2dusti, F("API Sensor.Community"), false);
-		page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
-		page_content += form_checkbox(Config_ssl_dusti, FPSTR(WEB_HTTPS), false);
-		page_content += FPSTR(WEB_BRACE_BR);
-		page_content += form_checkbox(Config_send2madavi, F("API Madavi.de"), false);
-		page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
-		page_content += form_checkbox(Config_ssl_madavi, FPSTR(WEB_HTTPS), false);
-		page_content += FPSTR(WEB_BRACE_BR);
-
-		page_content += FPSTR(WEB_BR_LF_B);
-
 		// Paginate page after ~ 1500 Bytes
 		server.sendContent(page_content);
 	}
-	page_content = FPSTR(INTL_SENSORS);
-
-	page_content += FPSTR(WEB_B_BR);
-	add_form_checkbox_sensor(page_content, Config_sds_read, FPSTR(INTL_SDS011));
-	add_form_checkbox_sensor(page_content, Config_pms_read, FPSTR(INTL_PMS));
-	add_form_checkbox_sensor(page_content, Config_hpm_read, FPSTR(INTL_HPM));
-	add_form_checkbox_sensor(page_content, Config_sps30_read, FPSTR(INTL_SPS30));
-	add_form_checkbox_sensor(page_content, Config_ppd_read, FPSTR(INTL_PPD42NS));
-
-	// Paginate page after ~ 1500 Bytes
-	server.sendContent(page_content);
-	page_content = emptyString;
-
-	add_form_checkbox_sensor(page_content, Config_dht_read, FPSTR(INTL_DHT22));
-	add_form_checkbox_sensor(page_content, Config_htu21d_read, FPSTR(INTL_HTU21D));
-	add_form_checkbox_sensor(page_content, Config_bmp_read, FPSTR(INTL_BMP180));
-	add_form_checkbox_sensor(page_content, Config_bmx280_read, FPSTR(INTL_BMX280));
-	add_form_checkbox_sensor(page_content, Config_sht3x_read, FPSTR(INTL_SHT3X));
-	add_form_checkbox_sensor(page_content, Config_ds18b20_read, FPSTR(INTL_DS18B20));
-
-	// Paginate page after ~ 1500 Bytes
-	server.sendContent(page_content);
-	page_content = emptyString;
-
-	add_form_checkbox_sensor(page_content, Config_dnms_read, FPSTR(INTL_DNMS));
-	page_content += FPSTR(TABLE_TAG_OPEN);
-	add_form_input(page_content, Config_dnms_correction, FPSTR(INTL_DNMS_CORRECTION), LEN_DNMS_CORRECTION-1);
-	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-	add_form_checkbox(page_content, Config_gps_read, FPSTR(INTL_NEO6M));
-
-	page_content += FPSTR(WEB_BR_LF_B);
-
-	// Paginate page after ~ 1500 Bytes
-	server.sendContent(page_content);
-	page_content = emptyString;
-
-	page_content += FPSTR(INTL_MORE_SETTINGS);
-	page_content += FPSTR(WEB_B_BR);
-	add_form_checkbox(page_content, Config_auto_update, FPSTR(INTL_AUTO_UPDATE));
-	add_form_checkbox(page_content, Config_use_beta, FPSTR(INTL_USE_BETA));
-	add_form_checkbox(page_content, Config_has_display, FPSTR(INTL_DISPLAY));
-	add_form_checkbox(page_content, Config_has_sh1106, FPSTR(INTL_SH1106));
-
-	// Paginate page after ~ 1500 Bytes
-	server.sendContent(page_content);
-	page_content = emptyString;
-
-	add_form_checkbox(page_content, Config_has_flipped_display, FPSTR(INTL_FLIP_DISPLAY));
-	add_form_checkbox(page_content, Config_has_lcd1602_27, FPSTR(INTL_LCD1602_27));
-	add_form_checkbox(page_content, Config_has_lcd1602, FPSTR(INTL_LCD1602_3F));
-	add_form_checkbox(page_content, Config_has_lcd2004_27, FPSTR(INTL_LCD2004_27));
-	add_form_checkbox(page_content, Config_display_wifi_info, FPSTR(INTL_DISPLAY_WIFI_INFO));
-	add_form_checkbox(page_content, Config_display_device_info, FPSTR(INTL_DISPLAY_DEVICE_INFO));
-
-	// Paginate page after ~ 1500 Bytes
-	server.sendContent(page_content);
-	page_content = emptyString;
+	page_content = FPSTR(WEB_BR_LF_B);
+	page_content += F(INTL_FIRMWARE "</b>&nbsp;");
+	add_form_checkbox(Config_auto_update, FPSTR(INTL_AUTO_UPDATE));
+	add_form_checkbox(Config_use_beta, FPSTR(INTL_USE_BETA));
 
 	page_content += FPSTR(TABLE_TAG_OPEN);
 	page_content += form_select_lang();
+	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+
+	page_content += F("<script>"
+	    "var $ = function(e) { return document.getElementById(e); };"
+	    "function updateOTAOptions() { "
+		"$('current_lang').disabled = $('use_beta').disabled = !$('auto_update').checked; "
+		"}; updateOTAOptions(); $('auto_update').onchange = updateOTAOptions;"
+		"</script>");
+
+	page_content += FPSTR(TABLE_TAG_OPEN);
 	add_form_input(page_content, Config_debug, FPSTR(INTL_DEBUG_LEVEL), 1);
 	add_form_input(page_content, Config_sending_intervall_ms, FPSTR(INTL_MEASUREMENT_INTERVAL), 5);
 	add_form_input(page_content, Config_time_for_wifi_config, FPSTR(INTL_DURATION_ROUTER_MODE), 5);
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-	page_content += FPSTR(WEB_BR_LF_B);
 
 	server.sendContent(page_content);
-	page_content = FPSTR(INTL_MORE_APIS);
-
+	page_content = FPSTR(WEB_BR_LF_B);
+	page_content += FPSTR(INTL_MORE_SETTINGS);
 	page_content += FPSTR(WEB_B_BR);
-	add_form_checkbox(page_content, Config_send2csv, tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_CSV)));
-	add_form_checkbox(page_content, Config_send2fsapp, tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_FEINSTAUB_APP)));
-	add_form_checkbox(page_content, Config_send2aircms, tmpl(FPSTR(INTL_SEND_TO), F("aircms.online")));
-	add_form_checkbox(page_content, Config_send2sensemap, tmpl(FPSTR(INTL_SEND_TO), F("OpenSenseMap")));
+
+	add_form_checkbox(Config_has_display, FPSTR(INTL_DISPLAY));
+	add_form_checkbox(Config_has_sh1106, FPSTR(INTL_SH1106));
+	add_form_checkbox(Config_has_flipped_display, FPSTR(INTL_FLIP_DISPLAY));
+	add_form_checkbox(Config_has_lcd1602_27, FPSTR(INTL_LCD1602_27));
+	add_form_checkbox(Config_has_lcd1602, FPSTR(INTL_LCD1602_3F));
+
+	// Paginate page after ~ 1500 Bytes
+	server.sendContent(page_content);
+	page_content = emptyString;
+
+	add_form_checkbox(Config_has_lcd2004_27, FPSTR(INTL_LCD2004_27));
+	add_form_checkbox(Config_has_lcd2004, FPSTR(INTL_LCD2004_3F));
+	add_form_checkbox(Config_display_wifi_info, FPSTR(INTL_DISPLAY_WIFI_INFO));
+	add_form_checkbox(Config_display_device_info, FPSTR(INTL_DISPLAY_DEVICE_INFO));
+
+	server.sendContent(page_content);
+	page_content = FPSTR(WEB_BR_LF_B);
+	page_content += FPSTR(INTL_SENSORS);
+	page_content += FPSTR(WEB_B_BR);
+	add_form_checkbox_sensor(Config_sds_read, FPSTR(INTL_SDS011));
+	add_form_checkbox_sensor(Config_hpm_read, FPSTR(INTL_HPM));
+	add_form_checkbox_sensor(Config_sps30_read, FPSTR(INTL_SPS30));
+
+	// Paginate page after ~ 1500 Bytes
+	server.sendContent(page_content);
+	page_content = emptyString;
+
+	add_form_checkbox_sensor(Config_dht_read, FPSTR(INTL_DHT22));
+	add_form_checkbox_sensor(Config_htu21d_read, FPSTR(INTL_HTU21D));
+	add_form_checkbox_sensor(Config_bmx280_read, FPSTR(INTL_BMX280));
+	add_form_checkbox_sensor(Config_sht3x_read, FPSTR(INTL_SHT3X));
+	add_form_checkbox_sensor(Config_ds18b20_read, FPSTR(INTL_DS18B20));
+
+	// Paginate page after ~ 1500 Bytes
+	server.sendContent(page_content);
+	page_content = emptyString;
+
+	add_form_checkbox_sensor(Config_dnms_read, FPSTR(INTL_DNMS));
+	page_content += FPSTR(TABLE_TAG_OPEN);
+	add_form_input(page_content, Config_dnms_correction, FPSTR(INTL_DNMS_CORRECTION), LEN_DNMS_CORRECTION-1);
+	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+
+	page_content += FPSTR(WEB_BR_LF_B);
+	page_content += FPSTR(INTL_MORE_SENSORS);
+	page_content += FPSTR(WEB_B_BR);
+
+	add_form_checkbox_sensor(Config_pms_read, FPSTR(INTL_PMS));
+	add_form_checkbox_sensor(Config_bmp_read, FPSTR(INTL_BMP180));
+	add_form_checkbox(Config_gps_read, FPSTR(INTL_NEO6M));
+
+	page_content += FPSTR(WEB_BR_LF_B);
+	page_content += F("APIs");
+	page_content += FPSTR(WEB_B_BR);
+	// Paginate page after ~ 1500 Bytes
+	server.sendContent(page_content);
+
+	page_content = form_checkbox(Config_send2dusti, F("API Sensor.Community"), false);
+	page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
+	page_content += form_checkbox(Config_ssl_dusti, FPSTR(WEB_HTTPS), false);
+	page_content += FPSTR(WEB_BRACE_BR);
+	page_content += form_checkbox(Config_send2madavi, F("API Madavi.de"), false);
+	page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
+	page_content += form_checkbox(Config_ssl_madavi, FPSTR(WEB_HTTPS), false);
+	page_content += FPSTR(WEB_BRACE_BR);
+	add_form_checkbox(Config_send2csv, tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_CSV)));
+	add_form_checkbox(Config_send2fsapp, tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_FEINSTAUB_APP)));
+	add_form_checkbox(Config_send2aircms, tmpl(FPSTR(INTL_SEND_TO), F("aircms.online")));
+	add_form_checkbox(Config_send2sensemap, tmpl(FPSTR(INTL_SEND_TO), F("OpenSenseMap")));
 	page_content += FPSTR(TABLE_TAG_OPEN);
 	add_form_input(page_content, Config_senseboxid, F("senseBox&nbsp;ID"), LEN_SENSEBOXID-1);
 
@@ -1535,8 +1519,8 @@ static void webserver_config_send_body_get(String& page_content) {
 	add_form_input(page_content, Config_user_influx, FPSTR(INTL_USER), LEN_USER_INFLUX-1);
 	add_form_input(page_content, Config_pwd_influx, FPSTR(INTL_PASSWORD), LEN_CFG_PASSWORD-1);
 	add_form_input(page_content, Config_measurement_name_influx, F("Measurement"), LEN_MEASUREMENT_NAME_INFLUX-1);
-	page_content += form_submit(FPSTR(INTL_SAVE_AND_RESTART));
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+	page_content += form_submit(FPSTR(INTL_SAVE_AND_RESTART));
 	page_content += FPSTR(BR_TAG);
 	page_content += FPSTR(WEB_BR_FORM);
 	if (wificonfig_loop) {  // scan for wlan ssids
@@ -1606,16 +1590,17 @@ static void webserver_config_send_body_post(String& page_content) {
 	server.sendContent(page_content);
 	page_content = emptyString;
 
-	add_line_value_bool(page_content, FPSTR(INTL_AUTO_UPDATE), auto_update);
-	add_line_value_bool(page_content, FPSTR(INTL_USE_BETA), use_beta);
 	add_line_value_bool(page_content, FPSTR(INTL_DISPLAY), has_display);
 	add_line_value_bool(page_content, FPSTR(INTL_SH1106), has_sh1106);
 	add_line_value_bool(page_content, FPSTR(INTL_FLIP_DISPLAY), has_flipped_display);
 	add_line_value_bool(page_content, FPSTR(INTL_LCD1602_27), has_lcd1602_27);
 	add_line_value_bool(page_content, FPSTR(INTL_LCD1602_3F), has_lcd1602);
 	add_line_value_bool(page_content, FPSTR(INTL_LCD2004_27), has_lcd2004_27);
+	add_line_value_bool(page_content, FPSTR(INTL_LCD2004_3F), has_lcd2004);
 	add_line_value_bool(page_content, FPSTR(INTL_DISPLAY_WIFI_INFO), display_wifi_info);
 	add_line_value_bool(page_content, FPSTR(INTL_DISPLAY_DEVICE_INFO), display_device_info);
+	add_line_value_bool(page_content, FPSTR(INTL_AUTO_UPDATE), auto_update);
+	add_line_value_bool(page_content, FPSTR(INTL_USE_BETA), use_beta);
 	add_line_value(page_content, FPSTR(INTL_DEBUG_LEVEL), String(debug));
 	add_line_value(page_content, FPSTR(INTL_MEASUREMENT_INTERVAL), String(sending_intervall_ms));
 	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("Feinstaub-App"), send2fsapp);
@@ -1775,17 +1760,18 @@ static void webserver_values() {
 	} else {
 		RESERVE_STRING(page_content, XLARGE_STR);
 		start_html_page(page_content, FPSTR(INTL_CURRENT_DATA));
-		const String unit_PM = "µg/m³";
-		const String unit_T = "°C";
-		const String unit_H = "%";
-		const String unit_P = "hPa";
-		const String unit_NC = "#/cm³";
-		const String unit_TS = "µm";
-		const String unit_LA = "dB(A)";
+		const String unit_PM("µg/m³");
+		const String unit_Deg("°");
+		const String unit_T("°C");
+		const String unit_H("%");
+		const String unit_P("hPa");
+		const String unit_NC(F("#/cm³"));
+		const String unit_TS("µm");
+		const String unit_LA(F("dB(A)"));
 
 		const int signal_quality = calcWiFiSignalQuality(last_signal_strength);
 		debug_outln_info(F("ws: values ..."));
-		if (first_cycle) {
+		if (!count_sends) {
 			page_content += F("<b style='color:red'>");
 			add_warning_first_cycle(page_content);
 			page_content += FPSTR(WEB_B_BR_BR);
@@ -1805,10 +1791,6 @@ static void webserver_values() {
 			page_content += FPSTR(EMPTY_ROW);
 			add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), FPSTR(WEB_PM25), check_display_value(last_value_SDS_P2, -1, 1, 0), unit_PM);
 			add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), FPSTR(WEB_PM10), check_display_value(last_value_SDS_P1, -1, 1, 0), unit_PM);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), F(INTL_FIRMWARE), last_value_SDS_version, emptyString);
-			if (SDS_error_count > 0) {
-				add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), F(INTL_ERROR), String(SDS_error_count), emptyString);
-			}
 		}
 		if (cfg::pms_read) {
 			page_content += FPSTR(EMPTY_ROW);
@@ -1875,8 +1857,8 @@ static void webserver_values() {
 		}
 		if (cfg::gps_read) {
 			page_content += FPSTR(EMPTY_ROW);
-			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_LATITUDE), check_display_value(last_value_GPS_lat, -200.0, 6, 0), "°");
-			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_LONGITUDE), check_display_value(last_value_GPS_lon, -200.0, 6, 0), "°");
+			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_LATITUDE), check_display_value(last_value_GPS_lat, -200.0, 6, 0), unit_Deg);
+			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_LONGITUDE), check_display_value(last_value_GPS_lon, -200.0, 6, 0), unit_Deg);
 			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_ALTITUDE), check_display_value(last_value_GPS_alt, -1000.0, 2, 0), "m");
 			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_DATE), last_value_GPS_date, emptyString);
 			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_TIME), last_value_GPS_time, emptyString);
@@ -1887,29 +1869,135 @@ static void webserver_values() {
 
 		add_table_row_from_value(page_content, F("WiFi"), FPSTR(INTL_SIGNAL_STRENGTH), String(last_signal_strength), "dBm");
 		add_table_row_from_value(page_content, F("WiFi"), FPSTR(INTL_SIGNAL_QUALITY), String(signal_quality), "%");
-		if (WiFi_error_count > 0) {
-			add_table_row_from_value(page_content, F("WiFi"), FPSTR(INTL_ERROR), String(WiFi_error_count), emptyString);
-		}
 
-		if (count_sends > 0) {
-			page_content += FPSTR(EMPTY_ROW);
-			page_content += F("<tr><td colspan='2'>" INTL_NUMBER_OF_MEASUREMENTS "</td><td class='r'>");
-			page_content += count_sends;
-			page_content += F("</td></tr>");
-			if (sending_time > 0) {
-				page_content += F("<tr><td colspan='2'>" INTL_TIME_SENDING_MS "</td><td class='r'>");
-				page_content += String(sending_time);
-				page_content += F("&nbsp;ms");
-				page_content += F("</td></tr>");
-			}
-			if (sendData_error_count > 0) {
-				add_table_row_from_value(page_content, F(INTL_SENSOR), F(INTL_ERROR), String(sendData_error_count), emptyString);
-			}
-		}
-
+		page_content += FPSTR(EMPTY_ROW);
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 		end_html_page(page_content);
 	}
+}
+
+static String delayToString(unsigned time_ms) {
+
+	char buf[64];
+	String s;
+
+	if (time_ms > 2 * 1000 * 60 * 60 * 24) {
+		sprintf_P(buf, PSTR("%d days, "), time_ms / (1000 * 60 * 60 * 24));
+		s += buf;
+		time_ms %= 1000 * 60 * 60 * 24;
+	}
+
+	if (time_ms > 2 * 1000 * 60 * 60) {
+		sprintf_P(buf, PSTR("%d hours, "), time_ms / (1000 * 60 * 60));
+		s += buf;
+		time_ms %= 1000 * 60 * 60;
+	}
+
+	if (time_ms > 2 * 1000 * 60) {
+		sprintf_P(buf, PSTR("%d min, "), time_ms / (1000 * 60));
+		s += buf;
+		time_ms %= 1000 * 60;
+	}
+
+	if (time_ms > 2 * 1000) {
+		sprintf_P(buf, PSTR("%ds, "), time_ms / 1000);
+		s += buf;
+	}
+
+	if (s.length() > 2) {
+		s = s.substring(0, s.length() - 2);
+	}
+
+	return s;
+}
+
+/*****************************************************************
+ * Webserver root: show device status
+ *****************************************************************/
+static void webserver_status() {
+	if (WiFi.status() != WL_CONNECTED) {
+		sendHttpRedirect();
+		return;
+	}
+
+	RESERVE_STRING(page_content, XLARGE_STR);
+	start_html_page(page_content, FPSTR(INTL_DEVICE_STATUS));
+
+	debug_outln_info(F("ws: status ..."));
+	server.sendContent(page_content);
+	page_content = F("<table cellspacing='0' border='1' cellpadding='5'>\n"
+			  "<tr><th> " INTL_PARAMETER "</th><th>" INTL_VALUE "</th></tr>");
+	String versionHtml(SOFTWARE_VERSION);
+	versionHtml += F("/ST:");
+	versionHtml += String(!airrohr_selftest_failed);
+	versionHtml += '/';
+	versionHtml += ESP.getFullVersion();
+	versionHtml.replace("/", FPSTR(BR_TAG));
+	add_table_row_from_value(page_content, FPSTR(INTL_FIRMWARE), versionHtml);
+	add_table_row_from_value(page_content, F("Free Memory"), String(ESP.getFreeHeap()));
+	add_table_row_from_value(page_content, F("Heap Fragmentation"), String(ESP.getHeapFragmentation()), "%");
+	if (cfg::auto_update) {
+		add_table_row_from_value(page_content, F("Last OTA"), delayToString(millis() - last_update_attempt));
+	}
+#if defined(ESP8266)
+    add_table_row_from_value(page_content, F("NTP Sync"), String(sntp_time_set));
+	StreamString ntpinfo;
+
+	for (unsigned i = 0; i < SNTP_MAX_SERVERS; i++) {
+		const ip_addr_t* sntp = sntp_getserver(i);
+		if (sntp && !ip_addr_isany(sntp)) {
+			const char* name = sntp_getservername(i);
+			if (!ntpinfo.isEmpty()) {
+				ntpinfo.print(FPSTR(BR_TAG));
+			}
+			ntpinfo.printf_P(PSTR("%s (%s)"), IPAddress(*sntp).toString().c_str(), name ? name : "?");
+			ntpinfo.printf_P(PSTR(" reachable: %s"), sntp_getreachability(i) ? "Yes" : "No");
+		}
+	}
+	add_table_row_from_value(page_content, F("NTP Info"), ntpinfo);
+#endif
+
+	time_t now = time(nullptr);
+	add_table_row_from_value(page_content, FPSTR(INTL_TIME), ctime(&now));
+	add_table_row_from_value(page_content, F("Uptime"), delayToString(millis() - time_point_device_start_ms));
+	add_table_row_from_value(page_content, F("Reset Reason"), ESP.getResetReason());
+	if (cfg::sds_read) {
+		page_content += FPSTR(EMPTY_ROW);
+		add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), last_value_SDS_version);
+	}
+
+	page_content += FPSTR(EMPTY_ROW);
+	page_content += F("<tr><td colspan='2'><b>" INTL_ERROR "</b></td></tr>");
+	add_table_row_from_value(page_content, F("WiFi"), String(WiFi_error_count));
+	if (last_update_returncode != 0) {
+		add_table_row_from_value(page_content, F("OTA Return"),
+			last_update_returncode > 0 ? String(last_update_returncode) : HTTPClient::errorToString(last_update_returncode));
+	}
+	add_table_row_from_value(page_content, F("Data Send"), String(sendData_error_count));
+	if (last_sendData_returncode != 0) {
+		add_table_row_from_value(page_content, F("Data Send Return"),
+			last_sendData_returncode > 0 ? String(last_sendData_returncode) : HTTPClient::errorToString(last_sendData_returncode));
+	}
+	if (cfg::sds_read) {
+		add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), String(SDS_error_count));
+	}
+	if (cfg::sps30_read) {
+		add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), String(SPS30_read_error_counter));
+	}
+
+	server.sendContent(page_content);
+	page_content = emptyString;
+
+	if (count_sends > 0) {
+		page_content += FPSTR(EMPTY_ROW);
+		add_table_row_from_value(page_content, F(INTL_NUMBER_OF_MEASUREMENTS), String(count_sends));
+		if (sending_time > 0) {
+			add_table_row_from_value(page_content, F(INTL_TIME_SENDING_MS), String(sending_time), "ms");
+		}
+	}
+
+	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+	end_html_page(page_content);
 }
 
 /*****************************************************************
@@ -1931,11 +2019,28 @@ static void webserver_debug_level() {
 			page_content += FPSTR(INTL_DEBUG_SETTING_TO);
 			page_content += ' ';
 
-			static constexpr const char * lvlText[6] PROGMEM = {
-				INTL_NONE, INTL_ERROR, INTL_WARNING, INTL_MIN_INFO, INTL_MED_INFO, INTL_MAX_INFO
-			};
+			const __FlashStringHelper* lvlText;
+			switch (lvl) {
+			case DEBUG_ERROR:
+				lvlText = F(INTL_ERROR);
+				break;
+			case DEBUG_WARNING:
+				lvlText = F(INTL_WARNING);
+				break;
+			case DEBUG_MIN_INFO:
+				lvlText = F(INTL_MIN_INFO);
+				break;
+			case DEBUG_MED_INFO:
+				lvlText = F(INTL_MED_INFO);
+				break;
+			case DEBUG_MAX_INFO:
+				lvlText = F(INTL_MAX_INFO);
+				break;
+			default:
+				lvlText = F(INTL_NONE);
+			}
 
-			page_content += FPSTR(lvlText[lvl]);
+			page_content += lvlText;
 			page_content += F(".</h3>");
 		}
 	}
@@ -1959,9 +2064,9 @@ static void webserver_removeConfig() {
 	} else {
 		// Silently remove the desaster backup
 		SPIFFS.remove(F("/config.json.old"));
-		if (SPIFFS.exists("/config.json")) {	//file exists
+		if (SPIFFS.exists(F("/config.json"))) {	//file exists
 			debug_outln_info(F("removing config.json..."));
-			if (SPIFFS.remove("/config.json")) {
+			if (SPIFFS.remove(F("/config.json"))) {
 				page_content += F("<h3>" INTL_CONFIG_DELETED ".</h3>");
 			} else {
 				page_content += F("<h3>" INTL_CONFIG_CAN_NOT_BE_DELETED ".</h3>");
@@ -2002,7 +2107,7 @@ static void webserver_data_json() {
 	unsigned long age = 0;
 
 	debug_outln_info(F("ws: data json..."));
-	if (first_cycle) {
+	if (!count_sends) {
 		s1 = FPSTR(data_first_part);
 		s1 += "]}";
 		age = cfg::sending_intervall_ms - msSince(starttime);
@@ -2102,6 +2207,7 @@ static void setup_webserver() {
 	server.on(F("/config"), webserver_config);
 	server.on(F("/wifi"), webserver_wifi);
 	server.on(F("/values"), webserver_values);
+	server.on(F("/status"), webserver_status);
 	server.on(F("/generate_204"), webserver_config);
 	server.on(F("/fwlink"), webserver_config);
 	server.on(F("/debug"), webserver_debug_level);
@@ -2224,7 +2330,7 @@ static void wifiConfig() {
 	debug_outln_info(FPSTR(DBG_TXT_SEP));
 	debug_outln_info_bool(F("Autoupdate: "), cfg::auto_update);
 	debug_outln_info_bool(F("Display: "), cfg::has_display);
-	debug_outln_info_bool(F("LCD 1602: "), cfg::has_lcd1602);
+	debug_outln_info_bool(F("LCD 1602: "), !!lcd_1602);
 	debug_outln_info(F("Debug: "), String(cfg::debug));
 	wificonfig_loop = false;
 }
@@ -2242,19 +2348,24 @@ static void waitForWifiToConnect(int maxRetries) {
  * WiFi auto connecting script                                   *
  *****************************************************************/
 static void connectWifi() {
-	WiFi.persistent(false);
-	WiFi.mode(WIFI_OFF);
-	delay(100);
+	display_debug(F("Connecting to"), String(cfg::wlanssid));
 #if defined(ESP8266)
 	// Enforce Rx/Tx calibration
 	system_phy_set_powerup_option(1);
-    // 20dBM == 100mW == max tx power allowed in europe
+	// 20dBM == 100mW == max tx power allowed in europe
 	WiFi.setOutputPower(20.0f);
 	WiFi.setSleepMode(WIFI_NONE_SLEEP);
 	WiFi.setPhyMode(WIFI_PHY_MODE_11N);
 	delay(100);
 #endif
+	if (WiFi.getAutoConnect()) {
+		WiFi.setAutoConnect(false);
+	}
+	if (!WiFi.getAutoReconnect()) {
+		WiFi.setAutoReconnect(true);
+	}
 	WiFi.mode(WIFI_STA);
+	WiFi.hostname(cfg::fs_ssid);
 	WiFi.begin(cfg::wlanssid, cfg::wlanpwd); // Start WiFI
 
 	debug_outln_info(FPSTR(DBG_TXT_CONNECTING_TO), cfg::wlanssid);
@@ -2330,6 +2441,7 @@ static unsigned long sendData(const LoggerEntry logger, const String& data, cons
 
 	unsigned long start_send = millis();
 	const __FlashStringHelper* contentType;
+	int result = 0;
 
 	String s_Host(FPSTR(host));
 	String s_url(FPSTR(url));
@@ -2351,6 +2463,7 @@ static unsigned long sendData(const LoggerEntry logger, const String& data, cons
 	HTTPClient http;
 	http.setTimeout(20 * 1000);
 	http.setUserAgent(SOFTWARE_VERSION + '/' + esp_chipid);
+    http.setReuse(false);
 	bool send_success = false;
 	if (logger == LoggerCustom && (*cfg::user_custom || *cfg::pwd_custom)) {
 		http.setAuthorization(cfg::user_custom, cfg::pwd_custom);
@@ -2365,7 +2478,7 @@ static unsigned long sendData(const LoggerEntry logger, const String& data, cons
 			http.addHeader(F("X-PIN"), String(pin));
 		}
 
-		int result = http.POST(data);
+		result = http.POST(data);
 
 		if (result >= HTTP_CODE_OK && result <= HTTP_CODE_ALREADY_REPORTED) {
 			debug_outln_info(F("Succeeded - "), s_Host);
@@ -2379,8 +2492,9 @@ static unsigned long sendData(const LoggerEntry logger, const String& data, cons
 		debug_outln_info(F("Failed connecting to "), s_Host);
 	}
 
-	if (!send_success) {
+	if (!send_success && result != 0) {
 		sendData_error_count++;
+		last_sendData_returncode = result;
 	}
 
 	return millis() - start_send;
@@ -2448,7 +2562,8 @@ static void send_csv(const String& data) {
 	debug_outln_info(F("CSV Output: "), data);
 	if (!err) {
 		String headline = F("Timestamp_ms;");
-		String valueline = String(act_milli) + ';';
+		String valueline(act_milli);
+		valueline += ';';
 		for (JsonObject measurement : json2data[FPSTR(JSON_SENSOR_DATA_VALUES)].as<JsonArray>()) {
 			headline += measurement["value_type"].as<char*>();
 			headline += ';';
@@ -2643,7 +2758,8 @@ static void fetchSensorSDS(String& s) {
 
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_SDS011));
 
-	if (msSince(starttime) < (cfg::sending_intervall_ms - (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS))) {
+	if (cfg::sending_intervall_ms > (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS) &&
+		msSince(starttime) < (cfg::sending_intervall_ms - (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS))) {
 		if (is_SDS_running) {
 			is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
 		}
@@ -2657,8 +2773,9 @@ static void fetchSensorSDS(String& s) {
 		while (serialSDS.available() >= 10 &&
 					serialSDS.find(header_measurement, sizeof(header_measurement))) {
 			uint8_t data[8];
-			bool read_ok = (sizeof(data) == serialSDS.readBytes(data, sizeof(data)));
-			if (read_ok && SDS_checksum_valid(data)) {
+			yield_for_serial_buffer(sizeof(data));
+			unsigned r = serialSDS.readBytes(data, sizeof(data));
+			if (r == sizeof(data) && SDS_checksum_valid(data)) {
 				uint32_t pm25_serial = data[0] | (data[1] << 8);
 				uint32_t pm10_serial = data[2] | (data[3] << 8);
 
@@ -2698,6 +2815,9 @@ static void fetchSensorSDS(String& s) {
 			add_Value2Json(s, F("SDS_P1"), F("PM10:  "), last_value_SDS_P1);
 			add_Value2Json(s, F("SDS_P2"), F("PM2.5: "), last_value_SDS_P2);
 			debug_outln_info(FPSTR(DBG_TXT_SEP));
+			if (sds_val_count < 3) {
+				SDS_error_count++;
+			}
 		}
 		else {
 			SDS_error_count++;
@@ -2848,8 +2968,8 @@ static void fetchSensorPMS(String& s) {
 					checksum_is = 0;
 				}
 			}
+			yield();
 		}
-		yield();
 	}
 
 	if (send_now) {
@@ -2987,8 +3107,8 @@ static void fetchSensorHPM(String& s) {
 					checksum_is = 0;
 				}
 			}
+			yield();
 		}
-		yield();
 
 	}
 	if (send_now) {
@@ -3271,13 +3391,15 @@ static bool fwDownloadStream(WiFiClientSecure& client, const String& url, Stream
 	http.setTimeout(20 * 1000);
 	http.setUserAgent(SOFTWARE_VERSION + ' ' + esp_chipid + ' ' + SDS_version_date() + ' ' +
 				 String(cfg::current_lang) + ' ' + String(CURRENT_LANG) + ' ' +
-				 String(cfg::use_beta ? "BETA" : ""));
+				 String(cfg::use_beta ? F("BETA") : F("")));
+    http.setReuse(false);
 
 	debug_outln_verbose(F("HTTP GET: "), String(FPSTR(FW_DOWNLOAD_HOST)) + ':' + String(FW_DOWNLOAD_PORT) + url);
 
 	if (http.begin(client, FPSTR(FW_DOWNLOAD_HOST), FW_DOWNLOAD_PORT, url)) {
 		int r = http.GET();
 		debug_outln_verbose(F("GET r: "), String(r));
+		last_update_returncode = r;
 		if (r == HTTP_CODE_OK) {
 			bytes_written = http.writeToStream(ostream);
 		}
@@ -3339,6 +3461,9 @@ static bool launchUpdateLoader(const String& md5) {
 		return false;
 	}
 
+	debug_outln_info(F("Erasing SDK config."));
+	ESP.eraseConfig();
+
 	sensor_restart();
 	return true;
 }
@@ -3371,7 +3496,8 @@ static void twoStageOTAUpdate() {
 	client.setSession(&clientSession);
 	configureCACertTrustAnchor(&client);
 
-	String fetch_md5_name = fetch_name + F(".md5");
+	String fetch_md5_name(fetch_name);
+	fetch_md5_name += F(".md5");
 
 	StreamString newFwmd5;
 	if (!fwDownloadStream(client, fetch_md5_name, &newFwmd5))
@@ -3587,7 +3713,7 @@ static void display_values() {
 	}
 	// update size of "screens" when adding more screens!
 
-	if (cfg::has_display || cfg::has_sh1106 || cfg::has_lcd2004_27) {
+	if (cfg::has_display || cfg::has_sh1106 || lcd_2004) {
 		switch (screens[next_display_count % screen_count]) {
 		case 1:
 			display_header = pm25_sensor;
@@ -3642,7 +3768,7 @@ static void display_values() {
 			display_header = F("Device Info");
 			display_lines[0] = "ID: "; display_lines[0] += esp_chipid;
 			display_lines[1] = "FW: "; display_lines[1] += SOFTWARE_VERSION;
-			display_lines[2] = "Measurements: "; display_lines[2] += String(count_sends);
+			display_lines[2] = F("Measurements: "); display_lines[2] += String(count_sends);
 			break;
 		}
 
@@ -3672,20 +3798,20 @@ static void display_values() {
 			display_sh1106.drawString(64, 52, displayGenerateFooter(screen_count));
 			display_sh1106.display();
 		}
-		if (cfg::has_lcd2004_27) {
+		if (lcd_2004) {
 			display_header = std::move(String((next_display_count % screen_count) + 1) + '/' + String(screen_count) + ' ' + display_header);
 			display_lines[0].replace(" µg/m³", emptyString);
 			display_lines[0].replace("°", String(char(223)));
 			display_lines[1].replace(" µg/m³", emptyString);
-			lcd_2004_27.clear();
-			lcd_2004_27.setCursor(0, 0);
-			lcd_2004_27.print(display_header);
-			lcd_2004_27.setCursor(0, 1);
-			lcd_2004_27.print(display_lines[0]);
-			lcd_2004_27.setCursor(0, 2);
-			lcd_2004_27.print(display_lines[1]);
-			lcd_2004_27.setCursor(0, 3);
-			lcd_2004_27.print(display_lines[2]);
+			lcd_2004->clear();
+			lcd_2004->setCursor(0, 0);
+			lcd_2004->print(display_header);
+			lcd_2004->setCursor(0, 1);
+			lcd_2004->print(display_lines[0]);
+			lcd_2004->setCursor(0, 2);
+			lcd_2004->print(display_lines[1]);
+			lcd_2004->setCursor(0, 3);
+			lcd_2004->print(display_lines[2]);
 		}
 	}
 
@@ -3694,7 +3820,7 @@ static void display_values() {
 // T/H: -10.0°C/100.0%
 // T/P: -10.0°C/1000hPa
 
-	if (cfg::has_lcd1602 || cfg::has_lcd1602_27 ) {
+	if (lcd_1602) {
 		switch (screens[next_display_count % screen_count]) {
 		case 1:
 			display_lines[0] = "PM2.5: ";
@@ -3736,24 +3862,14 @@ static void display_values() {
 
 		display_lines[0].replace("°", String(char(223)));
 
-		if (cfg::has_lcd1602_27) {
-			lcd_1602_27.clear();
-			lcd_1602_27.setCursor(0, 0);
-			lcd_1602_27.print(display_lines[0]);
-			lcd_1602_27.setCursor(0, 1);
-			lcd_1602_27.print(display_lines[1]);
-		}
-		if (cfg::has_lcd1602) {
-			lcd_1602_3f.clear();
-			lcd_1602_3f.setCursor(0, 0);
-			lcd_1602_3f.print(display_lines[0]);
-			lcd_1602_3f.setCursor(0, 1);
-			lcd_1602_3f.print(display_lines[1]);
-		}
+		lcd_1602->clear();
+		lcd_1602->setCursor(0, 0);
+		lcd_1602->print(display_lines[0]);
+		lcd_1602->setCursor(0, 1);
+		lcd_1602->print(display_lines[1]);
 	}
 	yield();
 	next_display_count++;
-	next_display_millis = millis() + DISPLAY_UPDATE_INTERVAL_MS;
 }
 
 /*****************************************************************
@@ -3772,17 +3888,26 @@ static void init_display() {
  * Init LCD display                                              *
  *****************************************************************/
 static void init_lcd() {
-	if (cfg::has_lcd1602_27) {
-		lcd_1602_27.init();
-		lcd_1602_27.backlight();
+    if (cfg::has_lcd1602) {
+        lcd_1602 = new LiquidCrystal_I2C(0x3f, 16, 2);
+    }
+	else if (cfg::has_lcd1602_27) {
+        lcd_1602 = new LiquidCrystal_I2C(0x27, 16, 2);
 	}
-	if (cfg::has_lcd1602) {
-		lcd_1602_3f.init();
-		lcd_1602_3f.backlight();
+    if (lcd_1602) {
+		lcd_1602->init();
+		lcd_1602->backlight();
 	}
-	if (cfg::has_lcd2004_27) {
-		lcd_2004_27.init();
-		lcd_2004_27.backlight();
+
+	if (cfg::has_lcd2004) {
+		lcd_2004 = new LiquidCrystal_I2C(0x3f, 20, 4);
+	}
+	else if (cfg::has_lcd2004_27) {
+		lcd_2004 = new LiquidCrystal_I2C(0x27, 20, 4);
+	}
+	if (lcd_2004) {
+		lcd_2004->init();
+		lcd_2004->backlight();
 	}
 }
 
@@ -3984,22 +4109,11 @@ static void logEnabledDisplays() {
 	if (cfg::has_display || cfg::has_sh1106) {
 		debug_outln_info(F("Show on OLED..."));
 	}
-	if (cfg::has_lcd1602 || cfg::has_lcd1602_27) {
+	if (lcd_1602) {
 		debug_outln_info(F("Show on LCD 1602 ..."));
 	}
-	if (cfg::has_lcd2004_27) {
+	if (lcd_2004) {
 		debug_outln_info(F("Show on LCD 2004 ..."));
-	}
-}
-
-static void time_is_set () {
-	if (!sntp_time_is_set) {
-		sntp_time_is_set = true;
-
-		time_t now = time(nullptr);
-		debug_outln_info(F("SNTP sync finished: "), ctime(&now));
-		twoStageOTAUpdate();
-		last_update_attempt = millis();
 	}
 }
 
@@ -4008,11 +4122,18 @@ static void setupNetworkTime() {
 	// the pointers are stored see implementation of lwip sntp_setservername()
 	static char ntpServer1[18], ntpServer2[18], ntpServer3[18];
 #if defined(ESP8266)
-	settimeofday_cb(time_is_set);
+	settimeofday_cb([]() {
+		if (!sntp_time_set) {
+			time_t now = time(nullptr);
+			debug_outln_info(F("SNTP synced: "), ctime(&now));
+			twoStageOTAUpdate();
+			last_update_attempt = millis();
+		}
+		sntp_time_set++;
+	});
 #endif
 	strcpy_P(ntpServer1, NTP_SERVER_1);
 	strcpy_P(ntpServer2, NTP_SERVER_2);
-	strcpy_P(ntpServer3, NTP_SERVER_3);
 	configTime(0, 0, ntpServer1, ntpServer2, ntpServer3);
 }
 
@@ -4039,7 +4160,12 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("aircms.online: "));
 		unsigned long ts = millis() / 1000;
 		String token = WiFi.macAddress();
-		String aircms_data = "L=" + esp_chipid + "&t=" + String(ts, DEC) + "&airrohr=" + data;
+		String aircms_data("L=");
+		aircms_data += esp_chipid;
+		aircms_data += "&t=";
+		aircms_data += String(ts, DEC);
+		aircms_data += F("&airrohr=");
+		aircms_data += data;
 		String aircms_url(FPSTR(URL_AIRCMS));
 		aircms_url += hmac1(sha1Hex(token), aircms_data + token);
 
@@ -4108,12 +4234,15 @@ void setup(void) {
 	cfg::initNonTrivials(esp_chipid.c_str());
 	WiFi.persistent(false);
 
-	debug_outln_info(F("Airrohr: "), SOFTWARE_VERSION);
+	debug_outln_info(F("airRohr: " SOFTWARE_VERSION_STR "/"), String(CURRENT_LANG));
+	if ((airrohr_selftest_failed = !ESP.checkFlashConfig(true) /* after 2.7.0 update: || !ESP.checkFlashCRC() */)) {
+		debug_outln_error(F("ERROR: SELF TEST FAILED!"));
+		SOFTWARE_VERSION += F("-STF");
+	}
 
 	init_config();
 	init_display();
 	init_lcd();
-	display_debug(F("Connecting to"), String(cfg::wlanssid));
 	setupNetworkTime();
 	connectWifi();
 	setup_webserver();
@@ -4148,8 +4277,7 @@ void setup(void) {
 
 	starttime = millis();									// store the start time
 	last_update_attempt = time_point_device_start_ms = starttime;
-	starttime_SDS = starttime;
-	next_display_millis = starttime + DISPLAY_UPDATE_INTERVAL_MS;
+	last_display_millis = starttime_SDS = starttime;
 }
 
 /*****************************************************************
@@ -4166,7 +4294,7 @@ void loop(void) {
 	send_now = msSince(starttime) > cfg::sending_intervall_ms;
 	// Wait at least 30s for each NTP server to sync
 
-	if (!sntp_time_is_set && send_now &&
+	if (!sntp_time_set && send_now &&
 			msSince(time_point_device_start_ms) < 1000 * 2 * 30 + 5000) {
 		debug_outln_info(F("NTP sync not finished yet, skipping send"));
 		send_now = false;
@@ -4263,9 +4391,10 @@ void loop(void) {
 		}
 	}
 
-	if ((cfg::has_display || cfg::has_sh1106 || cfg::has_lcd2004_27 || cfg::has_lcd1602 ||
-			cfg::has_lcd1602_27) && (act_milli > next_display_millis)) {
+	if ((msSince(last_display_millis) > DISPLAY_UPDATE_INTERVAL_MS) &&
+			(cfg::has_display || cfg::has_sh1106 || lcd_1602 || lcd_2004)) {
 		display_values();
+		last_display_millis = act_milli;
 	}
 
 	server.handleClient();
@@ -4395,7 +4524,6 @@ void loop(void) {
 		max_micro = 0;
 		sum_send_time = 0;
 		starttime = millis();								// store the start time
-		first_cycle = false;
 		count_sends++;
 	}
 	yield();
