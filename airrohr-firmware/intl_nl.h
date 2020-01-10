@@ -32,13 +32,15 @@ const char INTL_BMX280[] PROGMEM = "BMP280/BME280 ({t}, {h}, {p})";
 const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
 const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
-const char INTL_DNMS_CORRECTION[] PROGMEM ="correctie in dB(A)";
+const char INTL_DNMS_CORRECTION[] PROGMEM = "Correctie in dB(A)";
+const char INTL_TEMP_CORRECTION[] PROGMEM = "Correctie in °C";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Beperk toegang";
+#define INTL_REPORT_ISSUE "Een probleem melden"
 
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "Netwerknaam en -wachtwoord van de fijnstofsensor";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Naam (SSID)";
-const char INTL_MORE_SETTINGS[] PROGMEM ="Meer instellingen";
+const char INTL_MORE_SETTINGS[] PROGMEM = "Meer instellingen";
 const char INTL_AUTO_UPDATE[] PROGMEM = "Firmware automatisch bijwerken";
 const char INTL_USE_BETA[] PROGMEM = "Installeer beta-firmwares";
 const char INTL_DISPLAY[] PROGMEM = "OLED SSD1306";

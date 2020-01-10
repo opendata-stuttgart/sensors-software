@@ -32,13 +32,15 @@ const char INTL_BMX280[] PROGMEM = "BMP280/BME280 ({t}, {h}, {p})";
 const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
 const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
-const char INTL_DNMS_CORRECTION[] PROGMEM ="Valor de correção em dB(A)";
+const char INTL_DNMS_CORRECTION[] PROGMEM = "Valor de correção em dB(A)";
+const char INTL_TEMP_CORRECTION[] PROGMEM = "Correção em °C";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Autorização";
+#define INTL_REPORT_ISSUE "Informar um problema"
 
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "Nome do sensor WiFi em modo de configuração";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Nome";
-const char INTL_MORE_SETTINGS[] PROGMEM ="Outras configurações";
+const char INTL_MORE_SETTINGS[] PROGMEM = "Outras configurações";
 const char INTL_AUTO_UPDATE[] PROGMEM = "Atualização automática do Firmware";
 const char INTL_USE_BETA[] PROGMEM = "Carregar Firmware Beta";
 const char INTL_DISPLAY[] PROGMEM = "OLED SSD1306";
