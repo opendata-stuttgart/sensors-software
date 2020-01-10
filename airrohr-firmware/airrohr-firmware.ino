@@ -60,7 +60,7 @@
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2020-130-B1"
+#define SOFTWARE_VERSION_STR "NRZ-2020-130-B2"
 String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -369,7 +369,7 @@ Adafruit_SHT31 sht3x;
 /*****************************************************************
  * DS18B20 declaration                                            *
  *****************************************************************/
-OneWire oneWire(ONEWIRE_PIN);
+OneWire oneWire;
 DallasTemperature ds18b20(&oneWire);
 
 /*****************************************************************
@@ -1348,8 +1348,23 @@ static void webserver_config_send_body_get(String& page_content) {
 	};
 
 	debug_outln_info(F("begin webserver_config_body_get ..."));
-	page_content += F("<form method='POST' action='/config' style='width:100%;'>\n<b>" INTL_WIFI_SETTINGS "</b><br/>");
-	debug_outln_info(F("ws: config page 1"));
+	page_content += F("<form method='POST' action='/config' style='width:100%;'>\n"
+	"<input class='radio' id='one' name='group' type='radio' checked>"
+    "<input class='radio' id='two' name='group' type='radio'>"
+    "<input class='radio' id='three' name='group' type='radio'>"
+    "<input class='radio' id='four' name='group' type='radio'>"
+    "<div class='tabs'>"
+	"<label class='tab' id='tab1' for='one'>" INTL_WIFI_SETTINGS "</label>"
+	"<label class='tab' id='tab2' for='two'>");
+	page_content += FPSTR(INTL_MORE_SETTINGS);
+	page_content += F("</label>"
+		"<label class='tab' id='tab3' for='three'>");
+	page_content += FPSTR(INTL_SENSORS);
+	page_content += F("</label>"
+		"<label class='tab' id='tab4' for='four'>APIs"
+		"</label></div><div class='panels'>"
+		"<div class='panel' id='panel1'>");
+
 	if (wificonfig_loop) {  // scan for wlan ssids
 		page_content += F("<div id='wifilist'>" INTL_WIFI_NETWORKS "</div><br/>");
 	}
@@ -1389,6 +1404,25 @@ static void webserver_config_send_body_get(String& page_content) {
 		// Paginate page after ~ 1500 Bytes
 		server.sendContent(page_content);
 	}
+
+	page_content = tmpl(FPSTR(WEB_DIV_PANEL), String(2));
+
+	add_form_checkbox(Config_has_display, FPSTR(INTL_DISPLAY));
+	add_form_checkbox(Config_has_sh1106, FPSTR(INTL_SH1106));
+	add_form_checkbox(Config_has_flipped_display, FPSTR(INTL_FLIP_DISPLAY));
+	add_form_checkbox(Config_has_lcd1602_27, FPSTR(INTL_LCD1602_27));
+	add_form_checkbox(Config_has_lcd1602, FPSTR(INTL_LCD1602_3F));
+
+	// Paginate page after ~ 1500 Bytes
+	server.sendContent(page_content);
+	page_content = emptyString;
+
+	add_form_checkbox(Config_has_lcd2004_27, FPSTR(INTL_LCD2004_27));
+	add_form_checkbox(Config_has_lcd2004, FPSTR(INTL_LCD2004_3F));
+	add_form_checkbox(Config_display_wifi_info, FPSTR(INTL_DISPLAY_WIFI_INFO));
+	add_form_checkbox(Config_display_device_info, FPSTR(INTL_DISPLAY_DEVICE_INFO));
+
+	server.sendContent(page_content);
 	page_content = FPSTR(WEB_BR_LF_B);
 	page_content += F(INTL_FIRMWARE "</b>&nbsp;");
 	add_form_checkbox(Config_auto_update, FPSTR(INTL_AUTO_UPDATE));
@@ -1412,29 +1446,8 @@ static void webserver_config_send_body_get(String& page_content) {
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 
 	server.sendContent(page_content);
-	page_content = FPSTR(WEB_BR_LF_B);
-	page_content += FPSTR(INTL_MORE_SETTINGS);
-	page_content += FPSTR(WEB_B_BR);
 
-	add_form_checkbox(Config_has_display, FPSTR(INTL_DISPLAY));
-	add_form_checkbox(Config_has_sh1106, FPSTR(INTL_SH1106));
-	add_form_checkbox(Config_has_flipped_display, FPSTR(INTL_FLIP_DISPLAY));
-	add_form_checkbox(Config_has_lcd1602_27, FPSTR(INTL_LCD1602_27));
-	add_form_checkbox(Config_has_lcd1602, FPSTR(INTL_LCD1602_3F));
-
-	// Paginate page after ~ 1500 Bytes
-	server.sendContent(page_content);
-	page_content = emptyString;
-
-	add_form_checkbox(Config_has_lcd2004_27, FPSTR(INTL_LCD2004_27));
-	add_form_checkbox(Config_has_lcd2004, FPSTR(INTL_LCD2004_3F));
-	add_form_checkbox(Config_display_wifi_info, FPSTR(INTL_DISPLAY_WIFI_INFO));
-	add_form_checkbox(Config_display_device_info, FPSTR(INTL_DISPLAY_DEVICE_INFO));
-
-	server.sendContent(page_content);
-	page_content = FPSTR(WEB_BR_LF_B);
-	page_content += FPSTR(INTL_SENSORS);
-	page_content += FPSTR(WEB_B_BR);
+	page_content = tmpl(FPSTR(WEB_DIV_PANEL), String(3));
 	add_form_checkbox_sensor(Config_sds_read, FPSTR(INTL_SDS011));
 	add_form_checkbox_sensor(Config_hpm_read, FPSTR(INTL_HPM));
 	add_form_checkbox_sensor(Config_sps30_read, FPSTR(INTL_SPS30));
@@ -1447,7 +1460,6 @@ static void webserver_config_send_body_get(String& page_content) {
 	add_form_checkbox_sensor(Config_htu21d_read, FPSTR(INTL_HTU21D));
 	add_form_checkbox_sensor(Config_bmx280_read, FPSTR(INTL_BMX280));
 	add_form_checkbox_sensor(Config_sht3x_read, FPSTR(INTL_SHT3X));
-	add_form_checkbox_sensor(Config_ds18b20_read, FPSTR(INTL_DS18B20));
 
 	// Paginate page after ~ 1500 Bytes
 	server.sendContent(page_content);
@@ -1462,17 +1474,16 @@ static void webserver_config_send_body_get(String& page_content) {
 	page_content += FPSTR(INTL_MORE_SENSORS);
 	page_content += FPSTR(WEB_B_BR);
 
+	add_form_checkbox_sensor(Config_ds18b20_read, FPSTR(INTL_DS18B20));
 	add_form_checkbox_sensor(Config_pms_read, FPSTR(INTL_PMS));
 	add_form_checkbox_sensor(Config_bmp_read, FPSTR(INTL_BMP180));
 	add_form_checkbox(Config_gps_read, FPSTR(INTL_NEO6M));
 
-	page_content += FPSTR(WEB_BR_LF_B);
-	page_content += F("APIs");
-	page_content += FPSTR(WEB_B_BR);
 	// Paginate page after ~ 1500 Bytes
 	server.sendContent(page_content);
+	page_content = tmpl(FPSTR(WEB_DIV_PANEL), String(4));
 
-	page_content = form_checkbox(Config_send2dusti, F("API Sensor.Community"), false);
+	page_content += form_checkbox(Config_send2dusti, F("API Sensor.Community"), false);
 	page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
 	page_content += form_checkbox(Config_ssl_dusti, FPSTR(WEB_HTTPS), false);
 	page_content += FPSTR(WEB_BRACE_BR);
@@ -1520,6 +1531,7 @@ static void webserver_config_send_body_get(String& page_content) {
 	add_form_input(page_content, Config_pwd_influx, FPSTR(INTL_PASSWORD), LEN_CFG_PASSWORD-1);
 	add_form_input(page_content, Config_measurement_name_influx, F("Measurement"), LEN_MEASUREMENT_NAME_INFLUX-1);
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+	page_content += F("</div></div>");
 	page_content += form_submit(FPSTR(INTL_SAVE_AND_RESTART));
 	page_content += FPSTR(BR_TAG);
 	page_content += FPSTR(WEB_BR_FORM);
@@ -2253,11 +2265,19 @@ static void wifiConfig() {
 
 	WiFi.disconnect(true);
 	debug_outln_info(F("scan for wifi networks..."));
-	count_wifiInfo = WiFi.scanNetworks(false /* scan async */, true /* show hidden networks */);
-	delete [] wifiInfo;
-	wifiInfo = new struct_wifiInfo[count_wifiInfo];
+	int8_t scanReturnCode = WiFi.scanNetworks(false /* scan async */, true /* show hidden networks */);
+	if (scanReturnCode < 0) {
+		debug_outln_error(F("WiFi scan failed. Treating as empty. "));
+		count_wifiInfo = 0;
+	}
+	else {
+		count_wifiInfo = (uint8_t) scanReturnCode;
+	}
 
-	for (int i = 0; i < count_wifiInfo; i++) {
+	delete [] wifiInfo;
+	wifiInfo = new struct_wifiInfo[std::max(count_wifiInfo, (uint8_t) 1)];
+
+	for (unsigned i = 0; i < count_wifiInfo; i++) {
 		String SSID;
 		uint8_t* BSSID;
 
@@ -3873,21 +3893,21 @@ static void display_values() {
 }
 
 /*****************************************************************
- * Init OLED display                                             *
+ * Init LCD/OLED display                                         *
  *****************************************************************/
 static void init_display() {
-	display.init();
-	display_sh1106.init();
-	if (cfg::has_flipped_display) {
-		display.flipScreenVertically();
-		display_sh1106.flipScreenVertically();
-	}
-}
-
-/*****************************************************************
- * Init LCD display                                              *
- *****************************************************************/
-static void init_lcd() {
+    if (cfg::has_display) {
+        display.init();
+        if (cfg::has_flipped_display) {
+            display.flipScreenVertically();
+        }
+    }
+    if (cfg::has_sh1106) {
+        display_sh1106.init();
+        if (cfg::has_flipped_display) {
+            display_sh1106.flipScreenVertically();
+        }
+    }
     if (cfg::has_lcd1602) {
         lcd_1602 = new LiquidCrystal_I2C(0x3f, 16, 2);
     }
@@ -4059,6 +4079,7 @@ static void powerOnTestSensors() {
 	}
 
 	if (cfg::ds18b20_read) {
+		oneWire.begin(ONEWIRE_PIN);
 		ds18b20.begin();									// Start DS18B20
 		debug_outln_info(F("Read DS18B20..."));
 	}
@@ -4120,7 +4141,7 @@ static void logEnabledDisplays() {
 static void setupNetworkTime() {
 	// server name ptrs must be persisted after the call to configTime because internally
 	// the pointers are stored see implementation of lwip sntp_setservername()
-	static char ntpServer1[18], ntpServer2[18], ntpServer3[18];
+	static char ntpServer1[18], ntpServer2[18];
 #if defined(ESP8266)
 	settimeofday_cb([]() {
 		if (!sntp_time_set) {
@@ -4134,7 +4155,7 @@ static void setupNetworkTime() {
 #endif
 	strcpy_P(ntpServer1, NTP_SERVER_1);
 	strcpy_P(ntpServer2, NTP_SERVER_2);
-	configTime(0, 0, ntpServer1, ntpServer2, ntpServer3);
+	configTime(0, 0, ntpServer1, ntpServer2);
 }
 
 static unsigned long sendDataToOptionalApis(const String &data) {
@@ -4235,14 +4256,13 @@ void setup(void) {
 	WiFi.persistent(false);
 
 	debug_outln_info(F("airRohr: " SOFTWARE_VERSION_STR "/"), String(CURRENT_LANG));
-	if ((airrohr_selftest_failed = !ESP.checkFlashConfig(true) /* after 2.7.0 update: || !ESP.checkFlashCRC() */)) {
+	if ((airrohr_selftest_failed = !ESP.checkFlashConfig() /* after 2.7.0 update: || !ESP.checkFlashCRC() */)) {
 		debug_outln_error(F("ERROR: SELF TEST FAILED!"));
 		SOFTWARE_VERSION += F("-STF");
 	}
 
 	init_config();
 	init_display();
-	init_lcd();
 	setupNetworkTime();
 	connectWifi();
 	setup_webserver();
@@ -4318,14 +4338,6 @@ void loop(void) {
 	}
 	last_micro = act_micro;
 
-	if (msSince(time_point_device_start_ms) > DURATION_BEFORE_FORCED_RESTART_MS) {
-		sensor_restart();
-	}
-
-	if (msSince(last_update_attempt) > PAUSE_BETWEEN_UPDATE_ATTEMPTS_MS) {
-		twoStageOTAUpdate();
-		last_update_attempt = act_milli;
-	}
 
 	if (cfg::sps30_read && ( !sps30_init_failed)) {
 		if ((msSince(starttime) - SPS30_read_timer) > SPS30_WAITING_AFTER_LAST_READ) {
@@ -4512,6 +4524,17 @@ void loop(void) {
 			WiFi_error_count++;
 			WiFi.reconnect();
 			waitForWifiToConnect(20);
+		}
+
+		// only do a restart after finishing sending
+		if (msSince(time_point_device_start_ms) > DURATION_BEFORE_FORCED_RESTART_MS) {
+			sensor_restart();
+		}
+
+		// time for a OTA attempt?
+		if (msSince(last_update_attempt) > PAUSE_BETWEEN_UPDATE_ATTEMPTS_MS) {
+			twoStageOTAUpdate();
+			last_update_attempt = act_milli;
 		}
 
 		// Resetting for next sampling

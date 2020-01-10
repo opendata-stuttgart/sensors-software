@@ -1,3 +1,13 @@
+NRZ-2020-130-B2
+* Avoid crash on WiFi network scan failure (Related to #615)
+* Only do OTA after sensor measurements are finished
+* Remove uninitialized memory read in NTP handling
+* Accept larger flash sizes also as compatible
+* Switch to a tab based configuration page
+* Skip initialization of display's when not configured
+* Delay OneWire initialization until configured
+* Fix bulgarian translation error (Fixes #622)
+
 NRZ-2020-130-B1
 * next beta version
 
