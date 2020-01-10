@@ -32,13 +32,15 @@ const char INTL_BMX280[] PROGMEM = "BMP280/BME280 ({t}, {h}, {p})";
 const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
-const char INTL_DNMS_CORRECTION[] PROGMEM ="корекция в dB (A)";
+const char INTL_DNMS_CORRECTION[] PROGMEM = "корекция в dB (A)";
+const char INTL_TEMP_CORRECTION[] PROGMEM = "Корекция в °C";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Оторизация";
+#define INTL_REPORT_ISSUE "Подаване на сигнал за проблем"
 
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "WiFi сензор в режим на конфигуриране";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Име";
-const char INTL_MORE_SETTINGS[] PROGMEM ="Още настройки";
+const char INTL_MORE_SETTINGS[] PROGMEM = "Още настройки";
 const char INTL_AUTO_UPDATE[] PROGMEM = "Автоматична актуализация";
 const char INTL_USE_BETA[] PROGMEM = "Зареждане на бета актуализация";
 const char INTL_DISPLAY[] PROGMEM = "OLED SSD1306";
