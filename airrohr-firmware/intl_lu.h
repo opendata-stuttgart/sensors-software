@@ -8,7 +8,7 @@
  *	We only have 512 kB for the entire firmware
  */
 
-const char INTL_LANG[] = "LU";
+constexpr const char INTL_LANG[] = "LU";
 #define INTL_PM_SENSOR "Reng Stëbspartikelensensor"
 const char INTL_CONFIGURATION[] PROGMEM = "Konfiguratioun";
 #define INTL_WIFI_SETTINGS "WiFi Daten"

@@ -8,7 +8,7 @@
  *	We only have 512 kB for the entire firmware
  */
 
-const char INTL_LANG[] = "UA";
+constexpr const char INTL_LANG[] = "UA";
 #define INTL_PM_SENSOR "Вимірювач дрібних часток"
 const char INTL_CONFIGURATION[] PROGMEM = "Налаштування";
 #define INTL_WIFI_SETTINGS "Параметри WiFi"

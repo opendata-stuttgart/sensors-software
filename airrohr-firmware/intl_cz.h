@@ -8,7 +8,7 @@
  *	We only have 512 kB for the entire firmware
  */
 
-const char INTL_LANG[] = "CZ";
+constexpr const char INTL_LANG[] = "CZ";
 #define INTL_PM_SENSOR "Senzor prachových èástic"
 const char INTL_CONFIGURATION[] PROGMEM = "Konfigurace";
 #define INTL_WIFI_SETTINGS "Nastavení Wi-Fi"

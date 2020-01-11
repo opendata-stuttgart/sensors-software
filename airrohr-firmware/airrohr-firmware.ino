@@ -2238,7 +2238,7 @@ static int selectChannelForAp() {
 	std::array<int, 14> channels_rssi;
 	std::fill(channels_rssi.begin(), channels_rssi.end(), -100);
 
-	for (unsigned i = 0; i < count_wifiInfo; i++) {
+	for (unsigned i = 0; i < std::min((uint8_t) 14, count_wifiInfo); i++) {
 		if (wifiInfo[i].RSSI > channels_rssi[wifiInfo[i].channel]) {
 			channels_rssi[wifiInfo[i].channel] = wifiInfo[i].RSSI;
 		}
@@ -2384,6 +2384,15 @@ static void connectWifi() {
 	if (!WiFi.getAutoReconnect()) {
 		WiFi.setAutoReconnect(true);
 	}
+
+	// Use 13 channels if locale is not "EN"
+	wifi_country_t wifi;
+	wifi.policy = WIFI_COUNTRY_POLICY_MANUAL;
+	strcpy(wifi.cc, INTL_LANG);
+	wifi.nchan = (INTL_LANG[0] == 'E' && INTL_LANG[1] == 'N') ? 11 : 13;
+	wifi.schan = 1;
+	wifi_set_country(&wifi);
+
 	WiFi.mode(WIFI_STA);
 	WiFi.hostname(cfg::fs_ssid);
 	WiFi.begin(cfg::wlanssid, cfg::wlanpwd); // Start WiFI
@@ -2395,6 +2404,10 @@ static void connectWifi() {
 	if (WiFi.status() != WL_CONNECTED) {
 		String fss(cfg::fs_ssid);
 		display_debug(fss.substring(0, 16), fss.substring(16));
+
+		wifi.policy = WIFI_COUNTRY_POLICY_AUTO;
+		wifi_set_country(&wifi);
+
 		wifiConfig();
 		if (WiFi.status() != WL_CONNECTED) {
 			waitForWifiToConnect(20);

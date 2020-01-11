@@ -8,7 +8,7 @@
  *	We only have 512 kB for the entire firmware
  */
 
-const char INTL_LANG[] = "DE";
+constexpr const char INTL_LANG[] = "DE";
 #define INTL_PM_SENSOR "Feinstaubsensor"
 const char INTL_CONFIGURATION[] PROGMEM = "Konfiguration";
 #define INTL_WIFI_SETTINGS "WLAN Daten"
