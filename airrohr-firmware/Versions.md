@@ -7,6 +7,7 @@ NRZ-2020-130-B2
 * Skip initialization of display's when not configured
 * Delay OneWire initialization until configured
 * Fix bulgarian translation error (Fixes #622)
+* Fix hang on BME/P280 measurement read
 
 NRZ-2020-130-B1
 * next beta version
