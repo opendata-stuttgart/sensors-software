@@ -10,6 +10,7 @@ NRZ-2020-130-B2
 * Fix hang on BME/P280 measurement read
 * Connect up to wifi channel 13 if locale is not EN (Fixes #626)
 * Use IPv6 LWIP (Related to #605)
+* Add configurable temperature correction (Fixes #607)
 
 NRZ-2020-130-B1
 * next beta version

@@ -22,6 +22,7 @@ Bool		sht3x_read
 Bool		ds18b20_read
 Bool		dnms_read
 String		dnms_correction
+String		temp_correction
 Bool		gps_read
 Bool		send2dusti
 Bool		ssl_dusti
