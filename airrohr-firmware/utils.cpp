@@ -69,24 +69,6 @@ String tmpl(const __FlashStringHelper* patt, const String& value) {
 	return s;
 }
 
-void add_line_value(String& s, const __FlashStringHelper* name, const String& value) {
-	s += F("<br/>");
-	s += name;
-	s += ": ";
-	s += value;
-}
-
-void add_line_value_bool(String& s, const __FlashStringHelper* name, const bool value) {
-	add_line_value(s, name, String(value));
-}
-
-void add_line_value_bool(String&s, const __FlashStringHelper* patt, const __FlashStringHelper* name, const bool value) {
-	s += F("<br/>");
-	s += tmpl(patt, name);
-	s += ": ";
-	s += String(value);
-}
-
 void add_table_row_from_value(String& page_content, const __FlashStringHelper* sensor, const __FlashStringHelper* param, const String& value, const String& unit) {
 	RESERVE_STRING(s, MED_STR);
 	s = F("<tr><td>{s}</td><td>{p}</td><td class='r'>{v}&nbsp;{u}</td></tr>");

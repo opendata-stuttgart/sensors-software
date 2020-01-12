@@ -57,8 +57,8 @@ input[type=submit]:hover{background:#d44}\
 .tab{padding:10px 20px;display:inline-block;color:#333}\
 .panels{min-height:200px;overflow:hidden;padding:20px;border:2px solid #3ba;margin-bottom:1em;box-shadow:0 4px 4px #3ba}\
 .radio{display:none}.panel{display:none}\
-#four:checked~.panels>#panel4,#one:checked~.panels>#panel1,#three:checked~.panels>#panel3,#two:checked~.panels>#panel2{display:block}\
-#four:checked~.tabs>#tab4,#one:checked~.tabs>#tab1,#three:checked~.tabs>#tab3,#two:checked~.tabs>#tab2{background:#3ba;color:#fff}\
+#r4:checked~.panels>#panel4,#r1:checked~.panels>#panel1,#r3:checked~.panels>#panel3,#r2:checked~.panels>#panel2{display:block}\
+#r4:checked~.tabs>#tab4,#r1:checked~.tabs>#tab1,#r3:checked~.tabs>#tab3,#r2:checked~.tabs>#tab2{background:#3ba;color:#fff}\
 </style>\
 </head><body>\
 <div style='min-height:129px;background-color:#3ba;margin-bottom:20px;box-shadow:0px 4px 6px #3ba'>\

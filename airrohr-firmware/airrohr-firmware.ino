@@ -1092,19 +1092,19 @@ static void webserver_config_send_body_get(String& page_content) {
 
 	debug_outln_info(F("begin webserver_config_body_get ..."));
 	page_content += F("<form method='POST' action='/config' style='width:100%;'>\n"
-	"<input class='radio' id='one' name='group' type='radio' checked>"
-    "<input class='radio' id='two' name='group' type='radio'>"
-    "<input class='radio' id='three' name='group' type='radio'>"
-    "<input class='radio' id='four' name='group' type='radio'>"
+	"<input class='radio' id='r1' name='group' type='radio' checked>"
+    "<input class='radio' id='r2' name='group' type='radio'>"
+    "<input class='radio' id='r3' name='group' type='radio'>"
+    "<input class='radio' id='r4' name='group' type='radio'>"
     "<div class='tabs'>"
-	"<label class='tab' id='tab1' for='one'>" INTL_WIFI_SETTINGS "</label>"
-	"<label class='tab' id='tab2' for='two'>");
+	"<label class='tab' id='tab1' for='r1'>" INTL_WIFI_SETTINGS "</label>"
+	"<label class='tab' id='tab2' for='r2'>");
 	page_content += FPSTR(INTL_MORE_SETTINGS);
 	page_content += F("</label>"
-		"<label class='tab' id='tab3' for='three'>");
+		"<label class='tab' id='tab3' for='r3'>");
 	page_content += FPSTR(INTL_SENSORS);
 	page_content += F("</label>"
-		"<label class='tab' id='tab4' for='four'>APIs"
+		"<label class='tab' id='tab4' for='r4'>APIs"
 		"</label></div><div class='panels'>"
 		"<div class='panel' id='panel1'>");
 
@@ -1327,68 +1327,6 @@ static void webserver_config_send_body_post(String& page_content) {
 		}
 	}
 
-	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("Sensor.Community"), cfg::send2dusti);
-	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("Madavi"), cfg::send2madavi);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_DHT22), cfg::dht_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_HTU21D), cfg::htu21d_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_SDS011), cfg::sds_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_PMSx003), cfg::pms_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_HPM), cfg::hpm_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_SPS30), cfg::sps30_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_PPD42NS), cfg::ppd_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_BMX280), cfg::bmx280_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_SHT3X), cfg::sht3x_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_DS18B20), cfg::ds18b20_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_DNMS), cfg::dnms_read);
-	add_line_value(page_content, FPSTR(INTL_DNMS_CORRECTION), String(cfg::dnms_correction));
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("GPS"), cfg::gps_read);
-
-	// Paginate after ~ 1500 bytes
-	server.sendContent(page_content);
-	page_content = emptyString;
-
-	add_line_value_bool(page_content, FPSTR(INTL_DISPLAY), cfg::has_display);
-	add_line_value_bool(page_content, FPSTR(INTL_SH1106), cfg::has_sh1106);
-	add_line_value_bool(page_content, FPSTR(INTL_FLIP_DISPLAY), cfg::has_flipped_display);
-	add_line_value_bool(page_content, FPSTR(INTL_LCD1602_27), cfg::has_lcd1602_27);
-	add_line_value_bool(page_content, FPSTR(INTL_LCD1602_3F), cfg::has_lcd1602);
-	add_line_value_bool(page_content, FPSTR(INTL_LCD2004_27), cfg::has_lcd2004_27);
-	add_line_value_bool(page_content, FPSTR(INTL_LCD2004_3F), cfg::has_lcd2004);
-	add_line_value_bool(page_content, FPSTR(INTL_DISPLAY_WIFI_INFO), cfg::display_wifi_info);
-	add_line_value_bool(page_content, FPSTR(INTL_DISPLAY_DEVICE_INFO), cfg::display_device_info);
-	add_line_value_bool(page_content, FPSTR(INTL_AUTO_UPDATE), cfg::auto_update);
-	add_line_value_bool(page_content, FPSTR(INTL_USE_BETA), cfg::use_beta);
-	add_line_value(page_content, FPSTR(INTL_DEBUG_LEVEL), String(cfg::debug));
-	add_line_value(page_content, FPSTR(INTL_MEASUREMENT_INTERVAL), String(cfg::sending_intervall_ms));
-	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("Feinstaub-App"), cfg::send2fsapp);
-	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("aircms.online"), cfg::send2aircms);
-	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), FPSTR(WEB_CSV), cfg::send2csv);
-	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), FPSTR(WEB_FEINSTAUB_APP), cfg::send2fsapp);
-	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("opensensemap"), cfg::send2sensemap);
-
-	// Paginate after ~ 1500 bytes
-	server.sendContent(page_content);
-	page_content = emptyString;
-
-	page_content += F("<br/>senseBox-ID ");
-	page_content += cfg::senseboxid;
-	page_content += FPSTR(WEB_BR_BR);
-	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO_OWN_API), cfg::send2custom);
-	add_line_value(page_content, FPSTR(INTL_SERVER), cfg::host_custom);
-	add_line_value(page_content, FPSTR(INTL_PATH), cfg::url_custom);
-	add_line_value(page_content, FPSTR(INTL_PORT), String(cfg::port_custom));
-	add_line_value(page_content, FPSTR(INTL_USER), cfg::user_custom);
-	add_line_value(page_content, FPSTR(INTL_PASSWORD), cfg::pwd_custom);
-	page_content += F("<br/><br/>InfluxDB: ");
-	page_content += String(cfg::send2influx);
-	add_line_value(page_content, FPSTR(INTL_SERVER), cfg::host_influx);
-	add_line_value(page_content, FPSTR(INTL_PATH), cfg::url_influx);
-	add_line_value(page_content, FPSTR(INTL_PORT), String(cfg::port_influx));
-	add_line_value(page_content, FPSTR(INTL_USER), cfg::user_influx);
-	add_line_value(page_content, FPSTR(INTL_PASSWORD), cfg::pwd_influx);
-	add_line_value(page_content, F("Measurement"), cfg::measurement_name_influx);
-	add_line_value(page_content, F("SSL"), String(cfg::ssl_influx));
-	page_content += FPSTR(WEB_BR_BR);
 	page_content += FPSTR(INTL_SENSOR_IS_REBOOTING);
 
 	server.sendContent(page_content);

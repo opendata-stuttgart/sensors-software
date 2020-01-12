@@ -44,9 +44,6 @@ extern String sha1Hex(const String& s);
 extern String hmac1(const String& secret, const String& s);
 
 extern String tmpl(const __FlashStringHelper* patt, const String& value);
-extern void add_line_value(String& s, const __FlashStringHelper* name, const String& value);
-extern void add_line_value_bool(String& s, const __FlashStringHelper* name, const bool value);
-extern void add_line_value_bool(String&s, const __FlashStringHelper* patt, const __FlashStringHelper* name, const bool value);
 
 extern void add_table_row_from_value(String& page_content, const __FlashStringHelper* sensor, const __FlashStringHelper* param, const String& value, const String& unit);
 extern void add_table_row_from_value(String& page_content, const __FlashStringHelper* param, const String& value, const char* unit = nullptr);
