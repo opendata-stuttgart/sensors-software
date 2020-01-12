@@ -54,7 +54,7 @@ input[type=submit]{color:#fff;text-align:left;border-radius:5px;font-size:medium
 input[type=submit]:hover{background:#d44}\
 .s_green{padding:9px !important;width:100%;border-style:none;background:#3ba;color:#fff;text-align:left}\
 .tabs{display:flex;flex-direction:row;align-items:stretch;align-content:flex-end;justify-content:flex-start}\
-.tab{padding:10px 20px;display:inline-block;color:#333;margin:0 20px}\
+.tab{padding:10px 20px;display:inline-block;color:#333}\
 .panels{min-height:200px;overflow:hidden;padding:20px;border:2px solid #3ba;margin-bottom:1em;box-shadow:0 4px 4px #3ba}\
 .radio{display:none}.panel{display:none}\
 #four:checked~.panels>#panel4,#one:checked~.panels>#panel1,#three:checked~.panels>#panel3,#two:checked~.panels>#panel2{display:block}\
