@@ -3062,12 +3062,13 @@ static void fetchSensorDNMS(String& s) {
 	last_value_dnms_la_min = -1.0;
 	last_value_dnms_la_max = -1.0;
 
-	if (dnms_calculate_leq() !=  0) {
-		// error
+	if (dnms_calculate_leq() != 0) {
 		dnms_error = true;
 	}
+
 	uint16_t data_ready = 0;
 	dnms_error = true;
+
 	for (unsigned i = 0; i < 20; i++) {
 		delay(2);
 		int16_t ret_dnms = dnms_read_data_ready(&data_ready);
@@ -3084,12 +3085,10 @@ static void fetchSensorDNMS(String& s) {
 			last_value_dnms_la_min = dnms_values.leq_a_min + dnms_corr_value;
 			last_value_dnms_la_max = dnms_values.leq_a_max + dnms_corr_value;
 		} else {
-			// error
 			dnms_error = true;
 		}
 	}
 	if (dnms_error) {
-		// es gab einen Fehler
 		dnms_reset(); // try to reset dnms
 		debug_outln_error(F("DNMS read failed"));
 	} else {
