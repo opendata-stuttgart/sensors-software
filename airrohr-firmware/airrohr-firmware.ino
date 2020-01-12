@@ -112,69 +112,13 @@ String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 #include "./sps30_i2c.h"
 #include "./dnms_i2c.h"
 
-#if defined(INTL_BG)
-#include "intl_bg.h"
-#elif defined(INTL_CZ)
-#include "intl_cz.h"
-#elif defined(INTL_DE)
-#include "intl_de.h"
-#elif defined(INTL_DK)
-#include "intl_dk.h"
-#elif defined(INTL_EN)
-#include "intl_en.h"
-#elif defined(INTL_ES)
-#include "intl_es.h"
-#elif defined(INTL_FR)
-#include "intl_fr.h"
-#elif defined(INTL_IT)
-#include "intl_it.h"
-#elif defined(INTL_LU)
-#include "intl_lu.h"
-#elif defined(INTL_NL)
-#include "intl_nl.h"
-#elif defined(INTL_PL)
-#include "intl_pl.h"
-#elif defined(INTL_PT)
-#include "intl_pt.h"
-#elif defined(INTL_RS)
-#include "intl_rs.h"
-#elif defined(INTL_RU)
-#include "intl_ru.h"
-#elif defined(INTL_SE)
-#include "intl_se.h"
-#elif defined(INTL_TR)
-#include "intl_tr.h"
-#elif defined(INTL_UA)
-#include "intl_ua.h"
-#else
-#warning No language defined
-#include "intl_en.h"
-#endif
+#include "./intl.h"
 
+#include "./utils.h"
 #include "defines.h"
 #include "ext_def.h"
 #include "html-content.h"
-#include "ca-root.h"
 
-/******************************************************************
- * Constants                                                      *
- ******************************************************************/
-constexpr unsigned SMALL_STR = 64-1;
-constexpr unsigned MED_STR = 256-1;
-constexpr unsigned LARGE_STR = 512-1;
-constexpr unsigned XLARGE_STR = 1024-1;
-
-#define RESERVE_STRING(name, size) String name((const char*)nullptr); name.reserve(size)
-
-const unsigned long SAMPLETIME_MS = 30000;									// time between two measurements of the PPD42NS
-const unsigned long SAMPLETIME_SDS_MS = 1000;								// time between two measurements of the SDS011, PMSx003, Honeywell PM sensor
-const unsigned long WARMUPTIME_SDS_MS = 15000;								// time needed to "warm up" the sensor before we can take the first measurement
-const unsigned long READINGTIME_SDS_MS = 5000;								// how long we read data from the PM sensors
-const unsigned long SAMPLETIME_GPS_MS = 50;
-const unsigned long DISPLAY_UPDATE_INTERVAL_MS = 5000;						// time between switching display to next "screen"
-const unsigned long ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
-const unsigned long PAUSE_BETWEEN_UPDATE_ATTEMPTS_MS = ONE_DAY_IN_MS;		// check for firmware updates once a day
-const unsigned long DURATION_BEFORE_FORCED_RESTART_MS = ONE_DAY_IN_MS * 28;	// force a reboot every ~4 weeks
 
 /******************************************************************
  * The variables inside the cfg namespace are persistent          *
@@ -634,31 +578,7 @@ static void display_debug(const String& text1, const String& text2) {
 	}
 }
 
-/*****************************************************************
- * check display values, return '-' if undefined                 *
- *****************************************************************/
-static String check_display_value(double value, double undef, uint8_t len, uint8_t str_len) {
-	RESERVE_STRING(s, 15);
-	s = (value != undef ? String(value, len) : String("-"));
-	while (s.length() < str_len) {
-		s = " " + s;
-	}
-	return s;
-}
-
-/*****************************************************************
- * add value to json string                                  *
- *****************************************************************/
-static void add_Value2Json(String& res, const __FlashStringHelper* type, const String& value) {
-	RESERVE_STRING(s, SMALL_STR);
-
-	s = F("{\"value_type\":\"{t}\",\"value\":\"{v}\"},");
-	s.replace("{t}", String(type));
-	s.replace("{v}", value);
-	res += s;
-}
-
-static void add_Value2Json(String& res, const __FlashStringHelper* type, const __FlashStringHelper* debug_type, const float& value) {
+void add_Value2Json(String& res, const __FlashStringHelper* type, const __FlashStringHelper* debug_type, const float& value) {
 	debug_outln_info(FPSTR(debug_type), value);
 	add_Value2Json(res, type, String(value));
 }
@@ -1026,37 +946,6 @@ static void createLoggerConfigs() {
 }
 
 /*****************************************************************
- * aircms.online helper functions                                *
- *****************************************************************/
-static String sha1Hex(const String& s) {
-	char sha1sum_output[20];
-
-#if defined(ESP8266)
-	br_sha1_context sc;
-
-	br_sha1_init(&sc);
-	br_sha1_update(&sc, s.c_str(), s.length());
-	br_sha1_out(&sc, sha1sum_output);
-#endif
-#if defined(ESP32)
-	esp_sha(SHA1, (const unsigned char*) s.c_str(), s.length(), (unsigned char*)sha1sum_output);
-#endif
-	String r;
-	for (uint16_t i = 0; i < 20; i++) {
-		char hex[3];
-		snprintf(hex, sizeof(hex), "%02x", sha1sum_output[i]);
-		r += hex;
-	}
-	return r;
-}
-
-static String hmac1(const String& secret, const String& s) {
-	String str = sha1Hex(s);
-	str = secret + str;
-	return sha1Hex(str);
-}
-
-/*****************************************************************
  * html helper functions                                         *
  *****************************************************************/
 
@@ -1186,75 +1075,6 @@ static String form_select_lang() {
 	return s;
 }
 
-static String tmpl(const __FlashStringHelper* patt, const String& value) {
-	String s = patt;
-	s.replace("{v}", value);
-	return s;
-}
-
-static void add_line_value(String& s, const __FlashStringHelper* name, const String& value) {
-	s += F("<br/>");
-	s += name;
-	s += ": ";
-	s += value;
-}
-
-static void add_line_value_bool(String& s, const __FlashStringHelper* name, const bool value) {
-	add_line_value(s, name, String(value));
-}
-
-static void add_line_value_bool(String&s, const __FlashStringHelper* patt, const __FlashStringHelper* name, const bool value) {
-	s += F("<br/>");
-	s += tmpl(patt, name);
-	s += ": ";
-	s += String(value);
-}
-
-static void add_table_row_from_value(String& page_content, const __FlashStringHelper* sensor, const __FlashStringHelper* param, const String& value, const String& unit) {
-	RESERVE_STRING(s, MED_STR);
-	s = F("<tr><td>{s}</td><td>{p}</td><td class='r'>{v}&nbsp;{u}</td></tr>");
-	s.replace("{s}", sensor);
-	s.replace("{p}", param);
-	s.replace("{v}", value);
-	s.replace("{u}", unit);
-	page_content += s;
-}
-
-static void add_table_row_from_value(String& page_content, const __FlashStringHelper* param, const String& value, const char* unit = nullptr) {
-	RESERVE_STRING(s, MED_STR);
-	s = F("<tr><td>{p}</td><td class='r'>{v}&nbsp;{u}</td></tr>");
-	s.replace("{p}", param);
-	s.replace("{v}", value);
-	s.replace("{u}", String(unit));
-	page_content += s;
-}
-
-static int32_t calcWiFiSignalQuality(int32_t rssi) {
-	// Treat 0 or positive values as 0%
-	if (rssi >= 0 || rssi < -100) {
-		rssi = -100;
-	}
-	if (rssi > -50) {
-		rssi = -50;
-	}
-	return (rssi + 100) * 2;
-}
-
-static String wlan_ssid_to_table_row(const String& ssid, const String& encryption, int32_t rssi) {
-	String s = F(	"<tr>"
-					"<td>"
-					"<a href='#wlanpwd' onclick='setSSID(this)' class='wifi'>{n}</a>&nbsp;{e}"
-					"</td>"
-					"<td style='width:80%;vertical-align:middle;'>"
-					"{v}%"
-					"</td>"
-					"</tr>");
-	s.replace("{n}", ssid);
-	s.replace("{e}", encryption);
-	s.replace("{v}", String(calcWiFiSignalQuality(rssi)));
-	return s;
-}
-
 static void add_warning_first_cycle(String& page_content) {
 	String s = FPSTR(INTL_TIME_TO_FIRST_MEASUREMENT);
 	unsigned int time_to_first = cfg::sending_intervall_ms - msSince(starttime);
@@ -1274,17 +1094,6 @@ static void add_age_last_values(String& s) {
 	s += String((time_since_last + 500) / 1000);
 	s += FPSTR(INTL_TIME_SINCE_LAST_MEASUREMENT);
 	s += FPSTR(WEB_B_BR_BR);
-}
-
-static String add_sensor_type(const String& sensor_text) {
-	RESERVE_STRING(s, SMALL_STR);
-	s = sensor_text;
-	s.replace("{pm}", FPSTR(INTL_PARTICULATE_MATTER));
-	s.replace("{t}", FPSTR(INTL_TEMPERATURE));
-	s.replace("{h}", FPSTR(INTL_HUMIDITY));
-	s.replace("{p}", FPSTR(INTL_PRESSURE));
-	s.replace("{l_a}", FPSTR(INTL_LEQ_A));
-	return s;
 }
 
 /*****************************************************************
@@ -1893,41 +1702,6 @@ static void webserver_values() {
 	}
 }
 
-static String delayToString(unsigned time_ms) {
-
-	char buf[64];
-	String s;
-
-	if (time_ms > 2 * 1000 * 60 * 60 * 24) {
-		sprintf_P(buf, PSTR("%d days, "), time_ms / (1000 * 60 * 60 * 24));
-		s += buf;
-		time_ms %= 1000 * 60 * 60 * 24;
-	}
-
-	if (time_ms > 2 * 1000 * 60 * 60) {
-		sprintf_P(buf, PSTR("%d hours, "), time_ms / (1000 * 60 * 60));
-		s += buf;
-		time_ms %= 1000 * 60 * 60;
-	}
-
-	if (time_ms > 2 * 1000 * 60) {
-		sprintf_P(buf, PSTR("%d min, "), time_ms / (1000 * 60));
-		s += buf;
-		time_ms %= 1000 * 60;
-	}
-
-	if (time_ms > 2 * 1000) {
-		sprintf_P(buf, PSTR("%ds, "), time_ms / 1000);
-		s += buf;
-	}
-
-	if (s.length() > 2) {
-		s = s.substring(0, s.length() - 2);
-	}
-
-	return s;
-}
-
 /*****************************************************************
  * Webserver root: show device status
  *****************************************************************/
@@ -2428,23 +2202,6 @@ static void connectWifi() {
 	}
 }
 
-#if defined(ESP8266)
-BearSSL::X509List x509_dst_root_ca(dst_root_ca_x3);
-
-static void configureCACertTrustAnchor(WiFiClientSecure* client) {
-	constexpr time_t fw_built_year = (__DATE__[ 7] - '0') * 1000 + \
-							  (__DATE__[ 8] - '0') *  100 + \
-							  (__DATE__[ 9] - '0') *   10 + \
-							  (__DATE__[10] - '0');
-	if (time(nullptr) < (fw_built_year - 1970) * 365 * 24 * 3600) {
-		debug_outln_info(F("Time incorrect; Disabling CA verification."));
-		client->setInsecure();
-	}
-	else {
-		client->setTrustAnchors(&x509_dst_root_ca);
-	}
-}
-#endif
 
 static WiFiClient* getNewLoggerWiFiClient(const LoggerEntry logger) {
 
@@ -3297,16 +3054,6 @@ static void fetchSensorSPS30(String& s) {
 /*****************************************************************
    read DNMS values
  *****************************************************************/
-
-static float readCorrectionOffset(const char* correction) {
-	char* pEnd = nullptr;
-	// Avoiding atof() here as this adds a lot (~ 9kb) of code size
-	float r = float(strtol(correction, &pEnd, 10));
-	if (pEnd && pEnd[0] == '.' && pEnd[1] >= '0' && pEnd[1] <= '9') {
-		r += (r >= 0 ? 1.0 : -1.0) * ((pEnd[1] - '0') / 10.0);
-	}
-	return r;
-}
 
 static void fetchSensorDNMS(String& s) {
 	static bool dnms_error = false;
