@@ -64,8 +64,8 @@ input[type=submit]:hover{background:#d44}\
 <div style='min-height:129px;background-color:#3ba;margin-bottom:20px;box-shadow:0px 4px 6px #3ba'>\
 <a href='/' style='background:none;display:inline'><img src='/images?name=luftdaten_logo' alt='" INTL_BACK_TO_HOME "' style='float:left;margin:20px' width='100' height='89'/></a>";
 
-const char WEB_PAGE_HEADER_BODY[] PROGMEM = "<h3 style='margin:0'>" INTL_PM_SENSOR "</h3>\
-<small>ID: {id}<br/>MAC: {mac}<br/>" INTL_FIRMWARE ": " SOFTWARE_VERSION_STR "<br/>(" __DATE__ " " __TIME__ ")<br/>\
+const char WEB_PAGE_HEADER_BODY[] PROGMEM = "<h3 style='margin:0 10px'>" INTL_PM_SENSOR "</h3>\
+<small>ID: {id}<br/>MAC: {mac}<br/>" INTL_FIRMWARE ": " SOFTWARE_VERSION_STR "&nbsp;(" __DATE__ " " __TIME__ ")<br/>\
 <a href='https://github.com/opendata-stuttgart/sensors-software/labels/bug' target='_blank' rel='noreferrer'>" INTL_REPORT_ISSUE "</a>\
 </small></div><div class='content'><h4>" INTL_HOME " {n} {t}</h4>";
 
@@ -85,15 +85,7 @@ const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a href='/values'>{t}</a><br/>\
 <a href='/config'>{conf}</a><br/>\
 <a href='/removeConfig'>" INTL_CONFIGURATION_DELETE "</a><br/>\
 <a href='/reset'>{restart}</a><br/>\
-<h4>{debug_setting}</h4><br/>\
-<table style='width:100%;'>\
-<tr><td style='width:25%;'><a href='/debug?lvl=0'>" INTL_NONE "</a></td>\
-<td style='width:25%;'><a href='/debug?lvl=1'>" INTL_ERROR "</a></td>\
-<td style='width:25%;'><a href='/debug?lvl=3'>" INTL_MIN_INFO "</a></td>\
-<td style='width:25%;'><a href='/debug?lvl=5'>" INTL_MAX_INFO "</a></td>\
-</tr><tr>\
-</tr>\
-</table>\
+<a href='/debug'>{debug}</a><br/>\
 ";
 
 const char WEB_CONFIG_SCRIPT[] PROGMEM = "<script>\

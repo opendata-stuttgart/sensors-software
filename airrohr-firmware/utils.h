@@ -28,6 +28,7 @@
 #include <Hash.h>
 #include <coredecls.h>
 #include <ESP8266WiFi.h>
+#include <SoftwareSerial.h>
 
 constexpr unsigned SMALL_STR = 64-1;
 constexpr unsigned MED_STR = 256-1;
@@ -72,6 +73,20 @@ namespace cfg {
 /*****************************************************************
  * Debug output                                                  *
  *****************************************************************/
+
+class LoggingSerial : public HardwareSerial {
+
+public:
+	LoggingSerial();
+    size_t write(uint8_t c) override;
+    size_t write(const uint8_t *buffer, size_t size) override;
+	String popLines();
+
+private:
+	std::unique_ptr<circular_queue<uint8_t> > m_buffer;
+};
+
+extern class LoggingSerial Debug;
 
 extern void debug_out(const String& text, unsigned int level);
 extern void debug_out(const __FlashStringHelper* text, unsigned int level);

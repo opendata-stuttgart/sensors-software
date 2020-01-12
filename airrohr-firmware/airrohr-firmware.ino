@@ -479,7 +479,6 @@ template<typename T, std::size_t N> constexpr std::size_t array_num_elements(con
 const char data_first_part[] PROGMEM = "{\"software_version\": \"" SOFTWARE_VERSION_STR "\", \"sensordatavalues\":[";
 const char JSON_SENSOR_DATA_VALUES[] PROGMEM = "sensordatavalues";
 
-
 /*****************************************************************
  * display values                                                *
  *****************************************************************/
@@ -1072,7 +1071,7 @@ static void webserver_root() {
 		page_content.replace(F("{s}"), FPSTR(INTL_DEVICE_STATUS));
 		page_content.replace(F("{conf}"), FPSTR(INTL_CONFIGURATION));
 		page_content.replace(F("{restart}"), FPSTR(INTL_RESTART_SENSOR));
-		page_content.replace(F("{debug_setting}"), FPSTR(INTL_DEBUG_SETTING_TO));
+		page_content.replace(F("{debug}"), FPSTR(INTL_DEBUG_LEVEL));
 		end_html_page(page_content);
 	}
 }
@@ -1685,9 +1684,10 @@ static void webserver_debug_level() {
 
 	RESERVE_STRING(page_content, LARGE_STR);
 	start_html_page(page_content, FPSTR(INTL_DEBUG_LEVEL));
-	debug_outln_info(F("ws: debug level ..."));
 
 	if (server.hasArg("lvl")) {
+		debug_outln_info(F("ws: debug level ..."));
+
 		const int lvl = server.arg("lvl").toInt();
 		if (lvl >= 0 && lvl <= 5) {
 			cfg::debug = lvl;
@@ -1720,6 +1720,22 @@ static void webserver_debug_level() {
 			page_content += F(".</h3>");
 		}
 	}
+
+	page_content += F("<br/><pre class='panels'>");
+	page_content += Debug.popLines();
+	page_content += F("</pre>");
+	page_content += F("<h4>");
+	page_content += FPSTR(INTL_DEBUG_SETTING_TO);
+	page_content += F("</h4>"
+		"<table style='width:100%;'>"
+		"<tr><td style='width:25%;'><a href='/debug?lvl=0'>" INTL_NONE "</a></td>"
+		"<td style='width:25%;'><a href='/debug?lvl=1'>" INTL_ERROR "</a></td>"
+		"<td style='width:25%;'><a href='/debug?lvl=3'>" INTL_MIN_INFO "</a></td>"
+		"<td style='width:25%;'><a href='/debug?lvl=5'>" INTL_MAX_INFO "</a></td>"
+		"</tr><tr>"
+		"</tr>"
+		"</table>");
+
 	end_html_page(page_content);
 }
 
@@ -2254,13 +2270,13 @@ static void send_csv(const String& data) {
 			if (headline.length() > 0) {
 				headline.remove(headline.length() - 1);
 			}
-			Serial.println(headline);
+			Debug.println(headline);
 			first_csv_line = false;
 		}
 		if (valueline.length() > 0) {
 			valueline.remove(valueline.length() - 1);
 		}
-		Serial.println(valueline);
+		Debug.println(valueline);
 	} else {
 		debug_outln_error(FPSTR(DBG_TXT_DATA_READ_FAILED));
 	}
@@ -3818,7 +3834,7 @@ static unsigned long sendDataToOptionalApis(const String &data) {
  *****************************************************************/
 
 void setup(void) {
-	Serial.begin(9600);					// Output to Serial at 9600 baud
+	Debug.begin(9600);		// Output to Serial at 9600 baud
 #if defined(ESP8266)
 	serialSDS.begin(9600, SWSERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX);
 #endif
@@ -3881,14 +3897,6 @@ void setup(void) {
 
 	delay(50);
 
-	// sometimes parallel sending data and web page will stop nodemcu, watchdogtimer set to 30 seconds
-#if defined(ESP8266)
-	wdt_disable();
-#if defined(NDEBUG)
-	wdt_enable(30000);
-#endif
-#endif
-
 	starttime = millis();									// store the start time
 	last_update_attempt = time_point_device_start_ms = starttime;
 	last_display_millis = starttime_SDS = starttime;
@@ -3917,9 +3925,7 @@ void loop(void) {
 
 	sample_count++;
 
-#if defined(ESP8266)
-	wdt_reset(); // nodemcu is alive
-#endif
+	ESP.wdtFeed();
 
 	if (last_micro != 0) {
 		unsigned long diff_micro = act_micro - last_micro;

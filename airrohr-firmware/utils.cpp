@@ -252,44 +252,77 @@ float readCorrectionOffset(const char* correction) {
  * Debug output                                                  *
  *****************************************************************/
 
+LoggingSerial Debug;
+
+LoggingSerial::LoggingSerial()
+    : HardwareSerial(UART0)
+    , m_buffer(new circular_queue<uint8_t>(LARGE_STR))
+{
+}
+
+size_t LoggingSerial::write(uint8_t c)
+{
+	m_buffer->push(c);
+	return HardwareSerial::write(c);
+}
+
+size_t LoggingSerial::write(const uint8_t *buffer, size_t size)
+{
+	m_buffer->push_n(buffer, size);
+	return HardwareSerial::write(buffer, size);
+}
+
+String LoggingSerial::popLines()
+{
+	String r;
+	while (m_buffer->available() > 0) {
+		uint8_t c = m_buffer->pop();
+		r += (char) c;
+
+		if (c == '\n' && r.length() > m_buffer->available())
+			break;
+	}
+	return r;
+}
+
 #define debug_level_check(level) { if (level > cfg::debug) return; }
 
 void debug_out(const String& text, unsigned int level) {
-	debug_level_check(level); Serial.print(text);
+	debug_level_check(level); Debug.print(text);
 }
 
 void debug_out(const __FlashStringHelper* text, unsigned int level) {
-	debug_level_check(level); Serial.print(text);
+	debug_level_check(level); Debug.print(text);
 }
 
 void debug_outln(const String& text, unsigned int level) {
-	debug_level_check(level); Serial.println(text);
+	debug_level_check(level); Debug.println(text);
 }
 
 void debug_outln_info(const String& text) {
-	debug_level_check(DEBUG_MIN_INFO); Serial.println(text);
+	debug_level_check(DEBUG_MIN_INFO); Debug.println(text);
 }
 
 void debug_outln_verbose(const String& text) {
-	debug_level_check(DEBUG_MED_INFO); Serial.println(text);
+	debug_level_check(DEBUG_MED_INFO); Debug.println(text);
 }
 
 void debug_outln_error(const __FlashStringHelper* text) {
-	debug_level_check(DEBUG_ERROR); Serial.println(text);
+	debug_level_check(DEBUG_ERROR); Debug.println(text);
 }
 
 void debug_outln_info(const __FlashStringHelper* text) {
-	debug_level_check(DEBUG_MIN_INFO); Serial.println(text);
+	debug_level_check(DEBUG_MIN_INFO); Debug.println(text);
 }
 
 void debug_outln_verbose(const __FlashStringHelper* text) {
-	debug_level_check(DEBUG_MED_INFO); Serial.println(text);
+	debug_level_check(DEBUG_MED_INFO); Debug.println(text);
 }
 
 void debug_outln_info(const __FlashStringHelper* text, const String& option) {
 	debug_level_check(DEBUG_MIN_INFO);
-	Serial.print(text);
-	Serial.println(option);
+	Debug.print(text);
+	Debug.println(option);
 }
 
 void debug_outln_info(const __FlashStringHelper* text, float value) {
@@ -298,14 +331,14 @@ void debug_outln_info(const __FlashStringHelper* text, float value) {
 
 void debug_outln_verbose(const __FlashStringHelper* text, const String& option) {
 	debug_level_check(DEBUG_MED_INFO);
-	Serial.print(text);
-	Serial.println(option);
+	Debug.print(text);
+	Debug.println(option);
 }
 
 void debug_outln_info_bool(const __FlashStringHelper* text, const bool option) {
 	debug_level_check(DEBUG_MIN_INFO);
-	Serial.print(text);
-	Serial.println(String(option));
+	Debug.print(text);
+	Debug.println(String(option));
 }
 
 #undef debug_level_check
