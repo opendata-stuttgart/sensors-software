@@ -1,3 +1,7 @@
+NRZ-2020-130-B3
+* Serial debug output on webpage
+* Refactoring
+
 NRZ-2020-130-B2
 * Avoid crash on WiFi network scan failure (Related to #615)
 * Only do OTA after sensor measurements are finished
