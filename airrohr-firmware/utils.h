@@ -36,6 +36,10 @@ constexpr unsigned XLARGE_STR = 1024-1;
 
 #define RESERVE_STRING(name, size) String name((const char*)nullptr); name.reserve(size)
 
+#define UPDATE_MIN(MIN, SAMPLE) if (SAMPLE < MIN) { MIN = SAMPLE; }
+#define UPDATE_MAX(MAX, SAMPLE) if (SAMPLE > MAX) { MAX = SAMPLE; }
+#define UPDATE_MIN_MAX(MIN, MAX, SAMPLE) { UPDATE_MIN(MIN, SAMPLE); UPDATE_MAX(MAX, SAMPLE); }
+
 extern String sha1Hex(const String& s);
 extern String hmac1(const String& secret, const String& s);
 
@@ -55,11 +59,33 @@ extern String delayToString(unsigned time_ms);
 
 extern String check_display_value(double value, double undef, uint8_t len, uint8_t str_len);
 extern void add_Value2Json(String& res, const __FlashStringHelper* type, const String& value);
+extern void add_Value2Json(String& res, const __FlashStringHelper* type, const __FlashStringHelper* debug_type, const float& value);
 
 #if defined(ESP8266)
 void configureCACertTrustAnchor(WiFiClientSecure* client);
 #endif
 
 extern float readCorrectionOffset(const char* correction);
+
+namespace cfg {
+	extern unsigned debug;
+}
+
+/*****************************************************************
+ * Debug output                                                  *
+ *****************************************************************/
+
+extern void debug_out(const String& text, unsigned int level);
+extern void debug_out(const __FlashStringHelper* text, unsigned int level);
+extern void debug_outln(const String& text, unsigned int level);
+extern void debug_outln_info(const String& text);
+extern void debug_outln_verbose(const String& text);
+extern void debug_outln_error(const __FlashStringHelper* text);
+extern void debug_outln_info(const __FlashStringHelper* text);
+extern void debug_outln_verbose(const __FlashStringHelper* text);
+extern void debug_outln_info(const __FlashStringHelper* text, const String& option);
+extern void debug_outln_info(const __FlashStringHelper* text, float value);
+extern void debug_outln_verbose(const __FlashStringHelper* text, const String& option);
+extern void debug_outln_info_bool(const __FlashStringHelper* text, const bool option);
 
 #endif

@@ -27,6 +27,7 @@
 
 #include "./intl.h"
 #include "./utils.h"
+#include "./defines.h"
 
 #include "ca-root.h"
 
@@ -186,7 +187,7 @@ void configureCACertTrustAnchor(WiFiClientSecure* client) {
 							  (__DATE__[ 9] - '0') *   10 + \
 							  (__DATE__[10] - '0');
 	if (time(nullptr) < (fw_built_year - 1970) * 365 * 24 * 3600) {
-		//debug_outln_info(F("Time incorrect; Disabling CA verification."));
+		debug_outln_info(F("Time incorrect; Disabling CA verification."));
 		client->setInsecure();
 	}
 	else {
@@ -220,6 +221,11 @@ void add_Value2Json(String& res, const __FlashStringHelper* type, const String& 
 	res += s;
 }
 
+void add_Value2Json(String& res, const __FlashStringHelper* type, const __FlashStringHelper* debug_type, const float& value) {
+	debug_outln_info(FPSTR(debug_type), value);
+	add_Value2Json(res, type, String(value));
+}
+
 float readCorrectionOffset(const char* correction) {
 	char* pEnd = nullptr;
 	// Avoiding atof() here as this adds a lot (~ 9kb) of code size
@@ -229,3 +235,65 @@ float readCorrectionOffset(const char* correction) {
 	}
 	return r;
 }
+
+/*****************************************************************
+ * Debug output                                                  *
+ *****************************************************************/
+
+#define debug_level_check(level) { if (level > cfg::debug) return; }
+
+void debug_out(const String& text, unsigned int level) {
+	debug_level_check(level); Serial.print(text);
+}
+
+void debug_out(const __FlashStringHelper* text, unsigned int level) {
+	debug_level_check(level); Serial.print(text);
+}
+
+void debug_outln(const String& text, unsigned int level) {
+	debug_level_check(level); Serial.println(text);
+}
+
+void debug_outln_info(const String& text) {
+	debug_level_check(DEBUG_MIN_INFO); Serial.println(text);
+}
+
+void debug_outln_verbose(const String& text) {
+	debug_level_check(DEBUG_MED_INFO); Serial.println(text);
+}
+
+void debug_outln_error(const __FlashStringHelper* text) {
+	debug_level_check(DEBUG_ERROR); Serial.println(text);
+}
+
+void debug_outln_info(const __FlashStringHelper* text) {
+	debug_level_check(DEBUG_MIN_INFO); Serial.println(text);
+}
+
+void debug_outln_verbose(const __FlashStringHelper* text) {
+	debug_level_check(DEBUG_MED_INFO); Serial.println(text);
+}
+
+void debug_outln_info(const __FlashStringHelper* text, const String& option) {
+	debug_level_check(DEBUG_MIN_INFO);
+	Serial.print(text);
+	Serial.println(option);
+}
+
+void debug_outln_info(const __FlashStringHelper* text, float value) {
+	debug_outln_info(text, String(value));
+}
+
+void debug_outln_verbose(const __FlashStringHelper* text, const String& option) {
+	debug_level_check(DEBUG_MED_INFO);
+	Serial.print(text);
+	Serial.println(option);
+}
+
+void debug_outln_info_bool(const __FlashStringHelper* text, const bool option) {
+	debug_level_check(DEBUG_MIN_INFO);
+	Serial.print(text);
+	Serial.println(String(option));
+}
+
+#undef debug_level_check

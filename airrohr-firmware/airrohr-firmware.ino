@@ -479,67 +479,6 @@ template<typename T, std::size_t N> constexpr std::size_t array_num_elements(con
 const char data_first_part[] PROGMEM = "{\"software_version\": \"" SOFTWARE_VERSION_STR "\", \"sensordatavalues\":[";
 const char JSON_SENSOR_DATA_VALUES[] PROGMEM = "sensordatavalues";
 
-/*****************************************************************
- * Debug output                                                  *
- *****************************************************************/
-
-#define debug_level_check(level) { if (level > cfg::debug) return; }
-
-static void debug_out(const String& text, unsigned int level) {
-	debug_level_check(level); Serial.print(text);
-}
-
-static void debug_out(const __FlashStringHelper* text, unsigned int level) {
-	debug_level_check(level); Serial.print(text);
-}
-
-static void debug_outln(const String& text, unsigned int level) {
-	debug_level_check(level); Serial.println(text);
-}
-
-static void debug_outln_info(const String& text) {
-	debug_level_check(DEBUG_MIN_INFO); Serial.println(text);
-}
-
-static void debug_outln_verbose(const String& text) {
-	debug_level_check(DEBUG_MED_INFO); Serial.println(text);
-}
-
-static void debug_outln_error(const __FlashStringHelper* text) {
-	debug_level_check(DEBUG_ERROR); Serial.println(text);
-}
-
-static void debug_outln_info(const __FlashStringHelper* text) {
-	debug_level_check(DEBUG_MIN_INFO); Serial.println(text);
-}
-
-static void debug_outln_verbose(const __FlashStringHelper* text) {
-	debug_level_check(DEBUG_MED_INFO); Serial.println(text);
-}
-
-static void debug_outln_info(const __FlashStringHelper* text, const String& option) {
-	debug_level_check(DEBUG_MIN_INFO);
-	Serial.print(text);
-	Serial.println(option);
-}
-
-static void debug_outln_info(const __FlashStringHelper* text, float value) {
-	debug_outln_info(text, String(value));
-}
-
-static void debug_outln_verbose(const __FlashStringHelper* text, const String& option) {
-	debug_level_check(DEBUG_MED_INFO);
-	Serial.print(text);
-	Serial.println(option);
-}
-
-static void debug_outln_info_bool(const __FlashStringHelper* text, const bool option) {
-	debug_level_check(DEBUG_MIN_INFO);
-	Serial.print(text);
-	Serial.println(String(option));
-}
-
-#undef debug_level_check
 
 /*****************************************************************
  * display values                                                *
@@ -578,10 +517,6 @@ static void display_debug(const String& text1, const String& text2) {
 	}
 }
 
-void add_Value2Json(String& res, const __FlashStringHelper* type, const __FlashStringHelper* debug_type, const float& value) {
-	debug_outln_info(FPSTR(debug_type), value);
-	add_Value2Json(res, type, String(value));
-}
 
 /*****************************************************************
  * send SDS011 command (start, stop, continuous mode, version    *
