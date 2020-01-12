@@ -54,18 +54,18 @@ input[type=submit]{color:#fff;text-align:left;border-radius:5px;font-size:medium
 input[type=submit]:hover{background:#d44}\
 .s_green{padding:9px !important;width:100%;border-style:none;background:#3ba;color:#fff;text-align:left}\
 .tabs{display:flex;flex-direction:row;align-items:stretch;align-content:flex-end;justify-content:flex-start}\
-.tab{padding:10px 20px;display:inline-block;color:#333;margin:0 20px}\
+.tab{padding:10px 20px;display:inline-block;color:#333}\
 .panels{min-height:200px;overflow:hidden;padding:20px;border:2px solid #3ba;margin-bottom:1em;box-shadow:0 4px 4px #3ba}\
 .radio{display:none}.panel{display:none}\
-#four:checked~.panels>#panel4,#one:checked~.panels>#panel1,#three:checked~.panels>#panel3,#two:checked~.panels>#panel2{display:block}\
-#four:checked~.tabs>#tab4,#one:checked~.tabs>#tab1,#three:checked~.tabs>#tab3,#two:checked~.tabs>#tab2{background:#3ba;color:#fff}\
+#r4:checked~.panels>#panel4,#r1:checked~.panels>#panel1,#r3:checked~.panels>#panel3,#r2:checked~.panels>#panel2{display:block}\
+#r4:checked~.tabs>#tab4,#r1:checked~.tabs>#tab1,#r3:checked~.tabs>#tab3,#r2:checked~.tabs>#tab2{background:#3ba;color:#fff}\
 </style>\
 </head><body>\
 <div style='min-height:129px;background-color:#3ba;margin-bottom:20px;box-shadow:0px 4px 6px #3ba'>\
 <a href='/' style='background:none;display:inline'><img src='/images?name=luftdaten_logo' alt='" INTL_BACK_TO_HOME "' style='float:left;margin:20px' width='100' height='89'/></a>";
 
-const char WEB_PAGE_HEADER_BODY[] PROGMEM = "<h3 style='margin:0'>" INTL_PM_SENSOR "</h3>\
-<small>ID: {id}<br/>MAC: {mac}<br/>" INTL_FIRMWARE ": " SOFTWARE_VERSION_STR "<br/>(" __DATE__ " " __TIME__ ")<br/>\
+const char WEB_PAGE_HEADER_BODY[] PROGMEM = "<h3 style='margin:0 10px'>" INTL_PM_SENSOR "</h3>\
+<small>ID: {id}<br/>MAC: {mac}<br/>" INTL_FIRMWARE ": " SOFTWARE_VERSION_STR "&nbsp;(" __DATE__ " " __TIME__ ")<br/>\
 <a href='https://github.com/opendata-stuttgart/sensors-software/labels/bug' target='_blank' rel='noreferrer'>" INTL_REPORT_ISSUE "</a>\
 </small></div><div class='content'><h4>" INTL_HOME " {n} {t}</h4>";
 
@@ -85,15 +85,7 @@ const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a href='/values'>{t}</a><br/>\
 <a href='/config'>{conf}</a><br/>\
 <a href='/removeConfig'>" INTL_CONFIGURATION_DELETE "</a><br/>\
 <a href='/reset'>{restart}</a><br/>\
-<h4>{debug_setting}</h4><br/>\
-<table style='width:100%;'>\
-<tr><td style='width:25%;'><a href='/debug?lvl=0'>" INTL_NONE "</a></td>\
-<td style='width:25%;'><a href='/debug?lvl=1'>" INTL_ERROR "</a></td>\
-<td style='width:25%;'><a href='/debug?lvl=3'>" INTL_MIN_INFO "</a></td>\
-<td style='width:25%;'><a href='/debug?lvl=5'>" INTL_MAX_INFO "</a></td>\
-</tr><tr>\
-</tr>\
-</table>\
+<a href='/debug'>{debug}</a><br/>\
 ";
 
 const char WEB_CONFIG_SCRIPT[] PROGMEM = "<script>\
