@@ -1318,7 +1318,7 @@ static void webserver_config_send_body_post(String& page_content) {
 		case Config_Type_Password:
 			const String server_arg(server.arg(s_param));
 			masked_pwd = emptyString;
-			for (uint8_t i=0;i<server_arg.length();i++)
+			for (uint8_t i=0; i < server_arg.length(); i++)
 				masked_pwd += '*';
 			if (masked_pwd != server_arg || !server_arg.length()) {
 				server_arg.toCharArray(c.cfg_val.as_str, LEN_CFG_PASSWORD);
@@ -1876,36 +1876,36 @@ static void webserver_data_json() {
  *****************************************************************/
 static void webserver_prometheus_endpoint() {
 	debug_outln_info(F("ws: prometheus endpoint..."));
-	String data_4_prometheus = F("software_version{version=\"" SOFTWARE_VERSION_STR "\",{id}} 1\nuptime_ms{{id}} {up}\nsending_intervall_ms{{id}} {si}\nnumber_of_measurements{{id}} {cs}\n");
+	String page_content = F("software_version{version=\"" SOFTWARE_VERSION_STR "\",{id}} 1\nuptime_ms{{id}} {up}\nsending_intervall_ms{{id}} {si}\nnumber_of_measurements{{id}} {cs}\n");
 	debug_outln_info(F("Parse JSON for Prometheus"));
 	String id(F("node=\"" SENSOR_BASENAME));
 	id += esp_chipid;
 	id += '\"';
-	data_4_prometheus.replace("{id}", id);
-	data_4_prometheus.replace("{up}", String(msSince(time_point_device_start_ms)));
-	data_4_prometheus.replace("{si}", String(cfg::sending_intervall_ms));
-	data_4_prometheus.replace("{cs}", String(count_sends));
+	page_content.replace("{id}", id);
+	page_content.replace("{up}", String(msSince(time_point_device_start_ms)));
+	page_content.replace("{si}", String(cfg::sending_intervall_ms));
+	page_content.replace("{cs}", String(count_sends));
 	DynamicJsonDocument json2data(JSON_BUFFER_SIZE);
 	DeserializationError err = deserializeJson(json2data, last_data_string);
 	if (!err) {
 		for (JsonObject measurement : json2data[FPSTR(JSON_SENSOR_DATA_VALUES)].as<JsonArray>()) {
-			data_4_prometheus += measurement["value_type"].as<char*>();
-			data_4_prometheus += '{';
-			data_4_prometheus += id;
-			data_4_prometheus += "} ";
-			data_4_prometheus += measurement["value"].as<char*>();
-			data_4_prometheus += '\n';
+			page_content += measurement["value_type"].as<char*>();
+			page_content += '{';
+			page_content += id;
+			page_content += "} ";
+			page_content += measurement["value"].as<char*>();
+			page_content += '\n';
 		}
-		data_4_prometheus += F("last_sample_age_ms{");
-		data_4_prometheus += id;
-		data_4_prometheus += "} ";
-		data_4_prometheus += String(msSince(starttime));
-		data_4_prometheus += '\n';
+		page_content += F("last_sample_age_ms{");
+		page_content += id;
+		page_content += "} ";
+		page_content += String(msSince(starttime));
+		page_content += '\n';
 	} else {
 		debug_outln_error(FPSTR(DBG_TXT_DATA_READ_FAILED));
 	}
-	debug_outln(data_4_prometheus, DEBUG_MED_INFO);
-	server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN), data_4_prometheus);
+	debug_outln(page_content, DEBUG_MED_INFO);
+	server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN), page_content);
 }
 
 /*****************************************************************
@@ -3174,8 +3174,6 @@ static bool launchUpdateLoader(const String& md5) {
 
 	debug_outln_info(F("Erasing SDK config."));
 	ESP.eraseConfig();
-
-	sensor_restart();
 	return true;
 }
 #endif
@@ -3276,6 +3274,8 @@ static void twoStageOTAUpdate() {
 		SPIFFS.remove(firmware_md5);
 		return;
 	}
+
+	sensor_restart();
 #endif
 }
 
