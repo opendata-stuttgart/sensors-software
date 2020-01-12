@@ -221,6 +221,7 @@ namespace cfg {
 	bool dnms_read = DNMS_READ;
 	char dnms_correction[LEN_DNMS_CORRECTION] = DNMS_CORRECTION;
 	bool gps_read = GPS_READ;
+	char temp_correction[LEN_TEMP_CORRECTION] = TEMP_CORRECTION;
 
 	// send to "APIs"
 	bool send2dusti = SEND2SENSORCOMMUNITY;
@@ -1422,6 +1423,10 @@ static void webserver_config_send_body_get(String& page_content) {
 	add_form_checkbox(Config_display_wifi_info, FPSTR(INTL_DISPLAY_WIFI_INFO));
 	add_form_checkbox(Config_display_device_info, FPSTR(INTL_DISPLAY_DEVICE_INFO));
 
+	page_content += FPSTR(TABLE_TAG_OPEN);
+	add_form_input(page_content, Config_temp_correction, FPSTR(INTL_TEMP_CORRECTION), LEN_TEMP_CORRECTION-1);
+	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+
 	server.sendContent(page_content);
 	page_content = FPSTR(WEB_BR_LF_B);
 	page_content += F(INTL_FIRMWARE "</b>&nbsp;");
@@ -2238,7 +2243,7 @@ static int selectChannelForAp() {
 	std::array<int, 14> channels_rssi;
 	std::fill(channels_rssi.begin(), channels_rssi.end(), -100);
 
-	for (unsigned i = 0; i < count_wifiInfo; i++) {
+	for (unsigned i = 0; i < std::min((uint8_t) 14, count_wifiInfo); i++) {
 		if (wifiInfo[i].RSSI > channels_rssi[wifiInfo[i].channel]) {
 			channels_rssi[wifiInfo[i].channel] = wifiInfo[i].RSSI;
 		}
@@ -2384,6 +2389,15 @@ static void connectWifi() {
 	if (!WiFi.getAutoReconnect()) {
 		WiFi.setAutoReconnect(true);
 	}
+
+	// Use 13 channels if locale is not "EN"
+	wifi_country_t wifi;
+	wifi.policy = WIFI_COUNTRY_POLICY_MANUAL;
+	strcpy(wifi.cc, INTL_LANG);
+	wifi.nchan = (INTL_LANG[0] == 'E' && INTL_LANG[1] == 'N') ? 11 : 13;
+	wifi.schan = 1;
+	wifi_set_country(&wifi);
+
 	WiFi.mode(WIFI_STA);
 	WiFi.hostname(cfg::fs_ssid);
 	WiFi.begin(cfg::wlanssid, cfg::wlanpwd); // Start WiFI
@@ -2395,6 +2409,10 @@ static void connectWifi() {
 	if (WiFi.status() != WL_CONNECTED) {
 		String fss(cfg::fs_ssid);
 		display_debug(fss.substring(0, 16), fss.substring(16));
+
+		wifi.policy = WIFI_COUNTRY_POLICY_AUTO;
+		wifi_set_country(&wifi);
+
 		wifiConfig();
 		if (WiFi.status() != WL_CONNECTED) {
 			waitForWifiToConnect(20);
@@ -2450,7 +2468,6 @@ static WiFiClient* getNewLoggerWiFiClient(const LoggerEntry logger) {
 	} else {
 		_client = new WiFiClient;
 	}
-	_client->setTimeout(20000);
 	return _client;
 }
 
@@ -2630,7 +2647,7 @@ static void fetchSensorDHT(String& s) {
 		if (isnan(t) || isnan(h)) {
 			debug_outln_error(F("DHT11/DHT22 read failed"));
 		} else {
-			last_value_DHT_T = t;
+			last_value_DHT_T = t + readCorrectionOffset(cfg::temp_correction);
 			last_value_DHT_H = h;
 			add_Value2Json(s, F("temperature"), FPSTR(DBG_TXT_TEMPERATURE), last_value_DHT_T);
 			add_Value2Json(s, F("humidity"), FPSTR(DBG_TXT_HUMIDITY), last_value_DHT_H);
@@ -2725,7 +2742,7 @@ static void fetchSensorBMX280(String& s) {
 		last_value_BME280_H = -1.0;
 		debug_outln_error(F("BMP/BME280 read failed"));
 	} else {
-		last_value_BMX280_T = t;
+		last_value_BMX280_T = t + readCorrectionOffset(cfg::temp_correction);
 		last_value_BMX280_P = p;
 		if (bmx280.sensorID() == BME280_SENSOR_ID) {
 			add_Value2Json(s, F("BME280_temperature"), FPSTR(DBG_TXT_TEMPERATURE), last_value_BMX280_T);
@@ -2764,7 +2781,7 @@ static void fetchSensorDS18B20(String& s) {
 		last_value_DS18B20_T = -128.0;
 		debug_outln_error(F("DS18B20 read failed"));
 	} else {
-		last_value_DS18B20_T = t;
+		last_value_DS18B20_T = t + readCorrectionOffset(cfg::temp_correction);
 		add_Value2Json(s, F("DS18B20_temperature"), FPSTR(DBG_TXT_TEMPERATURE), last_value_DS18B20_T);
 	}
 	debug_outln_info(FPSTR(DBG_TXT_SEP));
@@ -3408,10 +3425,23 @@ static bool fwDownloadStream(WiFiClientSecure& client, const String& url, Stream
 	HTTPClient http;
 	int bytes_written = -1;
 
-	http.setTimeout(20 * 1000);
-	http.setUserAgent(SOFTWARE_VERSION + ' ' + esp_chipid + ' ' + SDS_version_date() + ' ' +
-				 String(cfg::current_lang) + ' ' + String(CURRENT_LANG) + ' ' +
-				 String(cfg::use_beta ? F("BETA") : F("")));
+	// work with 128kbit/s downlinks
+	http.setTimeout(60 * 1000);
+	String agent(SOFTWARE_VERSION);
+	agent += ' ';
+	agent += esp_chipid;
+	agent += ' ';
+	agent += SDS_version_date();
+	agent += ' ';
+	agent += String(cfg::current_lang);
+	agent += ' ';
+	agent += String(CURRENT_LANG);
+	agent += ' ';
+	if (cfg::use_beta) {
+		agent += F("BETA");
+	}
+
+	http.setUserAgent(agent);
     http.setReuse(false);
 
 	debug_outln_verbose(F("HTTP GET: "), String(FPSTR(FW_DOWNLOAD_HOST)) + ':' + String(FW_DOWNLOAD_PORT) + url);
@@ -3732,7 +3762,6 @@ static void display_values() {
 		screens[screen_count++] = 7;	// chipID, firmware and count of measurements
 	}
 	// update size of "screens" when adding more screens!
-
 	if (cfg::has_display || cfg::has_sh1106 || lcd_2004) {
 		switch (screens[next_display_count % screen_count]) {
 		case 1:

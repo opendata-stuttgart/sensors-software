@@ -8,7 +8,7 @@
  *	We only have 512 kB for the entire firmware
  */
 
-const char INTL_LANG[] = "PL";
+constexpr const char INTL_LANG[] = "PL";
 #define INTL_PM_SENSOR "Czujnik pyłu zawieszonego"
 const char INTL_CONFIGURATION[] PROGMEM = "Konfiguracja";
 #define INTL_WIFI_SETTINGS "Ustawienia WiFi"

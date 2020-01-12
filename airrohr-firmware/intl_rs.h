@@ -8,7 +8,7 @@
  *	We only have 512 kB for the entire firmware
  */
 
-const char INTL_LANG[] = "RS";
+constexpr const char INTL_LANG[] = "RS";
 #define INTL_PM_SENSOR "Senzor suspendovanih čestica"
 const char INTL_CONFIGURATION[] PROGMEM = "Konfiguracija";
 #define INTL_WIFI_SETTINGS "WiFi podešavanja"

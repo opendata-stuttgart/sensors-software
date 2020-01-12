@@ -8,7 +8,7 @@
  *	We only have 512 kB for the entire firmware
  */
 
-const char INTL_LANG[] = "TR";
+constexpr const char INTL_LANG[] = "TR";
 #define INTL_PM_SENSOR "Hava Kirliliği (Ince Toz) Ölçüm sensörü"
 const char INTL_CONFIGURATION[] PROGMEM = "Yapılandırma";
 #define INTL_WIFI_SETTINGS "WiFi bağlantı ayarları"
