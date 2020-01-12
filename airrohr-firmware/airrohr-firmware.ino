@@ -1165,10 +1165,6 @@ static void webserver_config_send_body_get(String& page_content) {
 	add_form_checkbox(Config_display_wifi_info, FPSTR(INTL_DISPLAY_WIFI_INFO));
 	add_form_checkbox(Config_display_device_info, FPSTR(INTL_DISPLAY_DEVICE_INFO));
 
-	page_content += FPSTR(TABLE_TAG_OPEN);
-	add_form_input(page_content, Config_temp_correction, FPSTR(INTL_TEMP_CORRECTION), LEN_TEMP_CORRECTION-1);
-	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-
 	server.sendContent(page_content);
 	page_content = FPSTR(WEB_BR_LF_B);
 	page_content += F(INTL_FIRMWARE "</b>&nbsp;");
@@ -1215,6 +1211,7 @@ static void webserver_config_send_body_get(String& page_content) {
 	add_form_checkbox_sensor(Config_dnms_read, FPSTR(INTL_DNMS));
 	page_content += FPSTR(TABLE_TAG_OPEN);
 	add_form_input(page_content, Config_dnms_correction, FPSTR(INTL_DNMS_CORRECTION), LEN_DNMS_CORRECTION-1);
+	add_form_input(page_content, Config_temp_correction, FPSTR(INTL_TEMP_CORRECTION), LEN_TEMP_CORRECTION-1);
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 
 	page_content += FPSTR(WEB_BR_LF_B);
