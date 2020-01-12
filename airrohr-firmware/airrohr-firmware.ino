@@ -1082,8 +1082,6 @@ static void webserver_root() {
  *****************************************************************/
 
 static void webserver_config_send_body_get(String& page_content) {
-	using namespace cfg;
-
 	auto add_form_checkbox = [&page_content](const ConfigShapeId cfgid, const String& info) {
 		page_content += form_checkbox(cfgid, info, true);
 	};
@@ -1295,8 +1293,6 @@ static void webserver_config_send_body_get(String& page_content) {
 static void webserver_config_send_body_post(String& page_content) {
 	String masked_pwd;
 
-	using namespace cfg;
-
 	for (unsigned e = 0; e < sizeof(configShape)/sizeof(configShape[0]); ++e) {
 		ConfigShapeEntry c;
 		memcpy_P(&c, &configShape[e], sizeof(ConfigShapeEntry));
@@ -1331,67 +1327,67 @@ static void webserver_config_send_body_post(String& page_content) {
 		}
 	}
 
-	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("Sensor.Community"), send2dusti);
-	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("Madavi"), send2madavi);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_DHT22), dht_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_HTU21D), htu21d_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_SDS011), sds_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_PMSx003), pms_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_HPM), hpm_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_SPS30), sps30_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_PPD42NS), ppd_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_BMX280), bmx280_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_SHT3X), sht3x_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_DS18B20), ds18b20_read);
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_DNMS), dnms_read);
-	add_line_value(page_content, FPSTR(INTL_DNMS_CORRECTION), String(dnms_correction));
-	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("GPS"), gps_read);
+	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("Sensor.Community"), cfg::send2dusti);
+	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("Madavi"), cfg::send2madavi);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_DHT22), cfg::dht_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_HTU21D), cfg::htu21d_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_SDS011), cfg::sds_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_PMSx003), cfg::pms_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_HPM), cfg::hpm_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_SPS30), cfg::sps30_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_PPD42NS), cfg::ppd_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_BMX280), cfg::bmx280_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_SHT3X), cfg::sht3x_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_DS18B20), cfg::ds18b20_read);
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), FPSTR(SENSORS_DNMS), cfg::dnms_read);
+	add_line_value(page_content, FPSTR(INTL_DNMS_CORRECTION), String(cfg::dnms_correction));
+	add_line_value_bool(page_content, FPSTR(INTL_READ_FROM), F("GPS"), cfg::gps_read);
 
 	// Paginate after ~ 1500 bytes
 	server.sendContent(page_content);
 	page_content = emptyString;
 
-	add_line_value_bool(page_content, FPSTR(INTL_DISPLAY), has_display);
-	add_line_value_bool(page_content, FPSTR(INTL_SH1106), has_sh1106);
-	add_line_value_bool(page_content, FPSTR(INTL_FLIP_DISPLAY), has_flipped_display);
-	add_line_value_bool(page_content, FPSTR(INTL_LCD1602_27), has_lcd1602_27);
-	add_line_value_bool(page_content, FPSTR(INTL_LCD1602_3F), has_lcd1602);
-	add_line_value_bool(page_content, FPSTR(INTL_LCD2004_27), has_lcd2004_27);
-	add_line_value_bool(page_content, FPSTR(INTL_LCD2004_3F), has_lcd2004);
-	add_line_value_bool(page_content, FPSTR(INTL_DISPLAY_WIFI_INFO), display_wifi_info);
-	add_line_value_bool(page_content, FPSTR(INTL_DISPLAY_DEVICE_INFO), display_device_info);
-	add_line_value_bool(page_content, FPSTR(INTL_AUTO_UPDATE), auto_update);
-	add_line_value_bool(page_content, FPSTR(INTL_USE_BETA), use_beta);
-	add_line_value(page_content, FPSTR(INTL_DEBUG_LEVEL), String(debug));
-	add_line_value(page_content, FPSTR(INTL_MEASUREMENT_INTERVAL), String(sending_intervall_ms));
-	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("Feinstaub-App"), send2fsapp);
-	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("aircms.online"), send2aircms);
-	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), FPSTR(WEB_CSV), send2csv);
-	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), FPSTR(WEB_FEINSTAUB_APP), send2fsapp);
-	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("opensensemap"), send2sensemap);
+	add_line_value_bool(page_content, FPSTR(INTL_DISPLAY), cfg::has_display);
+	add_line_value_bool(page_content, FPSTR(INTL_SH1106), cfg::has_sh1106);
+	add_line_value_bool(page_content, FPSTR(INTL_FLIP_DISPLAY), cfg::has_flipped_display);
+	add_line_value_bool(page_content, FPSTR(INTL_LCD1602_27), cfg::has_lcd1602_27);
+	add_line_value_bool(page_content, FPSTR(INTL_LCD1602_3F), cfg::has_lcd1602);
+	add_line_value_bool(page_content, FPSTR(INTL_LCD2004_27), cfg::has_lcd2004_27);
+	add_line_value_bool(page_content, FPSTR(INTL_LCD2004_3F), cfg::has_lcd2004);
+	add_line_value_bool(page_content, FPSTR(INTL_DISPLAY_WIFI_INFO), cfg::display_wifi_info);
+	add_line_value_bool(page_content, FPSTR(INTL_DISPLAY_DEVICE_INFO), cfg::display_device_info);
+	add_line_value_bool(page_content, FPSTR(INTL_AUTO_UPDATE), cfg::auto_update);
+	add_line_value_bool(page_content, FPSTR(INTL_USE_BETA), cfg::use_beta);
+	add_line_value(page_content, FPSTR(INTL_DEBUG_LEVEL), String(cfg::debug));
+	add_line_value(page_content, FPSTR(INTL_MEASUREMENT_INTERVAL), String(cfg::sending_intervall_ms));
+	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("Feinstaub-App"), cfg::send2fsapp);
+	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("aircms.online"), cfg::send2aircms);
+	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), FPSTR(WEB_CSV), cfg::send2csv);
+	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), FPSTR(WEB_FEINSTAUB_APP), cfg::send2fsapp);
+	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO), F("opensensemap"), cfg::send2sensemap);
 
 	// Paginate after ~ 1500 bytes
 	server.sendContent(page_content);
 	page_content = emptyString;
 
 	page_content += F("<br/>senseBox-ID ");
-	page_content += senseboxid;
+	page_content += cfg::senseboxid;
 	page_content += FPSTR(WEB_BR_BR);
-	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO_OWN_API), send2custom);
-	add_line_value(page_content, FPSTR(INTL_SERVER), host_custom);
-	add_line_value(page_content, FPSTR(INTL_PATH), url_custom);
-	add_line_value(page_content, FPSTR(INTL_PORT), String(port_custom));
-	add_line_value(page_content, FPSTR(INTL_USER), user_custom);
-	add_line_value(page_content, FPSTR(INTL_PASSWORD), pwd_custom);
+	add_line_value_bool(page_content, FPSTR(INTL_SEND_TO_OWN_API), cfg::send2custom);
+	add_line_value(page_content, FPSTR(INTL_SERVER), cfg::host_custom);
+	add_line_value(page_content, FPSTR(INTL_PATH), cfg::url_custom);
+	add_line_value(page_content, FPSTR(INTL_PORT), String(cfg::port_custom));
+	add_line_value(page_content, FPSTR(INTL_USER), cfg::user_custom);
+	add_line_value(page_content, FPSTR(INTL_PASSWORD), cfg::pwd_custom);
 	page_content += F("<br/><br/>InfluxDB: ");
-	page_content += String(send2influx);
-	add_line_value(page_content, FPSTR(INTL_SERVER), host_influx);
-	add_line_value(page_content, FPSTR(INTL_PATH), url_influx);
-	add_line_value(page_content, FPSTR(INTL_PORT), String(port_influx));
-	add_line_value(page_content, FPSTR(INTL_USER), user_influx);
-	add_line_value(page_content, FPSTR(INTL_PASSWORD), pwd_influx);
-	add_line_value(page_content, F("Measurement"), measurement_name_influx);
-	add_line_value(page_content, F("SSL"), String(ssl_influx));
+	page_content += String(cfg::send2influx);
+	add_line_value(page_content, FPSTR(INTL_SERVER), cfg::host_influx);
+	add_line_value(page_content, FPSTR(INTL_PATH), cfg::url_influx);
+	add_line_value(page_content, FPSTR(INTL_PORT), String(cfg::port_influx));
+	add_line_value(page_content, FPSTR(INTL_USER), cfg::user_influx);
+	add_line_value(page_content, FPSTR(INTL_PASSWORD), cfg::pwd_influx);
+	add_line_value(page_content, F("Measurement"), cfg::measurement_name_influx);
+	add_line_value(page_content, F("SSL"), String(cfg::ssl_influx));
 	page_content += FPSTR(WEB_BR_BR);
 	page_content += FPSTR(INTL_SENSOR_IS_REBOOTING);
 
@@ -1518,123 +1514,142 @@ static void webserver_wifi() {
 static void webserver_values() {
 	if (WiFi.status() != WL_CONNECTED) {
 		sendHttpRedirect();
-	} else {
-		RESERVE_STRING(page_content, XLARGE_STR);
-		start_html_page(page_content, FPSTR(INTL_CURRENT_DATA));
-		const String unit_PM("µg/m³");
-		const String unit_Deg("°");
-		const String unit_T("°C");
-		const String unit_H("%");
-		const String unit_P("hPa");
-		const String unit_NC(F("#/cm³"));
-		const String unit_TS("µm");
-		const String unit_LA(F("dB(A)"));
-
-		const int signal_quality = calcWiFiSignalQuality(last_signal_strength);
-		debug_outln_info(F("ws: values ..."));
-		if (!count_sends) {
-			page_content += F("<b style='color:red'>");
-			add_warning_first_cycle(page_content);
-			page_content += FPSTR(WEB_B_BR_BR);
-		} else {
-			add_age_last_values(page_content);
-		}
-
-		server.sendContent(page_content);
-		page_content = F("<table cellspacing='0' border='1' cellpadding='5'>\n"
-				  "<tr><th>" INTL_SENSOR "</th><th> " INTL_PARAMETER "</th><th>" INTL_VALUE "</th></tr>");
-		if (cfg::ppd_read) {
-			page_content += FPSTR(EMPTY_ROW);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_PPD42NS), FPSTR(WEB_PM1), check_display_value(last_value_PPD_P1, -1, 1, 0), FPSTR(INTL_PARTICLES_PER_LITER));
-			add_table_row_from_value(page_content, FPSTR(SENSORS_PPD42NS), FPSTR(WEB_PM25), check_display_value(last_value_PPD_P2, -1, 1, 0), FPSTR(INTL_PARTICLES_PER_LITER));
-		}
-		if (cfg::sds_read) {
-			page_content += FPSTR(EMPTY_ROW);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), FPSTR(WEB_PM25), check_display_value(last_value_SDS_P2, -1, 1, 0), unit_PM);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), FPSTR(WEB_PM10), check_display_value(last_value_SDS_P1, -1, 1, 0), unit_PM);
-		}
-		if (cfg::pms_read) {
-			page_content += FPSTR(EMPTY_ROW);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_PMSx003), FPSTR(WEB_PM1), check_display_value(last_value_PMS_P0, -1, 1, 0), unit_PM);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_PMSx003), FPSTR(WEB_PM25), check_display_value(last_value_PMS_P2, -1, 1, 0), unit_PM);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_PMSx003), FPSTR(WEB_PM10), check_display_value(last_value_PMS_P1, -1, 1, 0), unit_PM);
-		}
-		if (cfg::hpm_read) {
-			page_content += FPSTR(EMPTY_ROW);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_HPM), FPSTR(WEB_PM25), check_display_value(last_value_HPM_P2, -1, 1, 0), unit_PM);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_HPM), FPSTR(WEB_PM10), check_display_value(last_value_HPM_P1, -1, 1, 0), unit_PM);
-		}
-		if (cfg::sps30_read) {
-			page_content += FPSTR(EMPTY_ROW);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_PM1), check_display_value(last_value_SPS30_P0, -1, 1, 0), unit_PM);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_PM25), check_display_value(last_value_SPS30_P2, -1, 1, 0), unit_PM);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_PM4), check_display_value(last_value_SPS30_P4, -1, 1, 0), unit_PM);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_PM10), check_display_value(last_value_SPS30_P1, -1, 1, 0), unit_PM);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_NC0k5), check_display_value(last_value_SPS30_N05, -1, 0, 0), unit_NC);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_NC1k0), check_display_value(last_value_SPS30_N1, -1, 0, 0), unit_NC);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_NC2k5), check_display_value(last_value_SPS30_N25, -1, 0, 0), unit_NC);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_NC4k0), check_display_value(last_value_SPS30_N4, -1, 0, 0), unit_NC);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_NC10), check_display_value(last_value_SPS30_N10, -1, 0, 0), unit_NC);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_SPS30), FPSTR(WEB_TPS), check_display_value(last_value_SPS30_TS, -1, 1, 0), unit_TS);
-		}
-
-		if (cfg::dht_read) {
-			page_content += FPSTR(EMPTY_ROW);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_DHT22), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_DHT_T, -128, 1, 0), unit_T);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_DHT22), FPSTR(INTL_HUMIDITY), check_display_value(last_value_DHT_H, -1, 1, 0), unit_H);
-		}
-		if (cfg::htu21d_read) {
-			page_content += FPSTR(EMPTY_ROW);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_HTU21D), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_HTU21D_T, -128, 1, 0), unit_T);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_HTU21D), FPSTR(INTL_HUMIDITY), check_display_value(last_value_HTU21D_H, -1, 1, 0), unit_H);
-		}
-		if (cfg::bmp_read) {
-			page_content += FPSTR(EMPTY_ROW);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_BMP180), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_BMP_T, -128, 1, 0), unit_T);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_BMP180), FPSTR(INTL_PRESSURE), check_display_value(last_value_BMP_P / 100.0f, (-1 / 100.0f), 2, 0), unit_P);
-		}
-		if (cfg::bmx280_read) {
-			page_content += FPSTR(EMPTY_ROW);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_BMX280), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_BMX280_T, -128, 1, 0), unit_T);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_BMX280), FPSTR(INTL_PRESSURE), check_display_value(last_value_BMX280_P / 100.0f, (-1 / 100.0f), 2, 0), unit_P);
-			if (bmx280.sensorID() == BME280_SENSOR_ID) {
-				add_table_row_from_value(page_content, FPSTR(SENSORS_BMX280), FPSTR(INTL_HUMIDITY), check_display_value(last_value_BME280_H, -1, 1, 0), unit_H);
-			}
-		}
-		if (cfg::sht3x_read) {
-			page_content += FPSTR(EMPTY_ROW);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_SHT3X), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_SHT3X_T, -128, 1, 0), unit_T);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_SHT3X), FPSTR(INTL_HUMIDITY), check_display_value(last_value_SHT3X_H, -1, 1, 0), unit_H);
-		}
-		if (cfg::ds18b20_read) {
-			page_content += FPSTR(EMPTY_ROW);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_DS18B20), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_DS18B20_T, -128, 1, 0), unit_T);
-		}
-		if (cfg::dnms_read) {
-			page_content += FPSTR(EMPTY_ROW);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_DNMS), FPSTR(INTL_LEQ_A), check_display_value(last_value_dnms_laeq, -1, 1, 0), unit_LA);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_DNMS), FPSTR(INTL_LA_MIN), check_display_value(last_value_dnms_la_min, -1, 1, 0), unit_LA);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_DNMS), FPSTR(INTL_LA_MAX), check_display_value(last_value_dnms_la_max, -1, 1, 0), unit_LA);
-		}
-		if (cfg::gps_read) {
-			page_content += FPSTR(EMPTY_ROW);
-			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_LATITUDE), check_display_value(last_value_GPS_lat, -200.0, 6, 0), unit_Deg);
-			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_LONGITUDE), check_display_value(last_value_GPS_lon, -200.0, 6, 0), unit_Deg);
-			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_ALTITUDE), check_display_value(last_value_GPS_alt, -1000.0, 2, 0), "m");
-			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_DATE), last_value_GPS_date, emptyString);
-			add_table_row_from_value(page_content, FPSTR(WEB_GPS), FPSTR(INTL_TIME), last_value_GPS_time, emptyString);
-		}
-
-		server.sendContent(page_content);
-		page_content = FPSTR(EMPTY_ROW);
-
-		add_table_row_from_value(page_content, F("WiFi"), FPSTR(INTL_SIGNAL_STRENGTH), String(last_signal_strength), "dBm");
-		add_table_row_from_value(page_content, F("WiFi"), FPSTR(INTL_SIGNAL_QUALITY), String(signal_quality), "%");
-
-		page_content += FPSTR(EMPTY_ROW);
-		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-		end_html_page(page_content);
+		return;
 	}
+
+	RESERVE_STRING(page_content, XLARGE_STR);
+	start_html_page(page_content, FPSTR(INTL_CURRENT_DATA));
+	const String unit_Deg("°");
+	const String unit_P("hPa");
+	const String unit_NC();
+	const String unit_LA(F("dB(A)"));
+
+	const int signal_quality = calcWiFiSignalQuality(last_signal_strength);
+	debug_outln_info(F("ws: values ..."));
+	if (!count_sends) {
+		page_content += F("<b style='color:red'>");
+		add_warning_first_cycle(page_content);
+		page_content += FPSTR(WEB_B_BR_BR);
+	} else {
+		add_age_last_values(page_content);
+	}
+
+
+	auto add_table_pm_value = [&page_content](const __FlashStringHelper* sensor, const __FlashStringHelper* param, const float& value) {
+		add_table_row_from_value(page_content, sensor, param, check_display_value(value, -1, 1, 0), F("µg/m³"));
+	};
+
+	auto add_table_nc_value = [&page_content](const __FlashStringHelper* sensor, const __FlashStringHelper* param, const float value) {
+		add_table_row_from_value(page_content, sensor, param, check_display_value(value, -1, 1, 0), F("#/cm³"));
+	};
+
+	auto add_table_t_value = [&page_content](const __FlashStringHelper* sensor, const __FlashStringHelper* param, const float value) {
+		add_table_row_from_value(page_content, sensor, param, check_display_value(value, -128, 1, 0), "°C");
+	};
+
+	auto add_table_h_value = [&page_content](const __FlashStringHelper* sensor, const __FlashStringHelper* param, const float value) {
+		add_table_row_from_value(page_content, sensor, param, check_display_value(value, -1, 1, 0), "%");
+	};
+
+	auto add_table_value = [&page_content](const __FlashStringHelper* sensor, const __FlashStringHelper* param, const String& value, const String& unit) {
+		add_table_row_from_value(page_content, sensor, param, value, unit);
+	};
+
+
+	server.sendContent(page_content);
+	page_content = F("<table cellspacing='0' border='1' cellpadding='5'>\n"
+				"<tr><th>" INTL_SENSOR "</th><th> " INTL_PARAMETER "</th><th>" INTL_VALUE "</th></tr>");
+	if (cfg::ppd_read) {
+		page_content += FPSTR(EMPTY_ROW);
+		add_table_value(FPSTR(SENSORS_PPD42NS), FPSTR(WEB_PM1), check_display_value(last_value_PPD_P1, -1, 1, 0), FPSTR(INTL_PARTICLES_PER_LITER));
+		add_table_value(FPSTR(SENSORS_PPD42NS), FPSTR(WEB_PM25), check_display_value(last_value_PPD_P2, -1, 1, 0), FPSTR(INTL_PARTICLES_PER_LITER));
+	}
+	if (cfg::sds_read) {
+		page_content += FPSTR(EMPTY_ROW);
+		add_table_pm_value(FPSTR(SENSORS_SDS011), FPSTR(WEB_PM25), last_value_SDS_P2);
+		add_table_pm_value(FPSTR(SENSORS_SDS011), FPSTR(WEB_PM10), last_value_SDS_P1);
+	}
+	if (cfg::pms_read) {
+		page_content += FPSTR(EMPTY_ROW);
+		add_table_pm_value(FPSTR(SENSORS_PMSx003), FPSTR(WEB_PM1), last_value_PMS_P0);
+		add_table_pm_value(FPSTR(SENSORS_PMSx003), FPSTR(WEB_PM25), last_value_PMS_P2);
+		add_table_pm_value(FPSTR(SENSORS_PMSx003), FPSTR(WEB_PM10), last_value_PMS_P1);
+	}
+	if (cfg::hpm_read) {
+		page_content += FPSTR(EMPTY_ROW);
+		add_table_pm_value(FPSTR(SENSORS_HPM), FPSTR(WEB_PM25), last_value_HPM_P2);
+		add_table_pm_value(FPSTR(SENSORS_HPM), FPSTR(WEB_PM10), last_value_HPM_P1);
+	}
+	if (cfg::sps30_read) {
+		page_content += FPSTR(EMPTY_ROW);
+		add_table_pm_value(FPSTR(SENSORS_SPS30), FPSTR(WEB_PM1), last_value_SPS30_P0);
+		add_table_pm_value(FPSTR(SENSORS_SPS30), FPSTR(WEB_PM25), last_value_SPS30_P2);
+		add_table_pm_value(FPSTR(SENSORS_SPS30), FPSTR(WEB_PM4), last_value_SPS30_P4);
+		add_table_pm_value(FPSTR(SENSORS_SPS30), FPSTR(WEB_PM10), last_value_SPS30_P1);
+		add_table_nc_value(FPSTR(SENSORS_SPS30), FPSTR(WEB_NC0k5), last_value_SPS30_N05);
+		add_table_nc_value(FPSTR(SENSORS_SPS30), FPSTR(WEB_NC1k0), last_value_SPS30_N1);
+		add_table_nc_value(FPSTR(SENSORS_SPS30), FPSTR(WEB_NC2k5), last_value_SPS30_N25);
+		add_table_nc_value(FPSTR(SENSORS_SPS30), FPSTR(WEB_NC4k0), last_value_SPS30_N4);
+		add_table_nc_value(FPSTR(SENSORS_SPS30), FPSTR(WEB_NC10), last_value_SPS30_N10);
+		add_table_value(FPSTR(SENSORS_SPS30), FPSTR(WEB_TPS), check_display_value(last_value_SPS30_TS, -1, 1, 0), "µm");
+	}
+	if (cfg::dht_read) {
+		page_content += FPSTR(EMPTY_ROW);
+		add_table_t_value(FPSTR(SENSORS_DHT22), FPSTR(INTL_TEMPERATURE), last_value_DHT_T);
+
+		add_table_h_value(FPSTR(SENSORS_DHT22), FPSTR(INTL_HUMIDITY), last_value_DHT_H);
+	}
+	if (cfg::htu21d_read) {
+		page_content += FPSTR(EMPTY_ROW);
+		add_table_t_value(FPSTR(SENSORS_HTU21D), FPSTR(INTL_TEMPERATURE), last_value_HTU21D_T);
+		add_table_h_value(FPSTR(SENSORS_HTU21D), FPSTR(INTL_HUMIDITY), last_value_HTU21D_H);
+	}
+	if (cfg::bmp_read) {
+		page_content += FPSTR(EMPTY_ROW);
+		add_table_t_value(FPSTR(SENSORS_BMP180), FPSTR(INTL_TEMPERATURE), last_value_BMP_T);
+		add_table_value(FPSTR(SENSORS_BMP180), FPSTR(INTL_PRESSURE), check_display_value(last_value_BMP_P / 100.0f, (-1 / 100.0f), 2, 0), unit_P);
+	}
+	if (cfg::bmx280_read) {
+		page_content += FPSTR(EMPTY_ROW);
+		add_table_t_value(FPSTR(SENSORS_BMX280), FPSTR(INTL_TEMPERATURE), last_value_BMX280_T);
+		add_table_value(FPSTR(SENSORS_BMX280), FPSTR(INTL_PRESSURE), check_display_value(last_value_BMX280_P / 100.0f, (-1 / 100.0f), 2, 0), unit_P);
+		if (bmx280.sensorID() == BME280_SENSOR_ID) {
+			add_table_h_value(FPSTR(SENSORS_BMX280), FPSTR(INTL_HUMIDITY), last_value_BME280_H);
+		}
+	}
+	if (cfg::sht3x_read) {
+		page_content += FPSTR(EMPTY_ROW);
+		add_table_t_value(FPSTR(SENSORS_SHT3X), FPSTR(INTL_TEMPERATURE), last_value_SHT3X_T);
+		add_table_h_value(FPSTR(SENSORS_SHT3X), FPSTR(INTL_HUMIDITY), last_value_SHT3X_H);
+	}
+	if (cfg::ds18b20_read) {
+		page_content += FPSTR(EMPTY_ROW);
+		add_table_t_value(FPSTR(SENSORS_DS18B20), FPSTR(INTL_TEMPERATURE), last_value_DS18B20_T);
+	}
+	if (cfg::dnms_read) {
+		page_content += FPSTR(EMPTY_ROW);
+		add_table_value(FPSTR(SENSORS_DNMS), FPSTR(INTL_LEQ_A), check_display_value(last_value_dnms_laeq, -1, 1, 0), unit_LA);
+		add_table_value(FPSTR(SENSORS_DNMS), FPSTR(INTL_LA_MIN), check_display_value(last_value_dnms_la_min, -1, 1, 0), unit_LA);
+		add_table_value(FPSTR(SENSORS_DNMS), FPSTR(INTL_LA_MAX), check_display_value(last_value_dnms_la_max, -1, 1, 0), unit_LA);
+	}
+	if (cfg::gps_read) {
+		page_content += FPSTR(EMPTY_ROW);
+		add_table_value(FPSTR(WEB_GPS), FPSTR(INTL_LATITUDE), check_display_value(last_value_GPS_lat, -200.0, 6, 0), unit_Deg);
+		add_table_value(FPSTR(WEB_GPS), FPSTR(INTL_LONGITUDE), check_display_value(last_value_GPS_lon, -200.0, 6, 0), unit_Deg);
+		add_table_value(FPSTR(WEB_GPS), FPSTR(INTL_ALTITUDE), check_display_value(last_value_GPS_alt, -1000.0, 2, 0), "m");
+		add_table_value(FPSTR(WEB_GPS), FPSTR(INTL_DATE), last_value_GPS_date, emptyString);
+		add_table_value(FPSTR(WEB_GPS), FPSTR(INTL_TIME), last_value_GPS_time, emptyString);
+	}
+
+	server.sendContent(page_content);
+	page_content = FPSTR(EMPTY_ROW);
+
+	add_table_value(F("WiFi"), FPSTR(INTL_SIGNAL_STRENGTH), String(last_signal_strength), "dBm");
+	add_table_value(F("WiFi"), FPSTR(INTL_SIGNAL_QUALITY), String(signal_quality), "%");
+
+	page_content += FPSTR(EMPTY_ROW);
+	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+	end_html_page(page_content);
 }
 
 /*****************************************************************
@@ -2511,18 +2526,8 @@ static void fetchSensorSDS(String& s) {
 				if (msSince(starttime) > (cfg::sending_intervall_ms - READINGTIME_SDS_MS)) {
 					sds_pm10_sum += pm10_serial;
 					sds_pm25_sum += pm25_serial;
-					if (sds_pm10_min > pm10_serial) {
-						sds_pm10_min = pm10_serial;
-					}
-					if (sds_pm10_max < pm10_serial) {
-						sds_pm10_max = pm10_serial;
-					}
-					if (sds_pm25_min > pm25_serial) {
-						sds_pm25_min = pm25_serial;
-					}
-					if (sds_pm25_max < pm25_serial) {
-						sds_pm25_max = pm25_serial;
-					}
+					UPDATE_MIN_MAX(sds_pm10_min, sds_pm10_max, pm10_serial);
+					UPDATE_MIN_MAX(sds_pm25_min, sds_pm25_max, pm25_serial);
 					debug_outln_verbose(F("PM10 (sec.) : "), String(pm10_serial / 10.0f));
 					debug_outln_verbose(F("PM2.5 (sec.): "), String(pm25_serial / 10.0f));
 					sds_val_count++;
@@ -2666,24 +2671,9 @@ static void fetchSensorPMS(String& s) {
 						pms_pm1_sum += pm1_serial;
 						pms_pm10_sum += pm10_serial;
 						pms_pm25_sum += pm25_serial;
-						if (pms_pm1_min > pm1_serial) {
-							pms_pm1_min = pm1_serial;
-						}
-						if (pms_pm1_max < pm1_serial) {
-							pms_pm1_max = pm1_serial;
-						}
-						if (pms_pm25_min > pm25_serial) {
-							pms_pm25_min = pm25_serial;
-						}
-						if (pms_pm25_max < pm25_serial) {
-							pms_pm25_max = pm25_serial;
-						}
-						if (pms_pm10_min > pm10_serial) {
-							pms_pm10_min = pm10_serial;
-						}
-						if (pms_pm10_max < pm10_serial) {
-							pms_pm10_max = pm10_serial;
-						}
+						UPDATE_MIN_MAX(pms_pm1_min, pms_pm1_max, pm1_serial);
+						UPDATE_MIN_MAX(pms_pm25_min, pms_pm25_max, pm25_serial);
+						UPDATE_MIN_MAX(pms_pm10_min, pms_pm10_max, pm10_serial);
 						debug_outln_verbose(F("PM1 (sec.): "), String(pm1_serial));
 						debug_outln_verbose(F("PM2.5 (sec.): "), String(pm25_serial));
 						debug_outln_verbose(F("PM10 (sec.) : "), String(pm10_serial));
@@ -2813,18 +2803,8 @@ static void fetchSensorHPM(String& s) {
 					if ((! isnan(pm10_serial)) && (! isnan(pm25_serial))) {
 						hpm_pm10_sum += pm10_serial;
 						hpm_pm25_sum += pm25_serial;
-						if (hpm_pm10_min > pm10_serial) {
-							hpm_pm10_min = pm10_serial;
-						}
-						if (hpm_pm10_max < pm10_serial) {
-							hpm_pm10_max = pm10_serial;
-						}
-						if (hpm_pm25_min > pm25_serial) {
-							hpm_pm25_min = pm25_serial;
-						}
-						if (hpm_pm25_max < pm25_serial) {
-							hpm_pm25_max = pm25_serial;
-						}
+						UPDATE_MIN_MAX(hpm_pm10_min, hpm_pm10_max, pm10_serial);
+						UPDATE_MIN_MAX(hpm_pm25_min, hpm_pm25_max, pm25_serial);
 						debug_outln_verbose(F("PM2.5 (sec.): "), String(pm25_serial));
 						debug_outln_verbose(F("PM10 (sec.) : "), String(pm10_serial));
 						hpm_val_count++;
@@ -4039,15 +4019,9 @@ void loop(void) {
 
 	if (last_micro != 0) {
 		unsigned long diff_micro = act_micro - last_micro;
-		if (max_micro < diff_micro) {
-			max_micro = diff_micro;
-		}
-		if (min_micro > diff_micro) {
-			min_micro = diff_micro;
-		}
+		UPDATE_MIN_MAX(min_micro, max_micro, diff_micro);
 	}
 	last_micro = act_micro;
-
 
 	if (cfg::sps30_read && ( !sps30_init_failed)) {
 		if ((msSince(starttime) - SPS30_read_timer) > SPS30_WAITING_AFTER_LAST_READ) {
