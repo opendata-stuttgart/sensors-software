@@ -62,7 +62,8 @@ extern void add_Value2Json(String& res, const __FlashStringHelper* type, const S
 extern void add_Value2Json(String& res, const __FlashStringHelper* type, const __FlashStringHelper* debug_type, const float& value);
 
 #if defined(ESP8266)
-void configureCACertTrustAnchor(WiFiClientSecure* client);
+extern void configureCACertTrustAnchor(WiFiClientSecure* client);
+extern bool launchUpdateLoader(const String& md5);
 #endif
 
 extern float readCorrectionOffset(const char* correction);

@@ -3147,37 +3147,6 @@ static bool fwDownloadStreamFile(WiFiClientSecure& client, const String& url, co
 	return false;
 }
 
-#if defined(ESP8266)
-static bool launchUpdateLoader(const String& md5) {
-
-	File loaderFile = SPIFFS.open(F("/loader.bin"), "r");
-	if (!loaderFile) {
-		return false;
-	}
-
-	if (!Update.begin(loaderFile.size(), U_FLASH)) {
-		return false;
-	}
-
-	if (md5.length() && !Update.setMD5(md5.c_str())) {
-		return false;
-	}
-
-	if (Update.writeStream(loaderFile) != loaderFile.size()) {
-		return false;
-	}
-	loaderFile.close();
-
-	if (!Update.end()) {
-		return false;
-	}
-
-	debug_outln_info(F("Erasing SDK config."));
-	ESP.eraseConfig();
-	return true;
-}
-#endif
-
 static void twoStageOTAUpdate() {
 
 	if (!cfg::auto_update) return;

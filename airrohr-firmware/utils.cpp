@@ -194,6 +194,36 @@ void configureCACertTrustAnchor(WiFiClientSecure* client) {
 		client->setTrustAnchors(&x509_dst_root_ca);
 	}
 }
+
+bool launchUpdateLoader(const String& md5) {
+
+	File loaderFile = SPIFFS.open(F("/loader.bin"), "r");
+	if (!loaderFile) {
+		return false;
+	}
+
+	if (!Update.begin(loaderFile.size(), U_FLASH)) {
+		return false;
+	}
+
+	if (md5.length() && !Update.setMD5(md5.c_str())) {
+		return false;
+	}
+
+	if (Update.writeStream(loaderFile) != loaderFile.size()) {
+		return false;
+	}
+	loaderFile.close();
+
+	if (!Update.end()) {
+		return false;
+	}
+
+	debug_outln_info(F("Erasing SDK config."));
+	ESP.eraseConfig();
+	return true;
+}
+
 #endif
 
 
