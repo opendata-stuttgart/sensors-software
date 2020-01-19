@@ -1543,6 +1543,17 @@ static void webserver_status() {
 	end_html_page(page_content);
 }
 
+
+/*****************************************************************
+ * Webserver read serial ring buffer                             *
+ *****************************************************************/
+
+static void webserver_serial() {
+	String s(Debug.popLines());
+
+	server.send(s.length() ? 200 : 204, FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN), s);
+}
+
 /*****************************************************************
  * Webserver set debug level                                     *
  *****************************************************************/
@@ -1589,9 +1600,16 @@ static void webserver_debug_level() {
 		}
 	}
 
-	page_content += F("<br/><pre class='panels'>");
+	page_content += F("<br/><pre id='slog' class='panels'>");
 	page_content += Debug.popLines();
 	page_content += F("</pre>");
+	page_content += F("<script>"
+	"function slog_update() {"
+	"fetch('/serial').then(r => r.text()).then((r) => {"
+    "document.getElementById('slog').innerText += r;}).catch(err => console.log(err));};"
+	"setInterval(slog_update, 3000);"
+	"</script>"
+	);
 	page_content += F("<h4>");
 	page_content += FPSTR(INTL_DEBUG_SETTING_TO);
 	page_content += F("</h4>"
@@ -1774,6 +1792,7 @@ static void setup_webserver() {
 	server.on(F("/generate_204"), webserver_config);
 	server.on(F("/fwlink"), webserver_config);
 	server.on(F("/debug"), webserver_debug_level);
+	server.on(F("/serial"), webserver_serial);
 	server.on(F("/removeConfig"), webserver_removeConfig);
 	server.on(F("/reset"), webserver_reset);
 	server.on(F("/data.json"), webserver_data_json);
