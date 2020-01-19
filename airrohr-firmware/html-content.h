@@ -50,7 +50,7 @@ td{vertical-align:top}\
 .wifi{background:0 0;color:#00f;padding:5px;display:inline;border:0;box-shadow:none}\
 input[type=text]{width:100%}\
 input[type=password]{width:100%}\
-input[type=submit]{color:#fff;text-align:left;border-radius:5px;font-size:medium;background:#b33;box-shadow:0 2px 2px #b33;padding:9px!important;width:100%;border-style:none}\
+input[type=submit]{color:#fff;text-align:left;cursor:pointer;border-radius:5px;font-size:medium;background:#b33;box-shadow:0 2px 2px #b33;padding:9px!important;width:100%;border-style:none}\
 input[type=submit]:hover{background:#d44}\
 .s_green{padding:9px !important;width:100%;border-style:none;background:#3ba;color:#fff;text-align:left}\
 .tabs{display:flex;flex-direction:row;align-items:stretch;align-content:flex-end;justify-content:flex-start}\
