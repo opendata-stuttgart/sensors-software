@@ -5,10 +5,9 @@
  *  Russian translations
  *
  *	Texts should be as short as possible
- *	We only have 512 kB for the entire firmware
  */
 
-constexpr const char INTL_LANG[] = "RU";
+#define INTL_LANG "RU"
 #define INTL_PM_SENSOR "Датчик твердых мелкодисперсных частиц"
 const char INTL_CONFIGURATION[] PROGMEM = "Конфигурация";
 #define INTL_WIFI_SETTINGS "Доступы к локальной сети Wi-Fi"

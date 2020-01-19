@@ -5,10 +5,9 @@
  *  English translations
  *
  *	Texts should be as short as possible
- *	We only have 512 kB for the entire firmware
  */
 
-constexpr const char INTL_LANG[] = "EN";
+#define INTL_LANG "EN"
 #define INTL_PM_SENSOR "Particulate matter sensor"
 const char INTL_CONFIGURATION[] PROGMEM = "Configuration";
 #define INTL_WIFI_SETTINGS "WiFi Settings"

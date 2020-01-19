@@ -5,10 +5,9 @@
  *  Polish translations
  *
  *	Texts should be as short as possible
- *	We only have 512 kB for the entire firmware
  */
 
-constexpr const char INTL_LANG[] = "PL";
+#define INTL_LANG "PL"
 #define INTL_PM_SENSOR "Czujnik pyłu zawieszonego"
 const char INTL_CONFIGURATION[] PROGMEM = "Konfiguracja";
 #define INTL_WIFI_SETTINGS "Ustawienia WiFi"

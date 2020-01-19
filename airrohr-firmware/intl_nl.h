@@ -5,10 +5,9 @@
  *  Dutch translations
  *
  *	Texts should be as short as possible
- *	We only have 512 kB for the entire firmware
  */
 
-constexpr const char INTL_LANG[] = "NL";
+#define INTL_LANG "NL"
 #define INTL_PM_SENSOR "Fijnstofsensor"
 const char INTL_CONFIGURATION[] PROGMEM = "Configuratie";
 #define INTL_WIFI_SETTINGS "WiFi-instellingen"

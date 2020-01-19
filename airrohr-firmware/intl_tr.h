@@ -5,10 +5,9 @@
  *  Turkish translations
  *
  *	Texts should be as short as possible
- *	We only have 512 kB for the entire firmware
  */
 
-constexpr const char INTL_LANG[] = "TR";
+#define INTL_LANG "TR"
 #define INTL_PM_SENSOR "Hava Kirliliği (Ince Toz) Ölçüm sensörü"
 const char INTL_CONFIGURATION[] PROGMEM = "Yapılandırma";
 #define INTL_WIFI_SETTINGS "WiFi bağlantı ayarları"

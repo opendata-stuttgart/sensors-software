@@ -5,10 +5,9 @@
  *  Italian translations
  *
  *	Texts should be as short as possible
- *	We only have 512 kB for the entire firmware
  */
 
-constexpr const char INTL_LANG[] = "IT";
+#define INTL_LANG "IT"
 #define INTL_PM_SENSOR "Sensore polveri sottili"
 const char INTL_CONFIGURATION[] PROGMEM = "Configurazione";
 #define INTL_WIFI_SETTINGS "Impostazioni Wifi"

@@ -5,10 +5,9 @@
  *  Bulgarian translations
  *
  *	Texts should be as short as possible
- *	We only have 512 kB for the entire firmware
  */
 
-constexpr const char INTL_LANG[] = "BG";
+#define INTL_LANG "BG"
 #define INTL_PM_SENSOR "Сензор за прахови частици"
 const char INTL_CONFIGURATION[] PROGMEM = "Конфигурация";
 #define INTL_WIFI_SETTINGS "Настройки за WiFi"

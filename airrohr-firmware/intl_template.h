@@ -5,10 +5,9 @@
  *  Translation template
  *
  *	Texts should be as short as possible
- *	We only have 512 kB for the entire firmware
  */
 
-constexpr const char INTL_LANG[] = "";
+#define INTL_LANG "";
 #define INTL_PM_SENSOR ""
 const char INTL_CONFIGURATION[] PROGMEM = "";
 #define INTL_WIFI_SETTINGS ""

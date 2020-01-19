@@ -1,6 +1,7 @@
 const char TXT_CONTENT_TYPE_JSON[] PROGMEM = "application/json";
 const char TXT_CONTENT_TYPE_INFLUXDB[] PROGMEM = "application/x-www-form-urlencoded";
 const char TXT_CONTENT_TYPE_TEXT_HTML[] PROGMEM = "text/html; charset=utf-8";
+const char TXT_CONTENT_TYPE_TEXT_CSS[] PROGMEM = "text/css";
 const char TXT_CONTENT_TYPE_TEXT_PLAIN[] PROGMEM = "text/plain";
 const char TXT_CONTENT_TYPE_IMAGE_PNG[] PROGMEM = "image/png";
 
@@ -35,13 +36,12 @@ const char SENSORS_BMP180[] PROGMEM = "BMP180";
 const char SENSORS_BMX280[] PROGMEM = "BMP/E280";
 const char SENSORS_DNMS[] PROGMEM = "DNMS";
 
-const char WEB_PAGE_HEADER[] PROGMEM = "<!DOCTYPE html><html>\
+const char WEB_PAGE_HEADER[] PROGMEM = "<!DOCTYPE html><html lang='" INTL_LANG "'>\
 <head>\
 <meta charset='utf-8'/>\
 <title>{t}</title>";
 
-const char WEB_PAGE_HEADER_HEAD[] PROGMEM = "<meta name='viewport' content='width=device-width'/>\
-<style type='text/css'>\
+const char WEB_PAGE_STATIC_CSS[] PROGMEM = "\
 body{font-family:Arial;margin:0}\
 .content{margin:10px}\
 .r{text-align:right}\
@@ -57,12 +57,20 @@ input[type=submit]:hover{background:#d44}\
 .tab{padding:10px 20px;display:inline-block;color:#333}\
 .panels{min-height:200px;overflow:hidden;padding:20px;border:2px solid #3ba;margin-bottom:1em;box-shadow:0 4px 4px #3ba}\
 .radio{display:none}.panel{display:none}\
+.canvas{min-height:129px;background-color:#3ba;margin-bottom:20px;box-shadow:0 4px 6px #3ba}\
 #r4:checked~.panels>#panel4,#r1:checked~.panels>#panel1,#r3:checked~.panels>#panel3,#r2:checked~.panels>#panel2{display:block}\
 #r4:checked~.tabs>#tab4,#r1:checked~.tabs>#tab1,#r3:checked~.tabs>#tab3,#r2:checked~.tabs>#tab2{background:#3ba;color:#fff}\
+";
+
+#define STATIC_PREFIX "/" INTL_LANG "_s1"
+
+const char WEB_PAGE_HEADER_HEAD[] PROGMEM = "<meta name='viewport' content='width=device-width'/>\
+<link rel='stylesheet' href='" STATIC_PREFIX "?r=css'>\
 </style>\
 </head><body>\
-<div style='min-height:129px;background-color:#3ba;margin-bottom:20px;box-shadow:0px 4px 6px #3ba'>\
-<a href='/' style='background:none;display:inline'><img src='/images?name=luftdaten_logo' alt='" INTL_BACK_TO_HOME "' style='float:left;margin:20px' width='100' height='89'/></a>";
+<div class='canvas'>\
+<a class='b' href='/' style='background:none;display:inline'>\
+<img src='" STATIC_PREFIX "?r=logo' alt='" INTL_BACK_TO_HOME "' style='float:left;margin:20px' width='100' height='89'/></a>";
 
 const char WEB_PAGE_HEADER_BODY[] PROGMEM = "<h3 style='margin:0 10px'>" INTL_PM_SENSOR "</h3>\
 <small>ID: {id}<br/>MAC: {mac}<br/>" INTL_FIRMWARE ": " SOFTWARE_VERSION_STR "&nbsp;(" __DATE__ " " __TIME__ ")<br/>\
