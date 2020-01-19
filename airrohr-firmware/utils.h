@@ -70,6 +70,19 @@ namespace cfg {
 	extern unsigned debug;
 }
 
+#if defined(ESP8266)
+extern SoftwareSerial serialSDS;
+#endif
+#if defined(ESP32)
+#define serialSDS (Serial1)
+#endif
+
+enum class PmSensorCmd {
+	Start,
+	Stop,
+	ContinuousMode
+};
+
 /*****************************************************************
  * Debug output                                                  *
  *****************************************************************/
@@ -100,5 +113,13 @@ extern void debug_outln_info(const __FlashStringHelper* text, const String& opti
 extern void debug_outln_info(const __FlashStringHelper* text, float value);
 extern void debug_outln_verbose(const __FlashStringHelper* text, const String& option);
 extern void debug_outln_info_bool(const __FlashStringHelper* text, const bool option);
+
+
+extern bool SDS_checksum_valid(const uint8_t (&data)[8]);
+extern void yield_for_serial_buffer(size_t length);
+extern void SDS_rawcmd(const uint8_t cmd_head1, const uint8_t cmd_head2, const uint8_t cmd_head3);
+extern bool SDS_cmd(PmSensorCmd cmd);
+extern bool PMS_cmd(PmSensorCmd cmd);
+extern bool HPM_cmd(PmSensorCmd cmd);
 
 #endif
