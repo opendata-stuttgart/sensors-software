@@ -5,10 +5,9 @@
  *  Russian translations
  *
  *	Texts should be as short as possible
- *	We only have 512 kB for the entire firmware
  */
 
-constexpr const char INTL_LANG[] = "RU";
+#define INTL_LANG "RU"
 #define INTL_PM_SENSOR "Датчик твердых мелкодисперсных частиц"
 const char INTL_CONFIGURATION[] PROGMEM = "Конфигурация";
 #define INTL_WIFI_SETTINGS "Доступы к локальной сети Wi-Fi"
@@ -62,6 +61,7 @@ const char INTL_PATH[] PROGMEM = "Путь";
 const char INTL_PORT[] PROGMEM = "Порт";
 const char INTL_USER[] PROGMEM = "Пользователь";
 const char INTL_PASSWORD[] PROGMEM = "Пароль";
+const char INTL_MEASUREMENT[] PROGMEM = "Measurement";
 const char INTL_SEND_TO[] PROGMEM = "Отправлять в {v}";
 const char INTL_READ_FROM[] PROGMEM = "Считывать с {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Устройство перезапускается...";
@@ -105,7 +105,7 @@ const char INTL_LATITUDE[] PROGMEM = "Широта";
 const char INTL_LONGITUDE[] PROGMEM = "Долгота";
 const char INTL_ALTITUDE[] PROGMEM = "Высота";
 const char INTL_DATE[] PROGMEM = "Дата";
-const char INTL_TIME[] PROGMEM = "Время";
+const char INTL_TIME_UTC[] PROGMEM = "Время (UTC)";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Сигнал";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Качество";
 #define INTL_NUMBER_OF_MEASUREMENTS "Количество измерений"

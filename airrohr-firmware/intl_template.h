@@ -5,10 +5,9 @@
  *  Translation template
  *
  *	Texts should be as short as possible
- *	We only have 512 kB for the entire firmware
  */
 
-constexpr const char INTL_LANG[] = "";
+#define INTL_LANG "";
 #define INTL_PM_SENSOR ""
 const char INTL_CONFIGURATION[] PROGMEM = "";
 #define INTL_WIFI_SETTINGS ""
@@ -62,6 +61,8 @@ const char INTL_PATH[] PROGMEM = "";
 const char INTL_PORT[] PROGMEM = "";
 const char INTL_USER[] PROGMEM = "";
 const char INTL_PASSWORD[] PROGMEM = "";
+const char INTL_MEASUREMENT[] PROGMEM = "";
+const char INTL_MEASUREMENT[] PROGMEM = "";
 const char INTL_SEND_TO[] PROGMEM = "";
 const char INTL_READ_FROM[] PROGMEM = "";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "";
@@ -105,7 +106,7 @@ const char INTL_LATITUDE[] PROGMEM = "";
 const char INTL_LONGITUDE[] PROGMEM = "";
 const char INTL_ALTITUDE[] PROGMEM = "";
 const char INTL_DATE[] PROGMEM = "";
-const char INTL_TIME[] PROGMEM = "";
+const char INTL_TIME_UTC[] PROGMEM = "";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "";
 #define INTL_NUMBER_OF_MEASUREMENTS ""

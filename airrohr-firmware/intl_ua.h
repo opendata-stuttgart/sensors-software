@@ -5,10 +5,9 @@
  *  Ukrainian translations
  *
  *	Texts should be as short as possible
- *	We only have 512 kB for the entire firmware
  */
 
-constexpr const char INTL_LANG[] = "UA";
+#define INTL_LANG "UA"
 #define INTL_PM_SENSOR "Вимірювач дрібних часток"
 const char INTL_CONFIGURATION[] PROGMEM = "Налаштування";
 #define INTL_WIFI_SETTINGS "Параметри WiFi"
@@ -62,6 +61,7 @@ const char INTL_PATH[] PROGMEM = "Шлях";
 const char INTL_PORT[] PROGMEM = "Порт";
 const char INTL_USER[] PROGMEM = "Користувач";
 const char INTL_PASSWORD[] PROGMEM = "Пароль";
+const char INTL_MEASUREMENT[] PROGMEM = "Measurement";
 const char INTL_SEND_TO[] PROGMEM = "Відправляти до {v}";
 const char INTL_READ_FROM[] PROGMEM = "Читати з {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Сенсор перезавантажується.";
@@ -105,7 +105,7 @@ const char INTL_LATITUDE[] PROGMEM = "Широта";
 const char INTL_LONGITUDE[] PROGMEM = "Довгота";
 const char INTL_ALTITUDE[] PROGMEM = "Висота";
 const char INTL_DATE[] PROGMEM = "Дата";
-const char INTL_TIME[] PROGMEM = "Час";
+const char INTL_TIME_UTC[] PROGMEM = "Час (UTC)";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "потужність сигналу";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "якість сигналу";
 #define INTL_NUMBER_OF_MEASUREMENTS "Кількість вимірювань"

@@ -5,10 +5,9 @@
  *  Polish translations
  *
  *	Texts should be as short as possible
- *	We only have 512 kB for the entire firmware
  */
 
-constexpr const char INTL_LANG[] = "PL";
+#define INTL_LANG "PL"
 #define INTL_PM_SENSOR "Czujnik pyłu zawieszonego"
 const char INTL_CONFIGURATION[] PROGMEM = "Konfiguracja";
 #define INTL_WIFI_SETTINGS "Ustawienia WiFi"
@@ -62,6 +61,7 @@ const char INTL_PATH[] PROGMEM = "Ścieżka";
 const char INTL_PORT[] PROGMEM = "Port";
 const char INTL_USER[] PROGMEM = "Nazwa użytkownika";
 const char INTL_PASSWORD[] PROGMEM = "Hasło";
+const char INTL_MEASUREMENT[] PROGMEM = "Measurement";
 const char INTL_SEND_TO[] PROGMEM = "Wysyłaj dane do {v}";
 const char INTL_READ_FROM[] PROGMEM = "Czytaj z {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Ponowne uruchamianie czujnika.";
@@ -105,7 +105,7 @@ const char INTL_LATITUDE[] PROGMEM = "Szerokość geo.";
 const char INTL_LONGITUDE[] PROGMEM = "Długość geo.";
 const char INTL_ALTITUDE[] PROGMEM = "Wysokość";
 const char INTL_DATE[] PROGMEM = "Data";
-const char INTL_TIME[] PROGMEM = "Czas";
+const char INTL_TIME_UTC[] PROGMEM = "Czas (UTC)";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Siła sygnału";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Jakość sygnału";
 #define INTL_NUMBER_OF_MEASUREMENTS "Liczba pomiarów"

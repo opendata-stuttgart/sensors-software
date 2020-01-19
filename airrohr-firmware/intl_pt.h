@@ -5,10 +5,9 @@
  *  Portuguese translations
  *
  *	Texts should be as short as possible
- *	We only have 512 kB for the entire firmware
  */
 
-constexpr const char INTL_LANG[] = "PT";
+#define INTL_LANG "PT"
 #define INTL_PM_SENSOR "Sensor de partículas finas"
 const char INTL_CONFIGURATION[] PROGMEM = "Configuração";
 #define INTL_WIFI_SETTINGS "Configuração WiFi"
@@ -62,6 +61,7 @@ const char INTL_PATH[] PROGMEM = "Caminho";
 const char INTL_PORT[] PROGMEM = "Porta";
 const char INTL_USER[] PROGMEM = "Utilizador";
 const char INTL_PASSWORD[] PROGMEM = "Senha";
+const char INTL_MEASUREMENT[] PROGMEM = "Measurement";
 const char INTL_SEND_TO[] PROGMEM = "Enviar a {v}";
 const char INTL_READ_FROM[] PROGMEM = "Ler {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "O sensor esta a ser reiniciado.";
@@ -105,7 +105,7 @@ const char INTL_LATITUDE[] PROGMEM = "Latitude";
 const char INTL_LONGITUDE[] PROGMEM = "Longitude";
 const char INTL_ALTITUDE[] PROGMEM = "Altitude";
 const char INTL_DATE[] PROGMEM = "Data";
-const char INTL_TIME[] PROGMEM = "Hora";
+const char INTL_TIME_UTC[] PROGMEM = "Hora (UTC)";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Intensidade do Sinal";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Qualidade do Sinal";
 #define INTL_NUMBER_OF_MEASUREMENTS "Quantidade de medições"

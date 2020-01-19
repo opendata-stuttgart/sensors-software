@@ -5,10 +5,9 @@
  *  Turkish translations
  *
  *	Texts should be as short as possible
- *	We only have 512 kB for the entire firmware
  */
 
-constexpr const char INTL_LANG[] = "TR";
+#define INTL_LANG "TR"
 #define INTL_PM_SENSOR "Hava Kirliliği (Ince Toz) Ölçüm sensörü"
 const char INTL_CONFIGURATION[] PROGMEM = "Yapılandırma";
 #define INTL_WIFI_SETTINGS "WiFi bağlantı ayarları"
@@ -62,6 +61,7 @@ const char INTL_PATH[] PROGMEM = "Yol";
 const char INTL_PORT[] PROGMEM = "kapı";
 const char INTL_USER[] PROGMEM = "kullanıcı";
 const char INTL_PASSWORD[] PROGMEM = "parola";
+const char INTL_MEASUREMENT[] PROGMEM = "Measurement";
 const char INTL_SEND_TO[] PROGMEM = "Gönder {v}";
 const char INTL_READ_FROM[] PROGMEM = "Oku {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "sistem yeniden yükleniyor";
@@ -105,7 +105,7 @@ const char INTL_LATITUDE[] PROGMEM = "Enlem";
 const char INTL_LONGITUDE[] PROGMEM = "Boylam";
 const char INTL_ALTITUDE[] PROGMEM = "Rakım";
 const char INTL_DATE[] PROGMEM = "tarih";
-const char INTL_TIME[] PROGMEM = "zaman";
+const char INTL_TIME_UTC[] PROGMEM = "zaman (UTC)";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "sinyal gücü";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "sinyal kalitesi";
 #define INTL_NUMBER_OF_MEASUREMENTS "Ölçümlerin sayısı"

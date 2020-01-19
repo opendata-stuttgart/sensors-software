@@ -5,10 +5,9 @@
  *  Luxembourgish translations
  *
  *	Texts should be as short as possible
- *	We only have 512 kB for the entire firmware
  */
 
-constexpr const char INTL_LANG[] = "LU";
+#define INTL_LANG "LU"
 #define INTL_PM_SENSOR "Reng Stëbspartikelensensor"
 const char INTL_CONFIGURATION[] PROGMEM = "Konfiguratioun";
 #define INTL_WIFI_SETTINGS "WiFi Daten"
@@ -62,6 +61,7 @@ const char INTL_PATH[] PROGMEM = "Wee";
 const char INTL_PORT[] PROGMEM = "Port";
 const char INTL_USER[] PROGMEM = "Benotzer";
 const char INTL_PASSWORD[] PROGMEM = "Passwuert";
+const char INTL_MEASUREMENT[] PROGMEM = "Measurement";
 const char INTL_SEND_TO[] PROGMEM = "Schécken op {v}";
 const char INTL_READ_FROM[] PROGMEM = "Liesen {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "De Sensor gëtt neigestart.";
@@ -105,7 +105,7 @@ const char INTL_LATITUDE[] PROGMEM = "Breedegrad";
 const char INTL_LONGITUDE[] PROGMEM = "Längtegrad";
 const char INTL_ALTITUDE[] PROGMEM = "Héicht";
 const char INTL_DATE[] PROGMEM = "Datum";
-const char INTL_TIME[] PROGMEM = "Zäit";
+const char INTL_TIME_UTC[] PROGMEM = "Zäit (UTC)";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Signal";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Qualitéit";
 #define INTL_NUMBER_OF_MEASUREMENTS "Zuel vu Mesuren"

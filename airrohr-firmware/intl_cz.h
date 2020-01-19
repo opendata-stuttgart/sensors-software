@@ -5,10 +5,9 @@
  *  Czech translations
  *
  *	Texts should be as short as possible
- *	We only have 512 kB for the entire firmware
  */
 
-constexpr const char INTL_LANG[] = "CZ";
+#define INTL_LANG "CZ"
 #define INTL_PM_SENSOR "Senzor prachových èástic"
 const char INTL_CONFIGURATION[] PROGMEM = "Konfigurace";
 #define INTL_WIFI_SETTINGS "Nastavení Wi-Fi"
@@ -62,6 +61,7 @@ const char INTL_PATH[] PROGMEM = "Cesta";
 const char INTL_PORT[] PROGMEM = "Port";
 const char INTL_USER[] PROGMEM = "Uživatel";
 const char INTL_PASSWORD[] PROGMEM = "Heslo";
+const char INTL_MEASUREMENT[] PROGMEM = "Measurement";
 const char INTL_SEND_TO[] PROGMEM = "Odeslat na {v}";
 const char INTL_READ_FROM[] PROGMEM = "Èti z {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Zaøízení bude restartováno";
@@ -105,7 +105,7 @@ const char INTL_LATITUDE[] PROGMEM = "Zem. šíøka";
 const char INTL_LONGITUDE[] PROGMEM = "Zem. délka";
 const char INTL_ALTITUDE[] PROGMEM = "Nadm. výška";
 const char INTL_DATE[] PROGMEM = "Datum";
-const char INTL_TIME[] PROGMEM = "Èas";
+const char INTL_TIME_UTC[] PROGMEM = "Èas (UTC)";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Síla signálu";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Kvalita signálu";
 #define INTL_NUMBER_OF_MEASUREMENTS "Počet měření"

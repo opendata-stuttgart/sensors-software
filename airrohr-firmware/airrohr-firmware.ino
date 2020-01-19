@@ -233,12 +233,6 @@ namespace cfg {
 
 #define JSON_BUFFER_SIZE 2300
 
-enum class PmSensorCmd {
-	Start,
-	Stop,
-	ContinuousMode
-};
-
 LoggerConfig loggerConfigs[LoggerCount];
 
 long int sample_count = 0;
@@ -470,10 +464,6 @@ struct struct_wifiInfo {
 struct struct_wifiInfo *wifiInfo;
 uint8_t count_wifiInfo;
 
-template<typename T, std::size_t N> constexpr std::size_t array_num_elements(const T(&)[N]) {
-	return N;
-}
-
 #define msSince(timestamp_before) (act_milli - (timestamp_before))
 
 const char data_first_part[] PROGMEM = "{\"software_version\": \"" SOFTWARE_VERSION_STR "\", \"sensordatavalues\":[";
@@ -513,130 +503,6 @@ static void display_debug(const String& text1, const String& text2) {
 		lcd_2004->print(text1);
 		lcd_2004->setCursor(0, 1);
 		lcd_2004->print(text2);
-	}
-}
-
-
-/*****************************************************************
- * send SDS011 command (start, stop, continuous mode, version    *
- *****************************************************************/
-
-static bool SDS_checksum_valid(const uint8_t (&data)[8]) {
-    uint8_t checksum_is = 0;
-    for (unsigned i = 0; i < 6; ++i) {
-        checksum_is += data[i];
-    }
-    return (data[7] == 0xAB && checksum_is == data[6]);
-}
-
-static void SDS_rawcmd(const uint8_t cmd_head1, const uint8_t cmd_head2, const uint8_t cmd_head3) {
-	constexpr uint8_t cmd_len = 19;
-
-	uint8_t buf[cmd_len];
-	buf[0] = 0xAA;
-	buf[1] = 0xB4;
-	buf[2] = cmd_head1;
-	buf[3] = cmd_head2;
-	buf[4] = cmd_head3;
-	for (unsigned i = 5; i < 15; ++i) {
-		buf[i] = 0x00;
-	}
-	buf[15] = 0xFF;
-	buf[16] = 0xFF;
-	buf[17] = cmd_head1 + cmd_head2 + cmd_head3 - 2;
-	buf[18] = 0xAB;
-	serialSDS.write(buf, cmd_len);
-}
-
-static bool SDS_cmd(PmSensorCmd cmd) {
-	switch (cmd) {
-	case PmSensorCmd::Start:
-		SDS_rawcmd(0x06, 0x01, 0x01);
-		break;
-	case PmSensorCmd::Stop:
-		SDS_rawcmd(0x06, 0x01, 0x00);
-		break;
-	case PmSensorCmd::ContinuousMode:
-		// TODO: Check mode first before (re-)setting it
-		SDS_rawcmd(0x08, 0x01, 0x00);
-		SDS_rawcmd(0x02, 0x01, 0x00);
-		break;
-	}
-
-	return cmd != PmSensorCmd::Stop;
-}
-
-/*****************************************************************
- * send Plantower PMS sensor command start, stop, cont. mode     *
- *****************************************************************/
-static bool PMS_cmd(PmSensorCmd cmd) {
-	static constexpr uint8_t start_cmd[] PROGMEM = {
-		0x42, 0x4D, 0xE4, 0x00, 0x01, 0x01, 0x74
-	};
-	static constexpr uint8_t stop_cmd[] PROGMEM = {
-		0x42, 0x4D, 0xE4, 0x00, 0x00, 0x01, 0x73
-	};
-	static constexpr uint8_t continuous_mode_cmd[] PROGMEM = {
-		0x42, 0x4D, 0xE1, 0x00, 0x01, 0x01, 0x71
-	};
-	constexpr uint8_t cmd_len = array_num_elements(start_cmd);
-
-	uint8_t buf[cmd_len];
-	switch (cmd) {
-	case PmSensorCmd::Start:
-		memcpy_P(buf, start_cmd, cmd_len);
-		break;
-	case PmSensorCmd::Stop:
-		memcpy_P(buf, stop_cmd, cmd_len);
-		break;
-	case PmSensorCmd::ContinuousMode:
-		memcpy_P(buf, continuous_mode_cmd, cmd_len);
-		break;
-	}
-	serialSDS.write(buf, cmd_len);
-	return cmd != PmSensorCmd::Stop;
-}
-
-/*****************************************************************
- * send Honeywell PMS sensor command start, stop, cont. mode     *
- *****************************************************************/
-static bool HPM_cmd(PmSensorCmd cmd) {
-	static constexpr uint8_t start_cmd[] PROGMEM = {
-		0x68, 0x01, 0x01, 0x96
-	};
-	static constexpr uint8_t stop_cmd[] PROGMEM = {
-		0x68, 0x01, 0x02, 0x95
-	};
-	static constexpr uint8_t continuous_mode_cmd[] PROGMEM = {
-		0x68, 0x01, 0x40, 0x57
-	};
-	constexpr uint8_t cmd_len = array_num_elements(start_cmd);
-
-	uint8_t buf[cmd_len];
-	switch (cmd) {
-	case PmSensorCmd::Start:
-		memcpy_P(buf, start_cmd, cmd_len);
-		break;
-	case PmSensorCmd::Stop:
-		memcpy_P(buf, stop_cmd, cmd_len);
-		break;
-	case PmSensorCmd::ContinuousMode:
-		memcpy_P(buf, continuous_mode_cmd, cmd_len);
-		break;
-	}
-	serialSDS.write(buf, cmd_len);
-	return cmd != PmSensorCmd::Stop;
-}
-
-// workaround for https://github.com/plerup/espsoftwareserial/issues/127
-static void yield_for_serial_buffer(size_t length) {
-	unsigned long startMillis = millis();
-	unsigned long yield_timeout = length * 9 * 1000 / 9600;
-
-	while (serialSDS.available() < (int) length &&
-				millis() - startMillis < yield_timeout) {
-		yield();
-		serialSDS.perform_work();
 	}
 }
 
@@ -1226,18 +1092,20 @@ static void webserver_config_send_body_get(String& page_content) {
 	server.sendContent(page_content);
 	page_content = tmpl(FPSTR(WEB_DIV_PANEL), String(4));
 
-	page_content += form_checkbox(Config_send2dusti, F("API Sensor.Community"), false);
+	page_content += tmpl(FPSTR(INTL_SEND_TO), F("APIs"));
+	page_content += FPSTR(BR_TAG);
+	page_content += form_checkbox(Config_send2dusti, FPSTR(WEB_SENSORCOMMUNITY), false);
 	page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
 	page_content += form_checkbox(Config_ssl_dusti, FPSTR(WEB_HTTPS), false);
 	page_content += FPSTR(WEB_BRACE_BR);
-	page_content += form_checkbox(Config_send2madavi, F("API Madavi.de"), false);
+	page_content += form_checkbox(Config_send2madavi, FPSTR(WEB_MADAVI), false);
 	page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
 	page_content += form_checkbox(Config_ssl_madavi, FPSTR(WEB_HTTPS), false);
 	page_content += FPSTR(WEB_BRACE_BR);
-	add_form_checkbox(Config_send2csv, tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_CSV)));
-	add_form_checkbox(Config_send2fsapp, tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_FEINSTAUB_APP)));
-	add_form_checkbox(Config_send2aircms, tmpl(FPSTR(INTL_SEND_TO), F("aircms.online")));
-	add_form_checkbox(Config_send2sensemap, tmpl(FPSTR(INTL_SEND_TO), F("OpenSenseMap")));
+	add_form_checkbox(Config_send2csv, FPSTR(WEB_CSV));
+	add_form_checkbox(Config_send2fsapp, FPSTR(WEB_FEINSTAUB_APP));
+	add_form_checkbox(Config_send2aircms, FPSTR(WEB_AIRCMS));
+	add_form_checkbox(Config_send2sensemap, FPSTR(WEB_OPENSENSEMAP));
 	page_content += FPSTR(TABLE_TAG_OPEN);
 	add_form_input(page_content, Config_senseboxid, F("senseBox&nbsp;ID"), LEN_SENSEBOXID-1);
 
@@ -1272,7 +1140,7 @@ static void webserver_config_send_body_get(String& page_content) {
 	add_form_input(page_content, Config_port_influx, FPSTR(INTL_PORT), MAX_PORT_DIGITS);
 	add_form_input(page_content, Config_user_influx, FPSTR(INTL_USER), LEN_USER_INFLUX-1);
 	add_form_input(page_content, Config_pwd_influx, FPSTR(INTL_PASSWORD), LEN_CFG_PASSWORD-1);
-	add_form_input(page_content, Config_measurement_name_influx, F("Measurement"), LEN_MEASUREMENT_NAME_INFLUX-1);
+	add_form_input(page_content, Config_measurement_name_influx, FPSTR(INTL_MEASUREMENT), LEN_MEASUREMENT_NAME_INFLUX-1);
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 	page_content += F("</div></div>");
 	page_content += form_submit(FPSTR(INTL_SAVE_AND_RESTART));
@@ -1572,7 +1440,7 @@ static void webserver_values() {
 		add_table_value(FPSTR(WEB_GPS), FPSTR(INTL_LONGITUDE), check_display_value(last_value_GPS_lon, -200.0, 6, 0), unit_Deg);
 		add_table_value(FPSTR(WEB_GPS), FPSTR(INTL_ALTITUDE), check_display_value(last_value_GPS_alt, -1000.0, 2, 0), "m");
 		add_table_value(FPSTR(WEB_GPS), FPSTR(INTL_DATE), last_value_GPS_date, emptyString);
-		add_table_value(FPSTR(WEB_GPS), FPSTR(INTL_TIME), last_value_GPS_time, emptyString);
+		add_table_value(FPSTR(WEB_GPS), FPSTR(INTL_TIME_UTC), last_value_GPS_time, emptyString);
 	}
 
 	server.sendContent(page_content);
@@ -1633,7 +1501,7 @@ static void webserver_status() {
 #endif
 
 	time_t now = time(nullptr);
-	add_table_row_from_value(page_content, FPSTR(INTL_TIME), ctime(&now));
+	add_table_row_from_value(page_content, FPSTR(INTL_TIME_UTC), ctime(&now));
 	add_table_row_from_value(page_content, F("Uptime"), delayToString(millis() - time_point_device_start_ms));
 	add_table_row_from_value(page_content, F("Reset Reason"), ESP.getResetReason());
 	if (cfg::sds_read) {
@@ -1673,6 +1541,17 @@ static void webserver_status() {
 
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 	end_html_page(page_content);
+}
+
+
+/*****************************************************************
+ * Webserver read serial ring buffer                             *
+ *****************************************************************/
+
+static void webserver_serial() {
+	String s(Debug.popLines());
+
+	server.send(s.length() ? 200 : 204, FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN), s);
 }
 
 /*****************************************************************
@@ -1721,17 +1600,24 @@ static void webserver_debug_level() {
 		}
 	}
 
-	page_content += F("<br/><pre class='panels'>");
+	page_content += F("<br/><pre id='slog' class='panels'>");
 	page_content += Debug.popLines();
 	page_content += F("</pre>");
+	page_content += F("<script>"
+	"function slog_update() {"
+	"fetch('/serial').then(r => r.text()).then((r) => {"
+    "document.getElementById('slog').innerText += r;}).catch(err => console.log(err));};"
+	"setInterval(slog_update, 3000);"
+	"</script>"
+	);
 	page_content += F("<h4>");
 	page_content += FPSTR(INTL_DEBUG_SETTING_TO);
 	page_content += F("</h4>"
 		"<table style='width:100%;'>"
-		"<tr><td style='width:25%;'><a href='/debug?lvl=0'>" INTL_NONE "</a></td>"
-		"<td style='width:25%;'><a href='/debug?lvl=1'>" INTL_ERROR "</a></td>"
-		"<td style='width:25%;'><a href='/debug?lvl=3'>" INTL_MIN_INFO "</a></td>"
-		"<td style='width:25%;'><a href='/debug?lvl=5'>" INTL_MAX_INFO "</a></td>"
+		"<tr><td style='width:25%;'><a class='b' href='/debug?lvl=0'>" INTL_NONE "</a></td>"
+		"<td style='width:25%;'><a class='b' href='/debug?lvl=1'>" INTL_ERROR "</a></td>"
+		"<td style='width:25%;'><a class='b' href='/debug?lvl=3'>" INTL_MIN_INFO "</a></td>"
+		"<td style='width:25%;'><a class='b' href='/debug?lvl=5'>" INTL_MAX_INFO "</a></td>"
 		"</tr><tr>"
 		"</tr>"
 		"</table>");
@@ -1862,13 +1748,16 @@ static void webserver_prometheus_endpoint() {
 /*****************************************************************
  * Webserver Images                                              *
  *****************************************************************/
-static void webserver_images() {
+static void webserver_static() {
 	server.sendHeader(F("Cache-Control"), F("max-age=2592000, public"));
 
-	if (server.arg("name") == F("luftdaten_logo")) {
-		debug_outln_info(F("ws: luftdaten_logo..."));
+	if (server.arg(String('r')) == F("logo")) {
 		server.send_P(200, TXT_CONTENT_TYPE_IMAGE_PNG,
 			LUFTDATEN_INFO_LOGO_PNG, LUFTDATEN_INFO_LOGO_PNG_SIZE);
+	}
+	else if (server.arg(String('r')) == F("css")) {
+		server.send_P(200, TXT_CONTENT_TYPE_TEXT_CSS,
+			WEB_PAGE_STATIC_CSS, sizeof(WEB_PAGE_STATIC_CSS)-1);
 	} else {
 		webserver_not_found();
 	}
@@ -1903,11 +1792,12 @@ static void setup_webserver() {
 	server.on(F("/generate_204"), webserver_config);
 	server.on(F("/fwlink"), webserver_config);
 	server.on(F("/debug"), webserver_debug_level);
+	server.on(F("/serial"), webserver_serial);
 	server.on(F("/removeConfig"), webserver_removeConfig);
 	server.on(F("/reset"), webserver_reset);
 	server.on(F("/data.json"), webserver_data_json);
 	server.on(F("/metrics"), webserver_prometheus_endpoint);
-	server.on(F("/images"), webserver_images);
+	server.on(F(STATIC_PREFIX), webserver_static);
 	server.onNotFound(webserver_not_found);
 
 	debug_outln_info(F("Starting Webserver... "), WiFi.localIP().toString());

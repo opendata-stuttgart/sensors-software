@@ -5,10 +5,9 @@
  *  Serbian translations
  *
  *	Texts should be as short as possible
- *	We only have 512 kB for the entire firmware
  */
 
-constexpr const char INTL_LANG[] = "RS";
+#define INTL_LANG "RS"
 #define INTL_PM_SENSOR "Senzor suspendovanih čestica"
 const char INTL_CONFIGURATION[] PROGMEM = "Konfiguracija";
 #define INTL_WIFI_SETTINGS "WiFi podešavanja"
@@ -62,6 +61,7 @@ const char INTL_PATH[] PROGMEM = "Putanja";
 const char INTL_PORT[] PROGMEM = "Port";
 const char INTL_USER[] PROGMEM = "Korisnik";
 const char INTL_PASSWORD[] PROGMEM = "Lozinka";
+const char INTL_MEASUREMENT[] PROGMEM = "Measurement";
 const char INTL_SEND_TO[] PROGMEM = "Pošalji na {v}";
 const char INTL_READ_FROM[] PROGMEM = "Pročitaj iz {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Senzor se restartuje.";
@@ -105,7 +105,7 @@ const char INTL_LATITUDE[] PROGMEM = "Geografska širina";
 const char INTL_LONGITUDE[] PROGMEM = "Geografska dužina";
 const char INTL_ALTITUDE[] PROGMEM = "Nadmorska visina";
 const char INTL_DATE[] PROGMEM = "Datum";
-const char INTL_TIME[] PROGMEM = "Vreme";
+const char INTL_TIME_UTC[] PROGMEM = "Vreme (UTC)";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "jačina signala";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "kvalitet signala";
 #define INTL_NUMBER_OF_MEASUREMENTS "Broj merenja"

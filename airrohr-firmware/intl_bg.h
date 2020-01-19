@@ -5,10 +5,9 @@
  *  Bulgarian translations
  *
  *	Texts should be as short as possible
- *	We only have 512 kB for the entire firmware
  */
 
-constexpr const char INTL_LANG[] = "BG";
+#define INTL_LANG "BG"
 #define INTL_PM_SENSOR "Сензор за прахови частици"
 const char INTL_CONFIGURATION[] PROGMEM = "Конфигурация";
 #define INTL_WIFI_SETTINGS "Настройки за WiFi"
@@ -19,7 +18,7 @@ const char INTL_NETWORKS_FOUND[] PROGMEM = "Намерени мрежи: ";
 const char INTL_AB_HIER_NUR_ANDERN[] PROGMEM = "Разширени настройки (само ако знаете какво правите)";
 const char INTL_SAVE[] PROGMEM = "Запиши";
 const char INTL_SENSORS[] PROGMEM = "Сензори";
-const char INTL_MORE_SENSORS[] PROGMEM = "More Сензори";
+const char INTL_MORE_SENSORS[] PROGMEM = "Още Сензори";
 const char INTL_SDS011[] PROGMEM = "SDS011 ({pm})";
 const char INTL_PMS[] PROGMEM = "Plantower PMS(1,3,5,6,7)003 ({pm})";
 const char INTL_HPM[] PROGMEM = "Honeywell сензора за прахови частици";
@@ -62,6 +61,7 @@ const char INTL_PATH[] PROGMEM = "Път";
 const char INTL_PORT[] PROGMEM = "Порт";
 const char INTL_USER[] PROGMEM = "Потребител";
 const char INTL_PASSWORD[] PROGMEM = "Парола";
+const char INTL_MEASUREMENT[] PROGMEM = "Измерване";
 const char INTL_SEND_TO[] PROGMEM = "Изпрати до {v}";
 const char INTL_READ_FROM[] PROGMEM = "Получено от {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Сензорът се рестартира.";
@@ -105,7 +105,7 @@ const char INTL_LATITUDE[] PROGMEM = "Географска ширина";
 const char INTL_LONGITUDE[] PROGMEM = "Географска дължина";
 const char INTL_ALTITUDE[] PROGMEM = "Надморска височина";
 const char INTL_DATE[] PROGMEM = "Дата";
-const char INTL_TIME[] PROGMEM = "Дата";
+const char INTL_TIME_UTC[] PROGMEM = "Дата (UTC)";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Сила на сигнала";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Качество на сигнала";
 #define INTL_NUMBER_OF_MEASUREMENTS "Брой измервания"

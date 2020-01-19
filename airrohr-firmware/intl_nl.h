@@ -5,10 +5,9 @@
  *  Dutch translations
  *
  *	Texts should be as short as possible
- *	We only have 512 kB for the entire firmware
  */
 
-constexpr const char INTL_LANG[] = "NL";
+#define INTL_LANG "NL"
 #define INTL_PM_SENSOR "Fijnstofsensor"
 const char INTL_CONFIGURATION[] PROGMEM = "Configuratie";
 #define INTL_WIFI_SETTINGS "WiFi-instellingen"
@@ -62,6 +61,7 @@ const char INTL_PATH[] PROGMEM = "Pad";
 const char INTL_PORT[] PROGMEM = "Poort";
 const char INTL_USER[] PROGMEM = "Gebruiker";
 const char INTL_PASSWORD[] PROGMEM = "Wachtwoord";
+const char INTL_MEASUREMENT[] PROGMEM = "Measurement";
 const char INTL_SEND_TO[] PROGMEM = "Verzend naar {v}";
 const char INTL_READ_FROM[] PROGMEM = "Lees uit {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Toestel wordt opnieuw opgestart";
@@ -105,7 +105,7 @@ const char INTL_LATITUDE[] PROGMEM = "Breedtegraad";
 const char INTL_LONGITUDE[] PROGMEM = "Lengtegraad";
 const char INTL_ALTITUDE[] PROGMEM = "Hoogte";
 const char INTL_DATE[] PROGMEM = "Datum";
-const char INTL_TIME[] PROGMEM = "Tijd";
+const char INTL_TIME_UTC[] PROGMEM = "Tijd (UTC)";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Signaalsterkte";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Signaalkwaliteit";
 #define INTL_NUMBER_OF_MEASUREMENTS "Aantal metingen"
