@@ -105,7 +105,7 @@ const char INTL_LATITUDE[] PROGMEM = "Enlem";
 const char INTL_LONGITUDE[] PROGMEM = "Boylam";
 const char INTL_ALTITUDE[] PROGMEM = "Rakım";
 const char INTL_DATE[] PROGMEM = "tarih";
-const char INTL_TIME[] PROGMEM = "zaman";
+const char INTL_TIME_UTC[] PROGMEM = "zaman (UTC)";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "sinyal gücü";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "sinyal kalitesi";
 #define INTL_NUMBER_OF_MEASUREMENTS "Ölçümlerin sayısı"

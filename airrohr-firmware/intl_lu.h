@@ -105,7 +105,7 @@ const char INTL_LATITUDE[] PROGMEM = "Breedegrad";
 const char INTL_LONGITUDE[] PROGMEM = "Längtegrad";
 const char INTL_ALTITUDE[] PROGMEM = "Héicht";
 const char INTL_DATE[] PROGMEM = "Datum";
-const char INTL_TIME[] PROGMEM = "Zäit";
+const char INTL_TIME_UTC[] PROGMEM = "Zäit (UTC)";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Signal";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Qualitéit";
 #define INTL_NUMBER_OF_MEASUREMENTS "Zuel vu Mesuren"

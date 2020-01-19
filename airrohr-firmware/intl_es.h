@@ -105,7 +105,7 @@ const char INTL_LATITUDE[] PROGMEM = "Latitud";
 const char INTL_LONGITUDE[] PROGMEM = "Longitud";
 const char INTL_ALTITUDE[] PROGMEM = "Altitud";
 const char INTL_DATE[] PROGMEM = "Fecha";
-const char INTL_TIME[] PROGMEM = "Tiempo";
+const char INTL_TIME_UTC[] PROGMEM = "Tiempo (UTC)";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Intensidad de Señal";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Calidad de Señal";
 #define INTL_NUMBER_OF_MEASUREMENTS "Numero de mediciones"

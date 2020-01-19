@@ -105,7 +105,7 @@ const char INTL_LATITUDE[] PROGMEM = "Breddegrad";
 const char INTL_LONGITUDE[] PROGMEM = "Længdegrad";
 const char INTL_ALTITUDE[] PROGMEM = "Højde";
 const char INTL_DATE[] PROGMEM = "Dato";
-const char INTL_TIME[] PROGMEM = "Tid";
+const char INTL_TIME_UTC[] PROGMEM = "Tid (UTC)";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Signal";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Kvalitet";
 #define INTL_NUMBER_OF_MEASUREMENTS "Antal målinger"
