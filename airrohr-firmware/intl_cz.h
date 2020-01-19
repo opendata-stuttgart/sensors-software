@@ -61,6 +61,7 @@ const char INTL_PATH[] PROGMEM = "Cesta";
 const char INTL_PORT[] PROGMEM = "Port";
 const char INTL_USER[] PROGMEM = "Uživatel";
 const char INTL_PASSWORD[] PROGMEM = "Heslo";
+const char INTL_MEASUREMENT[] PROGMEM = "Measurement";
 const char INTL_SEND_TO[] PROGMEM = "Odeslat na {v}";
 const char INTL_READ_FROM[] PROGMEM = "Èti z {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Zaøízení bude restartováno";

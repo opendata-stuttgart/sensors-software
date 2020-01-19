@@ -61,6 +61,7 @@ const char INTL_PATH[] PROGMEM = "Wee";
 const char INTL_PORT[] PROGMEM = "Port";
 const char INTL_USER[] PROGMEM = "Benotzer";
 const char INTL_PASSWORD[] PROGMEM = "Passwuert";
+const char INTL_MEASUREMENT[] PROGMEM = "Measurement";
 const char INTL_SEND_TO[] PROGMEM = "Schécken op {v}";
 const char INTL_READ_FROM[] PROGMEM = "Liesen {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "De Sensor gëtt neigestart.";

@@ -61,6 +61,7 @@ const char INTL_PATH[] PROGMEM = "Percorso";
 const char INTL_PORT[] PROGMEM = "Porta";
 const char INTL_USER[] PROGMEM = "Utente";
 const char INTL_PASSWORD[] PROGMEM = "Password";
+const char INTL_MEASUREMENT[] PROGMEM = "Measurement";
 const char INTL_SEND_TO[] PROGMEM = "Spedire a {v}";
 const char INTL_READ_FROM[] PROGMEM = "Leggi da {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Riavvio dispositivo.";

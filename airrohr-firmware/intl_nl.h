@@ -61,6 +61,7 @@ const char INTL_PATH[] PROGMEM = "Pad";
 const char INTL_PORT[] PROGMEM = "Poort";
 const char INTL_USER[] PROGMEM = "Gebruiker";
 const char INTL_PASSWORD[] PROGMEM = "Wachtwoord";
+const char INTL_MEASUREMENT[] PROGMEM = "Measurement";
 const char INTL_SEND_TO[] PROGMEM = "Verzend naar {v}";
 const char INTL_READ_FROM[] PROGMEM = "Lees uit {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Toestel wordt opnieuw opgestart";

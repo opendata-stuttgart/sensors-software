@@ -61,6 +61,7 @@ const char INTL_PATH[] PROGMEM = "Sökväg (path)";
 const char INTL_PORT[] PROGMEM = "Port";
 const char INTL_USER[] PROGMEM = "Användarnamn";
 const char INTL_PASSWORD[] PROGMEM = "Lösenord";
+const char INTL_MEASUREMENT[] PROGMEM = "Measurement";
 const char INTL_SEND_TO[] PROGMEM = "Skicka till {v}";
 const char INTL_READ_FROM[] PROGMEM = "Hämta {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Sensor startas om.";

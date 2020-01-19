@@ -61,6 +61,7 @@ const char INTL_PATH[] PROGMEM = "Yol";
 const char INTL_PORT[] PROGMEM = "kapı";
 const char INTL_USER[] PROGMEM = "kullanıcı";
 const char INTL_PASSWORD[] PROGMEM = "parola";
+const char INTL_MEASUREMENT[] PROGMEM = "Measurement";
 const char INTL_SEND_TO[] PROGMEM = "Gönder {v}";
 const char INTL_READ_FROM[] PROGMEM = "Oku {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "sistem yeniden yükleniyor";

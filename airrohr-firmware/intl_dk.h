@@ -61,6 +61,7 @@ const char INTL_PATH[] PROGMEM = "Sti (path)";
 const char INTL_PORT[] PROGMEM = "Port";
 const char INTL_USER[] PROGMEM = "Brugernavn";
 const char INTL_PASSWORD[] PROGMEM = "Kodeord";
+const char INTL_MEASUREMENT[] PROGMEM = "Measurement";
 const char INTL_SEND_TO[] PROGMEM = "Send til {v}";
 const char INTL_READ_FROM[] PROGMEM = "Hent fra {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Sensor genstartes.";
