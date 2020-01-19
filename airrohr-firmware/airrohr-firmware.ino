@@ -1092,18 +1092,20 @@ static void webserver_config_send_body_get(String& page_content) {
 	server.sendContent(page_content);
 	page_content = tmpl(FPSTR(WEB_DIV_PANEL), String(4));
 
-	page_content += form_checkbox(Config_send2dusti, F("API Sensor.Community"), false);
+	page_content += tmpl(FPSTR(INTL_SEND_TO), F("APIs"));
+	page_content += FPSTR(BR_TAG);
+	page_content += form_checkbox(Config_send2dusti, FPSTR(WEB_SENSORCOMMUNITY), false);
 	page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
 	page_content += form_checkbox(Config_ssl_dusti, FPSTR(WEB_HTTPS), false);
 	page_content += FPSTR(WEB_BRACE_BR);
-	page_content += form_checkbox(Config_send2madavi, F("API Madavi.de"), false);
+	page_content += form_checkbox(Config_send2madavi, FPSTR(WEB_MADAVI), false);
 	page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
 	page_content += form_checkbox(Config_ssl_madavi, FPSTR(WEB_HTTPS), false);
 	page_content += FPSTR(WEB_BRACE_BR);
-	add_form_checkbox(Config_send2csv, tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_CSV)));
-	add_form_checkbox(Config_send2fsapp, tmpl(FPSTR(INTL_SEND_TO), FPSTR(WEB_FEINSTAUB_APP)));
-	add_form_checkbox(Config_send2aircms, tmpl(FPSTR(INTL_SEND_TO), F("aircms.online")));
-	add_form_checkbox(Config_send2sensemap, tmpl(FPSTR(INTL_SEND_TO), F("OpenSenseMap")));
+	add_form_checkbox(Config_send2csv, FPSTR(WEB_CSV));
+	add_form_checkbox(Config_send2fsapp, FPSTR(WEB_FEINSTAUB_APP));
+	add_form_checkbox(Config_send2aircms, FPSTR(WEB_AIRCMS));
+	add_form_checkbox(Config_send2sensemap, FPSTR(WEB_OPENSENSEMAP));
 	page_content += FPSTR(TABLE_TAG_OPEN);
 	add_form_input(page_content, Config_senseboxid, F("senseBox&nbsp;ID"), LEN_SENSEBOXID-1);
 
@@ -1594,10 +1596,10 @@ static void webserver_debug_level() {
 	page_content += FPSTR(INTL_DEBUG_SETTING_TO);
 	page_content += F("</h4>"
 		"<table style='width:100%;'>"
-		"<tr><td style='width:25%;'><a href='/debug?lvl=0'>" INTL_NONE "</a></td>"
-		"<td style='width:25%;'><a href='/debug?lvl=1'>" INTL_ERROR "</a></td>"
-		"<td style='width:25%;'><a href='/debug?lvl=3'>" INTL_MIN_INFO "</a></td>"
-		"<td style='width:25%;'><a href='/debug?lvl=5'>" INTL_MAX_INFO "</a></td>"
+		"<tr><td style='width:25%;'><a class='b' href='/debug?lvl=0'>" INTL_NONE "</a></td>"
+		"<td style='width:25%;'><a class='b' href='/debug?lvl=1'>" INTL_ERROR "</a></td>"
+		"<td style='width:25%;'><a class='b' href='/debug?lvl=3'>" INTL_MIN_INFO "</a></td>"
+		"<td style='width:25%;'><a class='b' href='/debug?lvl=5'>" INTL_MAX_INFO "</a></td>"
 		"</tr><tr>"
 		"</tr>"
 		"</table>");

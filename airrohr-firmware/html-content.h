@@ -46,7 +46,7 @@ body{font-family:Arial;margin:0}\
 .content{margin:10px}\
 .r{text-align:right}\
 td{vertical-align:top}\
-a{text-decoration:none;padding:10px;background:#3ba;color:#fff;display:block;width:auto;border-radius:5px;box-shadow:0 2px 2px #3ba}\
+.b{text-decoration:none;padding:10px;background:#3ba;color:#fff;display:block;width:auto;border-radius:5px;box-shadow:0 2px 2px #3ba}\
 .wifi{background:0 0;color:#00f;padding:5px;display:inline;border:0;box-shadow:none}\
 input[type=text]{width:100%}\
 input[type=password]{width:100%}\
@@ -83,17 +83,17 @@ const char TABLE_TAG_OPEN[] PROGMEM = "<table>";
 const char TABLE_TAG_CLOSE_BR[] PROGMEM = "</table>";
 const char EMPTY_ROW[] PROGMEM = "<tr><td colspan='3'>&nbsp;</td></tr>";
 
-const char WEB_PAGE_FOOTER[] PROGMEM = "<br/><br/><a href='/' style='display:inline;'>" INTL_BACK_TO_HOME "</a>"\
+const char WEB_PAGE_FOOTER[] PROGMEM = "<br/><br/><a class='b' href='/' style='display:inline;'>" INTL_BACK_TO_HOME "</a>"\
                 "<br/><br/><br/>"
                 "<a href='https://codefor.de/stuttgart/' target='_blank' rel='noreferrer' style='display:inline;background:none;color:black;box-shadow:none'>&copy; Open Knowledge Lab Stuttgart a.o. (Code for Germany)</a></div></body></html>\r\n";
 
-const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a href='/values'>{t}</a><br/>\
-<a href='/status'>{s}</a><br/>\
-<a href='https://maps.sensor.community/' target='_blank' rel='noreferrer'>" INTL_ACTIVE_SENSORS_MAP "</a><br/>\
-<a href='/config'>{conf}</a><br/>\
-<a href='/removeConfig'>" INTL_CONFIGURATION_DELETE "</a><br/>\
-<a href='/reset'>{restart}</a><br/>\
-<a href='/debug'>{debug}</a><br/>\
+const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a class='b' href='/values'>{t}</a><br/>\
+<a class='b' href='/status'>{s}</a><br/>\
+<a class='b' href='https://maps.sensor.community/' target='_blank' rel='noreferrer'>" INTL_ACTIVE_SENSORS_MAP "</a><br/>\
+<a class='b' href='/config'>{conf}</a><br/>\
+<a class='b' href='/removeConfig'>" INTL_CONFIGURATION_DELETE "</a><br/>\
+<a class='b' href='/reset'>{restart}</a><br/>\
+<a class='b' href='/debug'>{debug}</a><br/>\
 ";
 
 const char WEB_CONFIG_SCRIPT[] PROGMEM = "<script>\
@@ -104,13 +104,13 @@ function load_wifi_list(){var x=new XMLHttpRequest();x.open('GET','/wifi');x.onl
 const char WEB_REMOVE_CONFIG_CONTENT[] PROGMEM = "<h3>" INTL_CONFIGURATION_REALLY_DELETE "</h3>\
 <table><tr><td><form method='POST' action='/removeConfig'>\
 <input type='submit' class='s_red' name='submit' value='" INTL_DELETE "'/></form></td>\
-<td><a href='/'>" INTL_CANCEL "</a></td></tr></table>\
+<td><a class='b' href='/'>" INTL_CANCEL "</a></td></tr></table>\
 ";
 
 const char WEB_RESET_CONTENT[] PROGMEM = "<h3>" INTL_REALLY_RESTART_SENSOR "</h3>" \
 "<table><tr><td><form method='POST' action'/reset'>" \
 "<input type='submit' class='s_red' name='submit' value='" INTL_RESTART "'/>"\
-"</form></td><td><a href='/'>" INTL_CANCEL "</a></td></tr></table>";
+"</form></td><td><a class='b' href='/'>" INTL_CANCEL "</a></td></tr></table>";
 
 const char WEB_IOS_REDIRECT[] PROGMEM = "<html><body>Redirecting...\
 <script type=\"text/javascript\">\
@@ -126,7 +126,11 @@ const char WEB_BR_FORM[] PROGMEM = "<br/></form>";
 const char WEB_BR_LF_B[] PROGMEM = "<br/>\n<b>";
 const char WEB_LF_B[] PROGMEM = "\n<b>";
 const char WEB_CSV[] PROGMEM = "CSV";
-const char WEB_FEINSTAUB_APP[] PROGMEM = "Feinstaub-App";
+const char WEB_FEINSTAUB_APP[] PROGMEM = "<a target='_blank' href='https://mrgames13.jimdofree.com/feinstaub-app/info/'>Feinstaub-App</a>";
+const char WEB_OPENSENSEMAP[] PROGMEM = "<a target='_blank' href='https://opensensemap.org/about'>OpenSenseMap.org</a>";
+const char WEB_AIRCMS[] PROGMEM = "<a target='_blank' href='https://aircms.online/#/mission'>aircms.online</a>";
+const char WEB_MADAVI[] PROGMEM = "<a target='_blank' href='https://www.madavi.de/ok-lab-stuttgart/'>Madavi.de</a>";
+const char WEB_SENSORCOMMUNITY[] PROGMEM = "<a target='_blank' href='https://archive.sensor.community/00disclamer.md'>Sensor.Community</a>";
 const char WEB_HTTPS[] PROGMEM = "HTTPS";
 const char WEB_NBSP_NBSP_BRACE[] PROGMEM = "&nbsp;&nbsp;(";
 const char WEB_REPLN_REPLV[] PROGMEM = "\"{n}\":\"{v}\",";
