@@ -60,7 +60,7 @@
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2020-130-B3"
+#define SOFTWARE_VERSION_STR "NRZ-2020-130-B4"
 String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -619,6 +619,9 @@ static void readConfig(bool oldconfig = false) {
 			// SPIFFS.format();
 			rewriteConfig = true;
 		}
+		if (cfg::sending_intervall_ms < READINGTIME_SDS_MS) {
+			cfg::sending_intervall_ms = READINGTIME_SDS_MS;
+		}
 		if (strcmp_P(cfg::senseboxid, PSTR("00112233445566778899aabb")) == 0) {
 			cfg::senseboxid[0] = '\0';
 			cfg::send2sensemap = false;
@@ -799,11 +802,12 @@ static void add_form_input(String& page_content, const ConfigShapeId cfgid, cons
 		s.replace("{t}", F("number"));
 		break;
 	default:
-		t_value = c.cfg_val.as_str;
-		t_value.replace("'", "&#39;");
 		if (c.cfg_type == Config_Type_Password) {
 			s.replace("{t}", F("password"));
+			info = FPSTR(INTL_PASSWORD);
 		} else {
+			t_value = c.cfg_val.as_str;
+			t_value.replace("'", "&#39;");
 			s.replace("{t}", F("text"));
 		}
 	}
@@ -1164,27 +1168,24 @@ static void webserver_config_send_body_post(String& page_content) {
 		if (!server.hasArg(s_param)) {
 			continue;
 		}
+		const String server_arg(server.arg(s_param));
 
 		switch (c.cfg_type) {
 		case Config_Type_UInt:
-			*(c.cfg_val.as_uint) = server.arg(s_param).toInt();
+			*(c.cfg_val.as_uint) = server_arg.toInt();
 			break;
 		case Config_Type_Time:
-			*(c.cfg_val.as_uint) = server.arg(s_param).toInt() * 1000;
+			*(c.cfg_val.as_uint) = server_arg.toInt() * 1000;
 			break;
 		case Config_Type_Bool:
-			*(c.cfg_val.as_bool) = (server.arg(s_param) == "1");
+			*(c.cfg_val.as_bool) = (server_arg == "1");
 			break;
 		case Config_Type_String:
-			strncpy(c.cfg_val.as_str, server.arg(s_param).c_str(), c.cfg_len);
+			strncpy(c.cfg_val.as_str, server_arg.c_str(), c.cfg_len);
 			c.cfg_val.as_str[c.cfg_len] = '\0';
 			break;
 		case Config_Type_Password:
-			const String server_arg(server.arg(s_param));
-			masked_pwd = emptyString;
-			for (uint8_t i=0; i < server_arg.length(); i++)
-				masked_pwd += '*';
-			if (masked_pwd != server_arg || !server_arg.length()) {
+			if (server_arg.length()) {
 				server_arg.toCharArray(c.cfg_val.as_str, LEN_CFG_PASSWORD);
 			}
 			break;
