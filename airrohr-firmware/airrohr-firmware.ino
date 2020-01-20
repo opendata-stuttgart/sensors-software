@@ -619,6 +619,9 @@ static void readConfig(bool oldconfig = false) {
 			// SPIFFS.format();
 			rewriteConfig = true;
 		}
+		if (cfg::sending_intervall_ms < READINGTIME_SDS_MS) {
+			cfg::sending_intervall_ms = READINGTIME_SDS_MS;
+		}
 		if (strcmp_P(cfg::senseboxid, PSTR("00112233445566778899aabb")) == 0) {
 			cfg::senseboxid[0] = '\0';
 			cfg::send2sensemap = false;
