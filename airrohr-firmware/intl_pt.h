@@ -18,7 +18,7 @@ const char INTL_NETWORKS_FOUND[] PROGMEM = "Redes encontradas: ";
 const char INTL_AB_HIER_NUR_ANDERN[] PROGMEM = "Configuração avançada (apenas se sabe o que está a fazer)";
 const char INTL_SAVE[] PROGMEM = "Guardar";
 const char INTL_SENSORS[] PROGMEM = "Sensores";
-const char INTL_MORE_SENSORS[] PROGMEM = "More Sensores";
+const char INTL_MORE_SENSORS[] PROGMEM = "Outros sensores";
 const char INTL_SDS011[] PROGMEM = "SDS011 ({pm})";
 const char INTL_PMS[] PROGMEM = "Plantower PMS(1,3,5,6,7)003 ({pm})";
 const char INTL_HPM[] PROGMEM = "Honeywell sensor de partículas finas";
@@ -35,7 +35,7 @@ const char INTL_DNMS_CORRECTION[] PROGMEM = "Valor de correção em dB(A)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "Correção em °C";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Autorização";
-#define INTL_REPORT_ISSUE "Informar um problema"
+#define INTL_REPORT_ISSUE "Comunicar um problema"
 
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "Nome do sensor WiFi em modo de configuração";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Nome";
@@ -61,7 +61,7 @@ const char INTL_PATH[] PROGMEM = "Caminho";
 const char INTL_PORT[] PROGMEM = "Porta";
 const char INTL_USER[] PROGMEM = "Utilizador";
 const char INTL_PASSWORD[] PROGMEM = "Senha";
-const char INTL_MEASUREMENT[] PROGMEM = "Measurement";
+const char INTL_MEASUREMENT[] PROGMEM = "Medição";
 const char INTL_SEND_TO[] PROGMEM = "Enviar a {v}";
 const char INTL_READ_FROM[] PROGMEM = "Ler {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "O sensor esta a ser reiniciado.";
