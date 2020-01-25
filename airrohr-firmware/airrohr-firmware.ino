@@ -438,7 +438,6 @@ String esp_chipid;
 String last_value_SDS_version;
 
 unsigned long SDS_error_count;
-unsigned long sendData_error_count;
 unsigned long WiFi_error_count;
 
 unsigned long last_page_load = millis();
@@ -1522,7 +1521,15 @@ static void webserver_status() {
 		add_table_row_from_value(page_content, F("OTA Return"),
 			last_update_returncode > 0 ? String(last_update_returncode) : HTTPClient::errorToString(last_update_returncode));
 	}
-	add_table_row_from_value(page_content, F("Data Send"), String(sendData_error_count));
+	for (unsigned int i = 0; i < LoggerCount; ++i) {
+		if (loggerConfigs[i].errors) {
+			const __FlashStringHelper* logger = loggerDescription(i);
+			if (logger) {
+				add_table_row_from_value(page_content, logger, String(loggerConfigs[i].errors));
+			}
+		}
+	}
+
 	if (last_sendData_returncode != 0) {
 		add_table_row_from_value(page_content, F("Data Send Return"),
 			last_sendData_returncode > 0 ? String(last_sendData_returncode) : HTTPClient::errorToString(last_sendData_returncode));
@@ -2084,7 +2091,7 @@ static unsigned long sendData(const LoggerEntry logger, const String& data, cons
 	}
 
 	if (!send_success && result != 0) {
-		sendData_error_count++;
+		loggerConfigs[logger].errors++;
 		last_sendData_returncode = result;
 	}
 
@@ -2798,15 +2805,8 @@ static void fetchSensorSPS30(String& s) {
 	SPS30_measurement_count = 0;
 	SPS30_read_counter = 0;
 	SPS30_read_error_counter = 0;
-	value_SPS30_P0 = 0.0;
-	value_SPS30_P2 = 0.0;
-	value_SPS30_P4 = 0.0;
-	value_SPS30_P1 = 0.0;
-	value_SPS30_N05 = 0.0;
-	value_SPS30_N1 = 0.0;
-	value_SPS30_N25 = 0.0;
-	value_SPS30_N4 = 0.0;
-	value_SPS30_N10 = 0.0;
+	value_SPS30_P0 = value_SPS30_P1 = value_SPS30_P2 = value_SPS30_P4 = 0.0;
+	value_SPS30_N05 = value_SPS30_N1 = value_SPS30_N25 = value_SPS30_N10 = value_SPS30_N4 = 0.0;
 	value_SPS30_TS = 0.0;
 
 	debug_outln_info(FPSTR(DBG_TXT_SEP));

@@ -122,4 +122,6 @@ extern bool SDS_cmd(PmSensorCmd cmd);
 extern bool PMS_cmd(PmSensorCmd cmd);
 extern bool HPM_cmd(PmSensorCmd cmd);
 
+extern const __FlashStringHelper* loggerDescription(unsigned i);
+
 #endif

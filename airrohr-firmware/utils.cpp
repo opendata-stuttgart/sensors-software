@@ -28,6 +28,7 @@
 #include "./intl.h"
 #include "./utils.h"
 #include "./defines.h"
+#include "./ext_def.h"
 
 #include "ca-root.h"
 
@@ -471,3 +472,30 @@ void yield_for_serial_buffer(size_t length) {
 	}
 }
 
+const __FlashStringHelper* loggerDescription(unsigned i) {
+    const __FlashStringHelper* logger = nullptr;
+    switch (i) {
+        case LoggerSensorCommunity:
+            logger = F("Sensor.Community");
+            break;
+        case LoggerMadavi:
+            logger = F("Madavi.de");
+            break;
+        case LoggerSensemap:
+            logger = F("OpenSenseMap.org");
+            break;
+        case LoggerFSapp:
+            logger = F("Feinstaub-App");
+            break;
+        case Loggeraircms:
+            logger = F("aircms.online");
+            break;
+        case LoggerInflux:
+            logger = F("InfluxDB");
+            break;
+        case LoggerCustom:
+            logger = F("Custom");
+            break;
+    }
+    return logger;
+}
