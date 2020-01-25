@@ -676,7 +676,7 @@ static void init_config() {
 /*****************************************************************
  * write config to spiffs                                        *
  *****************************************************************/
-static void writeConfig() {
+static bool writeConfig() {
 	DynamicJsonDocument json(JSON_BUFFER_SIZE);
 	debug_outln_info(F("Saving config..."));
 	json["SOFTWARE_VERSION"] = SOFTWARE_VERSION;
@@ -709,7 +709,10 @@ static void writeConfig() {
 		debug_outln_info(F("Config written successfully."));
 	} else {
 		debug_outln_error(F("failed to open config file for writing"));
+		return false;
 	}
+
+	return true;
 }
 
 /*****************************************************************
@@ -1225,9 +1228,11 @@ static void webserver_config() {
 	end_html_page(page_content);
 
 	if (server.method() == HTTP_POST) {
-		display_debug(F("Writing config"), F("and restarting"));
-		writeConfig();
-		sensor_restart();
+		display_debug(F("Writing config"), emptyString);
+		if (writeConfig()) {
+			display_debug(F("Writing config"), F("and restarting"));
+			sensor_restart();
+		}
 	}
 }
 
