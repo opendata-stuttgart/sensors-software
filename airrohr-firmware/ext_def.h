@@ -44,7 +44,7 @@ enum LoggerEntry {
 
 struct LoggerConfig {
     uint16_t destport;
-    uint16_t _unused;
+    uint16_t errors;
 #if defined(ESP8266)
     BearSSL::Session* session;
 #else

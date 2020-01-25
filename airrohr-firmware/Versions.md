@@ -2,6 +2,7 @@ NRZ-2020-130-B4
 * Prevent password leakage in configuration dialogs
 * Change default password for webpage auth to ""
 * Ignore measurement interval settings below 5s
+* Track API sending errors for each API separately
 
 NRZ-2020-130-B3
 * Serial debug output on webpage
