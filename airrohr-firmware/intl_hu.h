@@ -19,7 +19,7 @@ const char INTL_NETWORKS_FOUND[] PROGMEM = "Talált WiFi hálózatok:";
 const char INTL_AB_HIER_NUR_ANDERN[] PROGMEM = "Haladó beállítások (csak, ha tudod mit csinálsz)";
 const char INTL_SAVE[] PROGMEM = "Mentés";
 const char INTL_SENSORS[] PROGMEM = "Szenzorok";
-const char INTL_MORE_SENSORS[] PROGMEM = "More Sensors";
+const char INTL_MORE_SENSORS[] PROGMEM = "További Szenzorok";
 const char INTL_SDS011[] PROGMEM = "SDS011 ({pm})";
 const char INTL_PMS[] PROGMEM = "Plantower PMS(1,3,5,6,7)003 ({pm})";
 const char INTL_HPM[] PROGMEM = "Honeywell PM sensor";
@@ -32,7 +32,7 @@ const char INTL_BMX280[] PROGMEM = "BMP280/BME280 ({t}, {p})";
 const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
 const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
-const char INTL_DNMS_CORRECTION[] PROGMEM ="correction in dB(A)";
+const char INTL_DNMS_CORRECTION[] PROGMEM ="korrekció dB(A)-ben";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Azonosítás";
 const char INTL_FS_WIFI[] PROGMEM = "WiFi Szenzor";
@@ -48,8 +48,8 @@ const char INTL_LCD1602_27[] PROGMEM = "LCD 1602 (I2C: 0x27)";
 const char INTL_LCD1602_3F[] PROGMEM = "LCD 1602 (I2C: 0x3F)";
 const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
 const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
-const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Display Wifi info";
-const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Display device info";
+const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Wifi adatok megjelenítése";
+const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Eszközadatok megjelenítése";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;Level";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Mérési intervallum";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Hotspot mód időtartama";
@@ -107,7 +107,7 @@ const char INTL_TIME[] PROGMEM = "Idő";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Jelerősség";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Jelminőség";
 #define INTL_NUMBER_OF_MEASUREMENTS "Mérések száma:"
-#define INTL_TIME_SENDING_MS "Time spent uploading"
+#define INTL_TIME_SENDING_MS "Feltöltéssel töltött idő:"
 #define INTL_SENSOR "Szenzor"
 #define INTL_PARAMETER "Paraméter"
 #define INTL_VALUE "Érték"
