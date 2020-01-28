@@ -114,6 +114,8 @@ String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 #if defined(INTL_BG)
 #include "intl_bg.h"
+#elif defined(INTL_HU)
+#include "intl_hu.h"
 #elif defined(INTL_CZ)
 #include "intl_cz.h"
 #elif defined(INTL_DE)
@@ -1167,6 +1169,7 @@ static String form_select_lang() {
 					"<option value='EN'>English (EN)</option>"
 					"<option value='ES'>Español (ES)</option>"
 					"<option value='FR'>Français (FR)</option>"
+					"<option value='HU'>Hungarian (HU)</option>"
 					"<option value='IT'>Italiano (IT)</option>"
 					"<option value='LU'>Lëtzebuergesch (LU)</option>"
 					"<option value='NL'>Nederlands (NL)</option>"
