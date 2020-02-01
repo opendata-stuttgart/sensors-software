@@ -1,8 +1,10 @@
 /*
  *	airRohr firmware
+ *	Copyright (C) 2016-2020  Code for Stuttgart a.o.
  *
  *  Hungarian translations
  *
+ *	Texts should be as short as possible
  */
 
 #define INTL_LANG "HU"
@@ -34,7 +36,7 @@ const char INTL_TEMP_CORRECTION[] PROGMEM = "Korrekció °C";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Azonosítás";
 #define INTL_REPORT_ISSUE "Jelentsen egy problémát"
-const char INTL_FS_WIFI[] PROGMEM = "WiFi Szenzor";
+
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "WiFi Szenzor konfigurációs módban";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Név";
 const char INTL_MORE_SETTINGS[] PROGMEM ="További beállítások";
@@ -63,7 +65,7 @@ const char INTL_MEASUREMENT[] PROGMEM = "Mérés";
 const char INTL_SEND_TO[] PROGMEM = "Send to {v}";
 const char INTL_READ_FROM[] PROGMEM = "Read from {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "A Szenzor újraindul...";
-#define INTL_RESTART_DEVICE "Eszköz újraindítása"
+const char INTL_RESTART_DEVICE[] PROGMEM = "Eszköz újraindítása";
 const char INTL_DELETE_CONFIG[] PROGMEM = "A mentett beállítások törlése";
 const char INTL_RESTART_SENSOR[] PROGMEM = "A szenzor újraindítása";
 #define INTL_HOME "Főoldal"
