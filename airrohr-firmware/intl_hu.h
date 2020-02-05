@@ -35,7 +35,7 @@ const char INTL_DNMS_CORRECTION[] PROGMEM ="korrekció dB(A)-ben";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "Korrekció °C";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Azonosítás";
-#define INTL_REPORT_ISSUE "Jelentsen egy problémát"
+#define INTL_REPORT_ISSUE "Jelents egy hibát"
 
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "WiFi Szenzor konfigurációs módban";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Név";
@@ -71,7 +71,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "A szenzor újraindítása";
 #define INTL_HOME "Főoldal"
 #define INTL_BACK_TO_HOME "Vissza a főoldalra"
 const char INTL_CURRENT_DATA[] PROGMEM = "Aktuális adatok";
-const char INTL_DEVICE_STATUS[] PROGMEM = "Device status";
+const char INTL_DEVICE_STATUS[] PROGMEM = "Eszköz státusz";
 #define INTL_ACTIVE_SENSORS_MAP "Aktív szenzorok térképe (külső link)"
 #define INTL_CONFIGURATION_DELETE "Beállítások törlése"
 #define INTL_CONFIGURATION_REALLY_DELETE "Biztosan törölni akarod a beállításokat?"
