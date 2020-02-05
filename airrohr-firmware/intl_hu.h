@@ -21,7 +21,7 @@ const char INTL_SENSORS[] PROGMEM = "Szenzorok";
 const char INTL_MORE_SENSORS[] PROGMEM = "További Szenzorok";
 const char INTL_SDS011[] PROGMEM = "SDS011 ({pm})";
 const char INTL_PMS[] PROGMEM = "Plantower PMS(1,3,5,6,7)003 ({pm})";
-const char INTL_HPM[] PROGMEM = "Honeywell PM sensor";
+const char INTL_HPM[] PROGMEM = "Honeywell PM szenzor";
 const char INTL_SPS30[] PROGMEM = "Sensirion SPS30 ({pm})";
 const char INTL_PPD42NS[] PROGMEM = "PPD42NS";
 const char INTL_DHT22[] PROGMEM = "DHT22 ({t}, {h})";
@@ -82,11 +82,11 @@ const char INTL_DEVICE_STATUS[] PROGMEM = "Eszköz státusz";
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Mentés és újraindítás";
 #define INTL_FIRMWARE "Firmware verzió"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Debug beállítás ";
-#define INTL_NONE "off"
-#define INTL_ERROR "only errors"
-#define INTL_WARNING "warnings"
+#define INTL_NONE "kikapcsolva"
+#define INTL_ERROR "csak hibajelzések"
+#define INTL_WARNING "minden figyelmeztetés"
 #define INTL_MIN_INFO "min. info"
-#define INTL_MED_INFO "mid. info"
+#define INTL_MED_INFO "közep. info"
 #define INTL_MAX_INFO "max. info"
 #define INTL_CONFIG_DELETED "Beállítások törölve"
 #define INTL_CONFIG_CAN_NOT_BE_DELETED "A beállítások törlése sikertelen."
