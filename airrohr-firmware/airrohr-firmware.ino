@@ -60,7 +60,7 @@
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2020-130-B4"
+#define SOFTWARE_VERSION_STR "NRZ-2020-130-B5"
 String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -435,6 +435,7 @@ String last_data_string;
 int last_signal_strength;
 
 String esp_chipid;
+String esp_mac_id;
 String last_value_SDS_version;
 
 unsigned long SDS_error_count;
@@ -2061,7 +2062,7 @@ static unsigned long sendData(const LoggerEntry logger, const String& data, cons
 
 	HTTPClient http;
 	http.setTimeout(20 * 1000);
-	http.setUserAgent(SOFTWARE_VERSION + '/' + esp_chipid);
+	http.setUserAgent(SOFTWARE_VERSION + '/' + esp_chipid + '/' + esp_mac_id);
     http.setReuse(false);
 	bool send_success = false;
 	if (logger == LoggerCustom && (*cfg::user_custom || *cfg::pwd_custom)) {
@@ -2073,6 +2074,7 @@ static unsigned long sendData(const LoggerEntry logger, const String& data, cons
 	if (http.begin(*client, s_Host, loggerConfigs[logger].destport, s_url, !!loggerConfigs[logger].session)) {
 		http.addHeader(F("Content-Type"), contentType);
 		http.addHeader(F("X-Sensor"), String(F(SENSOR_BASENAME)) + esp_chipid);
+		http.addHeader(F("X-MAC-ID"), String(F(SENSOR_BASENAME)) + esp_mac_id);
 		if (pin) {
 			http.addHeader(F("X-PIN"), String(pin));
 		}
@@ -2939,6 +2941,8 @@ static bool fwDownloadStream(WiFiClientSecure& client, const String& url, Stream
 	String agent(SOFTWARE_VERSION);
 	agent += ' ';
 	agent += esp_chipid;
+	agent += "/";
+	agent += esp_mac_id;
 	agent += ' ';
 	agent += SDS_version_date();
 	agent += ' ';
@@ -3752,6 +3756,9 @@ void setup(void) {
 
 #if defined(ESP8266)
 	esp_chipid = std::move(String(ESP.getChipId()));
+	esp_mac_id = std::move(String(WiFi.macAddress().c_str()));
+	esp_mac_id.replace(":", "");
+	esp_mac_id.toLowerCase();
 #endif
 #if defined(ESP32)
 	uint64_t chipid_num;
@@ -3775,6 +3782,7 @@ void setup(void) {
 	setup_webserver();
 	createLoggerConfigs();
 	debug_outln_info(F("\nChipId: "), esp_chipid);
+	debug_outln_info(F("\nMAC Id: "), esp_mac_id);
 
 	if (cfg::gps_read) {
 #if defined(ESP8266)
