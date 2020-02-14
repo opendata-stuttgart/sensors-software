@@ -18,7 +18,7 @@ const char INTL_NETWORKS_FOUND[] PROGMEM = "Znalezione sieci: ";
 const char INTL_AB_HIER_NUR_ANDERN[] PROGMEM = "Ustawienia zaawansowane (tylko gdy wiesz co robisz)";
 const char INTL_SAVE[] PROGMEM = "Zapisz";
 const char INTL_SENSORS[] PROGMEM = "Sensory";
-const char INTL_MORE_SENSORS[] PROGMEM = "More Sensory";
+const char INTL_MORE_SENSORS[] PROGMEM = "Więcej sensorów";
 const char INTL_SDS011[] PROGMEM = "SDS011 ({pm})";
 const char INTL_PMS[] PROGMEM = "Plantower PMS(1,3,5,6,7)003 ({pm})";
 const char INTL_HPM[] PROGMEM = "Honeywell ({pm})";
@@ -32,9 +32,9 @@ const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
 const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "Poprawka w dB(A)";
-const char INTL_TEMP_CORRECTION[] PROGMEM = "Korekta w °C";
-const char INTL_PRESS_CORRECTION[] PROGMEM = "Korekta w Pa";
-const char INTL_HUMIDITY_CORRECTION[] PROGMEM = "Korekta w %";
+const char INTL_TEMP_CORRECTION[] PROGMEM = "Poprawka w °C";
+const char INTL_PRESS_CORRECTION[] PROGMEM = "Poprawka w Pa";
+const char INTL_HUMIDITY_CORRECTION[] PROGMEM = "Poprawka w %";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Autoryzacja";
 #define INTL_REPORT_ISSUE "Zgłoś problem"
@@ -84,12 +84,12 @@ const char INTL_DEVICE_STATUS[] PROGMEM = "Stan urządzenia";
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Zapisz i zrestartuj";
 #define INTL_FIRMWARE "Wersja firmware"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Ustawiono poziom debugowania na ";
-#define INTL_NONE "wyłączony"
-#define INTL_ERROR "tylko błędy"
-#define INTL_WARNING "ostrzeżenia"
-#define INTL_MIN_INFO "min. info"
-#define INTL_MED_INFO "śr. info"
-#define INTL_MAX_INFO "maks. info"
+#define INTL_NONE "Brak"
+#define INTL_ERROR "Błędy"
+#define INTL_WARNING "Ostrzeżenia"
+#define INTL_MIN_INFO "Min. info"
+#define INTL_MED_INFO "Śr. info"
+#define INTL_MAX_INFO "Maks. info"
 #define INTL_CONFIG_DELETED "Usunięto konfigurację"
 #define INTL_CONFIG_CAN_NOT_BE_DELETED "Konfiguracja nie może zostać usunięta"
 #define INTL_CONFIG_NOT_FOUND "Nie znaleziono konfiguracji"

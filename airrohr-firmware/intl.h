@@ -15,6 +15,8 @@
 #include "intl_es.h"
 #elif defined(INTL_FR)
 #include "intl_fr.h"
+#elif defined(INTL_HU)
+#include "intl_hu.h"
 #elif defined(INTL_IT)
 #include "intl_it.h"
 #elif defined(INTL_LU)
