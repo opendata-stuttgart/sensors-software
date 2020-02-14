@@ -33,6 +33,8 @@ const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "Valeur corrigée en dB(A)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "Valeur corrigée en °C";
+const char INTL_PRESS_CORRECTION[] PROGMEM = "Valeur press. corrigée en Pa";
+const char INTL_HUMIDITY_CORRECTION[] PROGMEM = "Valeur humid. corrigée en %";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Activer BasicAuth";
 #define INTL_REPORT_ISSUE "Signaler un problème"
@@ -108,6 +110,7 @@ const char INTL_DATE[] PROGMEM = "Date";
 const char INTL_TIME_UTC[] PROGMEM = "Heure (UTC)";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Force du signal";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Qualité du signal";
+const char INTL_LOC_ALTI[] PROGMEM = "Sensor altitude [m] over msl";
 #define INTL_NUMBER_OF_MEASUREMENTS "Nombre de mesures"
 #define INTL_TIME_SENDING_MS "Durée de la transmission des mesures"
 #define INTL_SENSOR "Capteur"

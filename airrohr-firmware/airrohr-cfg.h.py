@@ -23,13 +23,18 @@ Bool		ds18b20_read
 Bool		dnms_read
 String		dnms_correction
 String		temp_correction
+String		press_correction
+String		humidity_correction
 Bool		gps_read
 Bool		send2dusti
 Bool		ssl_dusti
 Bool		send2madavi
 Bool		ssl_madavi
+Bool        madavi_p_nn
 Bool		send2sensemap
+Bool        sensemap_p_nn
 Bool		send2fsapp
+Bool        fsapp_p_nn
 Bool		send2aircms
 Bool		send2csv
 Bool		auto_update
@@ -52,16 +57,17 @@ String		host_custom
 String		url_custom
 UInt		port_custom
 String		user_custom
-Password		pwd_custom
+Password	pwd_custom
 Bool		ssl_custom
 Bool		send2influx
 String		host_influx
 String		url_influx
 UInt		port_influx
 String		user_influx
-Password		pwd_influx
+Password	pwd_influx
 String		measurement_name_influx
 Bool		ssl_influx
+String      local_altitude
 """
 
 with open("airrohr-cfg.h", "w") as h:

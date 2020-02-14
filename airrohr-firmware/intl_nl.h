@@ -33,6 +33,8 @@ const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "Correctie in dB(A)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "Correctie in °C";
+const char INTL_PRESS_CORRECTION[] PROGMEM = "Correctie in Pa";
+const char INTL_HUMIDITY_CORRECTION[] PROGMEM = "Correctie in %";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Beperk toegang";
 #define INTL_REPORT_ISSUE "Een probleem melden"
@@ -108,6 +110,7 @@ const char INTL_DATE[] PROGMEM = "Datum";
 const char INTL_TIME_UTC[] PROGMEM = "Tijd (UTC)";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Signaalsterkte";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Signaalkwaliteit";
+const char INTL_LOC_ALTI[] PROGMEM = "Sensor altitude [m] over msl";
 #define INTL_NUMBER_OF_MEASUREMENTS "Aantal metingen"
 #define INTL_TIME_SENDING_MS "Tijdsduur opsturen metingen"
 #define INTL_SENSOR "Sensor"

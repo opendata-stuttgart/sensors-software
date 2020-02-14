@@ -33,6 +33,8 @@ const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "Kорекція в дБ (А)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "Корекція в °C";
+const char INTL_PRESS_CORRECTION[] PROGMEM = "Корекція в Pa";
+const char INTL_HUMIDITY_CORRECTION[] PROGMEM = "Корекція в %";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Авторизація";
 #define INTL_REPORT_ISSUE "Повідомте про проблему"
@@ -108,6 +110,7 @@ const char INTL_DATE[] PROGMEM = "Дата";
 const char INTL_TIME_UTC[] PROGMEM = "Час (UTC)";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "потужність сигналу";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "якість сигналу";
+const char INTL_LOC_ALTI[] PROGMEM = "Sensor altitude [m] over msl";
 #define INTL_NUMBER_OF_MEASUREMENTS "Кількість вимірювань"
 #define INTL_TIME_SENDING_MS "Час, витрачений на відправлення"
 #define INTL_SENSOR "Сенсор"

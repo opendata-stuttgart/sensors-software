@@ -145,3 +145,4 @@ const char WEB_NC4k0[] PROGMEM = "NC4.0";
 const char WEB_NC10[] PROGMEM = "NC10";
 const char WEB_TPS[] PROGMEM = "TPS";
 const char WEB_GPS[] PROGMEM = "GPS";
+const char WEB_P_NN[] = "Pressure in msl";

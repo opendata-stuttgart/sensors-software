@@ -244,7 +244,13 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 
 // Temp compensation
 #define TEMP_CORRECTION "0.0"
-
+#define SENDMADAVI_P_NN 0
+#define SENDFSAPP_P_NN 0
+#define SENDSENSEMAP_P_NN 0
+// Local altitude over msl of sensor
+#define LOCAL_ALTITUDE "0.0"
+#define PRESS_CORRECTION "0.0"
+#define HUMIDITY_CORRECTION "0.0"
 // GPS, preferred Neo-6M
 #define GPS_READ 0
 #define GPS_API_PIN 9

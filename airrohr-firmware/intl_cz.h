@@ -33,6 +33,8 @@ const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "Korekce v dB (A)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "Korekce ve °C";
+const char INTL_PRESS_CORRECTION[] PROGMEM = "Korekce ve Pa";
+const char INTL_HUMIDITY_CORRECTION[] PROGMEM = "Korekce ve %";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Pøihlášení (heslem)";
 #define INTL_REPORT_ISSUE "Nahlásit problém"
@@ -108,6 +110,8 @@ const char INTL_DATE[] PROGMEM = "Datum";
 const char INTL_TIME_UTC[] PROGMEM = "Èas (UTC)";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Síla signálu";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Kvalita signálu";
+const char INTL_LOC_ALTI[] PROGMEM = "Sensor altitude [m] over msl";
+
 #define INTL_NUMBER_OF_MEASUREMENTS "Počet měření"
 #define INTL_TIME_SENDING_MS "Poèet mìøení"
 #define INTL_SENSOR "Modul"

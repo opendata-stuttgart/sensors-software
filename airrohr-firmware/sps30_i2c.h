@@ -65,6 +65,9 @@
 #define SPS_CMD_RESET                   0xd304
 #define SPS_WRITE_DELAY_US              20000
 
+//#define SPS_CMD_START_MANUAL_FAN_CLEANING 0x5607
+//#define SPS30_I2C_ADDRESS 0x69
+
 
 #define be16_to_cpu(s) (((uint16_t)(s) << 8) | (0xff & ((uint16_t)(s)) >> 8))
 #define be32_to_cpu(s) (((uint32_t)be16_to_cpu(s) << 16) | \
@@ -124,9 +127,9 @@ int16_t sps30_get_serial(char *serial);
 
 int16_t sps30_start_measurement();
 
-/*
+//TR einkommentiert
 int16_t sps30_stop_measurement();
-*/
+
 
 int16_t sps30_read_data_ready(uint16_t *data_ready);
 
@@ -171,3 +174,5 @@ int16_t sensirion_i2c_read_words(uint8_t address, uint16_t *data_words, uint16_t
 int16_t sensirion_i2c_write_cmd(uint8_t address, uint16_t command);
 
 int16_t sensirion_i2c_write_cmd_with_args(uint8_t address, uint16_t command, const uint16_t *data_words, uint16_t num_words);
+//TR dazu
+//int16_t sps30_start_manual_fan_cleaning();

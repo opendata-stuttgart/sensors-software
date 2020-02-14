@@ -33,6 +33,8 @@ const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "";
+const char INTL_PRESS_CORRECTION[] PROGMEM = "";
+const char INTL_HUMIDITY_CORRECTION[] PROGMEM = "";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "";
 #define INTL_REPORT_ISSUE ""
@@ -109,6 +111,7 @@ const char INTL_DATE[] PROGMEM = "";
 const char INTL_TIME_UTC[] PROGMEM = "";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "";
+const char INTL_LOC_ALTI[] PROGMEM = "";
 #define INTL_NUMBER_OF_MEASUREMENTS ""
 #define INTL_TIME_SENDING_MS ""
 #define INTL_SENSOR ""

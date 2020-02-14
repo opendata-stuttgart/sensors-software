@@ -91,12 +91,10 @@ int16_t sps30_start_measurement() {
   return sensirion_i2c_write_cmd_with_args(SPS_I2C_ADDRESS, SPS_CMD_START_MEASUREMENT, &arg, SENSIRION_NUM_WORDS(arg));
 }
 
-
-/*
+//TR einkommentiert
 int16_t sps30_stop_measurement() {
   return sensirion_i2c_write_cmd(SPS_I2C_ADDRESS, SPS_CMD_STOP_MEASUREMENT);
 }
-*/
 
 
 int16_t sps30_read_data_ready(uint16_t *data_ready) {
@@ -373,3 +371,15 @@ int16_t sensirion_i2c_write_cmd_with_args(uint8_t address, uint16_t command, con
   buf_size = sensirion_fill_cmd_send_buf(buf, command, data_words, num_words);
   return sensirion_i2c_write(address, buf, buf_size);
 }
+/*int16_t sps30_start_manual_fan_cleaning() {
+    int16_t ret;
+
+    ret = sensirion_i2c_write_cmd(SPS30_I2C_ADDRESS,
+                                  SPS_CMD_START_MANUAL_FAN_CLEANING);
+    if (ret)
+        return ret;
+
+    //sensirion_sleep_usec(SPS_CMD_DELAY_USEC);
+    delay(10);
+    return 0;
+}*/
