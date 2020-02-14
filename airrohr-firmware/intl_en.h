@@ -33,8 +33,6 @@ const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "correction in dB(A)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "Correction in °C";
-const char INTL_PRESS_CORRECTION[] PROGMEM = "Press. corr. in Pa";
-const char INTL_HUMIDITY_CORRECTION[] PROGMEM = "Humid. corr. in %";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Authentication";
 #define INTL_REPORT_ISSUE "Report an issue"

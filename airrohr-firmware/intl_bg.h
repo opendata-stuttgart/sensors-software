@@ -33,8 +33,6 @@ const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "корекция в dB (A)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "Корекция в °C";
-const char INTL_PRESS_CORRECTION[] PROGMEM = "Корекция в Pa";
-const char INTL_HUMIDITY_CORRECTION[] PROGMEM = "Корекция в %";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Оторизация";
 #define INTL_REPORT_ISSUE "Подаване на сигнал за проблем"

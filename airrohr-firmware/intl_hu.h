@@ -108,6 +108,7 @@ const char INTL_DATE[] PROGMEM = "Dátum";
 const char INTL_TIME_UTC[] PROGMEM = "Idő";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Jelerősség";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Jelminőség";
+const char INTL_LOC_ALTI[] PROGMEM = "Sensor altitude [m] over msl";
 #define INTL_NUMBER_OF_MEASUREMENTS "Mérések száma:"
 #define INTL_TIME_SENDING_MS "Feltöltéssel töltött idő:"
 #define INTL_SENSOR "Szenzor"

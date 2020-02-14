@@ -46,18 +46,13 @@ enum ConfigShapeId {
 	Config_dnms_read,
 	Config_dnms_correction,
 	Config_temp_correction,
-	Config_press_correction,
-	Config_humidity_correction,
 	Config_gps_read,
 	Config_send2dusti,
 	Config_ssl_dusti,
 	Config_send2madavi,
 	Config_ssl_madavi,
-	Config_madavi_p_nn,
 	Config_send2sensemap,
-	Config_sensemap_p_nn,
 	Config_send2fsapp,
-	Config_fsapp_p_nn,
 	Config_send2aircms,
 	Config_send2csv,
 	Config_auto_update,
@@ -114,18 +109,13 @@ const char CFG_KEY_DS18B20_READ[] PROGMEM = "ds18b20_read";
 const char CFG_KEY_DNMS_READ[] PROGMEM = "dnms_read";
 const char CFG_KEY_DNMS_CORRECTION[] PROGMEM = "dnms_correction";
 const char CFG_KEY_TEMP_CORRECTION[] PROGMEM = "temp_correction";
-const char CFG_KEY_PRESS_CORRECTION[] PROGMEM = "press_correction";
-const char CFG_KEY_HUMIDITY_CORRECTION[] PROGMEM = "humidity_correction";
 const char CFG_KEY_GPS_READ[] PROGMEM = "gps_read";
 const char CFG_KEY_SEND2DUSTI[] PROGMEM = "send2dusti";
 const char CFG_KEY_SSL_DUSTI[] PROGMEM = "ssl_dusti";
 const char CFG_KEY_SEND2MADAVI[] PROGMEM = "send2madavi";
 const char CFG_KEY_SSL_MADAVI[] PROGMEM = "ssl_madavi";
-const char CFG_KEY_MADAVI_P_NN[] PROGMEM = "madavi_p_nn";
 const char CFG_KEY_SEND2SENSEMAP[] PROGMEM = "send2sensemap";
-const char CFG_KEY_SENSEMAP_P_NN[] PROGMEM = "sensemap_p_nn";
 const char CFG_KEY_SEND2FSAPP[] PROGMEM = "send2fsapp";
-const char CFG_KEY_FSAPP_P_NN[] PROGMEM = "fsapp_p_nn";
 const char CFG_KEY_SEND2AIRCMS[] PROGMEM = "send2aircms";
 const char CFG_KEY_SEND2CSV[] PROGMEM = "send2csv";
 const char CFG_KEY_AUTO_UPDATE[] PROGMEM = "auto_update";
@@ -182,18 +172,13 @@ static constexpr ConfigShapeEntry configShape[] PROGMEM = {
 	{ Config_Type_Bool, 0, FPSTR(CFG_KEY_DNMS_READ), &cfg::dnms_read },
 	{ Config_Type_String, sizeof(cfg::dnms_correction)-1, FPSTR(CFG_KEY_DNMS_CORRECTION), cfg::dnms_correction },
 	{ Config_Type_String, sizeof(cfg::temp_correction)-1, FPSTR(CFG_KEY_TEMP_CORRECTION), cfg::temp_correction },
-	{ Config_Type_String, sizeof(cfg::press_correction)-1, FPSTR(CFG_KEY_PRESS_CORRECTION), cfg::press_correction },
-	{ Config_Type_String, sizeof(cfg::humidity_correction)-1, FPSTR(CFG_KEY_HUMIDITY_CORRECTION), cfg::humidity_correction },
 	{ Config_Type_Bool, 0, FPSTR(CFG_KEY_GPS_READ), &cfg::gps_read },
 	{ Config_Type_Bool, 0, FPSTR(CFG_KEY_SEND2DUSTI), &cfg::send2dusti },
 	{ Config_Type_Bool, 0, FPSTR(CFG_KEY_SSL_DUSTI), &cfg::ssl_dusti },
 	{ Config_Type_Bool, 0, FPSTR(CFG_KEY_SEND2MADAVI), &cfg::send2madavi },
 	{ Config_Type_Bool, 0, FPSTR(CFG_KEY_SSL_MADAVI), &cfg::ssl_madavi },
-	{ Config_Type_Bool, 0, FPSTR(CFG_KEY_MADAVI_P_NN), &cfg::madavi_p_nn },
 	{ Config_Type_Bool, 0, FPSTR(CFG_KEY_SEND2SENSEMAP), &cfg::send2sensemap },
-	{ Config_Type_Bool, 0, FPSTR(CFG_KEY_SENSEMAP_P_NN), &cfg::sensemap_p_nn },
 	{ Config_Type_Bool, 0, FPSTR(CFG_KEY_SEND2FSAPP), &cfg::send2fsapp },
-	{ Config_Type_Bool, 0, FPSTR(CFG_KEY_FSAPP_P_NN), &cfg::fsapp_p_nn },
 	{ Config_Type_Bool, 0, FPSTR(CFG_KEY_SEND2AIRCMS), &cfg::send2aircms },
 	{ Config_Type_Bool, 0, FPSTR(CFG_KEY_SEND2CSV), &cfg::send2csv },
 	{ Config_Type_Bool, 0, FPSTR(CFG_KEY_AUTO_UPDATE), &cfg::auto_update },
