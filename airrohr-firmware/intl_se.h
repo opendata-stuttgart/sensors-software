@@ -5,10 +5,9 @@
  *  Swedish translations
  *
  *	Texts should be as short as possible
- *	We only have 512 kB for the entire firmware
  */
 
-const char INTL_LANG[] = "SE";
+#define INTL_LANG "SE"
 #define INTL_PM_SENSOR "Partikelsensor"
 const char INTL_CONFIGURATION[] PROGMEM = "Inställningar";
 #define INTL_WIFI_SETTINGS "WLAN konfiguration"
@@ -32,13 +31,15 @@ const char INTL_BMX280[] PROGMEM = "BMP280/BME280 ({t}, {h}, {p})";
 const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
 const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
-const char INTL_DNMS_CORRECTION[] PROGMEM ="korrigering i dB (A)";
+const char INTL_DNMS_CORRECTION[] PROGMEM = "Korrigering i dB (A)";
+const char INTL_TEMP_CORRECTION[] PROGMEM = "Korrigering i °C";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Aktivera BasicAuth";
+#define INTL_REPORT_ISSUE "Rapportera ett problem"
 
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "WiFi-sensor i konfigurationsläge";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Sensorns WLAN namn";
-const char INTL_MORE_SETTINGS[] PROGMEM ="Avancerade inställningar";
+const char INTL_MORE_SETTINGS[] PROGMEM = "Avancerade inställningar";
 const char INTL_AUTO_UPDATE[] PROGMEM = "Automatisk uppdatering";
 const char INTL_USE_BETA[] PROGMEM = "Använd beta-versioner";
 const char INTL_DISPLAY[] PROGMEM = "OLED SSD1306";
@@ -60,6 +61,7 @@ const char INTL_PATH[] PROGMEM = "Sökväg (path)";
 const char INTL_PORT[] PROGMEM = "Port";
 const char INTL_USER[] PROGMEM = "Användarnamn";
 const char INTL_PASSWORD[] PROGMEM = "Lösenord";
+const char INTL_MEASUREMENT[] PROGMEM = "Measurement";
 const char INTL_SEND_TO[] PROGMEM = "Skicka till {v}";
 const char INTL_READ_FROM[] PROGMEM = "Hämta {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Sensor startas om.";
@@ -104,7 +106,7 @@ const char INTL_LATITUDE[] PROGMEM = "Latitud";
 const char INTL_LONGITUDE[] PROGMEM = "Longitud";
 const char INTL_ALTITUDE[] PROGMEM = "Altitud";
 const char INTL_DATE[] PROGMEM = "Datum";
-const char INTL_TIME[] PROGMEM = "Tid";
+const char INTL_TIME_UTC[] PROGMEM = "Tid (UTC)";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Signal";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Kvalitet";
 #define INTL_NUMBER_OF_MEASUREMENTS "Antal mätningar"

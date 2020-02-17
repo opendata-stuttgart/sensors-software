@@ -5,10 +5,9 @@
  *  German translations
  *
  *	Texts should be as short as possible
- *	We only have 512 kB for the entire firmware
  */
 
-const char INTL_LANG[] = "DE";
+#define INTL_LANG "DE"
 #define INTL_PM_SENSOR "Feinstaubsensor"
 const char INTL_CONFIGURATION[] PROGMEM = "Konfiguration";
 #define INTL_WIFI_SETTINGS "WLAN Daten"
@@ -32,13 +31,15 @@ const char INTL_BMX280[] PROGMEM = "BMP280/BME280 ({t}, {h}, {p})";
 const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
 const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
-const char INTL_DNMS_CORRECTION[] PROGMEM ="Korrekturwert&nbsp;in&nbsp;dB(A)";
+const char INTL_DNMS_CORRECTION[] PROGMEM = "Korrekturwert&nbsp;in&nbsp;dB(A)";
+const char INTL_TEMP_CORRECTION[] PROGMEM = "Korrekturwert in °C";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "BasicAuth aktivieren";
+#define INTL_REPORT_ISSUE "Ein Problem melden"
 
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "Sensor WLAN Name im Konfigurationsmodus";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Name";
-const char INTL_MORE_SETTINGS[] PROGMEM ="Weitere Einstellungen";
+const char INTL_MORE_SETTINGS[] PROGMEM = "Weitere Einstellungen";
 const char INTL_AUTO_UPDATE[] PROGMEM = "Auto Update";
 const char INTL_USE_BETA[] PROGMEM = "Lade Beta Versionen";
 const char INTL_DISPLAY[] PROGMEM = "OLED SSD1306";
@@ -60,6 +61,7 @@ const char INTL_PATH[] PROGMEM = "Pfad";
 const char INTL_PORT[] PROGMEM = "Port";
 const char INTL_USER[] PROGMEM = "Benutzer";
 const char INTL_PASSWORD[] PROGMEM = "Passwort";
+const char INTL_MEASUREMENT[] PROGMEM = "Messung";
 const char INTL_SEND_TO[] PROGMEM = "Senden an {v}";
 const char INTL_READ_FROM[] PROGMEM = "Lese {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Sensor wird neu gestartet.";
@@ -104,7 +106,7 @@ const char INTL_LATITUDE[] PROGMEM = "Breite";
 const char INTL_LONGITUDE[] PROGMEM = "Länge";
 const char INTL_ALTITUDE[] PROGMEM = "Höhe";
 const char INTL_DATE[] PROGMEM = "Datum";
-const char INTL_TIME[] PROGMEM = "Zeit";
+const char INTL_TIME_UTC[] PROGMEM = "Zeit (UTC)";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Signal";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Qualität";
 #define INTL_NUMBER_OF_MEASUREMENTS "Anzahl Messungen"

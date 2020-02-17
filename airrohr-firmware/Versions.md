@@ -1,3 +1,30 @@
+NRZ-2020-130-B4
+* Prevent password leakage in configuration dialogs
+* Change default password for webpage auth to ""
+* Ignore measurement interval settings below 5s
+* Track API sending errors for each API separately
+
+NRZ-2020-130-B3
+* Serial debug output on webpage
+* Refactoring
+
+NRZ-2020-130-B2
+* Avoid crash on WiFi network scan failure (Related to #615)
+* Only do OTA after sensor measurements are finished
+* Remove uninitialized memory read in NTP handling
+* Accept larger flash sizes also as compatible
+* Switch to a tab based configuration page
+* Skip initialization of display's when not configured
+* Delay OneWire initialization until configured
+* Fix bulgarian translation error (Fixes #622)
+* Fix hang on BME/P280 measurement read
+* Connect up to wifi channel 13 if locale is not EN (Fixes #626)
+* Use IPv6 LWIP (Related to #605)
+* Add configurable temperature correction (Fixes #607)
+
+NRZ-2020-130-B1
+* next beta version
+
 NRZ-2020-129
 online since 2020-01-07
 * same as NRZ-2019-128-B8 (+build date is shown in header)

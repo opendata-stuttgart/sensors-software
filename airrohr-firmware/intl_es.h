@@ -5,10 +5,9 @@
  *  Spanish translations
  *
  *	Texts should be as short as possible
- *	We only have 512 kB for the entire firmware
  */
 
-const char INTL_LANG[] = "ES";
+#define INTL_LANG "ES"
 #define INTL_PM_SENSOR "Sensor de partículas finas"
 const char INTL_CONFIGURATION[] PROGMEM = "Configuración";
 #define INTL_WIFI_SETTINGS "Configuración WiFi"
@@ -19,7 +18,7 @@ const char INTL_NETWORKS_FOUND[] PROGMEM = "Redes encontradas: ";
 const char INTL_AB_HIER_NUR_ANDERN[] PROGMEM = "Configuración avanzada (solo si sabes que lo que estas haciendo)";
 const char INTL_SAVE[] PROGMEM = "Guardar";
 const char INTL_SENSORS[] PROGMEM = "Sensores";
-const char INTL_MORE_SENSORS[] PROGMEM = "More Sensores";
+const char INTL_MORE_SENSORS[] PROGMEM = "Más sensores";
 const char INTL_SDS011[] PROGMEM = "SDS011 ({pm})";
 const char INTL_PMS[] PROGMEM = "Plantower PMS(1,3,5,6,7)003 ({pm})";
 const char INTL_HPM[] PROGMEM = "Honeywell sensor de partículas finas";
@@ -32,13 +31,15 @@ const char INTL_BMX280[] PROGMEM = "BMP280/BME280 ({t}, {h}, {p})";
 const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
 const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
-const char INTL_DNMS_CORRECTION[] PROGMEM = "corrección en dB (A)";
+const char INTL_DNMS_CORRECTION[] PROGMEM = "Corrección en dB (A)";
+const char INTL_TEMP_CORRECTION[] PROGMEM = "Corrección en °C";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Autorización";
+#define INTL_REPORT_ISSUE "Reportar un problema"
 
-const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "Sensor iFi en modo de configuración";
+const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "Sensor WiFi en modo de configuración";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Nombre";
-const char INTL_MORE_SETTINGS[] PROGMEM ="Otras configruaciones";
+const char INTL_MORE_SETTINGS[] PROGMEM = "Más configuraciones";
 const char INTL_AUTO_UPDATE[] PROGMEM = "Actualización automática del Firmware";
 const char INTL_USE_BETA[] PROGMEM = "Cargar del firmware beta";
 const char INTL_DISPLAY[] PROGMEM = "OLED SSD1306";
@@ -60,6 +61,7 @@ const char INTL_PATH[] PROGMEM = "Ruta";
 const char INTL_PORT[] PROGMEM = "Puerto";
 const char INTL_USER[] PROGMEM = "Usuario";
 const char INTL_PASSWORD[] PROGMEM = "Contraseña";
+const char INTL_MEASUREMENT[] PROGMEM = "Medición";
 const char INTL_SEND_TO[] PROGMEM = "Enviar a {v}";
 const char INTL_READ_FROM[] PROGMEM = "Leer {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "El sensor se está reiniciando.";
@@ -104,7 +106,7 @@ const char INTL_LATITUDE[] PROGMEM = "Latitud";
 const char INTL_LONGITUDE[] PROGMEM = "Longitud";
 const char INTL_ALTITUDE[] PROGMEM = "Altitud";
 const char INTL_DATE[] PROGMEM = "Fecha";
-const char INTL_TIME[] PROGMEM = "Tiempo";
+const char INTL_TIME_UTC[] PROGMEM = "Tiempo (UTC)";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Intensidad de Señal";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Calidad de Señal";
 #define INTL_NUMBER_OF_MEASUREMENTS "Numero de mediciones"

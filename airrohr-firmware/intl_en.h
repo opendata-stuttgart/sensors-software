@@ -5,10 +5,9 @@
  *  English translations
  *
  *	Texts should be as short as possible
- *	We only have 512 kB for the entire firmware
  */
 
-const char INTL_LANG[] = "EN";
+#define INTL_LANG "EN"
 #define INTL_PM_SENSOR "Particulate matter sensor"
 const char INTL_CONFIGURATION[] PROGMEM = "Configuration";
 #define INTL_WIFI_SETTINGS "WiFi Settings"
@@ -32,13 +31,15 @@ const char INTL_BMX280[] PROGMEM = "BMP280/BME280 ({t}, {h}, {p})";
 const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
 const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
-const char INTL_DNMS_CORRECTION[] PROGMEM ="correction in dB(A)";
+const char INTL_DNMS_CORRECTION[] PROGMEM = "correction in dB(A)";
+const char INTL_TEMP_CORRECTION[] PROGMEM = "Correction in °C";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Authentication";
+#define INTL_REPORT_ISSUE "Report an issue"
 
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "WiFi Sensor in configuration mode";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Network name";
-const char INTL_MORE_SETTINGS[] PROGMEM ="More settings";
+const char INTL_MORE_SETTINGS[] PROGMEM = "More settings";
 const char INTL_AUTO_UPDATE[] PROGMEM = "Auto update firmware";
 const char INTL_USE_BETA[] PROGMEM = "Load beta firmware";
 const char INTL_DISPLAY[] PROGMEM = "OLED SSD1306";
@@ -60,6 +61,7 @@ const char INTL_PATH[] PROGMEM = "Path";
 const char INTL_PORT[] PROGMEM = "Port";
 const char INTL_USER[] PROGMEM = "User";
 const char INTL_PASSWORD[] PROGMEM = "Password";
+const char INTL_MEASUREMENT[] PROGMEM = "Measurement";
 const char INTL_SEND_TO[] PROGMEM = "Send to {v}";
 const char INTL_READ_FROM[] PROGMEM = "Read from {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Sensor is rebooting.";
@@ -104,7 +106,7 @@ const char INTL_LATITUDE[] PROGMEM = "Latitude";
 const char INTL_LONGITUDE[] PROGMEM = "Longitude";
 const char INTL_ALTITUDE[] PROGMEM = "Altitude";
 const char INTL_DATE[] PROGMEM = "Date";
-const char INTL_TIME[] PROGMEM = "Time";
+const char INTL_TIME_UTC[] PROGMEM = "Time (UTC)";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "signal strength";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "signal quality";
 #define INTL_NUMBER_OF_MEASUREMENTS "Number of measurements"

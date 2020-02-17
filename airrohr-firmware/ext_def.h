@@ -7,7 +7,7 @@ const char WLANPWD[] PROGMEM = "";
 
 // BasicAuth config
 const char WWW_USERNAME[] PROGMEM = "admin";
-const char WWW_PASSWORD[] PROGMEM = "feinstaub";
+const char WWW_PASSWORD[] PROGMEM = "";
 #define WWW_BASICAUTH_ENABLED 0
 
 // Sensor Wifi config (config mode)
@@ -44,7 +44,7 @@ enum LoggerEntry {
 
 struct LoggerConfig {
     uint16_t destport;
-    uint16_t _unused;
+    uint16_t errors;
 #if defined(ESP8266)
     BearSSL::Session* session;
 #else
@@ -241,6 +241,9 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 #define DNMS_READ 0
 #define DNMS_API_PIN 15
 #define DNMS_CORRECTION "0.0"
+
+// Temp compensation
+#define TEMP_CORRECTION "0.0"
 
 // GPS, preferred Neo-6M
 #define GPS_READ 0

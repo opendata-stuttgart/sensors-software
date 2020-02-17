@@ -5,10 +5,9 @@
  *  Czech translations
  *
  *	Texts should be as short as possible
- *	We only have 512 kB for the entire firmware
  */
 
-const char INTL_LANG[] = "CZ";
+#define INTL_LANG "CZ"
 #define INTL_PM_SENSOR "Senzor prachových èástic"
 const char INTL_CONFIGURATION[] PROGMEM = "Konfigurace";
 #define INTL_WIFI_SETTINGS "Nastavení Wi-Fi"
@@ -32,9 +31,11 @@ const char INTL_BMX280[] PROGMEM = "BMP280/BME280 ({t}, {h}, {p})";
 const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
 const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
-const char INTL_DNMS_CORRECTION[] PROGMEM ="korekce v dB (A)";
+const char INTL_DNMS_CORRECTION[] PROGMEM = "Korekce v dB (A)";
+const char INTL_TEMP_CORRECTION[] PROGMEM = "Korekce ve °C";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Pøihlášení (heslem)";
+#define INTL_REPORT_ISSUE "Nahlásit problém"
 
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "Wi-Fi modul v konfiguraèním módu";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Název";
@@ -60,6 +61,7 @@ const char INTL_PATH[] PROGMEM = "Cesta";
 const char INTL_PORT[] PROGMEM = "Port";
 const char INTL_USER[] PROGMEM = "Uživatel";
 const char INTL_PASSWORD[] PROGMEM = "Heslo";
+const char INTL_MEASUREMENT[] PROGMEM = "Measurement";
 const char INTL_SEND_TO[] PROGMEM = "Odeslat na {v}";
 const char INTL_READ_FROM[] PROGMEM = "Èti z {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Zaøízení bude restartováno";
@@ -104,7 +106,7 @@ const char INTL_LATITUDE[] PROGMEM = "Zem. šíøka";
 const char INTL_LONGITUDE[] PROGMEM = "Zem. délka";
 const char INTL_ALTITUDE[] PROGMEM = "Nadm. výška";
 const char INTL_DATE[] PROGMEM = "Datum";
-const char INTL_TIME[] PROGMEM = "Èas";
+const char INTL_TIME_UTC[] PROGMEM = "Èas (UTC)";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Síla signálu";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Kvalita signálu";
 #define INTL_NUMBER_OF_MEASUREMENTS "Počet měření"
