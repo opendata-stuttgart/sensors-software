@@ -79,6 +79,7 @@ const char INTL_DEVICE_STATUS[] PROGMEM = "Cihaz durumu";
 #define INTL_RESTART "yeniden bağlat"
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Kaydet ve yeniden bağlat";
 #define INTL_FIRMWARE "Firmware sürümü"
+#define INTL_REPORT_ISSUE "Sorun bildirin"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Debug ayarı ";
 #define INTL_NONE "off"
 #define INTL_ERROR "hatalar"

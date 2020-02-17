@@ -79,6 +79,7 @@ const char INTL_DEVICE_STATUS[] PROGMEM = "Etat de l'appareil";
 #define INTL_RESTART "Redémarrer"
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Sauvegarder et redémarrer";
 #define INTL_FIRMWARE "Firmware"
+#define INTL_REPORT_ISSUE "Signaler un problème"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Paramètres de débogage";
 #define INTL_NONE "aucun"
 #define INTL_ERROR "erreur"

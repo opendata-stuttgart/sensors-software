@@ -79,6 +79,7 @@ const char INTL_DEVICE_STATUS[] PROGMEM = "Карам статус";
 #define INTL_RESTART "Рестарт"
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Запис и рестарт";
 #define INTL_FIRMWARE "Софтуер версия"
+#define INTL_REPORT_ISSUE "Съобщете за проблем"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Настройки дебъгването на";
 #define INTL_NONE "изключено"
 #define INTL_ERROR "само грешки"

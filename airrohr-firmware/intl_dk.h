@@ -79,6 +79,7 @@ const char INTL_DEVICE_STATUS[] PROGMEM = "Enhedsstatus";
 #define INTL_RESTART "Genstart"
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Gem og genstart";
 #define INTL_FIRMWARE "Firmware"
+#define INTL_REPORT_ISSUE "Rapporter et problem"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Debug-indstillinger sat til";
 #define INTL_NONE "none"
 #define INTL_ERROR "error"

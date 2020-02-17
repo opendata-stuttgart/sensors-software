@@ -79,6 +79,7 @@ const char INTL_DEVICE_STATUS[] PROGMEM = "Apparat Status";
 #define INTL_RESTART "Nei starten"
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Späicheren a nei starten";
 #define INTL_FIRMWARE "Firmware"
+#define INTL_REPORT_ISSUE "Rapport e Problem"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Debug setzen op";
 #define INTL_NONE "keng"
 #define INTL_ERROR "fehler"

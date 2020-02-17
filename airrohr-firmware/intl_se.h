@@ -79,6 +79,7 @@ const char INTL_DEVICE_STATUS[] PROGMEM = "Enhetsstatus";
 #define INTL_RESTART "Starta om"
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Spara och starta om";
 #define INTL_FIRMWARE "Firmware"
+#define INTL_REPORT_ISSUE "Rapportera ett problem"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Ställa in debug-läge";
 #define INTL_NONE "none"
 #define INTL_ERROR "error"
