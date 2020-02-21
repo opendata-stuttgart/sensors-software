@@ -81,6 +81,7 @@ const char INTL_DEVICE_STATUS[] PROGMEM = "Состояние устройств
 #define INTL_RESTART "Перезапустить"
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Сохранить и перезапустить";
 #define INTL_FIRMWARE "Прошивка"
+#define INTL_REPORT_ISSUE "Сообщить о проблеме"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Настройки отладки";
 #define INTL_NONE "отключена"
 #define INTL_ERROR "только ошибки"

@@ -81,6 +81,7 @@ const char INTL_DEVICE_STATUS[] PROGMEM = "Apparaatstatus";
 #define INTL_RESTART "Herstart"
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Opslaan en herstarten";
 #define INTL_FIRMWARE "Firmware-versie"
+#define INTL_REPORT_ISSUE "Meld een probleem"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Debugniveau naar ";
 #define INTL_NONE "Uit"
 #define INTL_ERROR "enkel foutmeldingen"

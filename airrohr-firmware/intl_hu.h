@@ -81,6 +81,7 @@ const char INTL_DEVICE_STATUS[] PROGMEM = "Eszköz státusz";
 #define INTL_RESTART "Újraindítás"
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Mentés és újraindítás";
 #define INTL_FIRMWARE "Firmware verzió"
+#define INTL_REPORT_ISSUE "Jelentsen egy problémát"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Debug beállítás ";
 #define INTL_NONE "kikapcsolva"
 #define INTL_ERROR "csak hibajelzések"
