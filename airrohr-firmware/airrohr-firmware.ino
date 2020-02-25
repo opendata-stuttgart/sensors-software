@@ -2812,6 +2812,10 @@ static void fetchSensorSDS(String& s) {
 		if (sds_val_count > 0) {
 			last_value_SDS_P1 = float(sds_pm10_sum) / (sds_val_count * 10.0f);
 			last_value_SDS_P2 = float(sds_pm25_sum) / (sds_val_count * 10.0f);
+			if (last_value_BME280_H) {
+				add_Value2Json(s, F("SDS_P1"), F("PM10:  "), last_value_SDS_P1/(1.0+0.81559*pow((last_value_BME280_H/100.0), 5.83411)));
+				add_Value2Json(s, F("SDS_P2"), F("PM2.5: "), last_value_SDS_P2/(1.0+0.48756*pow((last_value_BME280_H/100.0), 8.60068)));
+			}
 			add_Value2Json(s, F("SDS_P1"), F("PM10:  "), last_value_SDS_P1);
 			add_Value2Json(s, F("SDS_P2"), F("PM2.5: "), last_value_SDS_P2);
 			debug_outln_info(FPSTR(DBG_TXT_SEP));
