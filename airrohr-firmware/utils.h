@@ -25,10 +25,22 @@
 #define utils_h
 
 #include <WString.h>
+
+#if defined(ESP8266)
 #include <Hash.h>
 #include <coredecls.h>
 #include <ESP8266WiFi.h>
 #include <SoftwareSerial.h>
+#endif
+
+#if defined(ESP32)
+#include <WiFi.h>
+#include <WiFiClient.h>
+#include <WiFiClientSecure.h>
+#include <HardwareSerial.h>
+#include <hwcrypto/sha.h>
+#include <freertos/queue.h>
+#endif
 
 constexpr unsigned SMALL_STR = 64-1;
 constexpr unsigned MED_STR = 256-1;
@@ -96,7 +108,12 @@ public:
 	String popLines();
 
 private:
+#if defined(ESP8266)
 	std::unique_ptr<circular_queue<uint8_t> > m_buffer;
+#endif
+#if defined(ESP32)
+	QueueHandle_t m_buffer;
+#endif
 };
 
 extern class LoggingSerial Debug;
