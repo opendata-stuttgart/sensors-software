@@ -14,13 +14,16 @@ const char WWW_PASSWORD[] PROGMEM = "";
 #define FS_SSID ""
 #define FS_PWD ""
 
-// Where to send the data?
+// Initial configuration on where to send sensor data: 1 is "send", 0 is "do not send"
+// https://sensor.community
 #define SEND2SENSORCOMMUNITY 1
-#define SSL_SENSORCOMMUNITY 0
+// https://www.madavi.de
 #define SEND2MADAVI 1
-#define SSL_MADAVI 0
+// https://opensensemap.org
 #define SEND2SENSEMAP 0
+// https://chillibits.com/pmapp/
 #define SEND2FSAPP 0
+// https://aircms.online
 #define SEND2AIRCMS 0
 #define SEND2MQTT 0
 #define SEND2INFLUX 0
@@ -55,11 +58,11 @@ struct LoggerConfig {
 // IMPORTANT: NO MORE CHANGES TO VARIABLE NAMES NEEDED FOR EXTERNAL APIS
 static const char HOST_MADAVI[] PROGMEM = "api-rrd.madavi.de";
 static const char URL_MADAVI[] PROGMEM = "/data.php";
-#define PORT_MADAVI 80
+#define PORT_MADAVI 443
 
 static const char HOST_SENSORCOMMUNITY[] PROGMEM = "api.sensor.community";
 static const char URL_SENSORCOMMUNITY[] PROGMEM = "/v1/push-sensor-data/";
-#define PORT_SENSORCOMMUNITY 80
+#define PORT_SENSORCOMMUNITY 443
 
 static const char HOST_SENSEMAP[] PROGMEM = "ingress.opensensemap.org";
 static const char URL_SENSEMAP[] PROGMEM = "/boxes/{v}/data?luftdaten=1";

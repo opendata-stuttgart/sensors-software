@@ -193,8 +193,6 @@ namespace cfg {
 	bool display_device_info = DISPLAY_DEVICE_INFO;
 
 	// API settings
-	bool ssl_madavi = SSL_MADAVI;
-	bool ssl_dusti = SSL_SENSORCOMMUNITY;
 	char senseboxid[LEN_SENSEBOXID] = SENSEBOXID;
 
 	char host_influx[LEN_HOST_INFLUX];
@@ -725,15 +723,11 @@ static void createLoggerConfigs() {
 	auto new_session = []() { return nullptr; };
 #endif
 	if (cfg::send2dusti) {
-		loggerConfigs[LoggerSensorCommunity].destport = 80;
-		if (cfg::ssl_dusti) {
-			loggerConfigs[LoggerSensorCommunity].destport = 443;
-			loggerConfigs[LoggerSensorCommunity].session = new_session();
-		}
+		loggerConfigs[LoggerSensorCommunity].destport = PORT_SENSORCOMMUNITY;
+		loggerConfigs[LoggerSensorCommunity].session = new_session();
 	}
-	loggerConfigs[LoggerMadavi].destport = PORT_MADAVI;
-	if (cfg::send2madavi && cfg::ssl_madavi) {
-		loggerConfigs[LoggerMadavi].destport = 443;
+	if (cfg::send2madavi) {
+		loggerConfigs[LoggerMadavi].destport = PORT_MADAVI;
 		loggerConfigs[LoggerMadavi].session = new_session();
 	}
 	loggerConfigs[LoggerSensemap].destport = PORT_SENSEMAP;
@@ -1102,14 +1096,8 @@ static void webserver_config_send_body_get(String& page_content) {
 
 	page_content += tmpl(FPSTR(INTL_SEND_TO), F("APIs"));
 	page_content += FPSTR(BR_TAG);
-	page_content += form_checkbox(Config_send2dusti, FPSTR(WEB_SENSORCOMMUNITY), false);
-	page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
-	page_content += form_checkbox(Config_ssl_dusti, FPSTR(WEB_HTTPS), false);
-	page_content += FPSTR(WEB_BRACE_BR);
-	page_content += form_checkbox(Config_send2madavi, FPSTR(WEB_MADAVI), false);
-	page_content += FPSTR(WEB_NBSP_NBSP_BRACE);
-	page_content += form_checkbox(Config_ssl_madavi, FPSTR(WEB_HTTPS), false);
-	page_content += FPSTR(WEB_BRACE_BR);
+	add_form_checkbox(Config_send2dusti, FPSTR(WEB_SENSORCOMMUNITY));
+	add_form_checkbox(Config_send2madavi, FPSTR(WEB_MADAVI));
 	add_form_checkbox(Config_send2csv, FPSTR(WEB_CSV));
 	add_form_checkbox(Config_send2fsapp, FPSTR(WEB_FEINSTAUB_APP));
 	add_form_checkbox(Config_send2aircms, FPSTR(WEB_AIRCMS));
