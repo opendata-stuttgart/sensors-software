@@ -515,7 +515,9 @@ static String SDS_version_date() {
 		debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(DBG_TXT_SDS011_VERSION_DATE));
 		is_SDS_running = SDS_cmd(PmSensorCmd::Start);
 		delay(250);
+#if defined(ESP8266)
 		serialSDS.perform_work();
+#endif
 		serialSDS.flush();
 		// Query Version/Date
 		SDS_rawcmd(0x07, 0x00, 0x00);
@@ -1481,11 +1483,15 @@ static void webserver_status() {
 	versionHtml += F("/ST:");
 	versionHtml += String(!airrohr_selftest_failed);
 	versionHtml += '/';
+#if defined(ESP8266)
 	versionHtml += ESP.getFullVersion();
+#endif
 	versionHtml.replace("/", FPSTR(BR_TAG));
 	add_table_row_from_value(page_content, FPSTR(INTL_FIRMWARE), versionHtml);
 	add_table_row_from_value(page_content, F("Free Memory"), String(ESP.getFreeHeap()));
+#if defined(ESP8266)
 	add_table_row_from_value(page_content, F("Heap Fragmentation"), String(ESP.getHeapFragmentation()), "%");
+#endif
 	if (cfg::auto_update) {
 		add_table_row_from_value(page_content, F("Last OTA"), delayToString(millis() - last_update_attempt));
 	}
@@ -1510,7 +1516,9 @@ static void webserver_status() {
 	time_t now = time(nullptr);
 	add_table_row_from_value(page_content, FPSTR(INTL_TIME_UTC), ctime(&now));
 	add_table_row_from_value(page_content, F("Uptime"), delayToString(millis() - time_point_device_start_ms));
+#if defined(ESP8266)
 	add_table_row_from_value(page_content, F("Reset Reason"), ESP.getResetReason());
+#endif
 	if (cfg::sds_read) {
 		page_content += FPSTR(EMPTY_ROW);
 		add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), last_value_SDS_version);
@@ -1976,10 +1984,21 @@ static void connectWifi() {
 	strcpy(wifi.cc, INTL_LANG);
 	wifi.nchan = (INTL_LANG[0] == 'E' && INTL_LANG[1] == 'N') ? 11 : 13;
 	wifi.schan = 1;
+
+#if defined(ESP8266)
 	wifi_set_country(&wifi);
+#endif
 
 	WiFi.mode(WIFI_STA);
+	
+#if defined(ESP8266)
 	WiFi.hostname(cfg::fs_ssid);
+#endif
+
+#if defined(ESP32)
+	WiFi.setHostname(cfg::fs_ssid);
+#endif
+
 	WiFi.begin(cfg::wlanssid, cfg::wlanpwd); // Start WiFI
 
 	debug_outln_info(FPSTR(DBG_TXT_CONNECTING_TO), cfg::wlanssid);
@@ -1991,7 +2010,10 @@ static void connectWifi() {
 		display_debug(fss.substring(0, 16), fss.substring(16));
 
 		wifi.policy = WIFI_COUNTRY_POLICY_AUTO;
+
+#if defined(ESP8266)
 		wifi_set_country(&wifi);
+#endif
 
 		wifiConfig();
 		if (WiFi.status() != WL_CONNECTED) {
@@ -3738,11 +3760,11 @@ void setup(void) {
 	Debug.begin(9600);		// Output to Serial at 9600 baud
 #if defined(ESP8266)
 	serialSDS.begin(9600, SWSERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX);
+	serialSDS.enableIntTx(true);
 #endif
 #if defined(ESP32)
 	serialSDS.begin(9600, SERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX);
 #endif
-	serialSDS.enableIntTx(true);
 	serialSDS.setTimeout((12 * 9 * 1000) / 9600);
 
 #if defined(WIFI_LoRa_32_V2)
@@ -3770,15 +3792,16 @@ void setup(void) {
 	WiFi.persistent(false);
 
 	debug_outln_info(F("airRohr: " SOFTWARE_VERSION_STR "/"), String(CURRENT_LANG));
+#if defined(ESP8266)
 	if ((airrohr_selftest_failed = !ESP.checkFlashConfig() /* after 2.7.0 update: || !ESP.checkFlashCRC() */)) {
 		debug_outln_error(F("ERROR: SELF TEST FAILED!"));
 		SOFTWARE_VERSION += F("-STF");
 	}
-
+#endif
 	init_config();
 	init_display();
-	setupNetworkTime();
 	connectWifi();
+	setupNetworkTime();
 	setup_webserver();
 	createLoggerConfigs();
 	debug_outln_info(F("\nChipId: "), esp_chipid);
@@ -3829,9 +3852,9 @@ void loop(void) {
 	}
 
 	sample_count++;
-
+#if defined(ESP8266)
 	ESP.wdtFeed();
-
+#endif
 	if (last_micro != 0) {
 		unsigned long diff_micro = act_micro - last_micro;
 		UPDATE_MIN_MAX(min_micro, max_micro, diff_micro);

@@ -21,9 +21,6 @@
  */
 
 #include <WString.h>
-#include <Hash.h>
-#include <coredecls.h>
-#include <ESP8266WiFi.h>
 
 #include "./intl.h"
 #include "./utils.h"
@@ -255,27 +252,50 @@ float readCorrectionOffset(const char* correction) {
 
 LoggingSerial Debug;
 
+#if defined(ESP8266)
 LoggingSerial::LoggingSerial()
     : HardwareSerial(UART0)
     , m_buffer(new circular_queue<uint8_t>(LARGE_STR))
 {
 }
+#endif
+
+#if defined(ESP32)
+LoggingSerial::LoggingSerial()
+    : HardwareSerial(0)
+{
+	m_buffer = xQueueCreate(LARGE_STR, sizeof(uint8_t));
+}
+#endif
 
 size_t LoggingSerial::write(uint8_t c)
 {
+#if defined(ESP32)
+	xQueueSendToBack(m_buffer, ( void * ) &c, ( TickType_t ) 1);
+#endif
+#if defined(ESP8266)
 	m_buffer->push(c);
+#endif
 	return HardwareSerial::write(c);
 }
 
 size_t LoggingSerial::write(const uint8_t *buffer, size_t size)
 {
+#if defined(ESP32)
+	for(int i = 0; i < size; i++) {
+		xQueueSendToBack(m_buffer, ( void * ) &buffer[i], ( TickType_t ) 1);
+	}
+#endif
+#if defined(ESP8266)
 	m_buffer->push_n(buffer, size);
+#endif
 	return HardwareSerial::write(buffer, size);
 }
 
 String LoggingSerial::popLines()
 {
 	String r;
+#if defined(ESP8266)
 	while (m_buffer->available() > 0) {
 		uint8_t c = m_buffer->pop();
 		r += (char) c;
@@ -283,6 +303,16 @@ String LoggingSerial::popLines()
 		if (c == '\n' && r.length() > m_buffer->available())
 			break;
 	}
+#endif
+#if defined(ESP32)
+	uint8_t c;
+	while (xQueueReceive(m_buffer, &(c ), (TickType_t) 1 )) {
+		r += (char) c;
+
+		if (c == '\n' && r.length() > 10)
+			break;
+	}
+#endif
 	return r;
 }
 
@@ -468,7 +498,9 @@ void yield_for_serial_buffer(size_t length) {
 	while (serialSDS.available() < (int) length &&
 				millis() - startMillis < yield_timeout) {
 		yield();
+#if defined(ESP8266)
 		serialSDS.perform_work();
+#endif
 	}
 }
 
