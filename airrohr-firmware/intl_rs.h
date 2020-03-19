@@ -81,7 +81,6 @@ const char INTL_DEVICE_STATUS[] PROGMEM = "Status уређаја";
 #define INTL_RESTART "Restartuj"
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Sačuvaj i restartuj";
 #define INTL_FIRMWARE "Verzija firmvera"
-#define INTL_REPORT_ISSUE "Prijavite problem"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Podesi debagovanje na";
 #define INTL_NONE "isključeno"
 #define INTL_ERROR "greške"

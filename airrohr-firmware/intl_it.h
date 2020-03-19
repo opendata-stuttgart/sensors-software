@@ -81,7 +81,6 @@ const char INTL_DEVICE_STATUS[] PROGMEM = "Stato del dispositivo";
 #define INTL_RESTART "Riavvio"
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Salva e riavvia";
 #define INTL_FIRMWARE "Versione firmware"
-#define INTL_REPORT_ISSUE "Segnala un problema"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Imposta debug su";
 #define INTL_NONE "Nessuno"
 #define INTL_ERROR "Errore"

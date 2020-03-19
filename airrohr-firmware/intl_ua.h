@@ -81,7 +81,6 @@ const char INTL_DEVICE_STATUS[] PROGMEM = "стан пристрою";
 #define INTL_RESTART "Перезавантажити"
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Зберегти та перезавантажити";
 #define INTL_FIRMWARE "Версія мікропрограми"
-#define INTL_REPORT_ISSUE "Повідомте про проблему"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Зневадження: ";
 #define INTL_NONE "вимкнено"
 #define INTL_ERROR "лише помилки"
