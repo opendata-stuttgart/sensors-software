@@ -62,7 +62,6 @@ const char INTL_PORT[] PROGMEM = "";
 const char INTL_USER[] PROGMEM = "";
 const char INTL_PASSWORD[] PROGMEM = "";
 const char INTL_MEASUREMENT[] PROGMEM = "";
-const char INTL_MEASUREMENT[] PROGMEM = "";
 const char INTL_SEND_TO[] PROGMEM = "";
 const char INTL_READ_FROM[] PROGMEM = "";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "";
