@@ -81,7 +81,6 @@ const char INTL_DEVICE_STATUS[] PROGMEM = "stav pohonu";
 #define INTL_RESTART "Restartovat"
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Uložit a restartovat";
 #define INTL_FIRMWARE "Firmware verze"
-#define INTL_REPORT_ISSUE "Nahlásit problém"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Ladìní nastaveno na";
 #define INTL_NONE "žádný"
 #define INTL_ERROR "chyba"
