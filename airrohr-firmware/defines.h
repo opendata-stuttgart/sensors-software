@@ -81,9 +81,6 @@ constexpr const unsigned long DURATION_BEFORE_FORCED_RESTART_MS = ONE_DAY_IN_MS 
 
 #if defined(ESP32)
 
-//REVOIR POUR LE DEVKIT + IF POUR LE NPM
-
-
 //GPIO Pins
 // the IO pins which can be used for what depends on the following:
 //   - The board which is used

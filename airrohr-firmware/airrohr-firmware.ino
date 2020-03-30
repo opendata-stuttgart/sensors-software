@@ -159,7 +159,7 @@ namespace cfg {
 	bool sds_read = SDS_READ;
 	bool pms_read = PMS_READ;
 	bool hpm_read = HPM_READ;
-  bool npm_read = NPM_READ;
+    bool npm_read = NPM_READ;
 	bool sps30_read = SPS30_READ;
 	bool bmp_read = BMP_READ;
 	bool bmx280_read = BMX280_READ;
@@ -280,8 +280,6 @@ LiquidCrystal_I2C* lcd_2004 = nullptr;
 SoftwareSerial serialSDS;
 SoftwareSerial* serialGPS;
 #endif
-
-// VERIFIER QUE LE HERDWARE SERIAL ESP32 EST BIEN 8E1 SINON SOFTWARESERIAL
 
 #if defined(ESP32)
 #define serialSDS (Serial1)
@@ -4140,9 +4138,7 @@ void setup(void) {
 #endif
 
 #if defined(ESP8266) && defined(NPM_READ)
-//REVOIR CONDITION POUR ESP8266 && NPM_READ
   serialSDS.begin(115200,SWSERIAL_8E1, PM_SERIAL_RX, PM_SERIAL_TX);
-  // OU BIEN OPTION SERIAL_8E1
   serialSDS.enableIntTx(true);
 #endif
 
@@ -4152,11 +4148,10 @@ void setup(void) {
 #endif
 
 #if defined(ESP32) && defined(NPM_READ)
-//REVOIR CONDITION POUR DEVKIT && NPM_READ
   serialSDS.begin(115200, SERIAL_8E1, PM_SERIAL_RX, PM_SERIAL_TX);
   Debug.println("SERIAL_8E1");
-    pinMode(PIN_CS, OUTPUT);
-  digitalWrite(PIN_CS, LOW);
+//    pinMode(PIN_CS, OUTPUT);
+//  digitalWrite(PIN_CS, LOW);
 #endif
 
 
