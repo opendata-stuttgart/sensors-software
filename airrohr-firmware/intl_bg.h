@@ -22,7 +22,7 @@ const char INTL_SENSORS[] PROGMEM = "Сензори";
 const char INTL_MORE_SENSORS[] PROGMEM = "More Сензори";
 const char INTL_SDS011[] PROGMEM = "SDS011 ({pm})";
 const char INTL_PMS[] PROGMEM = "Plantower PMS(1,3,5,6,7)003 ({pm})";
-const char INTL_HPM[] PROGMEM = "Honeywell сензора за прахови частици";
+const char INTL_HPM[] PROGMEM = "Honeywell сензор за прахови частици";
 const char INTL_SPS30[] PROGMEM = "Sensirion SPS30 ({pm})";
 const char INTL_PPD42NS[] PROGMEM = "PPD42NS ({pm})";
 const char INTL_DHT22[] PROGMEM = "DHT22 ({t}, {h})";
@@ -37,7 +37,7 @@ const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Оторизация";
 
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "WiFi сензор в режим на конфигуриране";
-const char INTL_FS_WIFI_NAME[] PROGMEM = "Име";
+const char INTL_FS_WIFI_NAME[] PROGMEM = "Име на WiFi мрежата";
 const char INTL_MORE_SETTINGS[] PROGMEM ="Още настройки";
 const char INTL_AUTO_UPDATE[] PROGMEM = "Автоматична актуализация";
 const char INTL_USE_BETA[] PROGMEM = "Зареждане на бета актуализация";
@@ -50,9 +50,9 @@ const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
 const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Показване на WiFi информация";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Информация за устройството на дисплея";
-const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;Level";
+const char INTL_DEBUG_LEVEL[] PROGMEM = "Ниво на дебъгване";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Интервал на измерване";
-const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Продължителност като рутер";
+const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Продължителност на режим рутер";
 const char INTL_MORE_APIS[] PROGMEM = "Още API";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Изпращане към собствено API";
 const char INTL_SERVER[] PROGMEM = "Сървър";
@@ -64,14 +64,14 @@ const char INTL_SEND_TO[] PROGMEM = "Изпрати до {v}";
 const char INTL_READ_FROM[] PROGMEM = "Получено от {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Сензорът се рестартира.";
 const char INTL_RESTART_DEVICE[] PROGMEM = "Рестартирайте устройството";
-const char INTL_DELETE_CONFIG[] PROGMEM = "Изтриване на Конфигурацията";
+const char INTL_DELETE_CONFIG[] PROGMEM = "Изтриване на конфигурацията";
 const char INTL_RESTART_SENSOR[] PROGMEM = "Рестартиране на сензора";
 #define INTL_HOME "Начало"
 #define INTL_BACK_TO_HOME "Обратно към начало"
 const char INTL_CURRENT_DATA[] PROGMEM = "Текущи данни";
-const char INTL_DEVICE_STATUS[] PROGMEM = "Карам статус";
+const char INTL_DEVICE_STATUS[] PROGMEM = "Статус на устройството";
 #define INTL_ACTIVE_SENSORS_MAP "Карта на активните сензори (външен линк)"
-#define INTL_CONFIGURATION_DELETE "Изтриване на Конфигурацията"
+#define INTL_CONFIGURATION_DELETE "Изтриване на конфигурацията"
 #define INTL_CONFIGURATION_REALLY_DELETE "Наистина ли искате да изтриете конфигурацията?"
 #define INTL_DELETE "Изтрий"
 #define INTL_CANCEL "Отказ"
@@ -79,7 +79,7 @@ const char INTL_DEVICE_STATUS[] PROGMEM = "Карам статус";
 #define INTL_RESTART "Рестарт"
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Запис и рестарт";
 #define INTL_FIRMWARE "Софтуер версия"
-const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Настройки дебъгването на";
+const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Ниво на дебъгване";
 #define INTL_NONE "изключено"
 #define INTL_ERROR "само грешки"
 #define INTL_WARNING "предупреждения"
