@@ -41,14 +41,6 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-/*
- * 
- * Attention: in Wire.h set BUFFER_LENGTH to 64 !!
- *
- * #define BUFFER_LENGTH 64
- * 
- */
-
 
 #define SPS_I2C_ADDRESS 0x69
 #define SPS_MAX_SERIAL_LEN 32

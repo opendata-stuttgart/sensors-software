@@ -28,15 +28,6 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-/*
- * 
- * Attention: in Wire.h set BUFFER_LENGTH to 64 !!
- *
- * #define BUFFER_LENGTH 64
- * 
- */
-
-
 #define DNMS_I2C_ADDRESS                0x55
 #define DNMS_MAX_VERSION_LEN            18
 #define DNMS_WORD_SIZE                  2

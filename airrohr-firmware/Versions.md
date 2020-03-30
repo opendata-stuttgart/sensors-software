@@ -1,9 +1,170 @@
+NRZ-2020-130-B4
+* Prevent password leakage in configuration dialogs
+* Change default password for webpage auth to ""
+* Ignore measurement interval settings below 5s
+* Track API sending errors for each API separately
+
+NRZ-2020-130-B3
+* Serial debug output on webpage
+* Refactoring
+
+NRZ-2020-130-B2
+* Avoid crash on WiFi network scan failure (Related to #615)
+* Only do OTA after sensor measurements are finished
+* Remove uninitialized memory read in NTP handling
+* Accept larger flash sizes also as compatible
+* Switch to a tab based configuration page
+* Skip initialization of display's when not configured
+* Delay OneWire initialization until configured
+* Fix bulgarian translation error (Fixes #622)
+* Fix hang on BME/P280 measurement read
+* Connect up to wifi channel 13 if locale is not EN (Fixes #626)
+* Use IPv6 LWIP (Related to #605)
+* Add configurable temperature correction (Fixes #607)
+
+NRZ-2020-130-B1
+* next beta version
+
+NRZ-2020-129
+online since 2020-01-07
+* same as NRZ-2019-128-B8 (+build date is shown in header)
+
+NRZ-2019-128-B8
+* Improve NTP handling and status reporting
+* Fix weird placement of "save and restart" button in config
+* Fix handling of short intervals with SDS011 (Fixes #426)
+* Erase SDK config on OTA restart (Fixes #590)
+* Add link to report an issue to web ui
+* Add self-test
+* Split less recommended sensors into a subsection of config page (Fixes #171)
+
+NRZ-2019-128-B7
+* More introspection status for OTA and sending errors
+* Resorting Language selection alphabetically
+* Disable language and beta selector when OTA is disabled
+
+NRZ-2019-128-B6
+* Fix crash on device status page in some locales
+
+NRZ-2019-128-B5
+* Avoid calling wifi off on startup which seems to cause some issues (Fixes #598)
+
+NRZ-2019-128-B4
+* perfom blocking reads on SDS011 serial responses
+* Add Device Status webpage
+* Set DHCP hostname to the firmware config wifi name (Fixes #595)
+* Polish translation fixes
+* Mark potentially destructive actions with red highlight (idea from nettigo FW)
+* Add support for LCD 2004 on I2C 0x3F address
+
+NRZ-2019-128-B3
+* Fix startup hang on wifis without NTP access (#580)
+* Update SHT3.x to 1.1.6
+
+NRZ-2019-127-1 (intermediate version)
+online since 2019-12-03
+* same as NRZ-2019-127-B2
+
+NRZ-2019-128-B2
+* Initialize MDNS after wifi to restore functionality
+
+NRZ-2019-128-B1
+* next beta version
+
+NRZ-2019-127
+online since 2019-12-02
+* same as NRZ-2019-126-B9
+
+NRZ-2019-126-B9
+* Update to Arduino Core 2.6.2 to fix WiFi stability issues
+
+NRZ-2019-126-B8
+* Updated translations
+* Collect error counters
+* Serbian localization added
+
+NRZ-2019-126-B7
+* Updated italian translations - thanks stewecar
+* Fix instabilities in SDS011 measurement decoding
+
+NRZ-2019-126-B6
+* Read SDS011 version once on startup
+* Discard power-on self-test dust sensor measurements
+* Do not store WiFi station credentials in SDK protected flash
+* Switch to ArduinoJson 6.13
+* show SDS011 manufacturing date in values HTML page
+* Update to Arduino Core 2.6.1, including many fixes for SSL, WiFi and SoftwareSerial
+* Update SHT3.x to 1.1.5
+
+NRZ-2019-126-B5
+* Rename Luftdaten.info to Sensors.Community everywhere
+* Report the submitted wifi signal quality level in the web UI
+* Keep WiFi information persistent over restarts
+* Perform WiFi Tx power calibration on boot
+
+NRZ-2019-126-B4
+* Try to configure system time from 3 different NTP sources
+* When system time is invalid, disable TLS verification
+* Use TLS for Feinstaub-App reporting
+
+NRZ-2019-126-B3
+* OTA updater validates loader checksums prior update
+* Maintain config setting backups and fall back if current version is corrupt
+* Code cleanups
+* Fix regression in Humidity Reading of BME280
+* Fix regression in logging to Feinstaub App
+
+NRZ-2019-126-B2
+* Switch to Arduino Core 2.5.2
+* Switch OTA updater to use TLS with server certificate verification
+* SSL server certificate verification for Madavi, Sensor Community and OpenSensemap
+* Update ESPSoftwareSerial to 5.0.4
+* Add support for Sensirion SHT3x Temperature/Humidity sensors
+* Code size optimisations
+* Fix pressure precision of BMP/BME280
+
+NRZ-2019-126-B1
+* next beta version
+
+NRZ-2019-125-B1
+* Revert unintentional default senseboxid change
+
+NRZ-2019-125
+online since 2019-10-31
+* same as NRZ-2019-124-B10
+  (+ renaming PM value names for SDS30)
+
+NRZ-2019-124-B10
+* Persist Wifi configuration in flash
+* Rewrite config using current format when version changes
+* Fix truncation of wifi password
+* prometheus endpoint: esp prefix was missing
+
+NRZ-2019-124-B9
+* Handle Si7021 for HTU21d replacement
+* Fix GPS regression
+
+NRZ-2019-124-B8
+* bug fixes
+* translation updates
+
+NRZ-2019-124-B7
+* Fix update checking interval
+
 NRZ-2019-124-B6
 * noise sensor added
 * Sensirion SPS30 added
 * option to flip OLED output
 * Fix crash on selecting available networks in AP mode
 * add options to disable display of wifi and device infos
+* Code size optimisations
+* Serve config pages incrementally to avoid running out of memory
+* Write more compliant config JSON
+* Advertise as http://airrohr-$espid.local/ in AP mode
+* BMP280/BME280 sensors are merged into one implementation
+* Switch OTA updater two a two-Stage implemenation allowing more than 512kb of sketch size
+* Fix memory corruption when using displays
+* Reduce memory consumption in data sending which allows keeping the HTTP server available
 
 NRZ-2019-124-B5
 * some comments removed
@@ -224,7 +385,7 @@ NRZ-2018-104-B3
 
 NRZ-2018-104-B2
 * sending signal strength to InfluxDB
-* optimizations in reading PM sensors 
+* optimizations in reading PM sensors
 * disable sending data to OpenSenseMap with 'default' BoxID
 * disable sending data to InfluxDB at Luftdaten.info (only used internally)
 * character ' in text input fields (i.e. wifi SSID) should be displayed correctly
