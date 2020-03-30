@@ -38,10 +38,7 @@ enum ConfigShapeId {
 	Config_sds_read,
 	Config_pms_read,
 	Config_hpm_read,
-<<<<<<< HEAD
   Config_npm_read,
-=======
->>>>>>> b41f471898c07db43ca1576a38c5f0eace2aec7d
 	Config_sps30_read,
 	Config_bmp_read,
 	Config_bmx280_read,
@@ -104,10 +101,7 @@ const char CFG_KEY_PPD_READ[] PROGMEM = "ppd_read";
 const char CFG_KEY_SDS_READ[] PROGMEM = "sds_read";
 const char CFG_KEY_PMS_READ[] PROGMEM = "pms_read";
 const char CFG_KEY_HPM_READ[] PROGMEM = "hpm_read";
-<<<<<<< HEAD
 const char CFG_KEY_NPM_READ[] PROGMEM = "npm_read";
-=======
->>>>>>> b41f471898c07db43ca1576a38c5f0eace2aec7d
 const char CFG_KEY_SPS30_READ[] PROGMEM = "sps30_read";
 const char CFG_KEY_BMP_READ[] PROGMEM = "bmp_read";
 const char CFG_KEY_BMX280_READ[] PROGMEM = "bmx280_read";
@@ -170,10 +164,7 @@ static constexpr ConfigShapeEntry configShape[] PROGMEM = {
 	{ Config_Type_Bool, 0, FPSTR(CFG_KEY_SDS_READ), &cfg::sds_read },
 	{ Config_Type_Bool, 0, FPSTR(CFG_KEY_PMS_READ), &cfg::pms_read },
 	{ Config_Type_Bool, 0, FPSTR(CFG_KEY_HPM_READ), &cfg::hpm_read },
-<<<<<<< HEAD
   { Config_Type_Bool, 0, FPSTR(CFG_KEY_NPM_READ), &cfg::npm_read },
-=======
->>>>>>> b41f471898c07db43ca1576a38c5f0eace2aec7d
 	{ Config_Type_Bool, 0, FPSTR(CFG_KEY_SPS30_READ), &cfg::sps30_read },
 	{ Config_Type_Bool, 0, FPSTR(CFG_KEY_BMP_READ), &cfg::bmp_read },
 	{ Config_Type_Bool, 0, FPSTR(CFG_KEY_BMX280_READ), &cfg::bmx280_read },

@@ -2,7 +2,6 @@
 #define SENSOR_BASENAME "esp8266-"
 #define OTA_BASENAME "/airrohr"
 #endif
-<<<<<<< HEAD
 
 
 #if defined(ESP32)
@@ -10,27 +9,6 @@
 #define OTA_BASENAME "/airrohr/esp32"
 #endif
 
-=======
-#if defined(ESP32)
-#define SENSOR_BASENAME "esp32-"
-#define OTA_BASENAME "/airrohr/esp32"
-#endif
-
-#define SSID_BASENAME "airRohr-"
-#define HOSTNAME_BASE "airRohr-"
-
-#define LEN_CFG_STRING 65
-#define LEN_CFG_PASSWORD 65
-
-#define LEN_WLANSSID 35				// credentials for wifi connection
-
-#define LEN_WWW_USERNAME 65			// credentials for basic auth of server internal website
-
-#define LEN_FS_SSID 33				// credentials for sensor access point mode
-
-#define LEN_DNMS_CORRECTION 8
-#define LEN_TEMP_CORRECTION 8
->>>>>>> b41f471898c07db43ca1576a38c5f0eace2aec7d
 
 
 #define SSID_BASENAME "airRohr-"
@@ -50,10 +28,6 @@
 #define LEN_HOST_CUSTOM 100
 #define LEN_URL_CUSTOM 100
 #define LEN_USER_CUSTOM 65
-<<<<<<< HEAD
-=======
-
->>>>>>> b41f471898c07db43ca1576a38c5f0eace2aec7d
 #define MAX_PORT_DIGITS 5
 
 // define debug levels
@@ -70,12 +44,9 @@ constexpr const unsigned long SAMPLETIME_MS = 30000;									// time between two
 constexpr const unsigned long SAMPLETIME_SDS_MS = 1000;								// time between two measurements of the SDS011, PMSx003, Honeywell PM sensor
 constexpr const unsigned long WARMUPTIME_SDS_MS = 15000;								// time needed to "warm up" the sensor before we can take the first measurement
 constexpr const unsigned long READINGTIME_SDS_MS = 5000;								// how long we read data from the PM sensors
-<<<<<<< HEAD
 constexpr const unsigned long SAMPLETIME_NPM_MS = 1000;
 constexpr const unsigned long WARMUPTIME_NPM_MS = 15000;
 constexpr const unsigned long READINGTIME_NPM_MS = 15000;                // how long we read data from the PM sensors
-=======
->>>>>>> b41f471898c07db43ca1576a38c5f0eace2aec7d
 constexpr const unsigned long SAMPLETIME_GPS_MS = 50;
 constexpr const unsigned long DISPLAY_UPDATE_INTERVAL_MS = 5000;						// time between switching display to next "screen"
 constexpr const unsigned long ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -136,39 +107,29 @@ constexpr const unsigned long DURATION_BEFORE_FORCED_RESTART_MS = ONE_DAY_IN_MS 
 #endif
 #define D4 4
 #define D5 5
-<<<<<<< HEAD
 #define D13 13
 // pins 12 to 15 are needed by JTAG and should not be used to allow debugging (if you can afford it)
 //#define D9 9
 //#define D10 10
 
-=======
-// pins 12 to 15 are needed by JTAG and should not be used to allow debugging (if you can afford it)
->>>>>>> b41f471898c07db43ca1576a38c5f0eace2aec7d
 #if not defined(USING_JTAG_DEBUGGER_PINS)
 #define D12_JTAG_TDI_LOW_DURING_BOOT 12
 #define D13_JTAG_TCK 13
 #define D14_JTAG_TMS 14
 #define D15_JTAG_TDO_HIGH_DURING_BOOT 15
 #endif
-<<<<<<< HEAD
 
 
 
 
 
-=======
->>>>>>> b41f471898c07db43ca1576a38c5f0eace2aec7d
 #if defined(ESP32_WROOM_MODULE)
 // these two pins are used to access PSRAM on WROVER modules
 #define D16_WROOM_ONLY 16
 #define D17_WROOM_ONLY 17
 #endif
-<<<<<<< HEAD
 
 
-=======
->>>>>>> b41f471898c07db43ca1576a38c5f0eace2aec7d
 #define D18 18
 #define D19 19
 #define D21 21
