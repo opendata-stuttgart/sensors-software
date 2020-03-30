@@ -157,6 +157,7 @@ namespace cfg {
 	bool sds_read = SDS_READ;
 	bool pms_read = PMS_READ;
 	bool hpm_read = HPM_READ;
+	bool npm_read = NPM_READ;
 	bool sps30_read = SPS30_READ;
 	bool bmp_read = BMP_READ;
 	bool bmx280_read = BMX280_READ;
@@ -334,6 +335,8 @@ unsigned long starttime;
 unsigned long time_point_device_start_ms;
 unsigned long starttime_SDS;
 unsigned long starttime_GPS;
+unsigned long starttime_NPM;
+unsigned long last_NPM;
 unsigned long act_micro;
 unsigned long act_milli;
 unsigned long last_micro = 0;
@@ -343,6 +346,7 @@ unsigned long max_micro = 0;
 bool is_SDS_running = true;
 bool is_PMS_running = true;
 bool is_HPM_running = true;
+bool is_NPM_running = true;
 
 unsigned long sending_time = 0;
 unsigned long last_update_attempt;
@@ -389,6 +393,27 @@ int hpm_pm10_min = 20000;
 int hpm_pm25_max = 0;
 int hpm_pm25_min = 20000;
 
+uint16_t npm_pm1_sum = 0;
+uint16_t npm_pm10_sum = 0;
+uint16_t npm_pm25_sum = 0;
+uint16_t npm_pm1_sum_pcs = 0;
+uint16_t npm_pm10_sum_pcs = 0;
+uint16_t npm_pm25_sum_pcs = 0;
+uint16_t npm_val_count = 0;
+uint16_t npm_pm1_max = 0;
+uint16_t npm_pm1_min = 20000;
+uint16_t npm_pm10_max = 0;
+uint16_t npm_pm10_min = 20000;
+uint16_t npm_pm25_max = 0;
+uint16_t npm_pm25_min = 20000;
+uint16_t npm_pm1_max_pcs = 0;
+uint16_t npm_pm1_min_pcs = 60000;
+uint16_t npm_pm10_max_pcs = 0;
+uint16_t npm_pm10_min_pcs = 60000;
+uint16_t npm_pm25_max_pcs = 0;
+uint16_t npm_pm25_min_pcs = 60000;
+bool newCmdNPM = true;
+
 float last_value_SPS30_P0 = -1.0;
 float last_value_SPS30_P1 = -1.0;
 float last_value_SPS30_P2 = -1.0;
@@ -426,6 +451,12 @@ float last_value_PMS_P1 = -1.0;
 float last_value_PMS_P2 = -1.0;
 float last_value_HPM_P1 = -1.0;
 float last_value_HPM_P2 = -1.0;
+float last_value_NPM_P0 = -1.0;
+float last_value_NPM_P1 = -1.0;
+float last_value_NPM_P2 = -1.0;
+float last_value_NPM_N0 = -1.0;
+float last_value_NPM_N1 = -1.0;
+float last_value_NPM_N2 = -1.0;
 double last_value_GPS_lat = -200.0;
 double last_value_GPS_lon = -200.0;
 double last_value_GPS_alt = -1000.0;
@@ -1391,6 +1422,15 @@ static void webserver_values() {
 		page_content += FPSTR(EMPTY_ROW);
 		add_table_pm_value(FPSTR(SENSORS_HPM), FPSTR(WEB_PM25), last_value_HPM_P2);
 		add_table_pm_value(FPSTR(SENSORS_HPM), FPSTR(WEB_PM10), last_value_HPM_P1);
+	}
+	if (cfg::npm_read) {
+		page_content += FPSTR(EMPTY_ROW);
+		add_table_pm_value(FPSTR(SENSORS_NPM), FPSTR(WEB_PM1), last_value_NPM_P2);
+		add_table_pm_value(FPSTR(SENSORS_NPM), FPSTR(WEB_PM25), last_value_NPM_P2);
+		add_table_pm_value(FPSTR(SENSORS_NPM), FPSTR(WEB_PM10), last_value_NPM_P1);
+		add_table_nc_value(FPSTR(SENSORS_NPM), FPSTR(WEB_NC1k0), last_value_NPM_N0);
+		add_table_nc_value(FPSTR(SENSORS_NPM), FPSTR(WEB_NC2k5), last_value_NPM_N2);
+		add_table_nc_value(FPSTR(SENSORS_NPM), FPSTR(WEB_NC10), last_value_NPM_N1);
 	}
 	if (cfg::sps30_read) {
 		page_content += FPSTR(EMPTY_ROW);
@@ -2731,6 +2771,303 @@ static void fetchSensorHPM(String& s) {
 }
 
 /*****************************************************************
+ * read Tera Sensor Next PM sensor sensor values                 *
+ *****************************************************************/
+static void fetchSensorNPM(String& s) {
+
+	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_NPM));
+
+	if (msSince(starttime) < (cfg::sending_intervall_ms - (WARMUPTIME_NPM_MS + READINGTIME_NPM_MS))) {
+		if (is_NPM_running) {
+
+			const uint8_t constexpr answer_stop[4] = { 0x81, 0x15, 0x01, 0x69 };
+			uint8_t data[4];
+			serialSDS.flush();
+			NPM_cmd(PmSensorCmd2::Change);
+
+			while (!serialSDS.available()) {debug_outln_info(F("Wait for Serial..."));}
+
+			while (serialSDS.available() > 0) {
+				unsigned r = serialSDS.readBytes(data, sizeof(data));
+
+				if (r == sizeof(data) && NPM_checksum_valid_4(data)) {
+
+					String reader = "Read: ";
+
+					for (int i = 0; i < sizeof(data); i++) {
+						reader += "0x";
+						if (data[i] < 0x10) {
+							reader += "0";
+						}
+						reader += String(data[i], HEX);
+						if(i != (sizeof(data) - 1)) {
+							reader += ", ";
+						}
+					}
+
+					debug_outln(reader, DEBUG_MAX_INFO);
+
+					if (memcmp(data, answer_stop, 4) == 0) {
+						debug_outln_info(F("Next PM Stop..."));
+						is_NPM_running = false;
+					}
+					break;
+				}
+			}
+		}
+	} else {
+		if (!is_NPM_running) {
+			const uint8_t constexpr answer_start[4] = { 0x81, 0x15, 0x00, 0x6A };
+			uint8_t data[4];
+			serialSDS.flush();
+			NPM_cmd(PmSensorCmd2::Change);
+
+			while (!serialSDS.available()) {debug_outln_info(F("Wait for Serial..."));}
+
+			while (serialSDS.available() > 0) {
+				unsigned r = serialSDS.readBytes(data, sizeof(data));
+
+				if (r == sizeof(data) && NPM_checksum_valid_4(data)) {
+					String reader = "Read: ";
+
+					for (int i = 0; i < sizeof(data); i++) {
+						reader += "0x";
+						if (data[i] < 0x10) {
+							reader += "0";
+						}
+						reader += String(data[i], HEX);
+						if(i != (sizeof(data) - 1)) {
+							reader += ", ";
+						}
+					}
+
+					debug_outln(reader, DEBUG_MAX_INFO);
+
+					if(memcmp(data, answer_start, 4) == 0) {
+						debug_outln_info(F("Next PM Start..."));
+						is_NPM_running = true;
+						starttime_NPM = millis();
+						last_NPM = starttime_NPM - 1000;
+					}
+					break;
+				}
+			}
+
+		} else {
+			Debug.println(msSince(starttime_NPM));
+
+			if (msSince(starttime_NPM) > WARMUPTIME_NPM_MS && msSince(last_NPM) >= SAMPLETIME_NPM_MS && npm_val_count < 10 && newCmdNPM == true) {
+				uint8_t data[16];
+				serialSDS.flush();
+				NPM_cmd(PmSensorCmd2::Concentration);
+				newCmdNPM = false;
+				while (!serialSDS.available()) {debug_outln_info(F("Wait for Serial..."));}
+
+
+
+				while (serialSDS.available() > 0) {
+					//    yield_for_serial_buffer(sizeof(data));
+					unsigned r = serialSDS.readBytes(data, sizeof(data));
+
+					if (r == sizeof(data) && NPM_checksum_valid_16(data)) {
+
+
+						String reader = "Read: ";
+
+						for (int i = 0; i < sizeof(data); i++) {
+							reader += "0x";
+							if (data[i] < 0x10) {
+								reader += "0";
+							}
+							reader += String(data[i], HEX);
+							if(i != (sizeof(data) - 1)) {
+								reader += ", ";
+							}
+						}
+
+						debug_outln(reader, DEBUG_MAX_INFO);
+
+						byte stateByte = data[2];
+						String state = "State: ";
+
+						for (int b = 7; b >= 0; b--) {
+							state += String(bitRead(stateByte, b));
+						}
+
+						debug_outln(state, DEBUG_MAX_INFO);
+
+						uint16_t N1_serial = word(data[3], data[4]);
+						uint16_t N25_serial = word(data[5], data[6]);
+						uint16_t N10_serial =  word(data[7], data[8]);
+
+						uint16_t pm1_serial = word(data[9], data[10]);
+						uint16_t pm25_serial = word(data[11], data[12]);
+						uint16_t pm10_serial =  word(data[13], data[14]);
+
+						debug_outln_verbose(F("PM1 (μg/m3) : "), String(pm1_serial / 10.0f));
+						debug_outln_verbose(F("PM2.5 (μg/m3): "), String(pm25_serial / 10.0f));
+						debug_outln_verbose(F("PM10 (μg/m3) : "), String(pm10_serial / 10.0f));
+
+						debug_outln_verbose(F("PM1 (pcs/mL) : "), String(N1_serial));
+						debug_outln_verbose(F("PM2.5 (pcs/mL): "), String(N25_serial));
+						debug_outln_verbose(F("PM10 (pcs/mL) : "), String(N10_serial));
+
+						npm_pm1_sum += pm1_serial / 10.0f;
+						npm_pm25_sum += pm25_serial / 10.0f;
+						npm_pm10_sum += pm10_serial / 10.0f;
+
+						npm_pm1_sum_pcs += N1_serial;
+						npm_pm25_sum_pcs += N25_serial;
+						npm_pm10_sum_pcs += N10_serial;
+
+						UPDATE_MIN_MAX(npm_pm1_min, npm_pm1_max, pm1_serial / 10.0f);
+						UPDATE_MIN_MAX(npm_pm25_min, npm_pm25_max, pm25_serial / 10.0f);
+						UPDATE_MIN_MAX(npm_pm10_min, npm_pm10_max, pm10_serial / 10.0f);
+
+						UPDATE_MIN_MAX(npm_pm1_min_pcs, npm_pm1_max_pcs, N1_serial);
+						UPDATE_MIN_MAX(npm_pm25_min_pcs, npm_pm25_max_pcs, N25_serial);
+						UPDATE_MIN_MAX(npm_pm10_min_pcs, npm_pm10_max_pcs, N10_serial);
+
+						debug_outln_info(F("Next PM Measure..."));
+						newCmdNPM = true;
+						npm_val_count += 1;
+						last_NPM = millis();
+
+						break;
+					} else if(r == 4 && data[2] == 0x04) {
+
+
+						String reader = "Read: ";
+
+						for (int i = 0; i < 4; i++) {
+							reader += "0x";
+							if (data[i] < 0x10) {
+								reader += "0";
+							}
+							reader += String(data[i], HEX);
+							if(i != 3) {
+								reader += ", ";
+							}
+						}
+
+						debug_outln(reader, DEBUG_MAX_INFO);
+
+
+						debug_outln_info(F("Next PM not ready yet..."));
+						newCmdNPM = true;
+						break;
+					}
+				}
+			}
+		}
+	}
+	if (send_now) {
+		last_value_NPM_P0 = -1.0f;
+		last_value_NPM_P1 = -1.0f;
+		last_value_NPM_P2 = -1.0f;
+		last_value_NPM_N0 = -1.0f;
+		last_value_NPM_N1 = -1.0f;
+		last_value_NPM_N2 = -1.0f;
+
+
+		if (npm_val_count > 2) {
+			npm_pm1_sum = npm_pm1_sum - npm_pm1_min - npm_pm1_max;
+			npm_pm10_sum = npm_pm10_sum - npm_pm10_min - npm_pm10_max;
+			npm_pm25_sum = npm_pm25_sum - npm_pm25_min - npm_pm25_max;
+			npm_pm1_sum_pcs = npm_pm1_sum_pcs - npm_pm1_min_pcs - npm_pm1_max_pcs;
+			npm_pm10_sum_pcs = npm_pm10_sum_pcs - npm_pm10_min_pcs - npm_pm10_max_pcs;
+			npm_pm25_sum_pcs = npm_pm25_sum_pcs - npm_pm25_min_pcs - npm_pm25_max_pcs;
+			npm_val_count = npm_val_count - 2;
+		}
+		if (npm_val_count > 0) {
+			last_value_NPM_P0 = float(npm_pm1_sum) / float(npm_val_count);
+			last_value_NPM_P1 = float(npm_pm10_sum) / float(npm_val_count);
+			last_value_NPM_P2 = float(npm_pm25_sum) / float(npm_val_count);
+
+			last_value_NPM_N0 = float(npm_pm1_sum_pcs) / float(npm_val_count);
+			last_value_NPM_N1 = float(npm_pm10_sum_pcs) / float(npm_val_count);
+			last_value_NPM_N2 = float(npm_pm25_sum_pcs) / float(npm_val_count);
+
+			add_Value2Json(s, F("NPM_P0"), F("PM1: "), last_value_NPM_P0);
+			add_Value2Json(s, F("NPM_P1"), F("PM10:  "), last_value_NPM_P1);
+			add_Value2Json(s, F("NPM_P2"), F("PM2.5: "), last_value_NPM_P2);
+
+			add_Value2Json(s, F("NPM_N1"), F("NC1.0: "), last_value_NPM_N0);
+			add_Value2Json(s, F("NPM_N10"), F("NC10:  "), last_value_NPM_N1);
+			add_Value2Json(s, F("NPM_N25"), F("NC2.5: "), last_value_NPM_N2);
+
+			debug_outln_info(FPSTR(DBG_TXT_SEP));
+		}
+		npm_pm1_sum = 0;
+		npm_pm10_sum = 0;
+		npm_pm25_sum = 0;
+
+		npm_val_count = 0;
+
+		npm_pm1_max = 0;
+		npm_pm1_min = 20000;
+		npm_pm10_max = 0;
+		npm_pm10_min = 20000;
+		npm_pm25_max = 0;
+		npm_pm25_min = 20000;
+
+		npm_pm1_sum_pcs = 0;
+		npm_pm10_sum_pcs = 0;
+		npm_pm25_sum_pcs = 0;
+
+		npm_pm1_max_pcs = 0;
+		npm_pm1_min_pcs = 60000;
+		npm_pm10_max_pcs = 0;
+		npm_pm10_min_pcs = 60000;
+		npm_pm25_max_pcs = 0;
+		npm_pm25_min_pcs = 60000;
+
+		if(cfg::sending_intervall_ms > (WARMUPTIME_NPM_MS + READINGTIME_NPM_MS)) {
+
+			const uint8_t constexpr answer_stop[4] = { 0x81, 0x15, 0x01, 0x69 };
+			uint8_t data[4];
+			serialSDS.flush();
+			NPM_cmd(PmSensorCmd2::Change);
+
+			while (!serialSDS.available()) {Debug.println("Wait for Serial");}
+
+			while (serialSDS.available() > 0) {
+				unsigned r = serialSDS.readBytes(data, sizeof(data));
+
+				if (r == sizeof(data) && NPM_checksum_valid_4(data)) {
+
+					String reader = "Read: ";
+
+					for (int i = 0; i < sizeof(data); i++) {
+						reader += "0x";
+						if (data[i] < 0x10) {
+							reader += "0";
+						}
+						reader += String(data[i], HEX);
+						if(i != (sizeof(data) - 1)) {
+							reader += ", ";
+						}
+					}
+
+					debug_outln(reader, DEBUG_MAX_INFO);
+
+
+					if(memcmp(data, answer_stop, 4) == 0) {
+						debug_outln_info(F("Next PM Stop..."));
+						is_NPM_running = false;
+						npm_val_count = 0;
+					}
+					break;
+				}
+			}
+		}
+
+	}
+
+	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_NPM));
+}
+
+/*****************************************************************
  * read PPD42NS sensor values                                    *
  *****************************************************************/
 static void fetchSensorPPD(String& s) {
@@ -3182,6 +3519,16 @@ static void display_values() {
 		pm25_value = last_value_HPM_P2;
 		pm25_sensor = FPSTR(SENSORS_HPM);
 	}
+	if (cfg::npm_read) {
+		pm01_value = last_value_NPM_P0;
+		pm10_value = last_value_NPM_P1;
+		pm25_value = last_value_NPM_P2;
+		pm10_sensor = FPSTR(SENSORS_NPM);
+		pm25_sensor = FPSTR(SENSORS_NPM);
+		nc010_value = last_value_NPM_N0;
+		nc100_value = last_value_NPM_N1;
+		nc025_value = last_value_NPM_N2;
+	}
 	if (cfg::sps30_read) {
 		pm10_sensor = FPSTR(SENSORS_SPS30);
 		pm25_sensor = FPSTR(SENSORS_SPS30);
@@ -3567,6 +3914,63 @@ static void powerOnTestSensors() {
 		debug_outln_info(F("Stopping HPM..."));
 		is_HPM_running = HPM_cmd(PmSensorCmd::Stop);
 	}
+#if NPM_READ
+	if (cfg::npm_read) {
+
+		const uint8_t constexpr answer_sleep[4] = { 0x81, 0x16, 0x01, 0x68 };
+		const uint8_t constexpr answer_power[4] = { 0x81, 0x16, 0x00, 0x69 };
+		uint8_t data[4];
+
+		debug_outln_info(F("State NPM..."));
+		serialSDS.flush();
+		NPM_cmd(PmSensorCmd2::State);
+		while (!serialSDS.available()) {debug_outln_info(F("Wait for Serial..."));}
+
+		while (serialSDS.available() > 0) {
+
+			//yield_for_serial_buffer(sizeof(data));
+			unsigned r = serialSDS.readBytes(data, sizeof(data));
+
+			if (r == sizeof(data) && NPM_checksum_valid_4(data)) {
+
+
+				String reader = "Read: ";
+
+				for (int i = 0; i < sizeof(data); i++) {
+					reader += "0x";
+					if (data[i] < 0x10) {
+						reader += "0";
+					}
+					reader += String(data[i], HEX);
+					if (i != (sizeof(data) - 1)) {
+						reader += ", ";
+					}
+				}
+
+				debug_outln(reader, DEBUG_MAX_INFO);
+
+				if (memcmp(data, answer_sleep, 4) == 0) {
+					serialSDS.flush();
+					is_NPM_running = false;
+					debug_outln_info(F("Next PM Sleep..."));
+				} else if (memcmp(data, answer_power, 4) == 0) {
+					serialSDS.flush();
+					is_NPM_running = true;
+					debug_outln_info(F("Next PM Power On..."));
+				} else {
+					//digitalWrite(PIN_CS, HIGH);
+					delay(500);
+					//digitalWrite(PIN_CS, LOW);
+					is_NPM_running = true;
+					debug_outln_info(F("Next PM Reboot..."));
+				}
+
+				break;
+
+			}
+		}
+	}
+#endif
 
 	if (cfg::sps30_read) {
 		debug_outln_info(F("Read SPS30..."));
@@ -3759,12 +4163,22 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 
 void setup(void) {
 	Debug.begin(9600);		// Output to Serial at 9600 baud
-#if defined(ESP8266)
+#if defined(ESP8266) && !NPM_READ
 	serialSDS.begin(9600, SWSERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX);
 	serialSDS.enableIntTx(true);
 #endif
-#if defined(ESP32)
+#if defined(ESP8266) && NPM_READ
+	serialSDS.begin(115200, SWSERIAL_8E1, PM_SERIAL_RX, PM_SERIAL_TX);
+	serialSDS.enableIntTx(true);
+#endif
+#if defined(ESP32) && !NPM_READ
 	serialSDS.begin(9600, SERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX);
+#endif
+#if defined(ESP32) && NPM_READ
+	serialSDS.begin(115200, SERIAL_8E1, PM_SERIAL_RX, PM_SERIAL_TX);
+	Debug.println("SERIAL_8E1");
+	pinMode(PIN_CS, OUTPUT);
+	digitalWrite(PIN_CS, LOW);
 #endif
 	serialSDS.setTimeout((12 * 9 * 1000) / 9600);
 

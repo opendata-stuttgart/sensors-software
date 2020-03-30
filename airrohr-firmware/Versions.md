@@ -1,6 +1,7 @@
 NRZ-2020-130-B6
 * show new ID
 * rebranding to Sensor.Community
+* Tera Sensor Next PM sensor added (disabled from build atm)
 
 NRZ-2020-130-B5
 * Slovak translations added
