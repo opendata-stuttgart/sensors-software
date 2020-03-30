@@ -3921,17 +3921,20 @@ static void powerOnTestSensors() {
         serialSDS.flush();
         is_NPM_running = false;
         debug_outln_info(F("Next PM Sleep..."));
-       }else if(memcmp(data,answer_power,4)==0){
+       }
+//        else if 
+        if(memcmp(data,answer_power,4)==0){
         serialSDS.flush();
         is_NPM_running = true;
         debug_outln_info(F("Next PM Power On..."));
-       }else{
-        digitalWrite(PIN_CS, HIGH);
-        delay(500);
-        digitalWrite(PIN_CS, LOW);
-        is_NPM_running = true;
-        debug_outln_info(F("Next PM Reboot..."));
-        }
+       }
+//        else{
+//        digitalWrite(PIN_CS, HIGH);
+//        delay(500);
+//        digitalWrite(PIN_CS, LOW);
+//        is_NPM_running = true;
+//        debug_outln_info(F("Next PM Reboot..."));
+//        }
 
        break;
 
