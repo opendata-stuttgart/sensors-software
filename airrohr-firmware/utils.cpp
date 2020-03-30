@@ -490,6 +490,7 @@ bool HPM_cmd(PmSensorCmd cmd) {
 	return cmd != PmSensorCmd::Stop;
 }
 
+<<<<<<< HEAD
 
 /*****************************************************************
  * send Tera Sensor Next PM sensor command start, stop, cont. mode     *
@@ -541,6 +542,8 @@ void NPM_cmd(PmSensorCmd2 cmd) {
 }
 
 
+=======
+>>>>>>> b41f471898c07db43ca1576a38c5f0eace2aec7d
 // workaround for https://github.com/plerup/espsoftwareserial/issues/127
 void yield_for_serial_buffer(size_t length) {
 	unsigned long startMillis = millis();

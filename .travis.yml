@@ -12,8 +12,9 @@ env:
     - PLATFORMIO_CI_SRC=./
 
 install:
-    - pip install -U 'platformio<4.0.0'
-    - platformio update
+   - pip install -U platformio
+   - platformio update
 
 script:
     - cd airrohr-firmware && pwd && ls -l && platformio run && ls -l builds/
+    - cd ../airrohr-update-loader && pwd && ls -l && platformio run && ls -l builds/

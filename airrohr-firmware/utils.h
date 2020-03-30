@@ -92,6 +92,7 @@ extern SoftwareSerial serialSDS;
 enum class PmSensorCmd {
 	Start,
 	Stop,
+<<<<<<< HEAD
 	ContinuousMode,
 };
 
@@ -99,6 +100,9 @@ enum class PmSensorCmd2 { // for NPM
   State, 
   Change, 
   Concentration
+=======
+	ContinuousMode
+>>>>>>> b41f471898c07db43ca1576a38c5f0eace2aec7d
 };
 
 /*****************************************************************
@@ -144,6 +148,7 @@ extern void SDS_rawcmd(const uint8_t cmd_head1, const uint8_t cmd_head2, const u
 extern bool SDS_cmd(PmSensorCmd cmd);
 extern bool PMS_cmd(PmSensorCmd cmd);
 extern bool HPM_cmd(PmSensorCmd cmd);
+<<<<<<< HEAD
 extern void NPM_cmd(PmSensorCmd2 cmd);
 extern bool NPM_checksum_valid_4(const uint8_t (&data)[4]);
 extern bool NPM_checksum_valid_16(const uint8_t (&data)[16]);
@@ -151,3 +156,9 @@ extern bool NPM_checksum_valid_16(const uint8_t (&data)[16]);
 extern const __FlashStringHelper* loggerDescription(unsigned i);
 
 #endif
+=======
+
+extern const __FlashStringHelper* loggerDescription(unsigned i);
+
+#endif
+>>>>>>> b41f471898c07db43ca1576a38c5f0eace2aec7d

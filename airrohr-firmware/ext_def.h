@@ -124,6 +124,7 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 // PPD42NS, the cheaper version of the particle sensor
 #define PPD_PIN_PM1 GPS_SERIAL_TX
 #define PPD_PIN_PM2 GPS_SERIAL_RX
+<<<<<<< HEAD
 #endif
 
 
@@ -201,6 +202,59 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 #define PPD_PIN_PM2 GPS_SERIAL_RX
 #endif
 
+=======
+#endif
+
+
+//  === pin assignments for Arduino SAMD Zero board ===================================
+#if defined(ARDUINO_SAMD_ZERO)
+#define ONEWIRE_PIN D7
+#define PPD_PIN_PM1 GPS_SERIAL_TX
+#define PPD_PIN_PM2 GPS_SERIAL_RX
+#if defined(SERIAL_PORT_USBVIRTUAL)
+#define RFM69_CS 8
+#define RFM69_RST 4
+#define RFM69_INT 3
+#endif
+#endif
+
+//  === pin assignments for lolin_d32_pro board ===================================
+#if defined(ARDUINO_LOLIN_D32_PRO)
+#define ONEWIRE_PIN D32
+#define PM_SERIAL_RX D27
+#define PM_SERIAL_TX D33
+#if defined(FLIP_I2C_PMSERIAL) // exchange the pins of the ports to use external i2c connector for gps
+#define I2C_PIN_SCL D23
+#define I2C_PIN_SDA D19
+#define GPS_SERIAL_RX D22
+#define GPS_SERIAL_TX D21
+#else
+#define I2C_PIN_SCL D22
+#define I2C_PIN_SDA D21
+#define GPS_SERIAL_RX D19
+#define GPS_SERIAL_TX D23
+#endif
+#define PPD_PIN_PM1 GPS_SERIAL_TX
+#define PPD_PIN_PM2 GPS_SERIAL_RX
+//#define RFM69_CS D0
+//#define RFM69_RST D2
+//#define RFM69_INT D4
+#endif
+
+//  === pin assignments for heltec_wifi_lora_32_V2 board ===================================
+#if defined(WIFI_LoRa_32_V2)
+#define ONEWIRE_PIN D32
+#define I2C_PIN_SCL D22
+#define I2C_PIN_SDA D17_WROOM_ONLY
+#define PM_SERIAL_RX D23
+#define PM_SERIAL_TX D2_STRAPPING
+#define GPS_SERIAL_RX D13_JTAG_TCK
+#define GPS_SERIAL_TX D0_STRAPPING
+#define PPD_PIN_PM1 GPS_SERIAL_TX
+#define PPD_PIN_PM2 GPS_SERIAL_RX
+#endif
+
+>>>>>>> b41f471898c07db43ca1576a38c5f0eace2aec7d
 //  === pin assignments for heltec_wifi_lora_32 board ===================================
 #if defined(WIFI_LoRa_32)
 #define ONEWIRE_PIN D25 // TODO: this overlaps with LED, so it might not work
@@ -240,10 +294,13 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 #define HPM_READ 0
 #define HPM_API_PIN 1
 
+<<<<<<< HEAD
 // Tera Sensor Next PM sensor
 #define NPM_READ 0
 #define NPM_API_PIN 1
 
+=======
+>>>>>>> b41f471898c07db43ca1576a38c5f0eace2aec7d
 // Sensirion SPS30, the more expensive version of the particle sensor
 #define SPS30_READ 0
 #define SPS30_API_PIN 1
