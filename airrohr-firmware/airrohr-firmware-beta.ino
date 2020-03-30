@@ -1421,7 +1421,7 @@ static void webserver_values() {
 
  if (cfg::npm_read) {
    page_content += FPSTR(EMPTY_ROW);
-   add_table_pm_value(FPSTR(SENSORS_NPM), FPSTR(WEB_PM1), last_value_NPM_P2);
+   add_table_pm_value(FPSTR(SENSORS_NPM), FPSTR(WEB_PM1), last_value_NPM_P0);
     add_table_pm_value(FPSTR(SENSORS_NPM), FPSTR(WEB_PM25), last_value_NPM_P2);
     add_table_pm_value(FPSTR(SENSORS_NPM), FPSTR(WEB_PM10), last_value_NPM_P1);
   }
@@ -2856,7 +2856,6 @@ static void fetchSensorNPM(String& s) {
     }
    
     }else{
-      Debug.println(msSince(starttime_NPM));
     
     if (msSince(starttime_NPM) > WARMUPTIME_NPM_MS && msSince(last_NPM) >= SAMPLETIME_NPM_MS && npm_val_count < 10 && newCmdNPM == true) {
 
