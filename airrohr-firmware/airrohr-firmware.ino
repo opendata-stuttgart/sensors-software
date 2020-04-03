@@ -2938,9 +2938,9 @@ static void fetchSensorNPM(String& s) {
           npm_pm25_sum += pm25_serial/10.0f;
           npm_pm10_sum += pm10_serial/10.0f;
 
-          npm_pm1_sum_pcs += pm1_serial;
-          npm_pm25_sum_pcs += pm25_serial;
-          npm_pm10_sum_pcs += pm10_serial;
+          npm_pm1_sum_pcs += N1_serial;
+          npm_pm25_sum_pcs += N25_serial;
+          npm_pm10_sum_pcs += N10_serial;
           
           UPDATE_MIN_MAX(npm_pm1_min, npm_pm1_max, pm1_serial/10.0f);
           UPDATE_MIN_MAX(npm_pm25_min, npm_pm25_max, pm25_serial/10.0f);
@@ -3034,12 +3034,15 @@ static void fetchSensorNPM(String& s) {
       last_value_NPM_N0 = float(npm_pm1_sum_pcs) / float(npm_val_count);
       last_value_NPM_N1 = float(npm_pm10_sum_pcs) / float(npm_val_count);
       last_value_NPM_N2 = float(npm_pm25_sum_pcs) / float(npm_val_count);
-
-
       
       add_Value2Json(s, F("NPM_P0"), F("PM1: "), last_value_NPM_P0);
       add_Value2Json(s, F("NPM_P1"), F("PM10:  "), last_value_NPM_P1);
       add_Value2Json(s, F("NPM_P2"), F("PM2.5: "), last_value_NPM_P2);
+
+      add_Value2Json(s, F("NPM_N1"), F("NC1.0: "), last_value_NPM_N0);
+      add_Value2Json(s, F("NPM_N10"), F("NC10:  "), last_value_NPM_N1);
+      add_Value2Json(s, F("NPM_N25"), F("NC2.5: "), last_value_NPM_N2);
+      
       debug_outln_info(FPSTR(DBG_TXT_SEP));
     }
     npm_pm1_sum = 0;
