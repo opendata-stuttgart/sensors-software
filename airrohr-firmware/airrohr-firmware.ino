@@ -2920,7 +2920,7 @@ static void fetchSensorNPM(String& s) {
 
       uint16_t N1_serial = word(data[3],data[4]);
       uint16_t N25_serial = word(data[5],data[6]);
-      uint16_t N10_serial =  word(data[7],data[6]);
+      uint16_t N10_serial =  word(data[7],data[8]);
       
       uint16_t pm1_serial = word(data[9],data[10]);
       uint16_t pm25_serial = word(data[11],data[12]);
