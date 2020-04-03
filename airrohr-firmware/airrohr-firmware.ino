@@ -3048,13 +3048,26 @@ static void fetchSensorNPM(String& s) {
     npm_pm1_sum = 0;
     npm_pm10_sum = 0;
     npm_pm25_sum = 0;
+    
     npm_val_count = 0;
+    
     npm_pm1_max = 0;
     npm_pm1_min = 20000;
     npm_pm10_max = 0;
     npm_pm10_min = 20000;
     npm_pm25_max = 0;
     npm_pm25_min = 20000;
+
+    npm_pm1_sum_pcs = 0;
+    npm_pm10_sum_pcs = 0;
+    npm_pm25_sum_pcs = 0;
+    
+    npm_pm1_max_pcs = 0;
+    npm_pm1_min_pcs = 60000;
+    npm_pm10_max_pcs = 0;
+    npm_pm10_min_pcs = 60000;
+    npm_pm25_max_pcs = 0;
+    npm_pm25_min_pcs = 60000;
 
     if(cfg::sending_intervall_ms > (WARMUPTIME_NPM_MS + READINGTIME_NPM_MS)) {
 
