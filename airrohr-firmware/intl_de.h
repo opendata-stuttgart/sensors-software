@@ -40,7 +40,7 @@ const char INTL_BASICAUTH[] PROGMEM = "BasicAuth aktivieren";
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "Sensor WLAN Name im Konfigurationsmodus";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Name";
 const char INTL_MORE_SETTINGS[] PROGMEM = "Weitere Einstellungen";
-const char INTL_AUTO_UPDATE[] PROGMEM = "Auto Update";
+const char INTL_AUTO_UPDATE[] PROGMEM = "Auto Update (Deaktiviert manuelles Update)";
 const char INTL_USE_BETA[] PROGMEM = "Lade Beta Versionen";
 const char INTL_DISPLAY[] PROGMEM = "OLED SSD1306";
 const char INTL_SH1106[] PROGMEM = "OLED SH1106";
@@ -113,5 +113,13 @@ const char INTL_SIGNAL_QUALITY[] PROGMEM = "Qualität";
 #define INTL_SENSOR "Sensor"
 #define INTL_PARAMETER "Parameter"
 #define INTL_VALUE "Wert"
+const char INTL_UPDATE_FIRMWARE[] PROGMEM = "Firmware&nbsp;updaten";
+#define INTL_START_UPDATE "Update starten"
+#define INTL_UPDATE_HEAD "Neue Firmware hochladen"
+#define INTL_UPDATE_CONFIRM_HEAD "Firmware wirklich updaten?"
+#define INTL_UPDATE_CONFIRM_BODY_1 "Bitte stellen Sie sicher, dass die Prüfsumme korrekt ist und die Firmware zu diesem Sensor passt."
+#define INTL_UPDATE_CONFIRM_BODY_2 "Sollte die neue Firmware fehlerhaft sein, kann das Updaten per Webinterface unmöglich werden."
+#define INTL_UPDATE_COMPLETE_HEAD "Firmware wurde aktualisiert"
+#define INTL_UPDATE_FAILED_HEAD "Firmware Update fehlgeschlagen"
 
 #include "./airrohr-logo-common.h"

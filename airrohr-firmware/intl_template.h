@@ -113,5 +113,13 @@ const char INTL_SIGNAL_QUALITY[] PROGMEM = "";
 #define INTL_SENSOR ""
 #define INTL_PARAMETER ""
 #define INTL_VALUE ""
+const char INTL_UPDATE_FIRMWARE[] PROGMEM = "";
+#define INTL_START_UPDATE ""
+#define INTL_UPDATE_HEAD ""
+#define INTL_UPDATE_CONFIRM_HEAD ""
+#define INTL_UPDATE_CONFIRM_BODY_1 ""
+#define INTL_UPDATE_CONFIRM_BODY_2 ""
+#define INTL_UPDATE_COMPLETE_HEAD ""
+#define INTL_UPDATE_FAILED_HEAD ""
 
 #include "./airrohr-logo-common.h"

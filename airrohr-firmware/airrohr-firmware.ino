@@ -78,6 +78,7 @@ String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 #include <ctime>
 #include <coredecls.h>
 #include <sntp.h>
+#include <Updater.h>
 #endif
 
 #if defined(ESP32)
@@ -92,6 +93,7 @@ String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 #include <hwcrypto/sha.h>
 #include <WebServer.h>
 #include <ESPmDNS.h>
+#include <Update.h>
 #endif
 
 // includes common to ESP8266 and ESP32 (especially external libraries)
@@ -233,6 +235,8 @@ namespace cfg {
 
 #define JSON_BUFFER_SIZE 2300
 
+MD5Builder firmwareMD5;
+uint8_t updatePos;
 LoggerConfig loggerConfigs[LoggerCount];
 
 long int sample_count = 0;
@@ -948,6 +952,10 @@ static void webserver_root() {
 		page_content.replace(F("{conf}"), FPSTR(INTL_CONFIGURATION));
 		page_content.replace(F("{restart}"), FPSTR(INTL_RESTART_SENSOR));
 		page_content.replace(F("{debug}"), FPSTR(INTL_DEBUG_LEVEL));
+		if (!cfg::auto_update){
+			page_content += FPSTR(WEB_ROOT_PAGE_UPDATE_CONTENT);
+			page_content.replace(F("{update}"), FPSTR(INTL_UPDATE_FIRMWARE));
+		}
 		end_html_page(page_content);
 	}
 }
@@ -1043,6 +1051,7 @@ static void webserver_config_send_body_get(String& page_content) {
 	server.sendContent(page_content);
 	page_content = FPSTR(WEB_BR_LF_B);
 	page_content += F(INTL_FIRMWARE "</b>&nbsp;");
+	page_content += F("<br/>");
 	add_form_checkbox(Config_auto_update, FPSTR(INTL_AUTO_UPDATE));
 	add_form_checkbox(Config_use_beta, FPSTR(INTL_USE_BETA));
 
@@ -1700,6 +1709,135 @@ static void webserver_reset() {
 	end_html_page(page_content);
 }
 
+static void webserver_update() {
+	if (!webserver_request_auth())
+	{ return; }
+
+	String page_content;
+	page_content.reserve(512);
+
+	start_html_page(page_content, FPSTR(INTL_UPDATE_FIRMWARE));
+	debug_outln_info(F("ws: update ..."));
+
+	if (server.method() == HTTP_GET) {
+		page_content += FPSTR(WEB_UPDATE_CONTENT);
+	} else {
+	}
+	end_html_page(page_content);
+}
+
+static void do_update() {
+	HTTPUpload& upload = server.upload();
+#if defined(ESP32)
+	if (upload.status == UPLOAD_FILE_START) {
+		Debug.printf("Update: %s\n", upload.filename.c_str());
+		firmwareMD5.begin();
+		if (Update.isRunning()) {
+			Update.abort();
+		}
+		updatePos = 1;
+		if (!Update.begin(UPDATE_SIZE_UNKNOWN)) { //start with max available size
+			debug_outln_error(F(Update.errorString()));
+		}
+	} else if (upload.status == UPLOAD_FILE_WRITE) {
+		/* flashing firmware to ESP*/
+		if (updatePos) {
+			if (!(upload.buf[11] == 0x00 && upload.buf[12] == 0x00)){
+				debug_outln_error(F("Upload: Invalid Header"));
+				Update.abort();
+			}
+			updatePos = 0;
+		}
+		firmwareMD5.add(upload.buf, upload.currentSize);
+		if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
+			debug_outln_error(F(Update.errorString()));
+		}
+	} else if (upload.status == UPLOAD_FILE_END) {
+		firmwareMD5.calculate();
+		debug_outln_info(F("Upload Success! \n"));
+	}
+#endif
+#if defined(ESP8266)
+	if (upload.status == UPLOAD_FILE_START) {
+		Debug.printf("Update: %s\n", upload.filename.c_str());
+		firmwareMD5.begin();
+		if (Update.isRunning()) {
+			Update.write(upload.buf, 0xFFFFFFFF);
+			Update.clearError();
+		}
+		updatePos = 1;
+		if (upload.buf[11] == 0x00 && upload.buf[12] == 0x00){
+				debug_outln_error(F("Upload: Invalid Header"));
+				Update.write(upload.buf, 0xFFFFFFFF);
+		}
+		uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
+		if (!Update.begin(maxSketchSpace, U_FLASH)) { //start with max available size
+			Update.printError(Debug);
+		}
+	} else if (upload.status == UPLOAD_FILE_WRITE) {
+		/* flashing firmware to ESP*/
+		firmwareMD5.add(upload.buf, upload.currentSize);
+		if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
+			Update.printError(Debug);
+		}
+	} else if (upload.status == UPLOAD_FILE_END) {
+		firmwareMD5.calculate();
+		debug_outln_info("Upload Success! \n");
+	}
+#endif
+}
+
+static void webserver_do_update() {
+	if (!webserver_request_auth())
+	{ return; }
+
+	String page_content;
+	page_content.reserve(512);
+
+	start_html_page(page_content, FPSTR(INTL_UPDATE_FIRMWARE));
+	debug_outln_info(F("ws: doupdate ..."));
+	
+	if (server.method() == HTTP_POST) {
+		page_content += FPSTR(WEB_DO_UPDATE_CONTENT_1);
+		page_content += firmwareMD5.toString();
+		page_content += FPSTR(WEB_DO_UPDATE_CONTENT_2);
+	} else {
+	}
+	end_html_page(page_content);
+}
+
+static void webserver_update_done() {
+	if (!webserver_request_auth())
+	{ return; }
+
+	String page_content;
+	page_content.reserve(512);
+	
+	debug_outln_info(F("ws: updatedone ..."));
+
+	if (Update.isRunning()){
+		if (Update.end(true)) { //true to set the size to the current progress
+			start_html_page(page_content, FPSTR(INTL_UPDATE_FIRMWARE));
+			page_content += FPSTR(WEB_UPDATE_WAIT_CONTENT);
+			page_content += FPSTR(WEB_UPDATE_DONE_CONTENT);
+			end_html_page(page_content);
+			debug_outln_info("Update Success! \n");
+			sensor_restart();
+		} else {
+			start_html_page(page_content, FPSTR(INTL_UPDATE_FIRMWARE));
+			page_content += FPSTR(WEB_UPDATE_WAIT_CONTENT);
+			page_content += FPSTR(WEB_UPDATE_FAILED_CONTENT);
+			end_html_page(page_content);
+			Update.printError(Debug);
+		}
+	} else {
+		start_html_page(page_content, FPSTR(INTL_UPDATE_FIRMWARE));
+		page_content += FPSTR(WEB_UPDATE_WAIT_CONTENT);
+		page_content += FPSTR(WEB_UPDATE_FAILED_CONTENT);
+		end_html_page(page_content);
+		Update.printError(Debug);
+	}
+}
 /*****************************************************************
  * Webserver data.json                                           *
  *****************************************************************/
@@ -1818,6 +1956,11 @@ static void setup_webserver() {
 	server.on(F("/serial"), webserver_serial);
 	server.on(F("/removeConfig"), webserver_removeConfig);
 	server.on(F("/reset"), webserver_reset);
+	if(!cfg::auto_update){
+		server.on(F("/update"), webserver_update );
+		server.on(F("/doupdate"), HTTP_POST, webserver_do_update , do_update);
+		server.on(F("/updatedone"), webserver_update_done);
+	}
 	server.on(F("/data.json"), webserver_data_json);
 	server.on(F("/metrics"), webserver_prometheus_endpoint);
 	server.on(F(STATIC_PREFIX), webserver_static);

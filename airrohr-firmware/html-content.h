@@ -96,6 +96,8 @@ const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a class='b' href='/values'>{t}</a
 <a class='b' href='/debug'>{debug}</a><br/>\
 ";
 
+const char WEB_ROOT_PAGE_UPDATE_CONTENT[] PROGMEM = "<a class='b' href='/update'>{update}</a><br/>";
+
 const char WEB_CONFIG_SCRIPT[] PROGMEM = "<script>\
 function setSSID(ssid){document.getElementById('wlanssid').value=ssid.innerText||ssid.textContent;document.getElementById('wlanpwd').focus();}\
 function load_wifi_list(){var x=new XMLHttpRequest();x.open('GET','/wifi');x.onload = function(){if (x.status === 200) {document.getElementById('wifilist').innerHTML = x.responseText;}};x.send();}\
@@ -111,6 +113,26 @@ const char WEB_RESET_CONTENT[] PROGMEM = "<h3>" INTL_REALLY_RESTART_SENSOR "</h3
 "<table><tr><td><form method='POST' action'/reset'>" \
 "<input type='submit' class='s_red' name='submit' value='" INTL_RESTART "'/>"\
 "</form></td><td><a class='b' href='/'>" INTL_CANCEL "</a></td></tr></table>";
+
+const char WEB_UPDATE_CONTENT[] PROGMEM = "<h3>" INTL_UPDATE_HEAD "</h3>" \
+"<form method='POST' action='/doupdate' enctype='multipart/form-data' id='upload_form'><input type='file' name='file1' id='file1'>" \
+"<br><br>" \
+"<table><tbody><tr><td><input type='submit' class='s_red' name='submit' value='" INTL_START_UPDATE "'></td><td>" \
+"<a class='b' href='/'>" INTL_CANCEL "</a></td></tr></tbody></table>" \
+"</form>" ;
+
+const char WEB_DO_UPDATE_CONTENT_1[] PROGMEM = "<h3>" INTL_UPDATE_CONFIRM_HEAD "</h3>" \
+INTL_UPDATE_CONFIRM_BODY_1 "<br>" INTL_UPDATE_CONFIRM_BODY_2 "<br><br> MD5: ";
+
+const char WEB_DO_UPDATE_CONTENT_2[] PROGMEM = "<br><br><table><tr><td><form method='POST' action='/updatedone'>" \
+"<input type='submit' class='s_red' name='submit' value='" INTL_START_UPDATE "'/>"\
+"</form></td><td><a class='b' href='/'>" INTL_CANCEL "</a></td></tr></table>";
+
+const char WEB_UPDATE_WAIT_CONTENT[] PROGMEM = "<meta http-equiv='Refresh' content='10; url=/' />";
+
+const char WEB_UPDATE_DONE_CONTENT[] PROGMEM = "<h3>" INTL_UPDATE_COMPLETE_HEAD "</h3>";
+
+const char WEB_UPDATE_FAILED_CONTENT[] PROGMEM = "<h3>" INTL_UPDATE_FAILED_HEAD "</h3>";
 
 const char WEB_IOS_REDIRECT[] PROGMEM = "<html><body>Redirecting...\
 <script type=\"text/javascript\">\

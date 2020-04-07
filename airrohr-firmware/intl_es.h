@@ -113,5 +113,13 @@ const char INTL_SIGNAL_QUALITY[] PROGMEM = "Calidad de Señal";
 #define INTL_SENSOR "Sensor"
 #define INTL_PARAMETER "Parámetro"
 #define INTL_VALUE "Valor"
+const char INTL_UPDATE_FIRMWARE[] PROGMEM = "Update&nbsp;Firmware";
+#define INTL_START_UPDATE "Start Update"
+#define INTL_UPDATE_HEAD "Upload new firmware"
+#define INTL_UPDATE_CONFIRM_HEAD "Do you really want to update?"
+#define INTL_UPDATE_CONFIRM_BODY_1 "Please make sure that the checksum is correct and the new firmware works on this sensor."
+#define INTL_UPDATE_CONFIRM_BODY_2 "Should the new firmware be invalid future update attempts using the web interface may fail."
+#define INTL_UPDATE_COMPLETE_HEAD "Firmware was successfully updated"
+#define INTL_UPDATE_FAILED_HEAD "Firmware update failed"
 
 #include "./airrohr-logo-common.h"

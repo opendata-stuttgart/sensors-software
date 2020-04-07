@@ -40,7 +40,7 @@ const char INTL_BASICAUTH[] PROGMEM = "Authentication";
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "WiFi Sensor in configuration mode";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Network name";
 const char INTL_MORE_SETTINGS[] PROGMEM = "More settings";
-const char INTL_AUTO_UPDATE[] PROGMEM = "Auto update firmware";
+const char INTL_AUTO_UPDATE[] PROGMEM = "Auto update firmware (Disables manual update)";
 const char INTL_USE_BETA[] PROGMEM = "Load beta firmware";
 const char INTL_DISPLAY[] PROGMEM = "OLED SSD1306";
 const char INTL_SH1106[] PROGMEM = "OLED SH1106";
@@ -113,5 +113,13 @@ const char INTL_SIGNAL_QUALITY[] PROGMEM = "signal quality";
 #define INTL_SENSOR "Sensor"
 #define INTL_PARAMETER "Parameter"
 #define INTL_VALUE "Value"
+const char INTL_UPDATE_FIRMWARE[] PROGMEM = "Update&nbsp;Firmware";
+#define INTL_START_UPDATE "Start Update"
+#define INTL_UPDATE_HEAD "Upload new firmware"
+#define INTL_UPDATE_CONFIRM_HEAD "Do you really want to update?"
+#define INTL_UPDATE_CONFIRM_BODY_1 "Please make sure that the checksum is correct and the new firmware works on this sensor."
+#define INTL_UPDATE_CONFIRM_BODY_2 "Should the new firmware be invalid future update attempts using the web interface may fail."
+#define INTL_UPDATE_COMPLETE_HEAD "Firmware was successfully updated"
+#define INTL_UPDATE_FAILED_HEAD "Firmware update failed"
 
 #include "./airrohr-logo-common.h"
