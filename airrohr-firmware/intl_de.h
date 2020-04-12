@@ -121,5 +121,6 @@ const char INTL_UPDATE_FIRMWARE[] PROGMEM = "Firmware&nbsp;updaten";
 #define INTL_UPDATE_CONFIRM_BODY_2 "Sollte die neue Firmware fehlerhaft sein, kann das Updaten per Webinterface unmöglich werden."
 #define INTL_UPDATE_COMPLETE_HEAD "Firmware wurde aktualisiert"
 #define INTL_UPDATE_FAILED_HEAD "Firmware Update fehlgeschlagen"
+#define INTL_UPDATE_FAILED_LOADER "Bitte zuerst den -Loader- hochladen."
 
 #include "./airrohr-logo-common.h"

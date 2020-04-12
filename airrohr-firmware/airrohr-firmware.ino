@@ -78,7 +78,6 @@ String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 #include <ctime>
 #include <coredecls.h>
 #include <sntp.h>
-#include <Updater.h>
 #endif
 
 #if defined(ESP32)
@@ -237,6 +236,7 @@ namespace cfg {
 
 MD5Builder firmwareMD5;
 uint8_t updatePos;
+unsigned long waitMillisForRestart = 0;
 LoggerConfig loggerConfigs[LoggerCount];
 
 long int sample_count = 0;
@@ -250,6 +250,12 @@ bool airrohr_selftest_failed = false;
 
 #if defined(ESP8266)
 ESP8266WebServer server(80);
+
+File manualFwFile;
+bool manualUploadSuccess = false;
+String manualFirmwareName;
+String manualFirmwareNameNew;
+String manualFirmwareNameMd5;
 #endif
 #if defined(ESP32)
 WebServer server(80);
@@ -1761,29 +1767,45 @@ static void do_update() {
 	if (upload.status == UPLOAD_FILE_START) {
 		Debug.printf("Update: %s\n", upload.filename.c_str());
 		firmwareMD5.begin();
-		if (Update.isRunning()) {
-			Update.write(upload.buf, 0xFFFFFFFF);
-			Update.clearError();
-		}
 		updatePos = 1;
-		if (upload.buf[11] == 0x00 && upload.buf[12] == 0x00){
-				debug_outln_error(F("Upload: Invalid Header"));
-				Update.write(upload.buf, 0xFFFFFFFF);
+		if (upload.filename.startsWith("loader")){
+			manualFirmwareName = String(F("/loader.bin"));
+			manualFirmwareNameNew = String(F("/loader.bin.new"));
+			manualFirmwareNameMd5 = String(F("/loader.bin.md5"));
+		} else {
+			manualFirmwareName = String(F("/firmware.bin"));
+			manualFirmwareNameNew = String(F("/firmware.bin.new"));
+			manualFirmwareNameMd5 = String(F("/firmware.bin.md5"));
 		}
-		uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
-		if (!Update.begin(maxSketchSpace, U_FLASH)) { //start with max available size
-			Update.printError(Debug);
-		}
+		SPIFFS.remove(manualFirmwareNameNew);
+		manualUploadSuccess = false;
+		manualFwFile = SPIFFS.open(manualFirmwareNameNew, "w");
 	} else if (upload.status == UPLOAD_FILE_WRITE) {
-		/* flashing firmware to ESP*/
-		firmwareMD5.add(upload.buf, upload.currentSize);
-		if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
-			Update.printError(Debug);
+		if (updatePos) {
+			if (upload.buf[11] == 0x00 && upload.buf[12] == 0x00){
+					debug_outln_error(F("Upload: Invalid Header"));
+					manualFwFile.write(0xFF);
+			}
+			updatePos = 0;
 		}
+		firmwareMD5.add(upload.buf, upload.currentSize);
+		manualFwFile.write(upload.buf, upload.currentSize);
 	} else if (upload.status == UPLOAD_FILE_END) {
+		manualFwFile.close();
+		manualUploadSuccess = true;
+		SPIFFS.remove(manualFirmwareName);
+		SPIFFS.rename(manualFirmwareNameNew, manualFirmwareName);
 		firmwareMD5.calculate();
-		debug_outln_info("Upload Success! \n");
+		debug_outln_info(F("Upload Success! \n"));
+	} else if (upload.status == UPLOAD_FILE_ABORTED)
+	{
+		manualFwFile.close();
+		manualUploadSuccess = false;
+		SPIFFS.remove(manualFirmwareNameNew);
+		firmwareMD5.calculate();
+		debug_outln_info(F("Upload Aborted! \n"));
 	}
+	
 #endif
 }
 
@@ -1814,7 +1836,7 @@ static void webserver_update_done() {
 	page_content.reserve(512);
 	
 	debug_outln_info(F("ws: updatedone ..."));
-
+#if defined(ESP32)
 	if (Update.isRunning()){
 		if (Update.end(true)) { //true to set the size to the current progress
 			start_html_page(page_content, FPSTR(INTL_UPDATE_FIRMWARE));
@@ -1822,7 +1844,7 @@ static void webserver_update_done() {
 			page_content += FPSTR(WEB_UPDATE_DONE_CONTENT);
 			end_html_page(page_content);
 			debug_outln_info("Update Success! \n");
-			sensor_restart();
+			waitMillisForRestart = millis() + 1000;
 		} else {
 			start_html_page(page_content, FPSTR(INTL_UPDATE_FIRMWARE));
 			page_content += FPSTR(WEB_UPDATE_WAIT_CONTENT);
@@ -1837,6 +1859,98 @@ static void webserver_update_done() {
 		end_html_page(page_content);
 		Update.printError(Debug);
 	}
+#endif
+#if defined(ESP8266)
+	uint8_t testSuccess = 1;
+	uint8_t missingLoader = 0;
+	if (manualUploadSuccess){
+		manualUploadSuccess = false;
+		File md5File = SPIFFS.open(manualFirmwareNameMd5, "w");
+		if (!md5File) {
+			debug_outln_error(F("Failed writing md5 file.."));
+			testSuccess = 0;
+		}
+		md5File.write(firmwareMD5.toString().c_str());
+		md5File.close();
+		File md5ReadbackFile = SPIFFS.open(manualFirmwareNameMd5, "r");
+		if (!md5ReadbackFile) {
+			debug_outln_error(F("Failed reopening md5 file.."));
+			testSuccess = 0;
+		}
+		String firmwareReadbackMd5 = md5ReadbackFile.readString();
+		md5ReadbackFile.close();
+		File fwFile = SPIFFS.open(manualFirmwareName, "r");
+		if (!fwFile) {
+			debug_outln_error(F("Failed reopening fw file.."));
+			testSuccess = 0;
+		}
+		size_t fwSize = fwFile.size();
+		MD5Builder md5Written;
+		md5Written.begin();
+		md5Written.addStream(fwFile, fwSize);
+		md5Written.calculate();
+		fwFile.close();
+		String md5WrittenString = md5Written.toString();
+		if (fwSize < (1<<17) || (fwSize % 16 != 0) || (!firmwareReadbackMd5.equals(md5WrittenString))) {
+			debug_outln_error(F("FW download failed validation.. deleting"));
+			testSuccess = 0;
+		}
+		if (!manualFirmwareName.startsWith("/loader")){
+			debug_outln_info(F("Testing Loader"));
+			String loaderName(F("/loader.bin"));
+			String loaderMd5Name(F("/loader.bin.md5"));
+			File loaderFile = SPIFFS.open(loaderName, "r");
+			if (!loaderFile) {
+				debug_outln_error(F("Failed reopening loader file. Please upload loader!"));
+				testSuccess = 0;
+				missingLoader = 1;
+			}
+			loaderFile.close();
+
+			
+			File loaderMd5File = SPIFFS.open(loaderMd5Name, "r");
+			if (!loaderMd5File) {
+				debug_outln_error(F("Failed reopening loader md5 file. Please upload loader!"));
+				testSuccess = 0;
+				missingLoader = 1;
+			}
+			String loaderMd5 = loaderMd5File.readString();
+			loaderMd5File.close();
+
+
+			debug_outln_info(F("launching 2nd stage"));
+			if (!launchUpdateLoader(loaderMd5)) {
+				debug_outln_error(FPSTR(DBG_TXT_UPDATE_FAILED));
+				display_debug(FPSTR(DBG_TXT_UPDATE), FPSTR(DBG_TXT_UPDATE_FAILED));
+				testSuccess = 0;
+				missingLoader = 1;
+			}
+		} else {
+			debug_outln_info(F("Loader Uploaded"));
+		}
+		
+	} else {
+		testSuccess = 0;
+	}
+	if (testSuccess) {
+		start_html_page(page_content, FPSTR(INTL_UPDATE_FIRMWARE));
+		page_content += FPSTR(WEB_UPDATE_WAIT_CONTENT);
+		page_content += FPSTR(WEB_UPDATE_DONE_CONTENT);
+		end_html_page(page_content);
+		debug_outln_info("Update Success! \n");
+		waitMillisForRestart = millis() + 1000;
+	} else {
+		SPIFFS.remove(manualFirmwareNameMd5);
+		SPIFFS.remove(manualFirmwareName);
+		start_html_page(page_content, FPSTR(INTL_UPDATE_FIRMWARE));
+		page_content += FPSTR(WEB_UPDATE_WAIT_CONTENT);
+		page_content += FPSTR(WEB_UPDATE_FAILED_CONTENT);
+		if (missingLoader) {
+			page_content += FPSTR(WEB_UPDATE_FAILED_LOADER_CONTENT);
+		}
+		end_html_page(page_content);
+	}
+#endif
 }
 /*****************************************************************
  * Webserver data.json                                           *
@@ -4003,6 +4117,12 @@ void loop(void) {
 		UPDATE_MIN_MAX(min_micro, max_micro, diff_micro);
 	}
 	last_micro = act_micro;
+
+	if (waitMillisForRestart > 0) {
+		if (millis() > waitMillisForRestart) {
+			sensor_restart();
+		}
+	}
 
 	if (cfg::sps30_read && ( !sps30_init_failed)) {
 		if ((msSince(starttime) - SPS30_read_timer) > SPS30_WAITING_AFTER_LAST_READ) {

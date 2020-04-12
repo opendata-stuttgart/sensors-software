@@ -121,5 +121,6 @@ const char INTL_UPDATE_FIRMWARE[] PROGMEM = "Update&nbsp;Firmware";
 #define INTL_UPDATE_CONFIRM_BODY_2 "Should the new firmware be invalid future update attempts using the web interface may fail."
 #define INTL_UPDATE_COMPLETE_HEAD "Firmware was successfully updated"
 #define INTL_UPDATE_FAILED_HEAD "Firmware update failed"
+#define INTL_UPDATE_FAILED_LOADER "Please first upload the -Loader-."
 
 #include "./airrohr-logo-common.h"

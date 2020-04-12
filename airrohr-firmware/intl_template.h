@@ -121,5 +121,6 @@ const char INTL_UPDATE_FIRMWARE[] PROGMEM = "";
 #define INTL_UPDATE_CONFIRM_BODY_2 ""
 #define INTL_UPDATE_COMPLETE_HEAD ""
 #define INTL_UPDATE_FAILED_HEAD ""
+#define INTL_UPDATE_FAILED_LOADER ""
 
 #include "./airrohr-logo-common.h"

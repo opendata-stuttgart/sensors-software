@@ -128,11 +128,12 @@ const char WEB_DO_UPDATE_CONTENT_2[] PROGMEM = "<br><br><table><tr><td><form met
 "<input type='submit' class='s_red' name='submit' value='" INTL_START_UPDATE "'/>"\
 "</form></td><td><a class='b' href='/'>" INTL_CANCEL "</a></td></tr></table>";
 
-const char WEB_UPDATE_WAIT_CONTENT[] PROGMEM = "<meta http-equiv='Refresh' content='10; url=/' />";
+const char WEB_UPDATE_WAIT_CONTENT[] PROGMEM = "<meta http-equiv='Refresh' content='20; url=/' />";
 
 const char WEB_UPDATE_DONE_CONTENT[] PROGMEM = "<h3>" INTL_UPDATE_COMPLETE_HEAD "</h3>";
 
 const char WEB_UPDATE_FAILED_CONTENT[] PROGMEM = "<h3>" INTL_UPDATE_FAILED_HEAD "</h3>";
+const char WEB_UPDATE_FAILED_LOADER_CONTENT[] PROGMEM = "" INTL_UPDATE_FAILED_LOADER " <a href='https://firmware.sensor.community/airrohr/'>firmware.sensor.community/airrohr/</a>";
 
 const char WEB_IOS_REDIRECT[] PROGMEM = "<html><body>Redirecting...\
 <script type=\"text/javascript\">\
