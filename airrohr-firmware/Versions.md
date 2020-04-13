@@ -1,3 +1,7 @@
+NRZ-2020-130-B5
+* Slovak translations added
+
+
 NRZ-2020-130-B4
 * Prevent password leakage in configuration dialogs
 * Change default password for webpage auth to ""

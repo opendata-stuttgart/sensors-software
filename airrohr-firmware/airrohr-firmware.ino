@@ -60,7 +60,7 @@
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2020-130-B5"
+#define SOFTWARE_VERSION_STR "NRZ-2020-130-B6"
 String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -874,6 +874,7 @@ static String form_select_lang() {
 					"<option value='PT'>Português (PT)</option>"
 					"<option value='RS'>Srpski (RS)</option>"
 					"<option value='RU'>Русский (RU)</option>"
+					"<option value='SE'>Slovenský (SK)</option>"
 					"<option value='SE'>Svenska (SE)</option>"
 					"<option value='TR'>Türkçe (TR)</option>"
 					"<option value='UA'>український (UA)</option>"

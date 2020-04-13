@@ -33,6 +33,8 @@
 #include "intl_ru.h"
 #elif defined(INTL_SE)
 #include "intl_se.h"
+#elif defined(INTL_SK)
+#include "intl_sk.h"
 #elif defined(INTL_TR)
 #include "intl_tr.h"
 #elif defined(INTL_UA)
