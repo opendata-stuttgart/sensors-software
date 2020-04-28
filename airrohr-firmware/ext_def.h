@@ -209,9 +209,11 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = " ";
 
 
 // DHT22, temperature, humidity
+#define DHT_PIN 2 //pin of PCF8574 DHT is connected to
 #define DHT_READ 1
-#define DHT_TYPE DHT22
 #define DHT_API_PIN 7
+#define DHT_TYPE DHT22 //DHT 22 (AM2302), AM2321
+#define PCF8574_ADDRESS 0x02
 
 // HTU21D, temperature, humidity
 #define HTU21D_READ 0

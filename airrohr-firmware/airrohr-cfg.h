@@ -1,5 +1,3 @@
-
-
 // This file is generated, please do not edit.
 // Change airrohr-cfg.h.py instead.
 

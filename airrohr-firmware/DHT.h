@@ -30,6 +30,7 @@ written by Adafruit Industries
 
 // Define types of sensors.
 #define DHT11 11
+#define DHT12 12
 #define DHT22 22
 #define DHT21 21
 #define AM2301 21
@@ -37,13 +38,18 @@ written by Adafruit Industries
 
 class DHT {
   public:
-   DHT(uint8_t pin, uint8_t type);
-   void begin(void);
-   float readTemperature(bool force=false);
+   DHT(uint8_t pin, uint8_t type, uint8_t address, uint8_t count=6);
+   void begin(uint8_t usec=55);
+   float readTemperature(bool S=false, bool force=false);
+   float convertCtoF(float);
+   float convertFtoC(float);
+   float computeHeatIndex(bool isFarenheit=true);
+   float computeHeatIndex(float temperature, float percentHumidity, bool isFahrenheit=true);
    float readHumidity(bool force=false);
    bool read(bool force=false);
 
  private:
+  uint8_t pcf8574_address = 0x20;
   uint8_t data[5];
   uint8_t _pin, _type;
   #ifdef __AVR
@@ -53,18 +59,22 @@ class DHT {
   #endif
   bool _lastresult;
   uint32_t _lastreadtime, _maxcycles;
-
+  uint8_t pullTime;
   uint32_t expectPulse(bool level);
+  
 
 };
 
 class InterruptLock {
   public:
    InterruptLock() {
+    #if !defined(ARDUINO_ARCH_NRF52)
     noInterrupts();
    }
    ~InterruptLock() {
+    #if !defined(ARDUINO_ARCH_NRF52)
     interrupts();
+    #endif
    }
 
 };

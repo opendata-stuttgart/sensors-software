@@ -126,6 +126,7 @@ String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 #include "./bmx280_i2c.h"
 #include "./sps30_i2c.h"
 #include "./dnms_i2c.h"
+#include "./PCF8574.h"
 
 #if defined(INTL_BG)
 #include "intl_bg.h"
@@ -364,7 +365,7 @@ SoftwareSerial* serialGPS;
 /*****************************************************************
  * DHT declaration                                               *
  *****************************************************************/
-DHT dht(ONEWIRE_PIN, DHT_TYPE);
+DHT dht(DHTPIN, DHTTYPE, PCF8574_ADDRESS);
 
 /*****************************************************************
  * HTU21D declaration                                            *
