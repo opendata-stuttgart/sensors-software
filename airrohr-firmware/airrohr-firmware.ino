@@ -2323,7 +2323,7 @@ static void fetchSensorBMX280(String& s) {
 	const auto t = bmx280.readTemperature();
 	const auto p = bmx280.readPressure();
 	const auto h = bmx280.readHumidity();
-	if (isnan(t) || isnan(p)) {
+	if (isnan(t) || isnan(p) || isnan(h)) {
 		last_value_BMX280_T = -128.0;
 		last_value_BMX280_P = -1.0;
 		last_value_BME280_H = -1.0;
