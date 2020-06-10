@@ -741,7 +741,6 @@ static void createLoggerConfigs() {
 	loggerConfigs[LoggerSensemap].destport = PORT_SENSEMAP;
 	loggerConfigs[LoggerSensemap].session = new_session();
 	loggerConfigs[LoggerFSapp].destport = PORT_FSAPP;
-	loggerConfigs[LoggerFSapp].session = new_session();
 	loggerConfigs[Loggeraircms].destport = PORT_AIRCMS;
 	loggerConfigs[LoggerInflux].destport = cfg::port_influx;
 	if (cfg::send2influx && cfg::ssl_influx) {
