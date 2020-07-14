@@ -164,7 +164,7 @@ will use by default when selecting the correct sensor model.
 
 * HPM/PMS/SDS011/SPS30 => Pin 1
 * BMP180/BMP280 => Pin 3
-* DHT22/HTU21D/SHT3x => Pin 7
+* DHT22/HTU21D/SHT3x/Si7021 => Pin 7
 * GPS(Neo-6M) => Pin 9
 * BME280 => Pin 11
 * DS18B20 => Pin 13
