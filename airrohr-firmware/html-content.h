@@ -66,6 +66,7 @@ input[type=submit]:hover{background:#d44}\
 
 const char WEB_PAGE_HEADER_HEAD[] PROGMEM = "<meta name='viewport' content='width=device-width'/>\
 <link rel='stylesheet' href='" STATIC_PREFIX "?r=css'>\
+<link rel='icon' type='image/png' href='" STATIC_PREFIX "?r=logo'/>\
 </style>\
 </head><body>\
 <div class='canvas'>\
