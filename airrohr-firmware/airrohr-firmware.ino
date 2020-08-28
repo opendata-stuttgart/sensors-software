@@ -121,7 +121,6 @@ String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 #include "ext_def.h"
 #include "html-content.h"
 
-
 /******************************************************************
  * The variables inside the cfg namespace are persistent          *
  * configuration values. They have defaults which can be          *
@@ -159,7 +158,7 @@ namespace cfg {
 	bool sds_read = SDS_READ;
 	bool pms_read = PMS_READ;
 	bool hpm_read = HPM_READ;
-  bool npm_read = NPM_READ;
+	bool npm_read = NPM_READ;
 	bool sps30_read = SPS30_READ;
 	bool bmp_read = BMP_READ;
 	bool bmx280_read = BMX280_READ;
@@ -234,7 +233,7 @@ namespace cfg {
 			strcat(fs_ssid, id);
 		}
 	}
-}
+} // namespace cfg
 
 #define JSON_BUFFER_SIZE 2300
 
@@ -442,7 +441,6 @@ float value_SPS30_N4 = 0.0;
 float value_SPS30_N10 = 0.0;
 float value_SPS30_TS = 0.0;
 
-
 uint16_t SPS30_measurement_count = 0;
 unsigned long SPS30_read_counter = 0;
 unsigned long SPS30_read_error_counter = 0;
@@ -499,7 +497,7 @@ struct struct_wifiInfo {
 #endif
 };
 
-struct struct_wifiInfo *wifiInfo;
+struct struct_wifiInfo* wifiInfo;
 uint8_t count_wifiInfo;
 
 #define msSince(timestamp_before) (act_milli - (timestamp_before))
@@ -951,7 +949,7 @@ static void add_age_last_values(String& s) {
  * -Provide BasicAuth for all page contexts except /values and images
  *****************************************************************/
 static bool webserver_request_auth() {
-	if (cfg::www_basicauth_enabled && ! wificonfig_loop) {
+	if (cfg::www_basicauth_enabled && !wificonfig_loop) {
 		debug_outln_info(F("validate request auth..."));
 		if (!server.authenticate(cfg::www_username, cfg::www_password)) {
 			server.requestAuthentication(BASIC_AUTH, "Sensor Login", F("Authentication failed"));
@@ -973,8 +971,9 @@ static void webserver_root() {
 	if (WiFi.status() != WL_CONNECTED) {
 		sendHttpRedirect();
 	} else {
-		if (!webserver_request_auth())
-		{ return; }
+		if (!webserver_request_auth()) {
+			return;
+		}
 
 		RESERVE_STRING(page_content, XLARGE_STR);
 		start_html_page(page_content, emptyString);
@@ -1041,21 +1040,21 @@ static void webserver_config_send_body_get(String& page_content) {
 
 	add_form_checkbox(Config_www_basicauth_enabled, FPSTR(INTL_BASICAUTH));
 	page_content += FPSTR(TABLE_TAG_OPEN);
-	add_form_input(page_content, Config_www_username, FPSTR(INTL_USER), LEN_WWW_USERNAME-1);
-	add_form_input(page_content, Config_www_password, FPSTR(INTL_PASSWORD), LEN_CFG_PASSWORD-1);
+	add_form_input(page_content, Config_www_username, FPSTR(INTL_USER), LEN_WWW_USERNAME - 1);
+	add_form_input(page_content, Config_www_password, FPSTR(INTL_PASSWORD), LEN_CFG_PASSWORD - 1);
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 	page_content += FPSTR(BR_TAG);
 
 	// Paginate page after ~ 1500 Bytes
 	server.sendContent(page_content);
 
-	if (! wificonfig_loop) {
+	if (!wificonfig_loop) {
 		page_content = FPSTR(INTL_FS_WIFI_DESCRIPTION);
 		page_content += FPSTR(BR_TAG);
 
 		page_content += FPSTR(TABLE_TAG_OPEN);
-		add_form_input(page_content, Config_fs_ssid, FPSTR(INTL_FS_WIFI_NAME), LEN_FS_SSID-1);
-		add_form_input(page_content, Config_fs_pwd, FPSTR(INTL_PASSWORD), LEN_CFG_PASSWORD-1);
+		add_form_input(page_content, Config_fs_ssid, FPSTR(INTL_FS_WIFI_NAME), LEN_FS_SSID - 1);
+		add_form_input(page_content, Config_fs_pwd, FPSTR(INTL_PASSWORD), LEN_CFG_PASSWORD - 1);
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 
 		// Paginate page after ~ 1500 Bytes
@@ -1107,7 +1106,7 @@ static void webserver_config_send_body_get(String& page_content) {
 	page_content = tmpl(FPSTR(WEB_DIV_PANEL), String(3));
 	add_form_checkbox_sensor(Config_sds_read, FPSTR(INTL_SDS011));
 	add_form_checkbox_sensor(Config_hpm_read, FPSTR(INTL_HPM));
-  add_form_checkbox_sensor(Config_npm_read, FPSTR(INTL_NPM));
+	add_form_checkbox_sensor(Config_npm_read, FPSTR(INTL_NPM));
 	add_form_checkbox_sensor(Config_sps30_read, FPSTR(INTL_SPS30));
 
 	// Paginate page after ~ 1500 Bytes
@@ -1125,8 +1124,8 @@ static void webserver_config_send_body_get(String& page_content) {
 
 	add_form_checkbox_sensor(Config_dnms_read, FPSTR(INTL_DNMS));
 	page_content += FPSTR(TABLE_TAG_OPEN);
-	add_form_input(page_content, Config_dnms_correction, FPSTR(INTL_DNMS_CORRECTION), LEN_DNMS_CORRECTION-1);
-	add_form_input(page_content, Config_temp_correction, FPSTR(INTL_TEMP_CORRECTION), LEN_TEMP_CORRECTION-1);
+	add_form_input(page_content, Config_dnms_correction, FPSTR(INTL_DNMS_CORRECTION), LEN_DNMS_CORRECTION - 1);
+	add_form_input(page_content, Config_temp_correction, FPSTR(INTL_TEMP_CORRECTION), LEN_TEMP_CORRECTION - 1);
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 
 	page_content += FPSTR(WEB_BR_LF_B);
@@ -1157,7 +1156,7 @@ static void webserver_config_send_body_get(String& page_content) {
 	add_form_checkbox(Config_send2aircms, FPSTR(WEB_AIRCMS));
 	add_form_checkbox(Config_send2sensemap, FPSTR(WEB_OPENSENSEMAP));
 	page_content += FPSTR(TABLE_TAG_OPEN);
-	add_form_input(page_content, Config_senseboxid, F("senseBox&nbsp;ID"), LEN_SENSEBOXID-1);
+	add_form_input(page_content, Config_senseboxid, F("senseBox&nbsp;ID"), LEN_SENSEBOXID - 1);
 
 	server.sendContent(page_content);
 	page_content = FPSTR(TABLE_TAG_CLOSE_BR);
@@ -1169,11 +1168,11 @@ static void webserver_config_send_body_get(String& page_content) {
 
 	server.sendContent(page_content);
 	page_content = FPSTR(TABLE_TAG_OPEN);
-	add_form_input(page_content, Config_host_custom, FPSTR(INTL_SERVER), LEN_HOST_CUSTOM-1);
-	add_form_input(page_content, Config_url_custom, FPSTR(INTL_PATH), LEN_URL_CUSTOM-1);
+	add_form_input(page_content, Config_host_custom, FPSTR(INTL_SERVER), LEN_HOST_CUSTOM - 1);
+	add_form_input(page_content, Config_url_custom, FPSTR(INTL_PATH), LEN_URL_CUSTOM - 1);
 	add_form_input(page_content, Config_port_custom, FPSTR(INTL_PORT), MAX_PORT_DIGITS);
-	add_form_input(page_content, Config_user_custom, FPSTR(INTL_USER), LEN_USER_CUSTOM-1);
-	add_form_input(page_content, Config_pwd_custom, FPSTR(INTL_PASSWORD), LEN_CFG_PASSWORD-1);
+	add_form_input(page_content, Config_user_custom, FPSTR(INTL_USER), LEN_USER_CUSTOM - 1);
+	add_form_input(page_content, Config_pwd_custom, FPSTR(INTL_PASSWORD), LEN_CFG_PASSWORD - 1);
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 
 	page_content += FPSTR(BR_TAG);
@@ -1207,7 +1206,7 @@ static void webserver_config_send_body_get(String& page_content) {
 static void webserver_config_send_body_post(String& page_content) {
 	String masked_pwd;
 
-	for (unsigned e = 0; e < sizeof(configShape)/sizeof(configShape[0]); ++e) {
+	for (unsigned e = 0; e < sizeof(configShape) / sizeof(configShape[0]); ++e) {
 		ConfigShapeEntry c;
 		memcpy_P(&c, &configShape[e], sizeof(ConfigShapeEntry));
 		const String s_param(c.cfg_key);
@@ -1245,8 +1244,9 @@ static void webserver_config_send_body_post(String& page_content) {
 }
 
 static void webserver_config() {
-	if (!webserver_request_auth())
-	{ return; }
+	if (!webserver_request_auth()) {
+		return;
+	}
 
 	debug_outln_info(F("ws: config page ..."));
 
@@ -1259,7 +1259,8 @@ static void webserver_config() {
 	RESERVE_STRING(page_content, XLARGE_STR);
 
 	start_html_page(page_content, FPSTR(INTL_CONFIGURATION));
-	if (wificonfig_loop) {  // scan for wlan ssids
+	if (wificonfig_loop) {
+		// scan for wlan ssids
 		page_content += FPSTR(WEB_CONFIG_SCRIPT);
 	}
 
@@ -1432,15 +1433,15 @@ static void webserver_values() {
 		add_table_pm_value(FPSTR(SENSORS_HPM), FPSTR(WEB_PM10), last_value_HPM_P1);
 	}
 
- if (cfg::npm_read) {
-   page_content += FPSTR(EMPTY_ROW);
-   add_table_pm_value(FPSTR(SENSORS_NPM), FPSTR(WEB_PM1), last_value_NPM_P0);
-    add_table_pm_value(FPSTR(SENSORS_NPM), FPSTR(WEB_PM25), last_value_NPM_P2);
-    add_table_pm_value(FPSTR(SENSORS_NPM), FPSTR(WEB_PM10), last_value_NPM_P1);
-   add_table_nc_value(FPSTR(SENSORS_NPM), FPSTR(WEB_NC1k0), last_value_NPM_N0);
-   add_table_nc_value(FPSTR(SENSORS_NPM), FPSTR(WEB_NC2k5), last_value_NPM_N2);
-    add_table_nc_value(FPSTR(SENSORS_NPM), FPSTR(WEB_NC10), last_value_NPM_N1);
-  }
+	if (cfg::npm_read) {
+		page_content += FPSTR(EMPTY_ROW);
+		add_table_pm_value(FPSTR(SENSORS_NPM), FPSTR(WEB_PM1), last_value_NPM_P0);
+		add_table_pm_value(FPSTR(SENSORS_NPM), FPSTR(WEB_PM25), last_value_NPM_P2);
+		add_table_pm_value(FPSTR(SENSORS_NPM), FPSTR(WEB_PM10), last_value_NPM_P1);
+		add_table_nc_value(FPSTR(SENSORS_NPM), FPSTR(WEB_NC1k0), last_value_NPM_N0);
+		add_table_nc_value(FPSTR(SENSORS_NPM), FPSTR(WEB_NC2k5), last_value_NPM_N2);
+		add_table_nc_value(FPSTR(SENSORS_NPM), FPSTR(WEB_NC10), last_value_NPM_N1);
+	}
 	if (cfg::sps30_read) {
 		page_content += FPSTR(EMPTY_ROW);
 		add_table_pm_value(FPSTR(SENSORS_SPS30), FPSTR(WEB_PM1), last_value_SPS30_P0);
@@ -1546,7 +1547,7 @@ static void webserver_status() {
 		add_table_row_from_value(page_content, F("Last OTA"), delayToString(millis() - last_update_attempt));
 	}
 #if defined(ESP8266)
-    add_table_row_from_value(page_content, F("NTP Sync"), String(sntp_time_set));
+	add_table_row_from_value(page_content, F("NTP Sync"), String(sntp_time_set));
 	StreamString ntpinfo;
 
 	for (unsigned i = 0; i < SNTP_MAX_SERVERS; i++) {
@@ -1616,7 +1617,6 @@ static void webserver_status() {
 	end_html_page(page_content);
 }
 
-
 /*****************************************************************
  * Webserver read serial ring buffer                             *
  *****************************************************************/
@@ -1631,8 +1631,9 @@ static void webserver_serial() {
  * Webserver set debug level                                     *
  *****************************************************************/
 static void webserver_debug_level() {
-	if (!webserver_request_auth())
-	{ return; }
+	if (!webserver_request_auth()) {
+		return;
+	}
 
 	RESERVE_STRING(page_content, LARGE_STR);
 	start_html_page(page_content, FPSTR(INTL_DEBUG_LEVEL));
@@ -1702,8 +1703,9 @@ static void webserver_debug_level() {
  * Webserver remove config                                       *
  *****************************************************************/
 static void webserver_removeConfig() {
-	if (!webserver_request_auth())
-	{ return; }
+	if (!webserver_request_auth()) {
+		return;
+	}
 
 	RESERVE_STRING(page_content, LARGE_STR);
 	start_html_page(page_content, FPSTR(INTL_DELETE_CONFIG));
@@ -1711,11 +1713,11 @@ static void webserver_removeConfig() {
 
 	if (server.method() == HTTP_GET) {
 		page_content += FPSTR(WEB_REMOVE_CONFIG_CONTENT);
-
 	} else {
 		// Silently remove the desaster backup
 		SPIFFS.remove(F("/config.json.old"));
-		if (SPIFFS.exists(F("/config.json"))) {	//file exists
+		if (SPIFFS.exists(F("/config.json"))) {
+			//file exists
 			debug_outln_info(F("removing config.json..."));
 			if (SPIFFS.remove(F("/config.json"))) {
 				page_content += F("<h3>" INTL_CONFIG_DELETED ".</h3>");
@@ -1733,8 +1735,9 @@ static void webserver_removeConfig() {
  * Webserver reset NodeMCU                                       *
  *****************************************************************/
 static void webserver_reset() {
-	if (!webserver_request_auth())
-	{ return; }
+	if (!webserver_request_auth()) {
+		return;
+	}
 
 	String page_content;
 	page_content.reserve(512);
@@ -1980,7 +1983,7 @@ static void wifiConfig() {
 	debug_outln_info_bool(F("SDS: "), cfg::sds_read);
 	debug_outln_info_bool(F("PMS: "), cfg::pms_read);
 	debug_outln_info_bool(F("HPM: "), cfg::hpm_read);
- debug_outln_info_bool(F("NPM: "), cfg::npm_read);
+	debug_outln_info_bool(F("NPM: "), cfg::npm_read);
 	debug_outln_info_bool(F("SPS30: "), cfg::sps30_read);
 	debug_outln_info_bool(F("DHT: "), cfg::dht_read);
 	debug_outln_info_bool(F("DS18B20: "), cfg::ds18b20_read);
@@ -2136,7 +2139,7 @@ static unsigned long sendData(const LoggerEntry logger, const String& data, cons
 	HTTPClient http;
 	http.setTimeout(20 * 1000);
 	http.setUserAgent(SOFTWARE_VERSION + '/' + esp_chipid + '/' + esp_mac_id);
-    http.setReuse(false);
+	http.setReuse(false);
 	bool send_success = false;
 	if (logger == LoggerCustom && (*cfg::user_custom || *cfg::pwd_custom)) {
 		http.setAuthorization(cfg::user_custom, cfg::pwd_custom);
@@ -2780,345 +2783,307 @@ static void fetchSensorHPM(String& s) {
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_HPM));
 }
 
-
-
-
 /*****************************************************************
  * read Tera Sensor Next PM sensor sensor values                        *
  *****************************************************************/
 static void fetchSensorNPM(String& s) {
 
-  debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_NPM));
-  
-  if (msSince(starttime) < (cfg::sending_intervall_ms - (WARMUPTIME_NPM_MS + READINGTIME_NPM_MS))) {
-    if (is_NPM_running) {
+	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_NPM));
 
-    const uint8_t constexpr answer_stop[4] = { 0x81, 0x15, 0x01, 0x69 };
-    uint8_t data[4];
-    serialSDS.flush();
-    NPM_cmd(PmSensorCmd2::Change);
-    
- while (!serialSDS.available()) {debug_outln_info(F("Wait for Serial..."));}
+	if (msSince(starttime) < (cfg::sending_intervall_ms - (WARMUPTIME_NPM_MS + READINGTIME_NPM_MS))) {
+		if (is_NPM_running) {
 
- while (serialSDS.available() > 0){
-//    yield_for_serial_buffer(sizeof(data));
-    unsigned r = serialSDS.readBytes(data,sizeof(data));
+			const uint8_t constexpr answer_stop[4] = {0x81, 0x15, 0x01, 0x69};
+			uint8_t data[4];
+			serialSDS.flush();
+			NPM_cmd(PmSensorCmd2::Change);
 
-      if (r == sizeof(data) && NPM_checksum_valid_4(data)) {
+			while (!serialSDS.available()) {
+				debug_outln_info(F("Wait for Serial..."));
+			}
 
-       String reader = "Read: ";
+			while (serialSDS.available() > 0) {
+				//    yield_for_serial_buffer(sizeof(data));
+				unsigned r = serialSDS.readBytes(data, sizeof(data));
+				if (r == sizeof(data) && NPM_checksum_valid_4(data)) {
+					String reader = "Read: ";
+					for (unsigned i = 0; i < sizeof(data); i++) {
+						reader += "0x";
+						if (data[i] < 0x10) {
+							reader += "0";
+						}
+						reader += String(data[i], HEX);
+						if (i != (sizeof(data) - 1)) {
+							reader += ", ";
+						}
+					}
 
-       for (int i = 0; i < sizeof(data); i++)
-            {
-              reader += "0x";
-              if (data[i] < 0x10)
-                  reader += "0";
-              reader += String(data[i], HEX);
-              if(i!=(sizeof(data)-1)){
-              reader += ", ";
-              }
-              }
+					debug_outln(reader, DEBUG_MAX_INFO);
 
-       debug_outln(reader, DEBUG_MAX_INFO);
-      
-      if(memcmp(data,answer_stop,4)==0){
-        debug_outln_info(F("Next PM Stop..."));
-        is_NPM_running = false;
-      }
-    break;
-      }
-    }
- }
-  } else {
-    
-    if (!is_NPM_running) {
-      const uint8_t constexpr answer_start[4] = { 0x81, 0x15, 0x00, 0x6A };
-      uint8_t data[4];
-      serialSDS.flush();
-      NPM_cmd(PmSensorCmd2::Change);
+					if (memcmp(data, answer_stop, 4) == 0) {
+						debug_outln_info(F("Next PM Stop..."));
+						is_NPM_running = false;
+					}
+					break;
+				}
+			}
+		}
+	} else {
 
-        while (!serialSDS.available()) {debug_outln_info(F("Wait for Serial..."));}
-        
-        while (serialSDS.available() > 0){
-        //    yield_for_serial_buffer(sizeof(data));
-            unsigned r = serialSDS.readBytes(data,sizeof(data));
-            
-              if (r == sizeof(data) && NPM_checksum_valid_4(data)) {
-    
+		if (!is_NPM_running) {
+			const uint8_t constexpr answer_start[4] = {0x81, 0x15, 0x00, 0x6A};
+			uint8_t data[4];
+			serialSDS.flush();
+			NPM_cmd(PmSensorCmd2::Change);
 
-        String reader = "Read: ";
+			while (!serialSDS.available()) {
+				debug_outln_info(F("Wait for Serial..."));
+			}
 
-       for (int i = 0; i < sizeof(data); i++)
-            {
-              reader += "0x";
-              if (data[i] < 0x10)
-                  reader += "0";
-              reader += String(data[i], HEX);
-              if(i!=(sizeof(data)-1)){
-              reader += ", ";
-              }
-              }
+			while (serialSDS.available() > 0) {
+				//    yield_for_serial_buffer(sizeof(data));
+				unsigned r = serialSDS.readBytes(data, sizeof(data));
 
-       debug_outln(reader, DEBUG_MAX_INFO);
-              
-      
-      if(memcmp(data,answer_start,4)==0){
-        debug_outln_info(F("Next PM Start..."));
-        is_NPM_running = true;
-        starttime_NPM = millis();
-        last_NPM = starttime_NPM -1000;
-      }
-    
-    break;
-      }
-    }
-   
-    }else{
-    
-    if (msSince(starttime_NPM) > WARMUPTIME_NPM_MS && msSince(last_NPM) >= SAMPLETIME_NPM_MS && npm_val_count < 10 && newCmdNPM == true) {
+				if (r == sizeof(data) && NPM_checksum_valid_4(data)) {
 
-      //&& msSince(starttime_NPM) < (WARMUPTIME_NPM_MS +READINGTIME_NPM_MS)
+					String reader = "Read: ";
 
-      uint8_t data[16];
-      serialSDS.flush();
-      NPM_cmd(PmSensorCmd2::Concentration);
-      newCmdNPM = false;
-      while (!serialSDS.available()) {debug_outln_info(F("Wait for Serial..."));}
+					for (unsigned i = 0; i < sizeof(data); i++) {
+						reader += "0x";
+						if (data[i] < 0x10) {
+							reader += "0";
+						}
+						reader += String(data[i], HEX);
+						if (i != (sizeof(data) - 1)) {
+							reader += ", ";
+						}
+					}
 
+					debug_outln(reader, DEBUG_MAX_INFO);
 
-          
-              while (serialSDS.available() > 0){
-              //    yield_for_serial_buffer(sizeof(data));
-                  unsigned r = serialSDS.readBytes(data,sizeof(data));
+					if (memcmp(data, answer_start, 4) == 0) {
+						debug_outln_info(F("Next PM Start..."));
+						is_NPM_running = true;
+						starttime_NPM = millis();
+						last_NPM = starttime_NPM - 1000;
+					}
 
-                    if (r == sizeof(data) && NPM_checksum_valid_16(data)) {
-            
+					break;
+				}
+			}
+		} else {
 
-                        String reader = "Read: ";
+			if (msSince(starttime_NPM) > WARMUPTIME_NPM_MS && msSince(last_NPM) >= SAMPLETIME_NPM_MS && npm_val_count < 10 && newCmdNPM == true) {
 
-                       for (int i = 0; i < sizeof(data); i++)
-                            {
-                              reader += "0x";
-                              if (data[i] < 0x10)
-                                  reader += "0";
-                              reader += String(data[i], HEX);
-                              if(i!=(sizeof(data)-1)){
-                              reader += ", ";
-                              }
-                              }
-                
-                       debug_outln(reader, DEBUG_MAX_INFO);
+				//&& msSince(starttime_NPM) < (WARMUPTIME_NPM_MS +READINGTIME_NPM_MS)
 
-                       byte stateByte = data[2];
-                       String state = "State: ";
+				uint8_t data[16];
+				serialSDS.flush();
+				NPM_cmd(PmSensorCmd2::Concentration);
+				newCmdNPM = false;
+				while (!serialSDS.available()) {
+					debug_outln_info(F("Wait for Serial..."));
+				}
 
-                       for (int b = 7; b >= 0; b--)
-                        {
-                          state += String(bitRead(stateByte, b));
-                        }
+				while (serialSDS.available() > 0) {
+					//    yield_for_serial_buffer(sizeof(data));
+					unsigned r = serialSDS.readBytes(data, sizeof(data));
 
-                       debug_outln(state, DEBUG_MAX_INFO);
+					if (r == sizeof(data) && NPM_checksum_valid_16(data)) {
 
-      uint16_t N1_serial = word(data[3],data[4]);
-      uint16_t N25_serial = word(data[5],data[6]);
-      uint16_t N10_serial =  word(data[7],data[8]);
-      
-      uint16_t pm1_serial = word(data[9],data[10]);
-      uint16_t pm25_serial = word(data[11],data[12]);
-      uint16_t pm10_serial =  word(data[13],data[14]);
-      
-          debug_outln_verbose(F("PM1 (μg/m3) : "), String(pm1_serial/10.0f));
-          debug_outln_verbose(F("PM2.5 (μg/m3): "), String(pm25_serial/10.0f));
-          debug_outln_verbose(F("PM10 (μg/m3) : "), String(pm10_serial/10.0f));
+						String reader = "Read: ";
 
-          debug_outln_verbose(F("PM1 (pcs/mL) : "), String(N1_serial));
-          debug_outln_verbose(F("PM2.5 (pcs/mL): "), String(N25_serial));
-          debug_outln_verbose(F("PM10 (pcs/mL) : "), String(N10_serial));
-      
-          npm_pm1_sum += pm1_serial/10.0f;
-          npm_pm25_sum += pm25_serial/10.0f;
-          npm_pm10_sum += pm10_serial/10.0f;
+						for (unsigned i = 0; i < sizeof(data); i++) {
+							reader += "0x";
+							if (data[i] < 0x10) {
+								reader += "0";
+							}
+							reader += String(data[i], HEX);
+							if (i != (sizeof(data) - 1)) {
+								reader += ", ";
+							}
+						}
 
-          npm_pm1_sum_pcs += N1_serial;
-          npm_pm25_sum_pcs += N25_serial;
-          npm_pm10_sum_pcs += N10_serial;
-          
-          UPDATE_MIN_MAX(npm_pm1_min, npm_pm1_max, pm1_serial/10.0f);
-          UPDATE_MIN_MAX(npm_pm25_min, npm_pm25_max, pm25_serial/10.0f);
-          UPDATE_MIN_MAX(npm_pm10_min, npm_pm10_max, pm10_serial/10.0f);
+						debug_outln(reader, DEBUG_MAX_INFO);
 
-          UPDATE_MIN_MAX(npm_pm1_min_pcs, npm_pm1_max_pcs, N1_serial);
-          UPDATE_MIN_MAX(npm_pm25_min_pcs, npm_pm25_max_pcs, N25_serial);
-          UPDATE_MIN_MAX(npm_pm10_min_pcs, npm_pm10_max_pcs, N10_serial);
-          
-                  debug_outln_info(F("Next PM Measure..."));
-                  newCmdNPM = true;
-                  npm_val_count += 1;
-                  last_NPM = millis();
-               
-              break;
-                }else if(r == 4 && data[2] == 0x04){
+						byte stateByte = data[2];
+						String state = "State: ";
 
+						for (int b = 7; b >= 0; b--) {
+							state += String(bitRead(stateByte, b));
+						}
 
-                       String reader = "Read: ";
+						debug_outln(state, DEBUG_MAX_INFO);
 
-                       for (int i = 0; i < 4; i++)
-                            {
-                              reader += "0x";
-                              if (data[i] < 0x10)
-                                  reader += "0";
-                              reader += String(data[i], HEX);
-                              if(i!=3){
-                              reader += ", ";
-                              }
-                              }
-                
-                       debug_outln(reader, DEBUG_MAX_INFO);
-                        
-                  
-        debug_outln_info(F("Next PM not ready yet..."));
-        newCmdNPM = true;
-        break;
-         }
-       }
-   }
-   
-//   else{
-//      
-//    if (msSince(starttime_NPM) <= WARMUPTIME_NPM_MS){
-//      Debug.println("Wait 15 seconds");
-//      }
-//
-//      if (msSince(last_NPM) < SAMPLETIME_NPM_MS){
-//      Debug.println("Wait 1 seconds");
-//      }
-//
-////      if (msSince(starttime_NPM) >= WARMUPTIME_NPM_MS + READINGTIME_NPM_MS){
-////      Debug.println("More than 15 seconds reading");
-////      }
-//
-//      if (npm_val_count >= 10){
-//      Debug.println("Already 10 measures");
-//      }
-//
-//      if (newCmdNPM == false){
-//      Debug.println("newCmdNPM == false)");
-//      }
-//      
-//      }
-    
-  }
-  }
-  if (send_now) {
-    last_value_NPM_P0 = -1.0f;
-    last_value_NPM_P1 = -1.0f;
-    last_value_NPM_P2 = -1.0f;
-    last_value_NPM_N0 = -1.0f;
-    last_value_NPM_N1 = -1.0f;
-    last_value_NPM_N2 = -1.0f;
-    
+						uint16_t N1_serial = word(data[3], data[4]);
+						uint16_t N25_serial = word(data[5], data[6]);
+						uint16_t N10_serial = word(data[7], data[8]);
 
-    if (npm_val_count > 2) {
-      npm_pm1_sum = npm_pm1_sum - npm_pm1_min - npm_pm1_max;
-      npm_pm10_sum = npm_pm10_sum - npm_pm10_min - npm_pm10_max;
-      npm_pm25_sum = npm_pm25_sum - npm_pm25_min - npm_pm25_max;
-      npm_pm1_sum_pcs = npm_pm1_sum_pcs - npm_pm1_min_pcs - npm_pm1_max_pcs;
-      npm_pm10_sum_pcs = npm_pm10_sum_pcs - npm_pm10_min_pcs - npm_pm10_max_pcs;
-      npm_pm25_sum_pcs = npm_pm25_sum_pcs - npm_pm25_min_pcs - npm_pm25_max_pcs;
-      npm_val_count = npm_val_count - 2;
-    }
-    if (npm_val_count > 0) {
-      last_value_NPM_P0 = float(npm_pm1_sum) / float(npm_val_count);
-      last_value_NPM_P1 = float(npm_pm10_sum) / float(npm_val_count);
-      last_value_NPM_P2 = float(npm_pm25_sum) / float(npm_val_count);
+						uint16_t pm1_serial = word(data[9], data[10]);
+						uint16_t pm25_serial = word(data[11], data[12]);
+						uint16_t pm10_serial = word(data[13], data[14]);
 
-      last_value_NPM_N0 = float(npm_pm1_sum_pcs) / float(npm_val_count);
-      last_value_NPM_N1 = float(npm_pm10_sum_pcs) / float(npm_val_count);
-      last_value_NPM_N2 = float(npm_pm25_sum_pcs) / float(npm_val_count);
-      
-      add_Value2Json(s, F("NPM_P0"), F("PM1: "), last_value_NPM_P0);
-      add_Value2Json(s, F("NPM_P1"), F("PM10:  "), last_value_NPM_P1);
-      add_Value2Json(s, F("NPM_P2"), F("PM2.5: "), last_value_NPM_P2);
+						debug_outln_verbose(F("PM1 (μg/m3) : "), String(pm1_serial / 10.0f));
+						debug_outln_verbose(F("PM2.5 (μg/m3): "), String(pm25_serial / 10.0f));
+						debug_outln_verbose(F("PM10 (μg/m3) : "), String(pm10_serial / 10.0f));
 
-      add_Value2Json(s, F("NPM_N1"), F("NC1.0: "), last_value_NPM_N0);
-      add_Value2Json(s, F("NPM_N10"), F("NC10:  "), last_value_NPM_N1);
-      add_Value2Json(s, F("NPM_N25"), F("NC2.5: "), last_value_NPM_N2);
-      
-      debug_outln_info(FPSTR(DBG_TXT_SEP));
-    }
-    npm_pm1_sum = 0;
-    npm_pm10_sum = 0;
-    npm_pm25_sum = 0;
-    
-    npm_val_count = 0;
-    
-    npm_pm1_max = 0;
-    npm_pm1_min = 20000;
-    npm_pm10_max = 0;
-    npm_pm10_min = 20000;
-    npm_pm25_max = 0;
-    npm_pm25_min = 20000;
+						debug_outln_verbose(F("PM1 (pcs/mL) : "), String(N1_serial));
+						debug_outln_verbose(F("PM2.5 (pcs/mL): "), String(N25_serial));
+						debug_outln_verbose(F("PM10 (pcs/mL) : "), String(N10_serial));
 
-    npm_pm1_sum_pcs = 0;
-    npm_pm10_sum_pcs = 0;
-    npm_pm25_sum_pcs = 0;
-    
-    npm_pm1_max_pcs = 0;
-    npm_pm1_min_pcs = 60000;
-    npm_pm10_max_pcs = 0;
-    npm_pm10_min_pcs = 60000;
-    npm_pm25_max_pcs = 0;
-    npm_pm25_min_pcs = 60000;
+						npm_pm1_sum += pm1_serial / 10.0f;
+						npm_pm25_sum += pm25_serial / 10.0f;
+						npm_pm10_sum += pm10_serial / 10.0f;
 
-    if(cfg::sending_intervall_ms > (WARMUPTIME_NPM_MS + READINGTIME_NPM_MS)) {
+						npm_pm1_sum_pcs += N1_serial;
+						npm_pm25_sum_pcs += N25_serial;
+						npm_pm10_sum_pcs += N10_serial;
 
-    const uint8_t constexpr answer_stop[4] = { 0x81, 0x15, 0x01, 0x69 };
-    uint8_t data[4];
-    serialSDS.flush();
-    NPM_cmd(PmSensorCmd2::Change);
-    
- while (!serialSDS.available()) {Debug.println("Wait for Serial");}
+						UPDATE_MIN_MAX(npm_pm1_min, npm_pm1_max, pm1_serial / 10.0f);
+						UPDATE_MIN_MAX(npm_pm25_min, npm_pm25_max, pm25_serial / 10.0f);
+						UPDATE_MIN_MAX(npm_pm10_min, npm_pm10_max, pm10_serial / 10.0f);
 
- while (serialSDS.available() > 0){
-//    yield_for_serial_buffer(sizeof(data));
-    unsigned r = serialSDS.readBytes(data,sizeof(data));
-    
-      if (r == sizeof(data) && NPM_checksum_valid_4(data)) {
+						UPDATE_MIN_MAX(npm_pm1_min_pcs, npm_pm1_max_pcs, N1_serial);
+						UPDATE_MIN_MAX(npm_pm25_min_pcs, npm_pm25_max_pcs, N25_serial);
+						UPDATE_MIN_MAX(npm_pm10_min_pcs, npm_pm10_max_pcs, N10_serial);
 
-          String reader = "Read: ";
+						debug_outln_info(F("Next PM Measure..."));
+						newCmdNPM = true;
+						npm_val_count += 1;
+						last_NPM = millis();
 
-         for (int i = 0; i < sizeof(data); i++)
-              {
-                reader += "0x";
-                if (data[i] < 0x10)
-                    reader += "0";
-                reader += String(data[i], HEX);
-                if(i!=(sizeof(data)-1)){
-                reader += ", ";
-                }
-                }
-  
-         debug_outln(reader, DEBUG_MAX_INFO);
-          
+						break;
+					} else if (r == 4 && data[2] == 0x04) {
 
-      if(memcmp(data,answer_stop,4)==0){
-        debug_outln_info(F("Next PM Stop..."));
-        is_NPM_running = false;
-        npm_val_count = 0;
-      }
-    break;
-      }
-    } 
-    }
+						String reader = "Read: ";
 
-  }
+						for (int i = 0; i < 4; i++) {
+							reader += "0x";
+							if (data[i] < 0x10) {
+								reader += "0";
+							}
+							reader += String(data[i], HEX);
+							if (i != 3) {
+								reader += ", ";
+							}
+						}
 
-  debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_NPM));
+						debug_outln(reader, DEBUG_MAX_INFO);
+
+						debug_outln_info(F("Next PM not ready yet..."));
+						newCmdNPM = true;
+						break;
+					}
+				}
+			}
+		}
+	}
+	if (send_now) {
+		last_value_NPM_P0 = -1.0f;
+		last_value_NPM_P1 = -1.0f;
+		last_value_NPM_P2 = -1.0f;
+		last_value_NPM_N0 = -1.0f;
+		last_value_NPM_N1 = -1.0f;
+		last_value_NPM_N2 = -1.0f;
+
+		if (npm_val_count > 2) {
+			npm_pm1_sum = npm_pm1_sum - npm_pm1_min - npm_pm1_max;
+			npm_pm10_sum = npm_pm10_sum - npm_pm10_min - npm_pm10_max;
+			npm_pm25_sum = npm_pm25_sum - npm_pm25_min - npm_pm25_max;
+			npm_pm1_sum_pcs = npm_pm1_sum_pcs - npm_pm1_min_pcs - npm_pm1_max_pcs;
+			npm_pm10_sum_pcs = npm_pm10_sum_pcs - npm_pm10_min_pcs - npm_pm10_max_pcs;
+			npm_pm25_sum_pcs = npm_pm25_sum_pcs - npm_pm25_min_pcs - npm_pm25_max_pcs;
+			npm_val_count = npm_val_count - 2;
+		}
+
+		if (npm_val_count > 0) {
+			last_value_NPM_P0 = float(npm_pm1_sum) / float(npm_val_count);
+			last_value_NPM_P1 = float(npm_pm10_sum) / float(npm_val_count);
+			last_value_NPM_P2 = float(npm_pm25_sum) / float(npm_val_count);
+
+			last_value_NPM_N0 = float(npm_pm1_sum_pcs) / float(npm_val_count);
+			last_value_NPM_N1 = float(npm_pm10_sum_pcs) / float(npm_val_count);
+			last_value_NPM_N2 = float(npm_pm25_sum_pcs) / float(npm_val_count);
+
+			add_Value2Json(s, F("NPM_P0"), F("PM1: "), last_value_NPM_P0);
+			add_Value2Json(s, F("NPM_P1"), F("PM10:  "), last_value_NPM_P1);
+			add_Value2Json(s, F("NPM_P2"), F("PM2.5: "), last_value_NPM_P2);
+
+			add_Value2Json(s, F("NPM_N1"), F("NC1.0: "), last_value_NPM_N0);
+			add_Value2Json(s, F("NPM_N10"), F("NC10:  "), last_value_NPM_N1);
+			add_Value2Json(s, F("NPM_N25"), F("NC2.5: "), last_value_NPM_N2);
+
+			debug_outln_info(FPSTR(DBG_TXT_SEP));
+		}
+
+		npm_pm1_sum = 0;
+		npm_pm10_sum = 0;
+		npm_pm25_sum = 0;
+		npm_val_count = 0;
+
+		npm_pm1_max = 0;
+		npm_pm1_min = 20000;
+		npm_pm10_max = 0;
+		npm_pm10_min = 20000;
+		npm_pm25_max = 0;
+		npm_pm25_min = 20000;
+
+		npm_pm1_sum_pcs = 0;
+		npm_pm10_sum_pcs = 0;
+		npm_pm25_sum_pcs = 0;
+
+		npm_pm1_max_pcs = 0;
+		npm_pm1_min_pcs = 60000;
+		npm_pm10_max_pcs = 0;
+		npm_pm10_min_pcs = 60000;
+		npm_pm25_max_pcs = 0;
+		npm_pm25_min_pcs = 60000;
+
+		if (cfg::sending_intervall_ms > (WARMUPTIME_NPM_MS + READINGTIME_NPM_MS)) {
+
+			const uint8_t constexpr answer_stop[4] = {0x81, 0x15, 0x01, 0x69};
+			uint8_t data[4];
+			serialSDS.flush();
+			NPM_cmd(PmSensorCmd2::Change);
+
+			while (!serialSDS.available()) {
+				Debug.println("Wait for Serial");
+			}
+
+			while (serialSDS.available() > 0) {
+				//    yield_for_serial_buffer(sizeof(data));
+				unsigned r = serialSDS.readBytes(data, sizeof(data));
+
+				if (r == sizeof(data) && NPM_checksum_valid_4(data)) {
+
+					String reader = "Read: ";
+
+					for (unsigned i = 0; i < sizeof(data); i++) {
+						reader += "0x";
+						if (data[i] < 0x10) {
+							reader += "0";
+						}
+						reader += String(data[i], HEX);
+						if (i != (sizeof(data) - 1)) {
+							reader += ", ";
+						}
+					}
+
+					debug_outln(reader, DEBUG_MAX_INFO);
+
+					if (memcmp(data, answer_stop, 4) == 0) {
+						debug_outln_info(F("Next PM Stop..."));
+						is_NPM_running = false;
+						npm_val_count = 0;
+					}
+					break;
+				}
+			}
+		}
+	}
+
+	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_NPM));
 }
-
-
-
-
 
 /*****************************************************************
  * read PPD42NS sensor values                                    *
@@ -3152,7 +3117,6 @@ static void fetchSensorPPD(String& s) {
 			lowpulseoccupancyP2 += durationP2;
 			trigP2 = false;
 		}
-
 	}
 	// Checking if it is time to sample
 	if (send_now) {
@@ -3332,7 +3296,7 @@ static void fetchSensorGPS(String& s) {
 		debug_outln_info(FPSTR(DBG_TXT_SEP));
 	}
 
-	if ( count_sends > 0 && gps.charsProcessed() < 10) {
+	if (count_sends > 0 && gps.charsProcessed() < 10) {
 		debug_outln_error(F("No GPS data received: check wiring"));
 		gps_init_failed = true;
 	}
@@ -3368,7 +3332,7 @@ static bool fwDownloadStream(WiFiClientSecure& client, const String& url, Stream
 	}
 
 	http.setUserAgent(agent);
-    http.setReuse(false);
+	http.setReuse(false);
 
 	debug_outln_verbose(F("HTTP GET: "), String(FPSTR(FW_DOWNLOAD_HOST)) + ':' + String(FW_DOWNLOAD_PORT) + url);
 
@@ -3382,8 +3346,9 @@ static bool fwDownloadStream(WiFiClientSecure& client, const String& url, Stream
 		http.end();
 	}
 
-	if (bytes_written > 0)
+	if (bytes_written > 0) {
 		return true;
+	}
 
 	return false;
 }
@@ -3405,8 +3370,9 @@ static bool fwDownloadStreamFile(WiFiClientSecure& client, const String& url, co
 		}
 	}
 
-	if (downloadSuccess)
+	if (downloadSuccess) {
 		return true;
+	}
 
 	SPIFFS.remove(fname_new);
 	return false;
@@ -3414,7 +3380,9 @@ static bool fwDownloadStreamFile(WiFiClientSecure& client, const String& url, co
 
 static void twoStageOTAUpdate() {
 
-	if (!cfg::auto_update) return;
+	if (!cfg::auto_update) {
+		return;
+	}
 
 #if defined(ESP8266)
 	debug_outln_info(F("twoStageOTAUpdate"));
@@ -3443,8 +3411,9 @@ static void twoStageOTAUpdate() {
 	fetch_md5_name += F(".md5");
 
 	StreamString newFwmd5;
-	if (!fwDownloadStream(client, fetch_md5_name, &newFwmd5))
+	if (!fwDownloadStream(client, fetch_md5_name, &newFwmd5)) {
 		return;
+	}
 
 	newFwmd5.trim();
 	if (newFwmd5 == ESP.getSketchMD5()) {
@@ -3464,12 +3433,15 @@ static void twoStageOTAUpdate() {
 	String firmware_name(F("/firmware.bin"));
 	String firmware_md5(F("/firmware.bin.md5"));
 	String loader_name(F("/loader.bin"));
-	if (!fwDownloadStreamFile(client, fetch_name, firmware_name))
+	if (!fwDownloadStreamFile(client, fetch_name, firmware_name)) {
 		return;
-	if (!fwDownloadStreamFile(client, fetch_md5_name, firmware_md5))
+	}
+	if (!fwDownloadStreamFile(client, fetch_md5_name, firmware_md5)) {
 		return;
-	if (!fwDownloadStreamFile(client, FPSTR(FW_2ND_LOADER_URL), loader_name))
+	}
+	if (!fwDownloadStreamFile(client, FPSTR(FW_2ND_LOADER_URL), loader_name)) {
 		return;
+	}
 
 	File fwFile = SPIFFS.open(firmware_name, "r");
 	if (!fwFile) {
@@ -3487,7 +3459,7 @@ static void twoStageOTAUpdate() {
 	String md5String = md5.toString();
 
 	// Firmware is always at least 128 kB and padded to 16 bytes
-	if (fwSize < (1<<17) || (fwSize % 16 != 0) || newFwmd5 != md5String) {
+	if (fwSize < (1 << 17) || (fwSize % 16 != 0) || newFwmd5 != md5String) {
 		debug_outln_info(F("FW download failed validation.. deleting"));
 		SPIFFS.remove(firmware_name);
 		SPIFFS.remove(firmware_md5);
@@ -3495,8 +3467,9 @@ static void twoStageOTAUpdate() {
 	}
 
 	StreamString loaderMD5;
-	if (!fwDownloadStream(client, String(FPSTR(FW_2ND_LOADER_URL)) + F(".md5"), &loaderMD5))
+	if (!fwDownloadStream(client, String(FPSTR(FW_2ND_LOADER_URL)) + F(".md5"), &loaderMD5)) {
 		return;
+	}
 
 	loaderMD5.trim();
 
@@ -3549,7 +3522,7 @@ static void display_values() {
 	double lon_value = -200.0;
 	double alt_value = -1000.0;
 	String display_header;
-	String display_lines[3] = { "", "", ""};
+	String display_lines[3] = {"", "", ""};
 	uint8_t screen_count = 0;
 	uint8_t screens[8];
 	int line_count = 0;
@@ -3572,17 +3545,16 @@ static void display_values() {
 		pm25_value = last_value_HPM_P2;
 		pm25_sensor = FPSTR(SENSORS_HPM);
 	}
-
-  if (cfg::npm_read) {
-    pm01_value = last_value_NPM_P0;
-    pm10_value = last_value_NPM_P1;
-    pm25_value = last_value_NPM_P2;
-    pm10_sensor = FPSTR(SENSORS_NPM);
-    pm25_sensor = FPSTR(SENSORS_NPM);
-    nc010_value = last_value_NPM_N0;
-    nc100_value = last_value_NPM_N1;
-    nc025_value = last_value_NPM_N2; 
-  }
+	if (cfg::npm_read) {
+		pm01_value = last_value_NPM_P0;
+		pm10_value = last_value_NPM_P1;
+		pm25_value = last_value_NPM_P2;
+		pm10_sensor = FPSTR(SENSORS_NPM);
+		pm25_sensor = FPSTR(SENSORS_NPM);
+		nc010_value = last_value_NPM_N0;
+		nc100_value = last_value_NPM_N1;
+		nc025_value = last_value_NPM_N2;
+	}
 	if (cfg::sps30_read) {
 		pm10_sensor = FPSTR(SENSORS_SPS30);
 		pm25_sensor = FPSTR(SENSORS_SPS30);
@@ -3646,7 +3618,7 @@ static void display_values() {
 		lon_value = last_value_GPS_lon;
 		alt_value = last_value_GPS_alt;
 	}
-	if (cfg::ppd_read || cfg::pms_read || cfg::hpm_read || cfg::npm_read|| cfg::sds_read) {
+	if (cfg::ppd_read || cfg::pms_read || cfg::hpm_read || cfg::npm_read || cfg::sds_read) {
 		screens[screen_count++] = 1;
 	}
 	if (cfg::sps30_read) {
@@ -3894,7 +3866,7 @@ static void initSPS30() {
 	debug_out(F("Trying SPS30 sensor on 0x69H "), DEBUG_MIN_INFO);
 	sps30_reset();
 	delay(200);
-	if ( sps30_get_serial(serial) != 0 ) {
+	if (sps30_get_serial(serial) != 0) {
 		debug_outln_info(FPSTR(DBG_TXT_NOT_FOUND));
 
 		debug_outln_info(F("Check SPS30 wiring"));
@@ -3969,61 +3941,63 @@ static void powerOnTestSensors() {
 		is_HPM_running = HPM_cmd(PmSensorCmd::Stop);
 	}
 
- if (cfg::npm_read) {
+#if NPM_READ
+	if (cfg::npm_read) {
 
-  const uint8_t constexpr answer_sleep[4] = { 0x81, 0x16, 0x01, 0x68 };
-  const uint8_t constexpr answer_power[4] = { 0x81, 0x16, 0x00, 0x69 };
-  uint8_t data[4];
-  
-   debug_outln_info(F("State NPM..."));
-   serialSDS.flush();
-   NPM_cmd(PmSensorCmd2::State);
-   while (!serialSDS.available()) {debug_outln_info(F("Wait for Serial..."));}
+		const uint8_t constexpr answer_sleep[4] = {0x81, 0x16, 0x01, 0x68};
+		const uint8_t constexpr answer_power[4] = {0x81, 0x16, 0x00, 0x69};
+		uint8_t data[4];
 
-   while (serialSDS.available() > 0){
-    
-    //yield_for_serial_buffer(sizeof(data));
-    unsigned r = serialSDS.readBytes(data,sizeof(data));
+		debug_outln_info(F("State NPM..."));
+		serialSDS.flush();
+		NPM_cmd(PmSensorCmd2::State);
+		while (!serialSDS.available()) {
+			debug_outln_info(F("Wait for Serial..."));
+		}
 
-      if (r == sizeof(data) && NPM_checksum_valid_4(data)) {
+		while (serialSDS.available() > 0) {
 
+			//yield_for_serial_buffer(sizeof(data));
+			unsigned r = serialSDS.readBytes(data, sizeof(data));
 
-      String reader = "Read: ";
+			if (r == sizeof(data) && NPM_checksum_valid_4(data)) {
 
-       for (int i = 0; i < sizeof(data); i++)
-            {
-              reader += "0x";
-              if (data[i] < 0x10)
-                  reader += "0";
-              reader += String(data[i], HEX);
-              if(i!=(sizeof(data)-1)){
-              reader += ", ";
-              }
-              }
+				String reader = "Read: ";
 
-       debug_outln(reader, DEBUG_MAX_INFO);
+				for (unsigned i = 0; i < sizeof(data); i++) {
+					reader += "0x";
+					if (data[i] < 0x10) {
+						reader += "0";
+					}
+					reader += String(data[i], HEX);
+					if (i != (sizeof(data) - 1)) {
+						reader += ", ";
+					}
+				}
 
-      if(memcmp(data,answer_sleep,4)==0){
-        serialSDS.flush();
-        is_NPM_running = false;
-        debug_outln_info(F("Next PM Sleep..."));
-       }else if(memcmp(data,answer_power,4)==0){
-        serialSDS.flush();
-        is_NPM_running = true;
-        debug_outln_info(F("Next PM Power On..."));
-       }else{
-        digitalWrite(PIN_CS, HIGH);
-        delay(500);
-        digitalWrite(PIN_CS, LOW);
-        is_NPM_running = true;
-        debug_outln_info(F("Next PM Reboot..."));
-        }
+				debug_outln(reader, DEBUG_MAX_INFO);
 
-       break;
+				if (memcmp(data, answer_sleep, 4) == 0) {
+					serialSDS.flush();
+					is_NPM_running = false;
+					debug_outln_info(F("Next PM Sleep..."));
+				} else if (memcmp(data, answer_power, 4) == 0) {
+					serialSDS.flush();
+					is_NPM_running = true;
+					debug_outln_info(F("Next PM Power On..."));
+				} else {
+					digitalWrite(PIN_CS, HIGH);
+					delay(500);
+					digitalWrite(PIN_CS, LOW);
+					is_NPM_running = true;
+					debug_outln_info(F("Next PM Reboot..."));
+				}
 
-      }
-    }
-    }
+				break;
+			}
+		}
+	}
+#endif
 
 	if (cfg::sps30_read) {
 		debug_outln_info(F("Read SPS30..."));
@@ -4079,7 +4053,6 @@ static void powerOnTestSensors() {
 		debug_outln_info(F("Read DNMS..."));
 		initDNMS();
 	}
-
 }
 
 static void logEnabledAPIs() {
@@ -4215,34 +4188,27 @@ static unsigned long sendDataToOptionalApis(const String &data) {
  *****************************************************************/
 
 void setup(void) {
-	Debug.begin(9600);		// Output to Serial at 9600 baud
+	Debug.begin(9600); // Output to Serial at 9600 baud
 
-#if defined(ESP8266) && !defined(NPM_READ)
+#if defined(ESP8266)
+#if NPM_READ
+	serialSDS.begin(115200, SWSERIAL_8E1, PM_SERIAL_RX, PM_SERIAL_TX);
+#else
 	serialSDS.begin(9600, SWSERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX);
+#endif
 	serialSDS.enableIntTx(true);
 #endif
 
-#if defined(ESP8266) && defined(NPM_READ)
-//REVOIR CONDITION POUR ESP8266 && NPM_READ
-  serialSDS.begin(115200,SWSERIAL_8E1, PM_SERIAL_RX, PM_SERIAL_TX);
-  // OU BIEN OPTION SERIAL_8E1
-  serialSDS.enableIntTx(true);
-#endif
-
-
-#if defined(ESP32) && !defined(NPM_READ)
+#if defined(ESP32)
+#if NPM_READ
+	serialSDS.begin(115200, SERIAL_8E1, PM_SERIAL_RX, PM_SERIAL_TX);
+	Debug.println("SERIAL_8E1");
+	pinMode(PIN_CS, OUTPUT);
+	digitalWrite(PIN_CS, LOW);
+#else
 	serialSDS.begin(9600, SERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX);
 #endif
-
-#if defined(ESP32) && defined(NPM_READ)
-//REVOIR CONDITION POUR DEVKIT && NPM_READ
-  serialSDS.begin(115200, SERIAL_8E1, PM_SERIAL_RX, PM_SERIAL_TX);
-  Debug.println("SERIAL_8E1");
-    pinMode(PIN_CS, OUTPUT);
-  digitalWrite(PIN_CS, LOW);
 #endif
-
-
 	serialSDS.setTimeout((12 * 9 * 1000) / 9600);
 
 #if defined(WIFI_LoRa_32_V2)
@@ -4339,7 +4305,7 @@ void loop(void) {
 	}
 	last_micro = act_micro;
 
-	if (cfg::sps30_read && ( !sps30_init_failed)) {
+	if (cfg::sps30_read && (!sps30_init_failed)) {
 		if ((msSince(starttime) - SPS30_read_timer) > SPS30_WAITING_AFTER_LAST_READ) {
 			struct sps30_measurement sps30_values;
 			int16_t ret_SPS30;
@@ -4375,14 +4341,14 @@ void loop(void) {
 		fetchSensorPPD(result_PPD);
 	}
 
-  if (cfg::npm_read) {
-    fetchSensorNPM(result_NPM);
-  }
+	if (cfg::npm_read) {
+		fetchSensorNPM(result_NPM);
+	}
 
 	if (msSince(starttime_SDS) > SAMPLETIME_SDS_MS || send_now) {
-  
+
 		starttime_SDS = act_milli;
-    
+
 		if (cfg::sds_read) {
 			fetchSensorSDS(result_SDS);
 		}
@@ -4440,13 +4406,11 @@ void loop(void) {
 			data += result_HPM;
 			sum_send_time += sendSensorCommunity(result_HPM, HPM_API_PIN, FPSTR(SENSORS_HPM), "HPM_");
 		}
-
-   if (cfg::npm_read) {
-     data += result_NPM;
-      sum_send_time += sendSensorCommunity(result_NPM, NPM_API_PIN, FPSTR(SENSORS_NPM), "NPM_");
-    }
-    
-		if (cfg::sps30_read && (! sps30_init_failed)) {
+		if (cfg::npm_read) {
+			data += result_NPM;
+			sum_send_time += sendSensorCommunity(result_NPM, NPM_API_PIN, FPSTR(SENSORS_NPM), "NPM_");
+		}
+		if (cfg::sps30_read && (!sps30_init_failed)) {
 			fetchSensorSPS30(result);
 			data += result;
 			sum_send_time += sendSensorCommunity(result, SPS30_API_PIN, FPSTR(SENSORS_SPS30), "SPS30_");
@@ -4558,8 +4522,8 @@ void loop(void) {
 		min_micro = 1000000000;
 		max_micro = 0;
 		sum_send_time = 0;
-		starttime = millis();								// store the start time
-   starttime_NPM = millis();
+		starttime = millis(); // store the start time
+		starttime_NPM = millis();
 		count_sends++;
 	}
 	yield();
