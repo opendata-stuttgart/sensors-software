@@ -1,8 +1,10 @@
 --style=attach
+--align-pointer=type
+--align-reference=type
 --indent=force-tab
 --indent-namespaces
 --pad-oper
 --keep-one-line-blocks
 --keep-one-line-statements
---add-one-line-braces
+--add-braces
 --attach-return-type
