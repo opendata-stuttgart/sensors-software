@@ -19,14 +19,16 @@ env.Replace(
   LINKFLAGS=newflags
 )
 
-def after_build(source, target, env):
-  if not os.path.exists("./builds"):
-    os.mkdir("./builds")
 
-  configName = b64decode(ARGUMENTS.get("PIOENV"))
-  sectionName = 'env:' + configName.decode('utf-8')
-  lang = config.get(sectionName, "lang")
-  target_name = lang
-  shutil.copy(target[0].path, "./builds/latest_"+target_name.lower()+".bin")
+def after_build(source, target, env):
+    if not os.path.exists("./builds"):
+        os.mkdir("./builds")
+
+    configName = b64decode(ARGUMENTS.get("PIOENV"))
+    sectionName = 'env:' + configName.decode('utf-8')
+    lang = config.get(sectionName, "lang")
+    target_name = lang
+    shutil.copy(target[0].path, "./builds/latest_"+target_name.lower()+".bin")
+
 
 env.AddPostAction("$BUILD_DIR/firmware.bin", after_build)

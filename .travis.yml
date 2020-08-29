@@ -1,9 +1,10 @@
 language: python
 python:
-    - "2.7"
+    - "3.6"
 
 # Cache PlatformIO packages using Travis CI container-based infrastructure
 sudo: false
+dist: bionic
 cache:
     directories:
         - "~/.platformio"
@@ -12,8 +13,8 @@ env:
     - PLATFORMIO_CI_SRC=./
 
 install:
-   - pip install -U platformio
-   - platformio update
+   - pip3 install -U platformio
+   - platformio --version
 
 script:
     - cd airrohr-firmware && pwd && ls -l && platformio run && ls -l builds/
