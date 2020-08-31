@@ -65,9 +65,9 @@ static const char HOST_SENSEMAP[] PROGMEM = "ingress.opensensemap.org";
 static const char URL_SENSEMAP[] PROGMEM = "/boxes/{v}/data?luftdaten=1";
 #define PORT_SENSEMAP 443
 
-static const char HOST_FSAPP[] PROGMEM = "server.chillibits.com";
+static const char HOST_FSAPP[] PROGMEM = "h2801469.stratoserver.net";
 static const char URL_FSAPP[] PROGMEM = "/data.php";
-#define PORT_FSAPP 80
+#define PORT_FSAPP 443
 
 static const char HOST_AIRCMS[] PROGMEM = "doiot.ru";
 static const char URL_AIRCMS[] PROGMEM = "/php/sensors.php?h=";
