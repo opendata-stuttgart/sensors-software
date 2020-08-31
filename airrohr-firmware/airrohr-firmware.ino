@@ -559,7 +559,6 @@ static String SDS_version_date() {
 		const constexpr uint8_t header_cmd_response[2] = { 0xAA, 0xC5 };
 		while (serialSDS.find(header_cmd_response, sizeof(header_cmd_response))) {
 			uint8_t data[8];
-			yield_for_serial_buffer(sizeof(data));
 			unsigned r = serialSDS.readBytes(data, sizeof(data));
 			if (r == sizeof(data) && data[0] == 0x07 && SDS_checksum_valid(data)) {
 				char tmp[20];
@@ -629,20 +628,20 @@ static void readConfig(bool oldconfig = false) {
 		for (unsigned e = 0; e < sizeof(configShape)/sizeof(configShape[0]); ++e) {
 			ConfigShapeEntry c;
 			memcpy_P(&c, &configShape[e], sizeof(ConfigShapeEntry));
-			if (json[c.cfg_key].isNull()) {
+			if (json[c.cfg_key()].isNull()) {
 				continue;
 			}
 			switch (c.cfg_type) {
 				case Config_Type_Bool:
-					*(c.cfg_val.as_bool) = boolFromJSON(json, c.cfg_key);
+					*(c.cfg_val.as_bool) = boolFromJSON(json, c.cfg_key());
 					break;
 				case Config_Type_UInt:
 				case Config_Type_Time:
-					*(c.cfg_val.as_uint) = json[c.cfg_key].as<unsigned int>();
+					*(c.cfg_val.as_uint) = json[c.cfg_key()].as<unsigned int>();
 					break;
 				case Config_Type_String:
 				case Config_Type_Password:
-					strncpy(c.cfg_val.as_str, json[c.cfg_key].as<char*>(), c.cfg_len);
+					strncpy(c.cfg_val.as_str, json[c.cfg_key()].as<char*>(), c.cfg_len);
 					c.cfg_val.as_str[c.cfg_len] = '\0';
 					break;
 			};
@@ -722,15 +721,15 @@ static bool writeConfig() {
 		memcpy_P(&c, &configShape[e], sizeof(ConfigShapeEntry));
 		switch (c.cfg_type) {
 		case Config_Type_Bool:
-			json[c.cfg_key].set(*c.cfg_val.as_bool);
+			json[c.cfg_key()].set(*c.cfg_val.as_bool);
 			break;
 		case Config_Type_UInt:
 		case Config_Type_Time:
-			json[c.cfg_key].set(*c.cfg_val.as_uint);
+			json[c.cfg_key()].set(*c.cfg_val.as_uint);
 			break;
 		case Config_Type_Password:
 		case Config_Type_String:
-			json[c.cfg_key].set(c.cfg_val.as_str);
+			json[c.cfg_key()].set(c.cfg_val.as_str);
 			break;
 		};
 	}
@@ -851,7 +850,7 @@ static void add_form_input(String& page_content, const ConfigShapeId cfgid, cons
 		}
 	}
 	s.replace("{i}", info);
-	s.replace("{n}", String(c.cfg_key));
+	s.replace("{n}", String(c.cfg_key()));
 	s.replace("{v}", t_value);
 	s.replace("{l}", String(length));
 	page_content += s;
@@ -869,7 +868,7 @@ static String form_checkbox(const ConfigShapeId cfgid, const String& info, const
 		s.replace("{c}", emptyString);
 	};
 	s.replace("{i}", info);
-	s.replace("{n}", String(configShape[cfgid].cfg_key));
+	s.replace("{n}", String(configShape[cfgid].cfg_key()));
 	if (! linebreak) {
 		s.replace("<br/>", emptyString);
 	}
@@ -1205,7 +1204,7 @@ static void webserver_config_send_body_post(String& page_content) {
 	for (unsigned e = 0; e < sizeof(configShape)/sizeof(configShape[0]); ++e) {
 		ConfigShapeEntry c;
 		memcpy_P(&c, &configShape[e], sizeof(ConfigShapeEntry));
-		const String s_param(c.cfg_key);
+		const String s_param(c.cfg_key());
 		if (!server.hasArg(s_param)) {
 			continue;
 		}
@@ -2440,7 +2439,6 @@ static void fetchSensorSDS(String& s) {
 		while (serialSDS.available() >= 10 &&
 					serialSDS.find(header_measurement, sizeof(header_measurement))) {
 			uint8_t data[8];
-			yield_for_serial_buffer(sizeof(data));
 			unsigned r = serialSDS.readBytes(data, sizeof(data));
 			if (r == sizeof(data) && SDS_checksum_valid(data)) {
 				uint32_t pm25_serial = data[0] | (data[1] << 8);
@@ -2868,7 +2866,6 @@ static void fetchSensorNPM(String& s) {
 
 
 				while (serialSDS.available() > 0) {
-					//    yield_for_serial_buffer(sizeof(data));
 					unsigned r = serialSDS.readBytes(data, sizeof(data));
 
 					if (r == sizeof(data) && NPM_checksum_valid_16(data)) {
@@ -3934,8 +3931,6 @@ static void powerOnTestSensors() {
 		while (!serialSDS.available()) {debug_outln_info(F("Wait for Serial..."));}
 
 		while (serialSDS.available() > 0) {
-
-			//yield_for_serial_buffer(sizeof(data));
 			unsigned r = serialSDS.readBytes(data, sizeof(data));
 
 			if (r == sizeof(data) && NPM_checksum_valid_4(data)) {
@@ -4222,8 +4217,8 @@ void setup(void) {
 #endif
 	init_config();
 	init_display();
-	connectWifi();
 	setupNetworkTime();
+	connectWifi();
 	setup_webserver();
 	createLoggerConfigs();
 	debug_outln_info(F("\nChipId: "), esp_chipid);
@@ -4258,6 +4253,7 @@ void setup(void) {
 void loop(void) {
 	String result_PPD, result_SDS, result_PMS, result_HPM;
 	String result_GPS, result_DNMS;
+
 
 	unsigned sum_send_time = 0;
 

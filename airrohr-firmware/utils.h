@@ -139,7 +139,6 @@ extern void debug_outln_info_bool(const __FlashStringHelper* text, const bool op
 
 
 extern bool SDS_checksum_valid(const uint8_t (&data)[8]);
-extern void yield_for_serial_buffer(size_t length);
 extern void SDS_rawcmd(const uint8_t cmd_head1, const uint8_t cmd_head2, const uint8_t cmd_head3);
 extern bool SDS_cmd(PmSensorCmd cmd);
 extern bool PMS_cmd(PmSensorCmd cmd);

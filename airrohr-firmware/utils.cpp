@@ -534,20 +534,6 @@ void NPM_cmd(PmSensorCmd2 cmd) {
 	serialSDS.write(buf, cmd_len);
 }
 
-// workaround for https://github.com/plerup/espsoftwareserial/issues/127
-void yield_for_serial_buffer(size_t length) {
-	unsigned long startMillis = millis();
-	unsigned long yield_timeout = length * 9 * 1000 / 9600;
-
-	while (serialSDS.available() < (int) length &&
-				millis() - startMillis < yield_timeout) {
-		yield();
-#if defined(ESP8266)
-		serialSDS.perform_work();
-#endif
-	}
-}
-
 const __FlashStringHelper* loggerDescription(unsigned i) {
     const __FlashStringHelper* logger = nullptr;
     switch (i) {

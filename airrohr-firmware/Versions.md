@@ -6,6 +6,7 @@ NRZ-2020-130-B6
 * Disabled IPv6 for stable release
 * Force I2C clock to 100k for better compatibility with sensors (Fixes #735)
 * Update ArduinoJson to 6.16.1
+* Update ArduinoCore to 2.7.4 to fix WPA downgrade issue (CVE-2020-12638)
 
 NRZ-2020-130-B5
 * Slovak translations added
