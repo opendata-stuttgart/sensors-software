@@ -1,4 +1,4 @@
-# airRohr Sensor Firmware for SPS30, SDS011, DHT22, BMP180, BMP/E 280, NEO-6M and many more
+# airRohr Sensor Firmware for SPS30, SDS011, DHT22, BMP180, BMP/E 280 and many more
 
 ## Features:
 * many environmental and air quality sensors can be used concurrently
@@ -147,20 +147,20 @@ Pinout:
 * SCL  ->  Pin D4 (GPIO2)
 * SDA  ->  Pin D3 (GPIO0)
 
-### GPS NEO 6M (serial)
-VCC and GND can be provided by board board (use 3.3v!)
+### GPS NEO 6M (serial) !!! USE AT OWN RISK, in combination with PM sensor the firmware may crash !!! 
+VCC and GND can be provided by board (use 3.3v!)
 
 **Note**: Serial connections are always crossed (RX on one side is connected with TX on other side)
 
 * TX von Neo -> Pin D5 (RX) 
 * RX von Neo -> Pin D6 (TX) 
 
-## Luftdaten.info API "Pins"
+## Sensor.Community API "Pins"
 
-For use of multiple sensors with Luftdaten.info, you need to specify a *virtual* API Pin
-for the use of Luftdaten.info in the Luftdaten.info sensor registration. The firmware
-uses the following API pins hardcoded. These match what the Luftdaten.info expect and
-will use by default when selecting the correct sensor model.
+For use of multiple sensors with Sensor.Community (formerly Luftdaten.info), you need to specify a
+*virtual* API Pin  in the Luftdaten.info sensor registration. The firmware uses the following API 
+pins hardcoded. These match what the Sensor.Community API expect and will be used by default when
+selecting the correct sensor model.
 
 * HPM/PMS/SDS011/SPS30 => Pin 1
 * BMP180/BMP280 => Pin 3
