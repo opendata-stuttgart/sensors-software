@@ -741,7 +741,10 @@ static void createLoggerConfigs() {
 	loggerConfigs[LoggerSensemap].destport = PORT_SENSEMAP;
 	loggerConfigs[LoggerSensemap].session = new_session();
 	loggerConfigs[LoggerFSapp].destport = PORT_FSAPP;
-	loggerConfigs[LoggerFSapp].session = new_session();
+	if (cfg::send2fsapp && cfg::ssl_fsapp) {
+		loggerConfigs[LoggerFSapp].destport = 443;
+		loggerConfigs[LoggerFSapp].session = new_session();
+	}
 	loggerConfigs[Loggeraircms].destport = PORT_AIRCMS;
 	loggerConfigs[LoggerInflux].destport = cfg::port_influx;
 	if (cfg::send2influx && cfg::ssl_influx) {
@@ -875,7 +878,7 @@ static String form_select_lang() {
 					"<option value='PT'>Português (PT)</option>"
 					"<option value='RS'>Srpski (RS)</option>"
 					"<option value='RU'>Русский (RU)</option>"
-					"<option value='SE'>Slovenský (SK)</option>"
+					"<option value='SK'>Slovenský (SK)</option>"
 					"<option value='SE'>Svenska (SE)</option>"
 					"<option value='TR'>Türkçe (TR)</option>"
 					"<option value='UA'>український (UA)</option>"
