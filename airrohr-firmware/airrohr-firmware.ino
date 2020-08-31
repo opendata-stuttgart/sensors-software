@@ -2794,7 +2794,7 @@ static void fetchSensorNPM(String& s) {
 
 					String reader = "Read: ";
 
-					for (int i = 0; i < sizeof(data); i++) {
+					for (size_t i = 0; i < sizeof(data); i++) {
 						reader += "0x";
 						if (data[i] < 0x10) {
 							reader += "0";
@@ -2830,7 +2830,7 @@ static void fetchSensorNPM(String& s) {
 				if (r == sizeof(data) && NPM_checksum_valid_4(data)) {
 					String reader = "Read: ";
 
-					for (int i = 0; i < sizeof(data); i++) {
+					for (size_t i = 0; i < sizeof(data); i++) {
 						reader += "0x";
 						if (data[i] < 0x10) {
 							reader += "0";
@@ -2874,7 +2874,7 @@ static void fetchSensorNPM(String& s) {
 
 						String reader = "Read: ";
 
-						for (int i = 0; i < sizeof(data); i++) {
+						for (size_t i = 0; i < sizeof(data); i++) {
 							reader += "0x";
 							if (data[i] < 0x10) {
 								reader += "0";
@@ -3038,7 +3038,7 @@ static void fetchSensorNPM(String& s) {
 
 					String reader = "Read: ";
 
-					for (int i = 0; i < sizeof(data); i++) {
+					for (size_t i = 0; i < sizeof(data); i++) {
 						reader += "0x";
 						if (data[i] < 0x10) {
 							reader += "0";
