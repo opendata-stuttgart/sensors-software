@@ -27,7 +27,6 @@ const char SENSORS_SDS011[] PROGMEM = "SDS011";
 const char SENSORS_PPD42NS[] PROGMEM = "PPD42NS";
 const char SENSORS_PMSx003[] PROGMEM = "PMSx003";
 const char SENSORS_HPM[] PROGMEM = "Honeywell PM";
-const char SENSORS_NPM[] PROGMEM = "Tera Sensor Next PM";
 const char SENSORS_SPS30[] PROGMEM = "Sensirion SPS30";
 const char SENSORS_DHT22[] PROGMEM = "DHT22";
 const char SENSORS_DS18B20[] PROGMEM = "DS18B20";
