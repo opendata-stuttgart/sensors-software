@@ -776,6 +776,7 @@ static void start_html_page(String& page_content, const String& title) {
 		s.replace("{n}", emptyString);
 	}
 	s.replace("{id}", esp_chipid);
+	s.replace("{macid}", esp_mac_id);
 	s.replace("{mac}", WiFi.macAddress());
 	page_content += s;
 }

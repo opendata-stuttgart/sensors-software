@@ -1,6 +1,9 @@
+NRZ-2020-130-B6
+* show new ID
+* rebranding to Sensor.Community
+
 NRZ-2020-130-B5
 * Slovak translations added
-
 
 NRZ-2020-130-B4
 * Prevent password leakage in configuration dialogs

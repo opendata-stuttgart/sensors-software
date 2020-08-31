@@ -46,18 +46,18 @@ body{font-family:Arial;margin:0}\
 .content{margin:10px}\
 .r{text-align:right}\
 td{vertical-align:top}\
-.b{text-decoration:none;padding:10px;background:#3ba;color:#fff;display:block;width:auto;border-radius:5px;box-shadow:0 2px 2px #3ba}\
-.wifi{background:0 0;color:#00f;padding:5px;display:inline;border:0;box-shadow:none}\
+.b{text-decoration:none;padding:10px;background:#3ba;color:#fff;display:block;width:auto;border-radius:5px;}\
+.wifi{background:0 0;color:#00f;padding:5px;display:inline;border:0;}\
 input[type=text]{width:100%}\
 input[type=password]{width:100%}\
-input[type=submit]{color:#fff;text-align:left;cursor:pointer;border-radius:5px;font-size:medium;background:#b33;box-shadow:0 2px 2px #b33;padding:9px!important;width:100%;border-style:none}\
+input[type=submit]{color:#fff;text-align:left;cursor:pointer;border-radius:5px;font-size:medium;background:#b33;padding:9px!important;width:100%;border-style:none}\
 input[type=submit]:hover{background:#d44}\
 .s_green{padding:9px !important;width:100%;border-style:none;background:#3ba;color:#fff;text-align:left}\
 .tabs{display:flex;flex-direction:row;align-items:stretch;align-content:flex-end;justify-content:flex-start}\
 .tab{padding:10px 20px;display:inline-block;color:#333}\
-.panels{min-height:200px;overflow:hidden;padding:20px;border:2px solid #3ba;margin-bottom:1em;box-shadow:0 4px 4px #3ba}\
+.panels{min-height:200px;overflow:hidden;padding:20px;border:2px solid #3ba;margin-bottom:1em;}\
 .radio{display:none}.panel{display:none}\
-.canvas{min-height:129px;background-color:#3ba;margin-bottom:20px;box-shadow:0 4px 6px #3ba}\
+.canvas{min-height:129px;background-color:#3ba;margin-bottom:20px;}\
 #r4:checked~.panels>#panel4,#r1:checked~.panels>#panel1,#r3:checked~.panels>#panel3,#r2:checked~.panels>#panel2{display:block}\
 #r4:checked~.tabs>#tab4,#r1:checked~.tabs>#tab1,#r3:checked~.tabs>#tab3,#r2:checked~.tabs>#tab2{background:#3ba;color:#fff}\
 ";
@@ -73,7 +73,7 @@ const char WEB_PAGE_HEADER_HEAD[] PROGMEM = "<meta name='viewport' content='widt
 <img src='" STATIC_PREFIX "?r=logo' alt='" INTL_BACK_TO_HOME "' style='float:left;margin:20px' width='100' height='89'/></a>";
 
 const char WEB_PAGE_HEADER_BODY[] PROGMEM = "<h3 style='margin:0 10px'>" INTL_PM_SENSOR "</h3>\
-<small>ID: {id}<br/>MAC: {mac}<br/>" INTL_FIRMWARE ": " SOFTWARE_VERSION_STR "/" INTL_LANG "&nbsp;(" __DATE__ " " __TIME__ ")<br/>\
+<small>ID: {id} <!-- ({macid}) --><br/>MAC: {mac}<br/>" INTL_FIRMWARE ": " SOFTWARE_VERSION_STR "/" INTL_LANG "&nbsp;(" __DATE__ " " __TIME__ ")<br/>\
 <a href='https://github.com/opendata-stuttgart/sensors-software/labels/bug' target='_blank' rel='noreferrer'>" INTL_REPORT_ISSUE "</a>\
 </small></div><div class='content'><h4>" INTL_HOME " {n} {t}</h4>";
 
@@ -85,7 +85,7 @@ const char EMPTY_ROW[] PROGMEM = "<tr><td colspan='3'>&nbsp;</td></tr>";
 
 const char WEB_PAGE_FOOTER[] PROGMEM = "<br/><br/><a class='b' href='/' style='display:inline;'>" INTL_BACK_TO_HOME "</a>"\
                 "<br/><br/><br/>"
-                "<a href='https://codefor.de/stuttgart/' target='_blank' rel='noreferrer' style='display:inline;background:none;color:black;box-shadow:none'>&copy; Open Knowledge Lab Stuttgart a.o. (Code for Germany)</a></div></body></html>\r\n";
+                "<a href='https://codefor.de/stuttgart/' target='_blank' rel='noreferrer' style='display:inline;background:none;color:black;'>&copy; Open Knowledge Lab Stuttgart a.o. (Code for Germany)</a></div></body></html>\r\n";
 
 const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a class='b' href='/values'>{t}</a><br/>\
 <a class='b' href='/status'>{s}</a><br/>\
