@@ -241,7 +241,7 @@ float readCorrectionOffset(const char* correction) {
 	// Avoiding atof() here as this adds a lot (~ 9kb) of code size
 	float r = float(strtol(correction, &pEnd, 10));
 	if (pEnd && pEnd[0] == '.' && pEnd[1] >= '0' && pEnd[1] <= '9') {
-		r += (r >= 0 ? 1.0 : -1.0) * ((pEnd[1] - '0') / 10.0);
+		r += (r >= 0.0f ? 1.0f : -1.0f) * ((pEnd[1] - '0') / 10.0f);
 	}
 	return r;
 }
