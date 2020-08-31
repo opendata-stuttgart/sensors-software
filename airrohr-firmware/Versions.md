@@ -2,6 +2,7 @@ NRZ-2020-130-B6
 * show new ID
 * rebranding to Sensor.Community
 * Tera Sensor Next PM sensor added (disabled from build atm)
+* Fix crash on enabling OLEDs (Fixes #671)
 
 NRZ-2020-130-B5
 * Slovak translations added
