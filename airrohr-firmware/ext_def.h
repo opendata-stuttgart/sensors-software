@@ -139,32 +139,6 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 #endif
 #endif
 
-
-//  === pin assignments for dev kit board ===================================
-#ifdef ESP32
-#define ONEWIRE_PIN D32
-#define PM_SERIAL_RX D27 
-#define PM_SERIAL_TX D33 
-//#define PIN_CS D13
-
-#if defined(FLIP_I2C_PMSERIAL) // exchange the pins of the ports to use external i2c connector for gps
-#define I2C_PIN_SCL D23
-#define I2C_PIN_SDA D19
-#define GPS_SERIAL_RX D22
-#define GPS_SERIAL_TX D21
-#else
-#define I2C_PIN_SCL D22
-#define I2C_PIN_SDA D21
-#define GPS_SERIAL_RX D19
-#define GPS_SERIAL_TX D23
-#endif
-#define PPD_PIN_PM1 GPS_SERIAL_TX
-#define PPD_PIN_PM2 GPS_SERIAL_RX
-//#define RFM69_CS D0
-//#define RFM69_RST D2
-//#define RFM69_INT D4
-#endif
-
 //  === pin assignments for lolin_d32_pro board ===================================
 #if defined(ARDUINO_LOLIN_D32_PRO)
 #define ONEWIRE_PIN D32
@@ -239,10 +213,6 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 // Honeywell PM sensor
 #define HPM_READ 0
 #define HPM_API_PIN 1
-
-// Tera Sensor Next PM sensor
-#define NPM_READ 0
-#define NPM_API_PIN 1
 
 // Sensirion SPS30, the more expensive version of the particle sensor
 #define SPS30_READ 0

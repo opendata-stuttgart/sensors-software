@@ -490,57 +490,6 @@ bool HPM_cmd(PmSensorCmd cmd) {
 	return cmd != PmSensorCmd::Stop;
 }
 
-
-/*****************************************************************
- * send Tera Sensor Next PM sensor command start, stop, cont. mode     *
- *****************************************************************/
-//REVOIR LES DEFINITIONS ICI
-
-
-bool NPM_checksum_valid_4(const uint8_t (&data)[4]) {
-//Works only like that...
-  uint8_t checksum = data[3] + (data[0] + data[1] + data[2]);
-  return (checksum == 0);
-}
-
-bool NPM_checksum_valid_16(const uint8_t (&data)[16]) {
-  //Works only like that...
-    uint8_t sum = data[0] + data[1] + data[2] + data[3] + data[4] + data[5] + data[6] + data[7] + data[8] + data[9] + data[10] + data[11] + data[12] + data[13] + data[14] + data[15];
-    uint8_t checksum = sum % 0x100;
-    return (checksum == 0);
-}
-
-
-void NPM_cmd(PmSensorCmd2 cmd) { 
-  
-  static constexpr uint8_t state_cmd[] PROGMEM = { //read the current state
-    0x81,0x16,0x69
-  };
-  static constexpr uint8_t change_cmd[] PROGMEM = { //change the sate alternatively start/stop
-    0x81,0x15,0x6A
-  };
-  static constexpr uint8_t concentration_cmd[] PROGMEM = { //No continous mode => repeat call
-    0x81,0x11,0x6E      //Concentrations reading’s averaged over 10 seconds and updated every 1 second
-  };
-  
-  constexpr uint8_t cmd_len = array_num_elements(change_cmd);
-  uint8_t buf[cmd_len];
-    
-  switch (cmd) {
-  case PmSensorCmd2::State:
-    memcpy_P(buf, state_cmd, cmd_len);
-    break;
-  case PmSensorCmd2::Change:
-    memcpy_P(buf, change_cmd, cmd_len);
-    break;
-  case PmSensorCmd2::Concentration:
-    memcpy_P(buf, concentration_cmd, cmd_len);
-    break;
-  }
-  serialSDS.write(buf, cmd_len);
-}
-
-
 // workaround for https://github.com/plerup/espsoftwareserial/issues/127
 void yield_for_serial_buffer(size_t length) {
 	unsigned long startMillis = millis();
