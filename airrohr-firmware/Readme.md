@@ -155,11 +155,11 @@ VCC and GND can be provided by board board (use 3.3v!)
 * TX von Neo -> Pin D5 (RX) 
 * RX von Neo -> Pin D6 (TX) 
 
-##  Sensor.Community API "Pins"
+## Luftdaten.info API "Pins"
 
-For use of multiple sensors with Sensor.Community, you need to specify a *virtual* API Pin
-during registration on the https://devices.sensor.community page. The firmware
-uses the following API pins hardcoded. These match what the registration service expect and
+For use of multiple sensors with Luftdaten.info, you need to specify a *virtual* API Pin
+for the use of Luftdaten.info in the Luftdaten.info sensor registration. The firmware
+uses the following API pins hardcoded. These match what the Luftdaten.info expect and
 will use by default when selecting the correct sensor model.
 
 * HPM/PMS/SDS011/SPS30 => Pin 1
