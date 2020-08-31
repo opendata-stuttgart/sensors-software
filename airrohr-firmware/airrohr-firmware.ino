@@ -99,6 +99,9 @@ String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 #include <SSD1306.h>
 #include <SH1106.h>
 #include <LiquidCrystal_I2C.h>
+#define ARDUINOJSON_ENABLE_ARDUINO_STREAM 0
+#define ARDUINOJSON_ENABLE_ARDUINO_PRINT 0
+#define ARDUINOJSON_DECODE_UNICODE 0
 #include <ArduinoJson.h>
 #include <DNSServer.h>
 #include "./DHT.h"
@@ -618,7 +621,7 @@ static void readConfig(bool oldconfig = false) {
 
 	debug_outln_info(F("opened config file..."));
 	DynamicJsonDocument json(JSON_BUFFER_SIZE);
-	DeserializationError err = deserializeJson(json, configFile);
+	DeserializationError err = deserializeJson(json, configFile.readString());
 	configFile.close();
 
 	if (!err) {
