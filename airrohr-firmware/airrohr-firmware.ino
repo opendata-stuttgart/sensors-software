@@ -264,8 +264,8 @@ float last_value_dnms_la_max = -1.0;
 /*****************************************************************
  * Display definitions                                           *
  *****************************************************************/
-SSD1306 display(0x3c, I2C_PIN_SDA, I2C_PIN_SCL);
-SH1106 display_sh1106(0x3c, I2C_PIN_SDA, I2C_PIN_SCL);
+SSD1306*  oled_ssd1306 = nullptr;
+SH1106* oled_sh1106 = nullptr;
 LiquidCrystal_I2C* lcd_1602 = nullptr;
 LiquidCrystal_I2C* lcd_2004 = nullptr;
 
@@ -505,21 +505,21 @@ const char JSON_SENSOR_DATA_VALUES[] PROGMEM = "sensordatavalues";
  *****************************************************************/
 static void display_debug(const String& text1, const String& text2) {
 	debug_outln_info(F("output debug text to displays..."));
-	if (cfg::has_display) {
-		display.clear();
-		display.displayOn();
-		display.setTextAlignment(TEXT_ALIGN_LEFT);
-		display.drawString(0, 12, text1);
-		display.drawString(0, 24, text2);
-		display.display();
+	if (oled_ssd1306) {
+		oled_ssd1306->clear();
+		oled_ssd1306->displayOn();
+		oled_ssd1306->setTextAlignment(TEXT_ALIGN_LEFT);
+		oled_ssd1306->drawString(0, 12, text1);
+		oled_ssd1306->drawString(0, 24, text2);
+		oled_ssd1306->display();
 	}
-	if (cfg::has_sh1106) {
-		display_sh1106.clear();
-		display_sh1106.displayOn();
-		display_sh1106.setTextAlignment(TEXT_ALIGN_LEFT);
-		display_sh1106.drawString(0, 12, text1);
-		display_sh1106.drawString(0, 24, text2);
-		display_sh1106.display();
+	if (oled_sh1106) {
+		oled_sh1106->clear();
+		oled_sh1106->displayOn();
+		oled_sh1106->setTextAlignment(TEXT_ALIGN_LEFT);
+		oled_sh1106->drawString(0, 12, text1);
+		oled_sh1106->drawString(0, 24, text2);
+		oled_sh1106->display();
 	}
 	if (lcd_1602) {
 		lcd_1602->clear();
@@ -2472,8 +2472,7 @@ static void fetchSensorSDS(String& s) {
 			if (sds_val_count < 3) {
 				SDS_error_count++;
 			}
-		}
-		else {
+		} else {
 			SDS_error_count++;
 		}
 		sds_pm10_sum = 0;
@@ -3673,31 +3672,31 @@ static void display_values() {
 			break;
 		}
 
-		if (cfg::has_display) {
-			display.clear();
-			display.displayOn();
-			display.setTextAlignment(TEXT_ALIGN_CENTER);
-			display.drawString(64, 1, display_header);
-			display.setTextAlignment(TEXT_ALIGN_LEFT);
-			display.drawString(0, 16, display_lines[0]);
-			display.drawString(0, 28, display_lines[1]);
-			display.drawString(0, 40, display_lines[2]);
-			display.setTextAlignment(TEXT_ALIGN_CENTER);
-			display.drawString(64, 52, displayGenerateFooter(screen_count));
-			display.display();
+		if (oled_ssd1306) {
+			oled_ssd1306->clear();
+			oled_ssd1306->displayOn();
+			oled_ssd1306->setTextAlignment(TEXT_ALIGN_CENTER);
+			oled_ssd1306->drawString(64, 1, display_header);
+			oled_ssd1306->setTextAlignment(TEXT_ALIGN_LEFT);
+			oled_ssd1306->drawString(0, 16, display_lines[0]);
+			oled_ssd1306->drawString(0, 28, display_lines[1]);
+			oled_ssd1306->drawString(0, 40, display_lines[2]);
+			oled_ssd1306->setTextAlignment(TEXT_ALIGN_CENTER);
+			oled_ssd1306->drawString(64, 52, displayGenerateFooter(screen_count));
+			oled_ssd1306->display();
 		}
-		if (cfg::has_sh1106) {
-			display_sh1106.clear();
-			display_sh1106.displayOn();
-			display_sh1106.setTextAlignment(TEXT_ALIGN_CENTER);
-			display_sh1106.drawString(64, 1, display_header);
-			display_sh1106.setTextAlignment(TEXT_ALIGN_LEFT);
-			display_sh1106.drawString(0, 16, display_lines[0]);
-			display_sh1106.drawString(0, 28, display_lines[1]);
-			display_sh1106.drawString(0, 40, display_lines[2]);
-			display_sh1106.setTextAlignment(TEXT_ALIGN_CENTER);
-			display_sh1106.drawString(64, 52, displayGenerateFooter(screen_count));
-			display_sh1106.display();
+		if (oled_sh1106) {
+			oled_sh1106->clear();
+			oled_sh1106->displayOn();
+			oled_sh1106->setTextAlignment(TEXT_ALIGN_CENTER);
+			oled_sh1106->drawString(64, 1, display_header);
+			oled_sh1106->setTextAlignment(TEXT_ALIGN_LEFT);
+			oled_sh1106->drawString(0, 16, display_lines[0]);
+			oled_sh1106->drawString(0, 28, display_lines[1]);
+			oled_sh1106->drawString(0, 40, display_lines[2]);
+			oled_sh1106->setTextAlignment(TEXT_ALIGN_CENTER);
+			oled_sh1106->drawString(64, 52, displayGenerateFooter(screen_count));
+			oled_sh1106->display();
 		}
 		if (lcd_2004) {
 			display_header = std::move(String((next_display_count % screen_count) + 1) + '/' + String(screen_count) + ' ' + display_header);
@@ -3777,33 +3776,32 @@ static void display_values() {
  * Init LCD/OLED display                                         *
  *****************************************************************/
 static void init_display() {
-    if (cfg::has_display) {
-        display.init();
-        if (cfg::has_flipped_display) {
-            display.flipScreenVertically();
-        }
-    }
-    if (cfg::has_sh1106) {
-        display_sh1106.init();
-        if (cfg::has_flipped_display) {
-            display_sh1106.flipScreenVertically();
-        }
-    }
-    if (cfg::has_lcd1602) {
-        lcd_1602 = new LiquidCrystal_I2C(0x3f, 16, 2);
-    }
-	else if (cfg::has_lcd1602_27) {
-        lcd_1602 = new LiquidCrystal_I2C(0x27, 16, 2);
+	if (cfg::has_display) {
+		oled_ssd1306 = new SSD1306(0x3c, I2C_PIN_SDA, I2C_PIN_SCL);
+		oled_ssd1306->init();
+		if (cfg::has_flipped_display) {
+			oled_ssd1306->flipScreenVertically();
+		}
 	}
-    if (lcd_1602) {
+	if (cfg::has_sh1106) {
+		oled_sh1106 = new SH1106(0x3c, I2C_PIN_SDA, I2C_PIN_SCL);
+		oled_sh1106->init();
+		if (cfg::has_flipped_display) {
+			oled_sh1106->flipScreenVertically();
+		}
+	}
+	if (cfg::has_lcd1602) {
+		lcd_1602 = new LiquidCrystal_I2C(0x3f, 16, 2);
+	} else if (cfg::has_lcd1602_27) {
+		lcd_1602 = new LiquidCrystal_I2C(0x27, 16, 2);
+	}
+	if (lcd_1602) {
 		lcd_1602->init();
 		lcd_1602->backlight();
 	}
-
 	if (cfg::has_lcd2004) {
 		lcd_2004 = new LiquidCrystal_I2C(0x3f, 20, 4);
-	}
-	else if (cfg::has_lcd2004_27) {
+	} else if (cfg::has_lcd2004_27) {
 		lcd_2004 = new LiquidCrystal_I2C(0x27, 20, 4);
 	}
 	if (lcd_2004) {
