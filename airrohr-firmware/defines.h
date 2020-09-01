@@ -32,7 +32,6 @@
 #define LEN_HOST_CUSTOM 100
 #define LEN_URL_CUSTOM 100
 #define LEN_USER_CUSTOM 65
-
 #define MAX_PORT_DIGITS 5
 
 // define debug levels
@@ -49,6 +48,9 @@ constexpr const unsigned long SAMPLETIME_MS = 30000;									// time between two
 constexpr const unsigned long SAMPLETIME_SDS_MS = 1000;								// time between two measurements of the SDS011, PMSx003, Honeywell PM sensor
 constexpr const unsigned long WARMUPTIME_SDS_MS = 15000;								// time needed to "warm up" the sensor before we can take the first measurement
 constexpr const unsigned long READINGTIME_SDS_MS = 5000;								// how long we read data from the PM sensors
+constexpr const unsigned long SAMPLETIME_NPM_MS = 1000;
+constexpr const unsigned long WARMUPTIME_NPM_MS = 15000;
+constexpr const unsigned long READINGTIME_NPM_MS = 15000;                // how long we read data from the PM sensors
 constexpr const unsigned long SAMPLETIME_GPS_MS = 50;
 constexpr const unsigned long DISPLAY_UPDATE_INTERVAL_MS = 5000;						// time between switching display to next "screen"
 constexpr const unsigned long ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -103,13 +105,18 @@ constexpr const unsigned long DURATION_BEFORE_FORCED_RESTART_MS = ONE_DAY_IN_MS 
 #endif
 #define D4 4
 #define D5 5
+#define D13 13
 // pins 12 to 15 are needed by JTAG and should not be used to allow debugging (if you can afford it)
+//#define D9 9
+//#define D10 10
+//
 #if not defined(USING_JTAG_DEBUGGER_PINS)
 #define D12_JTAG_TDI_LOW_DURING_BOOT 12
 #define D13_JTAG_TCK 13
 #define D14_JTAG_TMS 14
 #define D15_JTAG_TDO_HIGH_DURING_BOOT 15
 #endif
+
 #if defined(ESP32_WROOM_MODULE)
 // these two pins are used to access PSRAM on WROVER modules
 #define D16_WROOM_ONLY 16
