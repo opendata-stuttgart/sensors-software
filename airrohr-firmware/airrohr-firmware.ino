@@ -3808,6 +3808,12 @@ static void init_display() {
 		lcd_2004->init();
 		lcd_2004->backlight();
 	}
+
+	// reset back to 100k as the OLEDDisplay initialization is
+	// modifying the I2C speed to 400k, which overwhelms some of the
+	// sensors.
+	Wire.setClock(100000);
+	Wire.setClockStretchLimit(150000);
 }
 
 /*****************************************************************
