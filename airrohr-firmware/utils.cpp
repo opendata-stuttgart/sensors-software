@@ -177,6 +177,9 @@ void configureCACertTrustAnchor(WiFiClientSecure* client) {
 
 bool launchUpdateLoader(const String& md5) {
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored  "-Wdeprecated-declarations"
+
 	File loaderFile = SPIFFS.open(F("/loader.bin"), "r");
 	if (!loaderFile) {
 		return false;
@@ -202,6 +205,7 @@ bool launchUpdateLoader(const String& md5) {
 	debug_outln_info(F("Erasing SDK config."));
 	ESP.eraseConfig();
 	return true;
+#pragma GCC diagnostic pop
 }
 
 #endif

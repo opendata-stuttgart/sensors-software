@@ -608,6 +608,8 @@ static void readConfig(bool oldconfig = false) {
 		cfgName += F(".old");
 	}
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored  "-Wdeprecated-declarations"
 	File configFile = SPIFFS.open(cfgName, "r");
 	if (!configFile) {
 		if (!oldconfig) {
@@ -622,6 +624,7 @@ static void readConfig(bool oldconfig = false) {
 	DynamicJsonDocument json(JSON_BUFFER_SIZE);
 	DeserializationError err = deserializeJson(json, configFile.readString());
 	configFile.close();
+#pragma GCC diagnostic pop
 
 	if (!err) {
 		debug_outln_info(F("parsed json..."));
@@ -695,11 +698,17 @@ static void readConfig(bool oldconfig = false) {
 static void init_config() {
 
 	debug_outln_info(F("mounting FS..."));
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored  "-Wdeprecated-declarations"
+
 #if defined(ESP32)
 	bool spiffs_begin_ok = SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED);
 #else
 	bool spiffs_begin_ok = SPIFFS.begin();
 #endif
+
+#pragma GCC diagnostic pop
 
 	if (!spiffs_begin_ok) {
 		debug_outln_error(F("failed to mount FS"));
@@ -734,6 +743,9 @@ static bool writeConfig() {
 		};
 	}
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored  "-Wdeprecated-declarations"
+
 	SPIFFS.remove(F("/config.json.old"));
 	SPIFFS.rename(F("/config.json"), F("/config.json.old"));
 
@@ -746,6 +758,8 @@ static bool writeConfig() {
 		debug_outln_error(F("failed to open config file for writing"));
 		return false;
 	}
+
+#pragma GCC diagnostic pop
 
 	return true;
 }
@@ -1279,7 +1293,14 @@ static void sensor_restart() {
 		WiFi.mode(WIFI_OFF);
 		delay(100);
 #endif
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored  "-Wdeprecated-declarations"
+
 		SPIFFS.end();
+
+#pragma GCC diagnostic pop
+
 		serialSDS.end();
 		debug_outln_info(F("Restart."));
 		delay(500);
@@ -1706,6 +1727,8 @@ static void webserver_removeConfig() {
 		page_content += FPSTR(WEB_REMOVE_CONFIG_CONTENT);
 
 	} else {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored  "-Wdeprecated-declarations"
 		// Silently remove the desaster backup
 		SPIFFS.remove(F("/config.json.old"));
 		if (SPIFFS.exists(F("/config.json"))) {	//file exists
@@ -1718,6 +1741,7 @@ static void webserver_removeConfig() {
 		} else {
 			page_content += F("<h3>" INTL_CONFIG_NOT_FOUND ".</h3>");
 		}
+#pragma GCC diagnostic pop
 	}
 	end_html_page(page_content);
 }
@@ -3314,7 +3338,7 @@ static bool fwDownloadStream(WiFiClientSecure& client, const String& url, Stream
 	}
 
 	http.setUserAgent(agent);
-    http.setReuse(false);
+	http.setReuse(false);
 
 	debug_outln_verbose(F("HTTP GET: "), String(FPSTR(FW_DOWNLOAD_HOST)) + ':' + String(FW_DOWNLOAD_PORT) + url);
 
@@ -3340,6 +3364,8 @@ static bool fwDownloadStreamFile(WiFiClientSecure& client, const String& url, co
 	fname_new += F(".new");
 	bool downloadSuccess = false;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored  "-Wdeprecated-declarations"
 	File fwFile = SPIFFS.open(fname_new, "w");
 	if (fwFile) {
 		downloadSuccess = fwDownloadStream(client, url, &fwFile);
@@ -3355,6 +3381,7 @@ static bool fwDownloadStreamFile(WiFiClientSecure& client, const String& url, co
 		return true;
 
 	SPIFFS.remove(fname_new);
+#pragma GCC diagnostic pop
 	return false;
 }
 
@@ -3417,6 +3444,9 @@ static void twoStageOTAUpdate() {
 	if (!fwDownloadStreamFile(client, FPSTR(FW_2ND_LOADER_URL), loader_name))
 		return;
 
+	// SPIFFS is deprecated, we know
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored  "-Wdeprecated-declarations"
 	File fwFile = SPIFFS.open(firmware_name, "r");
 	if (!fwFile) {
 		SPIFFS.remove(firmware_name);
@@ -3454,6 +3484,7 @@ static void twoStageOTAUpdate() {
 		SPIFFS.remove(firmware_md5);
 		return;
 	}
+#pragma GCC diagnostic pop
 
 	sensor_restart();
 #endif
