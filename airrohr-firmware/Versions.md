@@ -1,4 +1,7 @@
-NRZ-2020-130-B8
+NRZ-2020-130-B9
+* WebUI Styling refresh
+
+NRZ-2020-130-B8 (online/beta Sep 5th)
 * Update ArduinoCore to 2.7.4 to fix WPA downgrade issue (CVE-2020-12638)
 
 NRZ-2020-130-B7
