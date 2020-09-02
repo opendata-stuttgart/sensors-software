@@ -60,7 +60,7 @@
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2020-130-B6"
+#define SOFTWARE_VERSION_STR "NRZ-2020-130-B7"
 String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -559,7 +559,6 @@ static String SDS_version_date() {
 		const constexpr uint8_t header_cmd_response[2] = { 0xAA, 0xC5 };
 		while (serialSDS.find(header_cmd_response, sizeof(header_cmd_response))) {
 			uint8_t data[8];
-			yield_for_serial_buffer(sizeof(data));
 			unsigned r = serialSDS.readBytes(data, sizeof(data));
 			if (r == sizeof(data) && data[0] == 0x07 && SDS_checksum_valid(data)) {
 				char tmp[20];
@@ -609,6 +608,8 @@ static void readConfig(bool oldconfig = false) {
 		cfgName += F(".old");
 	}
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored  "-Wdeprecated-declarations"
 	File configFile = SPIFFS.open(cfgName, "r");
 	if (!configFile) {
 		if (!oldconfig) {
@@ -623,26 +624,27 @@ static void readConfig(bool oldconfig = false) {
 	DynamicJsonDocument json(JSON_BUFFER_SIZE);
 	DeserializationError err = deserializeJson(json, configFile.readString());
 	configFile.close();
+#pragma GCC diagnostic pop
 
 	if (!err) {
 		debug_outln_info(F("parsed json..."));
 		for (unsigned e = 0; e < sizeof(configShape)/sizeof(configShape[0]); ++e) {
 			ConfigShapeEntry c;
 			memcpy_P(&c, &configShape[e], sizeof(ConfigShapeEntry));
-			if (json[c.cfg_key].isNull()) {
+			if (json[c.cfg_key()].isNull()) {
 				continue;
 			}
 			switch (c.cfg_type) {
 				case Config_Type_Bool:
-					*(c.cfg_val.as_bool) = boolFromJSON(json, c.cfg_key);
+					*(c.cfg_val.as_bool) = boolFromJSON(json, c.cfg_key());
 					break;
 				case Config_Type_UInt:
 				case Config_Type_Time:
-					*(c.cfg_val.as_uint) = json[c.cfg_key].as<unsigned int>();
+					*(c.cfg_val.as_uint) = json[c.cfg_key()].as<unsigned int>();
 					break;
 				case Config_Type_String:
 				case Config_Type_Password:
-					strncpy(c.cfg_val.as_str, json[c.cfg_key].as<char*>(), c.cfg_len);
+					strncpy(c.cfg_val.as_str, json[c.cfg_key()].as<char*>(), c.cfg_len);
 					c.cfg_val.as_str[c.cfg_len] = '\0';
 					break;
 			};
@@ -696,11 +698,17 @@ static void readConfig(bool oldconfig = false) {
 static void init_config() {
 
 	debug_outln_info(F("mounting FS..."));
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored  "-Wdeprecated-declarations"
+
 #if defined(ESP32)
 	bool spiffs_begin_ok = SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED);
 #else
 	bool spiffs_begin_ok = SPIFFS.begin();
 #endif
+
+#pragma GCC diagnostic pop
 
 	if (!spiffs_begin_ok) {
 		debug_outln_error(F("failed to mount FS"));
@@ -722,18 +730,21 @@ static bool writeConfig() {
 		memcpy_P(&c, &configShape[e], sizeof(ConfigShapeEntry));
 		switch (c.cfg_type) {
 		case Config_Type_Bool:
-			json[c.cfg_key].set(*c.cfg_val.as_bool);
+			json[c.cfg_key()].set(*c.cfg_val.as_bool);
 			break;
 		case Config_Type_UInt:
 		case Config_Type_Time:
-			json[c.cfg_key].set(*c.cfg_val.as_uint);
+			json[c.cfg_key()].set(*c.cfg_val.as_uint);
 			break;
 		case Config_Type_Password:
 		case Config_Type_String:
-			json[c.cfg_key].set(c.cfg_val.as_str);
+			json[c.cfg_key()].set(c.cfg_val.as_str);
 			break;
 		};
 	}
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored  "-Wdeprecated-declarations"
 
 	SPIFFS.remove(F("/config.json.old"));
 	SPIFFS.rename(F("/config.json"), F("/config.json.old"));
@@ -747,6 +758,8 @@ static bool writeConfig() {
 		debug_outln_error(F("failed to open config file for writing"));
 		return false;
 	}
+
+#pragma GCC diagnostic pop
 
 	return true;
 }
@@ -851,7 +864,7 @@ static void add_form_input(String& page_content, const ConfigShapeId cfgid, cons
 		}
 	}
 	s.replace("{i}", info);
-	s.replace("{n}", String(c.cfg_key));
+	s.replace("{n}", String(c.cfg_key()));
 	s.replace("{v}", t_value);
 	s.replace("{l}", String(length));
 	page_content += s;
@@ -869,7 +882,7 @@ static String form_checkbox(const ConfigShapeId cfgid, const String& info, const
 		s.replace("{c}", emptyString);
 	};
 	s.replace("{i}", info);
-	s.replace("{n}", String(configShape[cfgid].cfg_key));
+	s.replace("{n}", String(configShape[cfgid].cfg_key()));
 	if (! linebreak) {
 		s.replace("<br/>", emptyString);
 	}
@@ -1205,7 +1218,7 @@ static void webserver_config_send_body_post(String& page_content) {
 	for (unsigned e = 0; e < sizeof(configShape)/sizeof(configShape[0]); ++e) {
 		ConfigShapeEntry c;
 		memcpy_P(&c, &configShape[e], sizeof(ConfigShapeEntry));
-		const String s_param(c.cfg_key);
+		const String s_param(c.cfg_key());
 		if (!server.hasArg(s_param)) {
 			continue;
 		}
@@ -1280,7 +1293,14 @@ static void sensor_restart() {
 		WiFi.mode(WIFI_OFF);
 		delay(100);
 #endif
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored  "-Wdeprecated-declarations"
+
 		SPIFFS.end();
+
+#pragma GCC diagnostic pop
+
 		serialSDS.end();
 		debug_outln_info(F("Restart."));
 		delay(500);
@@ -1707,6 +1727,8 @@ static void webserver_removeConfig() {
 		page_content += FPSTR(WEB_REMOVE_CONFIG_CONTENT);
 
 	} else {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored  "-Wdeprecated-declarations"
 		// Silently remove the desaster backup
 		SPIFFS.remove(F("/config.json.old"));
 		if (SPIFFS.exists(F("/config.json"))) {	//file exists
@@ -1719,6 +1741,7 @@ static void webserver_removeConfig() {
 		} else {
 			page_content += F("<h3>" INTL_CONFIG_NOT_FOUND ".</h3>");
 		}
+#pragma GCC diagnostic pop
 	}
 	end_html_page(page_content);
 }
@@ -2440,7 +2463,6 @@ static void fetchSensorSDS(String& s) {
 		while (serialSDS.available() >= 10 &&
 					serialSDS.find(header_measurement, sizeof(header_measurement))) {
 			uint8_t data[8];
-			yield_for_serial_buffer(sizeof(data));
 			unsigned r = serialSDS.readBytes(data, sizeof(data));
 			if (r == sizeof(data) && SDS_checksum_valid(data)) {
 				uint32_t pm25_serial = data[0] | (data[1] << 8);
@@ -2868,7 +2890,6 @@ static void fetchSensorNPM(String& s) {
 
 
 				while (serialSDS.available() > 0) {
-					//    yield_for_serial_buffer(sizeof(data));
 					unsigned r = serialSDS.readBytes(data, sizeof(data));
 
 					if (r == sizeof(data) && NPM_checksum_valid_16(data)) {
@@ -3317,7 +3338,7 @@ static bool fwDownloadStream(WiFiClientSecure& client, const String& url, Stream
 	}
 
 	http.setUserAgent(agent);
-    http.setReuse(false);
+	http.setReuse(false);
 
 	debug_outln_verbose(F("HTTP GET: "), String(FPSTR(FW_DOWNLOAD_HOST)) + ':' + String(FW_DOWNLOAD_PORT) + url);
 
@@ -3343,6 +3364,8 @@ static bool fwDownloadStreamFile(WiFiClientSecure& client, const String& url, co
 	fname_new += F(".new");
 	bool downloadSuccess = false;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored  "-Wdeprecated-declarations"
 	File fwFile = SPIFFS.open(fname_new, "w");
 	if (fwFile) {
 		downloadSuccess = fwDownloadStream(client, url, &fwFile);
@@ -3358,6 +3381,7 @@ static bool fwDownloadStreamFile(WiFiClientSecure& client, const String& url, co
 		return true;
 
 	SPIFFS.remove(fname_new);
+#pragma GCC diagnostic pop
 	return false;
 }
 
@@ -3420,6 +3444,9 @@ static void twoStageOTAUpdate() {
 	if (!fwDownloadStreamFile(client, FPSTR(FW_2ND_LOADER_URL), loader_name))
 		return;
 
+	// SPIFFS is deprecated, we know
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored  "-Wdeprecated-declarations"
 	File fwFile = SPIFFS.open(firmware_name, "r");
 	if (!fwFile) {
 		SPIFFS.remove(firmware_name);
@@ -3457,6 +3484,7 @@ static void twoStageOTAUpdate() {
 		SPIFFS.remove(firmware_md5);
 		return;
 	}
+#pragma GCC diagnostic pop
 
 	sensor_restart();
 #endif
@@ -3934,8 +3962,6 @@ static void powerOnTestSensors() {
 		while (!serialSDS.available()) {debug_outln_info(F("Wait for Serial..."));}
 
 		while (serialSDS.available() > 0) {
-
-			//yield_for_serial_buffer(sizeof(data));
 			unsigned r = serialSDS.readBytes(data, sizeof(data));
 
 			if (r == sizeof(data) && NPM_checksum_valid_4(data)) {
@@ -4222,8 +4248,8 @@ void setup(void) {
 #endif
 	init_config();
 	init_display();
-	connectWifi();
 	setupNetworkTime();
+	connectWifi();
 	setup_webserver();
 	createLoggerConfigs();
 	debug_outln_info(F("\nChipId: "), esp_chipid);
@@ -4258,6 +4284,7 @@ void setup(void) {
 void loop(void) {
 	String result_PPD, result_SDS, result_PMS, result_HPM;
 	String result_GPS, result_DNMS;
+
 
 	unsigned sum_send_time = 0;
 
