@@ -4,6 +4,7 @@ NRZ-2020-130-B6
 * Tera Sensor Next PM sensor added (disabled from build atm)
 * Fix crash on enabling OLEDs (Fixes #671)
 * Disabled IPv6 for stable release
+* Force I2C clock to 100k for better compatibility with sensors
 
 NRZ-2020-130-B5
 * Slovak translations added
