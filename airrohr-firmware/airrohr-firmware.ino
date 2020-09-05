@@ -465,6 +465,7 @@ double last_value_GPS_lon = -200.0;
 double last_value_GPS_alt = -1000.0;
 String last_value_GPS_date;
 String last_value_GPS_time;
+String last_value_GPS_datetime;
 String last_data_string;
 int last_signal_strength;
 
@@ -3286,6 +3287,12 @@ static void fetchSensorGPS(String& s) {
 		} else {
 			debug_outln_verbose(F("Time: INVALID"));
 		}
+		if (gps.date.isValid() && gps.time.isValid()) {
+			char gps_datetime[37];
+			snprintf_P(gps_datetime, sizeof(gps_datetime), PSTR("%02d-%02d%04dT%02d:%02d:%02d.%02d"),
+				gps.date.year(), gps.date.month(), gps.date.day(),gps.time.hour(), gps.time.minute(), gps.time.second(), gps.time.centisecond());
+			last_value_GPS_datetime = gps_datetime;
+		}
 	}
 
 	if (send_now) {
@@ -3297,8 +3304,7 @@ static void fetchSensorGPS(String& s) {
 		add_Value2Json(s, F("GPS_lat"), String(last_value_GPS_lat, 6));
 		add_Value2Json(s, F("GPS_lon"), String(last_value_GPS_lon, 6));
 		add_Value2Json(s, F("GPS_height"), F("Altitude: "), last_value_GPS_alt);
-		add_Value2Json(s, F("GPS_date"), last_value_GPS_date);
-		add_Value2Json(s, F("GPS_time"), last_value_GPS_time);
+		add_Value2Json(s, F("GPS_datetime"), "\"" + last_value_GPS_datetime + "\"");
 		debug_outln_info(FPSTR(DBG_TXT_SEP));
 	}
 
