@@ -1,3 +1,9 @@
+NRZ-2020-130-B9
+* WebUI Styling refresh
+
+NRZ-2020-130-B8 (online/beta Sep 5th)
+* Update ArduinoCore to 2.7.4 to fix WPA downgrade issue (CVE-2020-12638)
+
 NRZ-2020-130-B7
 * Disabled Tera Sensor Next PM from build until conflicts with other sensors
   can be resolved
@@ -5,7 +11,6 @@ NRZ-2020-130-B7
 * Disabled IPv6 for stable release
 * Force I2C clock to 100k for better compatibility with sensors (Fixes #735)
 * Update ArduinoJson to 6.16.1
-* Update ArduinoCore to 2.7.4 to fix WPA downgrade issue (CVE-2020-12638)
 * Force I2C clock to 100k for better compatibility with sensors
 
 NRZ-2020-130-B6

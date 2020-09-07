@@ -60,7 +60,7 @@
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2020-130-B7"
+#define SOFTWARE_VERSION_STR "NRZ-2020-130-B9"
 String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -465,6 +465,7 @@ double last_value_GPS_lon = -200.0;
 double last_value_GPS_alt = -1000.0;
 String last_value_GPS_date;
 String last_value_GPS_time;
+String last_value_GPS_datetime;
 String last_data_string;
 int last_signal_strength;
 
@@ -1423,40 +1424,39 @@ static void webserver_values() {
 
 
 	server.sendContent(page_content);
-	page_content = F("<table cellspacing='0' border='1' cellpadding='5'>\n"
-				"<tr><th>" INTL_SENSOR "</th><th> " INTL_PARAMETER "</th><th>" INTL_VALUE "</th></tr>");
+	page_content = F("<table cellspacing='0' cellpadding='5' class='v'>\n"
+			"<thead><tr><th>" INTL_SENSOR "</th><th> " INTL_PARAMETER "</th><th>" INTL_VALUE "</th></tr></thead>");
 	if (cfg::ppd_read) {
-		page_content += FPSTR(EMPTY_ROW);
 		add_table_value(FPSTR(SENSORS_PPD42NS), FPSTR(WEB_PM1), check_display_value(last_value_PPD_P1, -1, 1, 0), FPSTR(INTL_PARTICLES_PER_LITER));
 		add_table_value(FPSTR(SENSORS_PPD42NS), FPSTR(WEB_PM25), check_display_value(last_value_PPD_P2, -1, 1, 0), FPSTR(INTL_PARTICLES_PER_LITER));
+		page_content += FPSTR(EMPTY_ROW);
 	}
 	if (cfg::sds_read) {
-		page_content += FPSTR(EMPTY_ROW);
 		add_table_pm_value(FPSTR(SENSORS_SDS011), FPSTR(WEB_PM25), last_value_SDS_P2);
 		add_table_pm_value(FPSTR(SENSORS_SDS011), FPSTR(WEB_PM10), last_value_SDS_P1);
+		page_content += FPSTR(EMPTY_ROW);
 	}
 	if (cfg::pms_read) {
-		page_content += FPSTR(EMPTY_ROW);
 		add_table_pm_value(FPSTR(SENSORS_PMSx003), FPSTR(WEB_PM1), last_value_PMS_P0);
 		add_table_pm_value(FPSTR(SENSORS_PMSx003), FPSTR(WEB_PM25), last_value_PMS_P2);
 		add_table_pm_value(FPSTR(SENSORS_PMSx003), FPSTR(WEB_PM10), last_value_PMS_P1);
+		page_content += FPSTR(EMPTY_ROW);
 	}
 	if (cfg::hpm_read) {
-		page_content += FPSTR(EMPTY_ROW);
 		add_table_pm_value(FPSTR(SENSORS_HPM), FPSTR(WEB_PM25), last_value_HPM_P2);
 		add_table_pm_value(FPSTR(SENSORS_HPM), FPSTR(WEB_PM10), last_value_HPM_P1);
+		page_content += FPSTR(EMPTY_ROW);
 	}
 	if (cfg::npm_read) {
-		page_content += FPSTR(EMPTY_ROW);
 		add_table_pm_value(FPSTR(SENSORS_NPM), FPSTR(WEB_PM1), last_value_NPM_P2);
 		add_table_pm_value(FPSTR(SENSORS_NPM), FPSTR(WEB_PM25), last_value_NPM_P2);
 		add_table_pm_value(FPSTR(SENSORS_NPM), FPSTR(WEB_PM10), last_value_NPM_P1);
 		add_table_nc_value(FPSTR(SENSORS_NPM), FPSTR(WEB_NC1k0), last_value_NPM_N0);
 		add_table_nc_value(FPSTR(SENSORS_NPM), FPSTR(WEB_NC2k5), last_value_NPM_N2);
 		add_table_nc_value(FPSTR(SENSORS_NPM), FPSTR(WEB_NC10), last_value_NPM_N1);
+		page_content += FPSTR(EMPTY_ROW);
 	}
 	if (cfg::sps30_read) {
-		page_content += FPSTR(EMPTY_ROW);
 		add_table_pm_value(FPSTR(SENSORS_SPS30), FPSTR(WEB_PM1), last_value_SPS30_P0);
 		add_table_pm_value(FPSTR(SENSORS_SPS30), FPSTR(WEB_PM25), last_value_SPS30_P2);
 		add_table_pm_value(FPSTR(SENSORS_SPS30), FPSTR(WEB_PM4), last_value_SPS30_P4);
@@ -1467,63 +1467,63 @@ static void webserver_values() {
 		add_table_nc_value(FPSTR(SENSORS_SPS30), FPSTR(WEB_NC4k0), last_value_SPS30_N4);
 		add_table_nc_value(FPSTR(SENSORS_SPS30), FPSTR(WEB_NC10), last_value_SPS30_N10);
 		add_table_value(FPSTR(SENSORS_SPS30), FPSTR(WEB_TPS), check_display_value(last_value_SPS30_TS, -1, 1, 0), "µm");
+		page_content += FPSTR(EMPTY_ROW);
 	}
 	if (cfg::dht_read) {
-		page_content += FPSTR(EMPTY_ROW);
 		add_table_t_value(FPSTR(SENSORS_DHT22), FPSTR(INTL_TEMPERATURE), last_value_DHT_T);
-
 		add_table_h_value(FPSTR(SENSORS_DHT22), FPSTR(INTL_HUMIDITY), last_value_DHT_H);
+		page_content += FPSTR(EMPTY_ROW);
 	}
 	if (cfg::htu21d_read) {
-		page_content += FPSTR(EMPTY_ROW);
 		add_table_t_value(FPSTR(SENSORS_HTU21D), FPSTR(INTL_TEMPERATURE), last_value_HTU21D_T);
 		add_table_h_value(FPSTR(SENSORS_HTU21D), FPSTR(INTL_HUMIDITY), last_value_HTU21D_H);
+		page_content += FPSTR(EMPTY_ROW);
 	}
 	if (cfg::bmp_read) {
-		page_content += FPSTR(EMPTY_ROW);
 		add_table_t_value(FPSTR(SENSORS_BMP180), FPSTR(INTL_TEMPERATURE), last_value_BMP_T);
 		add_table_value(FPSTR(SENSORS_BMP180), FPSTR(INTL_PRESSURE), check_display_value(last_value_BMP_P / 100.0f, (-1 / 100.0f), 2, 0), unit_P);
+		page_content += FPSTR(EMPTY_ROW);
 	}
 	if (cfg::bmx280_read) {
-		page_content += FPSTR(EMPTY_ROW);
 		add_table_t_value(FPSTR(SENSORS_BMX280), FPSTR(INTL_TEMPERATURE), last_value_BMX280_T);
 		add_table_value(FPSTR(SENSORS_BMX280), FPSTR(INTL_PRESSURE), check_display_value(last_value_BMX280_P / 100.0f, (-1 / 100.0f), 2, 0), unit_P);
 		if (bmx280.sensorID() == BME280_SENSOR_ID) {
 			add_table_h_value(FPSTR(SENSORS_BMX280), FPSTR(INTL_HUMIDITY), last_value_BME280_H);
 		}
+		page_content += FPSTR(EMPTY_ROW);
 	}
 	if (cfg::sht3x_read) {
-		page_content += FPSTR(EMPTY_ROW);
 		add_table_t_value(FPSTR(SENSORS_SHT3X), FPSTR(INTL_TEMPERATURE), last_value_SHT3X_T);
 		add_table_h_value(FPSTR(SENSORS_SHT3X), FPSTR(INTL_HUMIDITY), last_value_SHT3X_H);
+		page_content += FPSTR(EMPTY_ROW);
 	}
 	if (cfg::ds18b20_read) {
-		page_content += FPSTR(EMPTY_ROW);
 		add_table_t_value(FPSTR(SENSORS_DS18B20), FPSTR(INTL_TEMPERATURE), last_value_DS18B20_T);
+		page_content += FPSTR(EMPTY_ROW);
 	}
 	if (cfg::dnms_read) {
-		page_content += FPSTR(EMPTY_ROW);
 		add_table_value(FPSTR(SENSORS_DNMS), FPSTR(INTL_LEQ_A), check_display_value(last_value_dnms_laeq, -1, 1, 0), unit_LA);
 		add_table_value(FPSTR(SENSORS_DNMS), FPSTR(INTL_LA_MIN), check_display_value(last_value_dnms_la_min, -1, 1, 0), unit_LA);
 		add_table_value(FPSTR(SENSORS_DNMS), FPSTR(INTL_LA_MAX), check_display_value(last_value_dnms_la_max, -1, 1, 0), unit_LA);
+		page_content += FPSTR(EMPTY_ROW);
 	}
 	if (cfg::gps_read) {
-		page_content += FPSTR(EMPTY_ROW);
 		add_table_value(FPSTR(WEB_GPS), FPSTR(INTL_LATITUDE), check_display_value(last_value_GPS_lat, -200.0, 6, 0), unit_Deg);
 		add_table_value(FPSTR(WEB_GPS), FPSTR(INTL_LONGITUDE), check_display_value(last_value_GPS_lon, -200.0, 6, 0), unit_Deg);
 		add_table_value(FPSTR(WEB_GPS), FPSTR(INTL_ALTITUDE), check_display_value(last_value_GPS_alt, -1000.0, 2, 0), "m");
 		add_table_value(FPSTR(WEB_GPS), FPSTR(INTL_DATE), last_value_GPS_date, emptyString);
 		add_table_value(FPSTR(WEB_GPS), FPSTR(INTL_TIME_UTC), last_value_GPS_time, emptyString);
+		page_content += FPSTR(EMPTY_ROW);
 	}
 
 	server.sendContent(page_content);
-	page_content = FPSTR(EMPTY_ROW);
+	page_content = emptyString;
 
 	add_table_value(F("WiFi"), FPSTR(INTL_SIGNAL_STRENGTH), String(last_signal_strength), "dBm");
 	add_table_value(F("WiFi"), FPSTR(INTL_SIGNAL_QUALITY), String(signal_quality), "%");
 
-	page_content += FPSTR(EMPTY_ROW);
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+	page_content += FPSTR(BR_TAG);
 	end_html_page(page_content);
 }
 
@@ -1541,8 +1541,8 @@ static void webserver_status() {
 
 	debug_outln_info(F("ws: status ..."));
 	server.sendContent(page_content);
-	page_content = F("<table cellspacing='0' border='1' cellpadding='5'>\n"
-			  "<tr><th> " INTL_PARAMETER "</th><th>" INTL_VALUE "</th></tr>");
+	page_content = F("<table cellspacing='0' cellpadding='5' class='v'>\n"
+			"<thead><tr><th> " INTL_PARAMETER "</th><th>" INTL_VALUE "</th></tr></thead>");
 	String versionHtml(SOFTWARE_VERSION);
 	versionHtml += F("/ST:");
 	versionHtml += String(!airrohr_selftest_failed);
@@ -3282,6 +3282,12 @@ static void fetchSensorGPS(String& s) {
 		} else {
 			debug_outln_verbose(F("Time: INVALID"));
 		}
+		if (gps.date.isValid() && gps.time.isValid()) {
+			char gps_datetime[37];
+			snprintf_P(gps_datetime, sizeof(gps_datetime), PSTR("%02d-%02d%04dT%02d:%02d:%02d.%02d"),
+				gps.date.year(), gps.date.month(), gps.date.day(),gps.time.hour(), gps.time.minute(), gps.time.second(), gps.time.centisecond());
+			last_value_GPS_datetime = gps_datetime;
+		}
 	}
 
 	if (send_now) {
@@ -3293,8 +3299,7 @@ static void fetchSensorGPS(String& s) {
 		add_Value2Json(s, F("GPS_lat"), String(last_value_GPS_lat, 6));
 		add_Value2Json(s, F("GPS_lon"), String(last_value_GPS_lon, 6));
 		add_Value2Json(s, F("GPS_height"), F("Altitude: "), float(last_value_GPS_alt));
-		add_Value2Json(s, F("GPS_date"), last_value_GPS_date);
-		add_Value2Json(s, F("GPS_time"), last_value_GPS_time);
+		add_Value2Json(s, F("GPS_datetime"), "\"" + last_value_GPS_datetime + "\"");
 		debug_outln_info(FPSTR(DBG_TXT_SEP));
 	}
 

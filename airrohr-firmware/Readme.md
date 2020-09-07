@@ -158,9 +158,9 @@ VCC and GND can be provided by board (use 3.3v!)
 ## Sensor.Community API "Pins"
 
 For use of multiple sensors with Sensor.Community (formerly Luftdaten.info), you need to specify a
-*virtual* API Pin  in the Luftdaten.info sensor registration. The firmware uses the following API 
-pins hardcoded. These match what the Sensor.Community API expect and will be used by default when
-selecting the correct sensor model.
+*virtual* API Pin  in the sensor registration form at devices.sensor.community. The firmware uses
+the following API pins hardcoded. These match what the Sensor.Community API expect and will be used
+by default when selecting the correct sensor model.
 
 * HPM/PMS/SDS011/SPS30 => Pin 1
 * BMP180/BMP280 => Pin 3
