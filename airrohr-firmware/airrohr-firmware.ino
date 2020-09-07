@@ -3293,19 +3293,18 @@ static void fetchSensorGPS(String& s) {
 		if (gps.date.isValid() && gps.time.isValid()) {
 			char gps_datetime[37];
 			snprintf_P(gps_datetime, sizeof(gps_datetime), PSTR("%04d-%02d-%02dT%02d:%02d:%02d.%03d"),
-				gps.date.year(), gps.date.month(), gps.date.day(),gps.time.hour(), gps.time.minute(), gps.time.second(), gps.time.centisecond());
+				gps.date.year(), gps.date.month(), gps.date.day(), gps.time.hour(), gps.time.minute(), gps.time.second(), gps.time.centisecond());
 			last_value_GPS_datetime = gps_datetime;
 		} else {
 			//define a default value
-			last_value_GPS_datetime = "1970-01-01T00:00:00.000";
+			last_value_GPS_datetime = F("1970-01-01T00:00:00.000");
 		}
 	}
 
 	if (send_now) {
 		debug_outln_info(F("Lat: "), String(last_value_GPS_lat, 6));
 		debug_outln_info(F("Lng: "), String(last_value_GPS_lon, 6));
-		debug_outln_info(F("Date: "), last_value_GPS_date);
-		debug_outln_info(F("Time "), last_value_GPS_time);
+		debug_outln_info(F("DateTime: "), last_value_GPS_datetime);
 
 		add_Value2Json(s, F("GPS_lat"), String(last_value_GPS_lat, 6));
 		add_Value2Json(s, F("GPS_lon"), String(last_value_GPS_lon, 6));
