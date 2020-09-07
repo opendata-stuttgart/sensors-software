@@ -396,12 +396,12 @@ int hpm_pm10_min = 20000;
 int hpm_pm25_max = 0;
 int hpm_pm25_min = 20000;
 
-uint16_t npm_pm1_sum = 0;
-uint16_t npm_pm10_sum = 0;
-uint16_t npm_pm25_sum = 0;
-uint16_t npm_pm1_sum_pcs = 0;
-uint16_t npm_pm10_sum_pcs = 0;
-uint16_t npm_pm25_sum_pcs = 0;
+uint32_t npm_pm1_sum = 0;
+uint32_t npm_pm10_sum = 0;
+uint32_t npm_pm25_sum = 0;
+uint32_t npm_pm1_sum_pcs = 0;
+uint32_t npm_pm10_sum_pcs = 0;
+uint32_t npm_pm25_sum_pcs = 0;
 uint16_t npm_val_count = 0;
 uint16_t npm_pm1_max = 0;
 uint16_t npm_pm1_min = 20000;
@@ -2935,17 +2935,13 @@ static void fetchSensorNPM(String& s) {
 						debug_outln_verbose(F("PM2.5 (pcs/mL): "), String(N25_serial));
 						debug_outln_verbose(F("PM10 (pcs/mL) : "), String(N10_serial));
 
-						npm_pm1_sum += pm1_serial / 10.0f;
-						npm_pm25_sum += pm25_serial / 10.0f;
-						npm_pm10_sum += pm10_serial / 10.0f;
-
 						npm_pm1_sum_pcs += N1_serial;
 						npm_pm25_sum_pcs += N25_serial;
 						npm_pm10_sum_pcs += N10_serial;
 
-						UPDATE_MIN_MAX(npm_pm1_min, npm_pm1_max, pm1_serial / 10.0f);
-						UPDATE_MIN_MAX(npm_pm25_min, npm_pm25_max, pm25_serial / 10.0f);
-						UPDATE_MIN_MAX(npm_pm10_min, npm_pm10_max, pm10_serial / 10.0f);
+						UPDATE_MIN_MAX(npm_pm1_min, npm_pm1_max, pm1_serial);
+						UPDATE_MIN_MAX(npm_pm25_min, npm_pm25_max, pm25_serial);
+						UPDATE_MIN_MAX(npm_pm10_min, npm_pm10_max, pm10_serial);
 
 						UPDATE_MIN_MAX(npm_pm1_min_pcs, npm_pm1_max_pcs, N1_serial);
 						UPDATE_MIN_MAX(npm_pm25_min_pcs, npm_pm25_max_pcs, N25_serial);
@@ -3003,9 +2999,9 @@ static void fetchSensorNPM(String& s) {
 			npm_val_count = npm_val_count - 2;
 		}
 		if (npm_val_count > 0) {
-			last_value_NPM_P0 = float(npm_pm1_sum) / float(npm_val_count);
-			last_value_NPM_P1 = float(npm_pm10_sum) / float(npm_val_count);
-			last_value_NPM_P2 = float(npm_pm25_sum) / float(npm_val_count);
+			last_value_NPM_P0 = float(npm_pm1_sum) / (float(npm_val_count) * 10.0f);
+			last_value_NPM_P1 = float(npm_pm10_sum) / (float(npm_val_count) * 10.0f);
+			last_value_NPM_P2 = float(npm_pm25_sum) / (float(npm_val_count) * 10.0f);
 
 			last_value_NPM_N0 = float(npm_pm1_sum_pcs) / float(npm_val_count);
 			last_value_NPM_N1 = float(npm_pm10_sum_pcs) / float(npm_val_count);
@@ -3302,7 +3298,7 @@ static void fetchSensorGPS(String& s) {
 
 		add_Value2Json(s, F("GPS_lat"), String(last_value_GPS_lat, 6));
 		add_Value2Json(s, F("GPS_lon"), String(last_value_GPS_lon, 6));
-		add_Value2Json(s, F("GPS_height"), F("Altitude: "), last_value_GPS_alt);
+		add_Value2Json(s, F("GPS_height"), F("Altitude: "), float(last_value_GPS_alt));
 		add_Value2Json(s, F("GPS_datetime"), "\"" + last_value_GPS_datetime + "\"");
 		debug_outln_info(FPSTR(DBG_TXT_SEP));
 	}
