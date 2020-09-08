@@ -3287,6 +3287,9 @@ static void fetchSensorGPS(String& s) {
 			snprintf_P(gps_datetime, sizeof(gps_datetime), PSTR("%04d-%02d-%02dT%02d:%02d:%02d.%03d"),
 				gps.date.year(), gps.date.month(), gps.date.day(),gps.time.hour(), gps.time.minute(), gps.time.second(), gps.time.centisecond());
 			last_value_GPS_datetime = gps_datetime;
+		} else {
+			//define a default value
+			last_value_GPS_datetime = "1970-01-01T00:00:00.000";
 		}
 	}
 
