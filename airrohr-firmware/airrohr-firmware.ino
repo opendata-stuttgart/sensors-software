@@ -2229,9 +2229,18 @@ static void create_influxdb_string_from_data(String& data_4_influxdb, const Stri
 		data_4_influxdb += esp_chipid + " ";
 		for (JsonObject measurement : json2data[FPSTR(JSON_SENSOR_DATA_VALUES)].as<JsonArray>()) {
 			data_4_influxdb += measurement["value_type"].as<char*>();
-			data_4_influxdb += '=';
-			data_4_influxdb += measurement["value"].as<char*>();
-			data_4_influxdb += ',';
+			data_4_influxdb += "=";
+
+			if (isNumeric(measurement["value"])) {
+				//send numerics without quotes
+				data_4_influxdb += measurement["value"].as<char*>();
+			} else {
+				//quote string values
+				data_4_influxdb += "\"";
+				data_4_influxdb += measurement["value"].as<char*>();
+				data_4_influxdb += "\"";
+			}
+			data_4_influxdb += ",";
 		}
 		if ((unsigned)(data_4_influxdb.lastIndexOf(',') + 1) == data_4_influxdb.length()) {
 			data_4_influxdb.remove(data_4_influxdb.length() - 1);
@@ -3243,7 +3252,6 @@ static void fetchSensorDNMS(String& s) {
 	debug_outln_info(FPSTR(DBG_TXT_SEP));
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_DNMS));
 }
-
 /*****************************************************************
  * read GPS sensor values                                        *
  *****************************************************************/
@@ -3302,7 +3310,7 @@ static void fetchSensorGPS(String& s) {
 		add_Value2Json(s, F("GPS_lat"), String(last_value_GPS_lat, 6));
 		add_Value2Json(s, F("GPS_lon"), String(last_value_GPS_lon, 6));
 		add_Value2Json(s, F("GPS_height"), F("Altitude: "), float(last_value_GPS_alt));
-		add_Value2Json(s, F("GPS_datetime"), "\"" + last_value_GPS_datetime + "\"");
+		add_Value2Json(s, F("GPS_timestamp"), last_value_GPS_datetime);
 		debug_outln_info(FPSTR(DBG_TXT_SEP));
 	}
 
