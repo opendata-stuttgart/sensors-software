@@ -3856,7 +3856,9 @@ static void init_display() {
 	// modifying the I2C speed to 400k, which overwhelms some of the
 	// sensors.
 	Wire.setClock(100000);
+#ifdef ESP8266
 	Wire.setClockStretchLimit(150000);
+#endif
 }
 
 /*****************************************************************
