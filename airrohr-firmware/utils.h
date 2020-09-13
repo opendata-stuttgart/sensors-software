@@ -147,7 +147,7 @@ extern void NPM_cmd(PmSensorCmd2 cmd);
 extern bool NPM_checksum_valid_4(const uint8_t (&data)[4]);
 extern bool NPM_checksum_valid_16(const uint8_t (&data)[16]);
 
-extern bool isNumeric(String str);
+extern bool isNumeric(const String& str);
 
 extern const __FlashStringHelper* loggerDescription(unsigned i);
 
