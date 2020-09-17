@@ -3856,7 +3856,9 @@ static void init_display() {
 	// modifying the I2C speed to 400k, which overwhelms some of the
 	// sensors.
 	Wire.setClock(100000);
-#ifdef ESP8266
+
+#if !defined(ESP32)
+	// Wire.setClockStretchLimit isn't implemented in ESP32 framework
 	Wire.setClockStretchLimit(150000);
 #endif
 }
@@ -4138,6 +4140,10 @@ static void setupNetworkTime() {
 		sntp_time_set++;
 	});
 #endif
+#if defined(ESP32)
+	// required if calling configTime() prior to Wifi connection, shouldn't hurt if called twice
+	tcpip_adapter_init();
+#endif
 	strcpy_P(ntpServer1, NTP_SERVER_1);
 	strcpy_P(ntpServer2, NTP_SERVER_2);
 	configTime(0, 0, ntpServer1, ntpServer2);
@@ -4262,8 +4268,8 @@ void setup(void) {
 #endif
 	init_config();
 	init_display();
-	connectWifi();
 	setupNetworkTime();
+	connectWifi();
 	setup_webserver();
 	createLoggerConfigs();
 	debug_outln_info(F("\nChipId: "), esp_chipid);
