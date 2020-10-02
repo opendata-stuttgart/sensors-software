@@ -64,7 +64,7 @@ void sendData(const String& data, int pin=-1) {
     return;
   }
   
-  // create an URI for the request
+  // create an URL for the request          
   String url = "/v1/push-sensor-data/";
   
   Serial.print("Requesting URL: ");
@@ -91,7 +91,10 @@ void sendData(const String& data, int pin=-1) {
   // Read reply from server and print them
   while(client.available()){
     char c = client.read();
-    Serial.print(c);
+//     Serial.print(c);
+    Serial.write(c);      // To print the response over serial monitor we have to use "write" function because data coming from the 
+                          // server through wifi module is in byte.
+    
   }
   
   Serial.println();
