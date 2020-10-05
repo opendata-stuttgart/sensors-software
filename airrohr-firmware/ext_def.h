@@ -192,6 +192,7 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 #if defined(WIFI_LoRa_32_V2)
 #define ONEWIRE_PIN D32
 #define I2C_PIN_SCL D22
+#define D17_WROOM_ONLY 17
 #define I2C_PIN_SDA D17_WROOM_ONLY
 #define PM_SERIAL_RX D23
 #define PM_SERIAL_TX D2_STRAPPING

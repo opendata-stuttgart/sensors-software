@@ -41,7 +41,8 @@
 #include "intl_ua.h"
 #else
 #warning No language defined
-#include "intl_en.h"
+//#include "intl_en.h"
+#include "intl_de.h"
 #endif
 
 #endif

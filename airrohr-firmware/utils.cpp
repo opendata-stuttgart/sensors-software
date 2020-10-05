@@ -565,36 +565,3 @@ const __FlashStringHelper* loggerDescription(unsigned i) {
     }
     return logger;
 }
-
-/*****************************************************************
- * helper to see if a given string is numeric                    *
- *****************************************************************/
-bool isNumeric(const String& str) {
-	size_t stringLength = str.length();
-
-	if (stringLength == 0) {
-		return false;
-	}
-
-	bool seenDecimal = false;
-
-	for (size_t i = 0; i < stringLength; ++i) {
-		if (i == 0 && str.charAt(0) == '-') {
-			continue;
-		}
-
-		if (isDigit(str.charAt(i))) {
-			continue;
-		}
-
-		if (str.charAt(i) == '.') {
-			if (seenDecimal) {
-				return false;
-			}
-			seenDecimal = true;
-			continue;
-		}
-		return false;
-	}
-	return true;
-}

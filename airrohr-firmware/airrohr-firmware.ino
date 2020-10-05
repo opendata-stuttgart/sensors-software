@@ -60,7 +60,7 @@
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2020-130-B9"
+#define SOFTWARE_VERSION_STR "NRZ-2020-130-B9-ESP32-Bit"
 String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -2229,18 +2229,9 @@ static void create_influxdb_string_from_data(String& data_4_influxdb, const Stri
 		data_4_influxdb += esp_chipid + " ";
 		for (JsonObject measurement : json2data[FPSTR(JSON_SENSOR_DATA_VALUES)].as<JsonArray>()) {
 			data_4_influxdb += measurement["value_type"].as<char*>();
-			data_4_influxdb += "=";
-
-			if (isNumeric(measurement["value"])) {
-				//send numerics without quotes
-				data_4_influxdb += measurement["value"].as<char*>();
-			} else {
-				//quote string values
-				data_4_influxdb += "\"";
-				data_4_influxdb += measurement["value"].as<char*>();
-				data_4_influxdb += "\"";
-			}
-			data_4_influxdb += ",";
+			data_4_influxdb += '=';
+			data_4_influxdb += measurement["value"].as<char*>();
+			data_4_influxdb += ',';
 		}
 		if ((unsigned)(data_4_influxdb.lastIndexOf(',') + 1) == data_4_influxdb.length()) {
 			data_4_influxdb.remove(data_4_influxdb.length() - 1);
@@ -3252,6 +3243,7 @@ static void fetchSensorDNMS(String& s) {
 	debug_outln_info(FPSTR(DBG_TXT_SEP));
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_DNMS));
 }
+
 /*****************************************************************
  * read GPS sensor values                                        *
  *****************************************************************/
@@ -3292,24 +3284,22 @@ static void fetchSensorGPS(String& s) {
 		}
 		if (gps.date.isValid() && gps.time.isValid()) {
 			char gps_datetime[37];
-			snprintf_P(gps_datetime, sizeof(gps_datetime), PSTR("%04d-%02d-%02dT%02d:%02d:%02d.%03d"),
-				gps.date.year(), gps.date.month(), gps.date.day(), gps.time.hour(), gps.time.minute(), gps.time.second(), gps.time.centisecond());
+			snprintf_P(gps_datetime, sizeof(gps_datetime), PSTR("%02d-%02d%04dT%02d:%02d:%02d.%02d"),
+				gps.date.year(), gps.date.month(), gps.date.day(),gps.time.hour(), gps.time.minute(), gps.time.second(), gps.time.centisecond());
 			last_value_GPS_datetime = gps_datetime;
-		} else {
-			//define a default value
-			last_value_GPS_datetime = F("1970-01-01T00:00:00.000");
 		}
 	}
 
 	if (send_now) {
 		debug_outln_info(F("Lat: "), String(last_value_GPS_lat, 6));
 		debug_outln_info(F("Lng: "), String(last_value_GPS_lon, 6));
-		debug_outln_info(F("DateTime: "), last_value_GPS_datetime);
+		debug_outln_info(F("Date: "), last_value_GPS_date);
+		debug_outln_info(F("Time "), last_value_GPS_time);
 
 		add_Value2Json(s, F("GPS_lat"), String(last_value_GPS_lat, 6));
 		add_Value2Json(s, F("GPS_lon"), String(last_value_GPS_lon, 6));
 		add_Value2Json(s, F("GPS_height"), F("Altitude: "), float(last_value_GPS_alt));
-		add_Value2Json(s, F("GPS_timestamp"), last_value_GPS_datetime);
+		add_Value2Json(s, F("GPS_datetime"), "\"" + last_value_GPS_datetime + "\"");
 		debug_outln_info(FPSTR(DBG_TXT_SEP));
 	}
 
@@ -3819,7 +3809,14 @@ static void display_values() {
  *****************************************************************/
 static void init_display() {
 	if (cfg::has_display) {
-		oled_ssd1306 = new SSD1306(0x3c, I2C_PIN_SDA, I2C_PIN_SCL);
+  
+#if defined(WIFI_LoRa_32_V2)   // Heltec WiFi LoRa 32 V2 board with display connected to separated I²C bus
+    oled_ssd1306 = new SSD1306(0x3c, 4, 15);   
+#else          
+//		oled_ssd1306 = new SSD1306(0x3c, I2C_PIN_SDA, I2C_PIN_SCL);
+    oled_ssd1306 = new SSD1306(0x3c, 4, 15);     
+#endif
+   
 		oled_ssd1306->init();
 		if (cfg::has_flipped_display) {
 			oled_ssd1306->flipScreenVertically();
@@ -3855,7 +3852,7 @@ static void init_display() {
 	// modifying the I2C speed to 400k, which overwhelms some of the
 	// sensors.
 	Wire.setClock(100000);
-	Wire.setClockStretchLimit(150000);
+//	Wire.setClockStretchLimit(150000);
 }
 
 /*****************************************************************
@@ -4137,7 +4134,7 @@ static void setupNetworkTime() {
 #endif
 	strcpy_P(ntpServer1, NTP_SERVER_1);
 	strcpy_P(ntpServer2, NTP_SERVER_2);
-	configTime(0, 0, ntpServer1, ntpServer2);
+//	configTime(0, 0, ntpServer1, ntpServer2);
 }
 
 static unsigned long sendDataToOptionalApis(const String &data) {
@@ -4226,13 +4223,26 @@ void setup(void) {
 #endif
 	serialSDS.setTimeout((12 * 9 * 1000) / 9600);
 
+ Debug.println(" ******** Jetzt sind wir hier *******");
+
 #if defined(WIFI_LoRa_32_V2)
-	// reset the OLED display, e.g. of the heltec_wifi_lora_32 board
-	pinMode(RST_OLED, OUTPUT);
-	digitalWrite(RST_OLED, LOW);
-	delay(50);
-	digitalWrite(RST_OLED, HIGH);
+  // reset the OLED display, e.g. of the heltec_wifi_lora_32 board
+  pinMode(RST_OLED, OUTPUT);
+  digitalWrite(RST_OLED, LOW);
+  delay(50);
+  digitalWrite(RST_OLED, HIGH);
 #endif
+
+	// reset the OLED display, e.g. of the heltec_wifi_lora_32 board
+  Debug.println(" ");
+  Debug.println(" **** Reset of TTGO OLED display **** ");
+  Debug.println(" ");
+	pinMode(16, OUTPUT);
+	digitalWrite(16, LOW);
+	delay(50);
+	digitalWrite(16, HIGH);
+
+
 	Wire.begin(I2C_PIN_SDA, I2C_PIN_SCL);
 
 #if defined(ESP8266)
