@@ -105,7 +105,6 @@ const char INTL_LA_MAX[] PROGMEM = "LA max";
 const char INTL_LATITUDE[] PROGMEM = "Földrajzi szélesség";
 const char INTL_LONGITUDE[] PROGMEM = "Földrajzi hosszúság";
 const char INTL_ALTITUDE[] PROGMEM = "Tengerszint feletti magasság";
-const char INTL_DATE[] PROGMEM = "Dátum";
 const char INTL_TIME_UTC[] PROGMEM = "Idő";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Jelerősség";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Jelminőség";

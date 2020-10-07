@@ -60,7 +60,7 @@
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2020-130-B9"
+#define SOFTWARE_VERSION_STR "NRZ-2020-130-B10"
 String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -460,12 +460,10 @@ float last_value_NPM_P2 = -1.0;
 float last_value_NPM_N0 = -1.0;
 float last_value_NPM_N1 = -1.0;
 float last_value_NPM_N2 = -1.0;
+float last_value_GPS_alt = -1000.0;
 double last_value_GPS_lat = -200.0;
 double last_value_GPS_lon = -200.0;
-double last_value_GPS_alt = -1000.0;
-String last_value_GPS_date;
-String last_value_GPS_time;
-String last_value_GPS_datetime;
+String last_value_GPS_timestamp;
 String last_data_string;
 int last_signal_strength;
 
@@ -1511,8 +1509,7 @@ static void webserver_values() {
 		add_table_value(FPSTR(WEB_GPS), FPSTR(INTL_LATITUDE), check_display_value(last_value_GPS_lat, -200.0, 6, 0), unit_Deg);
 		add_table_value(FPSTR(WEB_GPS), FPSTR(INTL_LONGITUDE), check_display_value(last_value_GPS_lon, -200.0, 6, 0), unit_Deg);
 		add_table_value(FPSTR(WEB_GPS), FPSTR(INTL_ALTITUDE), check_display_value(last_value_GPS_alt, -1000.0, 2, 0), "m");
-		add_table_value(FPSTR(WEB_GPS), FPSTR(INTL_DATE), last_value_GPS_date, emptyString);
-		add_table_value(FPSTR(WEB_GPS), FPSTR(INTL_TIME_UTC), last_value_GPS_time, emptyString);
+		add_table_value(FPSTR(WEB_GPS), FPSTR(INTL_TIME_UTC), last_value_GPS_timestamp, emptyString);
 		page_content += FPSTR(EMPTY_ROW);
 	}
 
@@ -2530,7 +2527,7 @@ static void fetchSensorSDS(String& s) {
 /*****************************************************************
  * read Plantronic PM sensor sensor values                       *
  *****************************************************************/
-static void fetchSensorPMS(String& s) {
+static __noinline void fetchSensorPMS(String& s) {
 	char buffer;
 	int value;
 	int len = 0;
@@ -2684,7 +2681,7 @@ static void fetchSensorPMS(String& s) {
 /*****************************************************************
  * read Honeywell PM sensor sensor values                        *
  *****************************************************************/
-static void fetchSensorHPM(String& s) {
+static __noinline void fetchSensorHPM(String& s) {
 	char buffer;
 	int value;
 	int len = 0;
@@ -3255,7 +3252,7 @@ static void fetchSensorDNMS(String& s) {
 /*****************************************************************
  * read GPS sensor values                                        *
  *****************************************************************/
-static void fetchSensorGPS(String& s) {
+static __noinline void fetchSensorGPS(String& s) {
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), "GPS");
 
 	if (gps.location.isUpdated()) {
@@ -3269,47 +3266,36 @@ static void fetchSensorGPS(String& s) {
 		}
 		if (gps.altitude.isValid()) {
 			last_value_GPS_alt = gps.altitude.meters();
-			String gps_alt(last_value_GPS_lat);
 		} else {
 			last_value_GPS_alt = -1000;
 			debug_outln_verbose(F("Altitude INVALID"));
 		}
-		if (gps.date.isValid()) {
-			char gps_date[16];
-			snprintf_P(gps_date, sizeof(gps_date), PSTR("%02d/%02d/%04d"),
-					gps.date.month(), gps.date.day(), gps.date.year());
-			last_value_GPS_date = gps_date;
-		} else {
+		if (!gps.date.isValid()) {
 			debug_outln_verbose(F("Date INVALID"));
 		}
-		if (gps.time.isValid()) {
-			char gps_time[20];
-			snprintf_P(gps_time, sizeof(gps_time), PSTR("%02d:%02d:%02d.%02d"),
-				gps.time.hour(), gps.time.minute(), gps.time.second(), gps.time.centisecond());
-			last_value_GPS_time = gps_time;
-		} else {
+		if (!gps.time.isValid()) {
 			debug_outln_verbose(F("Time: INVALID"));
 		}
 		if (gps.date.isValid() && gps.time.isValid()) {
 			char gps_datetime[37];
 			snprintf_P(gps_datetime, sizeof(gps_datetime), PSTR("%04d-%02d-%02dT%02d:%02d:%02d.%03d"),
 				gps.date.year(), gps.date.month(), gps.date.day(), gps.time.hour(), gps.time.minute(), gps.time.second(), gps.time.centisecond());
-			last_value_GPS_datetime = gps_datetime;
+			last_value_GPS_timestamp = gps_datetime;
 		} else {
 			//define a default value
-			last_value_GPS_datetime = F("1970-01-01T00:00:00.000");
+			last_value_GPS_timestamp = F("1970-01-01T00:00:00.000");
 		}
 	}
 
 	if (send_now) {
 		debug_outln_info(F("Lat: "), String(last_value_GPS_lat, 6));
 		debug_outln_info(F("Lng: "), String(last_value_GPS_lon, 6));
-		debug_outln_info(F("DateTime: "), last_value_GPS_datetime);
+		debug_outln_info(F("DateTime: "), last_value_GPS_timestamp);
 
 		add_Value2Json(s, F("GPS_lat"), String(last_value_GPS_lat, 6));
 		add_Value2Json(s, F("GPS_lon"), String(last_value_GPS_lon, 6));
-		add_Value2Json(s, F("GPS_height"), F("Altitude: "), float(last_value_GPS_alt));
-		add_Value2Json(s, F("GPS_timestamp"), last_value_GPS_datetime);
+		add_Value2Json(s, F("GPS_height"), F("Altitude: "), last_value_GPS_alt);
+		add_Value2Json(s, F("GPS_timestamp"), last_value_GPS_timestamp);
 		debug_outln_info(FPSTR(DBG_TXT_SEP));
 	}
 
@@ -4312,9 +4298,6 @@ void loop(void) {
 	}
 
 	sample_count++;
-#if defined(ESP8266)
-	ESP.wdtFeed();
-#endif
 	if (last_micro != 0) {
 		unsigned long diff_micro = act_micro - last_micro;
 		UPDATE_MIN_MAX(min_micro, max_micro, diff_micro);
@@ -4531,7 +4514,6 @@ void loop(void) {
 		starttime = millis();								// store the start time
 		count_sends++;
 	}
-	yield();
 #if defined(ESP8266)
 	MDNS.update();
 	serialSDS.perform_work();

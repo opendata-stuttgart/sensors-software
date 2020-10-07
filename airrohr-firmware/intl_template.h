@@ -105,7 +105,6 @@ const char INTL_LA_MAX[] PROGMEM = "LA max";
 const char INTL_LATITUDE[] PROGMEM = "";
 const char INTL_LONGITUDE[] PROGMEM = "";
 const char INTL_ALTITUDE[] PROGMEM = "";
-const char INTL_DATE[] PROGMEM = "";
 const char INTL_TIME_UTC[] PROGMEM = "";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "";
