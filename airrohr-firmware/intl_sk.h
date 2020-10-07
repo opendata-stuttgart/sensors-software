@@ -104,7 +104,6 @@ const char INTL_LA_MAX[] PROGMEM = "LA max";
 const char INTL_LATITUDE[] PROGMEM = "Zem. šírka";
 const char INTL_LONGITUDE[] PROGMEM = "Zem. dĺžka";
 const char INTL_ALTITUDE[] PROGMEM = "Nadm. výška";
-const char INTL_DATE[] PROGMEM = "Dátum";
 const char INTL_TIME_UTC[] PROGMEM = "Čas (UTC)";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "sila signálu";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "kvalita signálu";
