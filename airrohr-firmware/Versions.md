@@ -1,3 +1,6 @@
+NRZ-2020-130-B11
+* Remove floating point subroutines from IRAM (related to #789)
+
 NRZ-2020-130-B10
 * Show GPS date+time also as datetime timestamp
 * Reduce loop size (Related to #789)
