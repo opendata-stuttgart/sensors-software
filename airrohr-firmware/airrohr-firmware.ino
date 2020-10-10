@@ -1835,7 +1835,7 @@ static void webserver_values() {
 		if (cfg::bmx280_read) {
 			page_content += FPSTR(EMPTY_ROW);
 			add_table_row_from_value(page_content, FPSTR(SENSORS_BMX280), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_BMX280_T, -128, 1, 0), unit_T);
-			add_table_row_from_value(page_content, FPSTR(SENSORS_BMX280), FPSTR(INTL_PRESSURE), check_display_value(last_value_BMX280_P / 100.0f, (-1 / 100.0f), 2, 0), unit_P);
+			add_table_row_from_value(page_content, FPSTR(SENSORS_BMX280), FPSTR(INTL_PRESSURE), check_display_value(last_value_BMX280_P, (-1 / 100.0f), 2, 0), unit_P);
 			if (bmx280.sensorID() == BME280_SENSOR_ID) {
 				add_table_row_from_value(page_content, FPSTR(SENSORS_BMX280), FPSTR(INTL_HUMIDITY), check_display_value(last_value_BME280_H, -1, 1, 0), unit_H);
 			}
@@ -2706,7 +2706,7 @@ static void fetchSensorBMX280(String& s) {
 		debug_outln_error(F("BMP/BME280 read failed"));
 	} else {
 		last_value_BMX280_T = t;
-		last_value_BMX280_P = p;
+		last_value_BMX280_P = p / 100.0f;
 		if (bmx280.sensorID() == BME280_SENSOR_ID) {
 			add_Value2Json(s, F("BME280_temperature"), FPSTR(DBG_TXT_TEMPERATURE), last_value_BMX280_T);
 			add_Value2Json(s, F("BME280_pressure"), FPSTR(DBG_TXT_PRESSURE), last_value_BMX280_P);
