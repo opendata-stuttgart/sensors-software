@@ -120,7 +120,7 @@ Pinout:
 * Pin 7	(RX)     -> Pin D2 (GPIO4)
 * Pin 8 (GND)    -> GND
 
-### BMP180 / BMP280 / BME280 / HTU21D / SHT3x (I2C)
+### BMP180 / BME/P280 / HTU21D / SHT3x (I2C)
 * VCC  ->  Pin 3V3
 * GND  ->  Pin GND
 * SCL  ->  Pin D4 (GPIO2)
@@ -163,9 +163,9 @@ the following API pins hardcoded. These match what the Sensor.Community API expe
 by default when selecting the correct sensor model.
 
 * HPM/PMS/SDS011/SPS30 => Pin 1
+* BME280 => Pin 11
 * BMP180/BMP280 => Pin 3
 * DHT22/HTU21D/SHT3x => Pin 7
 * GPS(Neo-6M) => Pin 9
-* BME280 => Pin 11
 * DS18B20 => Pin 13
 * DNMS +> Pin 15

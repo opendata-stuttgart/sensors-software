@@ -1,5 +1,6 @@
 NRZ-2020-130-B11
 * Remove floating point subroutines from IRAM (related to #789)
+* Show clearly in webui whether we have BME280 or a BMP280
 
 NRZ-2020-130-B10
 * Show GPS date+time also as datetime timestamp
