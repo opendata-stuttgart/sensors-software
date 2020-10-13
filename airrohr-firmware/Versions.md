@@ -1,3 +1,6 @@
+NRZ-2020-132-B2
+* Adjust /metrics to be OpenMetrics protocol compatible
+
 NRZ-2020-132-B1
 * next beta version
 
