@@ -4468,6 +4468,7 @@ void loop(void) {
 		add_Value2Json(data, F("samples"), String(sample_count));
 		add_Value2Json(data, F("min_micro"), String(min_micro));
 		add_Value2Json(data, F("max_micro"), String(max_micro));
+		add_Value2Json(data, F("interval"), String(cfg::sending_intervall_ms));
 		add_Value2Json(data, F("signal"), String(last_signal_strength));
 
 		if ((unsigned)(data.lastIndexOf(',') + 1) == data.length()) {
