@@ -1,3 +1,6 @@
+NRZ-2020-132-B1
+* next beta version
+
 NRZ-2020-131
 online since 2020-10-17
 * same as NRZ-2020-130-B11
