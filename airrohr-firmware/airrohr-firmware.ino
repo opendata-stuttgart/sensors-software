@@ -60,7 +60,7 @@
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2020-130-B11"
+#define SOFTWARE_VERSION_STR "NRZ-2020-131"
 String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -3097,7 +3097,7 @@ static void fetchSensorNPM(String& s) {
 /*****************************************************************
  * read PPD42NS sensor values                                    *
  *****************************************************************/
-static void fetchSensorPPD(String& s) {
+static __noinline void fetchSensorPPD(String& s) {
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_PPD42NS));
 
 	if (msSince(starttime) <= SAMPLETIME_MS) {
@@ -3206,7 +3206,6 @@ static void fetchSensorSPS30(String& s) {
 /*****************************************************************
    read DNMS values
  *****************************************************************/
-
 static void fetchSensorDNMS(String& s) {
 	static bool dnms_error = false;
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_DNMS));
@@ -3251,6 +3250,7 @@ static void fetchSensorDNMS(String& s) {
 	debug_outln_info(FPSTR(DBG_TXT_SEP));
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_DNMS));
 }
+
 /*****************************************************************
  * read GPS sensor values                                        *
  *****************************************************************/

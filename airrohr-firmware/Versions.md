@@ -1,3 +1,7 @@
+NRZ-2020-131
+online since 2020-10-17
+* same as NRZ-2019-129-B11
+
 NRZ-2020-130-B11
 * Remove floating point subroutines from IRAM (related to #789)
 * Show clearly in webui whether we have BME280 or a BMP280
