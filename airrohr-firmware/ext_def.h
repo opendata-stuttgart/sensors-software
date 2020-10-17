@@ -7,7 +7,7 @@ const char WLANPWD[] PROGMEM = "";
 
 // BasicAuth config
 const char WWW_USERNAME[] PROGMEM = "admin";
-const char WWW_PASSWORD[] PROGMEM = "feinstaub";
+const char WWW_PASSWORD[] PROGMEM = "";
 #define WWW_BASICAUTH_ENABLED 0
 
 // Sensor Wifi config (config mode)
@@ -21,6 +21,7 @@ const char WWW_PASSWORD[] PROGMEM = "feinstaub";
 #define SSL_MADAVI 0
 #define SEND2SENSEMAP 0
 #define SEND2FSAPP 0
+#define SSL_FSAPP 0
 #define SEND2AIRCMS 0
 #define SEND2MQTT 0
 #define SEND2INFLUX 0
@@ -44,7 +45,7 @@ enum LoggerEntry {
 
 struct LoggerConfig {
     uint16_t destport;
-    uint16_t _unused;
+    uint16_t errors;
 #if defined(ESP8266)
     BearSSL::Session* session;
 #else
@@ -65,13 +66,13 @@ static const char HOST_SENSEMAP[] PROGMEM = "ingress.opensensemap.org";
 static const char URL_SENSEMAP[] PROGMEM = "/boxes/{v}/data?luftdaten=1";
 #define PORT_SENSEMAP 443
 
-static const char HOST_FSAPP[] PROGMEM = "h2801469.stratoserver.net";
+static const char HOST_FSAPP[] PROGMEM = "server.chillibits.com";
 static const char URL_FSAPP[] PROGMEM = "/data.php";
-#define PORT_FSAPP 443
+#define PORT_FSAPP 80
 
 static const char HOST_AIRCMS[] PROGMEM = "doiot.ru";
 static const char URL_AIRCMS[] PROGMEM = "/php/sensors.php?h=";
-// As of 2019/09 uses invalid certifiates on ssl/port 443 and does not support Maximum Fragment Length Negotiation (MFLN)
+// As of 2019/09 uses invalid certificates on ssl/port 443 and does not support Maximum Fragment Length Negotiation (MFLN)
 // So we can not use SSL
 #define PORT_AIRCMS 80
 
@@ -137,6 +138,31 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 #define RFM69_RST 4
 #define RFM69_INT 3
 #endif
+#endif
+
+//  === pin assignments for dev kit board ===================================
+#ifdef ESP32
+#define ONEWIRE_PIN D32
+#define PM_SERIAL_RX D27
+#define PM_SERIAL_TX D33
+#define PIN_CS D13
+
+#if defined(FLIP_I2C_PMSERIAL) // exchange the pins of the ports to use external i2c connector for gps
+#define I2C_PIN_SCL D23
+#define I2C_PIN_SDA D19
+#define GPS_SERIAL_RX D22
+#define GPS_SERIAL_TX D21
+#else
+#define I2C_PIN_SCL D22
+#define I2C_PIN_SDA D21
+#define GPS_SERIAL_RX D19
+#define GPS_SERIAL_TX D23
+#endif
+#define PPD_PIN_PM1 GPS_SERIAL_TX
+#define PPD_PIN_PM2 GPS_SERIAL_RX
+//#define RFM69_CS D0
+//#define RFM69_RST D2
+//#define RFM69_INT D4
 #endif
 
 //  === pin assignments for lolin_d32_pro board ===================================
@@ -214,6 +240,10 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 #define HPM_READ 0
 #define HPM_API_PIN 1
 
+// Tera Sensor Next PM sensor
+#define NPM_READ 0
+#define NPM_API_PIN 1
+
 // Sensirion SPS30, the more expensive version of the particle sensor
 #define SPS30_READ 0
 #define SPS30_API_PIN 1
@@ -241,6 +271,9 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 #define DNMS_READ 0
 #define DNMS_API_PIN 15
 #define DNMS_CORRECTION "0.0"
+
+// Temp compensation
+#define TEMP_CORRECTION "0.0"
 
 // GPS, preferred Neo-6M
 #define GPS_READ 0

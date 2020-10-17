@@ -5,10 +5,9 @@
  *  Translation template
  *
  *	Texts should be as short as possible
- *	We only have 512 kB for the entire firmware
  */
 
-const char INTL_LANG[] = "";
+#define INTL_LANG "";
 #define INTL_PM_SENSOR ""
 const char INTL_CONFIGURATION[] PROGMEM = "";
 #define INTL_WIFI_SETTINGS ""
@@ -23,22 +22,25 @@ const char INTL_MORE_SENSORS[] PROGMEM = "";
 const char INTL_SDS011[] PROGMEM = "SDS011 ({pm})";
 const char INTL_PMS[] PROGMEM = "Plantower PMS(1,3,5,6,7)003 ({pm})";
 const char INTL_HPM[] PROGMEM = "Honeywell PM ({pm})";
+const char INTL_NPM[] PROGMEM = "Tera Sensor Next PM ({pm})";
 const char INTL_SPS30[] PROGMEM = "Sensirion SPS30 ({pm})";
 const char INTL_PPD42NS[] PROGMEM = "PPD42NS ({pm})";
 const char INTL_DHT22[] PROGMEM = "DHT22 ({t}, {h})";
 const char INTL_HTU21D[] PROGMEM = "HTU21D ({t}, {h})";
 const char INTL_BMP180[] PROGMEM = "BMP180 ({t}, {p})";
-const char INTL_BMX280[] PROGMEM = "BMP/BME280 ({t}, {h}, {p})";
-const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
+const char INTL_BMX280[] PROGMEM = "BME280 ({t}, {h}, {p}), BMP280 ({t}, {p})";
 const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
+const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
-const char INTL_DNMS_CORRECTION[] PROGMEM ="";
+const char INTL_DNMS_CORRECTION[] PROGMEM = "";
+const char INTL_TEMP_CORRECTION[] PROGMEM = "";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "";
+#define INTL_REPORT_ISSUE ""
 
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "";
-const char INTL_MORE_SETTINGS[] PROGMEM ="";
+const char INTL_MORE_SETTINGS[] PROGMEM = "";
 const char INTL_AUTO_UPDATE[] PROGMEM = "";
 const char INTL_USE_BETA[] PROGMEM = "";
 const char INTL_DISPLAY[] PROGMEM = "OLED SSD1306";
@@ -60,6 +62,7 @@ const char INTL_PATH[] PROGMEM = "";
 const char INTL_PORT[] PROGMEM = "";
 const char INTL_USER[] PROGMEM = "";
 const char INTL_PASSWORD[] PROGMEM = "";
+const char INTL_MEASUREMENT[] PROGMEM = "";
 const char INTL_SEND_TO[] PROGMEM = "";
 const char INTL_READ_FROM[] PROGMEM = "";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "";
@@ -102,8 +105,7 @@ const char INTL_LA_MAX[] PROGMEM = "LA max";
 const char INTL_LATITUDE[] PROGMEM = "";
 const char INTL_LONGITUDE[] PROGMEM = "";
 const char INTL_ALTITUDE[] PROGMEM = "";
-const char INTL_DATE[] PROGMEM = "";
-const char INTL_TIME[] PROGMEM = "";
+const char INTL_TIME_UTC[] PROGMEM = "";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "";
 #define INTL_NUMBER_OF_MEASUREMENTS ""

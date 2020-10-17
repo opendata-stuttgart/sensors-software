@@ -5,10 +5,9 @@
  *  Dutch translations
  *
  *	Texts should be as short as possible
- *	We only have 512 kB for the entire firmware
  */
 
-const char INTL_LANG[] = "NL";
+#define INTL_LANG "NL"
 #define INTL_PM_SENSOR "Fijnstofsensor"
 const char INTL_CONFIGURATION[] PROGMEM = "Configuratie";
 #define INTL_WIFI_SETTINGS "WiFi-instellingen"
@@ -23,22 +22,25 @@ const char INTL_MORE_SENSORS[] PROGMEM = "More Sensors";
 const char INTL_SDS011[] PROGMEM = "SDS011 ({pm})";
 const char INTL_PMS[] PROGMEM = "Plantower PMS(1,3,5,6,7)003 ({pm})";
 const char INTL_HPM[] PROGMEM = "Honeywell PM ({pm})";
+const char INTL_NPM[] PROGMEM = "Tera Sensor Next PM ({pm})";
 const char INTL_SPS30[] PROGMEM = "Sensirion SPS30 ({pm})";
 const char INTL_PPD42NS[] PROGMEM = "PPD42NS ({pm})";
 const char INTL_DHT22[] PROGMEM = "DHT22 ({t}, {h})";
 const char INTL_HTU21D[] PROGMEM = "HTU21D ({t}, {h})";
 const char INTL_BMP180[] PROGMEM = "BMP180 ({t}, {p})";
-const char INTL_BMX280[] PROGMEM = "BMP280/BME280 ({t}, {h}, {p})";
+const char INTL_BMX280[] PROGMEM = "BME280 ({t}, {h}, {p}), BMP280 ({t}, {p})";
 const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
 const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
-const char INTL_DNMS_CORRECTION[] PROGMEM ="correctie in dB(A)";
+const char INTL_DNMS_CORRECTION[] PROGMEM = "Correctie in dB(A)";
+const char INTL_TEMP_CORRECTION[] PROGMEM = "Correctie in °C";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Beperk toegang";
+#define INTL_REPORT_ISSUE "Een probleem melden"
 
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "Netwerknaam en -wachtwoord van de fijnstofsensor";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Naam (SSID)";
-const char INTL_MORE_SETTINGS[] PROGMEM ="Meer instellingen";
+const char INTL_MORE_SETTINGS[] PROGMEM = "Meer instellingen";
 const char INTL_AUTO_UPDATE[] PROGMEM = "Firmware automatisch bijwerken";
 const char INTL_USE_BETA[] PROGMEM = "Installeer beta-firmwares";
 const char INTL_DISPLAY[] PROGMEM = "OLED SSD1306";
@@ -60,6 +62,7 @@ const char INTL_PATH[] PROGMEM = "Pad";
 const char INTL_PORT[] PROGMEM = "Poort";
 const char INTL_USER[] PROGMEM = "Gebruiker";
 const char INTL_PASSWORD[] PROGMEM = "Wachtwoord";
+const char INTL_MEASUREMENT[] PROGMEM = "Measurement";
 const char INTL_SEND_TO[] PROGMEM = "Verzend naar {v}";
 const char INTL_READ_FROM[] PROGMEM = "Lees uit {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Toestel wordt opnieuw opgestart";
@@ -102,8 +105,7 @@ const char INTL_LA_MAX[] PROGMEM = "LA max";
 const char INTL_LATITUDE[] PROGMEM = "Breedtegraad";
 const char INTL_LONGITUDE[] PROGMEM = "Lengtegraad";
 const char INTL_ALTITUDE[] PROGMEM = "Hoogte";
-const char INTL_DATE[] PROGMEM = "Datum";
-const char INTL_TIME[] PROGMEM = "Tijd";
+const char INTL_TIME_UTC[] PROGMEM = "Tijd (UTC)";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Signaalsterkte";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Signaalkwaliteit";
 #define INTL_NUMBER_OF_MEASUREMENTS "Aantal metingen"

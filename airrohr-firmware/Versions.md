@@ -1,3 +1,66 @@
+NRZ-2020-131
+online since 2020-10-17
+* same as NRZ-2020-130-B11
+
+NRZ-2020-130-B11
+* Remove floating point subroutines from IRAM (related to #789)
+* Show clearly in webui whether we have BME280 or a BMP280
+
+NRZ-2020-130-B10
+* Show GPS date+time also as datetime timestamp
+* Reduce loop size (Related to #789)
+
+NRZ-2020-130-B9
+* WebUI Styling refresh
+* GPS date+time is now sent as datetime timestamp
+
+NRZ-2020-130-B8 (online/beta Sep 5th)
+* Update ArduinoCore to 2.7.4 to fix WPA downgrade issue (CVE-2020-12638)
+
+NRZ-2020-130-B7
+* Disabled Tera Sensor Next PM from build until conflicts with other sensors
+  can be resolved
+* Fix crash on enabling OLEDs (Fixes #671)
+* Disabled IPv6 for stable release
+* Force I2C clock to 100k for better compatibility with sensors (Fixes #735)
+* Update ArduinoJson to 6.16.1
+* Force I2C clock to 100k for better compatibility with sensors
+
+NRZ-2020-130-B6
+* show new ID
+* rebranding to Sensor.Community
+* Tera Sensor Next PM sensor added
+
+NRZ-2020-130-B5
+* Slovak translations added
+
+NRZ-2020-130-B4
+* Prevent password leakage in configuration dialogs
+* Change default password for webpage auth to ""
+* Ignore measurement interval settings below 5s
+* Track API sending errors for each API separately
+
+NRZ-2020-130-B3
+* Serial debug output on webpage
+* Refactoring
+
+NRZ-2020-130-B2
+* Avoid crash on WiFi network scan failure (Related to #615)
+* Only do OTA after sensor measurements are finished
+* Remove uninitialized memory read in NTP handling
+* Accept larger flash sizes also as compatible
+* Switch to a tab based configuration page
+* Skip initialization of display's when not configured
+* Delay OneWire initialization until configured
+* Fix bulgarian translation error (Fixes #622)
+* Fix hang on BME/P280 measurement read
+* Connect up to wifi channel 13 if locale is not EN (Fixes #626)
+* Use IPv6 LWIP (Related to #605)
+* Add configurable temperature correction (Fixes #607)
+
+NRZ-2020-130-B1
+* next beta version
+
 NRZ-2020-129
 online since 2020-01-07
 * same as NRZ-2019-128-B8 (+build date is shown in header)

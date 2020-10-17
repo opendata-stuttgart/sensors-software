@@ -5,10 +5,9 @@
  *  Bulgarian translations
  *
  *	Texts should be as short as possible
- *	We only have 512 kB for the entire firmware
  */
 
-const char INTL_LANG[] = "BG";
+#define INTL_LANG "BG"
 #define INTL_PM_SENSOR "Сензор за прахови частици"
 const char INTL_CONFIGURATION[] PROGMEM = "Конфигурация";
 #define INTL_WIFI_SETTINGS "Настройки за WiFi"
@@ -19,7 +18,7 @@ const char INTL_NETWORKS_FOUND[] PROGMEM = "Намерени мрежи: ";
 const char INTL_AB_HIER_NUR_ANDERN[] PROGMEM = "Разширени настройки (само ако знаете какво правите)";
 const char INTL_SAVE[] PROGMEM = "Запиши";
 const char INTL_SENSORS[] PROGMEM = "Сензори";
-const char INTL_MORE_SENSORS[] PROGMEM = "More Сензори";
+const char INTL_MORE_SENSORS[] PROGMEM = "Още Сензори";
 const char INTL_SDS011[] PROGMEM = "SDS011 ({pm})";
 const char INTL_PMS[] PROGMEM = "Plantower PMS(1,3,5,6,7)003 ({pm})";
 const char INTL_HPM[] PROGMEM = "Honeywell сензора за прахови частици";
@@ -28,17 +27,19 @@ const char INTL_PPD42NS[] PROGMEM = "PPD42NS ({pm})";
 const char INTL_DHT22[] PROGMEM = "DHT22 ({t}, {h})";
 const char INTL_HTU21D[] PROGMEM = "HTU21D ({t}, {h})";
 const char INTL_BMP180[] PROGMEM = "BMP180 ({t}, {p})";
-const char INTL_BMX280[] PROGMEM = "BMP280/BME280 ({t}, {h}, {p})";
+const char INTL_BMX280[] PROGMEM = "BME280 ({t}, {h}, {p}), BMP280 ({t}, {p})";
 const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
-const char INTL_DNMS_CORRECTION[] PROGMEM ="корекция в dB (A)";
+const char INTL_DNMS_CORRECTION[] PROGMEM = "корекция в dB (A)";
+const char INTL_TEMP_CORRECTION[] PROGMEM = "Корекция в °C";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Оторизация";
+#define INTL_REPORT_ISSUE "Подаване на сигнал за проблем"
 
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "WiFi сензор в режим на конфигуриране";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Име";
-const char INTL_MORE_SETTINGS[] PROGMEM ="Още настройки";
+const char INTL_MORE_SETTINGS[] PROGMEM = "Още настройки";
 const char INTL_AUTO_UPDATE[] PROGMEM = "Автоматична актуализация";
 const char INTL_USE_BETA[] PROGMEM = "Зареждане на бета актуализация";
 const char INTL_DISPLAY[] PROGMEM = "OLED SSD1306";
@@ -60,6 +61,7 @@ const char INTL_PATH[] PROGMEM = "Път";
 const char INTL_PORT[] PROGMEM = "Порт";
 const char INTL_USER[] PROGMEM = "Потребител";
 const char INTL_PASSWORD[] PROGMEM = "Парола";
+const char INTL_MEASUREMENT[] PROGMEM = "Измерване";
 const char INTL_SEND_TO[] PROGMEM = "Изпрати до {v}";
 const char INTL_READ_FROM[] PROGMEM = "Получено от {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Сензорът се рестартира.";
@@ -69,7 +71,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "Рестартиране на сен
 #define INTL_HOME "Начало"
 #define INTL_BACK_TO_HOME "Обратно към начало"
 const char INTL_CURRENT_DATA[] PROGMEM = "Текущи данни";
-const char INTL_DEVICE_STATUS[] PROGMEM = "Карам статус";
+const char INTL_DEVICE_STATUS[] PROGMEM = "Статус на устройството";
 #define INTL_ACTIVE_SENSORS_MAP "Карта на активните сензори (външен линк)"
 #define INTL_CONFIGURATION_DELETE "Изтриване на Конфигурацията"
 #define INTL_CONFIGURATION_REALLY_DELETE "Наистина ли искате да изтриете конфигурацията?"
@@ -102,8 +104,7 @@ const char INTL_LA_MAX[] PROGMEM = "LA max";
 const char INTL_LATITUDE[] PROGMEM = "Географска ширина";
 const char INTL_LONGITUDE[] PROGMEM = "Географска дължина";
 const char INTL_ALTITUDE[] PROGMEM = "Надморска височина";
-const char INTL_DATE[] PROGMEM = "Дата";
-const char INTL_TIME[] PROGMEM = "Дата";
+const char INTL_TIME_UTC[] PROGMEM = "Дата (UTC)";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Сила на сигнала";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Качество на сигнала";
 #define INTL_NUMBER_OF_MEASUREMENTS "Брой измервания"

@@ -5,10 +5,9 @@
  *  Turkish translations
  *
  *	Texts should be as short as possible
- *	We only have 512 kB for the entire firmware
  */
 
-const char INTL_LANG[] = "TR";
+#define INTL_LANG "TR"
 #define INTL_PM_SENSOR "Hava Kirliliği (Ince Toz) Ölçüm sensörü"
 const char INTL_CONFIGURATION[] PROGMEM = "Yapılandırma";
 #define INTL_WIFI_SETTINGS "WiFi bağlantı ayarları"
@@ -23,22 +22,25 @@ const char INTL_MORE_SENSORS[] PROGMEM = "More Sensors";
 const char INTL_SDS011[] PROGMEM = "SDS011 ({pm})";
 const char INTL_PMS[] PROGMEM = "Plantower PMS(1,3,5,6,7)003 ({pm})";
 const char INTL_HPM[] PROGMEM = "Honeywell PM ({pm})";
+const char INTL_NPM[] PROGMEM = "Tera Sensor Next PM ({pm})";
 const char INTL_SPS30[] PROGMEM = "Sensirion SPS30 ({pm})";
 const char INTL_PPD42NS[] PROGMEM = "PPD42NS ({pm})";
 const char INTL_DHT22[] PROGMEM = "DHT22 ({t}, {h})";
 const char INTL_HTU21D[] PROGMEM = "HTU21D ({t}, {h})";
 const char INTL_BMP180[] PROGMEM = "BMP180 ({t}, {p})";
-const char INTL_BMX280[] PROGMEM = "BMP280/BME280 ({t}, {h}, {p})";
+const char INTL_BMX280[] PROGMEM = "BME280 ({t}, {h}, {p}), BMP280 ({t}, {p})";
 const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
 const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
-const char INTL_DNMS_CORRECTION[] PROGMEM ="dB (A) 'da düzeltme";
+const char INTL_DNMS_CORRECTION[] PROGMEM = "dB (A) 'da düzeltme";
+const char INTL_TEMP_CORRECTION[] PROGMEM = "°C olarak düzeltme";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "yetkilendirme";
+#define INTL_REPORT_ISSUE "Sorun bildirin"
 
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "WiFi Sensörü Yapılandırma modunda";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Isim";
-const char INTL_MORE_SETTINGS[] PROGMEM ="Daha fazla ayar";
+const char INTL_MORE_SETTINGS[] PROGMEM = "Daha fazla ayar";
 const char INTL_AUTO_UPDATE[] PROGMEM = "Yazılımı (Firmware) Otomatik güncelle ";
 const char INTL_USE_BETA[] PROGMEM = "Beta Yazılımı(Firmware) yükle";
 const char INTL_DISPLAY[] PROGMEM = "OLED SSD1306";
@@ -60,6 +62,7 @@ const char INTL_PATH[] PROGMEM = "Yol";
 const char INTL_PORT[] PROGMEM = "kapı";
 const char INTL_USER[] PROGMEM = "kullanıcı";
 const char INTL_PASSWORD[] PROGMEM = "parola";
+const char INTL_MEASUREMENT[] PROGMEM = "Measurement";
 const char INTL_SEND_TO[] PROGMEM = "Gönder {v}";
 const char INTL_READ_FROM[] PROGMEM = "Oku {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "sistem yeniden yükleniyor";
@@ -102,8 +105,7 @@ const char INTL_LA_MAX[] PROGMEM = "LA max";
 const char INTL_LATITUDE[] PROGMEM = "Enlem";
 const char INTL_LONGITUDE[] PROGMEM = "Boylam";
 const char INTL_ALTITUDE[] PROGMEM = "Rakım";
-const char INTL_DATE[] PROGMEM = "tarih";
-const char INTL_TIME[] PROGMEM = "zaman";
+const char INTL_TIME_UTC[] PROGMEM = "zaman (UTC)";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "sinyal gücü";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "sinyal kalitesi";
 #define INTL_NUMBER_OF_MEASUREMENTS "Ölçümlerin sayısı"

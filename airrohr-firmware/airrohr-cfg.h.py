@@ -15,6 +15,7 @@ Bool		ppd_read
 Bool		sds_read
 Bool		pms_read
 Bool		hpm_read
+Bool		npm_read
 Bool		sps30_read
 Bool		bmp_read
 Bool		bmx280_read
@@ -22,6 +23,7 @@ Bool		sht3x_read
 Bool		ds18b20_read
 Bool		dnms_read
 String		dnms_correction
+String		temp_correction
 Bool		gps_read
 Bool		send2dusti
 Bool		ssl_dusti
@@ -80,13 +82,14 @@ enum ConfigEntryType : unsigned short {
 struct ConfigShapeEntry {
 	enum ConfigEntryType cfg_type;
 	unsigned short cfg_len;
-	const __FlashStringHelper* cfg_key;
+	const char* _cfg_key;
 	union {
 		void* as_void;
 		bool* as_bool;
 		unsigned int* as_uint;
 		char* as_str;
 	} cfg_val;
+	const __FlashStringHelper* cfg_key() const { return FPSTR(_cfg_key); }
 };
 
 enum ConfigShapeId {""", file=h)
@@ -97,7 +100,7 @@ enum ConfigShapeId {""", file=h)
 
     for cfgentry in configshape_in.strip().split('\n'):
         _, cfgkey = cfgentry.split()
-        print("const char CFG_KEY_", cfgkey.upper(),
+        print("static constexpr char CFG_KEY_", cfgkey.upper(),
               "[] PROGMEM = \"", cfgkey, "\";", sep='', file=h)
 
     print("static constexpr ConfigShapeEntry configShape[] PROGMEM = {",
@@ -106,7 +109,7 @@ enum ConfigShapeId {""", file=h)
         cfgtype, cfgkey = cfgentry.split()
         print("\t{ Config_Type_", cfgtype,
               ", sizeof(cfg::" + cfgkey + ")-1" if cfgtype in ('String', 'Password') else ", 0",
-              ", FPSTR(CFG_KEY_", cfgkey.upper(),
-              "), ", "" if cfgtype in ('String', 'Password') else "&",
+              ", CFG_KEY_", cfgkey.upper(),
+              ", ", "" if cfgtype in ('String', 'Password') else "&",
               "cfg::", cfgkey, " },", sep='', file=h)
     print("};", file=h)

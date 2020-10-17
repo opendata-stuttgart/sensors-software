@@ -231,7 +231,8 @@ void BMX280::takeForcedMeasurement() {
   write8(BMX280_REGISTER_CONTROL, _measReg.get());
   // wait until measurement has been completed, otherwise we would read
   // the values from the last measurement
-  while (read8(BMX280_REGISTER_STATUS) & 0x08)
+  unsigned attempts = 15;
+  while (--attempts && (read8(BMX280_REGISTER_STATUS) & 0x08))
     delay(1);
 }
 

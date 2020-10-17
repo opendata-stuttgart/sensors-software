@@ -5,10 +5,9 @@
  *  Ukrainian translations
  *
  *	Texts should be as short as possible
- *	We only have 512 kB for the entire firmware
  */
 
-const char INTL_LANG[] = "UA";
+#define INTL_LANG "UA"
 #define INTL_PM_SENSOR "Вимірювач дрібних часток"
 const char INTL_CONFIGURATION[] PROGMEM = "Налаштування";
 #define INTL_WIFI_SETTINGS "Параметри WiFi"
@@ -23,22 +22,25 @@ const char INTL_MORE_SENSORS[] PROGMEM = "More Sensors";
 const char INTL_SDS011[] PROGMEM = "SDS011 ({pm})";
 const char INTL_PMS[] PROGMEM = "Plantower PMS(1,3,5,6,7)003 ({pm})";
 const char INTL_HPM[] PROGMEM = "Honeywell PM ({pm})";
+const char INTL_NPM[] PROGMEM = "Tera Sensor Next PM ({pm})";
 const char INTL_SPS30[] PROGMEM = "Sensirion SPS30 ({pm})";
 const char INTL_PPD42NS[] PROGMEM = "PPD42NS ({pm})";
 const char INTL_DHT22[] PROGMEM = "DHT22 ({t}, {h})";
 const char INTL_HTU21D[] PROGMEM = "HTU21D ({t}, {h})";
 const char INTL_BMP180[] PROGMEM = "BMP180 ({t}, {p})";
-const char INTL_BMX280[] PROGMEM = "BMP280/BME280 ({t}, {h}, {p})";
+const char INTL_BMX280[] PROGMEM = "BME280 ({t}, {h}, {p}), BMP280 ({t}, {p})";
 const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
 const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
-const char INTL_DNMS_CORRECTION[] PROGMEM ="корекція в дБ (А)";
+const char INTL_DNMS_CORRECTION[] PROGMEM = "Kорекція в дБ (А)";
+const char INTL_TEMP_CORRECTION[] PROGMEM = "Корекція в °C";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Авторизація";
+#define INTL_REPORT_ISSUE "Повідомте про проблему"
 
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "WiFi сенсор в режимі конфігурації";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Ім'я";
-const char INTL_MORE_SETTINGS[] PROGMEM ="Додаткові параметри";
+const char INTL_MORE_SETTINGS[] PROGMEM = "Додаткові параметри";
 const char INTL_AUTO_UPDATE[] PROGMEM = "Автооновлення мікропрограми";
 const char INTL_USE_BETA[] PROGMEM = "Встановлювати бета-версії мікропрограми";
 const char INTL_DISPLAY[] PROGMEM = "OLED SSD1306";
@@ -60,6 +62,7 @@ const char INTL_PATH[] PROGMEM = "Шлях";
 const char INTL_PORT[] PROGMEM = "Порт";
 const char INTL_USER[] PROGMEM = "Користувач";
 const char INTL_PASSWORD[] PROGMEM = "Пароль";
+const char INTL_MEASUREMENT[] PROGMEM = "Measurement";
 const char INTL_SEND_TO[] PROGMEM = "Відправляти до {v}";
 const char INTL_READ_FROM[] PROGMEM = "Читати з {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Сенсор перезавантажується.";
@@ -102,8 +105,7 @@ const char INTL_LA_MAX[] PROGMEM = "LA max";
 const char INTL_LATITUDE[] PROGMEM = "Широта";
 const char INTL_LONGITUDE[] PROGMEM = "Довгота";
 const char INTL_ALTITUDE[] PROGMEM = "Висота";
-const char INTL_DATE[] PROGMEM = "Дата";
-const char INTL_TIME[] PROGMEM = "Час";
+const char INTL_TIME_UTC[] PROGMEM = "Час (UTC)";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "потужність сигналу";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "якість сигналу";
 #define INTL_NUMBER_OF_MEASUREMENTS "Кількість вимірювань"
