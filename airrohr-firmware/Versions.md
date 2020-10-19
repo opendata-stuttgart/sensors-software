@@ -30,7 +30,6 @@ NRZ-2020-130-B7
 * Disabled IPv6 for stable release
 * Force I2C clock to 100k for better compatibility with sensors (Fixes #735)
 * Update ArduinoJson to 6.16.1
-* Force I2C clock to 100k for better compatibility with sensors
 
 NRZ-2020-130-B6
 * show new ID
