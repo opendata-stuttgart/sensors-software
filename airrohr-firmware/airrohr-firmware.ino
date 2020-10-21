@@ -466,6 +466,7 @@ double last_value_GPS_lon = -200.0;
 String last_value_GPS_timestamp;
 String last_data_string;
 int last_signal_strength;
+int last_disconnect_reason;
 
 String esp_chipid;
 String esp_mac_id;
@@ -1588,7 +1589,13 @@ static void webserver_status() {
 
 	page_content += FPSTR(EMPTY_ROW);
 	page_content += F("<tr><td colspan='2'><b>" INTL_ERROR "</b></td></tr>");
-	add_table_row_from_value(page_content, F("WiFi"), String(WiFi_error_count));
+	String wifiStatus(WiFi_error_count);
+	wifiStatus += '/';
+	wifiStatus += String(last_signal_strength);
+	wifiStatus += '/';
+	wifiStatus += String(last_disconnect_reason);
+	add_table_row_from_value(page_content, F("WiFi"), wifiStatus);
+
 	if (last_update_returncode != 0) {
 		add_table_row_from_value(page_content, F("OTA Return"),
 			last_update_returncode > 0 ? String(last_update_returncode) : HTTPClient::errorToString(last_update_returncode));
@@ -2026,6 +2033,9 @@ static void waitForWifiToConnect(int maxRetries) {
 /*****************************************************************
  * WiFi auto connecting script                                   *
  *****************************************************************/
+
+static WiFiEventHandler disconnectEventHandler;
+
 static void connectWifi() {
 	display_debug(F("Connecting to"), String(cfg::wlanssid));
 #if defined(ESP8266)
@@ -2036,6 +2046,10 @@ static void connectWifi() {
 	WiFi.setSleepMode(WIFI_NONE_SLEEP);
 	WiFi.setPhyMode(WIFI_PHY_MODE_11N);
 	delay(100);
+
+	disconnectEventHandler = WiFi.onStationModeDisconnected([](const WiFiEventStationModeDisconnected& evt) {
+		last_disconnect_reason = evt.reason;
+	});
 #endif
 	if (WiFi.getAutoConnect()) {
 		WiFi.setAutoConnect(false);
