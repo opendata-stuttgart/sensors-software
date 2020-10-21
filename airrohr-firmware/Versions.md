@@ -1,6 +1,7 @@
 NRZ-2020-132-B2
 * Adjust /metrics to be OpenMetrics protocol compatible
 * Track last Wifi disconnect reason in Device Status page
+* Rework SDS011 response handling to remain non-blocking
 
 NRZ-2020-132-B1
 * next beta version
