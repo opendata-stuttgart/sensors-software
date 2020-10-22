@@ -639,18 +639,18 @@ static void readConfig(bool oldconfig = false) {
 				continue;
 			}
 			switch (c.cfg_type) {
-				case Config_Type_Bool:
-					*(c.cfg_val.as_bool) = boolFromJSON(json, c.cfg_key());
-					break;
-				case Config_Type_UInt:
-				case Config_Type_Time:
-					*(c.cfg_val.as_uint) = json[c.cfg_key()].as<unsigned int>();
-					break;
-				case Config_Type_String:
-				case Config_Type_Password:
-					strncpy(c.cfg_val.as_str, json[c.cfg_key()].as<char*>(), c.cfg_len);
-					c.cfg_val.as_str[c.cfg_len] = '\0';
-					break;
+			case Config_Type_Bool:
+				*(c.cfg_val.as_bool) = boolFromJSON(json, c.cfg_key());
+				break;
+			case Config_Type_UInt:
+			case Config_Type_Time:
+				*(c.cfg_val.as_uint) = json[c.cfg_key()].as<unsigned int>();
+				break;
+			case Config_Type_String:
+			case Config_Type_Password:
+				strncpy(c.cfg_val.as_str, json[c.cfg_key()].as<char*>(), c.cfg_len);
+				c.cfg_val.as_str[c.cfg_len] = '\0';
+				break;
 			};
 		}
 		String writtenVersion(json["SOFTWARE_VERSION"].as<char*>());
