@@ -60,7 +60,7 @@
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2020-132-B1"
+#define SOFTWARE_VERSION_STR "NRZ-2020-132-B2"
 String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -347,6 +347,10 @@ unsigned long min_micro = 1000000000;
 unsigned long max_micro = 0;
 
 bool is_SDS_running = true;
+enum {
+	SDS_REPLY_HDR = 10,
+	SDS_REPLY_BODY = 8
+} SDS_waiting_for;
 bool is_PMS_running = true;
 bool is_HPM_running = true;
 bool is_NPM_running = true;
@@ -466,6 +470,7 @@ double last_value_GPS_lon = -200.0;
 String last_value_GPS_timestamp;
 String last_data_string;
 int last_signal_strength;
+int last_disconnect_reason;
 
 String esp_chipid;
 String esp_mac_id;
@@ -634,18 +639,18 @@ static void readConfig(bool oldconfig = false) {
 				continue;
 			}
 			switch (c.cfg_type) {
-				case Config_Type_Bool:
-					*(c.cfg_val.as_bool) = boolFromJSON(json, c.cfg_key());
-					break;
-				case Config_Type_UInt:
-				case Config_Type_Time:
-					*(c.cfg_val.as_uint) = json[c.cfg_key()].as<unsigned int>();
-					break;
-				case Config_Type_String:
-				case Config_Type_Password:
-					strncpy(c.cfg_val.as_str, json[c.cfg_key()].as<char*>(), c.cfg_len);
-					c.cfg_val.as_str[c.cfg_len] = '\0';
-					break;
+			case Config_Type_Bool:
+				*(c.cfg_val.as_bool) = boolFromJSON(json, c.cfg_key());
+				break;
+			case Config_Type_UInt:
+			case Config_Type_Time:
+				*(c.cfg_val.as_uint) = json[c.cfg_key()].as<unsigned int>();
+				break;
+			case Config_Type_String:
+			case Config_Type_Password:
+				strncpy(c.cfg_val.as_str, json[c.cfg_key()].as<char*>(), c.cfg_len);
+				c.cfg_val.as_str[c.cfg_len] = '\0';
+				break;
 			};
 		}
 		String writtenVersion(json["SOFTWARE_VERSION"].as<char*>());
@@ -1588,7 +1593,13 @@ static void webserver_status() {
 
 	page_content += FPSTR(EMPTY_ROW);
 	page_content += F("<tr><td colspan='2'><b>" INTL_ERROR "</b></td></tr>");
-	add_table_row_from_value(page_content, F("WiFi"), String(WiFi_error_count));
+	String wifiStatus(WiFi_error_count);
+	wifiStatus += '/';
+	wifiStatus += String(last_signal_strength);
+	wifiStatus += '/';
+	wifiStatus += String(last_disconnect_reason);
+	add_table_row_from_value(page_content, F("WiFi"), wifiStatus);
+
 	if (last_update_returncode != 0) {
 		add_table_row_from_value(page_content, F("OTA Return"),
 			last_update_returncode > 0 ? String(last_update_returncode) : HTTPClient::errorToString(last_update_returncode));
@@ -1783,7 +1794,6 @@ static void webserver_data_json() {
 		age = 0 - age;
 	} else {
 		s1 = last_data_string;
-		debug_outln(last_data_string, DEBUG_MED_INFO);
 		age = msSince(starttime);
 		if (age > cfg::sending_intervall_ms) {
 			age = 0;
@@ -2026,6 +2036,9 @@ static void waitForWifiToConnect(int maxRetries) {
 /*****************************************************************
  * WiFi auto connecting script                                   *
  *****************************************************************/
+
+static WiFiEventHandler disconnectEventHandler;
+
 static void connectWifi() {
 	display_debug(F("Connecting to"), String(cfg::wlanssid));
 #if defined(ESP8266)
@@ -2036,6 +2049,10 @@ static void connectWifi() {
 	WiFi.setSleepMode(WIFI_NONE_SLEEP);
 	WiFi.setPhyMode(WIFI_PHY_MODE_11N);
 	delay(100);
+
+	disconnectEventHandler = WiFi.onStationModeDisconnected([](const WiFiEventStationModeDisconnected& evt) {
+		last_disconnect_reason = evt.reason;
+	});
 #endif
 	if (WiFi.getAutoConnect()) {
 		WiFi.setAutoConnect(false);
@@ -2056,7 +2073,7 @@ static void connectWifi() {
 #endif
 
 	WiFi.mode(WIFI_STA);
-	
+
 #if defined(ESP8266)
 	WiFi.hostname(cfg::fs_ssid);
 #endif
@@ -2454,9 +2471,6 @@ static void fetchSensorDS18B20(String& s) {
  * read SDS011 sensor values                                     *
  *****************************************************************/
 static void fetchSensorSDS(String& s) {
-
-	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_SDS011));
-
 	if (cfg::sending_intervall_ms > (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS) &&
 		msSince(starttime) < (cfg::sending_intervall_ms - (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS))) {
 		if (is_SDS_running) {
@@ -2465,27 +2479,37 @@ static void fetchSensorSDS(String& s) {
 	} else {
 		if (! is_SDS_running) {
 			is_SDS_running = SDS_cmd(PmSensorCmd::Start);
+			SDS_waiting_for = SDS_REPLY_HDR;
 		}
 
-		const uint8_t constexpr header_measurement[2] = { 0xAA, 0xC0 };
-
-		while (serialSDS.available() >= 10 &&
-					serialSDS.find(header_measurement, sizeof(header_measurement))) {
+		while (serialSDS.available() >= SDS_waiting_for) {
+			const uint8_t constexpr hdr_measurement[2] = { 0xAA, 0xC0 };
 			uint8_t data[8];
-			unsigned r = serialSDS.readBytes(data, sizeof(data));
-			if (r == sizeof(data) && SDS_checksum_valid(data)) {
-				uint32_t pm25_serial = data[0] | (data[1] << 8);
-				uint32_t pm10_serial = data[2] | (data[3] << 8);
 
-				if (msSince(starttime) > (cfg::sending_intervall_ms - READINGTIME_SDS_MS)) {
-					sds_pm10_sum += pm10_serial;
-					sds_pm25_sum += pm25_serial;
-					UPDATE_MIN_MAX(sds_pm10_min, sds_pm10_max, pm10_serial);
-					UPDATE_MIN_MAX(sds_pm25_min, sds_pm25_max, pm25_serial);
-					debug_outln_verbose(F("PM10 (sec.) : "), String(pm10_serial / 10.0f));
-					debug_outln_verbose(F("PM2.5 (sec.): "), String(pm25_serial / 10.0f));
-					sds_val_count++;
+			switch (SDS_waiting_for) {
+			case SDS_REPLY_HDR:
+				if (serialSDS.find(hdr_measurement, sizeof(hdr_measurement)))
+					SDS_waiting_for = SDS_REPLY_BODY;
+				break;
+			case SDS_REPLY_BODY:
+				debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_SDS011));
+				if (serialSDS.readBytes(data, sizeof(data)) == sizeof(data) && SDS_checksum_valid(data)) {
+					uint32_t pm25_serial = data[0] | (data[1] << 8);
+					uint32_t pm10_serial = data[2] | (data[3] << 8);
+
+					if (msSince(starttime) > (cfg::sending_intervall_ms - READINGTIME_SDS_MS)) {
+						sds_pm10_sum += pm10_serial;
+						sds_pm25_sum += pm25_serial;
+						UPDATE_MIN_MAX(sds_pm10_min, sds_pm10_max, pm10_serial);
+						UPDATE_MIN_MAX(sds_pm25_min, sds_pm25_max, pm25_serial);
+						debug_outln_verbose(F("PM10 (sec.) : "), String(pm10_serial / 10.0f));
+						debug_outln_verbose(F("PM2.5 (sec.): "), String(pm25_serial / 10.0f));
+						sds_val_count++;
+					}
 				}
+				debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_SDS011));
+				SDS_waiting_for = SDS_REPLY_HDR;
+				break;
 			}
 		}
 	}
@@ -2523,8 +2547,6 @@ static void fetchSensorSDS(String& s) {
 			}
 		}
 	}
-
-	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_SDS011));
 }
 
 /*****************************************************************
@@ -4196,14 +4218,17 @@ static unsigned long sendDataToOptionalApis(const String &data) {
 
 void setup(void) {
 	Debug.begin(9600);		// Output to Serial at 9600 baud
-#if defined(ESP8266) && !NPM_READ
-	serialSDS.begin(9600, SWSERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX);
+#if defined (ESP8266)
+	serialSDS.begin(
+#if !NPM_READ
+		9600, SWSERIAL_8N1,
+#else
+		115200, SWSERIAL_8E1,
+#endif
+		PM_SERIAL_RX, PM_SERIAL_TX);
 	serialSDS.enableIntTx(true);
 #endif
-#if defined(ESP8266) && NPM_READ
-	serialSDS.begin(115200, SWSERIAL_8E1, PM_SERIAL_RX, PM_SERIAL_TX);
-	serialSDS.enableIntTx(true);
-#endif
+
 #if defined(ESP32) && !NPM_READ
 	serialSDS.begin(9600, SERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX);
 #endif
@@ -4213,7 +4238,7 @@ void setup(void) {
 	pinMode(PIN_CS, OUTPUT);
 	digitalWrite(PIN_CS, LOW);
 #endif
-	serialSDS.setTimeout((12 * 9 * 1000) / 9600);
+	serialSDS.setTimeout((4 * 12 * 1000) / 9600);
 
 #if defined(WIFI_LoRa_32_V2)
 	// reset the OLED display, e.g. of the heltec_wifi_lora_32 board
