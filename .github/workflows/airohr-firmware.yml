@@ -1,0 +1,39 @@
+on: [create, push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.7'
+    - name: Install dependencies
+      run: |
+        python3 -m pip install --upgrade pip
+        pip3 install platformio
+        platformio --version
+    - name: Run builds
+      run: |
+        cd airrohr-firmware && pwd && ls -l && platformio run && ls -l builds/
+        cd ../airrohr-update-loader && pwd && ls -l && platformio run && ls -l builds/
+    - name: Tar Results
+      run: |
+        tar czvf airrohr-firmware-builds.tar.gz -C airrohr-firmware/builds/ .
+    - name: Store airrohr-firmware
+      uses: actions/upload-artifact@v2
+      with:
+        if-no-files-found: error
+        name: airrohr-firmware-builds
+        path: airrohr-firmware-builds.tar.gz
+        retention-days: 30
+    - name: Store update-loader
+      uses: actions/upload-artifact@v2
+      with:
+        if-no-files-found: error
+        name: airrohr-update-loader
+        path: airrohr-update-loader/builds/latest_loader.bin
+        retention-days: 30
