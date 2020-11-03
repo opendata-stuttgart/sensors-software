@@ -60,7 +60,7 @@
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2020-132-B2"
+#define SOFTWARE_VERSION_STR "NRZ-2020-132-B3"
 String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -1847,6 +1847,14 @@ static void webserver_metrics_endpoint() {
 /*****************************************************************
  * Webserver Images                                              *
  *****************************************************************/
+
+static void webserver_favicon() {
+	server.sendHeader(F("Cache-Control"), F("max-age=2592000, public"));
+
+	server.send_P(200, TXT_CONTENT_TYPE_IMAGE_PNG,
+		LUFTDATEN_INFO_LOGO_PNG, LUFTDATEN_INFO_LOGO_PNG_SIZE);
+}
+
 static void webserver_static() {
 	server.sendHeader(F("Cache-Control"), F("max-age=2592000, public"));
 
@@ -1896,6 +1904,7 @@ static void setup_webserver() {
 	server.on(F("/reset"), webserver_reset);
 	server.on(F("/data.json"), webserver_data_json);
 	server.on(F("/metrics"), webserver_metrics_endpoint);
+	server.on(F("/favicon.ico"), webserver_favicon);
 	server.on(F(STATIC_PREFIX), webserver_static);
 	server.onNotFound(webserver_not_found);
 
