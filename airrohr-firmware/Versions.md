@@ -1,3 +1,6 @@
+NRZ-2020-132-B3
+* Move favicon.ico fetching last
+
 NRZ-2020-132-B2
 * Adjust /metrics to be OpenMetrics protocol compatible
 * Track last Wifi disconnect reason in Device Status page
