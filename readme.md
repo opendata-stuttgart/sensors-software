@@ -1,3 +1,8 @@
+# Fork note
+
+- [ ] Need to rewrite a bunch of GPIOs such that everything works with this board: https://oneguyoneblog.com/2018/12/28/wemos-d1-esp-wroom-02-arduino-ide/
+
+# Old Readme:
 firmware master branch: [![Build Status](https://travis-ci.com/opendata-stuttgart/sensors-software.svg?branch=master)](https://travis-ci.com/opendata-stuttgart/sensors-software)  
 firmware beta branch: [![Build Status](https://travis-ci.com/opendata-stuttgart/sensors-software.svg?branch=beta)](https://travis-ci.com/opendata-stuttgart/sensors-software)  
 
