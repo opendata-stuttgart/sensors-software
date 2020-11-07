@@ -13,3 +13,5 @@ GPIO 	Function
 15 	D8
 16 	LED green
 A0 	AD (ADC)
+
+![](schematics/wemos_d1_esp_wroom_02.jpg)
