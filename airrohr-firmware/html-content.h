@@ -8,8 +8,8 @@ const char TXT_CONTENT_TYPE_IMAGE_PNG[] PROGMEM = "image/png";
 const char DBG_TXT_TEMPERATURE[] PROGMEM = "Temperature (°C): ";
 const char DBG_TXT_HUMIDITY[] PROGMEM = "Humidity (%): ";
 const char DBG_TXT_PRESSURE[] PROGMEM = "Pressure (hPa): ";
-const char DBG_TXT_START_READING[] PROGMEM = "Start reading ";
-const char DBG_TXT_END_READING[] PROGMEM = "End reading ";
+const char DBG_TXT_START_READING[] PROGMEM = "R/ ";
+const char DBG_TXT_END_READING[] PROGMEM = "/R ";
 const char DBG_TXT_CHECKSUM_IS[] PROGMEM = "Checksum is: ";
 const char DBG_TXT_CHECKSUM_SHOULD[] PROGMEM = "Checksum should: ";
 const char DBG_TXT_DATA_READ_FAILED[] PROGMEM = "Data read failed";
@@ -70,7 +70,6 @@ input[type=submit]:hover{background:#d44}\
 
 const char WEB_PAGE_HEADER_HEAD[] PROGMEM = "<meta name='viewport' content='width=device-width'/>\
 <link rel='stylesheet' href='" STATIC_PREFIX "?r=css'>\
-<link rel='icon' type='image/png' href='" STATIC_PREFIX "?r=logo'/>\
 </style>\
 </head><body>\
 <div class='canvas'>\
