@@ -113,5 +113,10 @@ const char INTL_SIGNAL_QUALITY[] PROGMEM = "Jelminőség";
 #define INTL_SENSOR "Szenzor"
 #define INTL_PARAMETER "Paraméter"
 #define INTL_VALUE "Érték"
+const char INTL_ENABLE_BATTERY_MONITOR[] PROGMEM = "Engedélyezze az akkumulátorfigyelőt";
+const char INTL_BATTERY_CAPACITY[] PROGMEM = "Akkumulátor-kapacitás";
+const char INTL_BATTERY_U_MIN[] PROGMEM = "Akkumulátor U min (mV):";
+const char INTL_BATTERY_U_MAX[] PROGMEM = "Akkumulátor U max (mV):";
+const char INTL_ADC_DIVIDER_U_MAX[] PROGMEM = "ADA elválasztó U max (mV):";
 
 #include "./airrohr-logo-common.h"
