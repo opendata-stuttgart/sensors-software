@@ -47,13 +47,9 @@
  *                                                                      *
  ************************************************************************
  *
- * latest with lib 2.7.1
- * DATA:    [====      ]  39.5%	(used 32380 bytes from 81920 bytes)
- * PROGRAM:	[=====     ]  56.0%	(used 584924 bytes from 1044464 bytes)
- * 
- * latest mit lib 2.6.1
- * DATA:    [====      ]  40.7% (used 33316 bytes from 81920 bytes)
- * PROGRAM: [=====     ]  49.3% (used 514788 bytes from 1044464 bytes)
+ * latest mit lib 2.6.2
+ * DATA:    [====      ]  39.5% (used 32392 bytes from 81920 bytes)
+ * PROGRAM: [=====     ]  53.8% (used 580740 bytes from 1044464 bytes)
 
  * latest mit lib 2.5.2
  * DATA:    [====      ]  39.4% (used 32304 bytes from 81920 bytes)
@@ -3286,10 +3282,6 @@ static void fetchSensorSPS30(String& s) {
 
 	debug_outln_info(FPSTR(DBG_TXT_SEP));
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_SPS30));
-}
-
-long battery_map(long x, long in_min, long in_max, long out_min, long out_max){
-  return (x - in_min) * (out_max - out_min + 1) / (in_max - in_min + 1) + out_min;
 }
 
 /*****************************************************************
