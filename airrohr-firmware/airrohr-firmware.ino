@@ -198,7 +198,6 @@ namespace cfg {
 
 	// ADC settings
 	unsigned adc_divider_u_max = ADC_DIVIDER_U_MAX;
-	unsigned adc_range_max = ADC_RANGE_MAX;
 
 	// battery monitor measurement settings
 	bool enable_battery_monitor = ENABLE_BATTERY_MONITOR;
@@ -3306,7 +3305,7 @@ static void readBatteryVoltage() {
 	battery_sum += battery_last_value;
 	
 	float battery_avg_value = battery_sum / static_cast<float>(battery_val_count);
-	float ratio = cfg::adc_divider_u_max / static_cast<float>(cfg::adc_range_max);
+	float ratio = cfg::adc_divider_u_max / static_cast<float>(ADC_RANGE_MAX);
 	battery_analog_value = round(battery_avg_value * ratio);
 	debug_outln_verbose(F("Battery analog value (mV): "), String(battery_analog_value));
 	String bat_min_max = String(cfg::battery_u_min) + " / " + String(cfg::battery_u_max);

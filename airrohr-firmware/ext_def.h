@@ -127,7 +127,7 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 #define PPD_PIN_PM2 GPS_SERIAL_RX
 
 #define ADC_PIN A0
-#define ADC_RANGE_MAX 1023;
+#define ADC_RANGE_MAX 1023
 #endif
 
 
@@ -168,7 +168,7 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 //#define RFM69_INT D4
 
 #define ADC_PIN 36
-#define ADC_RANGE_MAX 4095;
+#define ADC_RANGE_MAX 4095
 #endif
 
 //  === pin assignments for lolin_d32_pro board ===================================
@@ -323,10 +323,10 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 
 #define ENABLE_BATTERY_MONITOR 0
 
-// Adc maximum input voltage applied to the resistor devider's input
+// Adc preset maximum input voltage applied to the voltage devider's input
 #define ADC_DIVIDER_U_MAX 5120
 
-// Battery fully charged and fully discharged voltages
+// Battery preset fully charged and discharged states voltages
 #define BATTERY_U_MAX 4200
 #define BATTERY_U_MIN 2800
 
