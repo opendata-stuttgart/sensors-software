@@ -923,7 +923,7 @@ static String form_select_lang() {
 					"<option value='HU'>Magyar (HU)</option>"
 					"<option value='PL'>Polski (PL)</option>"
 					"<option value='PT'>Português (PT)</option>"
-					"<option value='RS'>Srpski (RS)</option>"
+					"<option value='SR'>српски језик (SR)</option>"
 					"<option value='RU'>Русский (RU)</option>"
 					"<option value='SK'>Slovenský (SK)</option>"
 					"<option value='SE'>Svenska (SE)</option>"

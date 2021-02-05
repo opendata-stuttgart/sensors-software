@@ -27,8 +27,8 @@
 #include "intl_pl.h"
 #elif defined(INTL_PT)
 #include "intl_pt.h"
-#elif defined(INTL_RS)
-#include "intl_rs.h"
+#elif defined(INTL_SR)
+#include "intl_sr.h"
 #elif defined(INTL_RU)
 #include "intl_ru.h"
 #elif defined(INTL_SE)
