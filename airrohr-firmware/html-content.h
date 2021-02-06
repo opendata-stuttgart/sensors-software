@@ -63,12 +63,12 @@ input[type=submit]:hover{background:#d44}\
 .radio{display:none}.panel{display:none}\
 .canvas{min-height:118px;background:#3ba;margin-bottom:20px;}\
 #r4:checked~.panels>#panel4,#r1:checked~.panels>#panel1,#r3:checked~.panels>#panel3,#r2:checked~.panels>#panel2{display:block}\
-#r4:checked~.tabs>#tab4,#r1:checked~.tabs>#tab1,#r3:checked~.tabs>#tab3,#r2:checked~.tabs>#tab2{background:#3ba;color:#fff}\
-";
+#r4:checked~.tabs>#tab4,#r1:checked~.tabs>#tab1,#r3:checked~.tabs>#tab3,#r2:checked~.tabs>#tab2{background:#3ba;color:#fff}";
 
 #define STATIC_PREFIX "/" INTL_LANG "_s1"
 
 const char WEB_PAGE_HEADER_HEAD[] PROGMEM = "<meta name='viewport' content='width=device-width'/>\
+<meta name='theme-color' content='#3ba'>\
 <link rel='stylesheet' href='" STATIC_PREFIX "?r=css'>\
 </style>\
 </head><body>\
@@ -76,7 +76,7 @@ const char WEB_PAGE_HEADER_HEAD[] PROGMEM = "<meta name='viewport' content='widt
 <a class='b' href='/' style='background:none;display:inline'>\
 <img src='" STATIC_PREFIX "?r=logo' alt='" INTL_BACK_TO_HOME "' style='float:left;margin:16px' width='100' height='89'/></a>";
 
-const char WEB_PAGE_HEADER_BODY[] PROGMEM = "<h3 style='margin:0 10px'>" INTL_PM_SENSOR "</h3>\
+const char WEB_PAGE_HEADER_BODY[] PROGMEM = "<h3 style='margin:0 10px; color:#fff;'>" INTL_PM_SENSOR "</h3>\
 <br/><small style='color:#fff;font-weight:700'>ID: {id} ({macid})<br/>" INTL_FIRMWARE ": " SOFTWARE_VERSION_STR "/" INTL_LANG "&nbsp;(" __DATE__ ")<br/>\
 </small></div><div class='content'><h4>" INTL_HOME " {n} {t}</h4>";
 
@@ -100,8 +100,7 @@ const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a class='b' href='/values'>{t}</a
 <a class='b' href='/config'>{conf}</a><br/>\
 <a class='b' href='/removeConfig'>" INTL_CONFIGURATION_DELETE "</a><br/>\
 <a class='b' href='/reset'>{restart}</a><br/>\
-<a class='b' href='/debug'>{debug}</a><br/>\
-";
+<a class='b' href='/debug'>{debug}</a><br/>";
 
 const char WEB_CONFIG_SCRIPT[] PROGMEM = "<script>\
 function setSSID(ssid){document.getElementById('wlanssid').value=ssid.innerText||ssid.textContent;document.getElementById('wlanpwd').focus();}\
@@ -111,8 +110,7 @@ function load_wifi_list(){var x=new XMLHttpRequest();x.open('GET','/wifi');x.onl
 const char WEB_REMOVE_CONFIG_CONTENT[] PROGMEM = "<h3>" INTL_CONFIGURATION_REALLY_DELETE "</h3>\
 <table><tr><td><form method='POST' action='/removeConfig'>\
 <input type='submit' class='s_red' name='submit' value='" INTL_DELETE "'/></form></td>\
-<td><a class='b' href='/'>" INTL_CANCEL "</a></td></tr></table>\
-";
+<td><a class='b' href='/'>" INTL_CANCEL "</a></td></tr></table>";
 
 const char WEB_RESET_CONTENT[] PROGMEM = "<h3>" INTL_REALLY_RESTART_SENSOR "</h3>" \
 "<table><tr><td><form method='POST' action'/reset'>" \
