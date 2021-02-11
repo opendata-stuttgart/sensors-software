@@ -107,6 +107,7 @@ String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 #include "./DHT.h"
 #include <Adafruit_HTU21DF.h>
 #include <Adafruit_BMP085.h>
+#include "ClosedCube_SHT31D.h" // support for Nettigo Air Monitor HECA
 #include <Adafruit_SHT31.h>
 #include <StreamString.h>
 #include <DallasTemperature.h>
@@ -164,6 +165,7 @@ namespace cfg {
 	bool sps30_read = SPS30_READ;
 	bool bmp_read = BMP_READ;
 	bool bmx280_read = BMX280_READ;
+	bool heca_read = HECA_READ;
 	bool sht3x_read = SHT3X_READ;
 	bool ds18b20_read = DS18B20_READ;
 	bool dnms_read = DNMS_READ;
@@ -243,6 +245,7 @@ long int sample_count = 0;
 bool htu21d_init_failed = false;
 bool bmp_init_failed = false;
 bool bmx280_init_failed = false;
+bool heca_init_failed = false;
 bool sht3x_init_failed = false;
 bool dnms_init_failed = false;
 bool gps_init_failed = false;
@@ -303,6 +306,11 @@ Adafruit_BMP085 bmp;
  * BMP/BME280 declaration                                        *
  *****************************************************************/
 BMX280 bmx280;
+
+/*****************************************************************
+ * HECA (SHT30) declaration                                            *
+ *****************************************************************/
+ClosedCube_SHT31D heca;
 
 /*****************************************************************
  * SHT3x declaration                                             *
@@ -464,6 +472,8 @@ float last_value_NPM_P2 = -1.0;
 float last_value_NPM_N0 = -1.0;
 float last_value_NPM_N1 = -1.0;
 float last_value_NPM_N2 = -1.0;
+double last_value_HECA_T = -128.0;
+double last_value_HECA_H = -1.0;
 float last_value_GPS_alt = -1000.0;
 double last_value_GPS_lat = -200.0;
 double last_value_GPS_lon = -200.0;
@@ -1130,6 +1140,7 @@ static void webserver_config_send_body_get(String& page_content) {
 	add_form_checkbox_sensor(Config_htu21d_read, FPSTR(INTL_HTU21D));
 	add_form_checkbox_sensor(Config_bmx280_read, FPSTR(INTL_BMX280));
 	add_form_checkbox_sensor(Config_sht3x_read, FPSTR(INTL_SHT3X));
+	add_form_checkbox_sensor(Config_heca_read, FPSTR(INTL_HECA)); //page_content += form_checkbox_sensor("heca_read", FPSTR(INTL_HECA), heca_read);
 
 	// Paginate page after ~ 1500 Bytes
 	server.sendContent(page_content);
@@ -1499,6 +1510,11 @@ static void webserver_values() {
 	if (cfg::sht3x_read) {
 		add_table_t_value(FPSTR(SENSORS_SHT3X), FPSTR(INTL_TEMPERATURE), last_value_SHT3X_T);
 		add_table_h_value(FPSTR(SENSORS_SHT3X), FPSTR(INTL_HUMIDITY), last_value_SHT3X_H);
+		page_content += FPSTR(EMPTY_ROW);
+	}
+	if (cfg::heca_read) {
+		add_table_t_value(FPSTR(SENSORS_HECA), FPSTR(INTL_TEMPERATURE), check_display_value(last_value_HECA_T, -128, 1, 0), unit_T);
+		add_table_h_value(FPSTR(SENSORS_HECA), FPSTR(INTL_HUMIDITY), check_display_value(last_value_HECA_H, -1, 1, 0), unit_H);
 		page_content += FPSTR(EMPTY_ROW);
 	}
 	if (cfg::ds18b20_read) {
@@ -2411,6 +2427,27 @@ static void fetchSensorSHT3x(String& s) {
 	}
 	debug_outln_info(FPSTR(DBG_TXT_SEP));
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_SHT3X));
+}
+
+/*****************************************************************
+ * read HECA (SHT3x) sensor values                                      *
+ *****************************************************************/
+static string sensorHECA() {
+	String s;
+
+	debug_out(String(FPSTR(DBG_TXT_START_READING)) + FPSTR(SENSORS_HECA), DEBUG_MED_INFO, 1);
+
+	SHT31D result = heca.periodicFetchData();
+  if (result.error == SHT3XD_NO_ERROR) {
+		last_value_HECA_T = result.t;
+		last_value_HECA_H = result.rh;
+ 	} else {
+		last_value_HECA_T = -128.0;
+		last_value_HECA_H = -1.0;
+	}
+	s += Value2Json(F("HECA_temperature"), Float2String(last_value_HECA_T));
+	s += Value2Json(F("HECA_humidity"), Float2String(last_value_HECA_H));
+	return s;
 }
 
 /*****************************************************************
@@ -3659,7 +3696,7 @@ static void display_values() {
 	if (cfg::sps30_read) {
 		screens[screen_count++] = 2;
 	}
-	if (cfg::dht_read || cfg::ds18b20_read || cfg::htu21d_read || cfg::bmp_read || cfg::bmx280_read || cfg::sht3x_read) {
+	if (cfg::dht_read || cfg::ds18b20_read || cfg::htu21d_read || cfg::bmp_read || cfg::bmx280_read || cfg::sht3x_read || cfg::heca_read ) {
 		screens[screen_count++] = 3;
 	}
 	if (cfg::gps_read) {
@@ -3928,6 +3965,34 @@ static void initSPS30() {
 }
 
 /*****************************************************************
+ * Init HECA                                                     *
+ *****************************************************************/
+
+ bool initHECA() {
+
+	debug_out(F("Trying HECA (SHT30) sensor on 0x44"), DEBUG_MIN_INFO, 0);
+	heca.begin(0x44);
+	//heca.begin(addr);
+	if (heca.periodicStart(SHT3XD_REPEATABILITY_HIGH, SHT3XD_FREQUENCY_1HZ) != SHT3XD_NO_ERROR) {
+		debug_out(F(" ... not found"), DEBUG_MIN_INFO, 1);
+		debug_out(F(" [HECA ERROR] Cannot start periodic mode"), DEBUG_MIN_INFO, 1);
+		return false;
+	} else {
+		// temperature set, temperature clear, humidity set, humidity clear
+		if (heca.writeAlertHigh(120, 119, 63, 60) != SHT3XD_NO_ERROR) {
+			debug_out(F(" [HECA ERROR] Cannot set Alert HIGH"), DEBUG_MIN_INFO, 1);
+		}
+		if (heca.writeAlertLow(-5, 5, 0, 1) != SHT3XD_NO_ERROR) {
+			debug_out(F(" [HECA ERROR] Cannot set Alert LOW"), DEBUG_MIN_INFO, 1);
+		}
+		if (heca.clearAll() != SHT3XD_NO_ERROR) {
+			debug_out(F(" [HECA ERROR] Cannot clear register"), DEBUG_MIN_INFO, 1);
+		}
+		return true;
+	}
+}
+
+/*****************************************************************
    Init DNMS - Digital Noise Measurement Sensor
  *****************************************************************/
 static void initDNMS() {
@@ -4077,6 +4142,14 @@ static void powerOnTestSensors() {
 		if (!sht3x.begin()) {
 			debug_outln_error(F("Check SHT3x wiring"));
 			sht3x_init_failed = true;
+		}
+	}
+
+	if (cfg::heca_read) {
+		debug_out_info(F("Read HECA (SHT30)..."));
+		if (!initHECA()) {
+			debug_outln_error(F("Check HECA (SHT30) wiring"));
+			heca_init_failed = true;
 		}
 	}
 
@@ -4480,6 +4553,10 @@ void loop(void) {
 			data += result;
 			sum_send_time += sendSensorCommunity(result, SHT3X_API_PIN, FPSTR(SENSORS_SHT3X), "SHT3X_");
 			result = emptyString;
+		}
+		if (cfg::heca_read && (! heca_init_failed)) {
+			debug_out(String(FPSTR(DBG_TXT_CALL_SENSOR)) + FPSTR(SENSORS_HECA), DEBUG_MAX_INFO, 1);
+			result_HECA = sensorHECA();                 // getting temperature, humidity and pressure (optional)
 		}
 		if (cfg::ds18b20_read) {
 			// getting temperature (optional)
