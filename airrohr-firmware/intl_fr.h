@@ -1,6 +1,6 @@
 /*
  *	airRohr firmware
- *	Copyright (C) 2016-2020  Code for Stuttgart a.o.
+ *	Copyright (C) 2016-2020 Code for Stuttgart a.o.
  *
  *  French translations
  *
