@@ -34,6 +34,8 @@ const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "korrektsioon dB(A)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "Korrektsioon °C";
+const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "";
+const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Autentimine";
 #define INTL_REPORT_ISSUE "Teatage probleemist"
@@ -52,6 +54,13 @@ const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
 const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Wifi info kuvamine";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Seadme info kuvamine";
+
+#define INTL_STATIC_IP_TEXT ""
+const char INTL_STATIC_IP[] PROGMEM = "";
+const char INTL_STATIC_SUBNET[] PROGMEM = "";
+const char INTL_STATIC_GATEWAY[] PROGMEM = "";
+const char INTL_STATIC_DNS[] PROGMEM = "";
+
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;tase";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Mõõtmisintervall (sek)";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Kestus marsruuteri režiim";
@@ -99,6 +108,7 @@ const char INTL_PARTICULATE_MATTER[] PROGMEM = "tahked osakesed";
 const char INTL_TEMPERATURE[] PROGMEM = "temperatuur";
 const char INTL_HUMIDITY[] PROGMEM = "niiskus";
 const char INTL_PRESSURE[] PROGMEM = "õhurõhk";
+const char INTL_DEW_POINT[] PROGMEM = "";
 const char INTL_LEQ_A[] PROGMEM = "LAeq";
 const char INTL_LA_MIN[] PROGMEM = "LA min";
 const char INTL_LA_MAX[] PROGMEM = "LA max";

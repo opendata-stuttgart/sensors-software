@@ -60,7 +60,7 @@
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2020-134-B1"
+#define SOFTWARE_VERSION_STR "NRZ-2020-134-B2"
 String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -148,6 +148,11 @@ namespace cfg {
 	// wifi credentials
 	char wlanssid[LEN_WLANSSID];
 	char wlanpwd[LEN_CFG_PASSWORD];
+	
+	char static_ip[16];
+	char static_subnet[16];
+	char static_gateway[16];
+	char static_dns[16];
 
 	// credentials of the sensor in access point mode
 	char fs_ssid[LEN_FS_SSID] = FS_SSID;
@@ -164,6 +169,7 @@ namespace cfg {
 	bool sps30_read = SPS30_READ;
 	bool bmp_read = BMP_READ;
 	bool bmx280_read = BMX280_READ;
+	char height_above_sealevel[8] = "0";
 	bool sht3x_read = SHT3X_READ;
 	bool ds18b20_read = DS18B20_READ;
 	bool dnms_read = DNMS_READ;
@@ -205,7 +211,7 @@ namespace cfg {
 	char url_influx[LEN_URL_INFLUX];
 	unsigned port_influx = PORT_INFLUX;
 	char user_influx[LEN_USER_INFLUX] = USER_INFLUX;
-	char pwd_influx[LEN_CFG_PASSWORD] = PWD_INFLUX;
+	char pwd_influx[LEN_PASS_INFLUX] = PWD_INFLUX;
 	char measurement_name_influx[LEN_MEASUREMENT_NAME_INFLUX];
 	bool ssl_influx = SSL_INFLUX;
 
@@ -501,6 +507,11 @@ struct struct_wifiInfo {
 
 struct struct_wifiInfo *wifiInfo;
 uint8_t count_wifiInfo;
+
+IPAddress addr_static_ip;
+IPAddress addr_static_subnet;
+IPAddress addr_static_gateway;
+IPAddress addr_static_dns;
 
 #define msSince(timestamp_before) (act_milli - (timestamp_before))
 
@@ -804,6 +815,31 @@ static void createLoggerConfigs() {
 }
 
 /*****************************************************************
+ * dew point helper function                                     *
+ *****************************************************************/
+static float dew_point(const float temperature, const float humidity) {
+	float dew_temp;
+	const float k2 = 17.62;
+	const float k3 = 243.12;
+
+	dew_temp = k3 * ( ( ( k2 * temperature ) / ( k3 + temperature ) ) + log(humidity / 100.0f) ) / ( ( ( k2 * k3 ) / ( k3 + temperature) ) - log(humidity / 100.0f) );
+
+	return dew_temp;
+}
+
+/*****************************************************************
+ * dew point helper function                                     *
+ *****************************************************************/
+static float pressure_at_sealevel(const float temperature, const float pressure) {
+	float pressure_at_sealevel;
+
+	pressure_at_sealevel = pressure * pow(((temperature + 273.15f)/ (temperature + 273.15f + (0.0065f * readCorrectionOffset(cfg::height_above_sealevel)))),-5.255f);
+
+	return pressure_at_sealevel;
+}
+
+
+/*****************************************************************
  * html helper functions                                         *
  *****************************************************************/
 
@@ -1100,6 +1136,14 @@ static void webserver_config_send_body_get(String& page_content) {
 	add_form_checkbox(Config_display_wifi_info, FPSTR(INTL_DISPLAY_WIFI_INFO));
 	add_form_checkbox(Config_display_device_info, FPSTR(INTL_DISPLAY_DEVICE_INFO));
 
+	page_content = FPSTR(WEB_BR_LF_B);
+	page_content += F(INTL_STATIC_IP_TEXT "</b><br/>");
+	add_form_input(page_content, Config_static_ip, FPSTR(INTL_STATIC_IP), 15);
+	add_form_input(page_content, Config_static_subnet, FPSTR(INTL_STATIC_SUBNET), 15);
+	add_form_input(page_content, Config_static_gateway, FPSTR(INTL_STATIC_GATEWAY), 15);
+	add_form_input(page_content, Config_static_dns, FPSTR(INTL_STATIC_DNS), 15);
+	page_content += FPSTR(BR_TAG);
+
 	server.sendContent(page_content);
 	page_content = FPSTR(WEB_BR_LF_B);
 	page_content += F(INTL_FIRMWARE "</b>&nbsp;");
@@ -1147,6 +1191,7 @@ static void webserver_config_send_body_get(String& page_content) {
 	page_content += FPSTR(TABLE_TAG_OPEN);
 	add_form_input(page_content, Config_dnms_correction, FPSTR(INTL_DNMS_CORRECTION), LEN_DNMS_CORRECTION-1);
 	add_form_input(page_content, Config_temp_correction, FPSTR(INTL_TEMP_CORRECTION), LEN_TEMP_CORRECTION-1);
+	add_form_input(page_content, Config_height_above_sealevel, FPSTR(INTL_HEIGHT_ABOVE_SEALEVEL), LEN_HEIGHT_ABOVE_SEALEVEL-1);
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 
 	page_content += FPSTR(WEB_BR_LF_B);
@@ -1399,8 +1444,10 @@ static void webserver_values() {
 	start_html_page(page_content, FPSTR(INTL_CURRENT_DATA));
 	const String unit_Deg("°");
 	const String unit_P("hPa");
+	const String unit_T("°C");
 	const String unit_NC();
 	const String unit_LA(F("dB(A)"));
+	float dew_point_temp;
 
 	const int signal_quality = calcWiFiSignalQuality(last_signal_strength);
 	debug_outln_info(F("ws: values ..."));
@@ -1488,25 +1535,33 @@ static void webserver_values() {
 	if (cfg::htu21d_read) {
 		add_table_t_value(FPSTR(SENSORS_HTU21D), FPSTR(INTL_TEMPERATURE), last_value_HTU21D_T);
 		add_table_h_value(FPSTR(SENSORS_HTU21D), FPSTR(INTL_HUMIDITY), last_value_HTU21D_H);
+		dew_point_temp = dew_point(last_value_HTU21D_T, last_value_HTU21D_H);
+		add_table_value(FPSTR(SENSORS_HTU21D), FPSTR(INTL_DEW_POINT), isnan(dew_point_temp) ? "-" : String(dew_point_temp,1), unit_T);
 		page_content += FPSTR(EMPTY_ROW);
 	}
 	if (cfg::bmp_read) {
 		add_table_t_value(FPSTR(SENSORS_BMP180), FPSTR(INTL_TEMPERATURE), last_value_BMP_T);
 		add_table_value(FPSTR(SENSORS_BMP180), FPSTR(INTL_PRESSURE), check_display_value(last_value_BMP_P / 100.0f, (-1 / 100.0f), 2, 0), unit_P);
+		add_table_value(FPSTR(SENSORS_BMP180), FPSTR(INTL_PRESSURE_AT_SEALEVEL), last_value_BMP_P != -1.0f ? String(pressure_at_sealevel(last_value_BMP_T, last_value_BMP_P / 100.0f), 2) : "-", unit_P);
 		page_content += FPSTR(EMPTY_ROW);
 	}
 	if (cfg::bmx280_read) {
 		const char* const sensor_name = (bmx280.sensorID() == BME280_SENSOR_ID) ? SENSORS_BME280 : SENSORS_BMP280;
 		add_table_t_value(FPSTR(sensor_name), FPSTR(INTL_TEMPERATURE), last_value_BMX280_T);
 		add_table_value(FPSTR(sensor_name), FPSTR(INTL_PRESSURE), check_display_value(last_value_BMX280_P / 100.0f, (-1 / 100.0f), 2, 0), unit_P);
+		add_table_value(FPSTR(sensor_name), FPSTR(INTL_PRESSURE_AT_SEALEVEL), last_value_BMX280_P != -1.0f ? String(pressure_at_sealevel(last_value_BMX280_T, last_value_BMX280_P / 100.0f), 2) : "-", unit_P);
 		if (bmx280.sensorID() == BME280_SENSOR_ID) {
 			add_table_h_value(FPSTR(sensor_name), FPSTR(INTL_HUMIDITY), last_value_BME280_H);
+			dew_point_temp = dew_point(last_value_BMX280_T, last_value_BME280_H);
+			add_table_value(FPSTR(sensor_name), FPSTR(INTL_DEW_POINT), isnan(dew_point_temp) ? "-" : String(dew_point_temp,1), unit_T);
 		}
 		page_content += FPSTR(EMPTY_ROW);
 	}
 	if (cfg::sht3x_read) {
 		add_table_t_value(FPSTR(SENSORS_SHT3X), FPSTR(INTL_TEMPERATURE), last_value_SHT3X_T);
 		add_table_h_value(FPSTR(SENSORS_SHT3X), FPSTR(INTL_HUMIDITY), last_value_SHT3X_H);
+		dew_point_temp = dew_point(last_value_SHT3X_T, last_value_SHT3X_H);
+		add_table_value(FPSTR(SENSORS_SHT3X), FPSTR(INTL_DEW_POINT), isnan(dew_point_temp) ? "-" : String(dew_point_temp,1), unit_T);
 		page_content += FPSTR(EMPTY_ROW);
 	}
 	if (cfg::ds18b20_read) {
@@ -1647,11 +1702,9 @@ static void webserver_status() {
 	end_html_page(page_content);
 }
 
-
 /*****************************************************************
  * Webserver read serial ring buffer                             *
  *****************************************************************/
-
 static void webserver_serial() {
 	String s(Debug.popLines());
 
@@ -2093,6 +2146,9 @@ static void connectWifi() {
 
 #if defined(ESP8266)
 	WiFi.hostname(cfg::fs_ssid);
+	if (addr_static_ip.fromString(cfg::static_ip) && addr_static_subnet.fromString(cfg::static_subnet) && addr_static_gateway.fromString(cfg::static_gateway) && addr_static_dns.fromString(cfg::static_dns)) {
+		WiFi.config(addr_static_ip, addr_static_subnet, addr_static_gateway, addr_static_dns, addr_static_dns);
+	}
 #endif
 
 #if defined(ESP32)
@@ -2129,7 +2185,6 @@ static void connectWifi() {
 		MDNS.addServiceTxt("http", "tcp", "PATH", "/config");
 	}
 }
-
 
 static WiFiClient* getNewLoggerWiFiClient(const LoggerEntry logger) {
 
