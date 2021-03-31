@@ -1,3 +1,9 @@
+NRZ-2020-134-B2
+* dew point added
+* pressure at sea level added
+* additional languages (via DeepL)
+* static IP config
+
 NRZ-2020-134-B1
 * next beta version
 

@@ -34,6 +34,8 @@ const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "korekcija dB(A)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "Korekcija °C";
+const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "";
+const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Autentiškumo nustatymas";
 #define INTL_REPORT_ISSUE "Pranešti apie problemą"
@@ -52,6 +54,13 @@ const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
 const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Rodyti WiFi informaciją";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Rodyti informaciją apie įrenginį";
+
+#define INTL_STATIC_IP_TEXT ""
+const char INTL_STATIC_IP[] PROGMEM = "";
+const char INTL_STATIC_SUBNET[] PROGMEM = "";
+const char INTL_STATIC_GATEWAY[] PROGMEM = "";
+const char INTL_STATIC_DNS[] PROGMEM = "";
+
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Derinimo&nbsp;lygis";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Matavimo intervalas (sek.)";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Trukmė maršrutizatoriaus režimas";
@@ -99,6 +108,7 @@ const char INTL_PARTICULATE_MATTER[] PROGMEM = "kietosios dalelės";
 const char INTL_TEMPERATURE[] PROGMEM = "temperatūra";
 const char INTL_HUMIDITY[] PROGMEM = "drėgmė";
 const char INTL_PRESSURE[] PROGMEM = "oro slėgis";
+const char INTL_DEW_POINT[] PROGMEM = "";
 const char INTL_LEQ_A[] PROGMEM = "LAeq";
 const char INTL_LA_MIN[] PROGMEM = "LA min.";
 const char INTL_LA_MAX[] PROGMEM = "LA max";

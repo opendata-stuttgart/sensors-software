@@ -34,6 +34,8 @@ const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "Correctie in dB(A)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "Correctie in °C";
+const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "";
+const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Toegang beperken";
 #define INTL_REPORT_ISSUE "Een probleem melden"
@@ -52,6 +54,13 @@ const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
 const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Toon WiFi info";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Toon apparaatinfo";
+
+#define INTL_STATIC_IP_TEXT ""
+const char INTL_STATIC_IP[] PROGMEM = "";
+const char INTL_STATIC_SUBNET[] PROGMEM = "";
+const char INTL_STATIC_GATEWAY[] PROGMEM = "";
+const char INTL_STATIC_DNS[] PROGMEM = "";
+
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debugniveau";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Meetinterval";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Tijdsduur routermodus";
@@ -99,6 +108,7 @@ const char INTL_PARTICULATE_MATTER[] PROGMEM = "fijnstof";
 const char INTL_TEMPERATURE[] PROGMEM = "Temperatuur";
 const char INTL_HUMIDITY[] PROGMEM = "Rel. luchtvochtigheid";
 const char INTL_PRESSURE[] PROGMEM = "Luchtdruk";
+const char INTL_DEW_POINT[] PROGMEM = "Dauwpunt";
 const char INTL_LEQ_A[] PROGMEM = "LAeq";
 const char INTL_LA_MIN[] PROGMEM = "LA min";
 const char INTL_LA_MAX[] PROGMEM = "LA max";

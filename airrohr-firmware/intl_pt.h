@@ -33,6 +33,8 @@ const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "Valor de correção em dB(A)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "Correção em °C";
+const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "";
+const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Autorização";
 #define INTL_REPORT_ISSUE "Comunicar um problema"
@@ -51,6 +53,13 @@ const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
 const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Mostrar informações WiFi";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Mostrar informações do dispositivo";
+
+#define INTL_STATIC_IP_TEXT ""
+const char INTL_STATIC_IP[] PROGMEM = "";
+const char INTL_STATIC_SUBNET[] PROGMEM = "";
+const char INTL_STATIC_GATEWAY[] PROGMEM = "";
+const char INTL_STATIC_DNS[] PROGMEM = "";
+
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;Level";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Intervalo de medição";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Duração&nbsp;Modo roteador";
@@ -98,6 +107,7 @@ const char INTL_PARTICULATE_MATTER[] PROGMEM = "partículas finas";
 const char INTL_TEMPERATURE[] PROGMEM = "Temperatura";
 const char INTL_HUMIDITY[] PROGMEM = "Humidade";
 const char INTL_PRESSURE[] PROGMEM = "Pressão atmosférica";
+const char INTL_DEW_POINT[] PROGMEM = "";
 const char INTL_LEQ_A[] PROGMEM = "LAeq";
 const char INTL_LA_MIN[] PROGMEM = "LA min";
 const char INTL_LA_MAX[] PROGMEM = "LA max";
