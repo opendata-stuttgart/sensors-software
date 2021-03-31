@@ -33,6 +33,8 @@ const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "корекция в dB (A)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "Корекция в °C";
+const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "";
+const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Оторизация";
 #define INTL_REPORT_ISSUE "Подаване на сигнал за проблем"
@@ -49,6 +51,13 @@ const char INTL_LCD1602_27[] PROGMEM = "LCD 1602 (I2C: 0x27)";
 const char INTL_LCD1602_3F[] PROGMEM = "LCD 1602 (I2C: 0x3F)";
 const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
 const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
+
+#define INTL_STATIC_IP_TEXT ""
+const char INTL_STATIC_IP[] PROGMEM = "";
+const char INTL_STATIC_SUBNET[] PROGMEM = "";
+const char INTL_STATIC_GATEWAY[] PROGMEM = "";
+const char INTL_STATIC_DNS[] PROGMEM = "";
+
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Показване на WiFi информация";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Информация за устройството на дисплея";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;Level";
@@ -98,6 +107,7 @@ const char INTL_PARTICULATE_MATTER[] PROGMEM = "Прахови частици";
 const char INTL_TEMPERATURE[] PROGMEM = "Температура";
 const char INTL_HUMIDITY[] PROGMEM = "Влажност на въздуха";
 const char INTL_PRESSURE[] PROGMEM = "Атмосферно налягане";
+const char INTL_DEW_POINT[] PROGMEM = "";
 const char INTL_LEQ_A[] PROGMEM = "LAeq";
 const char INTL_LA_MIN[] PROGMEM = "LA min";
 const char INTL_LA_MAX[] PROGMEM = "LA max";

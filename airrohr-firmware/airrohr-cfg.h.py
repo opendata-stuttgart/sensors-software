@@ -24,6 +24,7 @@ Bool		ds18b20_read
 Bool		dnms_read
 String		dnms_correction
 String		temp_correction
+String		height_above_sealevel
 Bool		gps_read
 Bool		send2dusti
 Bool		ssl_dusti
@@ -44,6 +45,10 @@ Bool		has_lcd2004
 Bool		has_lcd2004_27
 Bool		display_wifi_info
 Bool		display_device_info
+String		static_ip
+String		static_subnet
+String		static_gateway
+String		static_dns
 UInt		debug
 Time		sending_intervall_ms
 Time		time_for_wifi_config
