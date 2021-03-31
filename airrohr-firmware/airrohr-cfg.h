@@ -70,7 +70,7 @@ enum ConfigShapeId {
 	Config_display_wifi_info,
 	Config_display_device_info,
 	Config_static_ip,
-	Config_static_mask,
+	Config_static_subnet,
 	Config_static_gateway,
 	Config_static_dns,
 	Config_debug,
@@ -138,7 +138,7 @@ static constexpr char CFG_KEY_HAS_LCD2004_27[] PROGMEM = "has_lcd2004_27";
 static constexpr char CFG_KEY_DISPLAY_WIFI_INFO[] PROGMEM = "display_wifi_info";
 static constexpr char CFG_KEY_DISPLAY_DEVICE_INFO[] PROGMEM = "display_device_info";
 static constexpr char CFG_KEY_STATIC_IP[] PROGMEM = "static_ip";
-static constexpr char CFG_KEY_STATIC_MASK[] PROGMEM = "static_mask";
+static constexpr char CFG_KEY_STATIC_SUBNET[] PROGMEM = "static_subnet";
 static constexpr char CFG_KEY_STATIC_GATEWAY[] PROGMEM = "static_gateway";
 static constexpr char CFG_KEY_STATIC_DNS[] PROGMEM = "static_dns";
 static constexpr char CFG_KEY_DEBUG[] PROGMEM = "debug";
@@ -206,7 +206,7 @@ static constexpr ConfigShapeEntry configShape[] PROGMEM = {
 	{ Config_Type_Bool, 0, CFG_KEY_DISPLAY_WIFI_INFO, &cfg::display_wifi_info },
 	{ Config_Type_Bool, 0, CFG_KEY_DISPLAY_DEVICE_INFO, &cfg::display_device_info },
 	{ Config_Type_String, sizeof(cfg::static_ip)-1, CFG_KEY_STATIC_IP, cfg::static_ip },
-	{ Config_Type_String, sizeof(cfg::static_mask)-1, CFG_KEY_STATIC_MASK, cfg::static_mask },
+	{ Config_Type_String, sizeof(cfg::static_subnet)-1, CFG_KEY_STATIC_SUBNET, cfg::static_subnet },
 	{ Config_Type_String, sizeof(cfg::static_gateway)-1, CFG_KEY_STATIC_GATEWAY, cfg::static_gateway },
 	{ Config_Type_String, sizeof(cfg::static_dns)-1, CFG_KEY_STATIC_DNS, cfg::static_dns },
 	{ Config_Type_UInt, 0, CFG_KEY_DEBUG, &cfg::debug },
