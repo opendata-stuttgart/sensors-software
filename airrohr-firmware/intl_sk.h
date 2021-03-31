@@ -33,6 +33,8 @@ const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM ="korekcia v dB(A)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "korekcia v °C";
+const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "";
+const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Prihlásenie (heslom)";
 #define INTL_REPORT_ISSUE "Report an issue"
@@ -51,6 +53,13 @@ const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
 const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Zobraziť info o WiFi";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Zobraziť info o zariadení";
+
+#define INTL_STATIC_IP_TEXT ""
+const char INTL_STATIC_IP[] PROGMEM = "";
+const char INTL_STATIC_SUBNET[] PROGMEM = "";
+const char INTL_STATIC_GATEWAY[] PROGMEM = "";
+const char INTL_STATIC_DNS[] PROGMEM = "";
+
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Ladenide&nbsp;úroveň";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Interval meraní (sec)";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Trvanie router mod";
@@ -98,6 +107,7 @@ const char INTL_PARTICULATE_MATTER[] PROGMEM = "prachových častíc";
 const char INTL_TEMPERATURE[] PROGMEM = "teplota";
 const char INTL_HUMIDITY[] PROGMEM = "rel. vlhkosť";
 const char INTL_PRESSURE[] PROGMEM = "tlak vzduchu";
+const char INTL_DEW_POINT[] PROGMEM = "";
 const char INTL_LEQ_A[] PROGMEM = "LAeq";
 const char INTL_LA_MIN[] PROGMEM = "LA min";
 const char INTL_LA_MAX[] PROGMEM = "LA max";

@@ -34,6 +34,8 @@ const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "correction in dB(A)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "Correction in °C";
+const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "Above sea level (m)";
+const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "pressure at sea level";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Authentication";
 #define INTL_REPORT_ISSUE "Report an issue"
@@ -52,6 +54,13 @@ const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
 const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Display Wifi info";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Display device info";
+
+#define INTL_STATIC_IP_TEXT "Configuration static IP address (all fields must be completed)"
+const char INTL_STATIC_IP[] PROGMEM = "IP address";
+const char INTL_STATIC_SUBNET[] PROGMEM = "Subnet";
+const char INTL_STATIC_GATEWAY[] PROGMEM = "Gateway";
+const char INTL_STATIC_DNS[] PROGMEM = "DNS server";
+
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;level";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Measuring interval (sec)";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Duration router mode";
@@ -99,6 +108,7 @@ const char INTL_PARTICULATE_MATTER[] PROGMEM = "particulate matter";
 const char INTL_TEMPERATURE[] PROGMEM = "temperature";
 const char INTL_HUMIDITY[] PROGMEM = "humidity";
 const char INTL_PRESSURE[] PROGMEM = "air pressure";
+const char INTL_DEW_POINT[] PROGMEM = "dew point";
 const char INTL_LEQ_A[] PROGMEM = "LAeq";
 const char INTL_LA_MIN[] PROGMEM = "LA min";
 const char INTL_LA_MAX[] PROGMEM = "LA max";
