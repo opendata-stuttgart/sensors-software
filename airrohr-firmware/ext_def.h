@@ -12,7 +12,7 @@ const char WWW_PASSWORD[] PROGMEM = "";
 
 // Sensor Wifi config (config mode)
 #define FS_SSID ""
-#define FS_PWD ""
+#define FS_PWD "airrohrcfg"
 
 // Where to send the data?
 #define SEND2SENSORCOMMUNITY 1
@@ -262,6 +262,10 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 // SHT3x, temperature, pressure
 #define SHT3X_READ 0
 #define SHT3X_API_PIN 7
+
+// SHT3x, temperature, pressure, CO2
+#define SCD30_READ 0
+#define SCD30_API_PIN 17
 
 // DS18B20, temperature
 #define DS18B20_READ 0

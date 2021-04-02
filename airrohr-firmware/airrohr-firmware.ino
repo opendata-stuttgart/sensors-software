@@ -110,6 +110,7 @@ String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 #include <Adafruit_SHT31.h>
 #include <StreamString.h>
 #include <DallasTemperature.h>
+#include <SparkFun_SCD30_Arduino_Library.h>
 #include <TinyGPS++.h>
 #include "./bmx280_i2c.h"
 #include "./sps30_i2c.h"
@@ -171,6 +172,7 @@ namespace cfg {
 	bool bmx280_read = BMX280_READ;
 	char height_above_sealevel[8] = "0";
 	bool sht3x_read = SHT3X_READ;
+	bool scd30_read = SCD30_READ;
 	bool ds18b20_read = DS18B20_READ;
 	bool dnms_read = DNMS_READ;
 	char dnms_correction[LEN_DNMS_CORRECTION] = DNMS_CORRECTION;
@@ -250,6 +252,7 @@ bool htu21d_init_failed = false;
 bool bmp_init_failed = false;
 bool bmx280_init_failed = false;
 bool sht3x_init_failed = false;
+bool scd30_init_failed = false;
 bool dnms_init_failed = false;
 bool gps_init_failed = false;
 bool airrohr_selftest_failed = false;
@@ -322,6 +325,11 @@ OneWire oneWire;
 DallasTemperature ds18b20(&oneWire);
 
 /*****************************************************************
+ * SCD30 declaration                                             *
+ *****************************************************************/
+SCD30 scd30;
+
+/*****************************************************************
  * GPS declaration                                               *
  *****************************************************************/
 TinyGPSPlus gps;
@@ -378,6 +386,9 @@ float last_value_HTU21D_T = -128.0;
 float last_value_HTU21D_H = -1.0;
 float last_value_SHT3X_T = -128.0;
 float last_value_SHT3X_H = -1.0;
+float last_value_SCD30_T = -128.0;
+float last_value_SCD30_H = -1.0;
+uint16_t last_value_SCD30_CO2 = 0;
 
 uint32_t sds_pm10_sum = 0;
 uint32_t sds_pm25_sum = 0;
@@ -601,14 +612,12 @@ static void disable_unneeded_nmea() {
 	serialGPS->println(F("$PUBX,40,VTG,0,0,0,0*5E"));       // Track made good and ground speed
 }
 
-
 /*****************************************************************
  * read config from spiffs                                       *
  *****************************************************************/
 
 /* backward compatibility for the times when we stored booleans as strings */
-static bool boolFromJSON(const DynamicJsonDocument& json, const __FlashStringHelper* key)
-{
+static bool boolFromJSON(const DynamicJsonDocument& json, const __FlashStringHelper* key) {
 	if (json[key].is<char*>()) {
 		return !strcmp_P(json[key].as<char*>(), PSTR("true"));
 	}
@@ -838,11 +847,9 @@ static float pressure_at_sealevel(const float temperature, const float pressure)
 	return pressure_at_sealevel;
 }
 
-
 /*****************************************************************
  * html helper functions                                         *
  *****************************************************************/
-
 static void start_html_page(String& page_content, const String& title) {
 	last_page_load = millis();
 
@@ -1051,7 +1058,6 @@ static void webserver_root() {
 /*****************************************************************
  * Webserver config: show config page                            *
  *****************************************************************/
-
 static void webserver_config_send_body_get(String& page_content) {
 	auto add_form_checkbox = [&page_content](const ConfigShapeId cfgid, const String& info) {
 		page_content += form_checkbox(cfgid, info, true);
@@ -1182,6 +1188,7 @@ static void webserver_config_send_body_get(String& page_content) {
 	add_form_checkbox_sensor(Config_htu21d_read, FPSTR(INTL_HTU21D));
 	add_form_checkbox_sensor(Config_bmx280_read, FPSTR(INTL_BMX280));
 	add_form_checkbox_sensor(Config_sht3x_read, FPSTR(INTL_SHT3X));
+	add_form_checkbox_sensor(Config_scd30_read, FPSTR(INTL_SCD30));
 
 	// Paginate page after ~ 1500 Bytes
 	server.sendContent(page_content);
@@ -1445,6 +1452,7 @@ static void webserver_values() {
 	const String unit_Deg("°");
 	const String unit_P("hPa");
 	const String unit_T("°C");
+	const String unit_CO2("ppm");
 	const String unit_NC();
 	const String unit_LA(F("dB(A)"));
 	float dew_point_temp;
@@ -1562,6 +1570,14 @@ static void webserver_values() {
 		add_table_h_value(FPSTR(SENSORS_SHT3X), FPSTR(INTL_HUMIDITY), last_value_SHT3X_H);
 		dew_point_temp = dew_point(last_value_SHT3X_T, last_value_SHT3X_H);
 		add_table_value(FPSTR(SENSORS_SHT3X), FPSTR(INTL_DEW_POINT), isnan(dew_point_temp) ? "-" : String(dew_point_temp,1), unit_T);
+		page_content += FPSTR(EMPTY_ROW);
+	}
+	if (cfg::scd30_read) {
+		add_table_t_value(FPSTR(SENSORS_SCD30), FPSTR(INTL_TEMPERATURE), last_value_SCD30_T);
+		add_table_h_value(FPSTR(SENSORS_SCD30), FPSTR(INTL_HUMIDITY), last_value_SCD30_H);
+		add_table_value(FPSTR(SENSORS_SCD30), FPSTR(INTL_CO2_PPM), check_display_value(last_value_SCD30_CO2,0,0,0),unit_CO2);
+		dew_point_temp = dew_point(last_value_SCD30_T, last_value_SCD30_H);
+		add_table_value(FPSTR(SENSORS_SCD30), FPSTR(INTL_DEW_POINT), isnan(dew_point_temp) ? "-" : String(dew_point_temp,1), unit_T);
 		page_content += FPSTR(EMPTY_ROW);
 	}
 	if (cfg::ds18b20_read) {
@@ -2032,6 +2048,17 @@ static void wifiConfig() {
 		SSID.toCharArray(wifiInfo[i].ssid, sizeof(wifiInfo[0].ssid));
 	}
 
+	// Use 13 channels if locale is not "EN"
+	wifi_country_t wifi;
+	wifi.policy = WIFI_COUNTRY_POLICY_MANUAL;
+	strcpy(wifi.cc, INTL_LANG);
+	wifi.nchan = (INTL_LANG[0] == 'E' && INTL_LANG[1] == 'N') ? 11 : 13;
+	wifi.schan = 1;
+
+#if defined(ESP8266)
+	wifi_set_country(&wifi);
+#endif
+
 	WiFi.mode(WIFI_AP);
 	const IPAddress apIP(192, 168, 4, 1);
 	WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
@@ -2060,6 +2087,16 @@ static void wifiConfig() {
 	}
 
 	WiFi.softAPdisconnect(true);
+
+	wifi.policy = WIFI_COUNTRY_POLICY_MANUAL;
+	strcpy(wifi.cc, INTL_LANG);
+	wifi.nchan = 13;
+	wifi.schan = 1;
+
+#if defined(ESP8266)
+	wifi_set_country(&wifi);
+#endif
+
 	WiFi.mode(WIFI_STA);
 
 	dnsServer.stop();
@@ -2131,11 +2168,11 @@ static void connectWifi() {
 		WiFi.setAutoReconnect(true);
 	}
 
-	// Use 13 channels if locale is not "EN"
+	// Use 13 channels for connect to known AP
 	wifi_country_t wifi;
 	wifi.policy = WIFI_COUNTRY_POLICY_MANUAL;
 	strcpy(wifi.cc, INTL_LANG);
-	wifi.nchan = (INTL_LANG[0] == 'E' && INTL_LANG[1] == 'N') ? 11 : 13;
+	wifi.nchan = 13;
 	wifi.schan = 1;
 
 #if defined(ESP8266)
@@ -2474,6 +2511,33 @@ static void fetchSensorSHT3x(String& s) {
 	}
 	debug_outln_info(FPSTR(DBG_TXT_SEP));
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_SHT3X));
+}
+
+/*****************************************************************
+ * read SHT3x sensor values                                      *
+ *****************************************************************/
+static void fetchSensorSCD30(String& s) {
+	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_SCD30));
+
+	const auto t = scd30.getTemperature();
+	const auto h = scd30.getHumidity();
+	const auto c = scd30.getCO2();
+	
+	if (isnan(h) || isnan(t) || isnan(c)) {
+		last_value_SCD30_T = -128.0;
+		last_value_SCD30_H = -1.0;
+		last_value_SCD30_CO2 = 0;
+		debug_outln_error(F("SCD30 read failed"));
+	} else {
+		last_value_SCD30_T = t;
+		last_value_SCD30_H = h;
+		last_value_SCD30_CO2 = c;
+		add_Value2Json(s, F("SCD30_temperature"), FPSTR(DBG_TXT_TEMPERATURE), last_value_SCD30_T);
+		add_Value2Json(s, F("SCD30_humidity"), FPSTR(DBG_TXT_HUMIDITY), last_value_SCD30_H);
+		add_Value2Json(s, F("SCD30_co2_ppm"), FPSTR(DBG_TXT_CO2PPM), last_value_SCD30_CO2);
+	}
+	debug_outln_info(FPSTR(DBG_TXT_SEP));
+	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_SCD30));
 }
 
 /*****************************************************************
@@ -3725,17 +3789,20 @@ static void display_values() {
 	if (cfg::dht_read || cfg::ds18b20_read || cfg::htu21d_read || cfg::bmp_read || cfg::bmx280_read || cfg::sht3x_read) {
 		screens[screen_count++] = 3;
 	}
-	if (cfg::gps_read) {
+	if (cfg::scd30_read) {
 		screens[screen_count++] = 4;
 	}
-	if (cfg::dnms_read) {
+	if (cfg::gps_read) {
 		screens[screen_count++] = 5;
 	}
+	if (cfg::dnms_read) {
+		screens[screen_count++] = 6;
+	}
 	if (cfg::display_wifi_info) {
-		screens[screen_count++] = 6;	// Wifi info
+		screens[screen_count++] = 7;	// Wifi info
 	}
 	if (cfg::display_device_info) {
-		screens[screen_count++] = 7;	// chipID, firmware and count of measurements
+		screens[screen_count++] = 8;	// chipID, firmware and count of measurements
 	}
 	// update size of "screens" when adding more screens!
 	if (cfg::has_display || cfg::has_sh1106 || lcd_2004) {
@@ -3769,27 +3836,29 @@ static void display_values() {
 			while (line_count < 3) { display_lines[line_count++] = emptyString; }
 			break;
 		case 4:
-			display_header = "NEO6M";
-			display_lines[0] = "Lat: ";
-			display_lines[0] += check_display_value(lat_value, -200.0, 6, 10);
-			display_lines[1] = "Lon: ";
-			display_lines[1] += check_display_value(lon_value, -200.0, 6, 10);
-			display_lines[2] = "Alt: ";
-			display_lines[2] += check_display_value(alt_value, -1000.0, 2, 10);
-			break;
+			display_header = "SCD30";
+			display_lines[0] = "Temp.: "; display_lines[0] += check_display_value(last_value_SCD30_H, -128, 1, 6); display_lines[0] += " °C";
+			display_lines[1] = "Hum.: ";  display_lines[1] += check_display_value(last_value_SCD30_T, -1, 1, 6);   display_lines[1] += " %";
+			display_lines[2] = "CO2: ";	  display_lines[2] += check_display_value(last_value_SCD30_CO2, 0, 0, 6);  display_lines[2] += " ppm";
 		case 5:
+			display_header = "NEO6M";
+			display_lines[0] = "Lat: ";	display_lines[0] += check_display_value(lat_value, -200.0, 6, 10);
+			display_lines[1] = "Lon: ";	display_lines[1] += check_display_value(lon_value, -200.0, 6, 10);
+			display_lines[2] = "Alt: ";	display_lines[2] += check_display_value(alt_value, -1000.0, 2, 10);
+			break;
+		case 6:
 			display_header = FPSTR(SENSORS_DNMS);
 			display_lines[0] = std::move(tmpl(F("LAeq: {v} db(A)"), check_display_value(la_eq_value, -1, 1, 6)));
 			display_lines[1] = std::move(tmpl(F("LA_max: {v} db(A)"), check_display_value(la_max_value, -1, 1, 6)));
 			display_lines[2] = std::move(tmpl(F("LA_min: {v} db(A)"), check_display_value(la_min_value, -1, 1, 6)));
 			break;
-		case 6:
+		case 7:
 			display_header = F("Wifi info");
 			display_lines[0] = "IP: "; display_lines[0] += WiFi.localIP().toString();
 			display_lines[1] = "SSID: "; display_lines[1] += WiFi.SSID();
 			display_lines[2] = std::move(tmpl(F("Signal: {v} %"), String(calcWiFiSignalQuality(last_signal_strength))));
 			break;
-		case 7:
+		case 8:
 			display_header = F("Device Info");
 			display_lines[0] = "ID: "; display_lines[0] += esp_chipid;
 			display_lines[1] = "FW: "; display_lines[1] += SOFTWARE_VERSION;
@@ -3864,20 +3933,24 @@ static void display_values() {
 			display_lines[1] = std::move(tmpl(F("H: {v} %"), check_display_value(h_value, -1, 1, 6)));
 			break;
 		case 4:
+			display_lines[0] = std::move(tmpl(F("T/H: {v}"), check_display_value(last_value_SCD30_T, -128, 1, 5) + " / " + check_display_value(last_value_SCD30_H,-1,0,3)));
+			display_lines[1] = std::move(tmpl(F("CO2: {v} ppm"), check_display_value(last_value_SCD30_CO2, 0, 0, 6)));
+			break;
+		case 5:
 			display_lines[0] = "Lat: ";
 			display_lines[0] += check_display_value(lat_value, -200.0, 6, 11);
 			display_lines[1] = "Lon: ";
 			display_lines[1] += check_display_value(lon_value, -200.0, 6, 11);
 			break;
-		case 5:
+		case 6:
 			display_lines[0] = std::move(tmpl(F("LAeq: {v} db(A)"), check_display_value(la_eq_value, -1, 1, 6)));
 			display_lines[1] = std::move(tmpl(F("LA_max: {v} db(A)"), check_display_value(la_max_value, -1, 1, 6)));
 			break;
-		case 6:
+		case 7:
 			display_lines[0] = WiFi.localIP().toString();
 			display_lines[1] = WiFi.SSID();
 			break;
-		case 7:
+		case 8:
 			display_lines[0] = "ID: ";
 			display_lines[0] += esp_chipid;
 			display_lines[1] = "FW: ";
@@ -4140,6 +4213,14 @@ static void powerOnTestSensors() {
 		if (!sht3x.begin()) {
 			debug_outln_error(F("Check SHT3x wiring"));
 			sht3x_init_failed = true;
+		}
+	}
+
+	if (cfg::scd30_read) {
+		debug_outln_info(F("Read SCD30..."));
+		if (!scd30.begin()) {
+			debug_outln_error(F("Check SCD30 wiring"));
+			scd30_init_failed = true;
 		}
 	}
 
@@ -4542,6 +4623,13 @@ void loop(void) {
 			fetchSensorSHT3x(result);
 			data += result;
 			sum_send_time += sendSensorCommunity(result, SHT3X_API_PIN, FPSTR(SENSORS_SHT3X), "SHT3X_");
+			result = emptyString;
+		}
+		if (cfg::scd30_read && (! scd30_init_failed )) {
+			// getting temperature and humidity (optional)
+			fetchSensorSCD30(result);
+			data += result;
+			sum_send_time += sendSensorCommunity(result, SCD30_API_PIN, FPSTR(SENSORS_SCD30), "SCD30_");
 			result = emptyString;
 		}
 		if (cfg::ds18b20_read) {

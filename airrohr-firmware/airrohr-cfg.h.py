@@ -20,6 +20,7 @@ Bool		sps30_read
 Bool		bmp_read
 Bool		bmx280_read
 Bool		sht3x_read
+Bool		scd30_read
 Bool		ds18b20_read
 Bool		dnms_read
 String		dnms_correction

@@ -1,3 +1,6 @@
+NRZ-2020-134-B3
+* support for SCD30 added
+
 NRZ-2020-134-B2
 * dew point added
 * pressure at sea level added
