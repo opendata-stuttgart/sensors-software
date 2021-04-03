@@ -60,7 +60,7 @@
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2020-134-B2"
+#define SOFTWARE_VERSION_STR "NRZ-2020-134-B3"
 String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -1142,7 +1142,7 @@ static void webserver_config_send_body_get(String& page_content) {
 	add_form_checkbox(Config_display_wifi_info, FPSTR(INTL_DISPLAY_WIFI_INFO));
 	add_form_checkbox(Config_display_device_info, FPSTR(INTL_DISPLAY_DEVICE_INFO));
 
-	page_content = FPSTR(WEB_BR_LF_B);
+	page_content += FPSTR(WEB_BR_LF_B);
 	page_content += F(INTL_STATIC_IP_TEXT "</b><br/>");
 	add_form_input(page_content, Config_static_ip, FPSTR(INTL_STATIC_IP), 15);
 	add_form_input(page_content, Config_static_subnet, FPSTR(INTL_STATIC_SUBNET), 15);
@@ -3837,9 +3837,10 @@ static void display_values() {
 			break;
 		case 4:
 			display_header = "SCD30";
-			display_lines[0] = "Temp.: "; display_lines[0] += check_display_value(last_value_SCD30_H, -128, 1, 6); display_lines[0] += " °C";
-			display_lines[1] = "Hum.: ";  display_lines[1] += check_display_value(last_value_SCD30_T, -1, 1, 6);   display_lines[1] += " %";
-			display_lines[2] = "CO2: ";	  display_lines[2] += check_display_value(last_value_SCD30_CO2, 0, 0, 6);  display_lines[2] += " ppm";
+			display_lines[0] = "Temp.: "; display_lines[0] += check_display_value(last_value_SCD30_T, -128, 1, 5); display_lines[0] += " °C";
+			display_lines[1] = "Hum.:  "; display_lines[1] += check_display_value(last_value_SCD30_H, -1, 1, 5);   display_lines[1] += " %";
+			display_lines[2] = "CO2:   "; display_lines[2] += check_display_value(last_value_SCD30_CO2, 0, 0, 5);  display_lines[2] += " ppm";
+			break;
 		case 5:
 			display_header = "NEO6M";
 			display_lines[0] = "Lat: ";	display_lines[0] += check_display_value(lat_value, -200.0, 6, 10);
