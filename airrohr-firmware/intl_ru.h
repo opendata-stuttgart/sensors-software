@@ -1,6 +1,6 @@
 /*
  *	airRohr firmware
- *	Copyright (C) 2016-2018  Code for Stuttgart a.o.
+ *	Copyright (C) 2016-2018 Code for Stuttgart a.o.
  *
  *  Russian translations
  *
@@ -18,7 +18,7 @@ const char INTL_NETWORKS_FOUND[] PROGMEM = "Найденые сети: ";
 const char INTL_AB_HIER_NUR_ANDERN[] PROGMEM = "Изменяйте значения ниже если действительно знаете что делаете";
 const char INTL_SAVE[] PROGMEM = "Сохранить";
 const char INTL_SENSORS[] PROGMEM = "Датчики";
-const char INTL_MORE_SENSORS[] PROGMEM = "More Sensors";
+const char INTL_MORE_SENSORS[] PROGMEM = "Иные датчики";
 const char INTL_SDS011[] PROGMEM = "SDS011 ({pm})";
 const char INTL_PMS[] PROGMEM = "Plantower PMS(1,3,5,6,7)003 ({pm})";
 const char INTL_HPM[] PROGMEM = "Honeywell PM ({pm})";
@@ -30,10 +30,13 @@ const char INTL_HTU21D[] PROGMEM = "HTU21D ({t}, {h})";
 const char INTL_BMP180[] PROGMEM = "BMP180 ({t}, {p})";
 const char INTL_BMX280[] PROGMEM = "BME280 ({t}, {h}, {p}), BMP280 ({t}, {p})";
 const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
+const char INTL_SCD30[] PROGMEM = "SCD30 ({t}, {h}, CO₂)";
 const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "поправка в dB(A)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "Коррекция в °C";
+const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "Высота над уровнем моря (м)";
+const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "Давление на уровне моря";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Активировать аутентификацию для входа в интерфейс сенсора";
 #define INTL_REPORT_ISSUE "Сообщить о проблеме"
@@ -42,7 +45,7 @@ const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "Название WiFi устр�
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Имя";
 const char INTL_MORE_SETTINGS[] PROGMEM = "Дополнительные настройки";
 const char INTL_AUTO_UPDATE[] PROGMEM = "Автоматическое обновление";
-const char INTL_USE_BETA[] PROGMEM = "Загружать бета-версии";
+const char INTL_USE_BETA[] PROGMEM = "Устанавливать бета-версии";
 const char INTL_DISPLAY[] PROGMEM = "OLED SSD1306";
 const char INTL_SH1106[] PROGMEM = "OLED SH1106";
 const char INTL_FLIP_DISPLAY[] PROGMEM = "Перевернуть OLED экран";
@@ -52,6 +55,13 @@ const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
 const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Отображать информацию о WiFi";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Отображать информацию об устройстве";
+
+#define INTL_STATIC_IP_TEXT "Настроить статический IP (необходимо заполнить все поля!)"
+const char INTL_STATIC_IP[] PROGMEM = "IP адрес";
+const char INTL_STATIC_SUBNET[] PROGMEM = "Подсеть";
+const char INTL_STATIC_GATEWAY[] PROGMEM = "Шлюз";
+const char INTL_STATIC_DNS[] PROGMEM = "DNS сервер";
+
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Уровень&nbsp;отладки";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Измерительный интервал";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Длительность режима маршрутизатора";
@@ -67,7 +77,7 @@ const char INTL_SEND_TO[] PROGMEM = "Отправлять в {v}";
 const char INTL_READ_FROM[] PROGMEM = "Считывать с {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Устройство перезапускается...";
 const char INTL_RESTART_DEVICE[] PROGMEM = "Перезапустить устройство";
-const char INTL_DELETE_CONFIG[] PROGMEM = "Config.json удалить";
+const char INTL_DELETE_CONFIG[] PROGMEM = "Удалить config.json ";
 const char INTL_RESTART_SENSOR[] PROGMEM = "Перезапустить устройство";
 #define INTL_HOME "Меню"
 #define INTL_BACK_TO_HOME "Вернуться в основное меню"
@@ -99,6 +109,8 @@ const char INTL_PARTICULATE_MATTER[] PROGMEM = "Датчик пыли";
 const char INTL_TEMPERATURE[] PROGMEM = "Температура";
 const char INTL_HUMIDITY[] PROGMEM = "Относительная влажность";
 const char INTL_PRESSURE[] PROGMEM = "Давление воздуха";
+const char INTL_DEW_POINT[] PROGMEM = "Точка росы";
+const char INTL_CO2_PPM[] PROGMEM = "ppm CO₂";
 const char INTL_LEQ_A[] PROGMEM = "LAeq";
 const char INTL_LA_MIN[] PROGMEM = "LA min";
 const char INTL_LA_MAX[] PROGMEM = "LA max";

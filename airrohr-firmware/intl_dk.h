@@ -1,6 +1,6 @@
 /*
  *	airRohr firmware
- *	Copyright (C) 2016-2018  Code for Stuttgart a.o.
+ *	Copyright (C) 2016-2018 Code for Stuttgart a.o.
  *
  *  Danish translations
  *
@@ -30,10 +30,13 @@ const char INTL_HTU21D[] PROGMEM = "HTU21D ({t}, {h})";
 const char INTL_BMP180[] PROGMEM = "BMP180 ({t}, {p})";
 const char INTL_BMX280[] PROGMEM = "BME280 ({t}, {h}, {p}), BMP280 ({t}, {p})";
 const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
+const char INTL_SCD30[] PROGMEM = "SCD30 ({t}, {h}, CO₂)";
 const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "korrektion i dB (A)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "Korrektion i °C";
+const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "";
+const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Aktiver BasicAuth";
 #define INTL_REPORT_ISSUE "Rapporter et problem"
@@ -52,6 +55,13 @@ const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
 const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Vis WiFi-info";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Vis enhedsinfo";
+
+#define INTL_STATIC_IP_TEXT ""
+const char INTL_STATIC_IP[] PROGMEM = "";
+const char INTL_STATIC_SUBNET[] PROGMEM = "";
+const char INTL_STATIC_GATEWAY[] PROGMEM = "";
+const char INTL_STATIC_DNS[] PROGMEM = "";
+
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;level";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Målinterval";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Permanent&nbsp;router-mode";
@@ -99,6 +109,8 @@ const char INTL_PARTICULATE_MATTER[] PROGMEM = "Partikelsensor";
 const char INTL_TEMPERATURE[] PROGMEM = "Temperatur";
 const char INTL_HUMIDITY[] PROGMEM = "Rel. Fugtighed";
 const char INTL_PRESSURE[] PROGMEM = "Lufttryk";
+const char INTL_DEW_POINT[] PROGMEM = "Dugpunkt";
+const char INTL_CO2_PPM[] PROGMEM = "ppm CO₂";
 const char INTL_LEQ_A[] PROGMEM = "LAeq";
 const char INTL_LA_MIN[] PROGMEM = "LA min";
 const char INTL_LA_MAX[] PROGMEM = "LA max";

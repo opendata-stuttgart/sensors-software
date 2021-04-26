@@ -1,6 +1,6 @@
 /*
  *	airRohr firmware
- *	Copyright (C) 2016-2018  Code for Stuttgart a.o.
+ *	Copyright (C) 2016-2018 Code for Stuttgart a.o.
  *
  *  Dutch translations
  *
@@ -17,8 +17,8 @@ const char INTL_NO_NETWORKS[] PROGMEM =  "Geen WiFi-netwerk gevonden";
 const char INTL_NETWORKS_FOUND[] PROGMEM = "Netwerk gevonden: ";
 const char INTL_AB_HIER_NUR_ANDERN[] PROGMEM = "Geavanceerde instellingen (enkel als je weet wat je doet)";
 const char INTL_SAVE[] PROGMEM = "Opslaan";
-const char INTL_SENSORS[] PROGMEM = "Sensors";
-const char INTL_MORE_SENSORS[] PROGMEM = "More Sensors";
+const char INTL_SENSORS[] PROGMEM = "Sensoren";
+const char INTL_MORE_SENSORS[] PROGMEM = "Overige sensoren";
 const char INTL_SDS011[] PROGMEM = "SDS011 ({pm})";
 const char INTL_PMS[] PROGMEM = "Plantower PMS(1,3,5,6,7)003 ({pm})";
 const char INTL_HPM[] PROGMEM = "Honeywell PM ({pm})";
@@ -30,12 +30,15 @@ const char INTL_HTU21D[] PROGMEM = "HTU21D ({t}, {h})";
 const char INTL_BMP180[] PROGMEM = "BMP180 ({t}, {p})";
 const char INTL_BMX280[] PROGMEM = "BME280 ({t}, {h}, {p}), BMP280 ({t}, {p})";
 const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
+const char INTL_SCD30[] PROGMEM = "SCD30 ({t}, {h}, CO₂)";
 const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "Correctie in dB(A)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "Correctie in °C";
+const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "Hoogte boven zeeniveau (m)";
+const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "Luchtdruk op zeeniveau";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
-const char INTL_BASICAUTH[] PROGMEM = "Beperk toegang";
+const char INTL_BASICAUTH[] PROGMEM = "Toegang beperken";
 #define INTL_REPORT_ISSUE "Een probleem melden"
 
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "Netwerknaam en -wachtwoord van de fijnstofsensor";
@@ -52,6 +55,13 @@ const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
 const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Toon WiFi info";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Toon apparaatinfo";
+
+#define INTL_STATIC_IP_TEXT "Configuratie statisch IP-adres (alle velden moeten ingevuld zijn)"
+const char INTL_STATIC_IP[] PROGMEM = "IP-adres";
+const char INTL_STATIC_SUBNET[] PROGMEM = "Subnet";
+const char INTL_STATIC_GATEWAY[] PROGMEM = "Gateway";
+const char INTL_STATIC_DNS[] PROGMEM = "DNS-server";
+
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debugniveau";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Meetinterval";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Tijdsduur routermodus";
@@ -73,7 +83,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "Herstart sensor";
 #define INTL_BACK_TO_HOME "Terug naar homepagina"
 const char INTL_CURRENT_DATA[] PROGMEM = "Huidige data";
 const char INTL_DEVICE_STATUS[] PROGMEM = "Apparaatstatus";
-#define INTL_ACTIVE_SENSORS_MAP "Actieve sensors kaart (externe link)"
+#define INTL_ACTIVE_SENSORS_MAP "Actieve sensoren kaart (externe link)"
 #define INTL_CONFIGURATION_DELETE "Configuratie verwijderen"
 #define INTL_CONFIGURATION_REALLY_DELETE "Bent u zeker dat u de configuratie wilt verwijderen?"
 #define INTL_DELETE "Verwijderen"
@@ -99,6 +109,8 @@ const char INTL_PARTICULATE_MATTER[] PROGMEM = "fijnstof";
 const char INTL_TEMPERATURE[] PROGMEM = "Temperatuur";
 const char INTL_HUMIDITY[] PROGMEM = "Rel. luchtvochtigheid";
 const char INTL_PRESSURE[] PROGMEM = "Luchtdruk";
+const char INTL_DEW_POINT[] PROGMEM = "Dauwpunt";
+const char INTL_CO2_PPM[] PROGMEM = "ppm CO₂";
 const char INTL_LEQ_A[] PROGMEM = "LAeq";
 const char INTL_LA_MIN[] PROGMEM = "LA min";
 const char INTL_LA_MAX[] PROGMEM = "LA max";
