@@ -501,7 +501,6 @@ int last_disconnect_reason;
 
 uint32_t battery_analog_value = 0;
 uint32_t battery_capacity = 0;
-// uint32_t battery_last_value = 0;
 uint32_t battery_sum = 0;
 uint32_t battery_val_count = 0;
 
@@ -3417,7 +3416,6 @@ static void readBatteryVoltage() {
 	battery_val_count++;
 	if(battery_val_count > 3){
 		battery_sum = 0;
-		// battery_last_value = 0;
 		if(msSince(battery_monitor_period) <= READINGTIME_ADC_MS) 
 					return;
 		
@@ -3429,8 +3427,6 @@ static void readBatteryVoltage() {
 	String dbg_reading = "Battery voltage #" + String(battery_val_count);
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), dbg_reading);
 	battery_sum += analogRead(ADC_PIN);
-	// battery_last_value = analogRead(ADC_PIN); 
-	// battery_sum += battery_last_value;
 	
 	float battery_avg_value = battery_sum / static_cast<float>(battery_val_count);
 	float ratio = cfg::adc_divider_u_max / static_cast<float>(ADC_RANGE_MAX);
