@@ -48,12 +48,12 @@
  ************************************************************************
  *
  * latest mit lib 2.6.2
- * DATA:    [====      ]  39.5% (used 32392 bytes from 81920 bytes)
- * PROGRAM: [=====     ]  53.8% (used 580740 bytes from 1044464 bytes)
+ * DATA:    [====      ]  39.8% (used 32636 bytes from 81920 bytes)
+ * PROGRAM: [=====     ]  54.9% (used 573916 bytes from 1044464 bytes)
 
  * latest mit lib 2.5.2
- * DATA:    [====      ]  39.4% (used 32304 bytes from 81920 bytes)
- * PROGRAM: [=====     ]  48.3% (used 504812 bytes from 1044464 bytes)
+ * DATA:    [====      ]  39.8% (used 32604 bytes from 81920 bytes)
+ * PROGRAM: [=====     ]  54.9% (used 573904 bytes from 1044464 bytes)
  *
  ************************************************************************/
 #include <WString.h>
