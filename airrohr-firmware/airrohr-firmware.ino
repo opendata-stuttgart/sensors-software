@@ -3434,10 +3434,13 @@ static void readBatteryVoltage() {
 	battery_analog_value = round(battery_avg_value * ratio);
 	debug_outln_verbose(F("Battery analog value (mV): "), String(battery_analog_value));
 	String bat_min_max = String(cfg::battery_u_min) + " / " + String(cfg::battery_u_max);
-	battery_charge = map(battery_analog_value, cfg::battery_u_min, cfg::battery_u_max, 0, 100);
-    if (battery_charge < 0){
-        battery_charge = 0;
-    }
+
+	// This will fix issues with the map() function when the value of the 'battery_analog_value' is outside of the predefined range by any circumstances.
+	uint32_t battery_voltage = (battery_analog_value < (uint32_t)cfg::battery_u_min) ? (uint32_t)cfg::battery_u_min : battery_analog_value;
+	battery_voltage = (battery_voltage > (uint32_t)cfg::battery_u_max) ? (uint32_t)cfg::battery_u_max : battery_voltage;
+
+	battery_charge = map(battery_voltage, cfg::battery_u_min, cfg::battery_u_max, 0, 100);
+
 	debug_outln_verbose(F("Battery capacity (%): "), String(battery_charge));
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), F("Battery voltage"));
 
@@ -4618,7 +4621,6 @@ void loop(void) {
 		if (msSince(battery_start_time) > SAMPLETIME_BAT_MS){
 			battery_start_time = act_milli;
 			readBatteryVoltage();
-			//readBatteryVoltage(result_BAT);
 		}
 	}
 
