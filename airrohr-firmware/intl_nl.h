@@ -125,5 +125,10 @@ const char INTL_SIGNAL_QUALITY[] PROGMEM = "Signaalkwaliteit";
 #define INTL_SENSOR "Sensor"
 #define INTL_PARAMETER "Parameter"
 #define INTL_VALUE "Waarde"
+const char INTL_ENABLE_BATTERY_MONITOR[] PROGMEM = "Schakel de batterijmonitor in";
+const char INTL_BATTERY_CHARGE[] PROGMEM = "Batterijlading";
+const char INTL_BATTERY_U_MIN[] PROGMEM = "batterij U min (mV):";
+const char INTL_BATTERY_U_MAX[] PROGMEM = "batterij U max (mV):";
+const char INTL_ADC_DIVIDER_U_MAX[] PROGMEM = "ADO divider U max (mV):";
 
 #include "./airrohr-logo-common.h"

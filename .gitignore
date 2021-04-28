@@ -6,3 +6,7 @@ esp8266-arduino/.DS_Store
 .DS_Store
 
 compile_mac.sh
+
+
+# Visual Studio Code
+.vscode
