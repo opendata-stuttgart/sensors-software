@@ -125,7 +125,7 @@ const char INTL_SIGNAL_QUALITY[] PROGMEM = "Качество на сигнала
 #define INTL_PARAMETER "Параметър"
 #define INTL_VALUE "Стойност"
 const char INTL_ENABLE_BATTERY_MONITOR[] PROGMEM = "Активиране на монитора на батерията";
-const char INTL_BATTERY_CAPACITY[] PROGMEM = "Капацитет на батерията";
+const char INTL_BATTERY_CHARGE[] PROGMEM = "Заряд на батерията";
 const char INTL_BATTERY_U_MIN[] PROGMEM = "U min на батерията (mV):";
 const char INTL_BATTERY_U_MAX[] PROGMEM = "U max на батерията (mV):";
 const char INTL_ADC_DIVIDER_U_MAX[] PROGMEM = "U max при делителя на АЦП (mV):";

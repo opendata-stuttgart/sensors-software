@@ -125,5 +125,10 @@ const char INTL_SIGNAL_QUALITY[] PROGMEM = "ποιότητα σήματος";
 #define INTL_SENSOR "Αισθητήρας"
 #define INTL_PARAMETER "Παράμετρος"
 #define INTL_VALUE "Αξία"
+const char INTL_ENABLE_BATTERY_MONITOR[] PROGMEM = "Ενεργοποίηση οθόνης μπαταρίας";
+const char INTL_BATTERY_CHARGE[] PROGMEM = "Φόρτιση μπαταρίας";
+const char INTL_BATTERY_U_MIN[] PROGMEM = "Μπαταρία U min (mV)";
+const char INTL_BATTERY_U_MAX[] PROGMEM = "Μπαταρία U max (mV)";
+const char INTL_ADC_DIVIDER_U_MAX[] PROGMEM = "Διαχωριστικό ADC U max (mV)";
 
 #include "./airrohr-logo-common.h"

@@ -126,7 +126,7 @@ const char INTL_SIGNAL_QUALITY[] PROGMEM = "Kvalita signálu";
 #define INTL_PARAMETER "Parametr"
 #define INTL_VALUE "Hodnota"
 const char INTL_ENABLE_BATTERY_MONITOR[] PROGMEM = "Povolit sledování baterie";
-const char INTL_BATTERY_CAPACITY[] PROGMEM = "Kapacita baterie";
+const char INTL_BATTERY_CHARGE[] PROGMEM = "Nabíjení baterie";
 const char INTL_BATTERY_U_MIN[] PROGMEM = "Baterie U min (mV):";
 const char INTL_BATTERY_U_MAX[] PROGMEM = "Baterie U max (mV):";
 const char INTL_ADC_DIVIDER_U_MAX[] PROGMEM = "Dělič ADP U max (mV):";

@@ -126,7 +126,7 @@ const char INTL_SIGNAL_QUALITY[] PROGMEM = "sinyal kalitesi";
 #define INTL_PARAMETER "Parametre"
 #define INTL_VALUE "değer"
 const char INTL_ENABLE_BATTERY_MONITOR[] PROGMEM = "Pil monitörünü etkinleştir";
-const char INTL_BATTERY_CAPACITY[] PROGMEM = "Pil kapasitesi";
+const char INTL_BATTERY_CHARGE[] PROGMEM = "Pil şarjı";
 const char INTL_BATTERY_U_MIN[] PROGMEM = "Pil U min (mV):";
 const char INTL_BATTERY_U_MAX[] PROGMEM = "Pil U max (mV):";
 const char INTL_ADC_DIVIDER_U_MAX[] PROGMEM = "ADD bölücü U max (mV):";

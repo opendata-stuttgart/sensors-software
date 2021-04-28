@@ -126,7 +126,7 @@ const char INTL_SIGNAL_QUALITY[] PROGMEM = "Qualitéit";
 #define INTL_PARAMETER "Parameter"
 #define INTL_VALUE "Wäert"
 const char INTL_ENABLE_BATTERY_MONITOR[] PROGMEM = "Aktivéiert Batterie Monitor";
-const char INTL_BATTERY_CAPACITY[] PROGMEM = "Batteriekapazitéit";
+const char INTL_BATTERY_CHARGE[] PROGMEM = "Batterieladung";
 const char INTL_BATTERY_U_MIN[] PROGMEM = "Batterie U min (mV):";
 const char INTL_BATTERY_U_MAX[] PROGMEM = "Batterie U max (mV):";
 const char INTL_ADC_DIVIDER_U_MAX[] PROGMEM = "ADC divider U max (mV):";

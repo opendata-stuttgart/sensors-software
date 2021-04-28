@@ -500,7 +500,7 @@ int last_signal_strength;
 int last_disconnect_reason;
 
 uint32_t battery_analog_value = 0;
-uint32_t battery_capacity = 0;
+uint32_t battery_charge = 0;
 uint32_t battery_sum = 0;
 uint32_t battery_val_count = 0;
 
@@ -1168,6 +1168,7 @@ static void webserver_config_send_body_get(String& page_content) {
 	server.sendContent(page_content);
 	page_content = emptyString;
 	
+	page_content += FPSTR(BR_TAG);
 	add_form_checkbox(Config_enable_battery_monitor, FPSTR(INTL_ENABLE_BATTERY_MONITOR));
 	page_content += F("<table id='battery_monitor_table'>");
 	add_form_input(page_content, Config_battery_u_min, FPSTR(INTL_BATTERY_U_MIN), 5);
@@ -1712,9 +1713,9 @@ static void webserver_status() {
 		add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), last_value_SDS_version);
 	}
 	if (cfg::enable_battery_monitor){
-		// String battery_state = F(String(battery_capacity) + " % (" + String(battery_analog_value / 1000.0) + "V)");
-		String battery_state = String(battery_capacity) + " % (" + String(battery_analog_value / 1000.0) + "V)";
-		add_table_row_from_value(page_content, FPSTR(INTL_BATTERY_CAPACITY), battery_state);
+		// String battery_state = F(String(battery_charge) + " % (" + String(battery_analog_value / 1000.0) + "V)");
+		String battery_state = String(battery_charge) + " % (" + String(battery_analog_value / 1000.0) + "V)";
+		add_table_row_from_value(page_content, FPSTR(INTL_BATTERY_CHARGE), battery_state);
 	}
 
 	page_content += FPSTR(EMPTY_ROW);
@@ -3433,11 +3434,11 @@ static void readBatteryVoltage() {
 	battery_analog_value = round(battery_avg_value * ratio);
 	debug_outln_verbose(F("Battery analog value (mV): "), String(battery_analog_value));
 	String bat_min_max = String(cfg::battery_u_min) + " / " + String(cfg::battery_u_max);
-	battery_capacity = map(battery_analog_value, cfg::battery_u_min, cfg::battery_u_max, 0, 100);
-    if (battery_capacity < 0){
-        battery_capacity = 0;
+	battery_charge = map(battery_analog_value, cfg::battery_u_min, cfg::battery_u_max, 0, 100);
+    if (battery_charge < 0){
+        battery_charge = 0;
     }
-	debug_outln_verbose(F("Battery capacity (%): "), String(battery_capacity));
+	debug_outln_verbose(F("Battery capacity (%): "), String(battery_charge));
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), F("Battery voltage"));
 
 	battery_monitor_period = act_milli; 
@@ -3449,9 +3450,9 @@ static void readBatteryVoltage() {
 static void sendBatteryStatus(String& s) {
 	float battery_voltage = battery_analog_value / 1000.0;
 	add_Value2Json(s, F("Battery_voltage"), String(battery_voltage));
-	add_Value2Json(s, F("Battery_capacity"), String(battery_capacity));
+	add_Value2Json(s, F("battery_charge"), String(battery_charge));
 	debug_outln_info(F("Battery (V): "), String(battery_voltage));
-	debug_outln_info(F("Battery (%): "), String(battery_capacity)); 
+	debug_outln_info(F("Battery (%): "), String(battery_charge)); 
 	debug_outln_info(FPSTR(DBG_TXT_SEP));
 }
 
