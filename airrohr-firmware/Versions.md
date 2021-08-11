@@ -2,8 +2,8 @@ NRZ-2021-134-B3
 * Upgrade to Arduino Core 3.0.1
 * Libraries updated
 * changes for compatibility to latest ArduinoJSON
-* all BearSSL ciphers enabled
-
+* more BearSSL ciphers enabled (ECDSA certs, AES-GCM-SHA + CHACHA20 ciphers)
+* SCD autocalibration status now shown on status page
 
 NRZ-2020-134-B3
 * support for SCD30 added
