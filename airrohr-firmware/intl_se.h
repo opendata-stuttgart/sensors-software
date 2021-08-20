@@ -36,7 +36,7 @@ const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "Korrigering i dB (A)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "Korrigering i °C";
 const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "";
-const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "";
+const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "Lufttryck vid havsytan";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Aktivera BasicAuth";
 #define INTL_REPORT_ISSUE "Rapportera ett problem"
@@ -109,7 +109,7 @@ const char INTL_PARTICULATE_MATTER[] PROGMEM = "partikelsensor";
 const char INTL_TEMPERATURE[] PROGMEM = "Temperatur";
 const char INTL_HUMIDITY[] PROGMEM = "rel. fuktighet";
 const char INTL_PRESSURE[] PROGMEM = "Lufttryck";
-const char INTL_DEW_POINT[] PROGMEM = "";
+const char INTL_DEW_POINT[] PROGMEM = "Daggpunkt";
 const char INTL_CO2_PPM[] PROGMEM = "ppm CO₂";
 const char INTL_LEQ_A[] PROGMEM = "LAeq";
 const char INTL_LA_MIN[] PROGMEM = "LA min";
