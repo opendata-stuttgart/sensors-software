@@ -1660,12 +1660,6 @@ static void webserver_status() {
 		page_content += FPSTR(EMPTY_ROW);
 		add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), last_value_SDS_version);
 	}
-	if (cfg::scd30_read) {
-		if (scd30.getAutoSelfCalibration() == true)
-	        add_table_row_from_value(page_content, F("SCD30 Auto Calibration"), "enabled");
-    	else
-	        add_table_row_from_value(page_content, F("SCD30 Auto Calibration"), "disabled");
-	}
 
 	page_content += FPSTR(EMPTY_ROW);
 	page_content += F("<tr><td colspan='2'><b>" INTL_ERROR "</b></td></tr>");
@@ -2228,7 +2222,6 @@ static WiFiClient* getNewLoggerWiFiClient(const LoggerEntry logger) {
 #if defined(ESP8266)
 		static_cast<WiFiClientSecure*>(_client)->setSession(loggerConfigs[logger].session);
 		static_cast<WiFiClientSecure*>(_client)->setBufferSizes(1024, TCP_MSS > 1024 ? 2048 : 1024);
-		static_cast<WiFiClientSecure*>(_client)->setCiphers(suites_P, sizeof(suites_P)/sizeof(suites_P[0]));
 		static_cast<WiFiClientSecure*>(_client)->setSSLVersion(BR_TLS12, BR_TLS12);
 		switch (logger) {
 		case Loggeraircms:
