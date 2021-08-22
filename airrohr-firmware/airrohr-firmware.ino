@@ -1660,6 +1660,18 @@ static void webserver_status() {
 		page_content += FPSTR(EMPTY_ROW);
 		add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), last_value_SDS_version);
 	}
+	if (cfg::scd30_read) {
+		if (scd30.getAutoSelfCalibration() == true)
+	        add_table_row_from_value(page_content, F("SCD30 Auto Calibration"), "enabled");
+    	else
+	        add_table_row_from_value(page_content, F("SCD30 Auto Calibration"), "disabled");
+		uint16_t settingVal;
+		scd30.getMeasurementInterval(&settingVal);
+		add_table_row_from_value(page_content, F("SCD30 measurement interval"), String(settingVal));
+		scd30.getTemperatureOffset(&settingVal);
+		add_table_row_from_value(page_content, F("SCD30 temperature offset"), String(settingVal));
+	}
+
 
 	page_content += FPSTR(EMPTY_ROW);
 	page_content += F("<tr><td colspan='2'><b>" INTL_ERROR "</b></td></tr>");
@@ -2956,7 +2968,7 @@ static __noinline void fetchSensorHPM(String& s) {
 /*****************************************************************
  * read Tera Sensor Next PM sensor sensor values                 *
  *****************************************************************/
-/* Disabled
+#if NPM_READ
 static void fetchSensorNPM(String& s) {
 
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_NPM));
@@ -3245,7 +3257,7 @@ static void fetchSensorNPM(String& s) {
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_NPM));
 }
-*/
+#endif
 
 /*****************************************************************
  * read PPD42NS sensor values                                    *
@@ -4216,6 +4228,8 @@ static void powerOnTestSensors() {
 		if (!scd30.begin()) {
 			debug_outln_error(F("Check SCD30 wiring"));
 			scd30_init_failed = true;
+		} else {
+			scd30.setMeasurementInterval(30);
 		}
 	}
 
