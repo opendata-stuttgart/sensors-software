@@ -35,7 +35,7 @@ const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "Korrigering i dB (A)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "Korrigering i °C";
-const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "";
+const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "Höjd över havet";
 const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "Lufttryck vid havsytan";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Aktivera BasicAuth";
@@ -56,11 +56,11 @@ const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Visa WiFi-information";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Visa enhetsinfo";
 
-#define INTL_STATIC_IP_TEXT ""
-const char INTL_STATIC_IP[] PROGMEM = "";
-const char INTL_STATIC_SUBNET[] PROGMEM = "";
-const char INTL_STATIC_GATEWAY[] PROGMEM = "";
-const char INTL_STATIC_DNS[] PROGMEM = "";
+#define INTL_STATIC_IP_TEXT "Konfiguration av statisk IP -adress (alla fält måste fyllas i)"
+const char INTL_STATIC_IP[] PROGMEM = "Statisk ip";
+const char INTL_STATIC_SUBNET[] PROGMEM = "Statisk delnät";
+const char INTL_STATIC_GATEWAY[] PROGMEM = "Statisk gateway";
+const char INTL_STATIC_DNS[] PROGMEM = "Statisk DNS";
 
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;level";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Mätintervall";
