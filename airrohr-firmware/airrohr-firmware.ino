@@ -47,14 +47,9 @@
  *                                                                      *
  ************************************************************************
  *
- * latest mit lib 2.6.2
- * DATA:    [====      ]  39.8% (used 32636 bytes from 81920 bytes)
- * PROGRAM: [=====     ]  54.9% (used 573916 bytes from 1044464 bytes)
-
- * latest mit lib 2.5.2
- * DATA:    [====      ]  39.8% (used 32604 bytes from 81920 bytes)
- * PROGRAM: [=====     ]  54.9% (used 573904 bytes from 1044464 bytes)
- *
+ * latest mit lib 3.1.0
+ * DATA:    [====      ]  41.2% (used 33728 bytes from 81920 bytes)
+ * PROGRAM: [======    ]  57.6% (used 601633 bytes from 1044464 bytes)
  ************************************************************************/
 #include <WString.h>
 #include <pgmspace.h>
