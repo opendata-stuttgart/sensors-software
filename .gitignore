@@ -10,3 +10,4 @@ compile_mac.sh
 
 # Visual Studio Code
 .vscode
+.vs
