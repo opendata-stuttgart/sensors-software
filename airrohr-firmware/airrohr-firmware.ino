@@ -45,7 +45,14 @@
  *                                                                      *
  * Please check Readme.md for other sensors and hardware                *
  *                                                                      *
+ ************************************************************************
+ *
+ * latest build using lib 3.1.0
+ * DATA:    [====      ]  41.1% (used 33660 bytes from 81920 bytes)
+ * PROGRAM: [======    ]  57.4% (used 599441 bytes from 1044464 bytes)
+ *  
  ************************************************************************/
+ 
 #include <WString.h>
 #include <pgmspace.h>
 
@@ -125,7 +132,7 @@ String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
  ******************************************************************/
 namespace cfg {
 	unsigned debug = DEBUG;
-
+	
 	unsigned time_for_wifi_config = 600000;
 	unsigned sending_intervall_ms = 145000;
 
@@ -253,6 +260,12 @@ ESP8266WebServer server(80);
 #if defined(ESP32)
 WebServer server(80);
 #endif
+
+// default IPv4 address (ex. 192.168.4.1)
+const uint8_t default_ip_first_octet = 192;
+const uint8_t default_ip_second_octet = 168;
+const uint8_t default_ip_third_octet = 4;
+const uint8_t default_ip_fourth_octet = 1;
 
 #include "./airrohr-cfg.h"
 
@@ -1017,7 +1030,14 @@ static bool webserver_request_auth() {
 }
 
 static void sendHttpRedirect() {
-	server.sendHeader(F("Location"), F("http://192.168.4.1/config"));
+	const IPAddress defaultIP(
+		default_ip_first_octet, 
+		default_ip_second_octet, 
+		default_ip_third_octet, 
+		default_ip_fourth_octet);
+
+	String defaultAddress = F("http://") + defaultIP.toString() + F("/config");
+	server.sendHeader(F("Location"), defaultAddress);
 	server.send(302, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), emptyString);
 }
 
@@ -2063,7 +2083,12 @@ static void wifiConfig() {
 #endif
 
 	WiFi.mode(WIFI_AP);
-	const IPAddress apIP(192, 168, 4, 1);
+	const IPAddress apIP(
+		default_ip_first_octet, 
+		default_ip_second_octet, 
+		default_ip_third_octet, 
+		default_ip_fourth_octet);
+		
 	WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
 	WiFi.softAP(cfg::fs_ssid, cfg::fs_pwd, selectChannelForAp());
 	// In case we create a unique password at first start
