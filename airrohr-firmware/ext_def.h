@@ -125,6 +125,9 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 // PPD42NS, the cheaper version of the particle sensor
 #define PPD_PIN_PM1 GPS_SERIAL_TX
 #define PPD_PIN_PM2 GPS_SERIAL_RX
+
+#define ADC_PIN A0
+#define ADC_RANGE_MAX 1023
 #endif
 
 
@@ -163,6 +166,9 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 //#define RFM69_CS D0
 //#define RFM69_RST D2
 //#define RFM69_INT D4
+
+#define ADC_PIN 36
+#define ADC_RANGE_MAX 4095
 #endif
 
 //  === pin assignments for lolin_d32_pro board ===================================
@@ -287,7 +293,7 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 #define MHZ19_READ 0
 
 // automatic firmware updates
-#define AUTO_UPDATE 1
+#define AUTO_UPDATE 0
 
 // use beta firmware
 #define USE_BETA 0
@@ -318,6 +324,15 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 
 // Show device info on displays
 #define DISPLAY_DEVICE_INFO 1
+
+#define ENABLE_BATTERY_MONITOR 0
+
+// Adc preset maximum input voltage applied to the voltage devider's input
+#define ADC_DIVIDER_U_MAX 5120
+
+// Battery preset fully charged and discharged states voltages
+#define BATTERY_U_MAX 4200
+#define BATTERY_U_MIN 2800
 
 // Set debug level for serial output?
 #define DEBUG 3

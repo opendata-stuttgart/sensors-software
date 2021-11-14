@@ -201,6 +201,14 @@ namespace cfg {
 	bool display_wifi_info = DISPLAY_WIFI_INFO;
 	bool display_device_info = DISPLAY_DEVICE_INFO;
 
+	// ADC settings
+	unsigned adc_divider_u_max = ADC_DIVIDER_U_MAX;
+
+	// battery monitor measurement settings
+	bool enable_battery_monitor = ENABLE_BATTERY_MONITOR;
+	unsigned battery_u_max = BATTERY_U_MAX;
+	unsigned battery_u_min = BATTERY_U_MIN;
+
 	// API settings
 	bool ssl_madavi = SSL_MADAVI;
 	bool ssl_dusti = SSL_SENSORCOMMUNITY;
@@ -362,6 +370,8 @@ unsigned long act_milli;
 unsigned long last_micro = 0;
 unsigned long min_micro = 1000000000;
 unsigned long max_micro = 0;
+unsigned long battery_start_time;
+unsigned long battery_monitor_period;
 
 bool is_SDS_running = true;
 enum {
@@ -376,7 +386,6 @@ unsigned long sending_time = 0;
 unsigned long last_update_attempt;
 int last_update_returncode;
 int last_sendData_returncode;
-
 
 float last_value_BMP_T = -128.0;
 float last_value_BMP_P = -1.0;
@@ -492,6 +501,11 @@ String last_value_GPS_timestamp;
 String last_data_string;
 int last_signal_strength;
 int last_disconnect_reason;
+
+uint32_t battery_analog_value = 0;
+uint32_t battery_charge = 0;
+uint32_t battery_sum = 0;
+uint32_t battery_val_count = 0;
 
 String esp_chipid;
 String esp_mac_id;
@@ -1162,6 +1176,33 @@ static void webserver_config_send_body_get(String& page_content) {
 	page_content += FPSTR(BR_TAG);
 
 	server.sendContent(page_content);
+	page_content = emptyString;
+	
+	page_content += FPSTR(BR_TAG);
+	add_form_checkbox(Config_enable_battery_monitor, FPSTR(INTL_ENABLE_BATTERY_MONITOR));
+	page_content += F("<table id='battery_monitor_table'>");
+	add_form_input(page_content, Config_battery_u_min, FPSTR(INTL_BATTERY_U_MIN), 5);
+	add_form_input(page_content, Config_battery_u_max, FPSTR(INTL_BATTERY_U_MAX), 5);
+	add_form_input(page_content, Config_adc_divider_u_max, FPSTR(INTL_ADC_DIVIDER_U_MAX), 5);
+	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+	
+	page_content += F("<script type='text/javascript'>"
+    	"  var $ = function (e) { "
+    	"      return document.getElementById(e); "
+        "  }; "
+        "  function updateBatteryMonitor() { "
+        "      $('battery_u_min').disabled = $('battery_u_max').disabled = $('adc_divider_u_max').disabled = !$('enable_battery_monitor').checked; "
+        "      if($('enable_battery_monitor').checked){ "
+        "          $('battery_monitor_table').style.display = 'block'; "
+        "      } else { "
+        "          $('battery_monitor_table').style.display = 'none'; "
+        "      } "
+        "  }; "
+        "  updateBatteryMonitor(); "
+        "  $('enable_battery_monitor').onchange = updateBatteryMonitor; "
+		"</script>");
+
+	server.sendContent(page_content);
 	page_content = FPSTR(WEB_BR_LF_B);
 	page_content += F(INTL_FIRMWARE "</b>&nbsp;");
 	add_form_checkbox(Config_auto_update, FPSTR(INTL_AUTO_UPDATE));
@@ -1680,6 +1721,11 @@ static void webserver_status() {
 		page_content += FPSTR(EMPTY_ROW);
 		add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), last_value_SDS_version);
 	}
+	if (cfg::enable_battery_monitor){
+		// String battery_state = F(String(battery_charge) + " % (" + String(battery_analog_value / 1000.0) + "V)");
+		String battery_state = String(battery_charge) + " % (" + String(battery_analog_value / 1000.0) + "V)";
+		add_table_row_from_value(page_content, FPSTR(INTL_BATTERY_CHARGE), battery_state);
+	}
 	if (cfg::scd30_read) {
 		if (scd30.getAutoSelfCalibration() == true)
 	        add_table_row_from_value(page_content, F("SCD30 Auto Calibration"), "enabled");
@@ -1691,7 +1737,6 @@ static void webserver_status() {
 		scd30.getTemperatureOffset(&settingVal);
 		add_table_row_from_value(page_content, F("SCD30 temperature offset"), String(settingVal));
 	}
-
 
 	page_content += FPSTR(EMPTY_ROW);
 	page_content += F("<tr><td colspan='2'><b>" INTL_ERROR "</b></td></tr>");
@@ -3394,6 +3439,55 @@ static void fetchSensorSPS30(String& s) {
 }
 
 /*****************************************************************
+   read Battery voltage
+ *****************************************************************/
+static void readBatteryVoltage() {
+	battery_val_count++;
+	if(battery_val_count > 3){
+		battery_sum = 0;
+		if(msSince(battery_monitor_period) <= READINGTIME_ADC_MS) 
+					return;
+		
+		battery_monitor_period = act_milli;
+		battery_val_count = 0;
+		return;		
+	}
+
+	String dbg_reading = "Battery voltage #" + String(battery_val_count);
+	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), dbg_reading);
+	battery_sum += analogRead(ADC_PIN);
+	
+	float battery_avg_value = battery_sum / static_cast<float>(battery_val_count);
+	float ratio = cfg::adc_divider_u_max / static_cast<float>(ADC_RANGE_MAX);
+	battery_analog_value = round(battery_avg_value * ratio);
+	debug_outln_verbose(F("Battery analog value (mV): "), String(battery_analog_value));
+	String bat_min_max = String(cfg::battery_u_min) + " / " + String(cfg::battery_u_max);
+
+	// This will fix issues with the map() function when the value of the 'battery_analog_value' is outside of the predefined range by any circumstances.
+	uint32_t battery_voltage = (battery_analog_value < (uint32_t)cfg::battery_u_min) ? (uint32_t)cfg::battery_u_min : battery_analog_value;
+	battery_voltage = (battery_voltage > (uint32_t)cfg::battery_u_max) ? (uint32_t)cfg::battery_u_max : battery_voltage;
+
+	battery_charge = map(battery_voltage, cfg::battery_u_min, cfg::battery_u_max, 0, 100);
+
+	debug_outln_verbose(F("Battery capacity (%): "), String(battery_charge));
+	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), F("Battery voltage"));
+
+	battery_monitor_period = act_milli; 
+}
+
+/*****************************************************************
+   send Battery status
+ *****************************************************************/
+static void sendBatteryStatus(String& s) {
+	float battery_voltage = battery_analog_value / 1000.0;
+	add_Value2Json(s, F("Battery_voltage"), String(battery_voltage));
+	add_Value2Json(s, F("battery_charge"), String(battery_charge));
+	debug_outln_info(F("Battery (V): "), String(battery_voltage));
+	debug_outln_info(F("Battery (%): "), String(battery_charge)); 
+	debug_outln_info(FPSTR(DBG_TXT_SEP));
+}
+
+/*****************************************************************
    read DNMS values
  *****************************************************************/
 static void fetchSensorDNMS(String& s) {
@@ -4442,6 +4536,7 @@ void setup(void) {
 	esp_mac_id.replace(":", "");
 	esp_mac_id.toLowerCase();
 #endif
+	pinMode(A0, INPUT);
 #if defined(ESP32)
 	uint64_t chipid_num;
 	chipid_num = ESP.getEfuseMac();
@@ -4488,6 +4583,7 @@ void setup(void) {
 	starttime = millis();									// store the start time
 	last_update_attempt = time_point_device_start_ms = starttime;
 	last_display_millis = starttime_SDS = starttime;
+	battery_start_time = starttime;
 }
 
 /*****************************************************************
@@ -4496,7 +4592,7 @@ void setup(void) {
 void loop(void) {
 	String result_PPD, result_SDS, result_PMS, result_HPM;
 	String result_GPS, result_DNMS;
-
+	String result_BAT;
 
 	unsigned sum_send_time = 0;
 
@@ -4548,6 +4644,13 @@ void loop(void) {
 				value_SPS30_TS += sps30_values.tps;
 				++SPS30_measurement_count;
 			}
+		}
+	}
+
+	if(cfg::enable_battery_monitor && !send_now){
+		if (msSince(battery_start_time) > SAMPLETIME_BAT_MS){
+			battery_start_time = act_milli;
+			readBatteryVoltage();
 		}
 	}
 
@@ -4685,11 +4788,17 @@ void loop(void) {
 			sum_send_time += sendSensorCommunity(result_GPS, GPS_API_PIN, F("GPS"), "GPS_");
 			result = emptyString;
 		}
+
 		add_Value2Json(data, F("samples"), String(sample_count));
 		add_Value2Json(data, F("min_micro"), String(min_micro));
 		add_Value2Json(data, F("max_micro"), String(max_micro));
 		add_Value2Json(data, F("interval"), String(cfg::sending_intervall_ms));
 		add_Value2Json(data, F("signal"), String(last_signal_strength));
+
+		if(cfg::enable_battery_monitor){
+			sendBatteryStatus(result_BAT);
+			data += result_BAT;
+		}
 
 		if ((unsigned)(data.lastIndexOf(',') + 1) == data.length()) {
 			data.remove(data.length() - 1);

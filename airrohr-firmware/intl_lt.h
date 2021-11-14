@@ -125,5 +125,10 @@ const char INTL_SIGNAL_QUALITY[] PROGMEM = "signalo kokybė";
 #define INTL_SENSOR "Jutiklis"
 #define INTL_PARAMETER "Parametras"
 #define INTL_VALUE "Vertė"
+const char INTL_ENABLE_BATTERY_MONITOR[] PROGMEM = "Įgalinti akumuliatoriaus monitorių";
+const char INTL_BATTERY_CHARGE[] PROGMEM = "Baterijos įkrovimas";
+const char INTL_BATTERY_U_MIN[] PROGMEM = "Baterija U min (mV)";
+const char INTL_BATTERY_U_MAX[] PROGMEM = "Baterija U max (mV)";
+const char INTL_ADC_DIVIDER_U_MAX[] PROGMEM = "ADC daliklis U max (mV)";
 
 #include "./airrohr-logo-common.h"
