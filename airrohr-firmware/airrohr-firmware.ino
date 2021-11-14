@@ -6,7 +6,7 @@
  ************************************************************************
  *                                                                      *
  *    airRohr firmware                                                  *
- *    Copyright (C) 2016-2020  Code for Stuttgart a.o.                  *
+ *    Copyright (C) 2016-2021  Code for Stuttgart a.o.                  *
  *    Copyright (C) 2019-2020  Dirk Mueller                             *
  *                                                                      *
  * This program is free software: you can redistribute it and/or modify *
@@ -60,7 +60,7 @@
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2020-134-B3"
+#define SOFTWARE_VERSION_STR "NRZ-2021-134-B4"
 String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -633,8 +633,8 @@ static void disable_unneeded_nmea() {
 
 /* backward compatibility for the times when we stored booleans as strings */
 static bool boolFromJSON(const DynamicJsonDocument& json, const __FlashStringHelper* key) {
-	if (json[key].is<char*>()) {
-		return !strcmp_P(json[key].as<char*>(), PSTR("true"));
+	if (json[key].is<const char*>()) {
+		return !strcmp_P(json[key].as<const char*>(), PSTR("true"));
 	}
 	return json[key].as<bool>();
 }
@@ -683,12 +683,12 @@ static void readConfig(bool oldconfig = false) {
 				break;
 			case Config_Type_String:
 			case Config_Type_Password:
-				strncpy(c.cfg_val.as_str, json[c.cfg_key()].as<char*>(), c.cfg_len);
+				strncpy(c.cfg_val.as_str, json[c.cfg_key()].as<const char*>(), c.cfg_len);
 				c.cfg_val.as_str[c.cfg_len] = '\0';
 				break;
 			};
 		}
-		String writtenVersion(json["SOFTWARE_VERSION"].as<char*>());
+		String writtenVersion(json["SOFTWARE_VERSION"].as<const char*>());
 		if (writtenVersion.length() && writtenVersion[0] == 'N' && SOFTWARE_VERSION != writtenVersion) {
 			debug_outln_info(F("Rewriting old config from: "), writtenVersion);
 			// would like to do that, but this would wipe firmware.old which the two stage loader
@@ -991,7 +991,7 @@ static String form_select_lang() {
 					"<option value='RS'>Srpski (RS)</option>"
 					"<option value='RU'>Русский (RU)</option>"
 					"<option value='SI'>Slovenščina (SI)</option>"
-					"<option value='SK'>Slovenský (SK)</option>"
+					"<option value='SK'>Slovák (SK)</option>"
 					"<option value='SE'>Svenska (SE)</option>"
 					"<option value='TR'>Türkçe (TR)</option>"
 					"<option value='UA'>український (UA)</option>"
@@ -1193,7 +1193,6 @@ static void webserver_config_send_body_get(String& page_content) {
 		"</script>");
 
 	server.sendContent(page_content);
-	//page_content = emptyString;
 	page_content = FPSTR(WEB_BR_LF_B);
 	page_content += F(INTL_FIRMWARE "</b>&nbsp;");
 	add_form_checkbox(Config_auto_update, FPSTR(INTL_AUTO_UPDATE));
@@ -1717,6 +1716,17 @@ static void webserver_status() {
 		String battery_state = String(battery_charge) + " % (" + String(battery_analog_value / 1000.0) + "V)";
 		add_table_row_from_value(page_content, FPSTR(INTL_BATTERY_CHARGE), battery_state);
 	}
+	if (cfg::scd30_read) {
+		if (scd30.getAutoSelfCalibration() == true)
+	        add_table_row_from_value(page_content, F("SCD30 Auto Calibration"), "enabled");
+    	else
+	        add_table_row_from_value(page_content, F("SCD30 Auto Calibration"), "disabled");
+		uint16_t settingVal;
+		scd30.getMeasurementInterval(&settingVal);
+		add_table_row_from_value(page_content, F("SCD30 measurement interval"), String(settingVal));
+		scd30.getTemperatureOffset(&settingVal);
+		add_table_row_from_value(page_content, F("SCD30 temperature offset"), String(settingVal));
+	}
 
 	page_content += FPSTR(EMPTY_ROW);
 	page_content += F("<tr><td colspan='2'><b>" INTL_ERROR "</b></td></tr>");
@@ -1949,11 +1959,11 @@ static void webserver_metrics_endpoint() {
 	DeserializationError err = deserializeJson(json2data, last_data_string);
 	if (!err) {
 		for (JsonObject measurement : json2data[FPSTR(JSON_SENSOR_DATA_VALUES)].as<JsonArray>()) {
-			page_content += measurement["value_type"].as<char*>();
+			page_content += measurement["value_type"].as<const char*>();
 			page_content += '{';
 			page_content += id;
 			page_content += "} ";
-			page_content += measurement["value"].as<char*>();
+			page_content += measurement["value"].as<const char*>();
 			page_content += '\n';
 		}
 		page_content += F("last_sample_age_ms{");
@@ -2279,6 +2289,7 @@ static WiFiClient* getNewLoggerWiFiClient(const LoggerEntry logger) {
 #if defined(ESP8266)
 		static_cast<WiFiClientSecure*>(_client)->setSession(loggerConfigs[logger].session);
 		static_cast<WiFiClientSecure*>(_client)->setBufferSizes(1024, TCP_MSS > 1024 ? 2048 : 1024);
+		static_cast<WiFiClientSecure*>(_client)->setSSLVersion(BR_TLS12, BR_TLS12);
 		switch (logger) {
 		case Loggeraircms:
 		case LoggerInflux:
@@ -2401,16 +2412,16 @@ static void create_influxdb_string_from_data(String& data_4_influxdb, const Stri
 		data_4_influxdb += F(",node=" SENSOR_BASENAME);
 		data_4_influxdb += esp_chipid + " ";
 		for (JsonObject measurement : json2data[FPSTR(JSON_SENSOR_DATA_VALUES)].as<JsonArray>()) {
-			data_4_influxdb += measurement["value_type"].as<char*>();
+			data_4_influxdb += measurement["value_type"].as<const char*>();
 			data_4_influxdb += "=";
 
 			if (isNumeric(measurement["value"])) {
 				//send numerics without quotes
-				data_4_influxdb += measurement["value"].as<char*>();
+				data_4_influxdb += measurement["value"].as<const char*>();
 			} else {
 				//quote string values
 				data_4_influxdb += "\"";
-				data_4_influxdb += measurement["value"].as<char*>();
+				data_4_influxdb += measurement["value"].as<const char*>();
 				data_4_influxdb += "\"";
 			}
 			data_4_influxdb += ",";
@@ -2437,9 +2448,9 @@ static void send_csv(const String& data) {
 		String valueline(act_milli);
 		valueline += ';';
 		for (JsonObject measurement : json2data[FPSTR(JSON_SENSOR_DATA_VALUES)].as<JsonArray>()) {
-			headline += measurement["value_type"].as<char*>();
+			headline += measurement["value_type"].as<const char*>();
 			headline += ';';
-			valueline += measurement["value"].as<char*>();
+			valueline += measurement["value"].as<const char*>();
 			valueline += ';';
 		}
 		static bool first_csv_line = true;
@@ -2562,7 +2573,7 @@ static void fetchSensorSHT3x(String& s) {
 }
 
 /*****************************************************************
- * read SHT3x sensor values                                      *
+ * read SCD30 sensor values                                      *
  *****************************************************************/
 static void fetchSensorSCD30(String& s) {
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_SCD30));
@@ -3012,6 +3023,7 @@ static __noinline void fetchSensorHPM(String& s) {
 /*****************************************************************
  * read Tera Sensor Next PM sensor sensor values                 *
  *****************************************************************/
+#if NPM_READ
 static void fetchSensorNPM(String& s) {
 
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_NPM));
@@ -3300,6 +3312,7 @@ static void fetchSensorNPM(String& s) {
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_NPM));
 }
+#endif
 
 /*****************************************************************
  * read PPD42NS sensor values                                    *
@@ -4319,6 +4332,8 @@ static void powerOnTestSensors() {
 		if (!scd30.begin()) {
 			debug_outln_error(F("Check SCD30 wiring"));
 			scd30_init_failed = true;
+		} else {
+			scd30.setMeasurementInterval(30);
 		}
 	}
 
