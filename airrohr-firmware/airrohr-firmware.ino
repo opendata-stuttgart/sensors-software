@@ -1645,12 +1645,12 @@ static void webserver_status() {
 #endif
 	versionHtml.replace("/", FPSTR(BR_TAG));
 	add_table_row_from_value(page_content, FPSTR(INTL_FIRMWARE), versionHtml);
-	add_table_row_from_value(page_content, F("Free Memory"), String(ESP.getFreeHeap()));
+	add_table_row_from_value(page_content, F(INTL_FREE_MEMORY), String(ESP.getFreeHeap()));
 #if defined(ESP8266)
-	add_table_row_from_value(page_content, F("Heap Fragmentation"), String(ESP.getHeapFragmentation()), "%");
+	add_table_row_from_value(page_content, F(INTL_HEAP_FRAGMENTATION), String(ESP.getHeapFragmentation()), "%");
 #endif
 	if (cfg::auto_update) {
-		add_table_row_from_value(page_content, F("Last OTA"), delayToString(millis() - last_update_attempt));
+		add_table_row_from_value(page_content, F(INTL_LAST_OVER_THE_AIR), delayToString(millis() - last_update_attempt));
 	}
 #if defined(ESP8266)
     add_table_row_from_value(page_content, F("NTP Sync"), String(sntp_time_set));
@@ -1664,7 +1664,7 @@ static void webserver_status() {
 				ntpinfo.print(FPSTR(BR_TAG));
 			}
 			ntpinfo.printf_P(PSTR("%s (%s)"), IPAddress(*sntp).toString().c_str(), name ? name : "?");
-			ntpinfo.printf_P(PSTR(" reachable: %s"), sntp_getreachability(i) ? "Yes" : "No");
+			ntpinfo.printf_P(PSTR(" %s: %s"), F(INTL_REACHABLE), sntp_getreachability(i) ? F(INTL_YES) : F(INTL_NO));
 		}
 	}
 	add_table_row_from_value(page_content, F("NTP Info"), ntpinfo);
@@ -1672,9 +1672,9 @@ static void webserver_status() {
 
 	time_t now = time(nullptr);
 	add_table_row_from_value(page_content, FPSTR(INTL_TIME_UTC), ctime(&now));
-	add_table_row_from_value(page_content, F("Uptime"), delayToString(millis() - time_point_device_start_ms));
+	add_table_row_from_value(page_content, F(INTL_UPTIME), delayToString(millis() - time_point_device_start_ms));
 #if defined(ESP8266)
-	add_table_row_from_value(page_content, F("Reset Reason"), ESP.getResetReason());
+	add_table_row_from_value(page_content, F(INTL_RESET_REASON), ESP.getResetReason());
 #endif
 	if (cfg::sds_read) {
 		page_content += FPSTR(EMPTY_ROW);
@@ -1716,7 +1716,7 @@ static void webserver_status() {
 	}
 
 	if (last_sendData_returncode != 0) {
-		add_table_row_from_value(page_content, F("Data Send Return"),
+		add_table_row_from_value(page_content, F(INTL_DATA_SEND_RETURN_CODE),
 			last_sendData_returncode > 0 ? String(last_sendData_returncode) : HTTPClient::errorToString(last_sendData_returncode));
 	}
 	if (cfg::sds_read) {
