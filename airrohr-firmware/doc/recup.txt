@@ -1,0 +1,94 @@
+if (cfg::npm_read == 1)
+	{
+#if defined(ESP8266)
+		serialSDS.begin(115200, SWSERIAL_8E1, PM_SERIAL_RX, PM_SERIAL_TX);
+		Debug.println("\n...Next PM selected! 115200 8E1 serial");
+		serialSDS.enableIntTx(true);
+#endif
+#if defined(ESP32)
+		serialSDS.begin(115200, SERIAL_8E1, PM_SERIAL_RX, PM_SERIAL_TX);
+		Debug.println("\n...Next PM selected! 115200 8E1 serial");
+#endif
+		serialSDS.setTimeout(400); // Next PM responds after 350 ms according to datasheet
+	}
+	else
+	{
+#if defined(ESP8266)
+		serialSDS.begin(9600, SWSERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX);
+		Debug.println("\n...Next PM not selected! 9600 8N1 serial");
+		serialSDS.enableIntTx(true);
+#endif
+#if defined(ESP32)
+		serialSDS.begin(9600, SERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX);
+		Debug.println("\n...Next PM not selected! 9600 8N1 serial");
+#endif
+
+		serialSDS.setTimeout((4 * 12 * 1000) / 9600);
+	}
+
+#if defined(WIFI_LoRa_32_V2)
+	// reset the OLED display, e.g. of the heltec_wifi_lora_32 board
+	pinMode(RST_OLED, OUTPUT);
+	digitalWrite(RST_OLED, LOW);
+	delay(50);
+	digitalWrite(RST_OLED, HIGH);
+#endif
+	Wire.begin(I2C_PIN_SDA, I2C_PIN_SCL);
+
+#if defined(ESP8266)
+	esp_chipid = std::move(String(ESP.getChipId()));
+	esp_mac_id = std::move(String(WiFi.macAddress().c_str()));
+	esp_mac_id.replace(":", "");
+	esp_mac_id.toLowerCase();
+#endif
+#if defined(ESP32)
+	uint64_t chipid_num;
+	chipid_num = ESP.getEfuseMac();
+	esp_chipid = String((uint16_t)(chipid_num >> 32), HEX);
+	esp_chipid += String((uint32_t)chipid_num, HEX);
+#endif
+	cfg::initNonTrivials(esp_chipid.c_str());
+	WiFi.persistent(false);
+
+	debug_outln_info(F("airRohr: " SOFTWARE_VERSION_STR "/"), String(CURRENT_LANG));
+#if defined(ESP8266)
+	if ((airrohr_selftest_failed = !ESP.checkFlashConfig() /* after 2.7.0 update: || !ESP.checkFlashCRC() */)) {
+		debug_outln_error(F("ERROR: SELF TEST FAILED!"));
+		SOFTWARE_VERSION += F("-STF");
+	}
+#endif
+
+
+	//debug_outln_error(F("TEST TEST TEST TEST TEST TEST"));
+
+	init_config();
+	init_display();
+	setupNetworkTime();
+	connectWifi();
+	setup_webserver();
+	createLoggerConfigs();
+	debug_outln_info(F("\nChipId: "), esp_chipid);
+	debug_outln_info(F("\nMAC Id: "), esp_mac_id);
+
+	if (cfg::gps_read)
+	{
+#if defined(ESP8266)
+		serialGPS = new SoftwareSerial;
+		serialGPS->begin(9600, SWSERIAL_8N1, GPS_SERIAL_RX, GPS_SERIAL_TX, false, 128);
+#endif
+#if defined(ESP32)
+		serialGPS->begin(9600, SERIAL_8N1, GPS_SERIAL_RX, GPS_SERIAL_TX);
+#endif
+		debug_outln_info(F("Read GPS..."));
+		disable_unneeded_nmea();
+	}
+
+	powerOnTestSensors();
+	logEnabledAPIs();
+	logEnabledDisplays();
+
+	delay(50);
+
+	starttime = millis();									// store the start time
+	last_update_attempt = time_point_device_start_ms = starttime;
+	last_display_millis = starttime_SDS = starttime;
