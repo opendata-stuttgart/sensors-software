@@ -924,7 +924,7 @@ static void readConfig(bool oldconfig = false)
 
 	if (!err)
 	{
-		//serializeJsonPretty(json, Debug);
+		serializeJsonPretty(json, Debug);
 		debug_outln_info(F("parsed json..."));
 		for (unsigned e = 0; e < sizeof(configShape) / sizeof(configShape[0]); ++e)
 		{
@@ -5155,7 +5155,7 @@ static unsigned long sendDataToOptionalApis(const String &data)
 void setup(void)
 {
 	Debug.begin(9600); // Output to Serial at 9600 baud
-//----------------------------------------------
+
 #if defined(ESP8266)
 	esp_chipid = std::move(String(ESP.getChipId()));
 	esp_mac_id = std::move(String(WiFi.macAddress().c_str()));
@@ -5172,6 +5172,7 @@ void setup(void)
 	WiFi.persistent(false);
 
 	debug_outln_info(F("airRohr: " SOFTWARE_VERSION_STR "/"), String(CURRENT_LANG));
+
 #if defined(ESP8266)
 	if ((airrohr_selftest_failed = !ESP.checkFlashConfig() /* after 2.7.0 update: || !ESP.checkFlashCRC() */))
 	{
@@ -5179,9 +5180,10 @@ void setup(void)
 		SOFTWARE_VERSION += F("-STF");
 	}
 #endif
-	//----------------------------------------------
 
-	init_config();
+	init_config(); 
+
+	Wire.begin(I2C_PIN_SDA, I2C_PIN_SCL);
 
 	if (cfg::npm_read)
 	{
@@ -5216,7 +5218,8 @@ void setup(void)
 	delay(50);
 	digitalWrite(RST_OLED, HIGH);
 #endif
-	Wire.begin(I2C_PIN_SDA, I2C_PIN_SCL);
+
+	
 
 	init_display();
 	setupNetworkTime();
