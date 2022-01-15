@@ -112,6 +112,7 @@ String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 #include "./bmx280_i2c.h"
 #include "./sps30_i2c.h"
 #include "./dnms_i2c.h"
+#include <Adafruit_INA219.h>
 
 #include "./intl.h"
 
@@ -261,6 +262,7 @@ bool scd30_init_failed = false;
 bool dnms_init_failed = false;
 bool gps_init_failed = false;
 bool airrohr_selftest_failed = false;
+bool ina219_init_failed = false;
 
 #if defined(ESP8266)
 ESP8266WebServer server(80);
@@ -541,6 +543,11 @@ IPAddress addr_static_ip;
 IPAddress addr_static_subnet;
 IPAddress addr_static_gateway;
 IPAddress addr_static_dns;
+
+/*****************************************************************
+ * INA219 declaration                                             *
+ *****************************************************************/
+Adafruit_INA219 ina219;
 
 #define msSince(timestamp_before) (act_milli - (timestamp_before))
 
@@ -4361,6 +4368,15 @@ static void powerOnTestSensors() {
 	if (cfg::dnms_read) {
 		debug_outln_info(F("Read DNMS..."));
 		initDNMS();
+	}
+
+	if (cfg::enable_battery_monitor){
+		if(!ina219.begin()){
+			debug_outln_error(F("Check INA219 wiring"));
+			ina219_init_failed = true;
+		} else {
+			
+		}
 	}
 
 }
