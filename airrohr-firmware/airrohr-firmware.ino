@@ -1515,7 +1515,7 @@ static void webserver_config_send_body_get(String &page_content)
 
 	server.sendContent(page_content);
 	page_content = FPSTR(WEB_BR_LF_B);
-	page_content += F(INTL_FIRMWARE "</b>&nbsp;");
+	page_content += F(INTL_FIRMWARE "</b><br/>");
 	add_form_checkbox(Config_auto_update, FPSTR(INTL_AUTO_UPDATE));
 	add_form_checkbox(Config_use_beta, FPSTR(INTL_USE_BETA));
 
