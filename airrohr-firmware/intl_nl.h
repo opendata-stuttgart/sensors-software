@@ -38,6 +38,7 @@ const char INTL_TEMP_CORRECTION[] PROGMEM = "Correctie in °C";
 const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "Hoogte boven zeeniveau (m)";
 const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "Luchtdruk op zeeniveau";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
+const char INTL_WIFI_TXPOWER[] PROGMEM = "Maximaal WiFi-vermogen";
 const char INTL_BASICAUTH[] PROGMEM = "Toegang beperken";
 #define INTL_REPORT_ISSUE "Een probleem melden"
 
