@@ -1453,8 +1453,9 @@ static void webserver_config_send_body_get(String &page_content)
 	add_form_input(page_content, Config_wlanssid, FPSTR(INTL_FS_WIFI_NAME), LEN_WLANSSID - 1);
 	add_form_input(page_content, Config_wlanpwd, FPSTR(INTL_PASSWORD), LEN_CFG_PASSWORD - 1);
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-	page_content += F("<hr/>\n<br/><b>");
+	page_content += F("<hr/>");
 
+	page_content += FPSTR(WEB_BR_LF_B);
 	page_content += FPSTR(INTL_AB_HIER_NUR_ANDERN);
 	page_content += FPSTR(WEB_B_BR);
 	page_content += FPSTR(BR_TAG);
@@ -1505,7 +1506,8 @@ static void webserver_config_send_body_get(String &page_content)
 	add_form_checkbox(Config_display_device_info, FPSTR(INTL_DISPLAY_DEVICE_INFO));
 
 	page_content += FPSTR(WEB_BR_LF_B);
-	page_content += F(INTL_STATIC_IP_TEXT "</b><br/>");
+	page_content += F(INTL_STATIC_IP_TEXT);
+	page_content += FPSTR(WEB_B_BR);
 	page_content += FPSTR(TABLE_TAG_OPEN);
 	add_form_input(page_content, Config_static_ip, FPSTR(INTL_STATIC_IP), 15);
 	add_form_input(page_content, Config_static_subnet, FPSTR(INTL_STATIC_SUBNET), 15);
@@ -1515,7 +1517,8 @@ static void webserver_config_send_body_get(String &page_content)
 
 	server.sendContent(page_content);
 	page_content = FPSTR(WEB_BR_LF_B);
-	page_content += F(INTL_FIRMWARE "</b><br/>");
+	page_content += F(INTL_FIRMWARE);
+	page_content += FPSTR(WEB_B_BR);
 	add_form_checkbox(Config_auto_update, FPSTR(INTL_AUTO_UPDATE));
 	add_form_checkbox(Config_use_beta, FPSTR(INTL_USE_BETA));
 
