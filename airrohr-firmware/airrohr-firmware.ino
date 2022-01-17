@@ -1506,11 +1506,12 @@ static void webserver_config_send_body_get(String &page_content)
 
 	page_content += FPSTR(WEB_BR_LF_B);
 	page_content += F(INTL_STATIC_IP_TEXT "</b><br/>");
+	page_content += FPSTR(TABLE_TAG_OPEN);
 	add_form_input(page_content, Config_static_ip, FPSTR(INTL_STATIC_IP), 15);
 	add_form_input(page_content, Config_static_subnet, FPSTR(INTL_STATIC_SUBNET), 15);
 	add_form_input(page_content, Config_static_gateway, FPSTR(INTL_STATIC_GATEWAY), 15);
 	add_form_input(page_content, Config_static_dns, FPSTR(INTL_STATIC_DNS), 15);
-	page_content += FPSTR(BR_TAG);
+	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 
 	server.sendContent(page_content);
 	page_content = FPSTR(WEB_BR_LF_B);
