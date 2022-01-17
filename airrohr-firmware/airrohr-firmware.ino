@@ -1530,6 +1530,11 @@ static void webserver_config_send_body_get(String &page_content)
 					  "}; updateOTAOptions(); $('auto_update').onchange = updateOTAOptions;"
 					  "</script>");
 
+	page_content += FPSTR(WEB_BR_LF_B);
+	page_content += FPSTR(INTL_AB_HIER_NUR_ANDERN);
+	page_content += FPSTR(WEB_B_BR);
+	page_content += FPSTR(BR_TAG);
+
 	page_content += FPSTR(TABLE_TAG_OPEN);
 	add_form_input(page_content, Config_debug, FPSTR(INTL_DEBUG_LEVEL), 1);
 	add_form_input(page_content, Config_sending_intervall_ms, FPSTR(INTL_MEASUREMENT_INTERVAL), 5);
