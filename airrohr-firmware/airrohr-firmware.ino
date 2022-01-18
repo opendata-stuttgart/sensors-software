@@ -143,9 +143,10 @@ namespace cfg {
 	char www_username[LEN_WWW_USERNAME];
 	char www_password[LEN_CFG_PASSWORD];
 
-	// wifi credentials
+	// wifi settings
 	char wlanssid[LEN_WLANSSID];
 	char wlanpwd[LEN_CFG_PASSWORD];
+	bool wlanpower = true;
 	
 	char static_ip[16];
 	char static_subnet[16];
@@ -1113,6 +1114,7 @@ static void webserver_config_send_body_get(String& page_content) {
 	server.sendContent(page_content);
 	page_content = emptyString;
 
+	add_form_checkbox(Config_wlanpower, FPSTR(INTL_WIFI_TXPOWER));
 	add_form_checkbox(Config_www_basicauth_enabled, FPSTR(INTL_BASICAUTH));
 	page_content += FPSTR(TABLE_TAG_OPEN);
 	add_form_input(page_content, Config_www_username, FPSTR(INTL_USER), LEN_WWW_USERNAME-1);
@@ -2179,8 +2181,10 @@ static void connectWifi() {
 #if defined(ESP8266)
 	// Enforce Rx/Tx calibration
 	system_phy_set_powerup_option(1);
-	// 20dBM == 100mW == max tx power allowed in europe
-	WiFi.setOutputPower(20.0f);
+	if (cfg::wlanpower) {
+		// 20dBM == 100mW == max tx power allowed in europe
+		WiFi.setOutputPower(20.0f);
+	}
 	WiFi.setSleepMode(WIFI_NONE_SLEEP);
 	WiFi.setPhyMode(WIFI_PHY_MODE_11N);
 	delay(100);

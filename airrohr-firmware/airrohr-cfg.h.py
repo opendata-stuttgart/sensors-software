@@ -4,6 +4,7 @@ configshape_in = """
 String		current_lang
 String		wlanssid
 Password		wlanpwd
+Bool		wlanpower
 String		www_username
 Password		www_password
 String		fs_ssid

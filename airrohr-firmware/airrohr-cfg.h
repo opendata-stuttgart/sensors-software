@@ -28,6 +28,7 @@ enum ConfigShapeId {
 	Config_current_lang,
 	Config_wlanssid,
 	Config_wlanpwd,
+	Config_wlanpower,
 	Config_www_username,
 	Config_www_password,
 	Config_fs_ssid,
@@ -97,6 +98,7 @@ enum ConfigShapeId {
 static constexpr char CFG_KEY_CURRENT_LANG[] PROGMEM = "current_lang";
 static constexpr char CFG_KEY_WLANSSID[] PROGMEM = "wlanssid";
 static constexpr char CFG_KEY_WLANPWD[] PROGMEM = "wlanpwd";
+static constexpr char CFG_KEY_WLANPOWER[] PROGMEM = "wlanpower";
 static constexpr char CFG_KEY_WWW_USERNAME[] PROGMEM = "www_username";
 static constexpr char CFG_KEY_WWW_PASSWORD[] PROGMEM = "www_password";
 static constexpr char CFG_KEY_FS_SSID[] PROGMEM = "fs_ssid";
@@ -166,6 +168,7 @@ static constexpr ConfigShapeEntry configShape[] PROGMEM = {
 	{ Config_Type_String, sizeof(cfg::current_lang)-1, CFG_KEY_CURRENT_LANG, cfg::current_lang },
 	{ Config_Type_String, sizeof(cfg::wlanssid)-1, CFG_KEY_WLANSSID, cfg::wlanssid },
 	{ Config_Type_Password, sizeof(cfg::wlanpwd)-1, CFG_KEY_WLANPWD, cfg::wlanpwd },
+	{ Config_Type_Bool, 0, CFG_KEY_WLANPOWER, &cfg::wlanpower },
 	{ Config_Type_String, sizeof(cfg::www_username)-1, CFG_KEY_WWW_USERNAME, cfg::www_username },
 	{ Config_Type_Password, sizeof(cfg::www_password)-1, CFG_KEY_WWW_PASSWORD, cfg::www_password },
 	{ Config_Type_String, sizeof(cfg::fs_ssid)-1, CFG_KEY_FS_SSID, cfg::fs_ssid },
