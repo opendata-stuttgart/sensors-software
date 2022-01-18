@@ -315,6 +315,8 @@ Adafruit_BMP085 bmp;
  * BMP/BME280 declaration                                        *
  *****************************************************************/
 BMX280 bmx280;
+const uint8_t bmx280_default_i2c_address = 0x77;
+const uint8_t bmx280_alternate_i2c_address = 0x76;
 
 /*****************************************************************
  * SHT3x declaration                                             *
@@ -4234,7 +4236,7 @@ static void powerOnTestSensors() {
 
 	if (cfg::bmx280_read) {
 		debug_outln_info(F("Read BMxE280..."));
-		if (!initBMX280(0x76) && !initBMX280(0x77)) {
+		if (!initBMX280(bmx280_default_i2c_address) && !initBMX280(bmx280_alternate_i2c_address)) {
 			debug_outln_error(F("Check BMx280 wiring"));
 			bmx280_init_failed = true;
 		}
