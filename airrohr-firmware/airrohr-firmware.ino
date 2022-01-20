@@ -291,6 +291,14 @@ SSD1306*  oled_ssd1306 = nullptr;
 SH1106* oled_sh1106 = nullptr;
 LiquidCrystal_I2C* lcd_1602 = nullptr;
 LiquidCrystal_I2C* lcd_2004 = nullptr;
+const uint8_t lcd_1602_default_i2c_address = 0x3f;
+const uint8_t lcd_1602_alternate_i2c_address = 0x27;
+const uint8_t lcd_1602_columns = 16;
+const uint8_t lcd_1602_rows = 2;
+const uint8_t lcd_2004_default_i2c_address = 0x3f;
+const uint8_t lcd_2004_alternate_i2c_address =  0x27;
+const uint8_t lcd_2004_columns = 20;
+const uint8_t lcd_2004_rows = 4;
 
 /*****************************************************************
  * SDS011 declarations                                           *
@@ -323,6 +331,8 @@ Adafruit_BMP085 bmp;
  * BMP/BME280 declaration                                        *
  *****************************************************************/
 BMX280 bmx280;
+const uint8_t bmx280_default_i2c_address = 0x77;
+const uint8_t bmx280_alternate_i2c_address = 0x76;
 
 /*****************************************************************
  * SHT3x declaration                                             *
@@ -4115,18 +4125,30 @@ static void init_display() {
 		}
 	}
 	if (cfg::has_lcd1602) {
-		lcd_1602 = new LiquidCrystal_I2C(0x3f, 16, 2);
+		lcd_1602 = new LiquidCrystal_I2C(
+			lcd_1602_default_i2c_address, 
+			lcd_1602_columns, 
+			lcd_1602_rows);
 	} else if (cfg::has_lcd1602_27) {
-		lcd_1602 = new LiquidCrystal_I2C(0x27, 16, 2);
+		lcd_1602 = new LiquidCrystal_I2C(
+			lcd_1602_alternate_i2c_address, 
+			lcd_1602_columns, 
+			lcd_1602_rows);
 	}
 	if (lcd_1602) {
 		lcd_1602->init();
 		lcd_1602->backlight();
 	}
 	if (cfg::has_lcd2004) {
-		lcd_2004 = new LiquidCrystal_I2C(0x3f, 20, 4);
+		lcd_2004 = new LiquidCrystal_I2C(
+			lcd_2004_default_i2c_address, 
+			lcd_2004_columns, 
+			lcd_2004_rows);
 	} else if (cfg::has_lcd2004_27) {
-		lcd_2004 = new LiquidCrystal_I2C(0x27, 20, 4);
+		lcd_2004 = new LiquidCrystal_I2C(
+			lcd_2004_alternate_i2c_address, 
+			lcd_2004_columns, 
+			lcd_2004_rows);
 	}
 	if (lcd_2004) {
 		lcd_2004->init();
@@ -4328,7 +4350,7 @@ static void powerOnTestSensors() {
 
 	if (cfg::bmx280_read) {
 		debug_outln_info(F("Read BMxE280..."));
-		if (!initBMX280(0x76) && !initBMX280(0x77)) {
+		if (!initBMX280(bmx280_default_i2c_address) && !initBMX280(bmx280_alternate_i2c_address)) {
 			debug_outln_error(F("Check BMx280 wiring"));
 			bmx280_init_failed = true;
 		}

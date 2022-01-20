@@ -98,6 +98,25 @@ Please take look at the existing translations and try to adhere and improve
 consistency accross and within the particular translation.
 
 
+## Reference list of all known I2C addresses used by the I2C device by instances that **Airrohr Firmware** is aware of
+
+
+| Device        | Class              | Address declaration          | Declaration location              | I2C address(es)                      |
+| --------------| ------------------ | -----------------------------| --------------------------------- | ------------------------------------ |
+| LCD 1602      | LiquidCrystal_I2C  | -                            | `aiirohr-firmware.ino` row 4024   | 0x27 or 0x3F                         |
+| LCD 2004      | LiquidCrystal_I2C  | -                            | `aiirohr-firmware.ino` row 4033   | 0x27 or 0x3F                         |
+| HTU21D        | Adafruit_HTU21DF   | HTU21DF_I2CADDR(0x40)        | `Adafruit_HTU21DF.h`     		    | 0x40                                 |
+| SHT31         | Adafruit_SHT31     | SHT31_DEFAULT_ADDR 0x44      | `Adafruit_STH31.h`                | 0x44                                 |
+| DNMS          | -                  | DNMS_I2C_ADDRESS 0x55        | `dnms_i2c.h`                      | 0x55                                 |
+| SCD30         | SCD30              | SCD30_ADDRESS 0x61           | `SparkFun_SCD30_Arduino_Library.h`| 0x61                                 |
+| SPS30         | -                  | SPS_I2C_ADDRESS0x69          | `sps30_i2c.h`                     | 0x69                                 |
+| BMP280        | BMX280             | const                        | `aiirohr-firmware.ino`            | 0x77 (default) or 0x76               |
+| BME280        | BMX280             | const                        | `aiirohr-firmware.ino`            | 0x77 (default) or 0x76               |
+| BM085:        | Adafruit_BMP085    | BMP085_I2CADDR 0x77          | `Adafruit_BM085.h`                | 0x77                                 |
+| BM180:        | Adafruit_BMP085    | BMP085_I2CADDR 0x77          | `Adafruit_BM085.h`                | 0x77                                 |
+
+Do not forget to update the table above when you are implementing a new I2C device.
+
 ## TODOs
 
 * [Bug fixes](https://github.com/opendata-stuttgart/sensors-software/issues?q=is%3Aopen+label%3Abug+sort%3Aupdated-desc)
