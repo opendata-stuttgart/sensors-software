@@ -82,4 +82,4 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           # Use tag on push event
           #tag: SSN-NRZ-2022-134-B${{ github.run_number }}
-          tag: $GITHUB_REF_NAME
+          tag: ${{ github.ref_name }}

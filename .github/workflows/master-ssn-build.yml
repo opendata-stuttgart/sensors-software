@@ -6,9 +6,11 @@ name: master-ssn build status
 on:
   # Triggers the workflow on push or pull request events but only for the master-ssn branch
   push:
-    branches: [ master-ssn ]
+    branches:
+      - master-ssn
   create:
-    branches: [ master-ssn ]
+    branches:
+      - master-ssn
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
