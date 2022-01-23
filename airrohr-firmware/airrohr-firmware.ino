@@ -5313,8 +5313,13 @@ void loop(void)
 	act_micro = micros();
 	act_milli = millis();
 	send_now = msSince(starttime) > cfg::sending_intervall_ms;
-	// Wait at least 30s for each NTP server to sync
 
+	if (send_now)
+	{
+		sleep = 0;
+	}
+
+	// Wait at least 30s for each NTP server to sync
 	if (!sntp_time_set && send_now &&
 		msSince(time_point_device_start_ms) < 1000 * 2 * 30 + 5000)
 	{
