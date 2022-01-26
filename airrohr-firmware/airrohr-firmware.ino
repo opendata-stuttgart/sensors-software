@@ -135,6 +135,7 @@ namespace cfg
 	
 	unsigned time_for_wifi_config = 600000;
 	unsigned sending_intervall_ms = 145000;
+	bool powersave;
 
 	char current_lang[3];
 
@@ -1538,6 +1539,7 @@ static void webserver_config_send_body_get(String &page_content)
 	page_content += FPSTR(WEB_B_BR);
 	page_content += FPSTR(BR_TAG);
 
+	add_form_checkbox(Config_powersave, FPSTR(INTL_POWERSAVE));
 	page_content += FPSTR(TABLE_TAG_OPEN);
 	add_form_input(page_content, Config_debug, FPSTR(INTL_DEBUG_LEVEL), 1);
 	add_form_input(page_content, Config_sending_intervall_ms, FPSTR(INTL_MEASUREMENT_INTERVAL), 5);
@@ -2696,7 +2698,11 @@ static void connectWifi()
 	system_phy_set_powerup_option(1);
 	// 20dBM == 100mW == max tx power allowed in europe
 	WiFi.setOutputPower(20.0f);
-	WiFi.setSleepMode(WIFI_NONE_SLEEP);
+	if (cfg::powersave) {
+		WiFi.setSleepMode(WIFI_MODEM_SLEEP);
+	} else {
+		WiFi.setSleepMode(WIFI_NONE_SLEEP);
+	}
 	WiFi.setPhyMode(WIFI_PHY_MODE_11N);
 	delay(100);
 
@@ -5297,6 +5303,8 @@ void setup(void)
  *****************************************************************/
 void loop(void)
 {
+	unsigned long sleep = SLEEPTIME_MS;
+
 	String result_PPD, result_SDS, result_PMS, result_HPM, result_NPM;
 	String result_GPS, result_DNMS;
 
@@ -5305,8 +5313,13 @@ void loop(void)
 	act_micro = micros();
 	act_milli = millis();
 	send_now = msSince(starttime) > cfg::sending_intervall_ms;
-	// Wait at least 30s for each NTP server to sync
 
+	if (send_now)
+	{
+		sleep = 0;
+	}
+
+	// Wait at least 30s for each NTP server to sync
 	if (!sntp_time_set && send_now &&
 		msSince(time_point_device_start_ms) < 1000 * 2 * 30 + 5000)
 	{
@@ -5596,6 +5609,7 @@ void loop(void)
 		starttime = millis(); // store the start time
 		count_sends++;
 	}
+
 #if defined(ESP8266)
 	MDNS.update();
 	if (cfg::npm_read)
@@ -5608,6 +5622,12 @@ void loop(void)
 	}
 
 #endif
+
+	// Sleep if all of the tasks have an event in the future. The chip can then
+	// enter a lower power mode.
+	if (cfg::powersave) {
+		delay(sleep);
+	}
 
 	if (sample_count % 500 == 0)
 	{
