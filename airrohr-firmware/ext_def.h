@@ -248,6 +248,10 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 #define NPM_READ 0
 #define NPM_API_PIN 1
 
+// Piera Systems IPS-7100
+#define IPS_READ 0
+#define IPS_API_PIN 1
+
 // Sensirion SPS30, the more expensive version of the particle sensor
 #define SPS30_READ 0
 #define SPS30_API_PIN 1

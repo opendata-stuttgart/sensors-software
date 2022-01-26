@@ -164,6 +164,7 @@ namespace cfg
 	bool pms_read = PMS_READ;
 	bool hpm_read = HPM_READ;
 	bool npm_read = NPM_READ;
+	bool ips_read = IPS_READ;
 	bool sps30_read = SPS30_READ;
 	bool bmp_read = BMP_READ;
 	bool bmx280_read = BMX280_READ;
@@ -293,11 +294,13 @@ LiquidCrystal_I2C *lcd_2004 = nullptr;
 SoftwareSerial serialSDS;
 SoftwareSerial *serialGPS;
 SoftwareSerial serialNPM;
+SoftwareSerial serialIPS;
 #endif
 #if defined(ESP32)
 #define serialSDS (Serial1)
 #define serialGPS (&(Serial2))
-#define serialNPM (&(Serial3)) //works????
+#define serialNPM (Serial1)
+#define serialIPS (Serial1)
 #endif
 
 /*****************************************************************
@@ -360,6 +363,7 @@ unsigned long time_point_device_start_ms;
 unsigned long starttime_SDS;
 unsigned long starttime_GPS;
 unsigned long starttime_NPM;
+unsigned long starttime_IPS;
 unsigned long act_micro;
 unsigned long act_milli;
 unsigned long last_micro = 0;
@@ -405,10 +409,12 @@ enum
 	NPM_REPLY_CHECKSUM_6 = 1
 } NPM_waiting_for_6; // for version
 
+//ENUM POUR IPS??
 
 bool is_PMS_running = true;
 bool is_HPM_running = true;
 bool is_NPM_running;
+bool is_IPS_running;
 
 unsigned long sending_time = 0;
 unsigned long last_update_attempt;
@@ -478,6 +484,50 @@ uint16_t npm_pm10_min_pcs = 60000;
 uint16_t npm_pm25_max_pcs = 0;
 uint16_t npm_pm25_min_pcs = 60000;
 
+uint32_t ips_pm01_sum = 0;
+uint32_t ips_pm03_sum = 0;
+uint32_t ips_pm05_sum = 0;
+uint32_t ips_pm1_sum = 0;
+uint32_t ips_pm25_sum = 0;
+uint32_t ips_pm5_sum = 0;
+uint32_t ips_pm10_sum = 0;
+uint32_t ips_pm01_sum_pcs = 0;
+uint32_t ips_pm03_sum_pcs = 0;
+uint32_t ips_pm05_sum_pcs = 0;
+uint32_t ips_pm1_sum_pcs = 0;
+uint32_t ips_pm25_sum_pcs = 0;
+uint32_t ips_pm5_sum_pcs = 0;
+uint32_t ips_pm10_sum_pcs = 0;
+uint16_t ips_val_count = 0;
+uint16_t ips_pm01_max = 0;
+uint16_t ips_pm01_min = 20000;
+uint16_t ips_pm03_max = 0;
+uint16_t ips_pm03_min = 20000;
+uint16_t ips_pm05_max = 0;
+uint16_t ips_pm05_min = 20000;
+uint16_t ips_pm1_max = 0;
+uint16_t ips_pm1_min = 20000;
+uint16_t ips_pm25_max = 0;
+uint16_t ips_pm25_min = 20000;
+uint16_t ips_pm5_max = 0;
+uint16_t ips_pm5_min = 20000;
+uint16_t ips_pm10_max = 0;
+uint16_t ips_pm10_min = 20000;
+uint16_t ips_pm01_max_pcs = 0;
+uint16_t ips_pm01_min_pcs = 60000;
+uint16_t ips_pm03_max_pcs = 0;
+uint16_t ips_pm03_min_pcs = 60000;
+uint16_t ips_pm05_max_pcs = 0;
+uint16_t ips_pm05_min_pcs = 60000;
+uint16_t ips_pm1_max_pcs = 0;
+uint16_t ips_pm1_min_pcs = 60000;
+uint16_t ips_pm25_max_pcs = 0;
+uint16_t ips_pm25_min_pcs = 60000;
+uint16_t ips_pm5_max_pcs = 0;
+uint16_t ips_pm5_min_pcs = 60000;
+uint16_t ips_pm10_max_pcs = 0;
+uint16_t ips_pm10_min_pcs = 60000;
+
 float last_value_SPS30_P0 = -1.0;
 float last_value_SPS30_P1 = -1.0;
 float last_value_SPS30_P2 = -1.0;
@@ -520,6 +570,22 @@ float last_value_NPM_P2 = -1.0;
 float last_value_NPM_N0 = -1.0;
 float last_value_NPM_N1 = -1.0;
 float last_value_NPM_N2 = -1.0;
+
+float last_value_IPS_P0 = -1.0; //PM1
+float last_value_IPS_P1 = -1.0;	//PM10
+float last_value_IPS_P2 = -1.0;	//PM2.5
+float last_value_IPS_P3 = -1.0; //PM0.1
+float last_value_IPS_P6 = -1.0; //PM0.3
+float last_value_IPS_P5 = -1.0; //PM0.5
+float last_value_IPS_P6 = -1.0; //PM5
+float last_value_IPS_N0 = -1.0;
+float last_value_IPS_N1 = -1.0;
+float last_value_IPS_N2 = -1.0;
+float last_value_IPS_N3 = -1.0;
+float last_value_IPS_N4 = -1.0;
+float last_value_IPS_N5 = -1.0;
+float last_value_IPS_N6 = -1.0;
+
 float last_value_GPS_alt = -1000.0;
 double last_value_GPS_lat = -200.0;
 double last_value_GPS_lon = -200.0;
@@ -532,9 +598,11 @@ String esp_chipid;
 String esp_mac_id;
 String last_value_SDS_version;
 String last_value_NPM_version;
+String last_value_IPS_version;
 
 unsigned long SDS_error_count;
 unsigned long NPM_error_count;
+unsigned long IPS_error_count;
 unsigned long WiFi_error_count;
 
 unsigned long last_page_load = millis();
@@ -5229,6 +5297,18 @@ void setup(void)
 		Debug.println("Read Next PM... serialNPM 115200 8E1");
 		serialNPM.setTimeout(400);
 	}
+	if (cfg::ips_read)
+	{
+#if defined(ESP8266)
+		serialIPS.begin(115200, SWSERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX);
+		serialIPS.enableIntTx(false);
+#endif
+#if defined(ESP32)
+		serialIPS.begin(115200, SERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX);
+#endif
+		Debug.println("Read IPS... serialIPS 115200 8N1");
+		serialIPS.setTimeout((4 * 12 * 1000) / 9600); //Which timeout?
+	}
 	else
 	{
 #if defined(ESP8266)
@@ -5453,6 +5533,12 @@ void loop(void)
 		{
 			data += result_NPM;
 			sum_send_time += sendSensorCommunity(result_NPM, NPM_API_PIN, FPSTR(SENSORS_NPM), "NPM_");
+			Debug.println(data);
+		}
+		if (cfg::ips_read)
+		{
+			data += result_IPS;
+			sum_send_time += sendSensorCommunity(result_IPS, IPS_API_PIN, FPSTR(SENSORS_IPS), "IPS_");
 			Debug.println(data);
 		}
 		if (cfg::sps30_read && (!sps30_init_failed))
