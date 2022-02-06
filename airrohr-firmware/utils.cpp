@@ -584,6 +584,64 @@ void NPM_cmd(PmSensorCmd2 cmd) {
 	serialNPM.write(buf, cmd_len);
 }
 
+
+/*********************************************************************************
+ * send Piera Systems IPS7100 sensor command state, change, concentration, version *
+ *********************************************************************************/
+
+	// Factory,
+	// Mode,
+	// Reset,
+	// Interval,
+	// Get,
+	// Version,
+	// //Clean,
+	// //Autoclean,
+	// Start,
+	// Stop,
+	// Smoke,
+	// //CRC,
+	// Lowdata,
+	// Baud
+
+void IPS_cmd(PmSensorCmd3 cmd) {
+
+	static constexpr char factory_cmd[] PROGMEM = "$Wfactory=\r\n";
+	static constexpr char manual_cmd[] PROGMEM = "$Wmodesel=1[\r\n";
+	static constexpr char auto_cmd[] PROGMEM = "$Wmodesel=0[\r\n";
+	static constexpr char reset_cmd[] PROGMEM = "$Wreset=[\r\n";
+	static constexpr char interval_cmd[] PROGMEM = "$Winterval=0[\r\n";
+	static constexpr char version_cmd[] PROGMEM = "$Rget=\r\n";
+	static constexpr char start_cmd[] PROGMEM = "$Rget=\r\n";
+	static constexpr char stop_cmd[] PROGMEM = "$Rget=\r\n";
+	static constexpr char smoke_cmd[] PROGMEM = "$Rget=\r\n";
+	static constexpr char lowdata_cmd[] PROGMEM = "$Rget=\r\n";
+	static constexpr char baud_cmd[] PROGMEM = "$Rget=\r\n";
+
+    constexpr uint8_t cmd_len = array_num_elements(interval_cmd); //REVOIR LA TAILLE !!
+	uint8_t buf[cmd_len];
+
+	switch (cmd) {
+	case PmSensorCmd3::Factory:
+		memcpy_P(buf, factory_cmd, cmd_len);
+		break;
+	case PmSensorCmd3::Manual:
+		memcpy_P(buf, manual_cmd, cmd_len);
+		break;
+	case PmSensorCmd3::Concentration:
+		memcpy_P(buf, concentration_cmd, cmd_len);
+		break;
+	case PmSensorCmd3::Version:
+		memcpy_P(buf, version_cmd, cmd_len);
+		break;
+	case PmSensorCmd3::Speed:
+		memcpy_P(buf, speed_cmd, cmd_len);
+		break;
+	}
+	serialIPS.print();
+}
+
+
 /*****************************************************************
  * Helpers                                                       *
  *****************************************************************/

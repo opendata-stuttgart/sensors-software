@@ -588,7 +588,7 @@ float last_value_IPS_P0 = -1.0; //PM1
 float last_value_IPS_P1 = -1.0;	//PM10
 float last_value_IPS_P2 = -1.0;	//PM2.5
 float last_value_IPS_P3 = -1.0; //PM0.1
-float last_value_IPS_P6 = -1.0; //PM0.3
+float last_value_IPS_P4 = -1.0; //PM0.3
 float last_value_IPS_P5 = -1.0; //PM0.5
 float last_value_IPS_P6 = -1.0; //PM5
 float last_value_IPS_N0 = -1.0;
@@ -966,6 +966,8 @@ static void NPM_fan_speed()
 
 static String NPM_temp_humi() 
 {
+	uint16_t NPM_temp;
+	uint16_t NPM_humi;
 	NPM_waiting_for_8 = NPM_REPLY_HEADER_8;
 	debug_outln_info(F("Temperature/Humidity in Next PM..."));
 	NPM_cmd(PmSensorCmd2::Temphumi);
@@ -997,12 +999,12 @@ static String NPM_temp_humi()
 					if (serialNPM.readBytes(data, sizeof(data)) == sizeof(data))
 					{
 						NPM_data_reader(data, 4);
-						uint16_t NPM_temp = word(data[0], data[1]);
-						uint16_t NPM_humi = word(data[2], data[3]);
+						 NPM_temp = word(data[0], data[1]);
+						 NPM_humi = word(data[2], data[3]);
 						debug_outln_verbose(F("Temperature (°C): "), String(NPM_temp / 10.0f));
 						debug_outln_verbose(F("Relative humidity (%): "), String(NPM_humi / 10.0f));
 					}
-					NPM_waiting_for_16 = NPM_REPLY_CHECKSUM_8;
+					NPM_waiting_for_8 = NPM_REPLY_CHECKSUM_8;
 					break;
 				case NPM_REPLY_CHECKSUM_16:
 					serialNPM.readBytes(checksum, sizeof(checksum));
@@ -3993,6 +3995,14 @@ static void fetchSensorNPM(String &s)
 
 
 /*****************************************************************
+ * read Piera Systems IPS-7100 sensor sensor values                 *
+ *****************************************************************/
+
+static void fetchSensorIPS(String &s)
+{
+
+}
+/*****************************************************************
  * read PPD42NS sensor values                                    *
  *****************************************************************/
 static __noinline void fetchSensorPPD(String &s)
@@ -5485,7 +5495,7 @@ void setup(void)
  *****************************************************************/
 void loop(void)
 {
-	String result_PPD, result_SDS, result_PMS, result_HPM, result_NPM;
+	String result_PPD, result_SDS, result_PMS, result_HPM, result_NPM, result_IPS;
 	String result_GPS, result_DNMS;
 
 	unsigned sum_send_time = 0;
@@ -5560,6 +5570,13 @@ void loop(void)
 		{
 			starttime_NPM = act_milli;
 			fetchSensorNPM(result_NPM);
+		}	
+	}else if(cfg::ips_read)
+	{
+		if ((msSince(starttime_IPS) > SAMPLETIME_IPS_MS) || send_now)
+		{
+			starttime_IPS = act_milli;
+			fetchSensorIPS(result_IPS);
 		}	
 	}
 	else

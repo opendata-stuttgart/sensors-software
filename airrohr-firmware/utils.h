@@ -107,6 +107,24 @@ enum class PmSensorCmd2 { // for NPM
 	Temphumi
 };
 
+enum class PmSensorCmd3 { // for IPS7100
+	Factory,
+	Manual,
+	Auto,
+	Reset,
+	Interval,
+	Get,
+	Version,
+	//Clean,
+	//Autoclean,
+	Start,
+	Stop,
+	Smoke,
+	//CRC,
+	Lowdata,
+	Baud
+};
+
 /*****************************************************************
  * Debug output                                                  *
  *****************************************************************/
