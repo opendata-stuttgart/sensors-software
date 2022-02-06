@@ -518,6 +518,13 @@ bool NPM_checksum_valid_6(const uint8_t (&data)[6])
 	return (checksum == 0);
 }
 
+bool NPM_checksum_valid_8(const uint8_t (&data)[8])
+{
+	uint8_t sum = data[0] + data[1] + data[2] + data[3] + data[4] + data[5] + data[6] + data[7];
+	uint8_t checksum = sum % 0x100;
+	return (checksum == 0);
+}
+
 bool NPM_checksum_valid_16(const uint8_t (&data)[16]) {
 	uint8_t sum = data[0] + data[1] + data[2] + data[3] + data[4] + data[5] + data[6] + data[7] + data[8] + data[9] + data[10] + data[11] + data[12] + data[13] + data[14] + data[15];
 	uint8_t checksum = sum % 0x100;
@@ -545,6 +552,10 @@ void NPM_cmd(PmSensorCmd2 cmd) {
 		0x81, 0x21, 0x32, 0x2C //50% 
 	};
 
+	static constexpr uint8_t temphumi_cmd[] PROGMEM = {
+		0x81, 0x14, 0x32, 0x6B
+	};
+
 //0x81 + 0x21 + 0x55 + 0x09 = 0x100
 
 	constexpr uint8_t cmd_len = array_num_elements(change_cmd);
@@ -565,6 +576,9 @@ void NPM_cmd(PmSensorCmd2 cmd) {
 		break;
 	case PmSensorCmd2::Speed:
 		memcpy_P(buf, speed_cmd, cmd_len);
+		break;
+	case PmSensorCmd2::Temphumi:
+		memcpy_P(buf, temphumi_cmd, cmd_len);
 		break;
 	}
 	serialNPM.write(buf, cmd_len);
@@ -593,7 +607,7 @@ void NPM_data_reader(uint8_t data[], size_t size)
 		debug_outln(reader, DEBUG_MAX_INFO);
 	}
 
-	void NPM_state(uint8_t bytedata)
+String NPM_state(uint8_t bytedata)
 	{
 		String state = "State: ";
 
@@ -602,6 +616,7 @@ void NPM_data_reader(uint8_t data[], size_t size)
 			state += String(bitRead(bytedata, b));
 		}
 		debug_outln(state, DEBUG_MAX_INFO);
+		return state;
 	}
 
 const __FlashStringHelper* loggerDescription(unsigned i) {

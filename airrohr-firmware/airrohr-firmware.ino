@@ -164,6 +164,7 @@ namespace cfg
 	bool pms_read = PMS_READ;
 	bool hpm_read = HPM_READ;
 	bool npm_read = NPM_READ;
+	bool npm_fulltime = NPM_READ;
 	bool ips_read = IPS_READ;
 	bool sps30_read = SPS30_READ;
 	bool bmp_read = BMP_READ;
@@ -409,7 +410,19 @@ enum
 	NPM_REPLY_CHECKSUM_6 = 1
 } NPM_waiting_for_6; // for version
 
+enum
+{
+	NPM_REPLY_HEADER_8 = 8,
+	NPM_REPLY_STATE_8 = 6,
+	NPM_REPLY_BODY_8 = 5,
+	NPM_REPLY_CHECKSUM_8 = 1
+} NPM_waiting_for_8; // for temperature/humidity
+
+
 //ENUM POUR IPS??
+
+String current_state_npm;
+String current_th_npm;
 
 bool is_PMS_running = true;
 bool is_HPM_running = true;
@@ -750,7 +763,7 @@ static uint8_t NPM_get_state()
 			break;
 		case NPM_REPLY_STATE_4:
 			serialNPM.readBytes(state, sizeof(state));
-			NPM_state(state[0]);
+			current_state_npm = NPM_state(state[0]);
 			result = state[0];
 			NPM_waiting_for_4 = NPM_REPLY_CHECKSUM_4;
 			break;
@@ -798,19 +811,22 @@ static bool NPM_start_stop()
 			break;
 		case NPM_REPLY_STATE_4:
 			serialNPM.readBytes(state, sizeof(state));
-			NPM_state(state[0]);
+			current_state_npm = NPM_state(state[0]);
 
 			if (bitRead(state[0], 0) == 0)
 			{
 				debug_outln_info(F("NPM start..."));
 				result = true;
 			}
-			else
+			else if (bitRead(state[0], 0) == 1)
 			{
 				debug_outln_info(F("NPM stop..."));
 				result = false;
 			}
-
+			else
+			{
+				result = !is_NPM_running;
+			}
 			NPM_waiting_for_4 = NPM_REPLY_CHECKSUM_4;
 			break;
 		case NPM_REPLY_CHECKSUM_4:
@@ -859,7 +875,7 @@ static String NPM_version_date()
 			break;
 		case NPM_REPLY_STATE_6:
 			serialNPM.readBytes(state, sizeof(state));
-			NPM_state(state[0]);
+			current_state_npm =  NPM_state(state[0]);
 			NPM_waiting_for_6 = NPM_REPLY_DATA_6;
 			break;
 		case NPM_REPLY_DATA_6:
@@ -919,7 +935,7 @@ static void NPM_fan_speed()
 			break;
 		case NPM_REPLY_STATE_5:
 			serialNPM.readBytes(state, sizeof(state));
-			NPM_state(state[0]);
+			current_state_npm = NPM_state(state[0]);
 			NPM_waiting_for_5 = NPM_REPLY_DATA_5;
 			break;
 		case NPM_REPLY_DATA_5:
@@ -945,6 +961,65 @@ static void NPM_fan_speed()
 		}
 	}
 }
+
+
+
+static String NPM_temp_humi() 
+{
+	NPM_waiting_for_8 = NPM_REPLY_HEADER_8;
+	debug_outln_info(F("Temperature/Humidity in Next PM..."));
+	NPM_cmd(PmSensorCmd2::Temphumi);
+			while (!serialNPM.available())
+			{
+				debug_outln("Wait for Serial...", DEBUG_MAX_INFO);
+			}
+
+			while (serialNPM.available() >= NPM_waiting_for_8)
+			{
+				const uint8_t constexpr header[2] = {0x81, 0x14};
+				uint8_t state[1];
+				uint8_t data[4];
+				uint8_t checksum[1];
+				uint8_t test[8];
+
+				switch (NPM_waiting_for_16)
+				{
+				case NPM_REPLY_HEADER_8:
+					if (serialNPM.find(header, sizeof(header)))
+						NPM_waiting_for_8 = NPM_REPLY_STATE_8;
+					break;
+				case NPM_REPLY_STATE_8:
+					serialNPM.readBytes(state, sizeof(state));
+					current_state_npm = NPM_state(state[0]);
+					NPM_waiting_for_8 = NPM_REPLY_BODY_8;
+					break;
+				case NPM_REPLY_BODY_8:
+					if (serialNPM.readBytes(data, sizeof(data)) == sizeof(data))
+					{
+						NPM_data_reader(data, 4);
+						uint16_t NPM_temp = word(data[0], data[1]);
+						uint16_t NPM_humi = word(data[2], data[3]);
+						debug_outln_verbose(F("Temperature (°C): "), String(NPM_temp / 10.0f));
+						debug_outln_verbose(F("Relative humidity (%): "), String(NPM_humi / 10.0f));
+					}
+					NPM_waiting_for_16 = NPM_REPLY_CHECKSUM_8;
+					break;
+				case NPM_REPLY_CHECKSUM_16:
+					serialNPM.readBytes(checksum, sizeof(checksum));
+					memcpy(test, header, sizeof(header));
+					memcpy(&test[sizeof(header)], state, sizeof(state));
+					memcpy(&test[sizeof(header) + sizeof(state)], data, sizeof(data));
+					memcpy(&test[sizeof(header) + sizeof(state) + sizeof(data)], checksum, sizeof(checksum));
+					NPM_data_reader(test, 8);
+					if (NPM_checksum_valid_8(test))
+						debug_outln_info(F("Checksum OK..."));
+					NPM_waiting_for_8 = NPM_REPLY_HEADER_8;
+					break;
+				}
+			}
+			return "T_NPM="+ String(NPM_temp / 10.0f) + "°C / RH_NPM=" + String(NPM_humi / 10.0f) + "%";
+}
+
 
 /*****************************************************************
  * disable unneeded NMEA sentences, TinyGPS++ needs GGA, RMC     *
@@ -3723,7 +3798,7 @@ static void fetchSensorNPM(String &s)
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_NPM));
 	if (cfg::sending_intervall_ms > (WARMUPTIME_NPM_MS + READINGTIME_NPM_MS) && msSince(starttime) < (cfg::sending_intervall_ms - (WARMUPTIME_NPM_MS + READINGTIME_NPM_MS)))
 	{
-		if (is_NPM_running)
+		if (is_NPM_running && !cfg::npm_fulltime)
 		{
 			debug_outln_info(F("Change NPM to stop..."));
 			is_NPM_running = NPM_start_stop();
@@ -3765,7 +3840,7 @@ static void fetchSensorNPM(String &s)
 					break;
 				case NPM_REPLY_STATE_16:
 					serialNPM.readBytes(state, sizeof(state));
-					NPM_state(state[0]);
+					current_state_npm = NPM_state(state[0]);
 					NPM_waiting_for_16 = NPM_REPLY_BODY_16;
 					break;
 				case NPM_REPLY_BODY_16:
@@ -3903,7 +3978,9 @@ static void fetchSensorNPM(String &s)
 
 		if (cfg::sending_intervall_ms > (WARMUPTIME_NPM_MS + READINGTIME_NPM_MS))
 		{
-			if (is_NPM_running)
+			debug_outln_info(F("Temperature and humidity in NPM after measure..."));
+			current_th_npm = NPM_temp_humi();
+			if (is_NPM_running && !cfg::npm_fulltime)
 			{
 				debug_outln_info(F("Change NPM to stop after measure..."));
 				is_NPM_running = NPM_start_stop();
@@ -4522,6 +4599,11 @@ static void display_values()
 	{
 		screens[screen_count++] = 1;
 	}
+	if (cfg::npm_read)
+	{
+		screens[screen_count++] = 9;
+		screens[screen_count++] = 10; 
+	}
 	if (cfg::sps30_read)
 	{
 		screens[screen_count++] = 2;
@@ -4648,6 +4730,17 @@ static void display_values()
 			display_lines[2] = F("Measurements: ");
 			display_lines[2] += String(count_sends);
 			break;
+		case 9:
+		    display_header = F("Tera Next PM");
+			display_lines[0] = std::move(tmpl(F("PM1: {v} µg/m³"), check_display_value(pm01_value, -1, 1, 6)));
+			display_lines[1] = std::move(tmpl(F("PM2.5: {v} µg/m³"), check_display_value(pm25_value, -1, 1, 6)));
+			display_lines[2] = std::move(tmpl(F("PM10: {v} µg/m³"), check_display_value(pm10_value, -1, 1, 6)));
+			break;
+		case 10:
+		    display_header = F("Tera Next PM");
+			display_lines[0] = current_state_npm;
+			display_lines[1] = current_th_npm;
+			break;
 		}
 
 		if (oled_ssd1306)
@@ -4744,6 +4837,16 @@ static void display_values()
 			display_lines[0] += esp_chipid;
 			display_lines[1] = "FW: ";
 			display_lines[1] += SOFTWARE_VERSION;
+			break;
+		case 9:
+			display_lines[0] = "PM1: ";
+			display_lines[0] += check_display_value(pm01_value, -1, 1, 6);
+			display_lines[1] = "PM2.5: ";
+			display_lines[1] += check_display_value(pm25_value, -1, 1, 6);
+			break;
+		case 10:
+			display_lines[0] = current_state_npm;
+			display_lines[1] = current_th_npm;
 			break;
 		}
 
@@ -5002,17 +5105,22 @@ static void powerOnTestSensors()
 			}
 			else
 			{
-				//if(!is_NPM_running){
 				debug_outln_info(F("Force start NPM..."));
 				is_NPM_running = NPM_start_stop();
-				//}
 			}
 		}
 
-		delay(1000);
+		delay(15000); //prevent any buffer overload on ESP82666
 		NPM_version_date();
-		delay(5000);
+		delay(3000); //prevent any buffer overload on ESP82666
+
+		current_th_npm = NPM_temp_humi();
+		delay(2000); 
+
+	if(cfg::npm_fulltime) {
 		is_NPM_running = NPM_start_stop();
+		delay(2000); //prevent any buffer overload on ESP82666
+	}
 	}
 
 	if (cfg::sps30_read)

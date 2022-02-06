@@ -247,6 +247,7 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 // Tera Sensor Next PM sensor
 #define NPM_READ 0
 #define NPM_API_PIN 1
+#define NPM_FULLTIME 0
 
 // Piera Systems IPS-7100
 #define IPS_READ 0
