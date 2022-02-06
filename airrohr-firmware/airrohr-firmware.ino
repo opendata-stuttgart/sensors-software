@@ -5403,7 +5403,7 @@ void setup(void)
 
 	Wire.begin(I2C_PIN_SDA, I2C_PIN_SCL);
 
-	if (cfg::npm_read)
+if (cfg::npm_read)
 	{
 #if defined(ESP8266)
 		serialNPM.begin(115200, SWSERIAL_8E1, PM_SERIAL_RX, PM_SERIAL_TX);
@@ -5415,7 +5415,7 @@ void setup(void)
 		Debug.println("Read Next PM... serialNPM 115200 8E1");
 		serialNPM.setTimeout(400);
 	}
-	if (cfg::ips_read)
+else if (cfg::ips_read)
 	{
 #if defined(ESP8266)
 		serialIPS.begin(115200, SWSERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX);
@@ -5448,8 +5448,6 @@ void setup(void)
 	delay(50);
 	digitalWrite(RST_OLED, HIGH);
 #endif
-
-	
 
 	init_display();
 	setupNetworkTime();

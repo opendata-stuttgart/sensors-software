@@ -590,11 +590,12 @@ void NPM_cmd(PmSensorCmd2 cmd) {
  *********************************************************************************/
 
 	// Factory,
-	// Mode,
+	// Manual,
+	// Auto,
 	// Reset,
 	// Interval,
 	// Get,
-	// Version,
+	// Version, // on start on reset
 	// //Clean,
 	// //Autoclean,
 	// Start,
@@ -607,38 +608,52 @@ void NPM_cmd(PmSensorCmd2 cmd) {
 void IPS_cmd(PmSensorCmd3 cmd) {
 
 	static constexpr char factory_cmd[] PROGMEM = "$Wfactory=\r\n";
-	static constexpr char manual_cmd[] PROGMEM = "$Wmodesel=1[\r\n";
-	static constexpr char auto_cmd[] PROGMEM = "$Wmodesel=0[\r\n";
-	static constexpr char reset_cmd[] PROGMEM = "$Wreset=[\r\n";
-	static constexpr char interval_cmd[] PROGMEM = "$Winterval=0[\r\n";
-	static constexpr char version_cmd[] PROGMEM = "$Rget=\r\n";
-	static constexpr char start_cmd[] PROGMEM = "$Rget=\r\n";
-	static constexpr char stop_cmd[] PROGMEM = "$Rget=\r\n";
-	static constexpr char smoke_cmd[] PROGMEM = "$Rget=\r\n";
-	static constexpr char lowdata_cmd[] PROGMEM = "$Rget=\r\n";
-	static constexpr char baud_cmd[] PROGMEM = "$Rget=\r\n";
-
-    constexpr uint8_t cmd_len = array_num_elements(interval_cmd); //REVOIR LA TAILLE !!
-	uint8_t buf[cmd_len];
+	static constexpr char manual_cmd[] PROGMEM = "$Wmodesel=1\r\n";
+	static constexpr char auto_cmd[] PROGMEM = "$Wmodesel=0\r\n";
+	static constexpr char reset_cmd[] PROGMEM = "$Wreset=\r\n"; // to read version? or at start
+	static constexpr char interval_cmd[] PROGMEM = "$Winterval=0\r\n";
+	static constexpr char get_cmd[] PROGMEM = "$Rget=\r\n";
+	static constexpr char start_cmd[] PROGMEM = "$Wpsm=0\r\n";
+	static constexpr char stop_cmd[] PROGMEM = "$Wpsm=1\r\n";
+	static constexpr char smoke_cmd[] PROGMEM = "$Wvsd=0\r\n"; //Stop smoke detection
+	static constexpr char lowdata_cmd[] PROGMEM = "$Wldm=1\r\n";
+	static constexpr char baud_cmd[] PROGMEM = "$Wuart=1\r\n"; //9600
 
 	switch (cmd) {
 	case PmSensorCmd3::Factory:
-		memcpy_P(buf, factory_cmd, cmd_len);
+		serialIPS.print(factory_cmd);
 		break;
 	case PmSensorCmd3::Manual:
-		memcpy_P(buf, manual_cmd, cmd_len);
+		serialIPS.print(manual_cmd);
 		break;
-	case PmSensorCmd3::Concentration:
-		memcpy_P(buf, concentration_cmd, cmd_len);
+	case PmSensorCmd3::Auto:
+		serialIPS.print(auto_cmd);
 		break;
-	case PmSensorCmd3::Version:
-		memcpy_P(buf, version_cmd, cmd_len);
+	case PmSensorCmd3::Reset:
+		serialIPS.print(reset_cmd);
 		break;
-	case PmSensorCmd3::Speed:
-		memcpy_P(buf, speed_cmd, cmd_len);
+	case PmSensorCmd3::Interval:
+		serialIPS.print(interval_cmd);
+		break;
+	case PmSensorCmd3::Get:
+		serialIPS.print(get_cmd);
+		break;
+	case PmSensorCmd3::Start:
+		serialIPS.print(start_cmd);
+		break;
+	case PmSensorCmd3::Stop:
+		serialIPS.print(stop_cmd);
+		break;
+	case PmSensorCmd3::Smoke:
+		serialIPS.print(smoke_cmd);
+		break;
+	case PmSensorCmd3::Lowdata:
+		serialIPS.print(lowdata_cmd);
+		break;
+	case PmSensorCmd3::Baud:
+		serialIPS.print(baud_cmd);
 		break;
 	}
-	serialIPS.print();
 }
 
 

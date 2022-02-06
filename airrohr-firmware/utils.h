@@ -85,11 +85,13 @@ namespace cfg {
 #if defined(ESP8266)
 extern SoftwareSerial serialSDS;
 extern SoftwareSerial serialNPM;
+extern SoftwareSerial serialIPS;
 #endif
 #if defined(ESP32)
 #define serialSDS (Serial1)
 #define serialGPS (&(Serial2))
 #define serialNPM (Serial1)
+#define serialIPS (Serial1)
 #endif
 
 enum class PmSensorCmd {
@@ -114,7 +116,7 @@ enum class PmSensorCmd3 { // for IPS7100
 	Reset,
 	Interval,
 	Get,
-	Version,
+	//Version,
 	//Clean,
 	//Autoclean,
 	Start,
