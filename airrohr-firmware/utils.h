@@ -170,6 +170,7 @@ extern bool SDS_cmd(PmSensorCmd cmd);
 extern bool PMS_cmd(PmSensorCmd cmd);
 extern bool HPM_cmd(PmSensorCmd cmd);
 extern void NPM_cmd(PmSensorCmd2 cmd);
+extern void IPS_cmd(PmSensorCmd3 cmd);
 extern bool NPM_checksum_valid_4(const uint8_t (&data)[4]);
 extern bool NPM_checksum_valid_5(const uint8_t (&data)[5]);
 extern bool NPM_checksum_valid_6(const uint8_t (&data)[6]);
