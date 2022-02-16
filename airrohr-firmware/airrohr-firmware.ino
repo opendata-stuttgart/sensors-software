@@ -4867,7 +4867,6 @@ static void display_values()
 	float pm04_value = -1.0;
 	float pm05_value = -1.0;
 	float pm10_value = -1.0;
-	float pm25_value = -1.0;
 	String pm01_sensor;
 	String pm10_sensor;
 	String pm25_sensor;
