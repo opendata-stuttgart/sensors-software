@@ -36,8 +36,8 @@ const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "Valeur corrigée en dB(A)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "Valeur corrigée en °C";
-const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "";
-const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "";
+const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "Altitude en m";
+const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "Press. atm. au niveau de la mer en hPa";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Activer BasicAuth";
 #define INTL_REPORT_ISSUE "Signaler un problème"
@@ -57,11 +57,11 @@ const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Afficher les informations wifi";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Afficher les informations de l'appareil";
 
-#define INTL_STATIC_IP_TEXT ""
-const char INTL_STATIC_IP[] PROGMEM = "";
-const char INTL_STATIC_SUBNET[] PROGMEM = "";
-const char INTL_STATIC_GATEWAY[] PROGMEM = "";
-const char INTL_STATIC_DNS[] PROGMEM = "";
+#define INTL_STATIC_IP_TEXT "Configuration de l'adresse IP statique (tous les champs doivent être remplis)"
+const char INTL_STATIC_IP[] PROGMEM = "Adresse IP";
+const char INTL_STATIC_SUBNET[] PROGMEM = "Subnet";
+const char INTL_STATIC_GATEWAY[] PROGMEM = "Gateway";
+const char INTL_STATIC_DNS[] PROGMEM = "Serveur DNS";
 
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Niveau&nbsp;de&nbsp;débogage";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Intervalle de mesure";
