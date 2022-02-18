@@ -126,6 +126,10 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 #define NPM_SERIAL_RX D1
 #define NPM_SERIAL_TX D2
 
+// define serial interface pins for IPS7100 Sensor
+#define IPS_SERIAL_RX D1
+#define IPS_SERIAL_TX D2
+
 // PPD42NS, the cheaper version of the particle sensor
 #define PPD_PIN_PM1 GPS_SERIAL_TX
 #define PPD_PIN_PM2 GPS_SERIAL_RX
