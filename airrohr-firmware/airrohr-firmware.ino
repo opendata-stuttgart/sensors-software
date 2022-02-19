@@ -165,6 +165,8 @@ namespace cfg
 	bool pms_read = PMS_READ;
 	bool hpm_read = HPM_READ;
 	bool npm_read = NPM_READ;
+	bool npm_fulltime = NPM_READ;
+	bool ips_read = IPS_READ;
 	bool sps30_read = SPS30_READ;
 	bool bmp_read = BMP_READ;
 	bool bmx280_read = BMX280_READ;
@@ -302,11 +304,13 @@ const uint8_t lcd_2004_rows = 4;
 SoftwareSerial serialSDS;
 SoftwareSerial *serialGPS;
 SoftwareSerial serialNPM;
+SoftwareSerial serialIPS;
 #endif
 #if defined(ESP32)
 #define serialSDS (Serial1)
 #define serialGPS (&(Serial2))
-#define serialNPM (&(Serial3)) //works????
+#define serialNPM (Serial1)
+#define serialIPS (Serial1)
 #endif
 
 /*****************************************************************
@@ -371,6 +375,7 @@ unsigned long time_point_device_start_ms;
 unsigned long starttime_SDS;
 unsigned long starttime_GPS;
 unsigned long starttime_NPM;
+unsigned long starttime_IPS;
 unsigned long act_micro;
 unsigned long act_milli;
 unsigned long last_micro = 0;
@@ -416,10 +421,24 @@ enum
 	NPM_REPLY_CHECKSUM_6 = 1
 } NPM_waiting_for_6; // for version
 
+enum
+{
+	NPM_REPLY_HEADER_8 = 8,
+	NPM_REPLY_STATE_8 = 6,
+	NPM_REPLY_BODY_8 = 5,
+	NPM_REPLY_CHECKSUM_8 = 1
+} NPM_waiting_for_8; // for temperature/humidity
+
+
+//ENUM POUR IPS??
+
+String current_state_npm;
+String current_th_npm;
 
 bool is_PMS_running = true;
 bool is_HPM_running = true;
 bool is_NPM_running;
+bool is_IPS_running;
 
 unsigned long sending_time = 0;
 unsigned long last_update_attempt;
@@ -489,6 +508,50 @@ uint16_t npm_pm10_min_pcs = 60000;
 uint16_t npm_pm25_max_pcs = 0;
 uint16_t npm_pm25_min_pcs = 60000;
 
+float ips_pm01_sum = 0;
+float ips_pm03_sum = 0;
+float ips_pm05_sum = 0;
+float ips_pm1_sum = 0;
+float ips_pm25_sum = 0;
+float ips_pm5_sum = 0;
+float ips_pm10_sum = 0;
+unsigned long ips_pm01_sum_pcs = 0;
+unsigned long ips_pm03_sum_pcs = 0;
+unsigned long ips_pm05_sum_pcs = 0;
+unsigned long ips_pm1_sum_pcs = 0;
+unsigned long ips_pm25_sum_pcs = 0;
+unsigned long ips_pm5_sum_pcs = 0;
+unsigned long ips_pm10_sum_pcs = 0;
+uint16_t ips_val_count = 0;
+float ips_pm01_max = 0;
+float ips_pm01_min = 200;
+float ips_pm03_max = 0;
+float ips_pm03_min = 200;
+float ips_pm05_max = 0;
+float ips_pm05_min = 200;
+float ips_pm1_max = 0;
+float ips_pm1_min = 200;
+float ips_pm25_max = 0;
+float ips_pm25_min = 200;
+float ips_pm5_max = 0;
+float ips_pm5_min = 200;
+float ips_pm10_max = 0;
+float ips_pm10_min = 200;
+unsigned long ips_pm01_max_pcs = 0;
+unsigned long  ips_pm01_min_pcs = 4000000000;
+unsigned long  ips_pm03_max_pcs = 0;
+unsigned long  ips_pm03_min_pcs = 4000000000;
+unsigned long  ips_pm05_max_pcs = 0;
+unsigned long  ips_pm05_min_pcs = 4000000000;
+unsigned long  ips_pm1_max_pcs = 0;
+unsigned long  ips_pm1_min_pcs = 4000000000;
+unsigned long  ips_pm25_max_pcs = 0;
+unsigned long  ips_pm25_min_pcs = 4000000000;
+unsigned long  ips_pm5_max_pcs = 0;
+unsigned long ips_pm5_min_pcs = 4000000000;
+unsigned long  ips_pm10_max_pcs = 0;
+unsigned long  ips_pm10_min_pcs = 4000000000;
+
 float last_value_SPS30_P0 = -1.0;
 float last_value_SPS30_P1 = -1.0;
 float last_value_SPS30_P2 = -1.0;
@@ -531,6 +594,22 @@ float last_value_NPM_P2 = -1.0;
 float last_value_NPM_N0 = -1.0;
 float last_value_NPM_N1 = -1.0;
 float last_value_NPM_N2 = -1.0;
+
+float last_value_IPS_P0 = -1.0; //PM1
+float last_value_IPS_P1 = -1.0;	//PM10
+float last_value_IPS_P2 = -1.0;	//PM2.5
+float last_value_IPS_P3 = -1.0; //PM0.1
+float last_value_IPS_P4 = -1.0; //PM0.3
+float last_value_IPS_P5 = -1.0; //PM0.5
+float last_value_IPS_P6 = -1.0; //PM5
+float last_value_IPS_N0 = -1.0;
+float last_value_IPS_N1 = -1.0;
+float last_value_IPS_N2 = -1.0;
+float last_value_IPS_N3 = -1.0;
+float last_value_IPS_N4 = -1.0;
+float last_value_IPS_N5 = -1.0;
+float last_value_IPS_N6 = -1.0;
+
 float last_value_GPS_alt = -1000.0;
 double last_value_GPS_lat = -200.0;
 double last_value_GPS_lon = -200.0;
@@ -543,9 +622,11 @@ String esp_chipid;
 String esp_mac_id;
 String last_value_SDS_version;
 String last_value_NPM_version;
+String last_value_IPS_version;
 
 unsigned long SDS_error_count;
 unsigned long NPM_error_count;
+unsigned long IPS_error_count;
 unsigned long WiFi_error_count;
 
 unsigned long last_page_load = millis();
@@ -748,12 +829,15 @@ static bool NPM_start_stop()
 				debug_outln_info(F("NPM start..."));
 				result = true;
 			}
-			else
+			else if (bitRead(state[0], 0) == 1)
 			{
 				debug_outln_info(F("NPM stop..."));
 				result = false;
 			}
-
+			else
+			{
+				result = !is_NPM_running;
+			}
 			NPM_waiting_for_4 = NPM_REPLY_CHECKSUM_4;
 			break;
 		case NPM_REPLY_CHECKSUM_4:
@@ -887,6 +971,98 @@ static void NPM_fan_speed()
 			break;
 		}
 	}
+}
+
+
+
+static String NPM_temp_humi() 
+{
+	uint16_t NPM_temp;
+	uint16_t NPM_humi;
+	NPM_waiting_for_8 = NPM_REPLY_HEADER_8;
+	debug_outln_info(F("Temperature/Humidity in Next PM..."));
+	NPM_cmd(PmSensorCmd2::Temphumi);
+			while (!serialNPM.available())
+			{
+				debug_outln("Wait for Serial...", DEBUG_MAX_INFO);
+			}
+
+			while (serialNPM.available() >= NPM_waiting_for_8)
+			{
+				const uint8_t constexpr header[2] = {0x81, 0x14};
+				uint8_t state[1];
+				uint8_t data[4];
+				uint8_t checksum[1];
+				uint8_t test[8];
+
+				switch (NPM_waiting_for_16)
+				{
+				case NPM_REPLY_HEADER_8:
+					if (serialNPM.find(header, sizeof(header)))
+						NPM_waiting_for_8 = NPM_REPLY_STATE_8;
+					break;
+				case NPM_REPLY_STATE_8:
+					serialNPM.readBytes(state, sizeof(state));
+					NPM_state(state[0]);
+					NPM_waiting_for_8 = NPM_REPLY_BODY_8;
+					break;
+				case NPM_REPLY_BODY_8:
+					if (serialNPM.readBytes(data, sizeof(data)) == sizeof(data))
+					{
+						NPM_data_reader(data, 4);
+						 NPM_temp = word(data[0], data[1]);
+						 NPM_humi = word(data[2], data[3]);
+						debug_outln_verbose(F("Temperature (°C): "), String(NPM_temp / 10.0f));
+						debug_outln_verbose(F("Relative humidity (%): "), String(NPM_humi / 10.0f));
+					}
+					NPM_waiting_for_8 = NPM_REPLY_CHECKSUM_8;
+					break;
+				case NPM_REPLY_CHECKSUM_16:
+					serialNPM.readBytes(checksum, sizeof(checksum));
+					memcpy(test, header, sizeof(header));
+					memcpy(&test[sizeof(header)], state, sizeof(state));
+					memcpy(&test[sizeof(header) + sizeof(state)], data, sizeof(data));
+					memcpy(&test[sizeof(header) + sizeof(state) + sizeof(data)], checksum, sizeof(checksum));
+					NPM_data_reader(test, 8);
+					if (NPM_checksum_valid_8(test))
+						debug_outln_info(F("Checksum OK..."));
+					NPM_waiting_for_8 = NPM_REPLY_HEADER_8;
+					break;
+				}
+			}
+			return "T_NPM="+ String(NPM_temp / 10.0f) + "°C / RH_NPM=" + String(NPM_humi / 10.0f) + "%";
+}
+
+
+/*****************************************************************
+ * read IPS-7100 sensor serial and firmware date                   *
+*****************************************************************/
+
+static String IPS_version_date()
+{
+	debug_outln_info(F("Version IPS..."));
+	String serial_data;
+
+	IPS_cmd(PmSensorCmd3::Reset);
+
+	if (serialIPS.available() > 0)
+	{
+	serial_data = serialIPS.readString();
+	//Debug.println(serial_data);
+	}
+
+	int index1 = serial_data.indexOf("VERSION_NUMBER ");
+	int index2 = serial_data.indexOf("\nSERIAL_NUMBER ");
+	int index3 = serial_data.indexOf("\nD:");
+
+	String version_ips = serial_data.substring(index1+15,index2-1);
+	String serial_ips = serial_data.substring(index2+15,index3-1);
+
+	last_value_IPS_version = version_ips + "/" + serial_ips;
+
+	debug_outln_info(F("IPS-7100 Version/Serial Number: "), last_value_IPS_version);
+
+	return last_value_IPS_version;
 }
 
 /*****************************************************************
@@ -1591,6 +1767,7 @@ static void webserver_config_send_body_get(String &page_content)
 	add_form_checkbox_sensor(Config_ds18b20_read, FPSTR(INTL_DS18B20));
 	add_form_checkbox_sensor(Config_pms_read, FPSTR(INTL_PMS));
 	add_form_checkbox_sensor(Config_npm_read, FPSTR(INTL_NPM));
+	add_form_checkbox_sensor(Config_ips_read, FPSTR(INTL_IPS));
 	add_form_checkbox_sensor(Config_bmp_read, FPSTR(INTL_BMP180));
 	add_form_checkbox(Config_gps_read, FPSTR(INTL_NEO6M));
 
@@ -1957,6 +2134,24 @@ static void webserver_values()
 		add_table_nc_value(FPSTR(SENSORS_NPM), FPSTR(WEB_NC1k0), last_value_NPM_N0);
 		add_table_nc_value(FPSTR(SENSORS_NPM), FPSTR(WEB_NC2k5), last_value_NPM_N2);
 		add_table_nc_value(FPSTR(SENSORS_NPM), FPSTR(WEB_NC10), last_value_NPM_N1);
+		page_content += FPSTR(EMPTY_ROW);
+	}
+	if (cfg::ips_read)
+	{
+		add_table_pm_value(FPSTR(SENSORS_IPS), FPSTR(WEB_PM01), last_value_IPS_P3);
+		add_table_pm_value(FPSTR(SENSORS_IPS), FPSTR(WEB_PM03), last_value_IPS_P4);
+		add_table_pm_value(FPSTR(SENSORS_IPS), FPSTR(WEB_PM05), last_value_IPS_P5);
+		add_table_pm_value(FPSTR(SENSORS_IPS), FPSTR(WEB_PM1), last_value_IPS_P0);
+		add_table_pm_value(FPSTR(SENSORS_IPS), FPSTR(WEB_PM25), last_value_IPS_P2);
+		add_table_pm_value(FPSTR(SENSORS_IPS), FPSTR(WEB_PM5), last_value_IPS_P6);
+		add_table_pm_value(FPSTR(SENSORS_IPS), FPSTR(WEB_PM10), last_value_IPS_P1);
+		add_table_nc_value(FPSTR(SENSORS_IPS), FPSTR(WEB_NC0k1), last_value_IPS_N3);
+		add_table_nc_value(FPSTR(SENSORS_IPS), FPSTR(WEB_NC0k3), last_value_IPS_N4);
+		add_table_nc_value(FPSTR(SENSORS_IPS), FPSTR(WEB_NC0k5), last_value_IPS_N5);	
+		add_table_nc_value(FPSTR(SENSORS_IPS), FPSTR(WEB_NC1k0), last_value_IPS_N0);
+		add_table_nc_value(FPSTR(SENSORS_IPS), FPSTR(WEB_NC2k5), last_value_IPS_N2);
+		add_table_nc_value(FPSTR(SENSORS_IPS), FPSTR(WEB_NC5k0), last_value_IPS_N6);
+		add_table_nc_value(FPSTR(SENSORS_IPS), FPSTR(WEB_NC10), last_value_IPS_N1);
 		page_content += FPSTR(EMPTY_ROW);
 	}
 	if (cfg::sps30_read)
@@ -3671,7 +3866,7 @@ static void fetchSensorNPM(String &s)
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_NPM));
 	if (cfg::sending_intervall_ms > (WARMUPTIME_NPM_MS + READINGTIME_NPM_MS) && msSince(starttime) < (cfg::sending_intervall_ms - (WARMUPTIME_NPM_MS + READINGTIME_NPM_MS)))
 	{
-		if (is_NPM_running)
+		if (is_NPM_running && !cfg::npm_fulltime)
 		{
 			debug_outln_info(F("Change NPM to stop..."));
 			is_NPM_running = NPM_start_stop();
@@ -3686,7 +3881,7 @@ static void fetchSensorNPM(String &s)
 			NPM_waiting_for_16 = NPM_REPLY_HEADER_16;
 		}
 
-		//if (){}
+	
 		if (msSince(starttime) > (cfg::sending_intervall_ms - READINGTIME_NPM_MS))
 		{ //DIMINUER LE READING TIME
 
@@ -3713,7 +3908,7 @@ static void fetchSensorNPM(String &s)
 					break;
 				case NPM_REPLY_STATE_16:
 					serialNPM.readBytes(state, sizeof(state));
-					NPM_state(state[0]);
+					current_state_npm = NPM_state(state[0]);
 					NPM_waiting_for_16 = NPM_REPLY_BODY_16;
 					break;
 				case NPM_REPLY_BODY_16:
@@ -3728,15 +3923,13 @@ static void fetchSensorNPM(String &s)
 						uint16_t pm25_serial = word(data[8], data[9]);
 						uint16_t pm10_serial = word(data[10], data[11]);
 
-						//if (msSince(starttime) > (cfg::sending_intervall_ms - READINGTIME_NPM_MS)){
-
 						debug_outln_verbose(F("PM1 (μg/m3) : "), String(pm1_serial / 10.0f));
 						debug_outln_verbose(F("PM2.5 (μg/m3): "), String(pm25_serial / 10.0f));
 						debug_outln_verbose(F("PM10 (μg/m3) : "), String(pm10_serial / 10.0f));
 
-						debug_outln_verbose(F("PM1 (pcs/mL) : "), String(N1_serial));
-						debug_outln_verbose(F("PM2.5 (pcs/mL): "), String(N25_serial));
-						debug_outln_verbose(F("PM10 (pcs/mL) : "), String(N10_serial));
+						debug_outln_verbose(F("PM1 (pcs/L) : "), String(N1_serial));
+						debug_outln_verbose(F("PM2.5 (pcs/L): "), String(N25_serial));
+						debug_outln_verbose(F("PM10 (pcs/L) : "), String(N10_serial));
 
 						npm_pm1_sum += pm1_serial;
 						npm_pm25_sum += pm25_serial;
@@ -3757,7 +3950,6 @@ static void fetchSensorNPM(String &s)
 						debug_outln_info(F("Next PM Measure..."));
 						npm_val_count++;
 						debug_outln(String(npm_val_count), DEBUG_MAX_INFO);
-						//}
 					}
 					NPM_waiting_for_16 = NPM_REPLY_CHECKSUM_16;
 					break;
@@ -3802,9 +3994,9 @@ static void fetchSensorNPM(String &s)
 			last_value_NPM_P1 = float(npm_pm10_sum) / (npm_val_count * 10.0f);
 			last_value_NPM_P2 = float(npm_pm25_sum) / (npm_val_count * 10.0f);
 
-			last_value_NPM_N0 = float(npm_pm1_sum_pcs) / npm_val_count;
-			last_value_NPM_N1 = float(npm_pm10_sum_pcs) / npm_val_count;
-			last_value_NPM_N2 = float(npm_pm25_sum_pcs) / npm_val_count;
+			last_value_NPM_N0 = float(npm_pm1_sum_pcs) / (npm_val_count * 1000.0f);
+			last_value_NPM_N1 = float(npm_pm10_sum_pcs) / (npm_val_count * 1000.0f);
+			last_value_NPM_N2 = float(npm_pm25_sum_pcs) / (npm_val_count * 1000.0f);
 
 			add_Value2Json(s, F("NPM_P0"), F("PM1: "), last_value_NPM_P0);
 			add_Value2Json(s, F("NPM_P1"), F("PM10:  "), last_value_NPM_P1);
@@ -3851,7 +4043,9 @@ static void fetchSensorNPM(String &s)
 
 		if (cfg::sending_intervall_ms > (WARMUPTIME_NPM_MS + READINGTIME_NPM_MS))
 		{
-			if (is_NPM_running)
+			debug_outln_info(F("Temperature and humidity in NPM after measure..."));
+			current_th_npm = NPM_temp_humi();
+			if (is_NPM_running && !cfg::npm_fulltime)
 			{
 				debug_outln_info(F("Change NPM to stop after measure..."));
 				is_NPM_running = NPM_start_stop();
@@ -3863,6 +4057,303 @@ static void fetchSensorNPM(String &s)
 }
 
 
+/*****************************************************************
+ * read Piera Systems IPS-7100 sensor sensor values                 *
+ *****************************************************************/
+
+static void fetchSensorIPS(String &s)
+{
+	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_IPS));
+
+			while (serialIPS.available() > 0)
+			{
+				serialIPS.read();				
+			}
+
+
+	if (cfg::sending_intervall_ms > (WARMUPTIME_IPS_MS + READINGTIME_IPS_MS) && msSince(starttime) < (cfg::sending_intervall_ms - (WARMUPTIME_IPS_MS + READINGTIME_IPS_MS)))
+	{
+		if (is_IPS_running)
+		{
+			debug_outln_info(F("Change IPS to stop..."));
+			IPS_cmd(PmSensorCmd3::Stop);
+			is_IPS_running = false;
+		}
+	}
+	else
+	{
+		if (!is_IPS_running)
+		{
+			debug_outln_info(F("Change IPS to start..."));
+			IPS_cmd(PmSensorCmd3::Start);
+			is_IPS_running = true;
+		}
+
+		//VIDER LE BUFFER DU START?
+	
+		if (msSince(starttime) > (cfg::sending_intervall_ms - READINGTIME_IPS_MS))
+		{ //DIMINUER LE READING TIME
+
+			debug_outln_info(F("Concentration IPS..."));
+			String serial_data;
+			//String serial_data2;
+
+			// while (Serial.available() > 0) {
+			// 	Serial.read();
+			// }
+
+			IPS_cmd(PmSensorCmd3::Get);
+
+			if (serialIPS.available() > 0)
+			{
+				serial_data = serialIPS.readString();				
+			}
+		 
+
+			// while (serialIPS.available() > 0)
+			// {
+			// 	serialIPS.read();				
+			// }
+
+		 Debug.println(serial_data);
+
+// 		if(serial_data.length()>240){
+
+
+	int index1 = serial_data.indexOf("PC0.1,");
+	int index2 = serial_data.indexOf(",PC0.3,");
+	int index3 = serial_data.indexOf(",PC0.5,");
+	int index4 = serial_data.indexOf(",PC1.0,");
+	int index5 = serial_data.indexOf(",PC2.5,");
+	int index6 = serial_data.indexOf(",PC5.0,");
+	int index7 = serial_data.indexOf(",PC10,");
+	int index8 = serial_data.indexOf(",PM0.1,");
+	int index9 = serial_data.indexOf(",PM0.3,");
+	int index10 = serial_data.indexOf(",PM0.5,");
+	int index11 = serial_data.indexOf(",PM1.0,");
+	int index12 = serial_data.indexOf(",PM2.5,");
+	int index13 = serial_data.indexOf(",PM5.0,");
+	int index14 = serial_data.indexOf(",PM10,");
+	int index15 = serial_data.indexOf(",IPS");	
+
+	String N01_serial = serial_data.substring(index1+6,index2);
+	String N03_serial = serial_data.substring(index2+7,index3);
+	String N05_serial = serial_data.substring(index3+7,index4);
+	String N1_serial = serial_data.substring(index4+7,index5);
+	String N25_serial = serial_data.substring(index5+7,index6);
+	String N5_serial = serial_data.substring(index6+7,index7);
+	String N10_serial = serial_data.substring(index7+6,index8);
+
+	String pm01_serial = serial_data.substring(index8+7,index9-6);
+	String pm03_serial = serial_data.substring(index9+7,index10-6);
+	String pm05_serial = serial_data.substring(index10+7,index11-6);
+	String pm1_serial = serial_data.substring(index11+7,index12-6);
+	String pm25_serial = serial_data.substring(index12+7,index13-6);
+	String pm5_serial = serial_data.substring(index13+7,index14-6);
+	String pm10_serial = serial_data.substring(index14+6,index15-6);
+
+	debug_outln_verbose(F("PM0.1 (μg/m3) : "), pm01_serial);
+	debug_outln_verbose(F("PM0.3 (μg/m3): "), pm03_serial);
+	debug_outln_verbose(F("PM0.5 (μg/m3) : "), pm05_serial);
+	debug_outln_verbose(F("PM1 (μg/m3) : "), pm1_serial);
+	debug_outln_verbose(F("PM2.5 (μg/m3): "), pm25_serial);
+	debug_outln_verbose(F("PM5 (μg/m3) : "), pm5_serial);
+	debug_outln_verbose(F("PM10 (μg/m3) : "), pm10_serial);
+
+	debug_outln_verbose(F("PM0.1 (pcs/L) : "), N01_serial);
+	debug_outln_verbose(F("PM0.3 (pcs/L): "), N03_serial);
+	debug_outln_verbose(F("PM0.5(pcs/L) : "), N05_serial);
+	debug_outln_verbose(F("PM1 (pcs/L) : "), N1_serial);
+	debug_outln_verbose(F("PM2.5 (pcs/L): "), N25_serial);
+	debug_outln_verbose(F("PM5 (pcs/L) : "), N5_serial);
+	debug_outln_verbose(F("PM10 (pcs/L) : "), N10_serial);
+
+	ips_pm01_sum += pm01_serial.toFloat();
+	ips_pm03_sum += pm03_serial.toFloat();
+	ips_pm05_sum += pm05_serial.toFloat();
+	ips_pm1_sum += pm1_serial.toFloat();
+	ips_pm25_sum += pm25_serial.toFloat();
+	ips_pm5_sum += pm5_serial.toFloat();
+	ips_pm10_sum += pm10_serial.toFloat();
+
+	char *ptr;
+
+	ips_pm01_sum_pcs += strtoul(N01_serial.c_str(),&ptr,10);
+	ips_pm03_sum_pcs += strtoul(N03_serial.c_str(),&ptr,10);
+	ips_pm05_sum_pcs += strtoul(N05_serial.c_str(),&ptr,10);
+	ips_pm1_sum_pcs += strtoul(N1_serial.c_str(),&ptr,10);
+	ips_pm25_sum_pcs += strtoul(N25_serial.c_str(),&ptr,10);
+	ips_pm5_sum_pcs += strtoul(N5_serial.c_str(),&ptr,10);
+	ips_pm10_sum_pcs += strtoul(N10_serial.c_str(),&ptr,10);
+
+	UPDATE_MIN_MAX(ips_pm01_min, ips_pm01_max, pm01_serial.toFloat());
+	UPDATE_MIN_MAX(ips_pm03_min, ips_pm03_max, pm03_serial.toFloat());
+	UPDATE_MIN_MAX(ips_pm05_min, ips_pm05_max, pm05_serial.toFloat());
+	UPDATE_MIN_MAX(ips_pm1_min, ips_pm1_max, pm1_serial.toFloat());
+	UPDATE_MIN_MAX(ips_pm25_min, ips_pm25_max, pm25_serial.toFloat());
+	UPDATE_MIN_MAX(ips_pm5_min, ips_pm5_max, pm5_serial.toFloat());
+	UPDATE_MIN_MAX(ips_pm10_min, ips_pm10_max, pm10_serial.toFloat());
+	
+	UPDATE_MIN_MAX(ips_pm01_min_pcs, ips_pm01_max_pcs, strtoul(N01_serial.c_str(),&ptr,10));
+	UPDATE_MIN_MAX(ips_pm03_min_pcs, ips_pm03_max_pcs, strtoul(N03_serial.c_str(),&ptr,10));
+	UPDATE_MIN_MAX(ips_pm05_min_pcs, ips_pm05_max_pcs, strtoul(N05_serial.c_str(),&ptr,10));
+	UPDATE_MIN_MAX(ips_pm1_min_pcs, ips_pm1_max_pcs, strtoul(N1_serial.c_str(),&ptr,10));
+	UPDATE_MIN_MAX(ips_pm25_min_pcs, ips_pm25_max_pcs, strtoul(N25_serial.c_str(),&ptr,10));
+	UPDATE_MIN_MAX(ips_pm5_min_pcs, ips_pm5_max_pcs, strtoul(N5_serial.c_str(),&ptr,10));
+	UPDATE_MIN_MAX(ips_pm10_min_pcs, ips_pm10_max_pcs, strtoul(N10_serial.c_str(),&ptr,10));
+
+	debug_outln_info(F("IPS Measure..."));
+	ips_val_count++;
+	debug_outln(String(ips_val_count), DEBUG_MAX_INFO);
+	}
+}
+
+	if (send_now)
+	{
+
+		last_value_IPS_P0 = -1.0; //PM1
+		last_value_IPS_P1 = -1.0; //PM10
+		last_value_IPS_P2 = -1.0; //PM2.5
+		last_value_IPS_P3 = -1.0; //PM0.1
+		last_value_IPS_P4 = -1.0; //PM0.3
+		last_value_IPS_P5 = -1.0; //PM0.5
+		last_value_IPS_P6 = -1.0; //PM5
+		last_value_IPS_N0 = -1.0;
+		last_value_IPS_N1 = -1.0;
+		last_value_IPS_N2 = -1.0;
+		last_value_IPS_N3 = -1.0;
+		last_value_IPS_N4 = -1.0;
+		last_value_IPS_N5 = -1.0;
+		last_value_IPS_N6 = -1.0;
+
+		if (ips_val_count > 2)
+		{
+			ips_pm01_sum = ips_pm01_sum - ips_pm01_min - ips_pm01_max;
+			ips_pm03_sum = ips_pm03_sum - ips_pm03_min - ips_pm03_max;
+			ips_pm05_sum = ips_pm05_sum - ips_pm05_min - ips_pm05_max;
+			ips_pm1_sum = ips_pm1_sum - ips_pm1_min - ips_pm1_max;
+			ips_pm25_sum = ips_pm25_sum - ips_pm25_min - ips_pm25_max;
+			ips_pm5_sum = ips_pm5_sum - ips_pm5_min - ips_pm5_max;
+			ips_pm10_sum = ips_pm10_sum - ips_pm10_min - ips_pm10_max;
+
+			ips_pm01_sum_pcs = ips_pm01_sum_pcs - ips_pm01_min_pcs - ips_pm01_max_pcs;
+			ips_pm03_sum_pcs = ips_pm03_sum_pcs - ips_pm03_min_pcs - ips_pm03_max_pcs;
+			ips_pm05_sum_pcs = ips_pm05_sum_pcs - ips_pm05_min_pcs - ips_pm05_max_pcs;
+			ips_pm1_sum_pcs = ips_pm1_sum_pcs - ips_pm1_min_pcs - ips_pm1_max_pcs;
+			ips_pm25_sum_pcs = ips_pm25_sum_pcs - ips_pm25_min_pcs - ips_pm25_max_pcs;
+			ips_pm5_sum_pcs = ips_pm5_sum_pcs - ips_pm5_min_pcs - ips_pm5_max_pcs;
+			ips_pm10_sum_pcs = ips_pm10_sum_pcs - ips_pm10_min_pcs - ips_pm10_max_pcs;
+
+			ips_val_count = ips_val_count - 2;
+		}
+		if (ips_val_count > 0)
+		{
+			last_value_IPS_P0 = float(ips_pm1_sum) / (ips_val_count);
+			last_value_IPS_P1 = float(ips_pm10_sum) / (ips_val_count);
+			last_value_IPS_P2 = float(ips_pm25_sum) / (ips_val_count);
+			last_value_IPS_P3 = float(ips_pm01_sum) / (ips_val_count);
+			last_value_IPS_P4 = float(ips_pm03_sum) / (ips_val_count);
+			last_value_IPS_P5 = float(ips_pm05_sum) / (ips_val_count);
+			last_value_IPS_P6 = float(ips_pm5_sum) / (ips_val_count);
+
+			last_value_IPS_N0 = float(ips_pm1_sum_pcs) / (ips_val_count * 1000.0f);
+			last_value_IPS_N1 = float(ips_pm10_sum_pcs) / (ips_val_count * 1000.0f);
+			last_value_IPS_N2 = float(ips_pm25_sum_pcs) / (ips_val_count * 1000.0f);
+			last_value_IPS_N3 = float(ips_pm01_sum_pcs) / (ips_val_count * 1000.0f);
+			last_value_IPS_N4 = float(ips_pm03_sum_pcs) / (ips_val_count * 1000.0f);
+			last_value_IPS_N5 = float(ips_pm05_sum_pcs) / (ips_val_count * 1000.0f);
+			last_value_IPS_N6 = float(ips_pm5_sum_pcs) / (ips_val_count * 1000.0f);
+
+			add_Value2Json(s, F("IPS_P0"), F("PM1: "), last_value_IPS_P0);
+			add_Value2Json(s, F("IPS_P1"), F("PM10:  "), last_value_IPS_P1);
+			add_Value2Json(s, F("IPS_P2"), F("PM2.5: "), last_value_IPS_P2);
+			add_Value2Json(s, F("IPS_P3"), F("PM0.1: "), last_value_IPS_P3);
+			add_Value2Json(s, F("IPS_P4"), F("PM0.3:  "), last_value_IPS_P4);
+			add_Value2Json(s, F("IPS_P5"), F("PM0.5: "), last_value_IPS_P5);
+			add_Value2Json(s, F("IPS_P6"), F("PM5: "), last_value_IPS_P6);
+
+			add_Value2Json(s, F("IPS_N1"), F("NC1.0: "), last_value_IPS_N0);
+			add_Value2Json(s, F("IPS_N10"), F("NC10:  "), last_value_IPS_N1);
+			add_Value2Json(s, F("IPS_N25"), F("NC2.5: "), last_value_IPS_N2);
+			add_Value2Json(s, F("IPS_N01"), F("NC0.1: "), last_value_IPS_N3);
+			add_Value2Json(s, F("IPS_N03"), F("NC0.3:  "), last_value_IPS_N4);
+			add_Value2Json(s, F("IPS_N05"), F("NC0.5: "), last_value_IPS_N5);
+			add_Value2Json(s, F("IPS_N5"), F("NC5: "), last_value_IPS_N6);
+
+
+			debug_outln_info(FPSTR(DBG_TXT_SEP));
+			if (ips_val_count < 3)
+			{
+				IPS_error_count++;
+			}
+		}
+		else
+		{
+			IPS_error_count++;
+		}
+
+		ips_pm01_sum = 0;
+		ips_pm03_sum = 0;
+		ips_pm05_sum = 0;
+		ips_pm1_sum = 0;
+		ips_pm25_sum = 0;
+		ips_pm5_sum = 0;
+		ips_pm10_sum = 0;
+
+		ips_val_count = 0;
+
+		ips_pm01_max = 0;
+		ips_pm01_min = 200;
+		ips_pm03_max = 0;
+		ips_pm03_min = 200;
+		ips_pm05_max = 0;
+		ips_pm05_min = 200;
+		ips_pm1_max = 0;
+		ips_pm1_min = 200;
+		ips_pm25_max = 0;
+		ips_pm25_min = 200;
+		ips_pm5_max = 0;
+		ips_pm5_min = 200;
+		ips_pm10_max = 0;
+		ips_pm10_min = 200;
+
+		ips_pm01_sum_pcs = 0;
+		ips_pm03_sum_pcs = 0;
+		ips_pm05_sum_pcs = 0;
+		ips_pm1_sum_pcs = 0;
+		ips_pm25_sum_pcs = 0;
+		ips_pm5_sum_pcs = 0;
+		ips_pm10_sum_pcs = 0;
+
+		ips_pm01_max_pcs = 0;
+		ips_pm01_min_pcs = 4000000000;
+		ips_pm03_max_pcs = 0;
+		ips_pm03_min_pcs = 4000000000;
+		ips_pm05_max_pcs = 0;
+		ips_pm05_min_pcs = 4000000000;
+		ips_pm1_max_pcs = 0;
+		ips_pm1_min_pcs = 4000000000;
+		ips_pm25_max_pcs = 0;
+		ips_pm25_min_pcs = 4000000000;
+		ips_pm5_max_pcs = 0;
+		ips_pm5_min_pcs = 4000000000;
+		ips_pm10_max_pcs = 0;
+		ips_pm10_min_pcs = 4000000000;
+
+		if (cfg::sending_intervall_ms > (WARMUPTIME_IPS_MS + READINGTIME_IPS_MS))
+		{
+			if (is_IPS_running)
+			{
+				debug_outln_info(F("Change IPS to stop after measure..."));
+				IPS_cmd(PmSensorCmd3::Stop);
+				is_IPS_running = false;
+			}
+		}
+	}
+
+	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_IPS));
+
+}
 /*****************************************************************
  * read PPD42NS sensor values                                    *
  *****************************************************************/
@@ -4133,6 +4624,10 @@ static bool fwDownloadStream(WiFiClientSecure &client, const String &url, Stream
 	if (cfg::npm_read)
 	{
 		agent += NPM_version_date();
+	}else if (cfg::ips_read)
+	{
+		agent += IPS_version_date();
+
 	}
 	else
 	{
@@ -4333,17 +4828,28 @@ static void display_values()
 	float h_value = -1.0;
 	float p_value = -1.0;
 	String t_sensor, h_sensor, p_sensor;
+	float pm001_value = -1.0;
+	float pm003_value = -1.0;
+	float pm005_value = -1.0;
+	float pm25_value = -1.0;
 	float pm01_value = -1.0;
 	float pm04_value = -1.0;
+	float pm05_value = -1.0;
 	float pm10_value = -1.0;
-	float pm25_value = -1.0;
 	String pm01_sensor;
 	String pm10_sensor;
 	String pm25_sensor;
+	String pm001_sensor;
+	String pm003_sensor;
+	String pm005_sensor;
+	String pm05_sensor;
+	float nc001_value = -1.0;
+	float nc003_value = -1.0;
 	float nc005_value = -1.0;
 	float nc010_value = -1.0;
 	float nc025_value = -1.0;
 	float nc040_value = -1.0;
+	float nc050_value = -1.0;
 	float nc100_value = -1.0;
 	float la_eq_value = -1.0;
 	float la_max_value = -1.0;
@@ -4391,6 +4897,30 @@ static void display_values()
 		nc010_value = last_value_NPM_N0;
 		nc100_value = last_value_NPM_N1;
 		nc025_value = last_value_NPM_N2;
+	}
+	if (cfg::ips_read)
+	{
+		pm01_value = last_value_IPS_P0;
+		pm10_value = last_value_IPS_P1;
+		pm25_value = last_value_IPS_P2;
+		pm001_value = last_value_IPS_P3;
+		pm003_value = last_value_IPS_P4;
+		pm005_value = last_value_IPS_P5;
+		pm05_value = last_value_IPS_P6;
+		pm001_sensor = FPSTR(SENSORS_IPS);
+		pm003_sensor = FPSTR(SENSORS_IPS);
+		pm005_sensor = FPSTR(SENSORS_IPS);
+		pm01_sensor = FPSTR(SENSORS_IPS);
+		pm10_sensor = FPSTR(SENSORS_IPS);
+		pm25_sensor = FPSTR(SENSORS_IPS);
+		pm05_sensor = FPSTR(SENSORS_IPS);
+		nc010_value = last_value_IPS_N0;
+		nc100_value = last_value_IPS_N1;
+		nc025_value = last_value_IPS_N2;
+		nc001_value = last_value_IPS_N3;
+		nc003_value = last_value_IPS_N4;
+		nc005_value = last_value_IPS_N5;
+		nc050_value = last_value_IPS_N6;
 	}
 	if (cfg::sps30_read)
 	{
@@ -4469,6 +4999,15 @@ static void display_values()
 	if (cfg::ppd_read || cfg::pms_read || cfg::hpm_read || cfg::sds_read)
 	{
 		screens[screen_count++] = 1;
+	}
+	if (cfg::npm_read)
+	{
+		screens[screen_count++] = 9;
+		screens[screen_count++] = 10; 
+	}
+	if (cfg::ips_read)
+	{
+		screens[screen_count++] = 11;  //A VOIR POUR AJOUTER DES ÈCRANS
 	}
 	if (cfg::sps30_read)
 	{
@@ -4596,6 +5135,23 @@ static void display_values()
 			display_lines[2] = F("Measurements: ");
 			display_lines[2] += String(count_sends);
 			break;
+		case 9:
+		    display_header = F("Tera Next PM");
+			display_lines[0] = std::move(tmpl(F("PM1: {v} µg/m³"), check_display_value(pm01_value, -1, 1, 6)));
+			display_lines[1] = std::move(tmpl(F("PM2.5: {v} µg/m³"), check_display_value(pm25_value, -1, 1, 6)));
+			display_lines[2] = std::move(tmpl(F("PM10: {v} µg/m³"), check_display_value(pm10_value, -1, 1, 6)));
+			break;
+		case 10:
+		    display_header = F("Tera Next PM");
+			display_lines[0] = current_state_npm;
+			display_lines[1] = current_th_npm;
+			break;
+		case 11:
+		    display_header = F("Piera IPS-7100");
+			display_lines[0] = std::move(tmpl(F("PM1: {v} µg/m³"), check_display_value(pm01_value, -1, 1, 6)));
+			display_lines[1] = std::move(tmpl(F("PM2.5: {v} µg/m³"), check_display_value(pm25_value, -1, 1, 6)));
+			display_lines[2] = std::move(tmpl(F("PM10: {v} µg/m³"), check_display_value(pm10_value, -1, 1, 6)));
+			break;
 		}
 
 		if (oled_ssd1306)
@@ -4692,6 +5248,22 @@ static void display_values()
 			display_lines[0] += esp_chipid;
 			display_lines[1] = "FW: ";
 			display_lines[1] += SOFTWARE_VERSION;
+			break;
+		case 9:
+			display_lines[0] = "PM1: ";
+			display_lines[0] += check_display_value(pm01_value, -1, 1, 6);
+			display_lines[1] = "PM2.5: ";
+			display_lines[1] += check_display_value(pm25_value, -1, 1, 6);
+			break;
+		case 10:
+			display_lines[0] = current_state_npm;
+			display_lines[1] = current_th_npm;
+			break;
+		case 11:
+			display_lines[0] = "PM1: ";
+			display_lines[0] += check_display_value(pm01_value, -1, 1, 6);
+			display_lines[1] = "PM2.5: ";
+			display_lines[1] += check_display_value(pm25_value, -1, 1, 6);
 			break;
 		}
 
@@ -4896,7 +5468,7 @@ static void powerOnTestSensors()
 
 	if (cfg::npm_read)
 	{
-				uint8_t test_state;
+		uint8_t test_state;
 		delay(15000); //wait a bit to be sure Next PM is ready to receive instructions.
 		test_state = NPM_get_state();
 		if (test_state == 0x00)
@@ -4950,23 +5522,44 @@ static void powerOnTestSensors()
 			{
 				debug_outln_info(F("Laser error"));
 			}
+
 			if (bitRead(test_state, 0) == 0)
 			{
 				debug_outln_info(F("NPM already started..."));
 			}
 			else
 			{
-				//if(!is_NPM_running){
 				debug_outln_info(F("Force start NPM..."));
 				is_NPM_running = NPM_start_stop();
-				//}
 			}
 		}
 
-		delay(1000);
+		delay(15000); //prevent any buffer overload on ESP82666
 		NPM_version_date();
-		delay(5000);
+		delay(3000); //prevent any buffer overload on ESP82666
+
+		NPM_temp_humi();
+		delay(2000); 
+
+	if(cfg::npm_fulltime) {
 		is_NPM_running = NPM_start_stop();
+		delay(2000); //prevent any buffer overload on ESP82666
+	}
+	}
+
+	if (cfg::ips_read)
+	{
+	IPS_cmd(PmSensorCmd3::Factory); //set to Factory
+	delay(1000);
+	IPS_version_date();
+	delay(1000);
+	IPS_cmd(PmSensorCmd3::Smoke); // no smoke detection
+	delay(1000);
+	IPS_cmd(PmSensorCmd3::Interval); //Set interval to 0 = manual mode
+	delay(1000);
+	IPS_cmd(PmSensorCmd3::Stop); 
+	delay(1000);
+	is_IPS_running = false;
 	}
 
 	if (cfg::sps30_read)
@@ -5238,7 +5831,7 @@ void setup(void)
 
 	Wire.begin(I2C_PIN_SDA, I2C_PIN_SCL);
 
-	if (cfg::npm_read)
+if (cfg::npm_read)
 	{
 #if defined(ESP8266)
 		serialNPM.begin(115200, SWSERIAL_8E1, PM_SERIAL_RX, PM_SERIAL_TX);
@@ -5249,6 +5842,19 @@ void setup(void)
 #endif
 		Debug.println("Read Next PM... serialNPM 115200 8E1");
 		serialNPM.setTimeout(400);
+	}
+else if (cfg::ips_read)
+	{
+//#define SERIAL_BUFFER_SIZE 256
+#if defined(ESP8266)
+		serialIPS.begin(115200, SWSERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX);
+		serialIPS.enableIntTx(false);
+#endif
+#if defined(ESP32)
+		serialIPS.begin(115200, SERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX);
+#endif
+		Debug.println("Read IPS... serialIPS 115200 8N1"); //will be set to 9600 8N1 afterwards
+		serialIPS.setTimeout(900); //Which timeout?
 	}
 	else
 	{
@@ -5271,8 +5877,6 @@ void setup(void)
 	delay(50);
 	digitalWrite(RST_OLED, HIGH);
 #endif
-
-	
 
 	init_display();
 	setupNetworkTime();
@@ -5319,8 +5923,7 @@ void setup(void)
 void loop(void)
 {
 	unsigned long sleep = SLEEPTIME_MS;
-
-	String result_PPD, result_SDS, result_PMS, result_HPM, result_NPM;
+	String result_PPD, result_SDS, result_PMS, result_HPM, result_NPM, result_IPS;
 	String result_GPS, result_DNMS;
 
 	unsigned sum_send_time = 0;
@@ -5400,6 +6003,13 @@ void loop(void)
 		{
 			starttime_NPM = act_milli;
 			fetchSensorNPM(result_NPM);
+		}	
+	}else if(cfg::ips_read)
+	{
+		if ((msSince(starttime_IPS) > SAMPLETIME_IPS_MS) || send_now)
+		{
+			starttime_IPS = act_milli;
+			fetchSensorIPS(result_IPS);
 		}	
 	}
 	else
@@ -5481,7 +6091,11 @@ void loop(void)
 		{
 			data += result_NPM;
 			sum_send_time += sendSensorCommunity(result_NPM, NPM_API_PIN, FPSTR(SENSORS_NPM), "NPM_");
-			Debug.println(data);
+		}
+		if (cfg::ips_read)
+		{
+			data += result_IPS;
+			sum_send_time += sendSensorCommunity(result_IPS, IPS_API_PIN, FPSTR(SENSORS_IPS), "IPS_");
 		}
 		if (cfg::sps30_read && (!sps30_init_failed))
 		{
@@ -5578,7 +6192,7 @@ void loop(void)
 			data.remove(data.length() - 1);
 		}
 		data += "]}";
-
+		Debug.println(data);
 		yield();
 
 		sum_send_time += sendDataToOptionalApis(data);

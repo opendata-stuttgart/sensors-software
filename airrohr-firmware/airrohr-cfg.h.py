@@ -16,6 +16,8 @@ Bool		sds_read
 Bool		pms_read
 Bool		hpm_read
 Bool		npm_read
+Bool        npm_fulltime
+Bool		ips_read
 Bool		sps30_read
 Bool		bmp_read
 Bool		bmx280_read

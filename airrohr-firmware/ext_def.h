@@ -126,6 +126,10 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 #define NPM_SERIAL_RX D1
 #define NPM_SERIAL_TX D2
 
+// define serial interface pins for IPS7100 Sensor
+#define IPS_SERIAL_RX D1
+#define IPS_SERIAL_TX D2
+
 // PPD42NS, the cheaper version of the particle sensor
 #define PPD_PIN_PM1 GPS_SERIAL_TX
 #define PPD_PIN_PM2 GPS_SERIAL_RX
@@ -247,6 +251,11 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 // Tera Sensor Next PM sensor
 #define NPM_READ 0
 #define NPM_API_PIN 1
+#define NPM_FULLTIME 0
+
+// Piera Systems IPS-7100
+#define IPS_READ 0
+#define IPS_API_PIN 1
 
 // Sensirion SPS30, the more expensive version of the particle sensor
 #define SPS30_READ 0

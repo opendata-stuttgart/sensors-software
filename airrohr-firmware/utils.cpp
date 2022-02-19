@@ -518,6 +518,13 @@ bool NPM_checksum_valid_6(const uint8_t (&data)[6])
 	return (checksum == 0);
 }
 
+bool NPM_checksum_valid_8(const uint8_t (&data)[8])
+{
+	uint8_t sum = data[0] + data[1] + data[2] + data[3] + data[4] + data[5] + data[6] + data[7];
+	uint8_t checksum = sum % 0x100;
+	return (checksum == 0);
+}
+
 bool NPM_checksum_valid_16(const uint8_t (&data)[16]) {
 	uint8_t sum = data[0] + data[1] + data[2] + data[3] + data[4] + data[5] + data[6] + data[7] + data[8] + data[9] + data[10] + data[11] + data[12] + data[13] + data[14] + data[15];
 	uint8_t checksum = sum % 0x100;
@@ -545,6 +552,10 @@ void NPM_cmd(PmSensorCmd2 cmd) {
 		0x81, 0x21, 0x32, 0x2C //50% 
 	};
 
+	static constexpr uint8_t temphumi_cmd[] PROGMEM = {
+		0x81, 0x14, 0x32, 0x6B
+	};
+
 //0x81 + 0x21 + 0x55 + 0x09 = 0x100
 
 	constexpr uint8_t cmd_len = array_num_elements(change_cmd);
@@ -566,8 +577,83 @@ void NPM_cmd(PmSensorCmd2 cmd) {
 	case PmSensorCmd2::Speed:
 		memcpy_P(buf, speed_cmd, cmd_len);
 		break;
+	case PmSensorCmd2::Temphumi:
+		memcpy_P(buf, temphumi_cmd, cmd_len);
+		break;
 	}
 	serialNPM.write(buf, cmd_len);
+}
+
+
+/*********************************************************************************
+ * send Piera Systems IPS7100 sensor command state, change, concentration, version *
+ *********************************************************************************/
+
+	// Factory,
+	// Manual,
+	// Auto,
+	// Reset,
+	// Interval,
+	// Get,
+	// Version, // on start on reset
+	// //Clean,
+	// //Autoclean,
+	// Start,
+	// Stop,
+	// Smoke,
+	// //CRC,
+	// Lowdata,
+	// Baud
+
+void IPS_cmd(PmSensorCmd3 cmd) {
+
+	static constexpr char factory_cmd[] PROGMEM = "$Wfactory=\r\n";
+	static constexpr char manual_cmd[] PROGMEM = "$Wmodesel=1\r\n";
+	static constexpr char auto_cmd[] PROGMEM = "$Wmodesel=0\r\n";
+	static constexpr char reset_cmd[] PROGMEM = "$Wreset=\r\n"; // to read version? or at start
+	static constexpr char interval_cmd[] PROGMEM = "$Winterval=0\r\n";
+	static constexpr char get_cmd[] PROGMEM = "$Rget=\r\n";
+	static constexpr char start_cmd[] PROGMEM = "$Wpsm=0\r\n";
+	static constexpr char stop_cmd[] PROGMEM = "$Wpsm=1\r\n";
+	static constexpr char smoke_cmd[] PROGMEM = "$Wvsd=0\r\n"; //Stop smoke detection
+	static constexpr char lowdata_cmd[] PROGMEM = "$Wldm=1\r\n";
+	static constexpr char baud_cmd[] PROGMEM = "$Wuart=1\r\n"; //9600
+
+	switch (cmd) {
+	case PmSensorCmd3::Factory:
+		serialIPS.print(factory_cmd);
+		break;
+	case PmSensorCmd3::Manual:
+		serialIPS.print(manual_cmd);
+		break;
+	case PmSensorCmd3::Auto:
+		serialIPS.print(auto_cmd);
+		break;
+	case PmSensorCmd3::Reset:
+		serialIPS.print(reset_cmd);
+		break;
+	case PmSensorCmd3::Interval:
+		serialIPS.print(interval_cmd);
+		break;
+	case PmSensorCmd3::Get:
+		serialIPS.print(get_cmd);
+		break;
+	case PmSensorCmd3::Start:
+		serialIPS.print(start_cmd);
+		break;
+	case PmSensorCmd3::Stop:
+		serialIPS.print(stop_cmd);
+		break;
+	case PmSensorCmd3::Smoke:
+		serialIPS.print(smoke_cmd);
+		break;
+	case PmSensorCmd3::Lowdata:
+		serialIPS.print(lowdata_cmd);
+		break;
+	case PmSensorCmd3::Baud:
+		serialIPS.print(baud_cmd);
+		break;
+	}
 }
 
 /*****************************************************************
@@ -593,7 +679,7 @@ void NPM_data_reader(uint8_t data[], size_t size)
 		debug_outln(reader, DEBUG_MAX_INFO);
 	}
 
-	void NPM_state(uint8_t bytedata)
+String NPM_state(uint8_t bytedata)
 	{
 		String state = "State: ";
 
@@ -602,6 +688,7 @@ void NPM_data_reader(uint8_t data[], size_t size)
 			state += String(bitRead(bytedata, b));
 		}
 		debug_outln(state, DEBUG_MAX_INFO);
+		return state;
 	}
 
 const __FlashStringHelper* loggerDescription(unsigned i) {
