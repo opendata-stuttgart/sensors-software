@@ -48,8 +48,8 @@
  ************************************************************************
  *
  * latest build using lib 3.1.0
- * DATA:    [====      ]  41.1% (used 33660 bytes from 81920 bytes)
- * PROGRAM: [======    ]  57.4% (used 599441 bytes from 1044464 bytes)
+ * DATA:    [====      ]  41.5% (used 34000 bytes from 81920 bytes)
+ * PROGRAM: [======    ]  58.0% (used 605529 bytes from 1044464 bytes)
  *  
  ************************************************************************/
  
@@ -135,6 +135,7 @@ namespace cfg
 	
 	unsigned time_for_wifi_config = 600000;
 	unsigned sending_intervall_ms = 145000;
+	bool powersave;
 
 	char current_lang[3];
 
@@ -287,6 +288,14 @@ SSD1306 *oled_ssd1306 = nullptr;
 SH1106 *oled_sh1106 = nullptr;
 LiquidCrystal_I2C *lcd_1602 = nullptr;
 LiquidCrystal_I2C *lcd_2004 = nullptr;
+const uint8_t lcd_1602_default_i2c_address = 0x3f;
+const uint8_t lcd_1602_alternate_i2c_address = 0x27;
+const uint8_t lcd_1602_columns = 16;
+const uint8_t lcd_1602_rows = 2;
+const uint8_t lcd_2004_default_i2c_address = 0x3f;
+const uint8_t lcd_2004_alternate_i2c_address =  0x27;
+const uint8_t lcd_2004_columns = 20;
+const uint8_t lcd_2004_rows = 4;
 
 /*****************************************************************
  * Serial declarations                                           *
@@ -323,6 +332,8 @@ Adafruit_BMP085 bmp;
  * BMP/BME280 declaration                                        *
  *****************************************************************/
 BMX280 bmx280;
+const uint8_t bmx280_default_i2c_address = 0x77;
+const uint8_t bmx280_alternate_i2c_address = 0x76;
 
 /*****************************************************************
  * SHT3x declaration                                             *
@@ -1714,6 +1725,7 @@ static void webserver_config_send_body_get(String &page_content)
 	page_content += FPSTR(WEB_B_BR);
 	page_content += FPSTR(BR_TAG);
 
+	add_form_checkbox(Config_powersave, FPSTR(INTL_POWERSAVE));
 	page_content += FPSTR(TABLE_TAG_OPEN);
 	add_form_input(page_content, Config_debug, FPSTR(INTL_DEBUG_LEVEL), 1);
 	add_form_input(page_content, Config_sending_intervall_ms, FPSTR(INTL_MEASUREMENT_INTERVAL), 5);
@@ -2891,7 +2903,11 @@ static void connectWifi()
 	system_phy_set_powerup_option(1);
 	// 20dBM == 100mW == max tx power allowed in europe
 	WiFi.setOutputPower(20.0f);
-	WiFi.setSleepMode(WIFI_NONE_SLEEP);
+	if (cfg::powersave) {
+		WiFi.setSleepMode(WIFI_MODEM_SLEEP);
+	} else {
+		WiFi.setSleepMode(WIFI_NONE_SLEEP);
+	}
 	WiFi.setPhyMode(WIFI_PHY_MODE_11N);
 	delay(100);
 
@@ -5286,26 +5302,32 @@ static void init_display()
 			oled_sh1106->flipScreenVertically();
 		}
 	}
-	if (cfg::has_lcd1602)
-	{
-		lcd_1602 = new LiquidCrystal_I2C(0x3f, 16, 2);
-	}
-	else if (cfg::has_lcd1602_27)
-	{
-		lcd_1602 = new LiquidCrystal_I2C(0x27, 16, 2);
+	if (cfg::has_lcd1602) {
+		lcd_1602 = new LiquidCrystal_I2C(
+			lcd_1602_default_i2c_address, 
+			lcd_1602_columns, 
+			lcd_1602_rows);
+	} else if (cfg::has_lcd1602_27) {
+		lcd_1602 = new LiquidCrystal_I2C(
+			lcd_1602_alternate_i2c_address, 
+			lcd_1602_columns, 
+			lcd_1602_rows);
 	}
 	if (lcd_1602)
 	{
 		lcd_1602->init();
 		lcd_1602->backlight();
 	}
-	if (cfg::has_lcd2004)
-	{
-		lcd_2004 = new LiquidCrystal_I2C(0x3f, 20, 4);
-	}
-	else if (cfg::has_lcd2004_27)
-	{
-		lcd_2004 = new LiquidCrystal_I2C(0x27, 20, 4);
+	if (cfg::has_lcd2004) {
+		lcd_2004 = new LiquidCrystal_I2C(
+			lcd_2004_default_i2c_address, 
+			lcd_2004_columns, 
+			lcd_2004_rows);
+	} else if (cfg::has_lcd2004_27) {
+		lcd_2004 = new LiquidCrystal_I2C(
+			lcd_2004_alternate_i2c_address, 
+			lcd_2004_columns, 
+			lcd_2004_rows);
 	}
 	if (lcd_2004)
 	{
@@ -5577,8 +5599,7 @@ static void powerOnTestSensors()
 	if (cfg::bmx280_read)
 	{
 		debug_outln_info(F("Read BMxE280..."));
-		if (!initBMX280(0x76) && !initBMX280(0x77))
-		{
+		if (!initBMX280(bmx280_default_i2c_address) && !initBMX280(bmx280_alternate_i2c_address)) {
 			debug_outln_error(F("Check BMx280 wiring"));
 			bmx280_init_failed = true;
 		}
@@ -5901,6 +5922,7 @@ else if (cfg::ips_read)
  *****************************************************************/
 void loop(void)
 {
+	unsigned long sleep = SLEEPTIME_MS;
 	String result_PPD, result_SDS, result_PMS, result_HPM, result_NPM, result_IPS;
 	String result_GPS, result_DNMS;
 
@@ -5909,8 +5931,13 @@ void loop(void)
 	act_micro = micros();
 	act_milli = millis();
 	send_now = msSince(starttime) > cfg::sending_intervall_ms;
-	// Wait at least 30s for each NTP server to sync
 
+	if (send_now)
+	{
+		sleep = 0;
+	}
+
+	// Wait at least 30s for each NTP server to sync
 	if (!sntp_time_set && send_now &&
 		msSince(time_point_device_start_ms) < 1000 * 2 * 30 + 5000)
 	{
@@ -6211,6 +6238,7 @@ void loop(void)
 		starttime = millis(); // store the start time
 		count_sends++;
 	}
+
 #if defined(ESP8266)
 	MDNS.update();
 	if (cfg::npm_read)
@@ -6223,6 +6251,12 @@ void loop(void)
 	}
 
 #endif
+
+	// Sleep if all of the tasks have an event in the future. The chip can then
+	// enter a lower power mode.
+	if (cfg::powersave) {
+		delay(sleep);
+	}
 
 	if (sample_count % 500 == 0)
 	{

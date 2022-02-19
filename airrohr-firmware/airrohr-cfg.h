@@ -79,6 +79,7 @@ enum ConfigShapeId {
 	Config_debug,
 	Config_sending_intervall_ms,
 	Config_time_for_wifi_config,
+	Config_powersave,
 	Config_senseboxid,
 	Config_send2custom,
 	Config_host_custom,
@@ -150,6 +151,7 @@ static constexpr char CFG_KEY_STATIC_DNS[] PROGMEM = "static_dns";
 static constexpr char CFG_KEY_DEBUG[] PROGMEM = "debug";
 static constexpr char CFG_KEY_SENDING_INTERVALL_MS[] PROGMEM = "sending_intervall_ms";
 static constexpr char CFG_KEY_TIME_FOR_WIFI_CONFIG[] PROGMEM = "time_for_wifi_config";
+static constexpr char CFG_KEY_POWERSAVE[] PROGMEM = "powersave";
 static constexpr char CFG_KEY_SENSEBOXID[] PROGMEM = "senseboxid";
 static constexpr char CFG_KEY_SEND2CUSTOM[] PROGMEM = "send2custom";
 static constexpr char CFG_KEY_HOST_CUSTOM[] PROGMEM = "host_custom";
@@ -221,6 +223,7 @@ static constexpr ConfigShapeEntry configShape[] PROGMEM = {
 	{ Config_Type_UInt, 0, CFG_KEY_DEBUG, &cfg::debug },
 	{ Config_Type_Time, 0, CFG_KEY_SENDING_INTERVALL_MS, &cfg::sending_intervall_ms },
 	{ Config_Type_Time, 0, CFG_KEY_TIME_FOR_WIFI_CONFIG, &cfg::time_for_wifi_config },
+	{ Config_Type_Bool, 0, CFG_KEY_POWERSAVE, &cfg::powersave },
 	{ Config_Type_String, sizeof(cfg::senseboxid)-1, CFG_KEY_SENSEBOXID, cfg::senseboxid },
 	{ Config_Type_Bool, 0, CFG_KEY_SEND2CUSTOM, &cfg::send2custom },
 	{ Config_Type_String, sizeof(cfg::host_custom)-1, CFG_KEY_HOST_CUSTOM, cfg::host_custom },

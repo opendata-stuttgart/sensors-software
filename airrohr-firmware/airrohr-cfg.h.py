@@ -55,6 +55,7 @@ String		static_dns
 UInt		debug
 Time		sending_intervall_ms
 Time		time_for_wifi_config
+Bool		powersave
 String		senseboxid
 Bool		send2custom
 String		host_custom
