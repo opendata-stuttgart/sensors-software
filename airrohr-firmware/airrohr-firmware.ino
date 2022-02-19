@@ -588,14 +588,14 @@ float last_value_IPS_P0 = -1.0; //PM1
 float last_value_IPS_P1 = -1.0;	//PM10
 float last_value_IPS_P2 = -1.0;	//PM2.5
 float last_value_IPS_P3 = -1.0; //PM0.1
-float last_value_IPS_P4 = -1.0; //PM0.3
+float last_value_IPS_P4 = -1.0; //PM0.3 //ATTENTION P4 = PM4 POUR SPS30
 float last_value_IPS_P5 = -1.0; //PM0.5
 float last_value_IPS_P6 = -1.0; //PM5
 float last_value_IPS_N0 = -1.0;
 float last_value_IPS_N1 = -1.0;
 float last_value_IPS_N2 = -1.0;
 float last_value_IPS_N3 = -1.0;
-float last_value_IPS_N4 = -1.0;
+float last_value_IPS_N4 = -1.0; //ATTENTION P4 = PM4 POUR SPS30
 float last_value_IPS_N5 = -1.0;
 float last_value_IPS_N6 = -1.0;
 
@@ -4160,15 +4160,17 @@ static void fetchSensorIPS(String &s)
 	ips_pm5_sum += pm5_serial.toFloat();
 	ips_pm10_sum += pm10_serial.toFloat();
 
-	char *ptr;
+	//char *ptr;
 
-	ips_pm01_sum_pcs += strtoul(N01_serial.c_str(),&ptr,10);
-	ips_pm03_sum_pcs += strtoul(N03_serial.c_str(),&ptr,10);
-	ips_pm05_sum_pcs += strtoul(N05_serial.c_str(),&ptr,10);
-	ips_pm1_sum_pcs += strtoul(N1_serial.c_str(),&ptr,10);
-	ips_pm25_sum_pcs += strtoul(N25_serial.c_str(),&ptr,10);
-	ips_pm5_sum_pcs += strtoul(N5_serial.c_str(),&ptr,10);
-	ips_pm10_sum_pcs += strtoul(N10_serial.c_str(),&ptr,10);
+    // SI EXCEPTION 28 DECLENCHÈE FLASHER SUR AUTRE PRISE USB.
+
+	ips_pm01_sum_pcs += strtoul(N01_serial.c_str(),NULL,10);
+	ips_pm03_sum_pcs += strtoul(N03_serial.c_str(),NULL,10);
+	ips_pm05_sum_pcs += strtoul(N05_serial.c_str(),NULL,10);
+	ips_pm1_sum_pcs += strtoul(N1_serial.c_str(),NULL,10);
+	ips_pm25_sum_pcs += strtoul(N25_serial.c_str(),NULL,10);
+	ips_pm5_sum_pcs += strtoul(N5_serial.c_str(),NULL,10);
+	ips_pm10_sum_pcs += strtoul(N10_serial.c_str(),NULL,10);
 
 	UPDATE_MIN_MAX(ips_pm01_min, ips_pm01_max, pm01_serial.toFloat());
 	UPDATE_MIN_MAX(ips_pm03_min, ips_pm03_max, pm03_serial.toFloat());
@@ -4178,13 +4180,13 @@ static void fetchSensorIPS(String &s)
 	UPDATE_MIN_MAX(ips_pm5_min, ips_pm5_max, pm5_serial.toFloat());
 	UPDATE_MIN_MAX(ips_pm10_min, ips_pm10_max, pm10_serial.toFloat());
 	
-	UPDATE_MIN_MAX(ips_pm01_min_pcs, ips_pm01_max_pcs, strtoul(N01_serial.c_str(),&ptr,10));
-	UPDATE_MIN_MAX(ips_pm03_min_pcs, ips_pm03_max_pcs, strtoul(N03_serial.c_str(),&ptr,10));
-	UPDATE_MIN_MAX(ips_pm05_min_pcs, ips_pm05_max_pcs, strtoul(N05_serial.c_str(),&ptr,10));
-	UPDATE_MIN_MAX(ips_pm1_min_pcs, ips_pm1_max_pcs, strtoul(N1_serial.c_str(),&ptr,10));
-	UPDATE_MIN_MAX(ips_pm25_min_pcs, ips_pm25_max_pcs, strtoul(N25_serial.c_str(),&ptr,10));
-	UPDATE_MIN_MAX(ips_pm5_min_pcs, ips_pm5_max_pcs, strtoul(N5_serial.c_str(),&ptr,10));
-	UPDATE_MIN_MAX(ips_pm10_min_pcs, ips_pm10_max_pcs, strtoul(N10_serial.c_str(),&ptr,10));
+	UPDATE_MIN_MAX(ips_pm01_min_pcs, ips_pm01_max_pcs, strtoul(N01_serial.c_str(),NULL,10));
+	UPDATE_MIN_MAX(ips_pm03_min_pcs, ips_pm03_max_pcs, strtoul(N03_serial.c_str(),NULL,10));
+	UPDATE_MIN_MAX(ips_pm05_min_pcs, ips_pm05_max_pcs, strtoul(N05_serial.c_str(),NULL,10));
+	UPDATE_MIN_MAX(ips_pm1_min_pcs, ips_pm1_max_pcs, strtoul(N1_serial.c_str(),NULL,10));
+	UPDATE_MIN_MAX(ips_pm25_min_pcs, ips_pm25_max_pcs, strtoul(N25_serial.c_str(),NULL,10));
+	UPDATE_MIN_MAX(ips_pm5_min_pcs, ips_pm5_max_pcs, strtoul(N5_serial.c_str(),NULL,10));
+	UPDATE_MIN_MAX(ips_pm10_min_pcs, ips_pm10_max_pcs, strtoul(N10_serial.c_str(),NULL,10));
 
 	debug_outln_info(F("IPS Measure..."));
 	ips_val_count++;
@@ -4251,18 +4253,18 @@ static void fetchSensorIPS(String &s)
 			add_Value2Json(s, F("IPS_P0"), F("PM1: "), last_value_IPS_P0);
 			add_Value2Json(s, F("IPS_P1"), F("PM10:  "), last_value_IPS_P1);
 			add_Value2Json(s, F("IPS_P2"), F("PM2.5: "), last_value_IPS_P2);
-			add_Value2Json(s, F("IPS_P3"), F("PM0.1: "), last_value_IPS_P3);
-			add_Value2Json(s, F("IPS_P4"), F("PM0.3:  "), last_value_IPS_P4);
-			add_Value2Json(s, F("IPS_P5"), F("PM0.5: "), last_value_IPS_P5);
-			add_Value2Json(s, F("IPS_P6"), F("PM5: "), last_value_IPS_P6);
+			// add_Value2Json(s, F("IPS_P3"), F("PM0.1: "), last_value_IPS_P3);
+			// add_Value2Json(s, F("IPS_P4"), F("PM0.3:  "), last_value_IPS_P4);
+			// add_Value2Json(s, F("IPS_P5"), F("PM0.5: "), last_value_IPS_P5);
+			// add_Value2Json(s, F("IPS_P6"), F("PM5: "), last_value_IPS_P6);
 
 			add_Value2Json(s, F("IPS_N1"), F("NC1.0: "), last_value_IPS_N0);
 			add_Value2Json(s, F("IPS_N10"), F("NC10:  "), last_value_IPS_N1);
 			add_Value2Json(s, F("IPS_N25"), F("NC2.5: "), last_value_IPS_N2);
-			add_Value2Json(s, F("IPS_N01"), F("NC0.1: "), last_value_IPS_N3);
-			add_Value2Json(s, F("IPS_N03"), F("NC0.3:  "), last_value_IPS_N4);
-			add_Value2Json(s, F("IPS_N05"), F("NC0.5: "), last_value_IPS_N5);
-			add_Value2Json(s, F("IPS_N5"), F("NC5: "), last_value_IPS_N6);
+			// add_Value2Json(s, F("IPS_N01"), F("NC0.1: "), last_value_IPS_N3);
+			// add_Value2Json(s, F("IPS_N03"), F("NC0.3:  "), last_value_IPS_N4);
+			// add_Value2Json(s, F("IPS_N05"), F("NC0.5: "), last_value_IPS_N5);
+			// add_Value2Json(s, F("IPS_N5"), F("NC5: "), last_value_IPS_N6);
 
 
 			debug_outln_info(FPSTR(DBG_TXT_SEP));
