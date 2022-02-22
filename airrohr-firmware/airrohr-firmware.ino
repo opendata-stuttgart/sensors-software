@@ -426,7 +426,7 @@ String current_th_npm;
 
 bool is_PMS_running = true;
 bool is_HPM_running = true;
-bool is_NPM_running;
+bool is_NPM_running = false;
 bool is_IPS_running;
 
 unsigned long sending_time = 0;
@@ -825,7 +825,7 @@ static bool NPM_start_stop()
 			}
 			else
 			{
-				result = !is_NPM_running;
+				result = !is_NPM_running; //DANGER BECAUSE NON INITIALISED
 			}
 			NPM_waiting_for_4 = NPM_REPLY_CHECKSUM_4;
 			break;
@@ -984,7 +984,7 @@ static String NPM_temp_humi()
 				uint8_t checksum[1];
 				uint8_t test[8];
 
-				switch (NPM_waiting_for_16)
+				switch (NPM_waiting_for_8)
 				{
 				case NPM_REPLY_HEADER_8:
 					if (serialNPM.find(header, sizeof(header)))
@@ -1001,8 +1001,8 @@ static String NPM_temp_humi()
 						NPM_data_reader(data, 4);
 						 NPM_temp = word(data[0], data[1]);
 						 NPM_humi = word(data[2], data[3]);
-						debug_outln_verbose(F("Temperature (°C): "), String(NPM_temp / 10.0f));
-						debug_outln_verbose(F("Relative humidity (%): "), String(NPM_humi / 10.0f));
+						debug_outln_verbose(F("Temperature (°C): "), String(NPM_temp / 100.0f));
+						debug_outln_verbose(F("Relative humidity (%): "), String(NPM_humi / 100.0f));
 					}
 					NPM_waiting_for_8 = NPM_REPLY_CHECKSUM_8;
 					break;
@@ -1019,7 +1019,7 @@ static String NPM_temp_humi()
 					break;
 				}
 			}
-			return "T_NPM="+ String(NPM_temp / 10.0f) + "°C / RH_NPM=" + String(NPM_humi / 10.0f) + "%";
+			return String(NPM_temp / 100.0f) + " / "+ String(NPM_humi / 100.0f);
 }
 
 
@@ -1755,6 +1755,7 @@ static void webserver_config_send_body_get(String &page_content)
 	add_form_checkbox_sensor(Config_ds18b20_read, FPSTR(INTL_DS18B20));
 	add_form_checkbox_sensor(Config_pms_read, FPSTR(INTL_PMS));
 	add_form_checkbox_sensor(Config_npm_read, FPSTR(INTL_NPM));
+	add_form_checkbox_sensor(Config_npm_fulltime, FPSTR(INTL_NPM_FULLTIME));
 	add_form_checkbox_sensor(Config_ips_read, FPSTR(INTL_IPS));
 	add_form_checkbox_sensor(Config_bmp_read, FPSTR(INTL_BMP180));
 	add_form_checkbox(Config_gps_read, FPSTR(INTL_NEO6M));
@@ -3858,11 +3859,16 @@ static void fetchSensorNPM(String &s)
 	}
 	else
 	{
-		if (!is_NPM_running)
+		if (!is_NPM_running && !cfg::npm_fulltime)
 		{
 			debug_outln_info(F("Change NPM to start..."));
 			is_NPM_running = NPM_start_stop();
 			NPM_waiting_for_16 = NPM_REPLY_HEADER_16;
+		}
+
+		if (is_NPM_running && cfg::npm_fulltime)
+		{
+				NPM_waiting_for_16 = NPM_REPLY_HEADER_16;
 		}
 
 	
@@ -3883,6 +3889,12 @@ static void fetchSensorNPM(String &s)
 				uint8_t data[12];
 				uint8_t checksum[1];
 				uint8_t test[16];
+				uint16_t N1_serial;
+				uint16_t N25_serial;
+				uint16_t N10_serial;
+				uint16_t pm1_serial;
+				uint16_t pm25_serial;
+				uint16_t pm10_serial;
 
 				switch (NPM_waiting_for_16)
 				{
@@ -3899,13 +3911,15 @@ static void fetchSensorNPM(String &s)
 					if (serialNPM.readBytes(data, sizeof(data)) == sizeof(data))
 					{
 						NPM_data_reader(data, 12);
-						uint16_t N1_serial = word(data[0], data[1]);
-						uint16_t N25_serial = word(data[2], data[3]);
-						uint16_t N10_serial = word(data[4], data[5]);
+						N1_serial = word(data[0], data[1]);
+						N25_serial = word(data[2], data[3]);
+						N10_serial = word(data[4], data[5]);
 
-						uint16_t pm1_serial = word(data[6], data[7]);
-						uint16_t pm25_serial = word(data[8], data[9]);
-						uint16_t pm10_serial = word(data[10], data[11]);
+						pm1_serial = word(data[6], data[7]);
+						pm25_serial = word(data[8], data[9]);
+						pm10_serial = word(data[10], data[11]);
+
+						debug_outln_info(F("Next PM Measure..."));
 
 						debug_outln_verbose(F("PM1 (μg/m3) : "), String(pm1_serial / 10.0f));
 						debug_outln_verbose(F("PM2.5 (μg/m3): "), String(pm25_serial / 10.0f));
@@ -3914,8 +3928,20 @@ static void fetchSensorNPM(String &s)
 						debug_outln_verbose(F("PM1 (pcs/L) : "), String(N1_serial));
 						debug_outln_verbose(F("PM2.5 (pcs/L): "), String(N25_serial));
 						debug_outln_verbose(F("PM10 (pcs/L) : "), String(N10_serial));
-
-						npm_pm1_sum += pm1_serial;
+					}
+					NPM_waiting_for_16 = NPM_REPLY_CHECKSUM_16;
+					break;
+				case NPM_REPLY_CHECKSUM_16:
+					serialNPM.readBytes(checksum, sizeof(checksum));
+					memcpy(test, header, sizeof(header));
+					memcpy(&test[sizeof(header)], state, sizeof(state));
+					memcpy(&test[sizeof(header) + sizeof(state)], data, sizeof(data));
+					memcpy(&test[sizeof(header) + sizeof(state) + sizeof(data)], checksum, sizeof(checksum));
+					NPM_data_reader(test, 16);
+					if (NPM_checksum_valid_16(test))
+					{
+							debug_outln_info(F("Checksum OK..."));
+													npm_pm1_sum += pm1_serial;
 						npm_pm25_sum += pm25_serial;
 						npm_pm10_sum += pm10_serial;
 
@@ -3931,21 +3957,9 @@ static void fetchSensorNPM(String &s)
 						UPDATE_MIN_MAX(npm_pm25_min_pcs, npm_pm25_max_pcs, N25_serial);
 						UPDATE_MIN_MAX(npm_pm10_min_pcs, npm_pm10_max_pcs, N10_serial);
 
-						debug_outln_info(F("Next PM Measure..."));
 						npm_val_count++;
 						debug_outln(String(npm_val_count), DEBUG_MAX_INFO);
 					}
-					NPM_waiting_for_16 = NPM_REPLY_CHECKSUM_16;
-					break;
-				case NPM_REPLY_CHECKSUM_16:
-					serialNPM.readBytes(checksum, sizeof(checksum));
-					memcpy(test, header, sizeof(header));
-					memcpy(&test[sizeof(header)], state, sizeof(state));
-					memcpy(&test[sizeof(header) + sizeof(state)], data, sizeof(data));
-					memcpy(&test[sizeof(header) + sizeof(state) + sizeof(data)], checksum, sizeof(checksum));
-					NPM_data_reader(test, 16);
-					if (NPM_checksum_valid_16(test))
-						debug_outln_info(F("Checksum OK..."));
 					NPM_waiting_for_16 = NPM_REPLY_HEADER_16;
 					break;
 				}
@@ -5130,7 +5144,8 @@ static void display_values()
 		case 10:
 		    display_header = F("Tera Next PM");
 			display_lines[0] = current_state_npm;
-			display_lines[1] = current_th_npm;
+			display_lines[1] = F("T_NPM / RH_NPM");
+			display_lines[2] = current_th_npm;
 			break;
 		case 11:
 		    display_header = F("Piera IPS-7100");
@@ -5174,6 +5189,7 @@ static void display_values()
 			display_lines[0].replace(" µg/m³", emptyString);
 			display_lines[0].replace("°", String(char(223)));
 			display_lines[1].replace(" µg/m³", emptyString);
+			display_lines[2].replace(" µg/m³", emptyString);
 			lcd_2004->clear();
 			lcd_2004->setCursor(0, 0);
 			lcd_2004->print(display_header);
@@ -5454,6 +5470,7 @@ static void powerOnTestSensors()
 		if (test_state == 0x00)
 		{
 			debug_outln_info(F("NPM already started..."));
+			is_NPM_running = true;
 		}
 		else if (test_state == 0x01)
 		{
@@ -5517,13 +5534,14 @@ static void powerOnTestSensors()
 		delay(15000); //prevent any buffer overload on ESP82666
 		NPM_version_date();
 		delay(3000); //prevent any buffer overload on ESP82666
-
 		NPM_temp_humi();
 		delay(2000); 
 
-	if(cfg::npm_fulltime) {
+	if(!cfg::npm_fulltime) {
 		is_NPM_running = NPM_start_stop();
 		delay(2000); //prevent any buffer overload on ESP82666
+	}else{
+		is_NPM_running = true;
 	}
 	}
 
