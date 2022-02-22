@@ -582,7 +582,7 @@ float last_value_NPM_P1 = -1.0;
 float last_value_NPM_P2 = -1.0;
 float last_value_NPM_N1 = -1.0;
 float last_value_NPM_N10 = -1.0;
-float last_value_NPM_N2 = -1.0;
+float last_value_NPM_N25 = -1.0;
 
 float last_value_IPS_P0 = -1.0; //PM1
 float last_value_IPS_P1 = -1.0;	//PM10
@@ -2120,7 +2120,7 @@ static void webserver_values()
 		add_table_pm_value(FPSTR(SENSORS_NPM), FPSTR(WEB_PM25), last_value_NPM_P2);
 		add_table_pm_value(FPSTR(SENSORS_NPM), FPSTR(WEB_PM10), last_value_NPM_P1);
 		add_table_nc_value(FPSTR(SENSORS_NPM), FPSTR(WEB_NC1k0), last_value_NPM_N1);
-		add_table_nc_value(FPSTR(SENSORS_NPM), FPSTR(WEB_NC2k5), last_value_NPM_N2);
+		add_table_nc_value(FPSTR(SENSORS_NPM), FPSTR(WEB_NC2k5), last_value_NPM_N25);
 		add_table_nc_value(FPSTR(SENSORS_NPM), FPSTR(WEB_NC10), last_value_NPM_N10);
 		page_content += FPSTR(EMPTY_ROW);
 	}
@@ -3960,7 +3960,7 @@ static void fetchSensorNPM(String &s)
 		last_value_NPM_P2 = -1.0f;
 		last_value_NPM_N1 = -1.0f;
 		last_value_NPM_N10 = -1.0f;
-		last_value_NPM_N2 = -1.0f;
+		last_value_NPM_N25 = -1.0f;
 
 		if (npm_val_count > 2)
 		{
@@ -3980,7 +3980,7 @@ static void fetchSensorNPM(String &s)
 
 			last_value_NPM_N1 = float(npm_pm1_sum_pcs) / (npm_val_count * 1000.0f);
 			last_value_NPM_N10 = float(npm_pm10_sum_pcs) / (npm_val_count * 1000.0f);
-			last_value_NPM_N2 = float(npm_pm25_sum_pcs) / (npm_val_count * 1000.0f);
+			last_value_NPM_N25 = float(npm_pm25_sum_pcs) / (npm_val_count * 1000.0f);
 
 			add_Value2Json(s, F("NPM_P0"), F("PM1: "), last_value_NPM_P0);
 			add_Value2Json(s, F("NPM_P1"), F("PM10:  "), last_value_NPM_P1);
@@ -3988,7 +3988,7 @@ static void fetchSensorNPM(String &s)
 
 			add_Value2Json(s, F("NPM_N1"), F("NC1.0: "), last_value_NPM_N1);
 			add_Value2Json(s, F("NPM_N10"), F("NC10:  "), last_value_NPM_N10);
-			add_Value2Json(s, F("NPM_N25"), F("NC2.5: "), last_value_NPM_N2);
+			add_Value2Json(s, F("NPM_N25"), F("NC2.5: "), last_value_NPM_N25);
 
 			debug_outln_info(FPSTR(DBG_TXT_SEP));
 			if (npm_val_count < 3)
@@ -4882,7 +4882,7 @@ static void display_values()
 		pm25_sensor = FPSTR(SENSORS_NPM);
 		nc010_value = last_value_NPM_N1;
 		nc100_value = last_value_NPM_N10;
-		nc025_value = last_value_NPM_N2;
+		nc025_value = last_value_NPM_N25;
 	}
 	if (cfg::ips_read)
 	{
