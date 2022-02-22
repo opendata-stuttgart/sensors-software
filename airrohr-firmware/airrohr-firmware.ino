@@ -580,24 +580,24 @@ float last_value_HPM_P2 = -1.0;
 float last_value_NPM_P0 = -1.0;
 float last_value_NPM_P1 = -1.0;
 float last_value_NPM_P2 = -1.0;
-float last_value_NPM_N0 = -1.0;
 float last_value_NPM_N1 = -1.0;
+float last_value_NPM_N10 = -1.0;
 float last_value_NPM_N2 = -1.0;
 
 float last_value_IPS_P0 = -1.0; //PM1
 float last_value_IPS_P1 = -1.0;	//PM10
 float last_value_IPS_P2 = -1.0;	//PM2.5
-float last_value_IPS_P3 = -1.0; //PM0.1
-float last_value_IPS_P4 = -1.0; //PM0.3 //ATTENTION P4 = PM4 POUR SPS30
-float last_value_IPS_P5 = -1.0; //PM0.5
-float last_value_IPS_P6 = -1.0; //PM5
-float last_value_IPS_N0 = -1.0;
+float last_value_IPS_P01 = -1.0; //PM0.1
+float last_value_IPS_P03 = -1.0; //PM0.3 //ATTENTION P4 = PM4 POUR SPS30
+float last_value_IPS_P05 = -1.0; //PM0.5
+float last_value_IPS_P5 = -1.0; //PM5
 float last_value_IPS_N1 = -1.0;
-float last_value_IPS_N2 = -1.0;
-float last_value_IPS_N3 = -1.0;
-float last_value_IPS_N4 = -1.0; //ATTENTION P4 = PM4 POUR SPS30
+float last_value_IPS_N10 = -1.0;
+float last_value_IPS_N25 = -1.0;
+float last_value_IPS_N01 = -1.0;
+float last_value_IPS_N03 = -1.0; //ATTENTION P4 = PM4 POUR SPS30
+float last_value_IPS_N05 = -1.0;
 float last_value_IPS_N5 = -1.0;
-float last_value_IPS_N6 = -1.0;
 
 float last_value_GPS_alt = -1000.0;
 double last_value_GPS_lat = -200.0;
@@ -2119,27 +2119,27 @@ static void webserver_values()
 		add_table_pm_value(FPSTR(SENSORS_NPM), FPSTR(WEB_PM1), last_value_NPM_P0);
 		add_table_pm_value(FPSTR(SENSORS_NPM), FPSTR(WEB_PM25), last_value_NPM_P2);
 		add_table_pm_value(FPSTR(SENSORS_NPM), FPSTR(WEB_PM10), last_value_NPM_P1);
-		add_table_nc_value(FPSTR(SENSORS_NPM), FPSTR(WEB_NC1k0), last_value_NPM_N0);
+		add_table_nc_value(FPSTR(SENSORS_NPM), FPSTR(WEB_NC1k0), last_value_NPM_N1);
 		add_table_nc_value(FPSTR(SENSORS_NPM), FPSTR(WEB_NC2k5), last_value_NPM_N2);
-		add_table_nc_value(FPSTR(SENSORS_NPM), FPSTR(WEB_NC10), last_value_NPM_N1);
+		add_table_nc_value(FPSTR(SENSORS_NPM), FPSTR(WEB_NC10), last_value_NPM_N10);
 		page_content += FPSTR(EMPTY_ROW);
 	}
 	if (cfg::ips_read)
 	{
-		add_table_pm_value(FPSTR(SENSORS_IPS), FPSTR(WEB_PM01), last_value_IPS_P3);
-		add_table_pm_value(FPSTR(SENSORS_IPS), FPSTR(WEB_PM03), last_value_IPS_P4);
-		add_table_pm_value(FPSTR(SENSORS_IPS), FPSTR(WEB_PM05), last_value_IPS_P5);
+		add_table_pm_value(FPSTR(SENSORS_IPS), FPSTR(WEB_PM01), last_value_IPS_P01);
+		add_table_pm_value(FPSTR(SENSORS_IPS), FPSTR(WEB_PM03), last_value_IPS_P03);
+		add_table_pm_value(FPSTR(SENSORS_IPS), FPSTR(WEB_PM05), last_value_IPS_P05);
 		add_table_pm_value(FPSTR(SENSORS_IPS), FPSTR(WEB_PM1), last_value_IPS_P0);
 		add_table_pm_value(FPSTR(SENSORS_IPS), FPSTR(WEB_PM25), last_value_IPS_P2);
-		add_table_pm_value(FPSTR(SENSORS_IPS), FPSTR(WEB_PM5), last_value_IPS_P6);
+		add_table_pm_value(FPSTR(SENSORS_IPS), FPSTR(WEB_PM5), last_value_IPS_P5);
 		add_table_pm_value(FPSTR(SENSORS_IPS), FPSTR(WEB_PM10), last_value_IPS_P1);
-		add_table_nc_value(FPSTR(SENSORS_IPS), FPSTR(WEB_NC0k1), last_value_IPS_N3);
-		add_table_nc_value(FPSTR(SENSORS_IPS), FPSTR(WEB_NC0k3), last_value_IPS_N4);
-		add_table_nc_value(FPSTR(SENSORS_IPS), FPSTR(WEB_NC0k5), last_value_IPS_N5);	
-		add_table_nc_value(FPSTR(SENSORS_IPS), FPSTR(WEB_NC1k0), last_value_IPS_N0);
-		add_table_nc_value(FPSTR(SENSORS_IPS), FPSTR(WEB_NC2k5), last_value_IPS_N2);
-		add_table_nc_value(FPSTR(SENSORS_IPS), FPSTR(WEB_NC5k0), last_value_IPS_N6);
-		add_table_nc_value(FPSTR(SENSORS_IPS), FPSTR(WEB_NC10), last_value_IPS_N1);
+		add_table_nc_value(FPSTR(SENSORS_IPS), FPSTR(WEB_NC0k1), last_value_IPS_N01);
+		add_table_nc_value(FPSTR(SENSORS_IPS), FPSTR(WEB_NC0k3), last_value_IPS_N03);
+		add_table_nc_value(FPSTR(SENSORS_IPS), FPSTR(WEB_NC0k5), last_value_IPS_N05);	
+		add_table_nc_value(FPSTR(SENSORS_IPS), FPSTR(WEB_NC1k0), last_value_IPS_N1);
+		add_table_nc_value(FPSTR(SENSORS_IPS), FPSTR(WEB_NC2k5), last_value_IPS_N25);
+		add_table_nc_value(FPSTR(SENSORS_IPS), FPSTR(WEB_NC5k0), last_value_IPS_N5);
+		add_table_nc_value(FPSTR(SENSORS_IPS), FPSTR(WEB_NC10), last_value_IPS_N10);
 		page_content += FPSTR(EMPTY_ROW);
 	}
 	if (cfg::sps30_read)
@@ -3958,8 +3958,8 @@ static void fetchSensorNPM(String &s)
 		last_value_NPM_P0 = -1.0f;
 		last_value_NPM_P1 = -1.0f;
 		last_value_NPM_P2 = -1.0f;
-		last_value_NPM_N0 = -1.0f;
 		last_value_NPM_N1 = -1.0f;
+		last_value_NPM_N10 = -1.0f;
 		last_value_NPM_N2 = -1.0f;
 
 		if (npm_val_count > 2)
@@ -3978,16 +3978,16 @@ static void fetchSensorNPM(String &s)
 			last_value_NPM_P1 = float(npm_pm10_sum) / (npm_val_count * 10.0f);
 			last_value_NPM_P2 = float(npm_pm25_sum) / (npm_val_count * 10.0f);
 
-			last_value_NPM_N0 = float(npm_pm1_sum_pcs) / (npm_val_count * 1000.0f);
-			last_value_NPM_N1 = float(npm_pm10_sum_pcs) / (npm_val_count * 1000.0f);
+			last_value_NPM_N1 = float(npm_pm1_sum_pcs) / (npm_val_count * 1000.0f);
+			last_value_NPM_N10 = float(npm_pm10_sum_pcs) / (npm_val_count * 1000.0f);
 			last_value_NPM_N2 = float(npm_pm25_sum_pcs) / (npm_val_count * 1000.0f);
 
 			add_Value2Json(s, F("NPM_P0"), F("PM1: "), last_value_NPM_P0);
 			add_Value2Json(s, F("NPM_P1"), F("PM10:  "), last_value_NPM_P1);
 			add_Value2Json(s, F("NPM_P2"), F("PM2.5: "), last_value_NPM_P2);
 
-			add_Value2Json(s, F("NPM_N1"), F("NC1.0: "), last_value_NPM_N0);
-			add_Value2Json(s, F("NPM_N10"), F("NC10:  "), last_value_NPM_N1);
+			add_Value2Json(s, F("NPM_N1"), F("NC1.0: "), last_value_NPM_N1);
+			add_Value2Json(s, F("NPM_N10"), F("NC10:  "), last_value_NPM_N10);
 			add_Value2Json(s, F("NPM_N25"), F("NC2.5: "), last_value_NPM_N2);
 
 			debug_outln_info(FPSTR(DBG_TXT_SEP));
@@ -4200,17 +4200,17 @@ static void fetchSensorIPS(String &s)
 		last_value_IPS_P0 = -1.0; //PM1
 		last_value_IPS_P1 = -1.0; //PM10
 		last_value_IPS_P2 = -1.0; //PM2.5
-		last_value_IPS_P3 = -1.0; //PM0.1
-		last_value_IPS_P4 = -1.0; //PM0.3
-		last_value_IPS_P5 = -1.0; //PM0.5
-		last_value_IPS_P6 = -1.0; //PM5
-		last_value_IPS_N0 = -1.0;
+		last_value_IPS_P01 = -1.0; //PM0.1
+		last_value_IPS_P03 = -1.0; //PM0.3
+		last_value_IPS_P05 = -1.0; //PM0.5
+		last_value_IPS_P5 = -1.0; //PM5
 		last_value_IPS_N1 = -1.0;
-		last_value_IPS_N2 = -1.0;
-		last_value_IPS_N3 = -1.0;
-		last_value_IPS_N4 = -1.0;
+		last_value_IPS_N10 = -1.0;
+		last_value_IPS_N25 = -1.0;
+		last_value_IPS_N01 = -1.0;
+		last_value_IPS_N03 = -1.0;
+		last_value_IPS_N05 = -1.0;
 		last_value_IPS_N5 = -1.0;
-		last_value_IPS_N6 = -1.0;
 
 		if (ips_val_count > 2)
 		{
@@ -4237,34 +4237,34 @@ static void fetchSensorIPS(String &s)
 			last_value_IPS_P0 = float(ips_pm1_sum) / (ips_val_count);
 			last_value_IPS_P1 = float(ips_pm10_sum) / (ips_val_count);
 			last_value_IPS_P2 = float(ips_pm25_sum) / (ips_val_count);
-			last_value_IPS_P3 = float(ips_pm01_sum) / (ips_val_count);
-			last_value_IPS_P4 = float(ips_pm03_sum) / (ips_val_count);
-			last_value_IPS_P5 = float(ips_pm05_sum) / (ips_val_count);
-			last_value_IPS_P6 = float(ips_pm5_sum) / (ips_val_count);
+			last_value_IPS_P01 = float(ips_pm01_sum) / (ips_val_count);
+			last_value_IPS_P03 = float(ips_pm03_sum) / (ips_val_count);
+			last_value_IPS_P05 = float(ips_pm05_sum) / (ips_val_count);
+			last_value_IPS_P5 = float(ips_pm5_sum) / (ips_val_count);
 
-			last_value_IPS_N0 = float(ips_pm1_sum_pcs) / (ips_val_count * 1000.0f);
-			last_value_IPS_N1 = float(ips_pm10_sum_pcs) / (ips_val_count * 1000.0f);
-			last_value_IPS_N2 = float(ips_pm25_sum_pcs) / (ips_val_count * 1000.0f);
-			last_value_IPS_N3 = float(ips_pm01_sum_pcs) / (ips_val_count * 1000.0f);
-			last_value_IPS_N4 = float(ips_pm03_sum_pcs) / (ips_val_count * 1000.0f);
-			last_value_IPS_N5 = float(ips_pm05_sum_pcs) / (ips_val_count * 1000.0f);
-			last_value_IPS_N6 = float(ips_pm5_sum_pcs) / (ips_val_count * 1000.0f);
+			last_value_IPS_N1 = float(ips_pm1_sum_pcs) / (ips_val_count * 1000.0f);
+			last_value_IPS_N10 = float(ips_pm10_sum_pcs) / (ips_val_count * 1000.0f);
+			last_value_IPS_N25 = float(ips_pm25_sum_pcs) / (ips_val_count * 1000.0f);
+			last_value_IPS_N01 = float(ips_pm01_sum_pcs) / (ips_val_count * 1000.0f);
+			last_value_IPS_N03 = float(ips_pm03_sum_pcs) / (ips_val_count * 1000.0f);
+			last_value_IPS_N05 = float(ips_pm05_sum_pcs) / (ips_val_count * 1000.0f);
+			last_value_IPS_N5 = float(ips_pm5_sum_pcs) / (ips_val_count * 1000.0f);
 
 			add_Value2Json(s, F("IPS_P0"), F("PM1: "), last_value_IPS_P0);
 			add_Value2Json(s, F("IPS_P1"), F("PM10:  "), last_value_IPS_P1);
 			add_Value2Json(s, F("IPS_P2"), F("PM2.5: "), last_value_IPS_P2);
-			// add_Value2Json(s, F("IPS_P3"), F("PM0.1: "), last_value_IPS_P3);
-			// add_Value2Json(s, F("IPS_P4"), F("PM0.3:  "), last_value_IPS_P4);
-			// add_Value2Json(s, F("IPS_P5"), F("PM0.5: "), last_value_IPS_P5);
-			// add_Value2Json(s, F("IPS_P6"), F("PM5: "), last_value_IPS_P6);
+			add_Value2Json(s, F("IPS_P01"), F("PM0.1: "), last_value_IPS_P01);
+			add_Value2Json(s, F("IPS_P03"), F("PM0.3:  "), last_value_IPS_P03);
+			add_Value2Json(s, F("IPS_P05"), F("PM0.5: "), last_value_IPS_P05);
+			add_Value2Json(s, F("IPS_P5"), F("PM5: "), last_value_IPS_P5);
 
-			add_Value2Json(s, F("IPS_N1"), F("NC1.0: "), last_value_IPS_N0);
-			add_Value2Json(s, F("IPS_N10"), F("NC10:  "), last_value_IPS_N1);
-			add_Value2Json(s, F("IPS_N25"), F("NC2.5: "), last_value_IPS_N2);
-			// add_Value2Json(s, F("IPS_N01"), F("NC0.1: "), last_value_IPS_N3);
-			// add_Value2Json(s, F("IPS_N03"), F("NC0.3:  "), last_value_IPS_N4);
-			// add_Value2Json(s, F("IPS_N05"), F("NC0.5: "), last_value_IPS_N5);
-			// add_Value2Json(s, F("IPS_N5"), F("NC5: "), last_value_IPS_N6);
+			add_Value2Json(s, F("IPS_N1"), F("NC1.0: "), last_value_IPS_N1);
+			add_Value2Json(s, F("IPS_N10"), F("NC10:  "), last_value_IPS_N10);
+			add_Value2Json(s, F("IPS_N25"), F("NC2.5: "), last_value_IPS_N25);
+			add_Value2Json(s, F("IPS_N01"), F("NC0.1: "), last_value_IPS_N01);
+			add_Value2Json(s, F("IPS_N03"), F("NC0.3:  "), last_value_IPS_N03);
+			add_Value2Json(s, F("IPS_N05"), F("NC0.5: "), last_value_IPS_N05);
+			add_Value2Json(s, F("IPS_N5"), F("NC5: "), last_value_IPS_N5);
 
 
 			debug_outln_info(FPSTR(DBG_TXT_SEP));
@@ -4880,8 +4880,8 @@ static void display_values()
 		pm01_sensor = FPSTR(SENSORS_NPM);
 		pm10_sensor = FPSTR(SENSORS_NPM);
 		pm25_sensor = FPSTR(SENSORS_NPM);
-		nc010_value = last_value_NPM_N0;
-		nc100_value = last_value_NPM_N1;
+		nc010_value = last_value_NPM_N1;
+		nc100_value = last_value_NPM_N10;
 		nc025_value = last_value_NPM_N2;
 	}
 	if (cfg::ips_read)
@@ -4889,10 +4889,10 @@ static void display_values()
 		pm01_value = last_value_IPS_P0;
 		pm10_value = last_value_IPS_P1;
 		pm25_value = last_value_IPS_P2;
-		pm001_value = last_value_IPS_P3;
-		pm003_value = last_value_IPS_P4;
-		pm005_value = last_value_IPS_P5;
-		pm05_value = last_value_IPS_P6;
+		pm001_value = last_value_IPS_P01;
+		pm003_value = last_value_IPS_P03;
+		pm005_value = last_value_IPS_P05;
+		pm05_value = last_value_IPS_P5;
 		pm001_sensor = FPSTR(SENSORS_IPS);
 		pm003_sensor = FPSTR(SENSORS_IPS);
 		pm005_sensor = FPSTR(SENSORS_IPS);
@@ -4900,13 +4900,13 @@ static void display_values()
 		pm10_sensor = FPSTR(SENSORS_IPS);
 		pm25_sensor = FPSTR(SENSORS_IPS);
 		pm05_sensor = FPSTR(SENSORS_IPS);
-		nc010_value = last_value_IPS_N0;
-		nc100_value = last_value_IPS_N1;
-		nc025_value = last_value_IPS_N2;
-		nc001_value = last_value_IPS_N3;
-		nc003_value = last_value_IPS_N4;
-		nc005_value = last_value_IPS_N5;
-		nc050_value = last_value_IPS_N6;
+		nc010_value = last_value_IPS_N1;
+		nc100_value = last_value_IPS_N10;
+		nc025_value = last_value_IPS_N25;
+		nc001_value = last_value_IPS_N01;
+		nc003_value = last_value_IPS_N03;
+		nc005_value = last_value_IPS_N05;
+		nc050_value = last_value_IPS_N5;
 	}
 	if (cfg::sps30_read)
 	{
