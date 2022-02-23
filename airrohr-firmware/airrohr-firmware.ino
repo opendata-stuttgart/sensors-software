@@ -165,7 +165,7 @@ namespace cfg
 	bool pms_read = PMS_READ;
 	bool hpm_read = HPM_READ;
 	bool npm_read = NPM_READ;
-	bool npm_fulltime = NPM_READ;
+	bool npm_fulltime = NPM_FULLTIME;
 	bool ips_read = IPS_READ;
 	bool sps30_read = SPS30_READ;
 	bool bmp_read = BMP_READ;
