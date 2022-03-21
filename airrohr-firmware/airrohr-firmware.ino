@@ -1124,7 +1124,6 @@ static void readConfig(bool oldconfig = false)
 
 	if (!err)
 	{
-		serializeJsonPretty(json, Debug);
 		debug_outln_info(F("parsed json..."));
 		for (unsigned e = 0; e < sizeof(configShape) / sizeof(configShape[0]); ++e)
 		{
@@ -6212,7 +6211,6 @@ void loop(void)
 			data.remove(data.length() - 1);
 		}
 		data += "]}";
-		Debug.println(data);
 		yield();
 
 		sum_send_time += sendDataToOptionalApis(data);
