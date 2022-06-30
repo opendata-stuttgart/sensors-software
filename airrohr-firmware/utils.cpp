@@ -243,9 +243,16 @@ void add_Value2Json(String& res, const __FlashStringHelper* type, const __FlashS
 float readCorrectionOffset(const char* correction) {
 	char* pEnd = nullptr;
 	// Avoiding atof() here as this adds a lot (~ 9kb) of code size
+	// which btw is really bad, because now we have a lot more work for everyone
+	// TODO: fix this mess to use fixed point
 	float r = float(strtol(correction, &pEnd, 10));
 	if (pEnd && pEnd[0] == '.' && pEnd[1] >= '0' && pEnd[1] <= '9') {
-		r += (r >= 0.0f ? 1.0f : -1.0f) * ((pEnd[1] - '0') / 10.0f);
+		bool isNegative = correction[0] == '-';
+		for (int i = 0; correction[i] == ' '; i++) {
+			isNegative = correction[i + 1] == '-';
+		}
+
+		r += (isNegative ? -1.0f : 1.0f) * ((pEnd[1] - '0') / 10.0f);
 	}
 	return r;
 }
