@@ -2306,7 +2306,8 @@ static void webserver_values()
 		add_table_value(FPSTR(SENSORS_SEN54), FPSTR(WEB_TPS), check_display_value(last_value_SEN5X_TS, -1, 1, 0), "µm");
 		add_table_t_value(FPSTR(SENSORS_SEN54), FPSTR(INTL_TEMPERATURE), last_value_SEN5X_T);
 		add_table_h_value(FPSTR(SENSORS_SEN54), FPSTR(INTL_HUMIDITY), last_value_SEN5X_H);
-		add_table_h_value(FPSTR(SENSORS_SEN54), FPSTR(INTL_VOC), last_value_SEN5X_VOC);
+		add_table_value(FPSTR(SENSORS_SEN54), FPSTR(INTL_VOC), check_display_value(last_value_SEN5X_VOC, 0, 0, 0), "(index)");
+
 		page_content += FPSTR(EMPTY_ROW);
 		}
 
@@ -5107,7 +5108,8 @@ static void display_values()
 	float t_value = -128.0;
 	float h_value = -1.0;
 	float p_value = -1.0;
-	String t_sensor, h_sensor, p_sensor;
+	float voc_value = -1.0;
+	String t_sensor, h_sensor, p_sensor, voc_sensor;
 	float pm001_value = -1.0;
 	float pm003_value = -1.0;
 	float pm005_value = -1.0;
@@ -5142,7 +5144,7 @@ static void display_values()
 	String display_header;
 	String display_lines[3] = {"", "", ""};
 	uint8_t screen_count = 0;
-	uint8_t screens[8];
+	uint8_t screens[13];
 	int line_count = 0;
 	debug_outln_info(F("output values to display..."));
 	if (cfg::ppd_read)
@@ -5201,6 +5203,40 @@ static void display_values()
 		nc003_value = last_value_IPS_N03;
 		nc005_value = last_value_IPS_N05;
 		nc050_value = last_value_IPS_N5;
+	}
+		if (cfg::sen5x_read)
+	{
+		if(memcmp(SEN5X_type,"SEN50",6) == 0)
+		{
+
+		}
+
+		if(memcmp(SEN5X_type,"SEN54",6)== 0)
+		{
+			pm01_sensor = FPSTR(SENSORS_SEN54);
+			pm10_sensor = FPSTR(SENSORS_SEN54);
+			pm25_sensor = FPSTR(SENSORS_SEN54);
+			t_sensor = h_sensor = voc_sensor = FPSTR(SENSORS_SEN54);
+		}
+		if(memcmp(SEN5X_type,"SEN55",6)== 0)
+		{
+		}
+
+
+
+		pm01_value = last_value_SEN5X_P0;
+		pm25_value = last_value_SEN5X_P2;
+		pm04_value = last_value_SEN5X_P4;
+		pm10_value = last_value_SEN5X_P1;
+		nc005_value = last_value_SEN5X_N05;
+		nc010_value = last_value_SEN5X_N1;
+		nc025_value = last_value_SEN5X_N25;
+		nc040_value = last_value_SEN5X_N4;
+		nc100_value = last_value_SEN5X_N10;
+		tps_value = last_value_SEN5X_TS;
+		t_value = last_value_SEN5X_T;
+		h_value = last_value_SEN5X_H;
+		voc_value = last_value_SEN5X_VOC;
 	}
 	if (cfg::sps30_read)
 	{
@@ -5288,6 +5324,11 @@ static void display_values()
 	if (cfg::ips_read)
 	{
 		screens[screen_count++] = 11;  //A VOIR POUR AJOUTER DES ÈCRANS
+	}
+	if (cfg::sen5x_read)
+	{
+		screens[screen_count++] = 12;  
+		screens[screen_count++] = 13; 
 	}
 	if (cfg::sps30_read)
 	{
@@ -5433,6 +5474,29 @@ static void display_values()
 			display_lines[1] = std::move(tmpl(F("PM2.5: {v} µg/m³"), check_display_value(pm25_value, -1, 1, 6)));
 			display_lines[2] = std::move(tmpl(F("PM10: {v} µg/m³"), check_display_value(pm10_value, -1, 1, 6)));
 			break;
+		case 12:
+		    display_header = F("Sensirion SEN5X");
+			display_lines[0] = std::move(tmpl(F("PM1: {v} µg/m³"), check_display_value(pm01_value, -1, 1, 6)));
+			display_lines[1] = std::move(tmpl(F("PM2.5: {v} µg/m³"), check_display_value(pm25_value, -1, 1, 6)));
+			display_lines[2] = std::move(tmpl(F("PM10: {v} µg/m³"), check_display_value(pm10_value, -1, 1, 6)));
+			break;
+		case 13:
+		    display_header = F("Sensirion SEN5X");
+			if(memcmp(SEN5X_type,"SEN50",6) == 0)
+			{
+
+			}
+			if(memcmp(SEN5X_type,"SEN54",6)== 0)
+			{
+			display_lines[0] = std::move(tmpl(F("Temp.: {v} °C"), check_display_value(t_value, -128, 1, 6)));
+			display_lines[1] = std::move(tmpl(F("Humi: {v} %"), check_display_value(h_value, -1, 1, 6)));
+			display_lines[2] = std::move(tmpl(F("VOC: {v} (index)"), check_display_value(voc_value, -1, 1, 6)));
+			}
+			if(memcmp(SEN5X_type,"SEN55",6)== 0)
+			{
+			}
+
+			break;
 		}
 
 		if (oled_ssd1306)
@@ -5545,6 +5609,18 @@ static void display_values()
 			display_lines[0] = "PM1: ";
 			display_lines[0] += check_display_value(pm01_value, -1, 1, 6);
 			display_lines[1] = "PM2.5: ";
+			display_lines[1] += check_display_value(pm25_value, -1, 1, 6);
+			break;
+		case 12:
+			display_lines[0] = "PM1: ";
+			display_lines[0] += check_display_value(pm01_value, -1, 1, 6);
+			display_lines[1] = "PM2.5: ";
+			display_lines[1] += check_display_value(pm25_value, -1, 1, 6);
+			break;
+		case 13:
+			display_lines[0] = "Temp.: ";
+			display_lines[0] += check_display_value(pm01_value, -1, 1, 6);
+			display_lines[1] = "Humi.: ";
 			display_lines[1] += check_display_value(pm25_value, -1, 1, 6);
 			break;
 		}
