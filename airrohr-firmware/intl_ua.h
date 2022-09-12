@@ -37,8 +37,8 @@ const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "Kорекція в дБ (А)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "Корекція в °C";
-const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "";
-const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "";
+const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "Висота над рівнем моря";
+const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "тиск на рівні моря";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Авторизація";
 #define INTL_REPORT_ISSUE "Повідомте про проблему"
@@ -58,16 +58,16 @@ const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Відобразити інформацію про Wi-Fi";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Відобразити інформацію про пристрій";
 
-#define INTL_STATIC_IP_TEXT ""
-const char INTL_STATIC_IP[] PROGMEM = "";
-const char INTL_STATIC_SUBNET[] PROGMEM = "";
-const char INTL_STATIC_GATEWAY[] PROGMEM = "";
-const char INTL_STATIC_DNS[] PROGMEM = "";
+#define INTL_STATIC_IP_TEXT "Статична IP-адреса конфігурації (усі поля мають бути заповнені)"
+const char INTL_STATIC_IP[] PROGMEM = "IP-адреса";
+const char INTL_STATIC_SUBNET[] PROGMEM = "Підмережа";
+const char INTL_STATIC_GATEWAY[] PROGMEM = "Шлюз";
+const char INTL_STATIC_DNS[] PROGMEM = "DNS-сервер";
 
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Рівень&nbsp;Зневадження";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Інтервал між вимірюваннями";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Тривалість режиму роутера";
-const char INTL_POWERSAVE[] PROGMEM = "";
+const char INTL_POWERSAVE[] PROGMEM = "Режим енергозбереження";
 const char INTL_MORE_APIS[] PROGMEM = "Додаткові API";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Відправляти дані на власний API";
 const char INTL_SERVER[] PROGMEM = "Сервер";
@@ -112,7 +112,7 @@ const char INTL_PARTICULATE_MATTER[] PROGMEM = "Вимірювач дрібни�
 const char INTL_TEMPERATURE[] PROGMEM = "температура";
 const char INTL_HUMIDITY[] PROGMEM = "вологість";
 const char INTL_PRESSURE[] PROGMEM = "атмосферний тиск";
-const char INTL_DEW_POINT[] PROGMEM = "";
+const char INTL_DEW_POINT[] PROGMEM = "точка роси";
 const char INTL_CO2_PPM[] PROGMEM = "ppm CO₂";
 const char INTL_LEQ_A[] PROGMEM = "LAeq";
 const char INTL_LA_MIN[] PROGMEM = "LA min";
