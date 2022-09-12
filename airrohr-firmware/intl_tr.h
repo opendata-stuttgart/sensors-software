@@ -67,6 +67,7 @@ const char INTL_STATIC_DNS[] PROGMEM = "";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;seviye";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = " Ölçüm aralığı";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Süre yönlendirici(Router) modu";
+const char INTL_POWERSAVE[] PROGMEM = "";
 const char INTL_MORE_APIS[] PROGMEM = "Daha fazla uygulama programlama arayüzü (API)";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "uygulama programlama arayüzüne (API)veri gönder";
 const char INTL_SERVER[] PROGMEM = "Sunucu";

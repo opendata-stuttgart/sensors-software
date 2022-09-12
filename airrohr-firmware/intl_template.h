@@ -67,6 +67,7 @@ const char INTL_STATIC_DNS[] PROGMEM = "";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "";
+const char INTL_POWERSAVE[] PROGMEM = "";
 const char INTL_MORE_APIS[] PROGMEM = "";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "";
 const char INTL_SERVER[] PROGMEM = "";

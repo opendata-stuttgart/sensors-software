@@ -67,6 +67,7 @@ const char INTL_STATIC_DNS[] PROGMEM = "";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;level";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Målinterval";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Permanent&nbsp;router-mode";
+const char INTL_POWERSAVE[] PROGMEM = "";
 const char INTL_MORE_APIS[] PROGMEM = "Yderligere APIer";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Send til eget API";
 const char INTL_SERVER[] PROGMEM = "Server";

@@ -67,6 +67,7 @@ const char INTL_STATIC_DNS[] PROGMEM = "";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "デバッグ&nbsp;レベル";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "測定間隔（秒";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "持続時間ルータモード";
+const char INTL_POWERSAVE[] PROGMEM = "";
 const char INTL_MORE_APIS[] PROGMEM = "その他のAPI";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "カスタムAPIへのデータ送信";
 const char INTL_SERVER[] PROGMEM = "サーバー";

@@ -67,6 +67,7 @@ const char INTL_STATIC_DNS[] PROGMEM = "";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;raven";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Interval merjenja (s)";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Trajanje načina usmerjevalnika";
+const char INTL_POWERSAVE[] PROGMEM = "";
 const char INTL_MORE_APIS[] PROGMEM = "Več API-jev";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Pošiljanje podatkov v API po meri";
 const char INTL_SERVER[] PROGMEM = "Strežnik";

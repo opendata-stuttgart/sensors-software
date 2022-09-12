@@ -67,6 +67,7 @@ const char INTL_STATIC_DNS[] PROGMEM = "DNS сервер";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Уровень&nbsp;отладки";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Измерительный интервал";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Длительность режима маршрутизатора";
+const char INTL_POWERSAVE[] PROGMEM = "";
 const char INTL_MORE_APIS[] PROGMEM = "Другие API";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Отправить в свой API";
 const char INTL_SERVER[] PROGMEM = "Сервер";

@@ -67,6 +67,7 @@ const char INTL_STATIC_DNS[] PROGMEM = "";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Рівень&nbsp;Зневадження";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Інтервал між вимірюваннями";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Тривалість режиму роутера";
+const char INTL_POWERSAVE[] PROGMEM = "";
 const char INTL_MORE_APIS[] PROGMEM = "Додаткові API";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Відправляти дані на власний API";
 const char INTL_SERVER[] PROGMEM = "Сервер";

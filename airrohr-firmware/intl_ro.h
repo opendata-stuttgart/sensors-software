@@ -67,6 +67,7 @@ const char INTL_STATIC_DNS[] PROGMEM = "";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;level";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Interval de măsurare (sec)";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Durata modului router";
+const char INTL_POWERSAVE[] PROGMEM = "";
 const char INTL_MORE_APIS[] PROGMEM = "Mai multe API-uri";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Trimiteți date către API personalizat";
 const char INTL_SERVER[] PROGMEM = "Server";

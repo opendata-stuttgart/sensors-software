@@ -67,6 +67,7 @@ const char INTL_STATIC_DNS[] PROGMEM = "";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;tase";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Mõõtmisintervall (sek)";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Kestus marsruuteri režiim";
+const char INTL_POWERSAVE[] PROGMEM = "";
 const char INTL_MORE_APIS[] PROGMEM = "Rohkem APIsid";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Andmete saatmine kohandatud API-le";
 const char INTL_SERVER[] PROGMEM = "Server";

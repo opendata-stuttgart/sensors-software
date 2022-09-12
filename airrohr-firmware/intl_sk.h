@@ -67,6 +67,7 @@ const char INTL_STATIC_DNS[] PROGMEM = "";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Ladenide&nbsp;úroveň";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Interval meraní (sec)";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Trvanie router mod";
+const char INTL_POWERSAVE[] PROGMEM = "";
 const char INTL_MORE_APIS[] PROGMEM = "Dalšie API";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Poslať data na vlastné API";
 const char INTL_SERVER[] PROGMEM = "Server";

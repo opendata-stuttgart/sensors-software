@@ -67,6 +67,7 @@ const char INTL_STATIC_DNS[] PROGMEM = "";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Derinimo&nbsp;lygis";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Matavimo intervalas (sek.)";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Trukmė maršrutizatoriaus režimas";
+const char INTL_POWERSAVE[] PROGMEM = "";
 const char INTL_MORE_APIS[] PROGMEM = "Daugiau API";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Duomenų siuntimas į pasirinktinę API";
 const char INTL_SERVER[] PROGMEM = "Serveris";

@@ -67,6 +67,7 @@ const char INTL_STATIC_DNS[] PROGMEM = "";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;级别";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "测量间隔(秒)";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "持续时间路由器模式";
+const char INTL_POWERSAVE[] PROGMEM = "";
 const char INTL_MORE_APIS[] PROGMEM = "更多API";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "发送数据到自定义API";
 const char INTL_SERVER[] PROGMEM = "服务器";
