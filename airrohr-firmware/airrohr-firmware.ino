@@ -1722,10 +1722,10 @@ static void webserver_config_send_body_get(String &page_content)
 	add_form_input(page_content, Config_static_subnet, FPSTR(INTL_STATIC_SUBNET), 15);
 	add_form_input(page_content, Config_static_gateway, FPSTR(INTL_STATIC_GATEWAY), 15);
 	add_form_input(page_content, Config_static_dns, FPSTR(INTL_STATIC_DNS), 15);
-	page_content += FPSTR(BR_TAG);
+	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 
 	server.sendContent(page_content);
-	page_content = emptyString;
+	// page_content = emptyString;
 	
 	page_content += FPSTR(BR_TAG);
 	add_form_checkbox(Config_enable_battery_monitor, FPSTR(INTL_ENABLE_BATTERY_MONITOR));
