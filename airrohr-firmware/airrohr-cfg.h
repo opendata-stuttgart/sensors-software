@@ -40,6 +40,8 @@ enum ConfigShapeId {
 	Config_pms_read,
 	Config_hpm_read,
 	Config_npm_read,
+	Config_npm_fulltime,
+	Config_ips_read,
 	Config_sps30_read,
 	Config_bmp_read,
 	Config_bmx280_read,
@@ -77,6 +79,7 @@ enum ConfigShapeId {
 	Config_debug,
 	Config_sending_intervall_ms,
 	Config_time_for_wifi_config,
+	Config_powersave,
 	Config_senseboxid,
 	Config_send2custom,
 	Config_host_custom,
@@ -113,6 +116,8 @@ static constexpr char CFG_KEY_SDS_READ[] PROGMEM = "sds_read";
 static constexpr char CFG_KEY_PMS_READ[] PROGMEM = "pms_read";
 static constexpr char CFG_KEY_HPM_READ[] PROGMEM = "hpm_read";
 static constexpr char CFG_KEY_NPM_READ[] PROGMEM = "npm_read";
+static constexpr char CFG_KEY_NPM_FULLTIME[] PROGMEM = "npm_fulltime";
+static constexpr char CFG_KEY_IPS_READ[] PROGMEM = "ips_read";
 static constexpr char CFG_KEY_SPS30_READ[] PROGMEM = "sps30_read";
 static constexpr char CFG_KEY_BMP_READ[] PROGMEM = "bmp_read";
 static constexpr char CFG_KEY_BMX280_READ[] PROGMEM = "bmx280_read";
@@ -150,6 +155,7 @@ static constexpr char CFG_KEY_STATIC_DNS[] PROGMEM = "static_dns";
 static constexpr char CFG_KEY_DEBUG[] PROGMEM = "debug";
 static constexpr char CFG_KEY_SENDING_INTERVALL_MS[] PROGMEM = "sending_intervall_ms";
 static constexpr char CFG_KEY_TIME_FOR_WIFI_CONFIG[] PROGMEM = "time_for_wifi_config";
+static constexpr char CFG_KEY_POWERSAVE[] PROGMEM = "powersave";
 static constexpr char CFG_KEY_SENSEBOXID[] PROGMEM = "senseboxid";
 static constexpr char CFG_KEY_SEND2CUSTOM[] PROGMEM = "send2custom";
 static constexpr char CFG_KEY_HOST_CUSTOM[] PROGMEM = "host_custom";
@@ -186,6 +192,8 @@ static constexpr ConfigShapeEntry configShape[] PROGMEM = {
 	{ Config_Type_Bool, 0, CFG_KEY_PMS_READ, &cfg::pms_read },
 	{ Config_Type_Bool, 0, CFG_KEY_HPM_READ, &cfg::hpm_read },
 	{ Config_Type_Bool, 0, CFG_KEY_NPM_READ, &cfg::npm_read },
+	{ Config_Type_Bool, 0, CFG_KEY_NPM_FULLTIME, &cfg::npm_fulltime },
+	{ Config_Type_Bool, 0, CFG_KEY_IPS_READ, &cfg::ips_read },
 	{ Config_Type_Bool, 0, CFG_KEY_SPS30_READ, &cfg::sps30_read },
 	{ Config_Type_Bool, 0, CFG_KEY_BMP_READ, &cfg::bmp_read },
 	{ Config_Type_Bool, 0, CFG_KEY_BMX280_READ, &cfg::bmx280_read },
@@ -223,6 +231,7 @@ static constexpr ConfigShapeEntry configShape[] PROGMEM = {
 	{ Config_Type_UInt, 0, CFG_KEY_DEBUG, &cfg::debug },
 	{ Config_Type_Time, 0, CFG_KEY_SENDING_INTERVALL_MS, &cfg::sending_intervall_ms },
 	{ Config_Type_Time, 0, CFG_KEY_TIME_FOR_WIFI_CONFIG, &cfg::time_for_wifi_config },
+	{ Config_Type_Bool, 0, CFG_KEY_POWERSAVE, &cfg::powersave },
 	{ Config_Type_String, sizeof(cfg::senseboxid)-1, CFG_KEY_SENSEBOXID, cfg::senseboxid },
 	{ Config_Type_Bool, 0, CFG_KEY_SEND2CUSTOM, &cfg::send2custom },
 	{ Config_Type_String, sizeof(cfg::host_custom)-1, CFG_KEY_HOST_CUSTOM, cfg::host_custom },

@@ -1,0 +1,85 @@
+# SSN Airrohr Firmware CI workflow
+
+name: Create SSN Release
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the master-ssn branch
+  push:
+    # branches:
+    #   - master-ssn
+    #   - beta-ssn
+    tags:
+      - 'SSN-*'
+
+  # Allows you to run this workflow manually from the Actions tab
+  # workflow_dispatch:
+        
+        # - name: Echo some Environment variables
+        #   run: |
+        #     echo github.run_number ${{ github.run_number }}
+        #     echo GITHUB_REF $GITHUB_REF
+        #     echo GITHUB_REF_NAME $GITHUB_REF_NAME
+        #     echo GITHUB_REF_TYPE $GITHUB_REF_TYPE
+        #     echo GITHUB_HEAD_REF $GITHUB_HEAD_REF
+        #     echo GITHUB_BASE_REF $GITHUB_BASE_REF
+
+jobs:
+  prod-check-and-release:
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/') && contains(github.ref_name, 'SSN')
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Creating release version $GITHUB_REF"
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+      - name: Load dependencies from cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      - name: Run counter
+        run: echo github.run_number ${{ github.run_number }}
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install platformio
+          platformio --version
+      - name: Run builds
+        run: |
+          cd airrohr-firmware && pwd && ls -l && platformio run && ls -l builds/
+          cd ../airrohr-update-loader && pwd && ls -l && platformio run && ls -l builds/
+      # - name: Run List all
+      #   run: pwd && ls -l airrohr-firmware/builds/
+      - name: Tar Results
+        run: |
+          tar czvf airrohr-firmware-builds.tar.gz -C airrohr-firmware/builds/ .
+      - name: Store airrohr-firmware
+        uses: actions/upload-artifact@v2
+        with:
+          if-no-files-found: error
+          name: airrohr-firmware-builds
+          path: airrohr-firmware-builds.tar.gz
+          retention-days: 30
+      - name: Store update-loader
+        uses: actions/upload-artifact@v2
+        with:
+          if-no-files-found: error
+          name: airrohr-update-loader
+          path: airrohr-update-loader/builds/latest_loader.bin
+          retention-days: 30
+      - name: Upload Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "airrohr-firmware-builds.tar.gz, airrohr-update-loader/builds/latest_loader.bin"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          # Use tag on push event
+          #tag: SSN-NRZ-2022-134-B${{ github.run_number }}
+          tag: ${{ github.ref_name }}
