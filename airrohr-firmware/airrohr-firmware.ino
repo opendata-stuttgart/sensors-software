@@ -5617,7 +5617,7 @@ static void powerOnTestSensors()
 
 	if (cfg::bmx280_read)
 	{
-		debug_outln_info(F("Read BMxE280..."));
+		debug_outln_info(F("Read BMx280..."));
 		if (!initBMX280(bmx280_default_i2c_address) && !initBMX280(bmx280_alternate_i2c_address)) {
 			debug_outln_error(F("Check BMx280 wiring"));
 			bmx280_init_failed = true;
