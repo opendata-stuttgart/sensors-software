@@ -114,6 +114,7 @@ const char INTL_TEMPERATURE[] PROGMEM = "Температура";
 const char INTL_HUMIDITY[] PROGMEM = "Влажност на въздуха";
 const char INTL_PRESSURE[] PROGMEM = "Атмосферно налягане";
 const char INTL_VOC[] PROGMEM = "";
+const char INTL_NOX[] PROGMEM = "";
 const char INTL_DEW_POINT[] PROGMEM = "Точка на оросяване";
 const char INTL_CO2_PPM[] PROGMEM = "ppm CO₂";
 const char INTL_LEQ_A[] PROGMEM = "LAeq";

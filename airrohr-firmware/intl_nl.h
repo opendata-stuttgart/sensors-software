@@ -114,6 +114,7 @@ const char INTL_TEMPERATURE[] PROGMEM = "Temperatuur";
 const char INTL_HUMIDITY[] PROGMEM = "Rel. luchtvochtigheid";
 const char INTL_PRESSURE[] PROGMEM = "Luchtdruk";
 const char INTL_VOC[] PROGMEM = "Vluchtige organische stoffen";
+const char INTL_NOX[] PROGMEM = "";
 const char INTL_DEW_POINT[] PROGMEM = "Dauwpunt";
 const char INTL_CO2_PPM[] PROGMEM = "ppm CO₂";
 const char INTL_LEQ_A[] PROGMEM = "LAeq";

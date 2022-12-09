@@ -114,6 +114,7 @@ const char INTL_TEMPERATURE[] PROGMEM = "sıcaklık";
 const char INTL_HUMIDITY[] PROGMEM = "nem";
 const char INTL_PRESSURE[] PROGMEM = "hava basıncı";
 const char INTL_VOC[] PROGMEM = "";
+const char INTL_NOX[] PROGMEM = "";
 const char INTL_DEW_POINT[] PROGMEM = "İşbâ";
 const char INTL_CO2_PPM[] PROGMEM = "ppm CO₂";
 const char INTL_LEQ_A[] PROGMEM = "LAeq";

@@ -114,6 +114,7 @@ const char INTL_TEMPERATURE[] PROGMEM = "Temperatura";
 const char INTL_HUMIDITY[] PROGMEM = "Humedad";
 const char INTL_PRESSURE[] PROGMEM = "Presión atmosférica";
 const char INTL_VOC[] PROGMEM = "";
+const char INTL_NOX[] PROGMEM = "";
 const char INTL_DEW_POINT[] PROGMEM = "Punto de rocío";
 const char INTL_CO2_PPM[] PROGMEM = "ppm CO₂";
 const char INTL_LEQ_A[] PROGMEM = "LAeq";

@@ -114,6 +114,7 @@ const char INTL_TEMPERATURE[] PROGMEM = "temperatūra";
 const char INTL_HUMIDITY[] PROGMEM = "mitrums";
 const char INTL_PRESSURE[] PROGMEM = "gaisa spiediens";
 const char INTL_VOC[] PROGMEM = "";
+const char INTL_NOX[] PROGMEM = "";
 const char INTL_DEW_POINT[] PROGMEM = "";
 const char INTL_CO2_PPM[] PROGMEM = "ppm CO₂";
 const char INTL_LEQ_A[] PROGMEM = "LAeq";
