@@ -573,6 +573,7 @@ float last_value_SEN5X_TS = -1.0;
 float last_value_SEN5X_T = -128.0;
 float last_value_SEN5X_H = -1.0;
 float last_value_SEN5X_VOC = -1.0;
+float last_value_SEN5X_NOX = -1.0;
 float value_SEN5X_P0 = 0.0;
 float value_SEN5X_P1 = 0.0;
 float value_SEN5X_P2 = 0.0;
@@ -586,6 +587,7 @@ float value_SEN5X_TS = 0.0;
 float value_SEN5X_T = 0.0;
 float value_SEN5X_H = 0.0;
 float value_SEN5X_VOC = 0.0;
+float value_SEN5X_NOX = 0.0;
 
 uint16_t SEN5X_measurement_count = 0;
 unsigned long SEN5X_read_counter = 0;
@@ -2289,7 +2291,17 @@ static void webserver_values()
 
 		if(memcmp(SEN5X_type,"SEN50",6) == 0)
 		{
-
+		add_table_pm_value(FPSTR(SENSORS_SEN50), FPSTR(WEB_PM1), last_value_SEN5X_P0);
+		add_table_pm_value(FPSTR(SENSORS_SEN50), FPSTR(WEB_PM25), last_value_SEN5X_P2);
+		add_table_pm_value(FPSTR(SENSORS_SEN50), FPSTR(WEB_PM4), last_value_SEN5X_P4);
+		add_table_pm_value(FPSTR(SENSORS_SEN50), FPSTR(WEB_PM10), last_value_SEN5X_P1);
+		add_table_nc_value(FPSTR(SENSORS_SEN50), FPSTR(WEB_NC0k5), last_value_SEN5X_N05);
+		add_table_nc_value(FPSTR(SENSORS_SEN50), FPSTR(WEB_NC1k0), last_value_SEN5X_N1);
+		add_table_nc_value(FPSTR(SENSORS_SEN50), FPSTR(WEB_NC2k5), last_value_SEN5X_N25);
+		add_table_nc_value(FPSTR(SENSORS_SEN50), FPSTR(WEB_NC4k0), last_value_SEN5X_N4);
+		add_table_nc_value(FPSTR(SENSORS_SEN50), FPSTR(WEB_NC10), last_value_SEN5X_N10);
+		add_table_value(FPSTR(SENSORS_SEN50), FPSTR(WEB_TPS), check_display_value(last_value_SEN5X_TS, -1, 1, 0), "µm");
+		page_content += FPSTR(EMPTY_ROW);
 		}
 
 		if(memcmp(SEN5X_type,"SEN54",6)== 0)
@@ -2307,13 +2319,26 @@ static void webserver_values()
 		add_table_t_value(FPSTR(SENSORS_SEN54), FPSTR(INTL_TEMPERATURE), last_value_SEN5X_T);
 		add_table_h_value(FPSTR(SENSORS_SEN54), FPSTR(INTL_HUMIDITY), last_value_SEN5X_H);
 		add_table_value(FPSTR(SENSORS_SEN54), FPSTR(INTL_VOC), check_display_value(last_value_SEN5X_VOC, 0, 0, 0), "(index)");
-
 		page_content += FPSTR(EMPTY_ROW);
 		}
 
 		if(memcmp(SEN5X_type,"SEN55",6)== 0)
 		{
-
+		add_table_pm_value(FPSTR(SENSORS_SEN55), FPSTR(WEB_PM1), last_value_SEN5X_P0);
+		add_table_pm_value(FPSTR(SENSORS_SEN55), FPSTR(WEB_PM25), last_value_SEN5X_P2);
+		add_table_pm_value(FPSTR(SENSORS_SEN55), FPSTR(WEB_PM4), last_value_SEN5X_P4);
+		add_table_pm_value(FPSTR(SENSORS_SEN55), FPSTR(WEB_PM10), last_value_SEN5X_P1);
+		add_table_nc_value(FPSTR(SENSORS_SEN55), FPSTR(WEB_NC0k5), last_value_SEN5X_N05);
+		add_table_nc_value(FPSTR(SENSORS_SEN55), FPSTR(WEB_NC1k0), last_value_SEN5X_N1);
+		add_table_nc_value(FPSTR(SENSORS_SEN55), FPSTR(WEB_NC2k5), last_value_SEN5X_N25);
+		add_table_nc_value(FPSTR(SENSORS_SEN55), FPSTR(WEB_NC4k0), last_value_SEN5X_N4);
+		add_table_nc_value(FPSTR(SENSORS_SEN55), FPSTR(WEB_NC10), last_value_SEN5X_N10);
+		add_table_value(FPSTR(SENSORS_SEN55), FPSTR(WEB_TPS), check_display_value(last_value_SEN5X_TS, -1, 1, 0), "µm");
+		add_table_t_value(FPSTR(SENSORS_SEN55), FPSTR(INTL_TEMPERATURE), last_value_SEN5X_T);
+		add_table_h_value(FPSTR(SENSORS_SEN55), FPSTR(INTL_HUMIDITY), last_value_SEN5X_H);
+		add_table_value(FPSTR(SENSORS_SEN55), FPSTR(INTL_VOC), check_display_value(last_value_SEN5X_VOC, 0, 0, 0), "(index)");
+		add_table_value(FPSTR(SENSORS_SEN55), FPSTR(INTL_NOX), check_display_value(last_value_SEN5X_NOX, 0, 0, 0), "ppm");
+		page_content += FPSTR(EMPTY_ROW);
 		}
 	}
 
@@ -2547,7 +2572,7 @@ static void webserver_status()
 	{
 		if(memcmp(SEN5X_type,"SEN50",6) == 0)
 		{
-
+		add_table_row_from_value(page_content, FPSTR(SENSORS_SEN50), String(SEN5X_read_error_counter));
 		}
 
 		if(memcmp(SEN5X_type,"SEN54",6)== 0)
@@ -2557,7 +2582,7 @@ static void webserver_status()
 
 		if(memcmp(SEN5X_type,"SEN55",6)== 0)
 		{
-
+		add_table_row_from_value(page_content, FPSTR(SENSORS_SEN55), String(SEN5X_read_error_counter));
 		}
 	}
 	if (cfg::sps30_read)
@@ -4589,6 +4614,7 @@ static void fetchSensorSEN5X(String &s)
 	last_value_SEN5X_T = value_SEN5X_T / SEN5X_measurement_count;
 	last_value_SEN5X_H = value_SEN5X_H / SEN5X_measurement_count;
 	last_value_SEN5X_VOC = value_SEN5X_VOC / SEN5X_measurement_count;
+	last_value_SEN5X_NOX = value_SEN5X_NOX / SEN5X_measurement_count;
 
 
 	add_Value2Json(s, F("SEN5X_P0"), F("PM1.0: "), last_value_SEN5X_P0);
@@ -4602,10 +4628,21 @@ static void fetchSensorSEN5X(String &s)
 	add_Value2Json(s, F("SEN5X_N10"), F("NC10:  "), last_value_SEN5X_N10);
 	add_Value2Json(s, F("SEN5X_TS"), F("TPS:   "), last_value_SEN5X_TS);
 
+if(memcmp(SEN5X_type,"SEN50",6)!= 0)
+{
 	add_Value2Json(s, F("SEN5X_temperature"), FPSTR(DBG_TXT_TEMPERATURE), last_value_SEN5X_T);
 	add_Value2Json(s, F("SEN5X_humidity"), FPSTR(DBG_TXT_HUMIDITY), last_value_SEN5X_H);
-	add_Value2Json(s, F("SEN5X_voc"), FPSTR(DBG_TXT_VOCINDEX), last_value_SEN5X_VOC);
+}
 
+if(memcmp(SEN5X_type,"SEN54",6)!= 0  || memcmp(SEN5X_type,"SEN55",6)!= 0)
+{
+	add_Value2Json(s, F("SEN5X_voc"), FPSTR(DBG_TXT_VOCINDEX), last_value_SEN5X_VOC);
+}
+
+if(memcmp(SEN5X_type,"SEN55",6)!= 0)
+{
+	add_Value2Json(s, F("SEN5X_nox"), FPSTR(DBG_TXT_NOX), last_value_SEN5X_NOX);
+}
 	debug_outln_info(F("SEN5X read counter: "), String(SEN5X_read_counter));
 	debug_outln_info(F("SEN5X read error counter: "), String(SEN5X_read_error_counter));
 
@@ -4615,7 +4652,7 @@ static void fetchSensorSEN5X(String &s)
 	value_SEN5X_P0 = value_SEN5X_P1 = value_SEN5X_P2 = value_SEN5X_P4 = 0.0;
 	value_SEN5X_N05 = value_SEN5X_N1 = value_SEN5X_N25 = value_SEN5X_N10 = value_SEN5X_N4 = 0.0;
 	value_SEN5X_TS = 0.0;
-	value_SEN5X_H = value_SEN5X_T = value_SEN5X_VOC = 0.0;
+	value_SEN5X_H = value_SEN5X_T = value_SEN5X_VOC = value_SEN5X_NOX = 0.0;
 
 	debug_outln_info(FPSTR(DBG_TXT_SEP));
 
@@ -5109,7 +5146,8 @@ static void display_values()
 	float h_value = -1.0;
 	float p_value = -1.0;
 	float voc_value = -1.0;
-	String t_sensor, h_sensor, p_sensor, voc_sensor;
+	float nox_value = -1.0;
+	String t_sensor, h_sensor, p_sensor, voc_sensor, nox_sensor;
 	float pm001_value = -1.0;
 	float pm003_value = -1.0;
 	float pm005_value = -1.0;
@@ -5220,6 +5258,10 @@ static void display_values()
 		}
 		if(memcmp(SEN5X_type,"SEN55",6)== 0)
 		{
+			pm01_sensor = FPSTR(SENSORS_SEN54);
+			pm10_sensor = FPSTR(SENSORS_SEN54);
+			pm25_sensor = FPSTR(SENSORS_SEN54);
+			t_sensor = h_sensor = voc_sensor = nox_sensor = FPSTR(SENSORS_SEN54);
 		}
 
 
@@ -5237,6 +5279,7 @@ static void display_values()
 		t_value = last_value_SEN5X_T;
 		h_value = last_value_SEN5X_H;
 		voc_value = last_value_SEN5X_VOC;
+		nox_value = last_value_SEN5X_NOX;
 	}
 	if (cfg::sps30_read)
 	{
@@ -5494,6 +5537,10 @@ static void display_values()
 			}
 			if(memcmp(SEN5X_type,"SEN55",6)== 0)
 			{
+			//display_lines[0] = std::move(tmpl(F("Temp.: {v} °C"), check_display_value(t_value, -128, 1, 6)));
+			display_lines[0] = std::move(tmpl(F("Humi: {v} %"), check_display_value(h_value, -1, 1, 6)));
+			display_lines[1] = std::move(tmpl(F("VOC: {v} (index)"), check_display_value(voc_value, -1, 1, 6)));
+			display_lines[2] = std::move(tmpl(F("NO2: {v} (ppm)"), check_display_value(nox_value, -1, 1, 6)));
 			}
 
 			break;
@@ -6459,6 +6506,7 @@ void loop(void)
 		value_SEN5X_T += ambientTemperature;
 		value_SEN5X_H += ambientHumidity;
 		value_SEN5X_VOC += vocIndex;
+		value_SEN5X_NOX += noxIndex;
 	}	
 		++SEN5X_measurement_count;
 		}
