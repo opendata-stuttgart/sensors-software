@@ -52,32 +52,20 @@
  * PROGRAM: [======    ]  58.0% (used 605529 bytes from 1044464 bytes)
  *  
  ************************************************************************/
- 
+
 #include <WString.h>
 #include <pgmspace.h>
-
+#include <Arduino.h>
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2021-134-B4"
+#define SOFTWARE_VERSION_STR "NRZ-2021-134-B4-ESP32"
 String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
  * Includes                                                      *
  *****************************************************************/
 
-#if defined(ESP8266)
-#include <FS.h> // must be first
-#include <ESP8266HTTPClient.h>
-#include <ESP8266WiFi.h>
-#include <ESP8266WebServer.h>
-#include <ESP8266mDNS.h>
-#include <SoftwareSerial.h>
-#include <Hash.h>
-#include <ctime>
-#include <coredecls.h>
-#include <sntp.h>
-#endif
+#include "ca-root.h"
 
-#if defined(ESP32)
 #define FORMAT_SPIFFS_IF_FAILED true
 #include <FS.h>
 #include <HTTPClient.h>
@@ -86,12 +74,21 @@ String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 #include <WiFiClient.h>
 #include <WiFiClientSecure.h>
 #include <HardwareSerial.h>
-#include <hwcrypto/sha.h>
-#include <WebServer.h>
-#include <ESPmDNS.h>
+//#include <hwcrypto/sha.h>
+#if ESP_IDF_VERSION_MAJOR >= 4
+#if (ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(1, 0, 6))
+#include "sha/sha_parallel_engine.h"
+#else
+#include <esp32/sha.h>
+#endif
+#else
+//#include <hwcrypto/sha.h>
 #endif
 
-// includes common to ESP8266 and ESP32 (especially external libraries)
+#include <WebServer.h>
+#include <ESPmDNS.h>
+#include <MD5Builder.h>
+
 #include "./oledfont.h" // avoids including the default Arial font, needs to be included before SSD1306.h
 #include <SSD1306.h>
 #include <SH1106.h>
@@ -108,12 +105,10 @@ String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 #include <StreamString.h>
 #include <DallasTemperature.h>
 #include <SparkFun_SCD30_Arduino_Library.h>
-#include <SensirionI2CSen5x.h>
 #include <TinyGPS++.h>
 #include "./bmx280_i2c.h"
 #include "./sps30_i2c.h"
 #include "./dnms_i2c.h"
-// #include "./SensirionI2CSen5x.h"
 
 #include "./intl.h"
 
@@ -134,7 +129,7 @@ String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 namespace cfg
 {
 	unsigned debug = DEBUG;
-	
+
 	unsigned time_for_wifi_config = 600000;
 	unsigned sending_intervall_ms = 145000;
 	bool powersave;
@@ -169,7 +164,6 @@ namespace cfg
 	bool npm_read = NPM_READ;
 	bool npm_fulltime = NPM_FULLTIME;
 	bool ips_read = IPS_READ;
-	bool sen5x_read = SEN5X_READ;
 	bool sps30_read = SPS30_READ;
 	bool bmp_read = BMP_READ;
 	bool bmx280_read = BMX280_READ;
@@ -262,12 +256,7 @@ bool dnms_init_failed = false;
 bool gps_init_failed = false;
 bool airrohr_selftest_failed = false;
 
-#if defined(ESP8266)
-ESP8266WebServer server(80);
-#endif
-#if defined(ESP32)
 WebServer server(80);
-#endif
 
 // default IPv4 address (ex. 192.168.4.1)
 const uint8_t default_ip_first_octet = 192;
@@ -296,25 +285,18 @@ const uint8_t lcd_1602_alternate_i2c_address = 0x27;
 const uint8_t lcd_1602_columns = 16;
 const uint8_t lcd_1602_rows = 2;
 const uint8_t lcd_2004_default_i2c_address = 0x3f;
-const uint8_t lcd_2004_alternate_i2c_address =  0x27;
+const uint8_t lcd_2004_alternate_i2c_address = 0x27;
 const uint8_t lcd_2004_columns = 20;
 const uint8_t lcd_2004_rows = 4;
 
 /*****************************************************************
  * Serial declarations                                           *
  *****************************************************************/
-#if defined(ESP8266)
-SoftwareSerial serialSDS;
-SoftwareSerial *serialGPS;
-SoftwareSerial serialNPM;
-SoftwareSerial serialIPS;
-#endif
-#if defined(ESP32)
+
 #define serialSDS (Serial1)
 #define serialGPS (&(Serial2))
 #define serialNPM (Serial1)
 #define serialIPS (Serial1)
-#endif
 
 /*****************************************************************
  * DHT declaration                                               *
@@ -348,11 +330,6 @@ Adafruit_SHT31 sht3x;
  *****************************************************************/
 OneWire oneWire;
 DallasTemperature ds18b20(&oneWire);
-
-/*****************************************************************
- * SEN5X declaration                                             *
- *****************************************************************/
-SensirionI2CSen5x sen5x;
 
 /*****************************************************************
  * SCD30 declaration                                             *
@@ -436,7 +413,6 @@ enum
 	NPM_REPLY_BODY_8 = 5,
 	NPM_REPLY_CHECKSUM_8 = 1
 } NPM_waiting_for_8; // for temperature/humidity
-
 
 //ENUM POUR IPS??
 
@@ -546,54 +522,19 @@ float ips_pm5_min = 200;
 float ips_pm10_max = 0;
 float ips_pm10_min = 200;
 unsigned long ips_pm01_max_pcs = 0;
-unsigned long  ips_pm01_min_pcs = 4000000000;
-unsigned long  ips_pm03_max_pcs = 0;
-unsigned long  ips_pm03_min_pcs = 4000000000;
-unsigned long  ips_pm05_max_pcs = 0;
-unsigned long  ips_pm05_min_pcs = 4000000000;
-unsigned long  ips_pm1_max_pcs = 0;
-unsigned long  ips_pm1_min_pcs = 4000000000;
-unsigned long  ips_pm25_max_pcs = 0;
-unsigned long  ips_pm25_min_pcs = 4000000000;
-unsigned long  ips_pm5_max_pcs = 0;
+unsigned long ips_pm01_min_pcs = 4000000000;
+unsigned long ips_pm03_max_pcs = 0;
+unsigned long ips_pm03_min_pcs = 4000000000;
+unsigned long ips_pm05_max_pcs = 0;
+unsigned long ips_pm05_min_pcs = 4000000000;
+unsigned long ips_pm1_max_pcs = 0;
+unsigned long ips_pm1_min_pcs = 4000000000;
+unsigned long ips_pm25_max_pcs = 0;
+unsigned long ips_pm25_min_pcs = 4000000000;
+unsigned long ips_pm5_max_pcs = 0;
 unsigned long ips_pm5_min_pcs = 4000000000;
-unsigned long  ips_pm10_max_pcs = 0;
-unsigned long  ips_pm10_min_pcs = 4000000000;
-
-float last_value_SEN5X_P0 = -1.0;
-float last_value_SEN5X_P1 = -1.0;
-float last_value_SEN5X_P2 = -1.0;
-float last_value_SEN5X_P4 = -1.0;
-float last_value_SEN5X_N05 = -1.0;
-float last_value_SEN5X_N1 = -1.0;
-float last_value_SEN5X_N25 = -1.0;
-float last_value_SEN5X_N4 = -1.0;
-float last_value_SEN5X_N10 = -1.0;
-float last_value_SEN5X_TS = -1.0;
-float last_value_SEN5X_T = -128.0;
-float last_value_SEN5X_H = -1.0;
-float last_value_SEN5X_VOC = -1.0;
-float last_value_SEN5X_NOX = -1.0;
-float value_SEN5X_P0 = 0.0;
-float value_SEN5X_P1 = 0.0;
-float value_SEN5X_P2 = 0.0;
-float value_SEN5X_P4 = 0.0;
-float value_SEN5X_N05 = 0.0;
-float value_SEN5X_N1 = 0.0;
-float value_SEN5X_N25 = 0.0;
-float value_SEN5X_N4 = 0.0;
-float value_SEN5X_N10 = 0.0;
-float value_SEN5X_TS = 0.0;
-float value_SEN5X_T = 0.0;
-float value_SEN5X_H = 0.0;
-float value_SEN5X_VOC = 0.0;
-float value_SEN5X_NOX = 0.0;
-
-uint16_t SEN5X_measurement_count = 0;
-unsigned long SEN5X_read_counter = 0;
-unsigned long SEN5X_read_error_counter = 0;
-unsigned long SEN5X_read_timer = 0;
-bool sen5x_init_failed = false;
+unsigned long ips_pm10_max_pcs = 0;
+unsigned long ips_pm10_min_pcs = 4000000000;
 
 float last_value_SPS30_P0 = -1.0;
 float last_value_SPS30_P1 = -1.0;
@@ -638,13 +579,13 @@ float last_value_NPM_N1 = -1.0;
 float last_value_NPM_N10 = -1.0;
 float last_value_NPM_N25 = -1.0;
 
-float last_value_IPS_P0 = -1.0; //PM1
-float last_value_IPS_P1 = -1.0;	//PM10
-float last_value_IPS_P2 = -1.0;	//PM2.5
+float last_value_IPS_P0 = -1.0;	 //PM1
+float last_value_IPS_P1 = -1.0;	 //PM10
+float last_value_IPS_P2 = -1.0;	 //PM2.5
 float last_value_IPS_P01 = -1.0; //PM0.1
 float last_value_IPS_P03 = -1.0; //PM0.3 //ATTENTION P4 = PM4 POUR SPS30
 float last_value_IPS_P05 = -1.0; //PM0.5
-float last_value_IPS_P5 = -1.0; //PM5
+float last_value_IPS_P5 = -1.0;	 //PM5
 float last_value_IPS_N1 = -1.0;
 float last_value_IPS_N10 = -1.0;
 float last_value_IPS_N25 = -1.0;
@@ -687,10 +628,6 @@ struct struct_wifiInfo
 	uint8_t encryptionType;
 	int32_t RSSI;
 	int32_t channel;
-#if defined(ESP8266)
-	bool isHidden;
-	uint8_t unused[3];
-#endif
 };
 
 struct struct_wifiInfo *wifiInfo;
@@ -759,9 +696,6 @@ static String SDS_version_date()
 		debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(DBG_TXT_SDS011_VERSION_DATE));
 		is_SDS_running = SDS_cmd(PmSensorCmd::Start);
 		delay(250);
-#if defined(ESP8266)
-		serialSDS.perform_work();
-#endif
 		serialSDS.flush();
 		// Query Version/Date
 		SDS_rawcmd(0x07, 0x00, 0x00);
@@ -1016,66 +950,63 @@ static void NPM_fan_speed()
 	}
 }
 
-
-
-static String NPM_temp_humi() 
+static String NPM_temp_humi()
 {
 	uint16_t NPM_temp;
 	uint16_t NPM_humi;
 	NPM_waiting_for_8 = NPM_REPLY_HEADER_8;
 	debug_outln_info(F("Temperature/Humidity in Next PM..."));
 	NPM_cmd(PmSensorCmd2::Temphumi);
-			while (!serialNPM.available())
-			{
-				debug_outln("Wait for Serial...", DEBUG_MAX_INFO);
-			}
+	while (!serialNPM.available())
+	{
+		debug_outln("Wait for Serial...", DEBUG_MAX_INFO);
+	}
 
-			while (serialNPM.available() >= NPM_waiting_for_8)
-			{
-				const uint8_t constexpr header[2] = {0x81, 0x14};
-				uint8_t state[1];
-				uint8_t data[4];
-				uint8_t checksum[1];
-				uint8_t test[8];
+	while (serialNPM.available() >= NPM_waiting_for_8)
+	{
+		const uint8_t constexpr header[2] = {0x81, 0x14};
+		uint8_t state[1];
+		uint8_t data[4];
+		uint8_t checksum[1];
+		uint8_t test[8];
 
-				switch (NPM_waiting_for_8)
-				{
-				case NPM_REPLY_HEADER_8:
-					if (serialNPM.find(header, sizeof(header)))
-						NPM_waiting_for_8 = NPM_REPLY_STATE_8;
-					break;
-				case NPM_REPLY_STATE_8:
-					serialNPM.readBytes(state, sizeof(state));
-					NPM_state(state[0]);
-					NPM_waiting_for_8 = NPM_REPLY_BODY_8;
-					break;
-				case NPM_REPLY_BODY_8:
-					if (serialNPM.readBytes(data, sizeof(data)) == sizeof(data))
-					{
-						NPM_data_reader(data, 4);
-						 NPM_temp = word(data[0], data[1]);
-						 NPM_humi = word(data[2], data[3]);
-						debug_outln_verbose(F("Temperature (°C): "), String(NPM_temp / 100.0f));
-						debug_outln_verbose(F("Relative humidity (%): "), String(NPM_humi / 100.0f));
-					}
-					NPM_waiting_for_8 = NPM_REPLY_CHECKSUM_8;
-					break;
-				case NPM_REPLY_CHECKSUM_16:
-					serialNPM.readBytes(checksum, sizeof(checksum));
-					memcpy(test, header, sizeof(header));
-					memcpy(&test[sizeof(header)], state, sizeof(state));
-					memcpy(&test[sizeof(header) + sizeof(state)], data, sizeof(data));
-					memcpy(&test[sizeof(header) + sizeof(state) + sizeof(data)], checksum, sizeof(checksum));
-					NPM_data_reader(test, 8);
-					if (NPM_checksum_valid_8(test))
-						debug_outln_info(F("Checksum OK..."));
-					NPM_waiting_for_8 = NPM_REPLY_HEADER_8;
-					break;
-				}
+		switch (NPM_waiting_for_8)
+		{
+		case NPM_REPLY_HEADER_8:
+			if (serialNPM.find(header, sizeof(header)))
+				NPM_waiting_for_8 = NPM_REPLY_STATE_8;
+			break;
+		case NPM_REPLY_STATE_8:
+			serialNPM.readBytes(state, sizeof(state));
+			NPM_state(state[0]);
+			NPM_waiting_for_8 = NPM_REPLY_BODY_8;
+			break;
+		case NPM_REPLY_BODY_8:
+			if (serialNPM.readBytes(data, sizeof(data)) == sizeof(data))
+			{
+				NPM_data_reader(data, 4);
+				NPM_temp = word(data[0], data[1]);
+				NPM_humi = word(data[2], data[3]);
+				debug_outln_verbose(F("Temperature (°C): "), String(NPM_temp / 100.0f));
+				debug_outln_verbose(F("Relative humidity (%): "), String(NPM_humi / 100.0f));
 			}
-			return String(NPM_temp / 100.0f) + " / "+ String(NPM_humi / 100.0f);
+			NPM_waiting_for_8 = NPM_REPLY_CHECKSUM_8;
+			break;
+		case NPM_REPLY_CHECKSUM_16:
+			serialNPM.readBytes(checksum, sizeof(checksum));
+			memcpy(test, header, sizeof(header));
+			memcpy(&test[sizeof(header)], state, sizeof(state));
+			memcpy(&test[sizeof(header) + sizeof(state)], data, sizeof(data));
+			memcpy(&test[sizeof(header) + sizeof(state) + sizeof(data)], checksum, sizeof(checksum));
+			NPM_data_reader(test, 8);
+			if (NPM_checksum_valid_8(test))
+				debug_outln_info(F("Checksum OK..."));
+			NPM_waiting_for_8 = NPM_REPLY_HEADER_8;
+			break;
+		}
+	}
+	return String(NPM_temp / 100.0f) + " / " + String(NPM_humi / 100.0f);
 }
-
 
 /*****************************************************************
  * read IPS-7100 sensor serial and firmware date                   *
@@ -1090,16 +1021,16 @@ static String IPS_version_date()
 
 	if (serialIPS.available() > 0)
 	{
-	serial_data = serialIPS.readString();
-	//Debug.println(serial_data);
+		serial_data = serialIPS.readString();
+		//Debug.println(serial_data);
 	}
 
 	int index1 = serial_data.indexOf("VERSION_NUMBER ");
 	int index2 = serial_data.indexOf("\nSERIAL_NUMBER ");
 	int index3 = serial_data.indexOf("\nD:");
 
-	String version_ips = serial_data.substring(index1+15,index2-1);
-	String serial_ips = serial_data.substring(index2+15,index3-1);
+	String version_ips = serial_data.substring(index1 + 15, index2 - 1);
+	String serial_ips = serial_data.substring(index2 + 15, index3 - 1);
 
 	last_value_IPS_version = version_ips + "/" + serial_ips;
 
@@ -1107,89 +1038,6 @@ static String IPS_version_date()
 
 	return last_value_IPS_version;
 }
-
-
-/*****************************************************************
- * read SEN5X sensor serial and firmware date                   *
- *****************************************************************/
-
-
-unsigned char SEN5X_type[6];
-
-#define MAXBUF_REQUIREMENT 48
-
-#if (defined(I2C_BUFFER_LENGTH) &&                 \
-     (I2C_BUFFER_LENGTH >= MAXBUF_REQUIREMENT)) || \
-    (defined(BUFFER_LENGTH) && BUFFER_LENGTH >= MAXBUF_REQUIREMENT)
-#define USE_PRODUCT_INFO
-#endif
-
-void printModuleVersions() {
-    uint16_t error;
-    char errorMessage[256];
-
-    unsigned char productName[32];
-    uint8_t productNameSize = 32;
-
-    error = sen5x.getProductName(productName, productNameSize);
-
-    if (error) {
-        Debug.print("Error trying to execute getProductName(): ");
-        errorToString(error, errorMessage, 256);
-        Debug.println(errorMessage);
-    } else {
-        Debug.print("ProductName:");
-        Debug.println((char*)productName);
-		memcpy(SEN5X_type, productName, 6);
-		//Debug.println((char*)SEN5X_type);
-    }
-
-    uint8_t firmwareMajor;
-    uint8_t firmwareMinor;
-    bool firmwareDebug;
-    uint8_t hardwareMajor;
-    uint8_t hardwareMinor;
-    uint8_t protocolMajor;
-    uint8_t protocolMinor;
-
-    error = sen5x.getVersion(firmwareMajor, firmwareMinor, firmwareDebug,
-                             hardwareMajor, hardwareMinor, protocolMajor,
-                             protocolMinor);
-    if (error) {
-        Debug.print("Error trying to execute getVersion(): ");
-        errorToString(error, errorMessage, 256);
-        Debug.println(errorMessage);
-    } else {
-        Debug.print("Firmware: ");
-        Debug.print(firmwareMajor);
-        Debug.print(".");
-        Debug.print(firmwareMinor);
-        Debug.print(", ");
-
-        Debug.print("Hardware: ");
-        Debug.print(hardwareMajor);
-        Debug.print(".");
-        Debug.println(hardwareMinor);
-    }
-}
-
-void printSerialNumber() {
-    uint16_t error;
-    char errorMessage[256];
-    unsigned char serialNumber[32];
-    uint8_t serialNumberSize = 32;
-
-    error = sen5x.getSerialNumber(serialNumber, serialNumberSize);
-    if (error) {
-        Debug.print("Error trying to execute getSerialNumber(): ");
-        errorToString(error, errorMessage, 256);
-        Debug.println(errorMessage);
-    } else {
-        Debug.print("SerialNumber:");
-        Debug.println((char*)serialNumber);
-    }
-}
-
 
 /*****************************************************************
  * disable unneeded NMEA sentences, TinyGPS++ needs GGA, RMC     *
@@ -1341,11 +1189,7 @@ static void init_config()
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
-#if defined(ESP32)
 	bool spiffs_begin_ok = SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED);
-#else
-	bool spiffs_begin_ok = SPIFFS.begin();
-#endif
 
 #pragma GCC diagnostic pop
 
@@ -1415,27 +1259,19 @@ static bool writeConfig()
  *****************************************************************/
 static void createLoggerConfigs()
 {
-#if defined(ESP8266)
-	auto new_session = []()
-	{ return new BearSSL::Session; };
-#else
 	auto new_session = []()
 	{ return nullptr; };
-#endif
-	if (cfg::send2dusti)
-	{
-		loggerConfigs[LoggerSensorCommunity].destport = 80;
-		if (cfg::ssl_dusti)
+
+	loggerConfigs[LoggerSensorCommunity].destport = PORT_DUSTI;
+		if (cfg::send2dusti && cfg::ssl_dusti)
 		{
 			loggerConfigs[LoggerSensorCommunity].destport = 443;
-			loggerConfigs[LoggerSensorCommunity].session = new_session();
 		}
-	}
+
 	loggerConfigs[LoggerMadavi].destport = PORT_MADAVI;
 	if (cfg::send2madavi && cfg::ssl_madavi)
 	{
 		loggerConfigs[LoggerMadavi].destport = 443;
-		loggerConfigs[LoggerMadavi].session = new_session();
 	}
 	loggerConfigs[LoggerSensemap].destport = PORT_SENSEMAP;
 	loggerConfigs[LoggerSensemap].session = new_session();
@@ -1449,7 +1285,7 @@ static void createLoggerConfigs()
 	loggerConfigs[LoggerCustom].destport = cfg::port_custom;
 	if (cfg::send2custom && (cfg::ssl_custom || (cfg::port_custom == 443)))
 	{
-		loggerConfigs[LoggerCustom].session = new_session();
+		// loggerConfigs[LoggerCustom].session = new_session();
 	}
 }
 
@@ -1682,14 +1518,15 @@ static bool webserver_request_auth()
 	return true;
 }
 
-static void sendHttpRedirect() {
+static void sendHttpRedirect()
+{
 	const IPAddress defaultIP(
-		default_ip_first_octet, 
-		default_ip_second_octet, 
-		default_ip_third_octet, 
+		default_ip_first_octet,
+		default_ip_second_octet,
+		default_ip_third_octet,
 		default_ip_fourth_octet);
 
-	String defaultAddress = F("http://") + defaultIP.toString() + F("/config");
+	String defaultAddress = F("http://192.168.4.1/config");
 	server.sendHeader(F("Location"), defaultAddress);
 	server.send(302, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), emptyString);
 }
@@ -1895,7 +1732,6 @@ static void webserver_config_send_body_get(String &page_content)
 	add_form_checkbox_sensor(Config_npm_read, FPSTR(INTL_NPM));
 	add_form_checkbox_sensor(Config_npm_fulltime, FPSTR(INTL_NPM_FULLTIME));
 	add_form_checkbox_sensor(Config_ips_read, FPSTR(INTL_IPS));
-	add_form_checkbox_sensor(Config_sen5x_read, FPSTR(INTL_SEN5X));
 	add_form_checkbox_sensor(Config_bmp_read, FPSTR(INTL_BMP180));
 	add_form_checkbox(Config_gps_read, FPSTR(INTL_NEO6M));
 
@@ -2057,11 +1893,6 @@ static void webserver_config()
 
 static void sensor_restart()
 {
-#if defined(ESP8266)
-	WiFi.disconnect();
-	WiFi.mode(WIFI_OFF);
-	delay(100);
-#endif
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -2146,20 +1977,13 @@ static void webserver_wifi()
 		for (int i = 0; i < count_wifiInfo; ++i)
 		{
 			if (indices[i] == -1
-#if defined(ESP8266)
-				|| wifiInfo[indices[i]].isHidden
-#endif
+
 			)
 			{
 				continue;
 			}
 			// Print SSID and RSSI for each network found
-#if defined(ESP8266)
-			page_content += wlan_ssid_to_table_row(wifiInfo[indices[i]].ssid, ((wifiInfo[indices[i]].encryptionType == ENC_TYPE_NONE) ? " " : u8"🔒"), wifiInfo[indices[i]].RSSI);
-#endif
-#if defined(ESP32)
 			page_content += wlan_ssid_to_table_row(wifiInfo[indices[i]].ssid, ((wifiInfo[indices[i]].encryptionType == WIFI_AUTH_OPEN) ? " " : u8"🔒"), wifiInfo[indices[i]].RSSI);
-#endif
 		}
 		page_content += FPSTR(TABLE_TAG_CLOSE_BR);
 		page_content += FPSTR(BR_TAG);
@@ -2275,73 +2099,13 @@ static void webserver_values()
 		add_table_pm_value(FPSTR(SENSORS_IPS), FPSTR(WEB_PM10), last_value_IPS_P1);
 		add_table_nc_value(FPSTR(SENSORS_IPS), FPSTR(WEB_NC0k1), last_value_IPS_N01);
 		add_table_nc_value(FPSTR(SENSORS_IPS), FPSTR(WEB_NC0k3), last_value_IPS_N03);
-		add_table_nc_value(FPSTR(SENSORS_IPS), FPSTR(WEB_NC0k5), last_value_IPS_N05);	
+		add_table_nc_value(FPSTR(SENSORS_IPS), FPSTR(WEB_NC0k5), last_value_IPS_N05);
 		add_table_nc_value(FPSTR(SENSORS_IPS), FPSTR(WEB_NC1k0), last_value_IPS_N1);
 		add_table_nc_value(FPSTR(SENSORS_IPS), FPSTR(WEB_NC2k5), last_value_IPS_N25);
 		add_table_nc_value(FPSTR(SENSORS_IPS), FPSTR(WEB_NC5k0), last_value_IPS_N5);
 		add_table_nc_value(FPSTR(SENSORS_IPS), FPSTR(WEB_NC10), last_value_IPS_N10);
 		page_content += FPSTR(EMPTY_ROW);
 	}
-
-	if (cfg::sen5x_read)
-	{
-
-		// Debug.println((char*)SEN5X_type);
-		// Debug.println(memcmp(SEN5X_type,"SEN50",6));
-
-		if(memcmp(SEN5X_type,"SEN50",6) == 0)
-		{
-		add_table_pm_value(FPSTR(SENSORS_SEN50), FPSTR(WEB_PM1), last_value_SEN5X_P0);
-		add_table_pm_value(FPSTR(SENSORS_SEN50), FPSTR(WEB_PM25), last_value_SEN5X_P2);
-		add_table_pm_value(FPSTR(SENSORS_SEN50), FPSTR(WEB_PM4), last_value_SEN5X_P4);
-		add_table_pm_value(FPSTR(SENSORS_SEN50), FPSTR(WEB_PM10), last_value_SEN5X_P1);
-		add_table_nc_value(FPSTR(SENSORS_SEN50), FPSTR(WEB_NC0k5), last_value_SEN5X_N05);
-		add_table_nc_value(FPSTR(SENSORS_SEN50), FPSTR(WEB_NC1k0), last_value_SEN5X_N1);
-		add_table_nc_value(FPSTR(SENSORS_SEN50), FPSTR(WEB_NC2k5), last_value_SEN5X_N25);
-		add_table_nc_value(FPSTR(SENSORS_SEN50), FPSTR(WEB_NC4k0), last_value_SEN5X_N4);
-		add_table_nc_value(FPSTR(SENSORS_SEN50), FPSTR(WEB_NC10), last_value_SEN5X_N10);
-		add_table_value(FPSTR(SENSORS_SEN50), FPSTR(WEB_TPS), check_display_value(last_value_SEN5X_TS, -1, 1, 0), "µm");
-		page_content += FPSTR(EMPTY_ROW);
-		}
-
-		if(memcmp(SEN5X_type,"SEN54",6)== 0)
-		{
-		add_table_pm_value(FPSTR(SENSORS_SEN54), FPSTR(WEB_PM1), last_value_SEN5X_P0);
-		add_table_pm_value(FPSTR(SENSORS_SEN54), FPSTR(WEB_PM25), last_value_SEN5X_P2);
-		add_table_pm_value(FPSTR(SENSORS_SEN54), FPSTR(WEB_PM4), last_value_SEN5X_P4);
-		add_table_pm_value(FPSTR(SENSORS_SEN54), FPSTR(WEB_PM10), last_value_SEN5X_P1);
-		add_table_nc_value(FPSTR(SENSORS_SEN54), FPSTR(WEB_NC0k5), last_value_SEN5X_N05);
-		add_table_nc_value(FPSTR(SENSORS_SEN54), FPSTR(WEB_NC1k0), last_value_SEN5X_N1);
-		add_table_nc_value(FPSTR(SENSORS_SEN54), FPSTR(WEB_NC2k5), last_value_SEN5X_N25);
-		add_table_nc_value(FPSTR(SENSORS_SEN54), FPSTR(WEB_NC4k0), last_value_SEN5X_N4);
-		add_table_nc_value(FPSTR(SENSORS_SEN54), FPSTR(WEB_NC10), last_value_SEN5X_N10);
-		add_table_value(FPSTR(SENSORS_SEN54), FPSTR(WEB_TPS), check_display_value(last_value_SEN5X_TS, -1, 1, 0), "µm");
-		add_table_t_value(FPSTR(SENSORS_SEN54), FPSTR(INTL_TEMPERATURE), last_value_SEN5X_T);
-		add_table_h_value(FPSTR(SENSORS_SEN54), FPSTR(INTL_HUMIDITY), last_value_SEN5X_H);
-		add_table_value(FPSTR(SENSORS_SEN54), FPSTR(INTL_VOC), check_display_value(last_value_SEN5X_VOC, 0, 0, 0), "(index)");
-		page_content += FPSTR(EMPTY_ROW);
-		}
-
-		if(memcmp(SEN5X_type,"SEN55",6)== 0)
-		{
-		add_table_pm_value(FPSTR(SENSORS_SEN55), FPSTR(WEB_PM1), last_value_SEN5X_P0);
-		add_table_pm_value(FPSTR(SENSORS_SEN55), FPSTR(WEB_PM25), last_value_SEN5X_P2);
-		add_table_pm_value(FPSTR(SENSORS_SEN55), FPSTR(WEB_PM4), last_value_SEN5X_P4);
-		add_table_pm_value(FPSTR(SENSORS_SEN55), FPSTR(WEB_PM10), last_value_SEN5X_P1);
-		add_table_nc_value(FPSTR(SENSORS_SEN55), FPSTR(WEB_NC0k5), last_value_SEN5X_N05);
-		add_table_nc_value(FPSTR(SENSORS_SEN55), FPSTR(WEB_NC1k0), last_value_SEN5X_N1);
-		add_table_nc_value(FPSTR(SENSORS_SEN55), FPSTR(WEB_NC2k5), last_value_SEN5X_N25);
-		add_table_nc_value(FPSTR(SENSORS_SEN55), FPSTR(WEB_NC4k0), last_value_SEN5X_N4);
-		add_table_nc_value(FPSTR(SENSORS_SEN55), FPSTR(WEB_NC10), last_value_SEN5X_N10);
-		add_table_value(FPSTR(SENSORS_SEN55), FPSTR(WEB_TPS), check_display_value(last_value_SEN5X_TS, -1, 1, 0), "µm");
-		add_table_t_value(FPSTR(SENSORS_SEN55), FPSTR(INTL_TEMPERATURE), last_value_SEN5X_T);
-		add_table_h_value(FPSTR(SENSORS_SEN55), FPSTR(INTL_HUMIDITY), last_value_SEN5X_H);
-		add_table_value(FPSTR(SENSORS_SEN55), FPSTR(INTL_VOC), check_display_value(last_value_SEN5X_VOC, 0, 0, 0), "(index)");
-		add_table_value(FPSTR(SENSORS_SEN55), FPSTR(INTL_NOX), check_display_value(last_value_SEN5X_NOX, 0, 0, 0), "ppm");
-		page_content += FPSTR(EMPTY_ROW);
-		}
-	}
-
 	if (cfg::sps30_read)
 	{
 		add_table_pm_value(FPSTR(SENSORS_SPS30), FPSTR(WEB_PM1), last_value_SPS30_P0);
@@ -2462,46 +2226,16 @@ static void webserver_status()
 	versionHtml += F("/ST:");
 	versionHtml += String(!airrohr_selftest_failed);
 	versionHtml += '/';
-#if defined(ESP8266)
-	versionHtml += ESP.getFullVersion();
-#endif
 	versionHtml.replace("/", FPSTR(BR_TAG));
 	add_table_row_from_value(page_content, FPSTR(INTL_FIRMWARE), versionHtml);
 	add_table_row_from_value(page_content, F("Free Memory"), String(ESP.getFreeHeap()));
-#if defined(ESP8266)
-	add_table_row_from_value(page_content, F("Heap Fragmentation"), String(ESP.getHeapFragmentation()), "%");
-#endif
 	if (cfg::auto_update)
 	{
 		add_table_row_from_value(page_content, F("Last OTA"), delayToString(millis() - last_update_attempt));
 	}
-#if defined(ESP8266)
-	add_table_row_from_value(page_content, F("NTP Sync"), String(sntp_time_set));
-	StreamString ntpinfo;
-
-	for (unsigned i = 0; i < SNTP_MAX_SERVERS; i++)
-	{
-		const ip_addr_t *sntp = sntp_getserver(i);
-		if (sntp && !ip_addr_isany(sntp))
-		{
-			const char *name = sntp_getservername(i);
-			if (!ntpinfo.isEmpty())
-			{
-				ntpinfo.print(FPSTR(BR_TAG));
-			}
-			ntpinfo.printf_P(PSTR("%s (%s)"), IPAddress(*sntp).toString().c_str(), name ? name : "?");
-			ntpinfo.printf_P(PSTR(" reachable: %s"), sntp_getreachability(i) ? "Yes" : "No");
-		}
-	}
-	add_table_row_from_value(page_content, F("NTP Info"), ntpinfo);
-#endif
-
 	time_t now = time(nullptr);
 	add_table_row_from_value(page_content, FPSTR(INTL_TIME_UTC), ctime(&now));
 	add_table_row_from_value(page_content, F("Uptime"), delayToString(millis() - time_point_device_start_ms));
-#if defined(ESP8266)
-	add_table_row_from_value(page_content, F("Reset Reason"), ESP.getResetReason());
-#endif
 	if (cfg::sds_read)
 	{
 		page_content += FPSTR(EMPTY_ROW);
@@ -2563,27 +2297,6 @@ static void webserver_status()
 	if (cfg::npm_read)
 	{
 		add_table_row_from_value(page_content, FPSTR(SENSORS_NPM), String(NPM_error_count));
-	}
-	if (cfg::ips_read)
-	{
-		add_table_row_from_value(page_content, FPSTR(SENSORS_IPS), String(IPS_error_count));
-	}
-	if (cfg::sen5x_read)
-	{
-		if(memcmp(SEN5X_type,"SEN50",6) == 0)
-		{
-		add_table_row_from_value(page_content, FPSTR(SENSORS_SEN50), String(SEN5X_read_error_counter));
-		}
-
-		if(memcmp(SEN5X_type,"SEN54",6)== 0)
-		{
-		add_table_row_from_value(page_content, FPSTR(SENSORS_SEN54), String(SEN5X_read_error_counter));
-		}
-
-		if(memcmp(SEN5X_type,"SEN55",6)== 0)
-		{
-		add_table_row_from_value(page_content, FPSTR(SENSORS_SEN55), String(SEN5X_read_error_counter));
-		}
 	}
 	if (cfg::sps30_read)
 	{
@@ -2986,14 +2699,9 @@ static void wifiConfig()
 		uint8_t *BSSID;
 
 		memset(&wifiInfo[i], 0, sizeof(struct_wifiInfo));
-#if defined(ESP8266)
-		WiFi.getNetworkInfo(i, SSID, wifiInfo[i].encryptionType,
-							wifiInfo[i].RSSI, BSSID, wifiInfo[i].channel,
-							wifiInfo[i].isHidden);
-#else
+
 		WiFi.getNetworkInfo(i, SSID, wifiInfo[i].encryptionType,
 							wifiInfo[i].RSSI, BSSID, wifiInfo[i].channel);
-#endif
 		SSID.toCharArray(wifiInfo[i].ssid, sizeof(wifiInfo[0].ssid));
 	}
 
@@ -3003,18 +2711,13 @@ static void wifiConfig()
 	strcpy(wifi.cc, INTL_LANG);
 	wifi.nchan = (INTL_LANG[0] == 'E' && INTL_LANG[1] == 'N') ? 11 : 13;
 	wifi.schan = 1;
-
-#if defined(ESP8266)
-	wifi_set_country(&wifi);
-#endif
-
 	WiFi.mode(WIFI_AP);
 	const IPAddress apIP(
-		default_ip_first_octet, 
-		default_ip_second_octet, 
-		default_ip_third_octet, 
+		default_ip_first_octet,
+		default_ip_second_octet,
+		default_ip_third_octet,
 		default_ip_fourth_octet);
-		
+
 	WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
 	WiFi.softAP(cfg::fs_ssid, cfg::fs_pwd, selectChannelForAp());
 	// In case we create a unique password at first start
@@ -3034,10 +2737,6 @@ static void wifiConfig()
 	{
 		dnsServer.processNextRequest();
 		server.handleClient();
-#if defined(ESP8266)
-		wdt_reset(); // nodemcu is alive
-		MDNS.update();
-#endif
 		yield();
 	}
 
@@ -3047,11 +2746,6 @@ static void wifiConfig()
 	strcpy(wifi.cc, INTL_LANG);
 	wifi.nchan = 13;
 	wifi.schan = 1;
-
-#if defined(ESP8266)
-	wifi_set_country(&wifi);
-#endif
-
 	WiFi.mode(WIFI_STA);
 
 	dnsServer.stop();
@@ -3102,27 +2796,15 @@ static void waitForWifiToConnect(int maxRetries)
  * WiFi auto connecting script                                   *
  *****************************************************************/
 
-static WiFiEventHandler disconnectEventHandler;
+static WiFiEventFuncCb disconnectEventHandler;
+
+// typedef void (*WiFiEventCb)(system_event_id_t event);
+// typedef std::function<void(system_event_id_t event, system_event_info_t info)> WiFiEventFuncCb;
+// typedef void (*WiFiEventSysCb)(system_event_t *event);
 
 static void connectWifi()
 {
 	display_debug(F("Connecting to"), String(cfg::wlanssid));
-#if defined(ESP8266)
-	// Enforce Rx/Tx calibration
-	system_phy_set_powerup_option(1);
-	// 20dBM == 100mW == max tx power allowed in europe
-	WiFi.setOutputPower(20.0f);
-	if (cfg::powersave) {
-		WiFi.setSleepMode(WIFI_MODEM_SLEEP);
-	} else {
-		WiFi.setSleepMode(WIFI_NONE_SLEEP);
-	}
-	WiFi.setPhyMode(WIFI_PHY_MODE_11N);
-	delay(100);
-
-	disconnectEventHandler = WiFi.onStationModeDisconnected([](const WiFiEventStationModeDisconnected &evt)
-															{ last_disconnect_reason = evt.reason; });
-#endif
 	if (WiFi.getAutoConnect())
 	{
 		WiFi.setAutoConnect(false);
@@ -3139,23 +2821,9 @@ static void connectWifi()
 	wifi.nchan = 13;
 	wifi.schan = 1;
 
-#if defined(ESP8266)
-	wifi_set_country(&wifi);
-#endif
-
 	WiFi.mode(WIFI_STA);
 
-#if defined(ESP8266)
-	WiFi.hostname(cfg::fs_ssid);
-	if (addr_static_ip.fromString(cfg::static_ip) && addr_static_subnet.fromString(cfg::static_subnet) && addr_static_gateway.fromString(cfg::static_gateway) && addr_static_dns.fromString(cfg::static_dns))
-	{
-		WiFi.config(addr_static_ip, addr_static_subnet, addr_static_gateway, addr_static_dns, addr_static_dns);
-	}
-#endif
-
-#if defined(ESP32)
 	WiFi.setHostname(cfg::fs_ssid);
-#endif
 
 	WiFi.begin(cfg::wlanssid, cfg::wlanpwd); // Start WiFI
 
@@ -3169,10 +2837,6 @@ static void connectWifi()
 		display_debug(fss.substring(0, 16), fss.substring(16));
 
 		wifi.policy = WIFI_COUNTRY_POLICY_AUTO;
-
-#if defined(ESP8266)
-		wifi_set_country(&wifi);
-#endif
 
 		wifiConfig();
 		if (WiFi.status() != WL_CONNECTED)
@@ -3193,40 +2857,24 @@ static void connectWifi()
 
 static WiFiClient *getNewLoggerWiFiClient(const LoggerEntry logger)
 {
-
 	WiFiClient *_client;
-	if (loggerConfigs[logger].session)
-	{
-		_client = new WiFiClientSecure;
-#if defined(ESP8266)
-		static_cast<WiFiClientSecure *>(_client)->setSession(loggerConfigs[logger].session);
-		static_cast<WiFiClientSecure *>(_client)->setBufferSizes(1024, TCP_MSS > 1024 ? 2048 : 1024);
-		static_cast<WiFiClientSecure *>(_client)->setSSLVersion(BR_TLS12, BR_TLS12);
-		switch (logger)
-		{
-		case Loggeraircms:
-		case LoggerInflux:
-		case LoggerCustom:
-		case LoggerFSapp:
-			static_cast<WiFiClientSecure *>(_client)->setInsecure();
-			break;
-		default:
-			configureCACertTrustAnchor(static_cast<WiFiClientSecure *>(_client));
-		}
-#endif
-	}
-	else
-	{
-		_client = new WiFiClient;
-	}
+	_client = new WiFiClient;
+	return _client;
+}
+
+static WiFiClientSecure *getNewLoggerWiFiClientSecure(const LoggerEntry logger)
+{
+	WiFiClientSecure *_client;
+	_client = new WiFiClientSecure;
 	return _client;
 }
 
 /*****************************************************************
  * send data to rest api                                         *
  *****************************************************************/
-static unsigned long sendData(const LoggerEntry logger, const String &data, const int pin, const char *host, const char *url)
+static unsigned long sendData(const LoggerEntry logger, const String &data, const int pin, const char *host, const char *url, bool ssl)
 {
+
 
 	unsigned long start_send = millis();
 	const __FlashStringHelper *contentType;
@@ -3243,55 +2891,122 @@ static unsigned long sendData(const LoggerEntry logger, const String &data, cons
 	case LoggerInflux:
 		contentType = FPSTR(TXT_CONTENT_TYPE_INFLUXDB);
 		break;
+	case LoggerSensorCommunity:
+		Debug.print("LoggerSensorCommunity https: ");
+		Debug.println(ssl);
+		contentType = FPSTR(TXT_CONTENT_TYPE_JSON);
+		break;
+	case LoggerMadavi:
+		Debug.print("LoggerMadavi https: ");
+		Debug.println(ssl);
+		contentType = FPSTR(TXT_CONTENT_TYPE_JSON);
+		break;
 	default:
 		contentType = FPSTR(TXT_CONTENT_TYPE_JSON);
 		break;
 	}
 
-	std::unique_ptr<WiFiClient> client(getNewLoggerWiFiClient(logger));
-
-	HTTPClient http;
-	http.setTimeout(20 * 1000);
-	http.setUserAgent(SOFTWARE_VERSION + '/' + esp_chipid + '/' + esp_mac_id);
-	http.setReuse(false);
-	bool send_success = false;
-	if (logger == LoggerCustom && (*cfg::user_custom || *cfg::pwd_custom))
+	if (!ssl)
 	{
-		http.setAuthorization(cfg::user_custom, cfg::pwd_custom);
+		std::unique_ptr<WiFiClient> client(getNewLoggerWiFiClient(logger));
+
+		HTTPClient http;
+		http.setTimeout(20 * 1000);
+		http.setUserAgent(SOFTWARE_VERSION + '/' + esp_chipid + '/' + esp_mac_id);
+		http.setReuse(false);
+		bool send_success = false;
+		if (logger == LoggerCustom && (*cfg::user_custom || *cfg::pwd_custom))
+		{
+			http.setAuthorization(cfg::user_custom, cfg::pwd_custom);
+		}
+		if (logger == LoggerInflux && (*cfg::user_influx || *cfg::pwd_influx))
+		{
+			http.setAuthorization(cfg::user_influx, cfg::pwd_influx);
+		}
+
+		if (http.begin(*client, s_Host, loggerConfigs[logger].destport, s_url, !!loggerConfigs[logger].session))
+		{
+			http.addHeader(F("Content-Type"), contentType);
+			http.addHeader(F("X-Sensor"), String(F(SENSOR_BASENAME)) + esp_chipid);
+			http.addHeader(F("X-MAC-ID"), String(F(SENSOR_BASENAME)) + esp_mac_id);
+			if (pin)
+			{
+				http.addHeader(F("X-PIN"), String(pin));
+			}
+
+			result = http.POST(data);
+
+			if (result >= HTTP_CODE_OK && result <= HTTP_CODE_ALREADY_REPORTED)
+			{
+				debug_outln_info(F("Succeeded http - "), s_Host);
+				send_success = true;
+			}
+			else if (result >= HTTP_CODE_BAD_REQUEST)
+			{
+				debug_outln_info(F("Request http failed with error: "), String(result));
+				debug_outln_info(F("Details:"), http.getString());
+			}
+			http.end();
+		}
+		else
+		{
+			debug_outln_info(F("Failed connecting to "), s_Host);
+		}
+			if (!send_success && result != 0)
+	{
+		loggerConfigs[logger].errors++;
+		last_sendData_returncode = result;
 	}
-	if (logger == LoggerInflux && (*cfg::user_influx || *cfg::pwd_influx))
-	{
-		http.setAuthorization(cfg::user_influx, cfg::pwd_influx);
-	}
-	if (http.begin(*client, s_Host, loggerConfigs[logger].destport, s_url, !!loggerConfigs[logger].session))
-	{
-		http.addHeader(F("Content-Type"), contentType);
-		http.addHeader(F("X-Sensor"), String(F(SENSOR_BASENAME)) + esp_chipid);
-		http.addHeader(F("X-MAC-ID"), String(F(SENSOR_BASENAME)) + esp_mac_id);
-		if (pin)
-		{
-			http.addHeader(F("X-PIN"), String(pin));
-		}
 
-		result = http.POST(data);
-
-		if (result >= HTTP_CODE_OK && result <= HTTP_CODE_ALREADY_REPORTED)
-		{
-			debug_outln_info(F("Succeeded - "), s_Host);
-			send_success = true;
-		}
-		else if (result >= HTTP_CODE_BAD_REQUEST)
-		{
-			debug_outln_info(F("Request failed with error: "), String(result));
-			debug_outln_info(F("Details:"), http.getString());
-		}
-		http.end();
+	return millis() - start_send;
 	}
 	else
 	{
-		debug_outln_info(F("Failed connecting to "), s_Host);
-	}
+		std::unique_ptr<WiFiClientSecure> clientSecure(getNewLoggerWiFiClientSecure(logger));
+		clientSecure->setCACert(dst_root_ca_x3);
 
+		HTTPClient https;
+		https.setTimeout(20 * 1000);
+		https.setUserAgent(SOFTWARE_VERSION + '/' + esp_chipid + '/' + esp_mac_id);
+		https.setReuse(false);
+		bool send_success = false;
+		if (logger == LoggerCustom && (*cfg::user_custom || *cfg::pwd_custom))
+		{
+			https.setAuthorization(cfg::user_custom, cfg::pwd_custom);
+		}
+		if (logger == LoggerInflux && (*cfg::user_influx || *cfg::pwd_influx))
+		{
+			https.setAuthorization(cfg::user_influx, cfg::pwd_influx);
+		}
+
+		if (https.begin(*clientSecure, s_Host, loggerConfigs[logger].destport, s_url, !!loggerConfigs[logger].session))
+		{
+			https.addHeader(F("Content-Type"), contentType);
+			https.addHeader(F("X-Sensor"), String(F(SENSOR_BASENAME)) + esp_chipid);
+			https.addHeader(F("X-MAC-ID"), String(F(SENSOR_BASENAME)) + esp_mac_id);
+			if (pin)
+			{
+				https.addHeader(F("X-PIN"), String(pin));
+			}
+
+			result = https.POST(data);
+
+			if (result >= HTTP_CODE_OK && result <= HTTP_CODE_ALREADY_REPORTED)
+			{
+				debug_outln_info(F("Succeeded https - "), s_Host);
+				send_success = true;
+			}
+			else if (result >= HTTP_CODE_BAD_REQUEST)
+			{
+				debug_outln_info(F("Request https failed with error: "), String(result));
+				debug_outln_info(F("Details:"), https.getString());
+			}
+			https.end();
+		}
+		else
+		{
+			debug_outln_info(F("Failed connecting to "), s_Host);
+		}
 	if (!send_success && result != 0)
 	{
 		loggerConfigs[logger].errors++;
@@ -3299,6 +3014,13 @@ static unsigned long sendData(const LoggerEntry logger, const String &data, cons
 	}
 
 	return millis() - start_send;
+
+	}
+
+	// void setCACert(const char *rootCA);
+	// void setCertificate(const char *client_ca);
+
+
 }
 
 /*****************************************************************
@@ -3318,7 +3040,9 @@ static unsigned long sendSensorCommunity(const String &data, const int pin, cons
 		data_sensorcommunity.remove(data_sensorcommunity.length() - 1);
 		data_sensorcommunity.replace(replace_str, emptyString);
 		data_sensorcommunity += "]}";
-		sum_send_time = sendData(LoggerSensorCommunity, data_sensorcommunity, pin, HOST_SENSORCOMMUNITY, URL_SENSORCOMMUNITY);
+		Debug.println(data_sensorcommunity);
+
+		sum_send_time = sendData(LoggerSensorCommunity, data_sensorcommunity, pin, HOST_SENSORCOMMUNITY, URL_SENSORCOMMUNITY, cfg::ssl_dusti);
 	}
 
 	return sum_send_time;
@@ -4092,10 +3816,9 @@ static void fetchSensorNPM(String &s)
 
 		if (is_NPM_running && cfg::npm_fulltime)
 		{
-				NPM_waiting_for_16 = NPM_REPLY_HEADER_16;
+			NPM_waiting_for_16 = NPM_REPLY_HEADER_16;
 		}
 
-	
 		if (msSince(starttime) > (cfg::sending_intervall_ms - READINGTIME_NPM_MS))
 		{ //DIMINUER LE READING TIME
 
@@ -4164,8 +3887,8 @@ static void fetchSensorNPM(String &s)
 					NPM_data_reader(test, 16);
 					if (NPM_checksum_valid_16(test))
 					{
-							debug_outln_info(F("Checksum OK..."));
-													npm_pm1_sum += pm1_serial;
+						debug_outln_info(F("Checksum OK..."));
+						npm_pm1_sum += pm1_serial;
 						npm_pm25_sum += pm25_serial;
 						npm_pm10_sum += pm10_serial;
 
@@ -4278,7 +4001,6 @@ static void fetchSensorNPM(String &s)
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_NPM));
 }
 
-
 /*****************************************************************
  * read Piera Systems IPS-7100 sensor sensor values                 *
  *****************************************************************/
@@ -4287,11 +4009,10 @@ static void fetchSensorIPS(String &s)
 {
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_IPS));
 
-			while (serialIPS.available() > 0)
-			{
-				serialIPS.read();				
-			}
-
+	while (serialIPS.available() > 0)
+	{
+		serialIPS.read();
+	}
 
 	if (cfg::sending_intervall_ms > (WARMUPTIME_IPS_MS + READINGTIME_IPS_MS) && msSince(starttime) < (cfg::sending_intervall_ms - (WARMUPTIME_IPS_MS + READINGTIME_IPS_MS)))
 	{
@@ -4312,7 +4033,7 @@ static void fetchSensorIPS(String &s)
 		}
 
 		//VIDER LE BUFFER DU START?
-	
+
 		if (msSince(starttime) > (cfg::sending_intervall_ms - READINGTIME_IPS_MS))
 		{ //DIMINUER LE READING TIME
 
@@ -4328,120 +4049,118 @@ static void fetchSensorIPS(String &s)
 
 			if (serialIPS.available() > 0)
 			{
-				serial_data = serialIPS.readString();				
+				serial_data = serialIPS.readString();
 			}
-		 
 
 			// while (serialIPS.available() > 0)
 			// {
-			// 	serialIPS.read();				
+			// 	serialIPS.read();
 			// }
 
-		 Debug.println(serial_data);
+			Debug.println(serial_data);
 
-// 		if(serial_data.length()>240){
+			// 		if(serial_data.length()>240){
 
+			int index1 = serial_data.indexOf("PC0.1,");
+			int index2 = serial_data.indexOf(",PC0.3,");
+			int index3 = serial_data.indexOf(",PC0.5,");
+			int index4 = serial_data.indexOf(",PC1.0,");
+			int index5 = serial_data.indexOf(",PC2.5,");
+			int index6 = serial_data.indexOf(",PC5.0,");
+			int index7 = serial_data.indexOf(",PC10,");
+			int index8 = serial_data.indexOf(",PM0.1,");
+			int index9 = serial_data.indexOf(",PM0.3,");
+			int index10 = serial_data.indexOf(",PM0.5,");
+			int index11 = serial_data.indexOf(",PM1.0,");
+			int index12 = serial_data.indexOf(",PM2.5,");
+			int index13 = serial_data.indexOf(",PM5.0,");
+			int index14 = serial_data.indexOf(",PM10,");
+			int index15 = serial_data.indexOf(",IPS");
 
-	int index1 = serial_data.indexOf("PC0.1,");
-	int index2 = serial_data.indexOf(",PC0.3,");
-	int index3 = serial_data.indexOf(",PC0.5,");
-	int index4 = serial_data.indexOf(",PC1.0,");
-	int index5 = serial_data.indexOf(",PC2.5,");
-	int index6 = serial_data.indexOf(",PC5.0,");
-	int index7 = serial_data.indexOf(",PC10,");
-	int index8 = serial_data.indexOf(",PM0.1,");
-	int index9 = serial_data.indexOf(",PM0.3,");
-	int index10 = serial_data.indexOf(",PM0.5,");
-	int index11 = serial_data.indexOf(",PM1.0,");
-	int index12 = serial_data.indexOf(",PM2.5,");
-	int index13 = serial_data.indexOf(",PM5.0,");
-	int index14 = serial_data.indexOf(",PM10,");
-	int index15 = serial_data.indexOf(",IPS");	
+			String N01_serial = serial_data.substring(index1 + 6, index2);
+			String N03_serial = serial_data.substring(index2 + 7, index3);
+			String N05_serial = serial_data.substring(index3 + 7, index4);
+			String N1_serial = serial_data.substring(index4 + 7, index5);
+			String N25_serial = serial_data.substring(index5 + 7, index6);
+			String N5_serial = serial_data.substring(index6 + 7, index7);
+			String N10_serial = serial_data.substring(index7 + 6, index8);
 
-	String N01_serial = serial_data.substring(index1+6,index2);
-	String N03_serial = serial_data.substring(index2+7,index3);
-	String N05_serial = serial_data.substring(index3+7,index4);
-	String N1_serial = serial_data.substring(index4+7,index5);
-	String N25_serial = serial_data.substring(index5+7,index6);
-	String N5_serial = serial_data.substring(index6+7,index7);
-	String N10_serial = serial_data.substring(index7+6,index8);
+			String pm01_serial = serial_data.substring(index8 + 7, index9 - 6);
+			String pm03_serial = serial_data.substring(index9 + 7, index10 - 6);
+			String pm05_serial = serial_data.substring(index10 + 7, index11 - 6);
+			String pm1_serial = serial_data.substring(index11 + 7, index12 - 6);
+			String pm25_serial = serial_data.substring(index12 + 7, index13 - 6);
+			String pm5_serial = serial_data.substring(index13 + 7, index14 - 6);
+			String pm10_serial = serial_data.substring(index14 + 6, index15 - 6);
 
-	String pm01_serial = serial_data.substring(index8+7,index9-6);
-	String pm03_serial = serial_data.substring(index9+7,index10-6);
-	String pm05_serial = serial_data.substring(index10+7,index11-6);
-	String pm1_serial = serial_data.substring(index11+7,index12-6);
-	String pm25_serial = serial_data.substring(index12+7,index13-6);
-	String pm5_serial = serial_data.substring(index13+7,index14-6);
-	String pm10_serial = serial_data.substring(index14+6,index15-6);
+			debug_outln_verbose(F("PM0.1 (μg/m3) : "), pm01_serial);
+			debug_outln_verbose(F("PM0.3 (μg/m3): "), pm03_serial);
+			debug_outln_verbose(F("PM0.5 (μg/m3) : "), pm05_serial);
+			debug_outln_verbose(F("PM1 (μg/m3) : "), pm1_serial);
+			debug_outln_verbose(F("PM2.5 (μg/m3): "), pm25_serial);
+			debug_outln_verbose(F("PM5 (μg/m3) : "), pm5_serial);
+			debug_outln_verbose(F("PM10 (μg/m3) : "), pm10_serial);
 
-	debug_outln_verbose(F("PM0.1 (μg/m3) : "), pm01_serial);
-	debug_outln_verbose(F("PM0.3 (μg/m3): "), pm03_serial);
-	debug_outln_verbose(F("PM0.5 (μg/m3) : "), pm05_serial);
-	debug_outln_verbose(F("PM1 (μg/m3) : "), pm1_serial);
-	debug_outln_verbose(F("PM2.5 (μg/m3): "), pm25_serial);
-	debug_outln_verbose(F("PM5 (μg/m3) : "), pm5_serial);
-	debug_outln_verbose(F("PM10 (μg/m3) : "), pm10_serial);
+			debug_outln_verbose(F("PM0.1 (pcs/L) : "), N01_serial);
+			debug_outln_verbose(F("PM0.3 (pcs/L): "), N03_serial);
+			debug_outln_verbose(F("PM0.5(pcs/L) : "), N05_serial);
+			debug_outln_verbose(F("PM1 (pcs/L) : "), N1_serial);
+			debug_outln_verbose(F("PM2.5 (pcs/L): "), N25_serial);
+			debug_outln_verbose(F("PM5 (pcs/L) : "), N5_serial);
+			debug_outln_verbose(F("PM10 (pcs/L) : "), N10_serial);
 
-	debug_outln_verbose(F("PM0.1 (pcs/L) : "), N01_serial);
-	debug_outln_verbose(F("PM0.3 (pcs/L): "), N03_serial);
-	debug_outln_verbose(F("PM0.5(pcs/L) : "), N05_serial);
-	debug_outln_verbose(F("PM1 (pcs/L) : "), N1_serial);
-	debug_outln_verbose(F("PM2.5 (pcs/L): "), N25_serial);
-	debug_outln_verbose(F("PM5 (pcs/L) : "), N5_serial);
-	debug_outln_verbose(F("PM10 (pcs/L) : "), N10_serial);
+			ips_pm01_sum += pm01_serial.toFloat();
+			ips_pm03_sum += pm03_serial.toFloat();
+			ips_pm05_sum += pm05_serial.toFloat();
+			ips_pm1_sum += pm1_serial.toFloat();
+			ips_pm25_sum += pm25_serial.toFloat();
+			ips_pm5_sum += pm5_serial.toFloat();
+			ips_pm10_sum += pm10_serial.toFloat();
 
-	ips_pm01_sum += pm01_serial.toFloat();
-	ips_pm03_sum += pm03_serial.toFloat();
-	ips_pm05_sum += pm05_serial.toFloat();
-	ips_pm1_sum += pm1_serial.toFloat();
-	ips_pm25_sum += pm25_serial.toFloat();
-	ips_pm5_sum += pm5_serial.toFloat();
-	ips_pm10_sum += pm10_serial.toFloat();
+			//char *ptr;
 
-	//char *ptr;
+			// SI EXCEPTION 28 DECLENCHÈE FLASHER SUR AUTRE PRISE USB.
 
-    // SI EXCEPTION 28 DECLENCHÈE FLASHER SUR AUTRE PRISE USB.
+			ips_pm01_sum_pcs += strtoul(N01_serial.c_str(), NULL, 10);
+			ips_pm03_sum_pcs += strtoul(N03_serial.c_str(), NULL, 10);
+			ips_pm05_sum_pcs += strtoul(N05_serial.c_str(), NULL, 10);
+			ips_pm1_sum_pcs += strtoul(N1_serial.c_str(), NULL, 10);
+			ips_pm25_sum_pcs += strtoul(N25_serial.c_str(), NULL, 10);
+			ips_pm5_sum_pcs += strtoul(N5_serial.c_str(), NULL, 10);
+			ips_pm10_sum_pcs += strtoul(N10_serial.c_str(), NULL, 10);
 
-	ips_pm01_sum_pcs += strtoul(N01_serial.c_str(),NULL,10);
-	ips_pm03_sum_pcs += strtoul(N03_serial.c_str(),NULL,10);
-	ips_pm05_sum_pcs += strtoul(N05_serial.c_str(),NULL,10);
-	ips_pm1_sum_pcs += strtoul(N1_serial.c_str(),NULL,10);
-	ips_pm25_sum_pcs += strtoul(N25_serial.c_str(),NULL,10);
-	ips_pm5_sum_pcs += strtoul(N5_serial.c_str(),NULL,10);
-	ips_pm10_sum_pcs += strtoul(N10_serial.c_str(),NULL,10);
+			UPDATE_MIN_MAX(ips_pm01_min, ips_pm01_max, pm01_serial.toFloat());
+			UPDATE_MIN_MAX(ips_pm03_min, ips_pm03_max, pm03_serial.toFloat());
+			UPDATE_MIN_MAX(ips_pm05_min, ips_pm05_max, pm05_serial.toFloat());
+			UPDATE_MIN_MAX(ips_pm1_min, ips_pm1_max, pm1_serial.toFloat());
+			UPDATE_MIN_MAX(ips_pm25_min, ips_pm25_max, pm25_serial.toFloat());
+			UPDATE_MIN_MAX(ips_pm5_min, ips_pm5_max, pm5_serial.toFloat());
+			UPDATE_MIN_MAX(ips_pm10_min, ips_pm10_max, pm10_serial.toFloat());
 
-	UPDATE_MIN_MAX(ips_pm01_min, ips_pm01_max, pm01_serial.toFloat());
-	UPDATE_MIN_MAX(ips_pm03_min, ips_pm03_max, pm03_serial.toFloat());
-	UPDATE_MIN_MAX(ips_pm05_min, ips_pm05_max, pm05_serial.toFloat());
-	UPDATE_MIN_MAX(ips_pm1_min, ips_pm1_max, pm1_serial.toFloat());
-	UPDATE_MIN_MAX(ips_pm25_min, ips_pm25_max, pm25_serial.toFloat());
-	UPDATE_MIN_MAX(ips_pm5_min, ips_pm5_max, pm5_serial.toFloat());
-	UPDATE_MIN_MAX(ips_pm10_min, ips_pm10_max, pm10_serial.toFloat());
-	
-	UPDATE_MIN_MAX(ips_pm01_min_pcs, ips_pm01_max_pcs, strtoul(N01_serial.c_str(),NULL,10));
-	UPDATE_MIN_MAX(ips_pm03_min_pcs, ips_pm03_max_pcs, strtoul(N03_serial.c_str(),NULL,10));
-	UPDATE_MIN_MAX(ips_pm05_min_pcs, ips_pm05_max_pcs, strtoul(N05_serial.c_str(),NULL,10));
-	UPDATE_MIN_MAX(ips_pm1_min_pcs, ips_pm1_max_pcs, strtoul(N1_serial.c_str(),NULL,10));
-	UPDATE_MIN_MAX(ips_pm25_min_pcs, ips_pm25_max_pcs, strtoul(N25_serial.c_str(),NULL,10));
-	UPDATE_MIN_MAX(ips_pm5_min_pcs, ips_pm5_max_pcs, strtoul(N5_serial.c_str(),NULL,10));
-	UPDATE_MIN_MAX(ips_pm10_min_pcs, ips_pm10_max_pcs, strtoul(N10_serial.c_str(),NULL,10));
+			UPDATE_MIN_MAX(ips_pm01_min_pcs, ips_pm01_max_pcs, strtoul(N01_serial.c_str(), NULL, 10));
+			UPDATE_MIN_MAX(ips_pm03_min_pcs, ips_pm03_max_pcs, strtoul(N03_serial.c_str(), NULL, 10));
+			UPDATE_MIN_MAX(ips_pm05_min_pcs, ips_pm05_max_pcs, strtoul(N05_serial.c_str(), NULL, 10));
+			UPDATE_MIN_MAX(ips_pm1_min_pcs, ips_pm1_max_pcs, strtoul(N1_serial.c_str(), NULL, 10));
+			UPDATE_MIN_MAX(ips_pm25_min_pcs, ips_pm25_max_pcs, strtoul(N25_serial.c_str(), NULL, 10));
+			UPDATE_MIN_MAX(ips_pm5_min_pcs, ips_pm5_max_pcs, strtoul(N5_serial.c_str(), NULL, 10));
+			UPDATE_MIN_MAX(ips_pm10_min_pcs, ips_pm10_max_pcs, strtoul(N10_serial.c_str(), NULL, 10));
 
-	debug_outln_info(F("IPS Measure..."));
-	ips_val_count++;
-	debug_outln(String(ips_val_count), DEBUG_MAX_INFO);
+			debug_outln_info(F("IPS Measure..."));
+			ips_val_count++;
+			debug_outln(String(ips_val_count), DEBUG_MAX_INFO);
+		}
 	}
-}
 
 	if (send_now)
 	{
 
-		last_value_IPS_P0 = -1.0; //PM1
-		last_value_IPS_P1 = -1.0; //PM10
-		last_value_IPS_P2 = -1.0; //PM2.5
+		last_value_IPS_P0 = -1.0;  //PM1
+		last_value_IPS_P1 = -1.0;  //PM10
+		last_value_IPS_P2 = -1.0;  //PM2.5
 		last_value_IPS_P01 = -1.0; //PM0.1
 		last_value_IPS_P03 = -1.0; //PM0.3
 		last_value_IPS_P05 = -1.0; //PM0.5
-		last_value_IPS_P5 = -1.0; //PM5
+		last_value_IPS_P5 = -1.0;  //PM5
 		last_value_IPS_N1 = -1.0;
 		last_value_IPS_N10 = -1.0;
 		last_value_IPS_N25 = -1.0;
@@ -4503,7 +4222,6 @@ static void fetchSensorIPS(String &s)
 			add_Value2Json(s, F("IPS_N03"), F("NC0.3:  "), last_value_IPS_N03);
 			add_Value2Json(s, F("IPS_N05"), F("NC0.5: "), last_value_IPS_N05);
 			add_Value2Json(s, F("IPS_N5"), F("NC5: "), last_value_IPS_N5);
-
 
 			debug_outln_info(FPSTR(DBG_TXT_SEP));
 			if (ips_val_count < 3)
@@ -4576,102 +4294,7 @@ static void fetchSensorIPS(String &s)
 	}
 
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_IPS));
-
 }
-
-
-
-/*****************************************************************
-   read SEN5X PM sensor values
- *****************************************************************/
-static void fetchSensorSEN5X(String &s)
-{
-		if(memcmp(SEN5X_type,"SEN50",6) == 0)
-		{
-		debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_SEN50));
-		}
-
-		if(memcmp(SEN5X_type,"SEN54",6)== 0)
-		{
-		debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_SEN54));
-		}
-		if(memcmp(SEN5X_type,"SEN55",6)== 0)
-		{
-		debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_SEN55));
-		}
-
-
-	last_value_SEN5X_P0 = value_SEN5X_P0 / SEN5X_measurement_count;
-	last_value_SEN5X_P2 = value_SEN5X_P2 / SEN5X_measurement_count;
-	last_value_SEN5X_P4 = value_SEN5X_P4 / SEN5X_measurement_count;
-	last_value_SEN5X_P1 = value_SEN5X_P1 / SEN5X_measurement_count;
-	last_value_SEN5X_N05 = value_SEN5X_N05 / SEN5X_measurement_count;
-	last_value_SEN5X_N1 = value_SEN5X_N1 / SEN5X_measurement_count;
-	last_value_SEN5X_N25 = value_SEN5X_N25 / SEN5X_measurement_count;
-	last_value_SEN5X_N4 = value_SEN5X_N4 / SEN5X_measurement_count;
-	last_value_SEN5X_N10 = value_SEN5X_N10 / SEN5X_measurement_count;
-	last_value_SEN5X_TS = value_SEN5X_TS / SEN5X_measurement_count;
-	last_value_SEN5X_T = value_SEN5X_T / SEN5X_measurement_count;
-	last_value_SEN5X_H = value_SEN5X_H / SEN5X_measurement_count;
-	last_value_SEN5X_VOC = value_SEN5X_VOC / SEN5X_measurement_count;
-	last_value_SEN5X_NOX = value_SEN5X_NOX / SEN5X_measurement_count;
-
-
-	add_Value2Json(s, F("SEN5X_P0"), F("PM1.0: "), last_value_SEN5X_P0);
-	add_Value2Json(s, F("SEN5X_P2"), F("PM2.5: "), last_value_SEN5X_P2);
-	add_Value2Json(s, F("SEN5X_P4"), F("PM4.0: "), last_value_SEN5X_P4);
-	add_Value2Json(s, F("SEN5X_P1"), F("PM 10: "), last_value_SEN5X_P1);
-	add_Value2Json(s, F("SEN5X_N05"), F("NC0.5: "), last_value_SEN5X_N05);
-	add_Value2Json(s, F("SEN5X_N1"), F("NC1.0: "), last_value_SEN5X_N1);
-	add_Value2Json(s, F("SEN5X_N25"), F("NC2.5: "), last_value_SEN5X_N25);
-	add_Value2Json(s, F("SEN5X_N4"), F("NC4.0: "), last_value_SEN5X_N4);
-	add_Value2Json(s, F("SEN5X_N10"), F("NC10:  "), last_value_SEN5X_N10);
-	add_Value2Json(s, F("SEN5X_TS"), F("TPS:   "), last_value_SEN5X_TS);
-
-if(memcmp(SEN5X_type,"SEN50",6)!= 0)
-{
-	add_Value2Json(s, F("SEN5X_temperature"), FPSTR(DBG_TXT_TEMPERATURE), last_value_SEN5X_T);
-	add_Value2Json(s, F("SEN5X_humidity"), FPSTR(DBG_TXT_HUMIDITY), last_value_SEN5X_H);
-}
-
-if(memcmp(SEN5X_type,"SEN54",6)!= 0  || memcmp(SEN5X_type,"SEN55",6)!= 0)
-{
-	add_Value2Json(s, F("SEN5X_voc"), FPSTR(DBG_TXT_VOCINDEX), last_value_SEN5X_VOC);
-}
-
-if(memcmp(SEN5X_type,"SEN55",6)!= 0)
-{
-	add_Value2Json(s, F("SEN5X_nox"), FPSTR(DBG_TXT_NOX), last_value_SEN5X_NOX);
-}
-	debug_outln_info(F("SEN5X read counter: "), String(SEN5X_read_counter));
-	debug_outln_info(F("SEN5X read error counter: "), String(SEN5X_read_error_counter));
-
-	SEN5X_measurement_count = 0;
-	SEN5X_read_counter = 0;
-	SEN5X_read_error_counter = 0;
-	value_SEN5X_P0 = value_SEN5X_P1 = value_SEN5X_P2 = value_SEN5X_P4 = 0.0;
-	value_SEN5X_N05 = value_SEN5X_N1 = value_SEN5X_N25 = value_SEN5X_N10 = value_SEN5X_N4 = 0.0;
-	value_SEN5X_TS = 0.0;
-	value_SEN5X_H = value_SEN5X_T = value_SEN5X_VOC = value_SEN5X_NOX = 0.0;
-
-	debug_outln_info(FPSTR(DBG_TXT_SEP));
-
-	if(memcmp(SEN5X_type,"SEN50",6) == 0)
-	{
-	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_SEN50));
-	}
-
-	if(memcmp(SEN5X_type,"SEN54",6)== 0)
-	{
-	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_SEN54));
-	}
-	if(memcmp(SEN5X_type,"SEN55",6)== 0)
-	{
-	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_SEN55));
-	}
-}
-
-
 /*****************************************************************
  * read PPD42NS sensor values                                    *
  *****************************************************************/
@@ -4942,10 +4565,10 @@ static bool fwDownloadStream(WiFiClientSecure &client, const String &url, Stream
 	if (cfg::npm_read)
 	{
 		agent += NPM_version_date();
-	}else if (cfg::ips_read)
+	}
+	else if (cfg::ips_read)
 	{
 		agent += IPS_version_date();
-
 	}
 	else
 	{
@@ -5014,118 +4637,124 @@ static bool fwDownloadStreamFile(WiFiClientSecure &client, const String &url, co
 	return false;
 }
 
-static void twoStageOTAUpdate()
-{
+// static void twoStageOTAUpdate()
+// {
 
-	if (!cfg::auto_update)
-		return;
+// 	// REVOIR AUTOUPDATE FOR ESP32!!!
 
-#if defined(ESP8266)
-	debug_outln_info(F("twoStageOTAUpdate"));
+// 	if (!cfg::auto_update)
+// 		return;
 
-	String lang_variant(cfg::current_lang);
-	if (lang_variant.length() != 2)
-	{
-		lang_variant = CURRENT_LANG;
-	}
-	lang_variant.toLowerCase();
+// 	debug_outln_info(F("twoStageOTAUpdate"));
 
-	String fetch_name(F(OTA_BASENAME "/update/latest_"));
-	if (cfg::use_beta)
-	{
-		fetch_name = F(OTA_BASENAME "/beta/latest_");
-	}
-	fetch_name += lang_variant;
-	fetch_name += F(".bin");
+// 	String lang_variant(cfg::current_lang);
+// 	if (lang_variant.length() != 2)
+// 	{
+// 		lang_variant = CURRENT_LANG;
+// 	}
+// 	lang_variant.toLowerCase();
 
-	WiFiClientSecure client;
-	BearSSL::Session clientSession;
+// 	String fetch_name(F(OTA_BASENAME "/update/latest_esp32_"));
+// 	if (cfg::use_beta)
+// 	{
+// 		fetch_name = F(OTA_BASENAME "/beta/latest_esp32_");
+// 	}
+// 	fetch_name += lang_variant;
+// 	fetch_name += F(".bin");
 
-	client.setBufferSizes(1024, TCP_MSS > 1024 ? 2048 : 1024);
-	client.setSession(&clientSession);
-	configureCACertTrustAnchor(&client);
+// 	WiFiClientSecure client;
 
-	String fetch_md5_name(fetch_name);
-	fetch_md5_name += F(".md5");
+// //REVOIR ICI
 
-	StreamString newFwmd5;
-	if (!fwDownloadStream(client, fetch_md5_name, &newFwmd5))
-		return;
+// 	// BearSSL::Session clientSession;
 
-	newFwmd5.trim();
-	if (newFwmd5 == ESP.getSketchMD5())
-	{
-		display_debug(FPSTR(DBG_TXT_UPDATE), FPSTR(DBG_TXT_UPDATE_NO_UPDATE));
-		debug_outln_verbose(F("No newer version available."));
-		return;
-	}
+// 	//client.setBufferSizes(1024, TCP_MSS > 1024 ? 2048 : 1024);
+// 	// client.setSession(&clientSession);
+// 	configureCACertTrustAnchor(&client);
 
-	debug_outln_info(F("Update md5: "), newFwmd5);
-	debug_outln_info(F("Sketch md5: "), ESP.getSketchMD5());
+// 	String fetch_md5_name(fetch_name);
+// 	fetch_md5_name += F(".md5");
 
-	// We're entering update phase, kill off everything else
-	WiFiUDP::stopAll();
-	WiFiClient::stopAllExcept(&client);
-	delay(100);
+// 	StreamString newFwmd5;
+// 	if (!fwDownloadStream(client, fetch_md5_name, &newFwmd5))
+// 		return;
 
-	String firmware_name(F("/firmware.bin"));
-	String firmware_md5(F("/firmware.bin.md5"));
-	String loader_name(F("/loader.bin"));
-	if (!fwDownloadStreamFile(client, fetch_name, firmware_name))
-		return;
-	if (!fwDownloadStreamFile(client, fetch_md5_name, firmware_md5))
-		return;
-	if (!fwDownloadStreamFile(client, FPSTR(FW_2ND_LOADER_URL), loader_name))
-		return;
+// 	newFwmd5.trim();
+// 	if (newFwmd5 == ESP.getSketchMD5())
+// 	{
+// 		display_debug(FPSTR(DBG_TXT_UPDATE), FPSTR(DBG_TXT_UPDATE_NO_UPDATE));
+// 		debug_outln_verbose(F("No newer version available."));
+// 		return;
+// 	}
 
-		// SPIFFS is deprecated, we know
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-	File fwFile = SPIFFS.open(firmware_name, "r");
-	if (!fwFile)
-	{
-		SPIFFS.remove(firmware_name);
-		SPIFFS.remove(firmware_md5);
-		debug_outln_error(F("Failed reopening fw file.."));
-		return;
-	}
-	size_t fwSize = fwFile.size();
-	MD5Builder md5;
-	md5.begin();
-	md5.addStream(fwFile, fwSize);
-	md5.calculate();
-	fwFile.close();
-	String md5String = md5.toString();
+// 	debug_outln_info(F("Update md5: "), newFwmd5);
+// 	debug_outln_info(F("Sketch md5: "), ESP.getSketchMD5());
 
-	// Firmware is always at least 128 kB and padded to 16 bytes
-	if (fwSize < (1 << 17) || (fwSize % 16 != 0) || newFwmd5 != md5String)
-	{
-		debug_outln_info(F("FW download failed validation.. deleting"));
-		SPIFFS.remove(firmware_name);
-		SPIFFS.remove(firmware_md5);
-		return;
-	}
+// 	// We're entering update phase, kill off everything else
+// 	//REVOIR
+// 	//WiFiUDP::stop();
+// 	client.stop();
 
-	StreamString loaderMD5;
-	if (!fwDownloadStream(client, String(FPSTR(FW_2ND_LOADER_URL)) + F(".md5"), &loaderMD5))
-		return;
+// 	//WiFiClient::stopAllExcept(&client);
+// 	delay(100);
 
-	loaderMD5.trim();
+// 	String firmware_name(F("/firmware.bin"));
+// 	String firmware_md5(F("/firmware.bin.md5"));
+// 	String loader_name(F("/loader.bin"));
+// 	if (!fwDownloadStreamFile(client, fetch_name, firmware_name))
+// 		return;
+// 	if (!fwDownloadStreamFile(client, fetch_md5_name, firmware_md5))
+// 		return;
+// 	if (!fwDownloadStreamFile(client, FPSTR(FW_2ND_LOADER_URL), loader_name))
+// 		return;
 
-	debug_outln_info(F("launching 2nd stage"));
-	if (!launchUpdateLoader(loaderMD5))
-	{
-		debug_outln_error(FPSTR(DBG_TXT_UPDATE_FAILED));
-		display_debug(FPSTR(DBG_TXT_UPDATE), FPSTR(DBG_TXT_UPDATE_FAILED));
-		SPIFFS.remove(firmware_name);
-		SPIFFS.remove(firmware_md5);
-		return;
-	}
-#pragma GCC diagnostic pop
+// 		// SPIFFS is deprecated, we know
+// #pragma GCC diagnostic push
+// #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+// 	File fwFile = SPIFFS.open(firmware_name, "r");
+// 	if (!fwFile)
+// 	{
+// 		SPIFFS.remove(firmware_name);
+// 		SPIFFS.remove(firmware_md5);
+// 		debug_outln_error(F("Failed reopening fw file.."));
+// 		return;
+// 	}
+// 	size_t fwSize = fwFile.size();
+// 	MD5Builder md5;
+// 	md5.begin();
+// 	md5.addStream(fwFile, fwSize);
+// 	md5.calculate();
+// 	fwFile.close();
+// 	String md5String = md5.toString();
 
-	sensor_restart();
-#endif
-}
+// 	// Firmware is always at least 128 kB and padded to 16 bytes
+// 	if (fwSize < (1 << 17) || (fwSize % 16 != 0) || newFwmd5 != md5String)
+// 	{
+// 		debug_outln_info(F("FW download failed validation.. deleting"));
+// 		SPIFFS.remove(firmware_name);
+// 		SPIFFS.remove(firmware_md5);
+// 		return;
+// 	}
+
+// 	StreamString loaderMD5;
+// 	if (!fwDownloadStream(client, String(FPSTR(FW_2ND_LOADER_URL)) + F(".md5"), &loaderMD5))
+// 		return;
+
+// 	loaderMD5.trim();
+
+// 	debug_outln_info(F("launching 2nd stage"));
+// 	if (!launchUpdateLoader(loaderMD5))
+// 	{
+// 		debug_outln_error(FPSTR(DBG_TXT_UPDATE_FAILED));
+// 		display_debug(FPSTR(DBG_TXT_UPDATE), FPSTR(DBG_TXT_UPDATE_FAILED));
+// 		SPIFFS.remove(firmware_name);
+// 		SPIFFS.remove(firmware_md5);
+// 		return;
+// 	}
+// #pragma GCC diagnostic pop
+
+// 	sensor_restart();
+// }
 
 static String displayGenerateFooter(unsigned int screen_count)
 {
@@ -5145,9 +4774,7 @@ static void display_values()
 	float t_value = -128.0;
 	float h_value = -1.0;
 	float p_value = -1.0;
-	float voc_value = -1.0;
-	float nox_value = -1.0;
-	String t_sensor, h_sensor, p_sensor, voc_sensor, nox_sensor;
+	String t_sensor, h_sensor, p_sensor;
 	float pm001_value = -1.0;
 	float pm003_value = -1.0;
 	float pm005_value = -1.0;
@@ -5182,7 +4809,7 @@ static void display_values()
 	String display_header;
 	String display_lines[3] = {"", "", ""};
 	uint8_t screen_count = 0;
-	uint8_t screens[13];
+	uint8_t screens[8];
 	int line_count = 0;
 	debug_outln_info(F("output values to display..."));
 	if (cfg::ppd_read)
@@ -5241,45 +4868,6 @@ static void display_values()
 		nc003_value = last_value_IPS_N03;
 		nc005_value = last_value_IPS_N05;
 		nc050_value = last_value_IPS_N5;
-	}
-		if (cfg::sen5x_read)
-	{
-		if(memcmp(SEN5X_type,"SEN50",6) == 0)
-		{
-
-		}
-
-		if(memcmp(SEN5X_type,"SEN54",6)== 0)
-		{
-			pm01_sensor = FPSTR(SENSORS_SEN54);
-			pm10_sensor = FPSTR(SENSORS_SEN54);
-			pm25_sensor = FPSTR(SENSORS_SEN54);
-			t_sensor = h_sensor = voc_sensor = FPSTR(SENSORS_SEN54);
-		}
-		if(memcmp(SEN5X_type,"SEN55",6)== 0)
-		{
-			pm01_sensor = FPSTR(SENSORS_SEN54);
-			pm10_sensor = FPSTR(SENSORS_SEN54);
-			pm25_sensor = FPSTR(SENSORS_SEN54);
-			t_sensor = h_sensor = voc_sensor = nox_sensor = FPSTR(SENSORS_SEN54);
-		}
-
-
-
-		pm01_value = last_value_SEN5X_P0;
-		pm25_value = last_value_SEN5X_P2;
-		pm04_value = last_value_SEN5X_P4;
-		pm10_value = last_value_SEN5X_P1;
-		nc005_value = last_value_SEN5X_N05;
-		nc010_value = last_value_SEN5X_N1;
-		nc025_value = last_value_SEN5X_N25;
-		nc040_value = last_value_SEN5X_N4;
-		nc100_value = last_value_SEN5X_N10;
-		tps_value = last_value_SEN5X_TS;
-		t_value = last_value_SEN5X_T;
-		h_value = last_value_SEN5X_H;
-		voc_value = last_value_SEN5X_VOC;
-		nox_value = last_value_SEN5X_NOX;
 	}
 	if (cfg::sps30_read)
 	{
@@ -5362,16 +4950,11 @@ static void display_values()
 	if (cfg::npm_read)
 	{
 		screens[screen_count++] = 9;
-		screens[screen_count++] = 10; 
+		screens[screen_count++] = 10;
 	}
 	if (cfg::ips_read)
 	{
-		screens[screen_count++] = 11;  //A VOIR POUR AJOUTER DES ÈCRANS
-	}
-	if (cfg::sen5x_read)
-	{
-		screens[screen_count++] = 12;  
-		screens[screen_count++] = 13; 
+		screens[screen_count++] = 11; //A VOIR POUR AJOUTER DES ÈCRANS
 	}
 	if (cfg::sps30_read)
 	{
@@ -5500,49 +5083,22 @@ static void display_values()
 			display_lines[2] += String(count_sends);
 			break;
 		case 9:
-		    display_header = F("Tera Next PM");
+			display_header = F("Tera Next PM");
 			display_lines[0] = std::move(tmpl(F("PM1: {v} µg/m³"), check_display_value(pm01_value, -1, 1, 6)));
 			display_lines[1] = std::move(tmpl(F("PM2.5: {v} µg/m³"), check_display_value(pm25_value, -1, 1, 6)));
 			display_lines[2] = std::move(tmpl(F("PM10: {v} µg/m³"), check_display_value(pm10_value, -1, 1, 6)));
 			break;
 		case 10:
-		    display_header = F("Tera Next PM");
+			display_header = F("Tera Next PM");
 			display_lines[0] = current_state_npm;
 			display_lines[1] = F("T_NPM / RH_NPM");
 			display_lines[2] = current_th_npm;
 			break;
 		case 11:
-		    display_header = F("Piera IPS-7100");
+			display_header = F("Piera IPS-7100");
 			display_lines[0] = std::move(tmpl(F("PM1: {v} µg/m³"), check_display_value(pm01_value, -1, 1, 6)));
 			display_lines[1] = std::move(tmpl(F("PM2.5: {v} µg/m³"), check_display_value(pm25_value, -1, 1, 6)));
 			display_lines[2] = std::move(tmpl(F("PM10: {v} µg/m³"), check_display_value(pm10_value, -1, 1, 6)));
-			break;
-		case 12:
-		    display_header = F("Sensirion SEN5X");
-			display_lines[0] = std::move(tmpl(F("PM1: {v} µg/m³"), check_display_value(pm01_value, -1, 1, 6)));
-			display_lines[1] = std::move(tmpl(F("PM2.5: {v} µg/m³"), check_display_value(pm25_value, -1, 1, 6)));
-			display_lines[2] = std::move(tmpl(F("PM10: {v} µg/m³"), check_display_value(pm10_value, -1, 1, 6)));
-			break;
-		case 13:
-		    display_header = F("Sensirion SEN5X");
-			if(memcmp(SEN5X_type,"SEN50",6) == 0)
-			{
-
-			}
-			if(memcmp(SEN5X_type,"SEN54",6)== 0)
-			{
-			display_lines[0] = std::move(tmpl(F("Temp.: {v} °C"), check_display_value(t_value, -128, 1, 6)));
-			display_lines[1] = std::move(tmpl(F("Humi: {v} %"), check_display_value(h_value, -1, 1, 6)));
-			display_lines[2] = std::move(tmpl(F("VOC: {v} (index)"), check_display_value(voc_value, -1, 1, 6)));
-			}
-			if(memcmp(SEN5X_type,"SEN55",6)== 0)
-			{
-			//display_lines[0] = std::move(tmpl(F("Temp.: {v} °C"), check_display_value(t_value, -128, 1, 6)));
-			display_lines[0] = std::move(tmpl(F("Humi: {v} %"), check_display_value(h_value, -1, 1, 6)));
-			display_lines[1] = std::move(tmpl(F("VOC: {v} (index)"), check_display_value(voc_value, -1, 1, 6)));
-			display_lines[2] = std::move(tmpl(F("NO2: {v} (ppm)"), check_display_value(nox_value, -1, 1, 6)));
-			}
-
 			break;
 		}
 
@@ -5658,18 +5214,6 @@ static void display_values()
 			display_lines[1] = "PM2.5: ";
 			display_lines[1] += check_display_value(pm25_value, -1, 1, 6);
 			break;
-		case 12:
-			display_lines[0] = "PM1: ";
-			display_lines[0] += check_display_value(pm01_value, -1, 1, 6);
-			display_lines[1] = "PM2.5: ";
-			display_lines[1] += check_display_value(pm25_value, -1, 1, 6);
-			break;
-		case 13:
-			display_lines[0] = "Temp.: ";
-			display_lines[0] += check_display_value(pm01_value, -1, 1, 6);
-			display_lines[1] = "Humi.: ";
-			display_lines[1] += check_display_value(pm25_value, -1, 1, 6);
-			break;
 		}
 
 		display_lines[0].replace("°", String(char(223)));
@@ -5707,15 +5251,18 @@ static void init_display()
 			oled_sh1106->flipScreenVertically();
 		}
 	}
-	if (cfg::has_lcd1602) {
+	if (cfg::has_lcd1602)
+	{
 		lcd_1602 = new LiquidCrystal_I2C(
-			lcd_1602_default_i2c_address, 
-			lcd_1602_columns, 
+			lcd_1602_default_i2c_address,
+			lcd_1602_columns,
 			lcd_1602_rows);
-	} else if (cfg::has_lcd1602_27) {
+	}
+	else if (cfg::has_lcd1602_27)
+	{
 		lcd_1602 = new LiquidCrystal_I2C(
-			lcd_1602_alternate_i2c_address, 
-			lcd_1602_columns, 
+			lcd_1602_alternate_i2c_address,
+			lcd_1602_columns,
 			lcd_1602_rows);
 	}
 	if (lcd_1602)
@@ -5723,15 +5270,18 @@ static void init_display()
 		lcd_1602->init();
 		lcd_1602->backlight();
 	}
-	if (cfg::has_lcd2004) {
+	if (cfg::has_lcd2004)
+	{
 		lcd_2004 = new LiquidCrystal_I2C(
-			lcd_2004_default_i2c_address, 
-			lcd_2004_columns, 
+			lcd_2004_default_i2c_address,
+			lcd_2004_columns,
 			lcd_2004_rows);
-	} else if (cfg::has_lcd2004_27) {
+	}
+	else if (cfg::has_lcd2004_27)
+	{
 		lcd_2004 = new LiquidCrystal_I2C(
-			lcd_2004_alternate_i2c_address, 
-			lcd_2004_columns, 
+			lcd_2004_alternate_i2c_address,
+			lcd_2004_columns,
 			lcd_2004_rows);
 	}
 	if (lcd_2004)
@@ -5744,9 +5294,11 @@ static void init_display()
 	// modifying the I2C speed to 400k, which overwhelms some of the
 	// sensors.
 	Wire.setClock(100000);
-	Wire.setClockStretchLimit(150000);
+	//Wire.setClockStretchLimit(150000);
 }
 
+//Find rtc_gpio_desc replace with rtc_io_desc in the OneWire_direct_gpio.h file solved the issue
+//https://github.com/arendst/Tasmota/tree/development/lib/lib_basic/OneWire-Stickbreaker
 /*****************************************************************
  * Init BMP280/BME280                                            *
  *****************************************************************/
@@ -5769,48 +5321,6 @@ static bool initBMX280(char addr)
 		debug_outln_info(FPSTR(DBG_TXT_NOT_FOUND));
 		return false;
 	}
-}
-
-/*****************************************************************
-   Init SEN5X Sensor
- *****************************************************************/
-static void initSEN5X()
-{
-	debug_out(F("Trying SEN5X sensor"), DEBUG_MIN_INFO);
-
-	sen5x.begin(Wire);
-
-	uint16_t error;
-    char errorMessage[256];
-    error = sen5x.deviceReset();
-    if (error) {
-        Debug.print("Error trying to execute deviceReset(): ");
-        errorToString(error, errorMessage, 256);
-        Debug.println(errorMessage);
-		sen5x_init_failed = true;
-		return;
-    }
-
-#ifdef USE_PRODUCT_INFO
-    printSerialNumber();
-    printModuleVersions();
-#endif
-
-	if (sen5x.setFanAutoCleaningInterval(SEN5X_AUTO_CLEANING_INTERVAL) != 0)
-	{
-		debug_outln_error(F("setting of Auto Cleaning Intervall SEN5X failed!"));
-		sen5x_init_failed = true;
-		return;
-	}
-
-    error = sen5x.startMeasurement();
-    if (error) {
-        Debug.print("Error trying to execute startMeasurement(): ");
-        errorToString(error, errorMessage, 256);
-        Debug.println(errorMessage);
-		sen5x_init_failed = true;
-		return;
-    }
 }
 
 /*****************************************************************
@@ -5982,40 +5492,36 @@ static void powerOnTestSensors()
 			}
 		}
 
-		delay(15000); //prevent any buffer overload on ESP82666
+		delay(15000); //prevent any buffer overload
 		NPM_version_date();
-		delay(3000); //prevent any buffer overload on ESP82666
+		delay(3000); //prevent any buffer overload
 		NPM_temp_humi();
-		delay(2000); 
+		delay(2000);
 
-	if(!cfg::npm_fulltime) {
-		is_NPM_running = NPM_start_stop();
-		delay(2000); //prevent any buffer overload on ESP82666
-	}else{
-		is_NPM_running = true;
-	}
+		if (!cfg::npm_fulltime)
+		{
+			is_NPM_running = NPM_start_stop();
+			delay(2000); //prevent any buffer overload
+		}
+		else
+		{
+			is_NPM_running = true;
+		}
 	}
 
 	if (cfg::ips_read)
 	{
-	IPS_cmd(PmSensorCmd3::Factory); //set to Factory
-	delay(1000);
-	IPS_version_date();
-	delay(1000);
-	IPS_cmd(PmSensorCmd3::Smoke); // no smoke detection
-	delay(1000);
-	IPS_cmd(PmSensorCmd3::Interval); //Set interval to 0 = manual mode
-	delay(1000);
-	IPS_cmd(PmSensorCmd3::Stop); 
-	delay(1000);
-	is_IPS_running = false;
-	}
-
-
-	if (cfg::sen5x_read)
-	{
-		debug_outln_info(F("Read SEN5X..."));
-		initSEN5X();
+		IPS_cmd(PmSensorCmd3::Factory); //set to Factory
+		delay(1000);
+		IPS_version_date();
+		delay(1000);
+		IPS_cmd(PmSensorCmd3::Smoke); // no smoke detection
+		delay(1000);
+		IPS_cmd(PmSensorCmd3::Interval); //Set interval to 0 = manual mode
+		delay(1000);
+		IPS_cmd(PmSensorCmd3::Stop);
+		delay(1000);
+		is_IPS_running = false;
 	}
 
 	if (cfg::sps30_read)
@@ -6055,7 +5561,8 @@ static void powerOnTestSensors()
 	if (cfg::bmx280_read)
 	{
 		debug_outln_info(F("Read BMxE280..."));
-		if (!initBMX280(bmx280_default_i2c_address) && !initBMX280(bmx280_alternate_i2c_address)) {
+		if (!initBMX280(bmx280_default_i2c_address) && !initBMX280(bmx280_alternate_i2c_address))
+		{
 			debug_outln_error(F("Check BMx280 wiring"));
 			bmx280_init_failed = true;
 		}
@@ -6164,19 +5671,6 @@ static void setupNetworkTime()
 	// server name ptrs must be persisted after the call to configTime because internally
 	// the pointers are stored see implementation of lwip sntp_setservername()
 	static char ntpServer1[18], ntpServer2[18];
-#if defined(ESP8266)
-	settimeofday_cb([]()
-					{
-						if (!sntp_time_set)
-						{
-							time_t now = time(nullptr);
-							debug_outln_info(F("SNTP synced: "), ctime(&now));
-							twoStageOTAUpdate();
-							last_update_attempt = millis();
-						}
-						sntp_time_set++;
-					});
-#endif
 	strcpy_P(ntpServer1, NTP_SERVER_1);
 	strcpy_P(ntpServer2, NTP_SERVER_2);
 	configTime(0, 0, ntpServer1, ntpServer2);
@@ -6189,20 +5683,21 @@ static unsigned long sendDataToOptionalApis(const String &data)
 	if (cfg::send2madavi)
 	{
 		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("madavi.de: "));
-		sum_send_time += sendData(LoggerMadavi, data, 0, HOST_MADAVI, URL_MADAVI);
+		Debug.println(data);
+		sum_send_time += sendData(LoggerMadavi, data, 0, HOST_MADAVI, URL_MADAVI, cfg::ssl_madavi);
 	}
 
 	if (cfg::send2sensemap && (cfg::senseboxid[0] != '\0'))
 	{
 		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("opensensemap: "));
 		String sensemap_path(tmpl(FPSTR(URL_SENSEMAP), cfg::senseboxid));
-		sum_send_time += sendData(LoggerSensemap, data, 0, HOST_SENSEMAP, sensemap_path.c_str());
+		sum_send_time += sendData(LoggerSensemap, data, 0, HOST_SENSEMAP, sensemap_path.c_str(), false);
 	}
 
 	if (cfg::send2fsapp)
 	{
 		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("Server FS App: "));
-		sum_send_time += sendData(LoggerFSapp, data, 0, HOST_FSAPP, URL_FSAPP);
+		sum_send_time += sendData(LoggerFSapp, data, 0, HOST_FSAPP, URL_FSAPP, false);
 	}
 
 	if (cfg::send2aircms)
@@ -6219,7 +5714,7 @@ static unsigned long sendDataToOptionalApis(const String &data)
 		String aircms_url(FPSTR(URL_AIRCMS));
 		aircms_url += hmac1(sha1Hex(token), aircms_data + token);
 
-		sum_send_time += sendData(Loggeraircms, aircms_data, 0, HOST_AIRCMS, aircms_url.c_str());
+		sum_send_time += sendData(Loggeraircms, aircms_data, 0, HOST_AIRCMS, aircms_url.c_str(), false);
 	}
 
 	if (cfg::send2influx)
@@ -6227,19 +5722,19 @@ static unsigned long sendDataToOptionalApis(const String &data)
 		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("custom influx db: "));
 		RESERVE_STRING(data_4_influxdb, LARGE_STR);
 		create_influxdb_string_from_data(data_4_influxdb, data);
-		sum_send_time += sendData(LoggerInflux, data_4_influxdb, 0, cfg::host_influx, cfg::url_influx);
+		sum_send_time += sendData(LoggerInflux, data_4_influxdb, 0, cfg::host_influx, cfg::url_influx, cfg::ssl_influx);
 	}
 
 	if (cfg::send2custom)
 	{
 		String data_to_send = data;
 		data_to_send.remove(0, 1);
-		String data_4_custom(F("{\"esp8266id\": \""));
+		String data_4_custom(F("{\"esp32id\": \""));
 		data_4_custom += esp_chipid;
 		data_4_custom += "\", ";
 		data_4_custom += data_to_send;
 		debug_outln_info(FPSTR(DBG_TXT_SENDING_TO), F("custom api: "));
-		sum_send_time += sendData(LoggerCustom, data_4_custom, 0, cfg::host_custom, cfg::url_custom);
+		sum_send_time += sendData(LoggerCustom, data_4_custom, 0, cfg::host_custom, cfg::url_custom, cfg::ssl_custom);
 	}
 
 	if (cfg::send2csv)
@@ -6258,81 +5753,36 @@ static unsigned long sendDataToOptionalApis(const String &data)
 void setup(void)
 {
 	Debug.begin(9600); // Output to Serial at 9600 baud
-
-#if defined(ESP8266)
-	esp_chipid = std::move(String(ESP.getChipId()));
-	esp_mac_id = std::move(String(WiFi.macAddress().c_str()));
-	esp_mac_id.replace(":", "");
-	esp_mac_id.toLowerCase();
-#endif
-#if defined(ESP32)
 	uint64_t chipid_num;
 	chipid_num = ESP.getEfuseMac();
 	esp_chipid = String((uint16_t)(chipid_num >> 32), HEX);
 	esp_chipid += String((uint32_t)chipid_num, HEX);
-#endif
 	cfg::initNonTrivials(esp_chipid.c_str());
 
 	debug_outln_info(F("airRohr: " SOFTWARE_VERSION_STR "/"), String(CURRENT_LANG));
-
-#if defined(ESP8266)
-	if ((airrohr_selftest_failed = !ESP.checkFlashConfig() /* after 2.7.0 update: || !ESP.checkFlashCRC() */))
-	{
-		debug_outln_error(F("ERROR: SELF TEST FAILED!"));
-		SOFTWARE_VERSION += F("-STF");
-	}
-#endif
-
-	init_config(); 
+	init_config();
 
 	Wire.begin(I2C_PIN_SDA, I2C_PIN_SCL);
 
-if (cfg::npm_read)
+	if (cfg::npm_read)
 	{
-#if defined(ESP8266)
-		serialNPM.begin(115200, SWSERIAL_8E1, PM_SERIAL_RX, PM_SERIAL_TX);
-		serialNPM.enableIntTx(false);
-#endif
-#if defined(ESP32)
 		serialNPM.begin(115200, SERIAL_8E1, PM_SERIAL_RX, PM_SERIAL_TX);
-#endif
 		Debug.println("Read Next PM... serialNPM 115200 8E1");
 		serialNPM.setTimeout(400);
 	}
-else if (cfg::ips_read)
+	else if (cfg::ips_read)
 	{
-//#define SERIAL_BUFFER_SIZE 256
-#if defined(ESP8266)
-		serialIPS.begin(115200, SWSERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX);
-		serialIPS.enableIntTx(false);
-#endif
-#if defined(ESP32)
+		//#define SERIAL_BUFFER_SIZE 256
 		serialIPS.begin(115200, SERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX);
-#endif
 		Debug.println("Read IPS... serialIPS 115200 8N1"); //will be set to 9600 8N1 afterwards
-		serialIPS.setTimeout(900); //Which timeout?
+		serialIPS.setTimeout(900);						   //Which timeout?
 	}
 	else
 	{
-#if defined(ESP8266)
-		serialSDS.begin(9600, SWSERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX);
-		serialSDS.enableIntTx(true);
-#endif
-
-#if defined(ESP32)
 		serialSDS.begin(9600, SERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX);
-#endif
 		Debug.println("No Next PM... serialSDS 9600 8N1");
 		serialSDS.setTimeout((4 * 12 * 1000) / 9600);
 	}
-
-#if defined(WIFI_LoRa_32_V2)
-	// reset the OLED display, e.g. of the heltec_wifi_lora_32 board
-	pinMode(RST_OLED, OUTPUT);
-	digitalWrite(RST_OLED, LOW);
-	delay(50);
-	digitalWrite(RST_OLED, HIGH);
-#endif
 
 	init_display();
 	setupNetworkTime();
@@ -6344,13 +5794,7 @@ else if (cfg::ips_read)
 
 	if (cfg::gps_read)
 	{
-#if defined(ESP8266)
-		serialGPS = new SoftwareSerial;
-		serialGPS->begin(9600, SWSERIAL_8N1, GPS_SERIAL_RX, GPS_SERIAL_TX, false, 128);
-#endif
-#if defined(ESP32)
 		serialGPS->begin(9600, SERIAL_8N1, GPS_SERIAL_RX, GPS_SERIAL_TX);
-#endif
 		debug_outln_info(F("Read GPS..."));
 		disable_unneeded_nmea();
 	}
@@ -6448,70 +5892,6 @@ void loop(void)
 		}
 	}
 
-
-
-	if (cfg::sen5x_read && (!sen5x_init_failed))
-	{
-		if ((msSince(starttime) - SEN5X_read_timer) > SEN5X_WAITING_AFTER_LAST_READ)
-		{
-	
-	uint16_t error;
-    char errorMessage[256];
-
-			float massConcentrationPm1p0;
-			float massConcentrationPm2p5;
-			float massConcentrationPm4p0;
-			float massConcentrationPm10p0;
-			float numberConcentrationPm0p5;
-			float numberConcentrationPm1p0;
-			float numberConcentrationPm2p5;
-			float numberConcentrationPm4p0;
-			float numberConcentrationPm10p0;
-			float typicalParticleSize;
-			float ambientHumidity;
-			float ambientTemperature;
-			float vocIndex;
-			float noxIndex;
-
-
-			 SEN5X_read_timer = msSince(starttime);
-
-    error = sen5x.readMeasuredPmValues(massConcentrationPm1p0, massConcentrationPm2p5, massConcentrationPm4p0, massConcentrationPm10p0, numberConcentrationPm0p5, numberConcentrationPm1p0,numberConcentrationPm2p5, numberConcentrationPm4p0,numberConcentrationPm10p0, typicalParticleSize);
-			++SEN5X_read_counter;
-
-    if (error) {
-        Debug.print("Error trying to execute readMeasuredPmValues(): ");
-        errorToString(error, errorMessage, 256);
-        Debug.println(errorMessage);
-    }else{
-		value_SEN5X_P0 += massConcentrationPm1p0;
-		value_SEN5X_P1 += massConcentrationPm10p0;
-		value_SEN5X_P2 += massConcentrationPm2p5;
-		value_SEN5X_P4 += massConcentrationPm4p0;
-		value_SEN5X_N05 += numberConcentrationPm0p5;
-		value_SEN5X_N1 += numberConcentrationPm1p0;
-		value_SEN5X_N25 += numberConcentrationPm2p5;
-		value_SEN5X_N4 += numberConcentrationPm4p0;
-		value_SEN5X_N10 += numberConcentrationPm10p0;
-		value_SEN5X_TS += typicalParticleSize;
-	}
-
-    error = sen5x.readMeasuredValues(massConcentrationPm1p0, massConcentrationPm2p5, massConcentrationPm4p0, massConcentrationPm10p0,ambientHumidity, ambientTemperature, vocIndex, noxIndex);
-
-    if (error) {
-        Debug.print("Error trying to execute readMeasuredValues(): ");
-        errorToString(error, errorMessage, 256);
-        Debug.println(errorMessage);
-    }else{
-		value_SEN5X_T += ambientTemperature;
-		value_SEN5X_H += ambientHumidity;
-		value_SEN5X_VOC += vocIndex;
-		value_SEN5X_NOX += noxIndex;
-	}	
-		++SEN5X_measurement_count;
-		}
-	}
-
 	if (cfg::ppd_read)
 	{
 		fetchSensorPPD(result_PPD);
@@ -6523,14 +5903,15 @@ void loop(void)
 		{
 			starttime_NPM = act_milli;
 			fetchSensorNPM(result_NPM);
-		}	
-	}else if(cfg::ips_read)
+		}
+	}
+	else if (cfg::ips_read)
 	{
 		if ((msSince(starttime_IPS) > SAMPLETIME_IPS_MS) || send_now)
 		{
 			starttime_IPS = act_milli;
 			fetchSensorIPS(result_IPS);
-		}	
+		}
 	}
 	else
 	{
@@ -6616,26 +5997,6 @@ void loop(void)
 		{
 			data += result_IPS;
 			sum_send_time += sendSensorCommunity(result_IPS, IPS_API_PIN, FPSTR(SENSORS_IPS), "IPS_");
-		}
-		if (cfg::sen5x_read && (!sen5x_init_failed))
-		{
-			fetchSensorSEN5X(result);
-			data += result;
-		
-		if(memcmp(SEN5X_type,"SEN50",6) == 0)
-		{
-			sum_send_time += sendSensorCommunity(result, SEN5X_API_PIN, FPSTR(SENSORS_SEN50), "SEN50_");
-		}
-
-		if(memcmp(SEN5X_type,"SEN54",6)== 0)
-		{
-			sum_send_time += sendSensorCommunity(result, SEN5X_API_PIN, FPSTR(SENSORS_SEN54), "SEN54_");
-		}
-		if(memcmp(SEN5X_type,"SEN55",6)== 0)
-		{
-			sum_send_time += sendSensorCommunity(result, SEN5X_API_PIN, FPSTR(SENSORS_SEN55), "SEN55_");
-		}
-			result = emptyString;
 		}
 		if (cfg::sps30_read && (!sps30_init_failed))
 		{
@@ -6732,7 +6093,7 @@ void loop(void)
 			data.remove(data.length() - 1);
 		}
 		data += "]}";
-		Debug.println(data);
+		// Debug.println(data);
 		yield();
 
 		sum_send_time += sendDataToOptionalApis(data);
@@ -6762,8 +6123,8 @@ void loop(void)
 		// time for a OTA attempt?
 		if (msSince(last_update_attempt) > PAUSE_BETWEEN_UPDATE_ATTEMPTS_MS)
 		{
-			twoStageOTAUpdate();
-			last_update_attempt = act_milli;
+			// twoStageOTAUpdate();
+			// last_update_attempt = act_milli;
 		}
 
 		// Resetting for next sampling
@@ -6778,23 +6139,10 @@ void loop(void)
 		starttime = millis(); // store the start time
 		count_sends++;
 	}
-
-#if defined(ESP8266)
-	MDNS.update();
-	if (cfg::npm_read)
-	{
-		serialNPM.perform_work();
-	}
-	else
-	{
-		serialSDS.perform_work();
-	}
-
-#endif
-
 	// Sleep if all of the tasks have an event in the future. The chip can then
 	// enter a lower power mode.
-	if (cfg::powersave) {
+	if (cfg::powersave)
+	{
 		delay(sleep);
 	}
 

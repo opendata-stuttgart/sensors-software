@@ -105,8 +105,6 @@ String add_sensor_type(const String& sensor_text) {
 	s.replace("{h}", FPSTR(INTL_HUMIDITY));
 	s.replace("{p}", FPSTR(INTL_PRESSURE));
 	s.replace("{l_a}", FPSTR(INTL_LEQ_A));
-	s.replace("{voc}", FPSTR(INTL_VOC));
-	s.replace("{nox}", FPSTR(INTL_NOX));
 	return s;
 }
 
@@ -160,57 +158,57 @@ String delayToString(unsigned time_ms) {
 	return s;
 }
 
-#if defined(ESP8266)
-BearSSL::X509List x509_dst_root_ca(dst_root_ca_x3);
+// #if defined(ESP8266)
+// BearSSL::X509List x509_dst_root_ca(dst_root_ca_x3);
 
-void configureCACertTrustAnchor(WiFiClientSecure* client) {
-	constexpr time_t fw_built_year = (__DATE__[ 7] - '0') * 1000 + \
-							  (__DATE__[ 8] - '0') *  100 + \
-							  (__DATE__[ 9] - '0') *   10 + \
-							  (__DATE__[10] - '0');
-	if (time(nullptr) < (fw_built_year - 1970) * 365 * 24 * 3600) {
-		debug_outln_info(F("Time incorrect; Disabling CA verification."));
-		client->setInsecure();
-	}
-	else {
-		client->setTrustAnchors(&x509_dst_root_ca);
-	}
-}
+// void configureCACertTrustAnchor(WiFiClientSecure* client) {
+// 	constexpr time_t fw_built_year = (__DATE__[ 7] - '0') * 1000 + \
+// 							  (__DATE__[ 8] - '0') *  100 + \
+// 							  (__DATE__[ 9] - '0') *   10 + \
+// 							  (__DATE__[10] - '0');
+// 	if (time(nullptr) < (fw_built_year - 1970) * 365 * 24 * 3600) {
+// 		debug_outln_info(F("Time incorrect; Disabling CA verification."));
+// 		client->setInsecure();
+// 	}
+// 	else {
+// 		client->setTrustAnchors(&x509_dst_root_ca);
+// 	}
+// }
 
-bool launchUpdateLoader(const String& md5) {
+// bool launchUpdateLoader(const String& md5) {
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored  "-Wdeprecated-declarations"
+// #pragma GCC diagnostic push
+// #pragma GCC diagnostic ignored  "-Wdeprecated-declarations"
 
-	File loaderFile = SPIFFS.open(F("/loader.bin"), "r");
-	if (!loaderFile) {
-		return false;
-	}
+// 	File loaderFile = SPIFFS.open(F("/loader.bin"), "r");
+// 	if (!loaderFile) {
+// 		return false;
+// 	}
 
-	if (!Update.begin(loaderFile.size(), U_FLASH)) {
-		return false;
-	}
+// 	if (!Update.begin(loaderFile.size(), U_FLASH)) {
+// 		return false;
+// 	}
 
-	if (md5.length() && !Update.setMD5(md5.c_str())) {
-		return false;
-	}
+// 	if (md5.length() && !Update.setMD5(md5.c_str())) {
+// 		return false;
+// 	}
 
-	if (Update.writeStream(loaderFile) != loaderFile.size()) {
-		return false;
-	}
-	loaderFile.close();
+// 	if (Update.writeStream(loaderFile) != loaderFile.size()) {
+// 		return false;
+// 	}
+// 	loaderFile.close();
 
-	if (!Update.end()) {
-		return false;
-	}
+// 	if (!Update.end()) {
+// 		return false;
+// 	}
 
-	debug_outln_info(F("Erasing SDK config."));
-	ESP.eraseConfig();
-	return true;
-#pragma GCC diagnostic pop
-}
+// 	debug_outln_info(F("Erasing SDK config."));
+// 	ESP.eraseConfig();
+// 	return true;
+// #pragma GCC diagnostic pop
+// }
 
-#endif
+// #endif
 
 
 /*****************************************************************
@@ -218,7 +216,7 @@ bool launchUpdateLoader(const String& md5) {
  *****************************************************************/
 String check_display_value(double value, double undef, uint8_t len, uint8_t str_len) {
 	RESERVE_STRING(s, 15);
-	s = (value != undef ? String(value, len) : String("-"));
+	s = (value != undef ? String(value, (int8_t)len) : String("-"));
 	while (s.length() < str_len) {
 		s = " " + s;
 	}
