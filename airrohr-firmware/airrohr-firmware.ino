@@ -2804,13 +2804,6 @@ static void connectWifi()
 
 	disconnectEventHandler = WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info)
 										  {
-											  if (cfg::has_matrix && !wifi_connection_lost) //c'est statique ? ca kill son  propre interrupt !!!!
-											  {
-												  Debug.println("Event disconnect/Matrix off");
-												  display_update_enable(false); //deactivate matrix during wifi connection because of interrupts
-											  	  wifi_connection_lost = true;
-											  }
-
 											  last_disconnect_reason = info.wifi_sta_disconnected.reason;
 										  },
 										  WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
