@@ -2796,7 +2796,7 @@ static void waitForWifiToConnect(int maxRetries)
  * WiFi auto connecting script                                   *
  *****************************************************************/
 
-static WiFiEventFuncCb disconnectEventHandler;
+static WiFiEventId_t disconnectEventHandler;
 
 static void connectWifi()
 {
