@@ -40,6 +40,7 @@ const char SENSORS_SCD30[] PROGMEM = "SCD30";
 const char SENSORS_BMP180[] PROGMEM = "BMP180";
 const char SENSORS_BME280[] PROGMEM = "BME280";
 const char SENSORS_BMP280[] PROGMEM = "BMP280";
+const char SENSORS_CCS811[] PROGMEM = "CCS811";
 const char SENSORS_DNMS[] PROGMEM = "DNMS";
 
 const char WEB_PAGE_HEADER[] PROGMEM = "<!DOCTYPE html><html lang='" INTL_LANG "'>\
