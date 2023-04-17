@@ -5175,6 +5175,11 @@ static void display_values()
 			}
 			break;
 		case 4:
+			display_header = co2_sensor;
+			display_lines[0] = "CO2: "; check_display_value(co2_value, -1, 1, 6); display_lines[line_count++] += " ppm";
+			display_lines[1] = "TVOC: "; check_display_value(tvoc_value, -1, 1, 6); display_lines[line_count++] += " ppb";
+			break;
+		case 5:
 			display_header = "SCD30";
 			display_lines[0] = "Temp.: ";
 			display_lines[0] += check_display_value(last_value_SCD30_T, -128, 1, 5);
@@ -5186,7 +5191,7 @@ static void display_values()
 			display_lines[2] += check_display_value(last_value_SCD30_CO2, 0, 0, 5);
 			display_lines[2] += " ppm";
 			break;
-		case 5:
+		case 6:
 			display_header = "NEO6M";
 			display_lines[0] = "Lat: ";
 			display_lines[0] += check_display_value(lat_value, -200.0, 6, 10);
@@ -5195,13 +5200,13 @@ static void display_values()
 			display_lines[2] = "Alt: ";
 			display_lines[2] += check_display_value(alt_value, -1000.0, 2, 10);
 			break;
-		case 6:
+		case 7:
 			display_header = FPSTR(SENSORS_DNMS);
 			display_lines[0] = std::move(tmpl(F("LAeq: {v} db(A)"), check_display_value(la_eq_value, -1, 1, 6)));
 			display_lines[1] = std::move(tmpl(F("LA_max: {v} db(A)"), check_display_value(la_max_value, -1, 1, 6)));
 			display_lines[2] = std::move(tmpl(F("LA_min: {v} db(A)"), check_display_value(la_min_value, -1, 1, 6)));
 			break;
-		case 7:
+		case 8:
 			display_header = F("Wifi info");
 			display_lines[0] = "IP: ";
 			display_lines[0] += WiFi.localIP().toString();
@@ -5209,7 +5214,7 @@ static void display_values()
 			display_lines[1] += WiFi.SSID();
 			display_lines[2] = std::move(tmpl(F("Signal: {v} %"), String(calcWiFiSignalQuality(last_signal_strength))));
 			break;
-		case 8:
+		case 9:
 			display_header = F("Device Info");
 			display_lines[0] = "ID: ";
 			display_lines[0] += esp_chipid;
@@ -5218,19 +5223,19 @@ static void display_values()
 			display_lines[2] = F("Measurements: ");
 			display_lines[2] += String(count_sends);
 			break;
-		case 9:
+		case 10:
 		    display_header = F("Tera Next PM");
 			display_lines[0] = std::move(tmpl(F("PM1: {v} µg/m³"), check_display_value(pm01_value, -1, 1, 6)));
 			display_lines[1] = std::move(tmpl(F("PM2.5: {v} µg/m³"), check_display_value(pm25_value, -1, 1, 6)));
 			display_lines[2] = std::move(tmpl(F("PM10: {v} µg/m³"), check_display_value(pm10_value, -1, 1, 6)));
 			break;
-		case 10:
+		case 11:
 		    display_header = F("Tera Next PM");
 			display_lines[0] = current_state_npm;
 			display_lines[1] = F("T_NPM / RH_NPM");
 			display_lines[2] = current_th_npm;
 			break;
-		case 11:
+		case 12:
 		    display_header = F("Piera IPS-7100");
 			display_lines[0] = std::move(tmpl(F("PM1: {v} µg/m³"), check_display_value(pm01_value, -1, 1, 6)));
 			display_lines[1] = std::move(tmpl(F("PM2.5: {v} µg/m³"), check_display_value(pm25_value, -1, 1, 6)));
@@ -6255,6 +6260,16 @@ void loop(void)
 			{
 				sum_send_time += sendSensorCommunity(result, BMP280_API_PIN, FPSTR(SENSORS_BMP280), "BMP280_");
 			}
+			result = emptyString;
+		}
+		if (cfg::ccs811_read && (! ccs811_init_failed))
+		{
+			// getting co2 and tvoc (optional)
+			fetchSensorCCS811(result);
+			data += result;
+			// TODO: uncomment once sensor community amend their API to receive ccs811 data...
+			// sum_send_time += sendSensorCommunity(result, CCS811_API_PIN, FPSTR(SENSORS_CCS811), "CCS811_");
+			
 			result = emptyString;
 		}
 		if (cfg::sht3x_read && (!sht3x_init_failed))
