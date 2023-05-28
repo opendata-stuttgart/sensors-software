@@ -47,17 +47,17 @@
  *                                                                      *
  ************************************************************************
  *
- * latest build using lib 3.1.0
- * DATA:    [====      ]  41.5% (used 34000 bytes from 81920 bytes)
- * PROGRAM: [======    ]  58.0% (used 605529 bytes from 1044464 bytes)
- *  
+ * latest build using lib 2.7.4 with -O2
+ * DATA:    [====      ]  41.3% (used 33856 bytes from 81920 bytes)
+ * PROGRAM: [======    ]  59.5% (used 621184 bytes from 1044464 bytes)
+ *
  ************************************************************************/
  
 #include <WString.h>
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2021-134-B4"
+#define SOFTWARE_VERSION_STR "NRZ-2023-134-B5"
 String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
