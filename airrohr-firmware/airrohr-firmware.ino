@@ -245,7 +245,7 @@ namespace cfg
 	}
 }
 
-#define JSON_BUFFER_SIZE 2300
+#define JSON_BUFFER_SIZE 2800
 
 LoggerConfig loggerConfigs[LoggerCount];
 
@@ -1119,12 +1119,12 @@ static void readConfig(bool oldconfig = false)
 	debug_outln_info(F("opened config file..."));
 	DynamicJsonDocument json(JSON_BUFFER_SIZE);
 	DeserializationError err = deserializeJson(json, configFile.readString());
+	debug_outln_info(F("parsing json: "), err.f_str());
 	configFile.close();
 #pragma GCC diagnostic pop
 
 	if (!err)
 	{
-		debug_outln_info(F("parsed json..."));
 		for (unsigned e = 0; e < sizeof(configShape) / sizeof(configShape[0]); ++e)
 		{
 			ConfigShapeEntry c;
