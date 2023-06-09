@@ -1149,6 +1149,12 @@ static void readConfig(bool oldconfig = false)
 				break;
 			};
 		}
+
+		if (cfg::debug > DEBUG_MIN_INFO)
+		{
+			serializeJsonPretty(json, Debug); Debug.print('\n');
+		}
+
 		String writtenVersion(json["SOFTWARE_VERSION"].as<const char *>());
 		if (writtenVersion.length() && writtenVersion[0] == 'N' && SOFTWARE_VERSION != writtenVersion)
 		{
@@ -3127,7 +3133,6 @@ static unsigned long sendSensorCommunity(const String &data, const int pin, cons
  *****************************************************************/
 static void create_influxdb_string_from_data(String &data_4_influxdb, const String &data)
 {
-	debug_outln_verbose(F("Parse JSON for influx DB: "), data);
 	DynamicJsonDocument json2data(JSON_BUFFER_SIZE);
 	DeserializationError err = deserializeJson(json2data, data);
 	if (!err)
@@ -6214,6 +6219,7 @@ void loop(void)
 			data.remove(data.length() - 1);
 		}
 		data += "]}";
+		debug_outln_verbose(F("Data to send: "), data);
 		yield();
 
 		sum_send_time += sendDataToOptionalApis(data);
