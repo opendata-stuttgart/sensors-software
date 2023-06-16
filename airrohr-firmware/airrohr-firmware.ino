@@ -1195,6 +1195,13 @@ static void readConfig(bool oldconfig = false)
 			cfg::bmx280_read = true;
 			rewriteConfig = true;
 		}
+
+		if (strlen(cfg::fs_ssid) == 0)
+		{
+			snprintf_P(cfg::fs_ssid, LEN_FS_SSID, PSTR("%s%s"), SSID_BASENAME, esp_chipid.c_str());
+			debug_outln_info(F("Setting default AP SSID to "), cfg::fs_ssid);
+			rewriteConfig = true;
+		}
 	}
 	else
 	{
