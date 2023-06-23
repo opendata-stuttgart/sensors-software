@@ -3086,10 +3086,13 @@ static unsigned long sendData(const LoggerEntry logger, const String &data, cons
 			debug_outln_info(F("Succeeded - "), s_Host);
 			send_success = true;
 		}
-		else if (result >= HTTP_CODE_BAD_REQUEST)
+		else
 		{
 			debug_outln_info(F("Request failed with error: "), String(result));
-			debug_outln_info(F("Details:"), http.getString());
+			if (result >= HTTP_CODE_BAD_REQUEST)
+			{
+				debug_outln_info(F("Details:"), http.getString());
+			}
 		}
 		http.end();
 	}
