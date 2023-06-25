@@ -47,9 +47,9 @@
  *                                                                      *
  ************************************************************************
  *
- * latest build using lib 2.7.4 with -O2
- * DATA:    [====      ]  41.3% (used 33856 bytes from 81920 bytes)
- * PROGRAM: [======    ]  59.5% (used 621184 bytes from 1044464 bytes)
+ * latest build using lib 2.7.4 with -O3
+ * DATA:    [====      ]  41.6% (used 34104 bytes from 81920 bytes)
+ * PROGRAM: [=======   ]  66.5% (used 694547 bytes from 1044464 bytes)
  *
  ************************************************************************/
  
