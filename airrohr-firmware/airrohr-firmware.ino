@@ -4760,6 +4760,7 @@ static void twoStageOTAUpdate()
 	BearSSL::Session clientSession;
 
 	client.setBufferSizes(1024, TCP_MSS > 1024 ? 2048 : 1024);
+	client.setCiphersLessSecure();
 	client.setSession(&clientSession);
 	configureCACertTrustAnchor(&client);
 
