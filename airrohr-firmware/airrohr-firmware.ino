@@ -4692,9 +4692,13 @@ static bool fwDownloadStream(WiFiClientSecure &client, const String &url, Stream
 		http.end();
 	}
 
+	debug_outln_verbose(F("bytes written: "), String(bytes_written));
+
 	if (bytes_written > 0)
 		return true;
 
+	last_update_returncode = bytes_written ;
+	Debug.println( http.errorToString(bytes_written) );
 	return false;
 }
 
