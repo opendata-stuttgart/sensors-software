@@ -1,4 +1,21 @@
-NRZ-2021-134-B3
+NRZ-2023-134-B5
+* Go back to Arduino Core 2.7.4 as a workaround for stalling OTA downloads
+* Change setting of compiler optimization to -O3 for better performance
+* Replace LetsEncrypt DST Root CA X3 with ISRG Root X1 certificate
+* Add displaying errors with config parsing and network connections
+* Minor bug fixes and cosmetics
+* Update Github Actions CI workflow
+
+NRZ-2021-134-B4
+* Added Tera Sensor Next PM fulltime support
+* Added Piera Systems IPS-7100 support
+* Implement power save feature (experimental)
+* Minor improvements to config page
+* Decrease GPS update interval
+* Update various translations
+* Contribution.md: Added Information of all known I2C addresses and the devices behind that the firmware is aware of
+* more SCD30 info on status page
+* Some ciphers removed (MD5,3DES)
 * Upgrade to Arduino Core 3.0.1
 * Libraries updated
 * changes for compatibility to latest ArduinoJSON
