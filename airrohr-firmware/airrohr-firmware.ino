@@ -2955,7 +2955,11 @@ static void connectWifi()
 	WiFi.hostname(cfg::fs_ssid);
 	if (addr_static_ip.fromString(cfg::static_ip) && addr_static_subnet.fromString(cfg::static_subnet) && addr_static_gateway.fromString(cfg::static_gateway) && addr_static_dns.fromString(cfg::static_dns))
 	{
-		WiFi.config(addr_static_ip, addr_static_subnet, addr_static_gateway, addr_static_dns, addr_static_dns);
+		//ESP argument order is: ip, gateway, subnet, dns1
+		//Arduino arg order is:  ip, dns, gateway, subnet.
+		//To allow compatibility, check first octet of 3rd arg. If 255, interpret as ESP order, otherwise Arduino order.
+		//Here ESP order is used
+		WiFi.config(addr_static_ip, addr_static_gateway, addr_static_subnet, addr_static_dns, addr_static_dns);
 	}
 #endif
 
