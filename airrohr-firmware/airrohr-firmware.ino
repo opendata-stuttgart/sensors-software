@@ -57,7 +57,7 @@
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2021-134-B4"
+#define SOFTWARE_VERSION_STR "NRZ-2021-134-B5"
 String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -2851,7 +2851,14 @@ static void wifiConfig()
 
 	debug_outln_info(FPSTR(DBG_TXT_CONNECTING_TO), cfg::wlanssid);
 
-	WiFi.begin(cfg::wlanssid, cfg::wlanpwd);
+	if( *cfg::wlanpwd ) // non-empty password
+	{
+		WiFi.begin(cfg::wlanssid, cfg::wlanpwd);
+	}
+	else  // empty password: WiFi AP without a password, e.g. "freifunk" or the like
+	{
+		WiFi.begin(cfg::wlanssid); // since somewhen, the espressif API changed semantics: no password need the 1 args call since.
+	}
 
 	debug_outln_info(F("---- Result Webconfig ----"));
 	debug_outln_info(F("WLANSSID: "), cfg::wlanssid);
