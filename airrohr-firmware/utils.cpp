@@ -158,57 +158,57 @@ String delayToString(unsigned time_ms) {
 	return s;
 }
 
-// #if defined(ESP8266)
-// BearSSL::X509List x509_dst_root_ca(dst_root_ca_x3);
+#if defined(ESP8266)
+BearSSL::X509List x509_dst_root_ca(dst_root_ca_x3);
 
-// void configureCACertTrustAnchor(WiFiClientSecure* client) {
-// 	constexpr time_t fw_built_year = (__DATE__[ 7] - '0') * 1000 + \
-// 							  (__DATE__[ 8] - '0') *  100 + \
-// 							  (__DATE__[ 9] - '0') *   10 + \
-// 							  (__DATE__[10] - '0');
-// 	if (time(nullptr) < (fw_built_year - 1970) * 365 * 24 * 3600) {
-// 		debug_outln_info(F("Time incorrect; Disabling CA verification."));
-// 		client->setInsecure();
-// 	}
-// 	else {
-// 		client->setTrustAnchors(&x509_dst_root_ca);
-// 	}
-// }
+void configureCACertTrustAnchor(WiFiClientSecure* client) {
+	constexpr time_t fw_built_year = (__DATE__[ 7] - '0') * 1000 + \
+							  (__DATE__[ 8] - '0') *  100 + \
+							  (__DATE__[ 9] - '0') *   10 + \
+							  (__DATE__[10] - '0');
+	if (time(nullptr) < (fw_built_year - 1970) * 365 * 24 * 3600) {
+		debug_outln_info(F("Time incorrect; Disabling CA verification."));
+		client->setInsecure();
+	}
+	else {
+		client->setTrustAnchors(&x509_dst_root_ca);
+	}
+}
 
-// bool launchUpdateLoader(const String& md5) {
+bool launchUpdateLoader(const String& md5) {
 
-// #pragma GCC diagnostic push
-// #pragma GCC diagnostic ignored  "-Wdeprecated-declarations"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored  "-Wdeprecated-declarations"
 
-// 	File loaderFile = SPIFFS.open(F("/loader.bin"), "r");
-// 	if (!loaderFile) {
-// 		return false;
-// 	}
+	File loaderFile = SPIFFS.open(F("/loader.bin"), "r");
+	if (!loaderFile) {
+		return false;
+	}
 
-// 	if (!Update.begin(loaderFile.size(), U_FLASH)) {
-// 		return false;
-// 	}
+	if (!Update.begin(loaderFile.size(), U_FLASH)) {
+		return false;
+	}
 
-// 	if (md5.length() && !Update.setMD5(md5.c_str())) {
-// 		return false;
-// 	}
+	if (md5.length() && !Update.setMD5(md5.c_str())) {
+		return false;
+	}
 
-// 	if (Update.writeStream(loaderFile) != loaderFile.size()) {
-// 		return false;
-// 	}
-// 	loaderFile.close();
+	if (Update.writeStream(loaderFile) != loaderFile.size()) {
+		return false;
+	}
+	loaderFile.close();
 
-// 	if (!Update.end()) {
-// 		return false;
-// 	}
+	if (!Update.end()) {
+		return false;
+	}
 
-// 	debug_outln_info(F("Erasing SDK config."));
-// 	ESP.eraseConfig();
-// 	return true;
-// #pragma GCC diagnostic pop
-// }
+	debug_outln_info(F("Erasing SDK config."));
+	ESP.eraseConfig();
+	return true;
+#pragma GCC diagnostic pop
+}
 
-// #endif
+#endif
 
 
 /*****************************************************************
@@ -216,7 +216,7 @@ String delayToString(unsigned time_ms) {
  *****************************************************************/
 String check_display_value(double value, double undef, uint8_t len, uint8_t str_len) {
 	RESERVE_STRING(s, 15);
-	s = (value != undef ? String(value, (int8_t)len) : String("-"));
+	s = (value != undef ? String(value, len) : String("-"));
 	while (s.length() < str_len) {
 		s = " " + s;
 	}
@@ -411,7 +411,7 @@ void SDS_rawcmd(const uint8_t cmd_head1, const uint8_t cmd_head2, const uint8_t 
 	buf[16] = 0xFF;
 	buf[17] = cmd_head1 + cmd_head2 + cmd_head3 - 2;
 	buf[18] = 0xAB;
-	serialSDS.write(buf, cmd_len);
+	serialPMS.write(buf, cmd_len);
 }
 
 bool SDS_cmd(PmSensorCmd cmd) {
@@ -459,7 +459,38 @@ bool PMS_cmd(PmSensorCmd cmd) {
 		memcpy_P(buf, continuous_mode_cmd, cmd_len);
 		break;
 	}
-	serialSDS.write(buf, cmd_len);
+	serialPMS.write(buf, cmd_len);
+	return cmd != PmSensorCmd::Stop;
+}
+
+/*****************************************************************
+ * send 2nd Plantower PMS sensor command start, stop, cont. mode     *
+ *****************************************************************/
+bool PMS2_cmd(PmSensorCmd cmd) {
+	static constexpr uint8_t start_cmd[] PROGMEM = {
+		0x42, 0x4D, 0xE4, 0x00, 0x01, 0x01, 0x74
+	};
+	static constexpr uint8_t stop_cmd[] PROGMEM = {
+		0x42, 0x4D, 0xE4, 0x00, 0x00, 0x01, 0x73
+	};
+	static constexpr uint8_t continuous_mode_cmd[] PROGMEM = {
+		0x42, 0x4D, 0xE1, 0x00, 0x01, 0x01, 0x71
+	};
+	constexpr uint8_t cmd_len = array_num_elements(start_cmd);
+
+	uint8_t buf[cmd_len];
+	switch (cmd) {
+	case PmSensorCmd::Start:
+		memcpy_P(buf, start_cmd, cmd_len);
+		break;
+	case PmSensorCmd::Stop:
+		memcpy_P(buf, stop_cmd, cmd_len);
+		break;
+	case PmSensorCmd::ContinuousMode:
+		memcpy_P(buf, continuous_mode_cmd, cmd_len);
+		break;
+	}
+	serialPMS2.write(buf, cmd_len);
 	return cmd != PmSensorCmd::Stop;
 }
 
@@ -490,7 +521,7 @@ bool HPM_cmd(PmSensorCmd cmd) {
 		memcpy_P(buf, continuous_mode_cmd, cmd_len);
 		break;
 	}
-	serialSDS.write(buf, cmd_len);
+	serialPMS.write(buf, cmd_len);
 	return cmd != PmSensorCmd::Stop;
 }
 

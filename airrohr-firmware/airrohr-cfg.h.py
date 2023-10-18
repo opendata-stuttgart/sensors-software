@@ -14,6 +14,7 @@ Bool		htu21d_read
 Bool		ppd_read
 Bool		sds_read
 Bool		pms_read
+Bool		pms2_read
 Bool		hpm_read
 Bool		npm_read
 Bool        npm_fulltime
@@ -28,7 +29,6 @@ Bool		dnms_read
 String		dnms_correction
 String		temp_correction
 String		height_above_sealevel
-Bool		gps_read
 Bool		send2dusti
 Bool		ssl_dusti
 Bool		send2madavi

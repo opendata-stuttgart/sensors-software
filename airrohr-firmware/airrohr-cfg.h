@@ -38,6 +38,7 @@ enum ConfigShapeId {
 	Config_ppd_read,
 	Config_sds_read,
 	Config_pms_read,
+	Config_pms2_read,
 	Config_hpm_read,
 	Config_npm_read,
 	Config_npm_fulltime,
@@ -52,7 +53,6 @@ enum ConfigShapeId {
 	Config_dnms_correction,
 	Config_temp_correction,
 	Config_height_above_sealevel,
-	Config_gps_read,
 	Config_send2dusti,
 	Config_ssl_dusti,
 	Config_send2madavi,
@@ -110,6 +110,7 @@ static constexpr char CFG_KEY_HTU21D_READ[] PROGMEM = "htu21d_read";
 static constexpr char CFG_KEY_PPD_READ[] PROGMEM = "ppd_read";
 static constexpr char CFG_KEY_SDS_READ[] PROGMEM = "sds_read";
 static constexpr char CFG_KEY_PMS_READ[] PROGMEM = "pms_read";
+static constexpr char CFG_KEY_PMS2_READ[] PROGMEM = "pms2_read";
 static constexpr char CFG_KEY_HPM_READ[] PROGMEM = "hpm_read";
 static constexpr char CFG_KEY_NPM_READ[] PROGMEM = "npm_read";
 static constexpr char CFG_KEY_NPM_FULLTIME[] PROGMEM = "npm_fulltime";
@@ -124,7 +125,6 @@ static constexpr char CFG_KEY_DNMS_READ[] PROGMEM = "dnms_read";
 static constexpr char CFG_KEY_DNMS_CORRECTION[] PROGMEM = "dnms_correction";
 static constexpr char CFG_KEY_TEMP_CORRECTION[] PROGMEM = "temp_correction";
 static constexpr char CFG_KEY_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "height_above_sealevel";
-static constexpr char CFG_KEY_GPS_READ[] PROGMEM = "gps_read";
 static constexpr char CFG_KEY_SEND2DUSTI[] PROGMEM = "send2dusti";
 static constexpr char CFG_KEY_SSL_DUSTI[] PROGMEM = "ssl_dusti";
 static constexpr char CFG_KEY_SEND2MADAVI[] PROGMEM = "send2madavi";
@@ -182,6 +182,7 @@ static constexpr ConfigShapeEntry configShape[] PROGMEM = {
 	{ Config_Type_Bool, 0, CFG_KEY_PPD_READ, &cfg::ppd_read },
 	{ Config_Type_Bool, 0, CFG_KEY_SDS_READ, &cfg::sds_read },
 	{ Config_Type_Bool, 0, CFG_KEY_PMS_READ, &cfg::pms_read },
+	{ Config_Type_Bool, 0, CFG_KEY_PMS2_READ, &cfg::pms2_read },
 	{ Config_Type_Bool, 0, CFG_KEY_HPM_READ, &cfg::hpm_read },
 	{ Config_Type_Bool, 0, CFG_KEY_NPM_READ, &cfg::npm_read },
 	{ Config_Type_Bool, 0, CFG_KEY_NPM_FULLTIME, &cfg::npm_fulltime },
@@ -196,7 +197,6 @@ static constexpr ConfigShapeEntry configShape[] PROGMEM = {
 	{ Config_Type_String, sizeof(cfg::dnms_correction)-1, CFG_KEY_DNMS_CORRECTION, cfg::dnms_correction },
 	{ Config_Type_String, sizeof(cfg::temp_correction)-1, CFG_KEY_TEMP_CORRECTION, cfg::temp_correction },
 	{ Config_Type_String, sizeof(cfg::height_above_sealevel)-1, CFG_KEY_HEIGHT_ABOVE_SEALEVEL, cfg::height_above_sealevel },
-	{ Config_Type_Bool, 0, CFG_KEY_GPS_READ, &cfg::gps_read },
 	{ Config_Type_Bool, 0, CFG_KEY_SEND2DUSTI, &cfg::send2dusti },
 	{ Config_Type_Bool, 0, CFG_KEY_SSL_DUSTI, &cfg::ssl_dusti },
 	{ Config_Type_Bool, 0, CFG_KEY_SEND2MADAVI, &cfg::send2madavi },

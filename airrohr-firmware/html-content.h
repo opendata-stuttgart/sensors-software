@@ -27,7 +27,8 @@ const char DBG_TXT_SEP[] PROGMEM = "----";
 
 const char SENSORS_SDS011[] PROGMEM = "SDS011";
 const char SENSORS_PPD42NS[] PROGMEM = "PPD42NS";
-const char SENSORS_PMSx003[] PROGMEM = "PMSx003";
+const char SENSORS_PMSx003_1[] PROGMEM = "PMSx003 1";
+const char SENSORS_PMSx003_2[] PROGMEM = "PMSx003 2";
 const char SENSORS_HPM[] PROGMEM = "Honeywell PM";
 const char SENSORS_NPM[] PROGMEM = "Tera Sensor Next PM";
 const char SENSORS_IPS[] PROGMEM = "Piera Systems IPS-7100";
