@@ -64,7 +64,7 @@ const char INTL_STATIC_SUBNET[] PROGMEM = "[[static_subnet]]";
 const char INTL_STATIC_GATEWAY[] PROGMEM = "[[static_gateway]]";
 const char INTL_STATIC_DNS[] PROGMEM = "[[static_dns]]";
 
-const char INTL_DEBUG_LEVEL[] PROGMEM = "Ladenide&nbsp;úroveň";
+const char INTL_DEBUG_LEVEL[] PROGMEM = "Ladenie&nbsp;úroveň";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Interval meraní (sec)";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Trvanie router mod";
 const char INTL_POWERSAVE[] PROGMEM = "[[powersave]]";
