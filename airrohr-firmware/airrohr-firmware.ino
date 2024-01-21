@@ -104,6 +104,7 @@ String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 #include "./DHT.h"
 #include <Adafruit_HTU21DF.h>
 #include <Adafruit_BMP085.h>
+#include "Adafruit_CCS811.h"
 #include <Adafruit_SHT31.h>
 #include <StreamString.h>
 #include <DallasTemperature.h>
@@ -170,6 +171,7 @@ namespace cfg
 	bool sps30_read = SPS30_READ;
 	bool bmp_read = BMP_READ;
 	bool bmx280_read = BMX280_READ;
+	bool ccs811_read = CCS811_READ;
 	char height_above_sealevel[8] = "0";
 	bool sht3x_read = SHT3X_READ;
 	bool scd30_read = SCD30_READ;
@@ -253,6 +255,7 @@ long int sample_count = 0;
 bool htu21d_init_failed = false;
 bool bmp_init_failed = false;
 bool bmx280_init_failed = false;
+bool ccs811_init_failed = false;
 bool sht3x_init_failed = false;
 bool scd30_init_failed = false;
 bool dnms_init_failed = false;
@@ -334,6 +337,11 @@ Adafruit_BMP085 bmp;
 BMX280 bmx280;
 const uint8_t bmx280_default_i2c_address = 0x77;
 const uint8_t bmx280_alternate_i2c_address = 0x76;
+
+/*****************************************************************
+ * CCS811 declaration                                            *
+ *****************************************************************/
+Adafruit_CCS811 ccs811;
 
 /*****************************************************************
  * SHT3x declaration                                             *
@@ -450,6 +458,8 @@ float last_value_BMP_P = -1.0;
 float last_value_BMX280_T = -128.0;
 float last_value_BMX280_P = -1.0;
 float last_value_BME280_H = -1.0;
+float last_value_CCS811_C = -1.0;
+float last_value_CCS811_T = -1.0;
 float last_value_DHT_T = -128.0;
 float last_value_DHT_H = -1.0;
 float last_value_DS18B20_T = -1.0;
@@ -1190,6 +1200,11 @@ static void readConfig(bool oldconfig = false)
 			cfg::bmx280_read = true;
 			rewriteConfig = true;
 		}
+		if (boolFromJSON(json, F("ccs811_read")))
+		{
+			cfg::ccs811_read = true;
+			rewriteConfig = true;
+		}
 	}
 	else
 	{
@@ -1746,6 +1761,7 @@ static void webserver_config_send_body_get(String &page_content)
 	add_form_checkbox_sensor(Config_dht_read, FPSTR(INTL_DHT22));
 	add_form_checkbox_sensor(Config_htu21d_read, FPSTR(INTL_HTU21D));
 	add_form_checkbox_sensor(Config_bmx280_read, FPSTR(INTL_BMX280));
+	add_form_checkbox_sensor(Config_ccs811_read, FPSTR(INTL_CCS811));
 	add_form_checkbox_sensor(Config_sht3x_read, FPSTR(INTL_SHT3X));
 	add_form_checkbox_sensor(Config_scd30_read, FPSTR(INTL_SCD30));
 
@@ -2202,6 +2218,12 @@ static void webserver_values()
 			dew_point_temp = dew_point(last_value_BMX280_T, last_value_BME280_H);
 			add_table_value(FPSTR(sensor_name), FPSTR(INTL_DEW_POINT), isnan(dew_point_temp) ? "-" : String(dew_point_temp, 1), unit_T);
 		}
+		page_content += FPSTR(EMPTY_ROW);
+	}
+	if (cfg::ccs811_read)
+	{
+		add_table_value(FPSTR(SENSORS_CCS811), FPSTR(INTL_CO2), check_display_value(last_value_CCS811_C, -1, 1, 6), "ppm");
+		add_table_value(FPSTR(SENSORS_CCS811), FPSTR(INTL_TVOC), check_display_value(last_value_CCS811_T, -1, 1, 6), "ppb");
 		page_content += FPSTR(EMPTY_ROW);
 	}
 	if (cfg::sht3x_read)
@@ -3397,6 +3419,38 @@ static void fetchSensorBMX280(String &s)
 	}
 	debug_outln_info(FPSTR(DBG_TXT_SEP));
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(sensor_name));
+}
+
+/*****************************************************************
+ * read CCS811 sensor values                              *
+ *****************************************************************/
+static void fetchSensorCCS811(String& s) {
+	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_CCS811));
+	
+	if(ccs811.available()){
+		if (!ccs811.readData()) {
+			const auto c = ccs811.geteCO2();
+			const auto t = ccs811.getTVOC();
+		
+			if (isnan(c) || isnan(t)) {
+				last_value_CCS811_C = -1.0;
+				last_value_CCS811_T = -1.0;
+				debug_outln_error(F("CCS811 read failed"));
+			} else {
+				last_value_CCS811_C = c;
+				last_value_CCS811_T = t;
+				add_Value2Json(s, F("CCS811_co2"), F("CO2:   "), last_value_CCS811_C);
+				add_Value2Json(s, F("CCS811_tvoc"), F("TVOC: "), last_value_CCS811_T);
+			}
+		} else {
+			last_value_CCS811_C = -1.0;
+			last_value_CCS811_T = -1.0;
+			debug_outln_error(F("CCS811 read failed"));
+		}
+	}
+    
+	debug_outln_info(FPSTR(DBG_TXT_SEP));
+	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_CCS811));
 }
 
 /*****************************************************************
@@ -4844,6 +4898,9 @@ static void display_values()
 	float h_value = -1.0;
 	float p_value = -1.0;
 	String t_sensor, h_sensor, p_sensor;
+	float co2_value = -1.0;
+	float tvoc_value = -1.0;
+	String co2_sensor, tvoc_sensor;
 	float pm001_value = -1.0;
 	float pm003_value = -1.0;
 	float pm005_value = -1.0;
@@ -4878,7 +4935,7 @@ static void display_values()
 	String display_header;
 	String display_lines[3] = {"", "", ""};
 	uint8_t screen_count = 0;
-	uint8_t screens[8];
+	uint8_t screens[12];
 	int line_count = 0;
 	debug_outln_info(F("output values to display..."));
 	if (cfg::ppd_read)
@@ -4993,6 +5050,12 @@ static void display_values()
 			h_value = last_value_BME280_H;
 		}
 	}
+	if (cfg::ccs811_read)
+	{
+		co2_sensor = tvoc_sensor = FPSTR(SENSORS_CCS811);
+		co2_value = last_value_CCS811_C;
+		tvoc_value = last_value_CCS811_T;
+	}
 	if (cfg::sht3x_read)
 	{
 		h_sensor = t_sensor = FPSTR(SENSORS_SHT3X);
@@ -5018,12 +5081,12 @@ static void display_values()
 	}
 	if (cfg::npm_read)
 	{
-		screens[screen_count++] = 9;
-		screens[screen_count++] = 10; 
+		screens[screen_count++] = 10;
+		screens[screen_count++] = 11; 
 	}
 	if (cfg::ips_read)
 	{
-		screens[screen_count++] = 11;  //A VOIR POUR AJOUTER DES ÈCRANS
+		screens[screen_count++] = 12;  //A VOIR POUR AJOUTER DES ÈCRANS
 	}
 	if (cfg::sps30_read)
 	{
@@ -5033,25 +5096,29 @@ static void display_values()
 	{
 		screens[screen_count++] = 3;
 	}
-	if (cfg::scd30_read)
+	if (cfg::ccs811_read)
 	{
 		screens[screen_count++] = 4;
 	}
-	if (cfg::gps_read)
+	if (cfg::scd30_read)
 	{
 		screens[screen_count++] = 5;
 	}
-	if (cfg::dnms_read)
+	if (cfg::gps_read)
 	{
 		screens[screen_count++] = 6;
 	}
+	if (cfg::dnms_read)
+	{
+		screens[screen_count++] = 7;
+	}
 	if (cfg::display_wifi_info)
 	{
-		screens[screen_count++] = 7; // Wifi info
+		screens[screen_count++] = 8; // Wifi info
 	}
 	if (cfg::display_device_info)
 	{
-		screens[screen_count++] = 8; // chipID, firmware and count of measurements
+		screens[screen_count++] = 9; // chipID, firmware and count of measurements
 	}
 	// update size of "screens" when adding more screens!
 	if (cfg::has_display || cfg::has_sh1106 || lcd_2004)
@@ -5108,6 +5175,11 @@ static void display_values()
 			}
 			break;
 		case 4:
+			display_header = co2_sensor;
+			display_lines[0] = "CO2: "; check_display_value(co2_value, -1, 1, 6); display_lines[line_count++] += " ppm";
+			display_lines[1] = "TVOC: "; check_display_value(tvoc_value, -1, 1, 6); display_lines[line_count++] += " ppb";
+			break;
+		case 5:
 			display_header = "SCD30";
 			display_lines[0] = "Temp.: ";
 			display_lines[0] += check_display_value(last_value_SCD30_T, -128, 1, 5);
@@ -5119,7 +5191,7 @@ static void display_values()
 			display_lines[2] += check_display_value(last_value_SCD30_CO2, 0, 0, 5);
 			display_lines[2] += " ppm";
 			break;
-		case 5:
+		case 6:
 			display_header = "NEO6M";
 			display_lines[0] = "Lat: ";
 			display_lines[0] += check_display_value(lat_value, -200.0, 6, 10);
@@ -5128,13 +5200,13 @@ static void display_values()
 			display_lines[2] = "Alt: ";
 			display_lines[2] += check_display_value(alt_value, -1000.0, 2, 10);
 			break;
-		case 6:
+		case 7:
 			display_header = FPSTR(SENSORS_DNMS);
 			display_lines[0] = std::move(tmpl(F("LAeq: {v} db(A)"), check_display_value(la_eq_value, -1, 1, 6)));
 			display_lines[1] = std::move(tmpl(F("LA_max: {v} db(A)"), check_display_value(la_max_value, -1, 1, 6)));
 			display_lines[2] = std::move(tmpl(F("LA_min: {v} db(A)"), check_display_value(la_min_value, -1, 1, 6)));
 			break;
-		case 7:
+		case 8:
 			display_header = F("Wifi info");
 			display_lines[0] = "IP: ";
 			display_lines[0] += WiFi.localIP().toString();
@@ -5142,7 +5214,7 @@ static void display_values()
 			display_lines[1] += WiFi.SSID();
 			display_lines[2] = std::move(tmpl(F("Signal: {v} %"), String(calcWiFiSignalQuality(last_signal_strength))));
 			break;
-		case 8:
+		case 9:
 			display_header = F("Device Info");
 			display_lines[0] = "ID: ";
 			display_lines[0] += esp_chipid;
@@ -5151,19 +5223,19 @@ static void display_values()
 			display_lines[2] = F("Measurements: ");
 			display_lines[2] += String(count_sends);
 			break;
-		case 9:
+		case 10:
 		    display_header = F("Tera Next PM");
 			display_lines[0] = std::move(tmpl(F("PM1: {v} µg/m³"), check_display_value(pm01_value, -1, 1, 6)));
 			display_lines[1] = std::move(tmpl(F("PM2.5: {v} µg/m³"), check_display_value(pm25_value, -1, 1, 6)));
 			display_lines[2] = std::move(tmpl(F("PM10: {v} µg/m³"), check_display_value(pm10_value, -1, 1, 6)));
 			break;
-		case 10:
+		case 11:
 		    display_header = F("Tera Next PM");
 			display_lines[0] = current_state_npm;
 			display_lines[1] = F("T_NPM / RH_NPM");
 			display_lines[2] = current_th_npm;
 			break;
-		case 11:
+		case 12:
 		    display_header = F("Piera IPS-7100");
 			display_lines[0] = std::move(tmpl(F("PM1: {v} µg/m³"), check_display_value(pm01_value, -1, 1, 6)));
 			display_lines[1] = std::move(tmpl(F("PM2.5: {v} µg/m³"), check_display_value(pm25_value, -1, 1, 6)));
@@ -5379,6 +5451,24 @@ static bool initBMX280(char addr)
 	}
 	else
 	{
+		debug_outln_info(FPSTR(DBG_TXT_NOT_FOUND));
+		return false;
+	}
+}
+
+/*****************************************************************
+ * Init CCS811                                                   *
+ *****************************************************************/
+static bool initCCS811() {
+	debug_out(String(F("Trying CCS811 sensor on 0X5A")), DEBUG_MIN_INFO);
+	
+	if(ccs811.begin()) {
+		debug_outln_info(FPSTR(DBG_TXT_FOUND));
+		while(!ccs811.available()){
+			yield(); // Prevent WDT from resetting the ESP
+		}
+		return true;
+	} else {
 		debug_outln_info(FPSTR(DBG_TXT_NOT_FOUND));
 		return false;
 	}
@@ -5622,6 +5712,15 @@ static void powerOnTestSensors()
 		if (!initBMX280(bmx280_default_i2c_address) && !initBMX280(bmx280_alternate_i2c_address)) {
 			debug_outln_error(F("Check BMx280 wiring"));
 			bmx280_init_failed = true;
+		}
+	}
+
+	if (cfg::ccs811_read)
+	{
+		debug_outln_info(F("Read CCS811..."));
+		if (!initCCS811()) {
+			debug_outln_error(F("Check CCS811 wiring"));
+			ccs811_init_failed = true;
 		}
 	}
 
@@ -6161,6 +6260,16 @@ void loop(void)
 			{
 				sum_send_time += sendSensorCommunity(result, BMP280_API_PIN, FPSTR(SENSORS_BMP280), "BMP280_");
 			}
+			result = emptyString;
+		}
+		if (cfg::ccs811_read && (! ccs811_init_failed))
+		{
+			// getting co2 and tvoc (optional)
+			fetchSensorCCS811(result);
+			data += result;
+			// TODO: uncomment once sensor community amend their API to receive ccs811 data...
+			// sum_send_time += sendSensorCommunity(result, CCS811_API_PIN, FPSTR(SENSORS_CCS811), "CCS811_");
+			
 			result = emptyString;
 		}
 		if (cfg::sht3x_read && (!sht3x_init_failed))
