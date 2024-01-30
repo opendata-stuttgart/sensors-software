@@ -7,7 +7,7 @@
  *	Texts should be as short as possible
  */
 
-#define INTL_LANG "BR";
+#define INTL_LANG "BR"
 #define INTL_PM_SENSOR ""
 const char INTL_CONFIGURATION[] PROGMEM = "";
 #define INTL_WIFI_SETTINGS "Configuracões de Wi-Fi"
