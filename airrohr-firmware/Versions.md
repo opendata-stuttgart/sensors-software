@@ -1,4 +1,4 @@
-NRZ-2023-134-B5
+NRZ-2024-134-B5
 * Go back to Arduino Core 2.7.4 as a workaround for stalling OTA downloads
 * Change setting of compiler optimization to -O3 for better performance
 * Replace LetsEncrypt DST Root CA X3 with ISRG Root X1 certificate
