@@ -3,6 +3,8 @@
 
 #if defined(INTL_BG)
 #include "intl_bg.h"
+#elif defined(INTL_BR)
+#include "intl_br.h"
 #elif defined(INTL_CN)
 #include "intl_cn.h"
 #elif defined(INTL_CZ)

@@ -1,11 +1,11 @@
-firmware master branch: [![Build Status](https://travis-ci.com/opendata-stuttgart/sensors-software.svg?branch=master)](https://travis-ci.com/opendata-stuttgart/sensors-software)  
-firmware beta branch: [![Build Status](https://travis-ci.com/opendata-stuttgart/sensors-software.svg?branch=beta)](https://travis-ci.com/opendata-stuttgart/sensors-software)  
+firmware master branch: [![Build Status](https://github.com/opendata-stuttgart/sensors-software/actions/workflows/airohr-firmware.yml/badge.svg?branch=master)](https://github.com/opendata-stuttgart/sensors-software/actions/workflows/airohr-firmware.yml?query=branch%3Amaster)  
+firmware beta branch: [![Build Status](https://github.com/opendata-stuttgart/sensors-software/actions/workflows/airohr-firmware.yml/badge.svg?branch=beta)](https://github.com/opendata-stuttgart/sensors-software/actions/workflows/airohr-firmware.yml?query=branch%3Abeta)
 
 # Software for Sensor.Community / Luftdaten.Info Sensor
 
 ## airrohr-firmware
 
-The maintained main firmware for the Luftdaten.Info Sensor. 
+The maintained main firmware for the Sensor.Community / Luftdaten.Info Sensor. 
 
 ## airrohr-update-loader
 
