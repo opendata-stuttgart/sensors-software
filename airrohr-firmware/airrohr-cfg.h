@@ -42,6 +42,7 @@ enum ConfigShapeId {
 	Config_npm_read,
 	Config_npm_fulltime,
 	Config_ips_read,
+	Config_sen5x_read,
 	Config_sps30_read,
 	Config_bmp_read,
 	Config_bmx280_read,
@@ -114,6 +115,7 @@ static constexpr char CFG_KEY_HPM_READ[] PROGMEM = "hpm_read";
 static constexpr char CFG_KEY_NPM_READ[] PROGMEM = "npm_read";
 static constexpr char CFG_KEY_NPM_FULLTIME[] PROGMEM = "npm_fulltime";
 static constexpr char CFG_KEY_IPS_READ[] PROGMEM = "ips_read";
+static constexpr char CFG_KEY_SEN5X_READ[] PROGMEM = "sen5x_read";
 static constexpr char CFG_KEY_SPS30_READ[] PROGMEM = "sps30_read";
 static constexpr char CFG_KEY_BMP_READ[] PROGMEM = "bmp_read";
 static constexpr char CFG_KEY_BMX280_READ[] PROGMEM = "bmx280_read";
@@ -186,6 +188,7 @@ static constexpr ConfigShapeEntry configShape[] PROGMEM = {
 	{ Config_Type_Bool, 0, CFG_KEY_NPM_READ, &cfg::npm_read },
 	{ Config_Type_Bool, 0, CFG_KEY_NPM_FULLTIME, &cfg::npm_fulltime },
 	{ Config_Type_Bool, 0, CFG_KEY_IPS_READ, &cfg::ips_read },
+	{ Config_Type_Bool, 0, CFG_KEY_SEN5X_READ, &cfg::sen5x_read },
 	{ Config_Type_Bool, 0, CFG_KEY_SPS30_READ, &cfg::sps30_read },
 	{ Config_Type_Bool, 0, CFG_KEY_BMP_READ, &cfg::bmp_read },
 	{ Config_Type_Bool, 0, CFG_KEY_BMX280_READ, &cfg::bmx280_read },
