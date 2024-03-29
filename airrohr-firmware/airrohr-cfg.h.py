@@ -29,6 +29,7 @@ Bool		dnms_read
 String		dnms_correction
 String		temp_correction
 String		height_above_sealevel
+String		last_calibration_scd30
 Bool		gps_read
 Bool		send2dusti
 Bool		ssl_dusti
