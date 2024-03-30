@@ -38,8 +38,8 @@ const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "補正量（単位：dB(A)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "補正（単位：°C";
-const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "";
-const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "";
+const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "[[height_above_sealevel]]";
+const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "[[pressure_at_sealevel]]";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "認証";
 #define INTL_REPORT_ISSUE "問題を報告する"
@@ -59,16 +59,16 @@ const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Wifi情報の表示";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "デバイス情報の表示";
 
-#define INTL_STATIC_IP_TEXT ""
-const char INTL_STATIC_IP[] PROGMEM = "";
-const char INTL_STATIC_SUBNET[] PROGMEM = "";
-const char INTL_STATIC_GATEWAY[] PROGMEM = "";
-const char INTL_STATIC_DNS[] PROGMEM = "";
+#define INTL_STATIC_IP_TEXT "[[static_ip_text]]"
+const char INTL_STATIC_IP[] PROGMEM = "[[static_ip]]";
+const char INTL_STATIC_SUBNET[] PROGMEM = "[[static_subnet]]";
+const char INTL_STATIC_GATEWAY[] PROGMEM = "[[static_gateway]]";
+const char INTL_STATIC_DNS[] PROGMEM = "[[static_dns]]";
 
 const char INTL_DEBUG_LEVEL[] PROGMEM = "デバッグ&nbsp;レベル";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "測定間隔（秒";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "持続時間ルータモード";
-const char INTL_POWERSAVE[] PROGMEM = "";
+const char INTL_POWERSAVE[] PROGMEM = "[[powersave]]";
 const char INTL_MORE_APIS[] PROGMEM = "その他のAPI";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "カスタムAPIへのデータ送信";
 const char INTL_SERVER[] PROGMEM = "サーバー";
@@ -113,9 +113,9 @@ const char INTL_PARTICULATE_MATTER[] PROGMEM = "粒子状物質";
 const char INTL_TEMPERATURE[] PROGMEM = "温度";
 const char INTL_HUMIDITY[] PROGMEM = "湿度";
 const char INTL_PRESSURE[] PROGMEM = "空気圧";
-const char INTL_VOC[] PROGMEM = "";
-const char INTL_NOX[] PROGMEM = "";
-const char INTL_DEW_POINT[] PROGMEM = "";
+const char INTL_VOC[] PROGMEM = "[[voc]]";
+const char INTL_NOX[] PROGMEM = "[[nox]]";
+const char INTL_DEW_POINT[] PROGMEM = "[[dew_point]]";
 const char INTL_CO2_PPM[] PROGMEM = "ppm CO₂";
 const char INTL_LEQ_A[] PROGMEM = "LAeq";
 const char INTL_LA_MIN[] PROGMEM = "L.A.分";

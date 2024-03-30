@@ -38,8 +38,8 @@ const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "Korrekturwärt&nbsp;an&nbsp;dB(A)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "Korrekturwärt&nbsp;an&nbsp;°C";
-const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "";
-const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "";
+const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "[[height_above_sealevel]]";
+const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "[[pressure_at_sealevel]]";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "BasicAuth aktivéieren";
 #define INTL_REPORT_ISSUE "E Feeler melden"
@@ -59,16 +59,16 @@ const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "WiFi Info uweisen";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Apparat Info uweisen";
 
-#define INTL_STATIC_IP_TEXT ""
-const char INTL_STATIC_IP[] PROGMEM = "";
-const char INTL_STATIC_SUBNET[] PROGMEM = "";
-const char INTL_STATIC_GATEWAY[] PROGMEM = "";
-const char INTL_STATIC_DNS[] PROGMEM = "";
+#define INTL_STATIC_IP_TEXT "[[static_ip_text]]"
+const char INTL_STATIC_IP[] PROGMEM = "[[static_ip]]";
+const char INTL_STATIC_SUBNET[] PROGMEM = "[[static_subnet]]";
+const char INTL_STATIC_GATEWAY[] PROGMEM = "[[static_gateway]]";
+const char INTL_STATIC_DNS[] PROGMEM = "[[static_dns]]";
 
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;Niveau";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Mooss-intervall";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Zait&nbsp;Routermodus";
-const char INTL_POWERSAVE[] PROGMEM = "";
+const char INTL_POWERSAVE[] PROGMEM = "[[powersave]]";
 const char INTL_MORE_APIS[] PROGMEM = "Aner APIs";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Un eegen API schécken";
 const char INTL_SERVER[] PROGMEM = "Server";
@@ -113,9 +113,9 @@ const char INTL_PARTICULATE_MATTER[] PROGMEM = "Reng Stëbspartikelen";
 const char INTL_TEMPERATURE[] PROGMEM = "Temperatur";
 const char INTL_HUMIDITY[] PROGMEM = "rel. Loftfiichtegkeet";
 const char INTL_PRESSURE[] PROGMEM = "Loftdrock";
-const char INTL_VOC[] PROGMEM = "";
-const char INTL_NOX[] PROGMEM = "";
-const char INTL_DEW_POINT[] PROGMEM = "";
+const char INTL_VOC[] PROGMEM = "[[voc]]";
+const char INTL_NOX[] PROGMEM = "[[nox]]";
+const char INTL_DEW_POINT[] PROGMEM = "[[dew_point]]";
 const char INTL_CO2_PPM[] PROGMEM = "ppm CO₂";
 const char INTL_LEQ_A[] PROGMEM = "LAeq";
 const char INTL_LA_MIN[] PROGMEM = "LA min";

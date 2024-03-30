@@ -1,15 +1,15 @@
 /*
  *	airRohr firmware
- *	Copyright (C) 2016-2018  Code for Stuttgart a.o.
+ *	Copyright (C) 2016-2018 Code for Stuttgart a.o.
  *
- *  Translation template
+ *  Portuguese/Brasilian translations
  *
  *	Texts should be as short as possible
  */
 
-#define INTL_LANG "BR";
-#define INTL_PM_SENSOR ""
-const char INTL_CONFIGURATION[] PROGMEM = "";
+#define INTL_LANG "BR"
+#define INTL_PM_SENSOR "Sensor de partículas finas"
+const char INTL_CONFIGURATION[] PROGMEM = "Configuração";
 #define INTL_WIFI_SETTINGS "Configuracões de Wi-Fi"
 #define INTL_WIFI_NETWORKS "Carregando redes Wi-Fi"
 #define INTL_LANGUAGE "Idioma"
@@ -25,6 +25,7 @@ const char INTL_HPM[] PROGMEM = "Honeywell PM ({pm})";
 const char INTL_NPM[] PROGMEM = "Tera Sensor Next PM ({pm})";
 const char INTL_NPM_FULLTIME[] PROGMEM = "Next PM fulltime";
 const char INTL_IPS[] PROGMEM = "Piera Systems IPS-7100 ({pm})";
+const char INTL_SEN5X[] PROGMEM = "Sensirion I2C SEN5X ({pm}, {t}, {h}, {voc}, {nox})";
 const char INTL_SPS30[] PROGMEM = "Sensirion SPS30 ({pm})";
 const char INTL_PPD42NS[] PROGMEM = "PPD42NS ({pm})";
 const char INTL_DHT22[] PROGMEM = "DHT22 ({t}, {h})";
@@ -37,8 +38,8 @@ const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "Valor de correção em dB(A)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "Correção em C°";
-const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "";
-const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "";
+const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "[[height_above_sealevel]]";
+const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "[[pressure_at_sealevel]]";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Autorização";
 #define INTL_REPORT_ISSUE " Reporter um problema"
@@ -58,16 +59,16 @@ const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Mostrar informações da rede Wi-Fi";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Mostrar informações do dispositivo";
 
-#define INTL_STATIC_IP_TEXT ""
-const char INTL_STATIC_IP[] PROGMEM = "";
-const char INTL_STATIC_SUBNET[] PROGMEM = "";
-const char INTL_STATIC_GATEWAY[] PROGMEM = "";
-const char INTL_STATIC_DNS[] PROGMEM = "";
+#define INTL_STATIC_IP_TEXT "[[static_ip_text]]"
+const char INTL_STATIC_IP[] PROGMEM = "[[static_ip]]";
+const char INTL_STATIC_SUBNET[] PROGMEM = "[[static_subnet]]";
+const char INTL_STATIC_GATEWAY[] PROGMEM = "[[static_gateway]]";
+const char INTL_STATIC_DNS[] PROGMEM = "[[static_dns]]";
 
-const char INTL_DEBUG_LEVEL[] PROGMEM = "";
+const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;Level";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Intervalo de medição";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Duração ";
-const char INTL_POWERSAVE[] PROGMEM = "";
+const char INTL_POWERSAVE[] PROGMEM = "[[powersave]]";
 const char INTL_MORE_APIS[] PROGMEM = "Outros API";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Enviar para a própria API";
 const char INTL_SERVER[] PROGMEM = "Servidor";
@@ -112,7 +113,9 @@ const char INTL_PARTICULATE_MATTER[] PROGMEM = "Particulas finas";
 const char INTL_TEMPERATURE[] PROGMEM = "Temperatura";
 const char INTL_HUMIDITY[] PROGMEM = "Humidade";
 const char INTL_PRESSURE[] PROGMEM = "Pessão atmosférica";
-const char INTL_DEW_POINT[] PROGMEM = "";
+const char INTL_VOC[] PROGMEM = "[[voc]]";
+const char INTL_NOX[] PROGMEM = "[[nox]]";
+const char INTL_DEW_POINT[] PROGMEM = "[[dew_point]]";
 const char INTL_CO2_PPM[] PROGMEM = "ppm CO₂";
 const char INTL_LEQ_A[] PROGMEM = "LAeq";
 const char INTL_LA_MIN[] PROGMEM = "LA min";

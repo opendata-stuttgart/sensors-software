@@ -47,17 +47,17 @@
  *                                                                      *
  ************************************************************************
  *
- * latest build using lib 3.1.0
- * DATA:    [====      ]  41.5% (used 34000 bytes from 81920 bytes)
- * PROGRAM: [======    ]  58.0% (used 605529 bytes from 1044464 bytes)
- *  
+ * latest build using lib 2.7.4 with -O3
+ * DATA:    [====      ]  41.6% (used 34104 bytes from 81920 bytes)
+ * PROGRAM: [=======   ]  66.5% (used 694547 bytes from 1044464 bytes)
+ *
  ************************************************************************/
  
 #include <WString.h>
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2023-134-B5"
+#define SOFTWARE_VERSION_STR "NRZ-2024-134-B5"
 String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -173,10 +173,9 @@ namespace cfg
 	bool sps30_read = SPS30_READ;
 	bool bmp_read = BMP_READ;
 	bool bmx280_read = BMX280_READ;
-	char height_above_sealevel[LEN_HEIGHT_ABOVE_SEALEVEL] = "0";
+	char height_above_sealevel[8] = "0";
 	bool sht3x_read = SHT3X_READ;
 	bool scd30_read = SCD30_READ;
-	char last_calibration_scd30[LEN_LAST_CALIBRATION_SCD30] = "";
 	bool ds18b20_read = DS18B20_READ;
 	bool dnms_read = DNMS_READ;
 	char dnms_correction[LEN_DNMS_CORRECTION] = DNMS_CORRECTION;
@@ -249,7 +248,7 @@ namespace cfg
 	}
 }
 
-#define JSON_BUFFER_SIZE 2300
+#define JSON_BUFFER_SIZE 2800
 
 LoggerConfig loggerConfigs[LoggerCount];
 
@@ -622,10 +621,6 @@ unsigned long SPS30_read_counter = 0;
 unsigned long SPS30_read_error_counter = 0;
 unsigned long SPS30_read_timer = 0;
 bool sps30_init_failed = false;
-
-bool scd30_calibration = 0;
-unsigned long scd30_start_cal = 0;
-unsigned long scd30_last_val_change = 0;
 
 float last_value_PPD_P1 = -1.0;
 float last_value_PPD_P2 = -1.0;
@@ -1250,13 +1245,12 @@ static void readConfig(bool oldconfig = false)
 	debug_outln_info(F("opened config file..."));
 	DynamicJsonDocument json(JSON_BUFFER_SIZE);
 	DeserializationError err = deserializeJson(json, configFile.readString());
+	debug_outln_info(F("parsing json: "), err.f_str());
 	configFile.close();
 #pragma GCC diagnostic pop
 
 	if (!err)
 	{
-		serializeJsonPretty(json, Debug);
-		debug_outln_info(F("parsed json..."));
 		for (unsigned e = 0; e < sizeof(configShape) / sizeof(configShape[0]); ++e)
 		{
 			ConfigShapeEntry c;
@@ -1281,6 +1275,12 @@ static void readConfig(bool oldconfig = false)
 				break;
 			};
 		}
+
+		if (cfg::debug > DEBUG_MIN_INFO)
+		{
+			serializeJsonPretty(json, Debug); Debug.print('\n');
+		}
+
 		String writtenVersion(json["SOFTWARE_VERSION"].as<const char *>());
 		if (writtenVersion.length() && writtenVersion[0] == 'N' && SOFTWARE_VERSION != writtenVersion)
 		{
@@ -1319,6 +1319,13 @@ static void readConfig(bool oldconfig = false)
 		if (boolFromJSON(json, F("bmp280_read")) || boolFromJSON(json, F("bme280_read")))
 		{
 			cfg::bmx280_read = true;
+			rewriteConfig = true;
+		}
+
+		if (strlen(cfg::fs_ssid) == 0)
+		{
+			snprintf_P(cfg::fs_ssid, LEN_FS_SSID, PSTR("%s%s"), SSID_BASENAME, esp_chipid.c_str());
+			debug_outln_info(F("Setting default AP SSID to "), cfg::fs_ssid);
 			rewriteConfig = true;
 		}
 	}
@@ -1627,11 +1634,13 @@ static String form_select_lang()
 				 "<option value='HU'>Magyar (HU)</option>"
 				 "<option value='PL'>Polski (PL)</option>"
 				 "<option value='PT'>Português (PT)</option>"
+				 "<option value='BR'>Português brasileiro (BR)</option>"
 				 "<option value='RO'>Română (RO)</option>"
 				 "<option value='RS'>Srpski (RS)</option>"
 				 "<option value='RU'>Русский (RU)</option>"
 				 "<option value='SI'>Slovenščina (SI)</option>"
 				 "<option value='SK'>Slovák (SK)</option>"
+				 "<option value='FI'>Suomi (FI)</option>"
 				 "<option value='SE'>Svenska (SE)</option>"
 				 "<option value='TR'>Türkçe (TR)</option>"
 				 "<option value='UA'>український (UA)</option>"
@@ -1694,7 +1703,8 @@ static void sendHttpRedirect() {
 		default_ip_third_octet, 
 		default_ip_fourth_octet);
 
-	String defaultAddress = F("http://") + defaultIP.toString() + F("/config");
+	//String defaultAddress = F("http://") + defaultIP.toString() + F("/config");
+	String defaultAddress = F("http://192.168.4.1/config");
 	server.sendHeader(F("Location"), defaultAddress);
 	server.send(302, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), emptyString);
 }
@@ -2528,11 +2538,6 @@ static void webserver_status()
 		add_table_row_from_value(page_content, F("SCD30 measurement interval"), String(settingVal));
 		scd30.getTemperatureOffset(&settingVal);
 		add_table_row_from_value(page_content, F("SCD30 temperature offset"), String(settingVal));
-		if (scd30_calibration) {
-			add_table_row_from_value(page_content, F("SCD30 calibration running since",  delayToString(millis() - scd30_start_cal));
-		} else {
-			add_table_row_from_value(page_content, F("SCD30 last calibration"), cfg::last_calibration_scd30);
-		}
 	}
 
 	page_content += FPSTR(EMPTY_ROW);
@@ -2772,29 +2777,6 @@ static void webserver_reset()
 	{
 		sensor_restart();
 	}
-	end_html_page(page_content);
-}
-
-/*****************************************************************
- * Webserver start SCD30 calibration                             *
- *****************************************************************/
-static void webserver_scd30_calib() {
-	if (!webserver_request_auth())
-	{ return; }
-
-	String page_content;
-	page_content.reserve(512);
-
-	start_html_page(page_content, FPSTR(INTL_SCD30_CALIBRATION));
-	debug_outln_info(F("ws: start SCD30 calibration..."));
-
-	page_content += FPSTR(WEB_SCD30_CALIBRATION_CONTENT);
-
-	if (! scd30_calibration) {
-		scd30_calibration = true;
-		scd30_start_cal = millis();
-	}
-
 	end_html_page(page_content);
 }
 
@@ -3189,7 +3171,11 @@ static void connectWifi()
 	WiFi.hostname(cfg::fs_ssid);
 	if (addr_static_ip.fromString(cfg::static_ip) && addr_static_subnet.fromString(cfg::static_subnet) && addr_static_gateway.fromString(cfg::static_gateway) && addr_static_dns.fromString(cfg::static_dns))
 	{
-		WiFi.config(addr_static_ip, addr_static_subnet, addr_static_gateway, addr_static_dns, addr_static_dns);
+		//ESP argument order is: ip, gateway, subnet, dns1
+		//Arduino arg order is:  ip, dns, gateway, subnet.
+		//To allow compatibility, check first octet of 3rd arg. If 255, interpret as ESP order, otherwise Arduino order.
+		//Here ESP order is used
+		WiFi.config(addr_static_ip, addr_static_gateway, addr_static_subnet, addr_static_dns, addr_static_dns);
 	}
 #endif
 
@@ -3241,7 +3227,7 @@ static WiFiClient *getNewLoggerWiFiClient(const LoggerEntry logger)
 #if defined(ESP8266)
 		static_cast<WiFiClientSecure *>(_client)->setSession(loggerConfigs[logger].session);
 		static_cast<WiFiClientSecure *>(_client)->setBufferSizes(1024, TCP_MSS > 1024 ? 2048 : 1024);
-		static_cast<WiFiClientSecure *>(_client)->setSSLVersion(BR_TLS12, BR_TLS12);
+		//static_cast<WiFiClientSecure *>(_client)->setSSLVersion(BR_TLS12, BR_TLS12);
 		switch (logger)
 		{
 		case Loggeraircms:
@@ -3320,10 +3306,13 @@ static unsigned long sendData(const LoggerEntry logger, const String &data, cons
 			debug_outln_info(F("Succeeded - "), s_Host);
 			send_success = true;
 		}
-		else if (result >= HTTP_CODE_BAD_REQUEST)
+		else
 		{
 			debug_outln_info(F("Request failed with error: "), String(result));
-			debug_outln_info(F("Details:"), http.getString());
+			if (result >= HTTP_CODE_BAD_REQUEST)
+			{
+				debug_outln_info(F("Details:"), http.getString());
+			}
 		}
 		http.end();
 	}
@@ -3374,7 +3363,6 @@ static unsigned long sendSensorCommunity(const String &data, const int pin, cons
  *****************************************************************/
 static void create_influxdb_string_from_data(String &data_4_influxdb, const String &data)
 {
-	debug_outln_verbose(F("Parse JSON for influx DB: "), data);
 	DynamicJsonDocument json2data(JSON_BUFFER_SIZE);
 	DeserializationError err = deserializeJson(json2data, data);
 	if (!err)
@@ -5018,9 +5006,13 @@ static bool fwDownloadStream(WiFiClientSecure &client, const String &url, Stream
 		http.end();
 	}
 
+	debug_outln_verbose(F("bytes written: "), String(bytes_written));
+
 	if (bytes_written > 0)
 		return true;
 
+	last_update_returncode = bytes_written ;
+	Debug.println( http.errorToString(bytes_written) );
 	return false;
 }
 
@@ -5082,6 +5074,7 @@ static void twoStageOTAUpdate()
 	BearSSL::Session clientSession;
 
 	client.setBufferSizes(1024, TCP_MSS > 1024 ? 2048 : 1024);
+	client.setCiphersLessSecure();
 	client.setSession(&clientSession);
 	configureCACertTrustAnchor(&client);
 
@@ -6094,7 +6087,7 @@ static void powerOnTestSensors()
 
 	if (cfg::bmx280_read)
 	{
-		debug_outln_info(F("Read BMxE280..."));
+		debug_outln_info(F("Read BMx280..."));
 		if (!initBMX280(bmx280_default_i2c_address) && !initBMX280(bmx280_alternate_i2c_address)) {
 			debug_outln_error(F("Check BMx280 wiring"));
 			bmx280_init_failed = true;
@@ -6312,6 +6305,7 @@ void setup(void)
 	esp_chipid += String((uint32_t)chipid_num, HEX);
 #endif
 	cfg::initNonTrivials(esp_chipid.c_str());
+	WiFi.persistent(false);
 
 	debug_outln_info(F("airRohr: " SOFTWARE_VERSION_STR "/"), String(CURRENT_LANG));
 
@@ -6772,7 +6766,7 @@ void loop(void)
 			data.remove(data.length() - 1);
 		}
 		data += "]}";
-		Debug.println(data);
+		debug_outln_verbose(F("Data to send: "), data);
 		yield();
 
 		sum_send_time += sendDataToOptionalApis(data);
