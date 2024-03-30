@@ -78,15 +78,15 @@ Additional Libraries needed for building:
 
 ## Source Layout
 
-| Dateiname                                 | Beschreibung                                                                                               |
-| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `airrohr-firmware.ino`                      | Sourcecode der eigentlichen Firmware                                                                       |
-| `ext_def.h`                                 | grundsätzliche Konfiguration der Parameter (WLAN, Sensoren, APIs)                                          |
-| `html-content.h`                            | allgemeine HTML-Sourcen und Bilder für HTML- und Text-Ausgaben                                             |
-| `intl_xx.h`                                 | Dateien mit übersetzten Texten für die Internationalisierung, 'xx' ist der 2 letter ISO code der 'Sprache' |
-| `intl_template.h`                           | Vorlage für Übersetzungen                                                                                  |
-| `astyle.rc`                                 | Formatierungsvorlage für Astyle                                                                            |
-| `ppd42ns-wificonfig-ppd-sds-dht.spiffs.bin` | Binary mit leerem Dateisystem, zum Löschen der Konfiguration, siehe Anleitung im Wiki                      |
+| File                                        | Description                                                                                             |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `airrohr-firmware.ino`                      | Source code of the actual firmware                                                                       |
+| `ext_def.h`                                 | Basic configuration of the parameters (WLAN, sensors, APIs)                                              |
+| `html-content.h`                            | General HTML sources and images for HTML and text output                                                 |
+| `intl_xx.h`                                 | Files with translated texts for internationalization, 'xx' is the 2 letter ISO code of the 'language'    |
+| `intl_template.h`                           | Template for translations                                                                                |
+| `astyle.rc`                                 | Formatting template for Astyle                                                                           |
+| `ppd42ns-wificonfig-ppd-sds-dht.spiffs.bin` | Binary with an empty file system, to delete the configuration, see the instructions in the wiki          |
 
 
 ## Translations

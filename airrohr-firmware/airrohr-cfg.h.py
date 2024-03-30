@@ -18,6 +18,7 @@ Bool		hpm_read
 Bool		npm_read
 Bool        npm_fulltime
 Bool		ips_read
+Bool		sen5x_read
 Bool		sps30_read
 Bool		bmp_read
 Bool		bmx280_read
@@ -28,6 +29,7 @@ Bool		dnms_read
 String		dnms_correction
 String		temp_correction
 String		height_above_sealevel
+String		last_calibration_scd30
 Bool		gps_read
 Bool		send2dusti
 Bool		ssl_dusti
