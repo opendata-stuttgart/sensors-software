@@ -173,10 +173,9 @@ namespace cfg
 	bool sps30_read = SPS30_READ;
 	bool bmp_read = BMP_READ;
 	bool bmx280_read = BMX280_READ;
-	char height_above_sealevel[LEN_HEIGHT_ABOVE_SEALEVEL] = "0";
+	char height_above_sealevel[8] = "0";
 	bool sht3x_read = SHT3X_READ;
 	bool scd30_read = SCD30_READ;
-	char last_calibration_scd30[LEN_LAST_CALIBRATION_SCD30] = "";
 	bool ds18b20_read = DS18B20_READ;
 	bool dnms_read = DNMS_READ;
 	char dnms_correction[LEN_DNMS_CORRECTION] = DNMS_CORRECTION;
@@ -622,10 +621,6 @@ unsigned long SPS30_read_counter = 0;
 unsigned long SPS30_read_error_counter = 0;
 unsigned long SPS30_read_timer = 0;
 bool sps30_init_failed = false;
-
-bool scd30_calibration = 0;
-unsigned long scd30_start_cal = 0;
-unsigned long scd30_last_val_change = 0;
 
 float last_value_PPD_P1 = -1.0;
 float last_value_PPD_P2 = -1.0;
@@ -2543,11 +2538,6 @@ static void webserver_status()
 		add_table_row_from_value(page_content, F("SCD30 measurement interval"), String(settingVal));
 		scd30.getTemperatureOffset(&settingVal);
 		add_table_row_from_value(page_content, F("SCD30 temperature offset"), String(settingVal));
-		if (scd30_calibration) {
-			add_table_row_from_value(page_content, F("SCD30 calibration running since",  delayToString(millis() - scd30_start_cal));
-		} else {
-			add_table_row_from_value(page_content, F("SCD30 last calibration"), cfg::last_calibration_scd30);
-		}
 	}
 
 	page_content += FPSTR(EMPTY_ROW);
@@ -2787,29 +2777,6 @@ static void webserver_reset()
 	{
 		sensor_restart();
 	}
-	end_html_page(page_content);
-}
-
-/*****************************************************************
- * Webserver start SCD30 calibration                             *
- *****************************************************************/
-static void webserver_scd30_calib() {
-	if (!webserver_request_auth())
-	{ return; }
-
-	String page_content;
-	page_content.reserve(512);
-
-	start_html_page(page_content, FPSTR(INTL_SCD30_CALIBRATION));
-	debug_outln_info(F("ws: start SCD30 calibration..."));
-
-	page_content += FPSTR(WEB_SCD30_CALIBRATION_CONTENT);
-
-	if (! scd30_calibration) {
-		scd30_calibration = true;
-		scd30_start_cal = millis();
-	}
-
 	end_html_page(page_content);
 }
 
