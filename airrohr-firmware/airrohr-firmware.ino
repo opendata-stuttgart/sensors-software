@@ -57,7 +57,7 @@
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2024-134-B5"
+#define SOFTWARE_VERSION_STR "NRZ-2024-134-B6"
 String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -6112,10 +6112,10 @@ static void powerOnTestSensors()
 			debug_outln_error(F("Check SCD30 wiring"));
 			scd30_init_failed = true;
 		}
-		else
+/*		else
 		{
 			scd30.setMeasurementInterval(30);
-		}
+		} */
 	}
 
 	if (cfg::ds18b20_read)
