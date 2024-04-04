@@ -48,9 +48,9 @@
  *                                                                      *
  ************************************************************************
  *
- * latest build
- * RAM:   [====      ]  41.8% (used 34220 bytes from 81920 bytes)
- * Flash: [=======   ]  67.1% (used 701191 bytes from 1044464 bytes)
+ * latest build using lib 3.0.2
+ * DATA:    [====      ]  43.7% (used 35820 bytes from 81920 bytes)
+ * PROGRAM: [======    ]  60.2% (used 628885 bytes from 1044464 bytes)
  *
  ************************************************************************/
  
@@ -1704,8 +1704,7 @@ static void sendHttpRedirect() {
 		default_ip_third_octet, 
 		default_ip_fourth_octet);
 
-	//String defaultAddress = F("http://") + defaultIP.toString() + F("/config");
-	String defaultAddress = F("http://192.168.4.1/config");
+	String defaultAddress = F("http://") + defaultIP.toString() + F("/config");
 	server.sendHeader(F("Location"), defaultAddress);
 	server.send(302, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), emptyString);
 }
@@ -3228,7 +3227,7 @@ static WiFiClient *getNewLoggerWiFiClient(const LoggerEntry logger)
 #if defined(ESP8266)
 		static_cast<WiFiClientSecure *>(_client)->setSession(loggerConfigs[logger].session);
 		static_cast<WiFiClientSecure *>(_client)->setBufferSizes(1024, TCP_MSS > 1024 ? 2048 : 1024);
-		//static_cast<WiFiClientSecure *>(_client)->setSSLVersion(BR_TLS12, BR_TLS12);
+		static_cast<WiFiClientSecure *>(_client)->setSSLVersion(BR_TLS12, BR_TLS12);
 		switch (logger)
 		{
 		case Loggeraircms:
@@ -6306,7 +6305,6 @@ void setup(void)
 	esp_chipid += String((uint32_t)chipid_num, HEX);
 #endif
 	cfg::initNonTrivials(esp_chipid.c_str());
-	WiFi.persistent(false);
 
 	debug_outln_info(F("airRohr: " SOFTWARE_VERSION_STR "/"), String(CURRENT_LANG));
 
