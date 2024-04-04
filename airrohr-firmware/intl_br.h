@@ -41,7 +41,7 @@ const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "[[height_above_sealevel]]";
 const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "[[pressure_at_sealevel]]";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Autorização";
-#define INTL_REPORT_ISSUE " Reporter um problema"
+#define INTL_REPORT_ISSUE "Reporter um problema"
 
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "Nome do sensor Wi-Fi em modo de configuração";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Nome";
@@ -96,7 +96,7 @@ const char INTL_DEVICE_STATUS[] PROGMEM = "Status do dispositivo";
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Salvar e reiniciar";
 #define INTL_FIRMWARE "Versão do Firmaware"
 const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Ajustar configuração de Debug ";
-#define INTL_NONE " nenhum"
+#define INTL_NONE "nenhum"
 #define INTL_ERROR "erro"
 #define INTL_WARNING "aviso"
 #define INTL_MIN_INFO "Informação minima"
@@ -105,8 +105,8 @@ const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Ajustar configuração de Debug ";
 #define INTL_CONFIG_DELETED "Configuração apagada"
 #define INTL_CONFIG_CAN_NOT_BE_DELETED "Configuração não pode ser apagada"
 #define INTL_CONFIG_NOT_FOUND "Configuração não encontrada"
-const char INTL_TIME_TO_FIRST_MEASUREMENT[] PROGMEM = "Tempo para a primeira medição";
-const char INTL_TIME_SINCE_LAST_MEASUREMENT[] PROGMEM = "Tempo desde a última medição";
+const char INTL_TIME_TO_FIRST_MEASUREMENT[] PROGMEM = "Outros {v} segundos para a primeira medição.";
+const char INTL_TIME_SINCE_LAST_MEASUREMENT[] PROGMEM = " Tempo desde a última medição";
 const char INTL_PARTICLES_PER_LITER[] PROGMEM = "Particulas/litro";
 const char INTL_PARTICULATE_MATTER[] PROGMEM = "Particulas finas";
 const char INTL_TEMPERATURE[] PROGMEM = "Temperatura";
