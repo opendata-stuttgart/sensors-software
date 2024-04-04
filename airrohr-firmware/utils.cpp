@@ -106,6 +106,8 @@ String add_sensor_type(const String& sensor_text) {
 	s.replace("{h}", FPSTR(INTL_HUMIDITY));
 	s.replace("{p}", FPSTR(INTL_PRESSURE));
 	s.replace("{l_a}", FPSTR(INTL_LEQ_A));
+	s.replace("{voc}", FPSTR(INTL_VOC));
+	s.replace("{nox}", FPSTR(INTL_NOX));
 	return s;
 }
 

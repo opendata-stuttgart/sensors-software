@@ -257,6 +257,13 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 #define IPS_READ 0
 #define IPS_API_PIN 1
 
+// Sensirion Sensirion I2C SEN5X
+#define SEN5X_READ 0
+#define SEN5X_API_PIN 16 // New pin n°! 1 for PM, 7 for the rest?
+#define SEN5X_WAITING_AFTER_LAST_READ 11000   // waiting time after last reading mesurement data in ms
+#define SEN5X_AUTO_CLEANING_INTERVAL 7200 // time in seconds
+
+
 // Sensirion SPS30, the more expensive version of the particle sensor
 #define SPS30_READ 0
 #define SPS30_API_PIN 1
