@@ -106,7 +106,7 @@ const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Imposta debug su";
 #define INTL_CONFIG_CAN_NOT_BE_DELETED "Impossibile cancellare la configurazione"
 #define INTL_CONFIG_NOT_FOUND "Configurazione non trovata"
 const char INTL_TIME_TO_FIRST_MEASUREMENT[] PROGMEM = "Altri {v} secondi per la prima misurazione.";
-const char INTL_TIME_SINCE_LAST_MEASUREMENT[] PROGMEM = "secondi dall'ultima misurazione";
+const char INTL_TIME_SINCE_LAST_MEASUREMENT[] PROGMEM = " secondi dall'ultima misurazione";
 const char INTL_PARTICLES_PER_LITER[] PROGMEM = "Particelle / litro";
 const char INTL_PARTICULATE_MATTER[] PROGMEM = "polveri sottili";
 const char INTL_TEMPERATURE[] PROGMEM = "Temperatura";
