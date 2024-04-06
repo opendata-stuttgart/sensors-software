@@ -58,7 +58,7 @@
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2024-134-B7"
+#define SOFTWARE_VERSION_STR "NRZ-2024-135"
 String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -5593,27 +5593,27 @@ static void powerOnTestSensors()
 		NPM_temp_humi();
 		delay(2000); 
 
-	if(!cfg::npm_fulltime) {
-		is_NPM_running = NPM_start_stop();
-		delay(2000); //prevent any buffer overload on ESP82666
-	}else{
-		is_NPM_running = true;
-	}
+		if(!cfg::npm_fulltime) {
+			is_NPM_running = NPM_start_stop();
+			delay(2000); //prevent any buffer overload on ESP82666
+		}else{
+			is_NPM_running = true;
+		}
 	}
 
 	if (cfg::ips_read)
 	{
-	IPS_cmd(PmSensorCmd3::Factory); //set to Factory
-	delay(1000);
-	IPS_version_date();
-	delay(1000);
-	IPS_cmd(PmSensorCmd3::Smoke); // no smoke detection
-	delay(1000);
-	IPS_cmd(PmSensorCmd3::Interval); //Set interval to 0 = manual mode
-	delay(1000);
-	IPS_cmd(PmSensorCmd3::Stop); 
-	delay(1000);
-	is_IPS_running = false;
+		IPS_cmd(PmSensorCmd3::Factory); //set to Factory
+		delay(1000);
+		IPS_version_date();
+		delay(1000);
+		IPS_cmd(PmSensorCmd3::Smoke); // no smoke detection
+		delay(1000);
+		IPS_cmd(PmSensorCmd3::Interval); //Set interval to 0 = manual mode
+		delay(1000);
+		IPS_cmd(PmSensorCmd3::Stop); 
+		delay(1000);
+		is_IPS_running = false;
 	}
 
 	if (cfg::sps30_read)
