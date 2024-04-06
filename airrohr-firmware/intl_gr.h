@@ -1,6 +1,7 @@
 /*
  *  airRohr firmware 
- *  Copyright (C) 2016-2018 Code for Stuttgart a.o. 
+ *  Copyright (C) 2016-2021  Code for Stuttgart a.o.
+ *  Copyright (C) 2021-2024  Sensor.Community a.o.
  * 
  *  Greek translation
  * 

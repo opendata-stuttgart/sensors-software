@@ -7,6 +7,7 @@
  *                                                                      *
  *    airRohr firmware                                                  *
  *    Copyright (C) 2016-2021  Code for Stuttgart a.o.                  *
+ *    Copyright (C) 2021-2024  Sensor.Community a.o.                    *
  *    Copyright (C) 2019-2020  Dirk Mueller                             *
  *                                                                      *
  * This program is free software: you can redistribute it and/or modify *
@@ -57,7 +58,7 @@
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2024-134-B6"
+#define SOFTWARE_VERSION_STR "NRZ-2024-134-B7"
 String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
