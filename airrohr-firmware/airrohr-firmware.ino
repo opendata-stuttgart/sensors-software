@@ -48,9 +48,9 @@
  *                                                                      *
  ************************************************************************
  *
- * latest build using lib 3.0.2
- * DATA:    [====      ]  43.7% (used 35820 bytes from 81920 bytes)
- * PROGRAM: [======    ]  60.2% (used 628885 bytes from 1044464 bytes)
+ * latest build using lib 3.0.2 using -O2
+ * DATA:    [====      ]  44.3% (used 36280 bytes from 81920 bytes)
+ * PROGRAM: [======    ]  64.0% (used 668011 bytes from 1044464 bytes)
  *
  ************************************************************************/
  
@@ -58,7 +58,7 @@
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2024-136-B1"
+#define SOFTWARE_VERSION_STR "NRZ-2024-136-B1-SEN5X"
 String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
