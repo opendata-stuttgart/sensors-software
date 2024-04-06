@@ -8,6 +8,7 @@ const char TXT_CONTENT_TYPE_IMAGE_PNG[] PROGMEM = "image/png";
 const char DBG_TXT_TEMPERATURE[] PROGMEM = "Temperature (°C): ";
 const char DBG_TXT_HUMIDITY[] PROGMEM = "Humidity (%): ";
 const char DBG_TXT_PRESSURE[] PROGMEM = "Pressure (hPa): ";
+const char DBG_TXT_CO2PPM[] PROGMEM = "CO₂ (ppm): ";
 const char DBG_TXT_START_READING[] PROGMEM = "R/ ";
 const char DBG_TXT_END_READING[] PROGMEM = "/R ";
 const char DBG_TXT_CHECKSUM_IS[] PROGMEM = "Checksum is: ";
@@ -18,6 +19,7 @@ const char DBG_TXT_UPDATE_FAILED[] PROGMEM = "Update failed.";
 const char DBG_TXT_UPDATE_NO_UPDATE[] PROGMEM = "No update.";
 const char DBG_TXT_SENDING_TO[] PROGMEM = "## Sending to ";
 const char DBG_TXT_SDS011_VERSION_DATE[] PROGMEM = "SDS011 version date";
+const char DBG_TXT_NPM_VERSION_DATE[] PROGMEM = "Next PM version date";
 const char DBG_TXT_CONNECTING_TO[] PROGMEM = "Connecting to ";
 const char DBG_TXT_FOUND[] PROGMEM = " ... found";
 const char DBG_TXT_NOT_FOUND[] PROGMEM = " ... not found";
@@ -28,11 +30,13 @@ const char SENSORS_PPD42NS[] PROGMEM = "PPD42NS";
 const char SENSORS_PMSx003[] PROGMEM = "PMSx003";
 const char SENSORS_HPM[] PROGMEM = "Honeywell PM";
 const char SENSORS_NPM[] PROGMEM = "Tera Sensor Next PM";
+const char SENSORS_IPS[] PROGMEM = "Piera Systems IPS-7100";
 const char SENSORS_SPS30[] PROGMEM = "Sensirion SPS30";
 const char SENSORS_DHT22[] PROGMEM = "DHT22";
 const char SENSORS_DS18B20[] PROGMEM = "DS18B20";
 const char SENSORS_HTU21D[] PROGMEM = "HTU21D";
 const char SENSORS_SHT3X[] PROGMEM = "SHT3x";
+const char SENSORS_SCD30[] PROGMEM = "SCD30";
 const char SENSORS_BMP180[] PROGMEM = "BMP180";
 const char SENSORS_BME280[] PROGMEM = "BME280";
 const char SENSORS_BMP280[] PROGMEM = "BMP280";
@@ -63,12 +67,12 @@ input[type=submit]:hover{background:#d44}\
 .radio{display:none}.panel{display:none}\
 .canvas{min-height:118px;background:#3ba;margin-bottom:20px;}\
 #r4:checked~.panels>#panel4,#r1:checked~.panels>#panel1,#r3:checked~.panels>#panel3,#r2:checked~.panels>#panel2{display:block}\
-#r4:checked~.tabs>#tab4,#r1:checked~.tabs>#tab1,#r3:checked~.tabs>#tab3,#r2:checked~.tabs>#tab2{background:#3ba;color:#fff}\
-";
+#r4:checked~.tabs>#tab4,#r1:checked~.tabs>#tab1,#r3:checked~.tabs>#tab3,#r2:checked~.tabs>#tab2{background:#3ba;color:#fff}";
 
 #define STATIC_PREFIX "/" INTL_LANG "_s1"
 
 const char WEB_PAGE_HEADER_HEAD[] PROGMEM = "<meta name='viewport' content='width=device-width'/>\
+<meta name='theme-color' content='#3ba'>\
 <link rel='stylesheet' href='" STATIC_PREFIX "?r=css'>\
 </style>\
 </head><body>\
@@ -76,7 +80,7 @@ const char WEB_PAGE_HEADER_HEAD[] PROGMEM = "<meta name='viewport' content='widt
 <a class='b' href='/' style='background:none;display:inline'>\
 <img src='" STATIC_PREFIX "?r=logo' alt='" INTL_BACK_TO_HOME "' style='float:left;margin:16px' width='100' height='89'/></a>";
 
-const char WEB_PAGE_HEADER_BODY[] PROGMEM = "<h3 style='margin:0 10px'>" INTL_PM_SENSOR "</h3>\
+const char WEB_PAGE_HEADER_BODY[] PROGMEM = "<h3 style='margin:0 10px; color:#fff;'>" INTL_PM_SENSOR "</h3>\
 <br/><small style='color:#fff;font-weight:700'>ID: {id} ({macid})<br/>" INTL_FIRMWARE ": " SOFTWARE_VERSION_STR "/" INTL_LANG "&nbsp;(" __DATE__ ")<br/>\
 </small></div><div class='content'><h4>" INTL_HOME " {n} {t}</h4>";
 
@@ -100,8 +104,7 @@ const char WEB_ROOT_PAGE_CONTENT[] PROGMEM = "<a class='b' href='/values'>{t}</a
 <a class='b' href='/config'>{conf}</a><br/>\
 <a class='b' href='/removeConfig'>" INTL_CONFIGURATION_DELETE "</a><br/>\
 <a class='b' href='/reset'>{restart}</a><br/>\
-<a class='b' href='/debug'>{debug}</a><br/>\
-";
+<a class='b' href='/debug'>{debug}</a><br/>";
 
 const char WEB_CONFIG_SCRIPT[] PROGMEM = "<script>\
 function setSSID(ssid){document.getElementById('wlanssid').value=ssid.innerText||ssid.textContent;document.getElementById('wlanpwd').focus();}\
@@ -111,8 +114,7 @@ function load_wifi_list(){var x=new XMLHttpRequest();x.open('GET','/wifi');x.onl
 const char WEB_REMOVE_CONFIG_CONTENT[] PROGMEM = "<h3>" INTL_CONFIGURATION_REALLY_DELETE "</h3>\
 <table><tr><td><form method='POST' action='/removeConfig'>\
 <input type='submit' class='s_red' name='submit' value='" INTL_DELETE "'/></form></td>\
-<td><a class='b' href='/'>" INTL_CANCEL "</a></td></tr></table>\
-";
+<td><a class='b' href='/'>" INTL_CANCEL "</a></td></tr></table>";
 
 const char WEB_RESET_CONTENT[] PROGMEM = "<h3>" INTL_REALLY_RESTART_SENSOR "</h3>" \
 "<table><tr><td><form method='POST' action'/reset'>" \
@@ -145,10 +147,17 @@ const char WEB_PM1[] PROGMEM = "PM1";
 const char WEB_PM25[] PROGMEM = "PM2.5";
 const char WEB_PM10[] PROGMEM = "PM10";
 const char WEB_PM4[] PROGMEM = "PM4";
+const char WEB_PM01[] PROGMEM = "PM0.1";
+const char WEB_PM03[] PROGMEM = "PM0.3";
+const char WEB_PM05[] PROGMEM = "PM0.5";
+const char WEB_PM5[] PROGMEM = "PM5";
+const char WEB_NC0k1[] PROGMEM = "NC0.1";
+const char WEB_NC0k3[] PROGMEM = "NC0.3";
 const char WEB_NC0k5[] PROGMEM = "NC0.5";
 const char WEB_NC1k0[] PROGMEM = "NC1.0";
 const char WEB_NC2k5[] PROGMEM = "NC2.5";
 const char WEB_NC4k0[] PROGMEM = "NC4.0";
+const char WEB_NC5k0[] PROGMEM = "NC5.0";
 const char WEB_NC10[] PROGMEM = "NC10";
 const char WEB_TPS[] PROGMEM = "TPS";
 const char WEB_GPS[] PROGMEM = "GPS";

@@ -1,6 +1,7 @@
 /*
  *	airRohr firmware
- *	Copyright (C) 2016-2020  Code for Stuttgart a.o.
+ *  Copyright (C) 2016-2021  Code for Stuttgart a.o.
+ *  Copyright (C) 2021-2024  Sensor.Community a.o.
  *
  *  French translations
  *
@@ -22,6 +23,9 @@ const char INTL_MORE_SENSORS[] PROGMEM = "Autres capteurs";
 const char INTL_SDS011[] PROGMEM = "SDS011 ({pm})";
 const char INTL_PMS[] PROGMEM = "Plantower PMS(1,3,5,6,7)003 ({pm})";
 const char INTL_HPM[] PROGMEM = "Honeywell détecteur de particules fines";
+const char INTL_NPM[] PROGMEM = "Tera Sensor Next PM ({pm})";
+const char INTL_NPM_FULLTIME[] PROGMEM = "Next PM permanent";
+const char INTL_IPS[] PROGMEM = "Piera Systems IPS-7100 ({pm})";
 const char INTL_SPS30[] PROGMEM = "Sensirion SPS30 ({pm})";
 const char INTL_PPD42NS[] PROGMEM = "PPD42NS ({pm})";
 const char INTL_DHT22[] PROGMEM = "DHT22 ({t}, {h})";
@@ -29,10 +33,13 @@ const char INTL_HTU21D[] PROGMEM = "HTU21D ({t}, {h})";
 const char INTL_BMP180[] PROGMEM = "BMP180 ({t}, {p})";
 const char INTL_BMX280[] PROGMEM = "BME280 ({t}, {h}, {p}), BMP280 ({t}, {p})";
 const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
+const char INTL_SCD30[] PROGMEM = "SCD30 ({t}, {h}, CO₂)";
 const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "Valeur corrigée en dB(A)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "Valeur corrigée en °C";
+const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "Altitude en m";
+const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "Press. atm. au niveau de la mer en hPa";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Activer BasicAuth";
 #define INTL_REPORT_ISSUE "Signaler un problème"
@@ -51,9 +58,17 @@ const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
 const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Afficher les informations wifi";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Afficher les informations de l'appareil";
+
+#define INTL_STATIC_IP_TEXT "Configuration de l'adresse IP statique (tous les champs doivent être remplis)"
+const char INTL_STATIC_IP[] PROGMEM = "Adresse IP";
+const char INTL_STATIC_SUBNET[] PROGMEM = "Subnet";
+const char INTL_STATIC_GATEWAY[] PROGMEM = "Gateway";
+const char INTL_STATIC_DNS[] PROGMEM = "Serveur DNS";
+
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Niveau&nbsp;de&nbsp;débogage";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Intervalle de mesure";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Durée mode routeur";
+const char INTL_POWERSAVE[] PROGMEM = "Sauvegarde énergie";
 const char INTL_MORE_APIS[] PROGMEM = "Autres API";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Envoyer les données vers l'API personnelle";
 const char INTL_SERVER[] PROGMEM = "Serveur";
@@ -98,6 +113,8 @@ const char INTL_PARTICULATE_MATTER[] PROGMEM = "particules fines";
 const char INTL_TEMPERATURE[] PROGMEM = "Température";
 const char INTL_HUMIDITY[] PROGMEM = "Humidité relative";
 const char INTL_PRESSURE[] PROGMEM = "Pression atmosphérique";
+const char INTL_DEW_POINT[] PROGMEM = "Point de rosée";
+const char INTL_CO2_PPM[] PROGMEM = "ppm CO₂";
 const char INTL_LEQ_A[] PROGMEM = "LAeq";
 const char INTL_LA_MIN[] PROGMEM = "LA min";
 const char INTL_LA_MAX[] PROGMEM = "LA max";

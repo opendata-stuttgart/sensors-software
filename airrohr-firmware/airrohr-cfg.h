@@ -40,14 +40,18 @@ enum ConfigShapeId {
 	Config_pms_read,
 	Config_hpm_read,
 	Config_npm_read,
+	Config_npm_fulltime,
+	Config_ips_read,
 	Config_sps30_read,
 	Config_bmp_read,
 	Config_bmx280_read,
 	Config_sht3x_read,
+	Config_scd30_read,
 	Config_ds18b20_read,
 	Config_dnms_read,
 	Config_dnms_correction,
 	Config_temp_correction,
+	Config_height_above_sealevel,
 	Config_gps_read,
 	Config_send2dusti,
 	Config_ssl_dusti,
@@ -68,9 +72,14 @@ enum ConfigShapeId {
 	Config_has_lcd2004_27,
 	Config_display_wifi_info,
 	Config_display_device_info,
+	Config_static_ip,
+	Config_static_subnet,
+	Config_static_gateway,
+	Config_static_dns,
 	Config_debug,
 	Config_sending_intervall_ms,
 	Config_time_for_wifi_config,
+	Config_powersave,
 	Config_senseboxid,
 	Config_send2custom,
 	Config_host_custom,
@@ -103,14 +112,18 @@ static constexpr char CFG_KEY_SDS_READ[] PROGMEM = "sds_read";
 static constexpr char CFG_KEY_PMS_READ[] PROGMEM = "pms_read";
 static constexpr char CFG_KEY_HPM_READ[] PROGMEM = "hpm_read";
 static constexpr char CFG_KEY_NPM_READ[] PROGMEM = "npm_read";
+static constexpr char CFG_KEY_NPM_FULLTIME[] PROGMEM = "npm_fulltime";
+static constexpr char CFG_KEY_IPS_READ[] PROGMEM = "ips_read";
 static constexpr char CFG_KEY_SPS30_READ[] PROGMEM = "sps30_read";
 static constexpr char CFG_KEY_BMP_READ[] PROGMEM = "bmp_read";
 static constexpr char CFG_KEY_BMX280_READ[] PROGMEM = "bmx280_read";
 static constexpr char CFG_KEY_SHT3X_READ[] PROGMEM = "sht3x_read";
+static constexpr char CFG_KEY_SCD30_READ[] PROGMEM = "scd30_read";
 static constexpr char CFG_KEY_DS18B20_READ[] PROGMEM = "ds18b20_read";
 static constexpr char CFG_KEY_DNMS_READ[] PROGMEM = "dnms_read";
 static constexpr char CFG_KEY_DNMS_CORRECTION[] PROGMEM = "dnms_correction";
 static constexpr char CFG_KEY_TEMP_CORRECTION[] PROGMEM = "temp_correction";
+static constexpr char CFG_KEY_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "height_above_sealevel";
 static constexpr char CFG_KEY_GPS_READ[] PROGMEM = "gps_read";
 static constexpr char CFG_KEY_SEND2DUSTI[] PROGMEM = "send2dusti";
 static constexpr char CFG_KEY_SSL_DUSTI[] PROGMEM = "ssl_dusti";
@@ -131,9 +144,14 @@ static constexpr char CFG_KEY_HAS_LCD2004[] PROGMEM = "has_lcd2004";
 static constexpr char CFG_KEY_HAS_LCD2004_27[] PROGMEM = "has_lcd2004_27";
 static constexpr char CFG_KEY_DISPLAY_WIFI_INFO[] PROGMEM = "display_wifi_info";
 static constexpr char CFG_KEY_DISPLAY_DEVICE_INFO[] PROGMEM = "display_device_info";
+static constexpr char CFG_KEY_STATIC_IP[] PROGMEM = "static_ip";
+static constexpr char CFG_KEY_STATIC_SUBNET[] PROGMEM = "static_subnet";
+static constexpr char CFG_KEY_STATIC_GATEWAY[] PROGMEM = "static_gateway";
+static constexpr char CFG_KEY_STATIC_DNS[] PROGMEM = "static_dns";
 static constexpr char CFG_KEY_DEBUG[] PROGMEM = "debug";
 static constexpr char CFG_KEY_SENDING_INTERVALL_MS[] PROGMEM = "sending_intervall_ms";
 static constexpr char CFG_KEY_TIME_FOR_WIFI_CONFIG[] PROGMEM = "time_for_wifi_config";
+static constexpr char CFG_KEY_POWERSAVE[] PROGMEM = "powersave";
 static constexpr char CFG_KEY_SENSEBOXID[] PROGMEM = "senseboxid";
 static constexpr char CFG_KEY_SEND2CUSTOM[] PROGMEM = "send2custom";
 static constexpr char CFG_KEY_HOST_CUSTOM[] PROGMEM = "host_custom";
@@ -166,14 +184,18 @@ static constexpr ConfigShapeEntry configShape[] PROGMEM = {
 	{ Config_Type_Bool, 0, CFG_KEY_PMS_READ, &cfg::pms_read },
 	{ Config_Type_Bool, 0, CFG_KEY_HPM_READ, &cfg::hpm_read },
 	{ Config_Type_Bool, 0, CFG_KEY_NPM_READ, &cfg::npm_read },
+	{ Config_Type_Bool, 0, CFG_KEY_NPM_FULLTIME, &cfg::npm_fulltime },
+	{ Config_Type_Bool, 0, CFG_KEY_IPS_READ, &cfg::ips_read },
 	{ Config_Type_Bool, 0, CFG_KEY_SPS30_READ, &cfg::sps30_read },
 	{ Config_Type_Bool, 0, CFG_KEY_BMP_READ, &cfg::bmp_read },
 	{ Config_Type_Bool, 0, CFG_KEY_BMX280_READ, &cfg::bmx280_read },
 	{ Config_Type_Bool, 0, CFG_KEY_SHT3X_READ, &cfg::sht3x_read },
+	{ Config_Type_Bool, 0, CFG_KEY_SCD30_READ, &cfg::scd30_read },
 	{ Config_Type_Bool, 0, CFG_KEY_DS18B20_READ, &cfg::ds18b20_read },
 	{ Config_Type_Bool, 0, CFG_KEY_DNMS_READ, &cfg::dnms_read },
 	{ Config_Type_String, sizeof(cfg::dnms_correction)-1, CFG_KEY_DNMS_CORRECTION, cfg::dnms_correction },
 	{ Config_Type_String, sizeof(cfg::temp_correction)-1, CFG_KEY_TEMP_CORRECTION, cfg::temp_correction },
+	{ Config_Type_String, sizeof(cfg::height_above_sealevel)-1, CFG_KEY_HEIGHT_ABOVE_SEALEVEL, cfg::height_above_sealevel },
 	{ Config_Type_Bool, 0, CFG_KEY_GPS_READ, &cfg::gps_read },
 	{ Config_Type_Bool, 0, CFG_KEY_SEND2DUSTI, &cfg::send2dusti },
 	{ Config_Type_Bool, 0, CFG_KEY_SSL_DUSTI, &cfg::ssl_dusti },
@@ -194,9 +216,14 @@ static constexpr ConfigShapeEntry configShape[] PROGMEM = {
 	{ Config_Type_Bool, 0, CFG_KEY_HAS_LCD2004_27, &cfg::has_lcd2004_27 },
 	{ Config_Type_Bool, 0, CFG_KEY_DISPLAY_WIFI_INFO, &cfg::display_wifi_info },
 	{ Config_Type_Bool, 0, CFG_KEY_DISPLAY_DEVICE_INFO, &cfg::display_device_info },
+	{ Config_Type_String, sizeof(cfg::static_ip)-1, CFG_KEY_STATIC_IP, cfg::static_ip },
+	{ Config_Type_String, sizeof(cfg::static_subnet)-1, CFG_KEY_STATIC_SUBNET, cfg::static_subnet },
+	{ Config_Type_String, sizeof(cfg::static_gateway)-1, CFG_KEY_STATIC_GATEWAY, cfg::static_gateway },
+	{ Config_Type_String, sizeof(cfg::static_dns)-1, CFG_KEY_STATIC_DNS, cfg::static_dns },
 	{ Config_Type_UInt, 0, CFG_KEY_DEBUG, &cfg::debug },
 	{ Config_Type_Time, 0, CFG_KEY_SENDING_INTERVALL_MS, &cfg::sending_intervall_ms },
 	{ Config_Type_Time, 0, CFG_KEY_TIME_FOR_WIFI_CONFIG, &cfg::time_for_wifi_config },
+	{ Config_Type_Bool, 0, CFG_KEY_POWERSAVE, &cfg::powersave },
 	{ Config_Type_String, sizeof(cfg::senseboxid)-1, CFG_KEY_SENSEBOXID, cfg::senseboxid },
 	{ Config_Type_Bool, 0, CFG_KEY_SEND2CUSTOM, &cfg::send2custom },
 	{ Config_Type_String, sizeof(cfg::host_custom)-1, CFG_KEY_HOST_CUSTOM, cfg::host_custom },

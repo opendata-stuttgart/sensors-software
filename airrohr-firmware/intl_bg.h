@@ -1,6 +1,7 @@
 /*
  *	airRohr firmware
- *	Copyright (C) 2016-2018  Code for Stuttgart a.o.
+ *  Copyright (C) 2016-2021  Code for Stuttgart a.o.
+ *  Copyright (C) 2021-2024  Sensor.Community a.o.
  *
  *  Bulgarian translations
  *
@@ -22,6 +23,9 @@ const char INTL_MORE_SENSORS[] PROGMEM = "Още Сензори";
 const char INTL_SDS011[] PROGMEM = "SDS011 ({pm})";
 const char INTL_PMS[] PROGMEM = "Plantower PMS(1,3,5,6,7)003 ({pm})";
 const char INTL_HPM[] PROGMEM = "Honeywell сензора за прахови частици";
+const char INTL_NPM[] PROGMEM = "Tera Sensor Next PM ({pm})";
+const char INTL_NPM_FULLTIME[] PROGMEM = "Next PM fulltime";
+const char INTL_IPS[] PROGMEM = "Piera Systems IPS-7100 ({pm})";
 const char INTL_SPS30[] PROGMEM = "Sensirion SPS30 ({pm})";
 const char INTL_PPD42NS[] PROGMEM = "PPD42NS ({pm})";
 const char INTL_DHT22[] PROGMEM = "DHT22 ({t}, {h})";
@@ -30,9 +34,12 @@ const char INTL_BMP180[] PROGMEM = "BMP180 ({t}, {p})";
 const char INTL_BMX280[] PROGMEM = "BME280 ({t}, {h}, {p}), BMP280 ({t}, {p})";
 const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
+const char INTL_SCD30[] PROGMEM = "SCD30 ({t}, {h}, CO₂)";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "корекция в dB (A)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "Корекция в °C";
+const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "Над морското ниво (м)";
+const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "Налягане на морското ниво";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Оторизация";
 #define INTL_REPORT_ISSUE "Подаване на сигнал за проблем"
@@ -49,11 +56,19 @@ const char INTL_LCD1602_27[] PROGMEM = "LCD 1602 (I2C: 0x27)";
 const char INTL_LCD1602_3F[] PROGMEM = "LCD 1602 (I2C: 0x3F)";
 const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
 const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
+
+#define INTL_STATIC_IP_TEXT "Конфигурация на статичен IP адрес (всички полета трябва да са попълнени)"
+const char INTL_STATIC_IP[] PROGMEM = "IP адрес";
+const char INTL_STATIC_SUBNET[] PROGMEM = "Subnet";
+const char INTL_STATIC_GATEWAY[] PROGMEM = "Gateway";
+const char INTL_STATIC_DNS[] PROGMEM = "DNS сървър";
+
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Показване на WiFi информация";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Информация за устройството на дисплея";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;Level";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Интервал на измерване";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Продължителност като рутер";
+const char INTL_POWERSAVE[] PROGMEM = "[[powersave]]";
 const char INTL_MORE_APIS[] PROGMEM = "Още API";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Изпращане към собствено API";
 const char INTL_SERVER[] PROGMEM = "Сървър";
@@ -98,6 +113,8 @@ const char INTL_PARTICULATE_MATTER[] PROGMEM = "Прахови частици";
 const char INTL_TEMPERATURE[] PROGMEM = "Температура";
 const char INTL_HUMIDITY[] PROGMEM = "Влажност на въздуха";
 const char INTL_PRESSURE[] PROGMEM = "Атмосферно налягане";
+const char INTL_DEW_POINT[] PROGMEM = "Точка на оросяване";
+const char INTL_CO2_PPM[] PROGMEM = "ppm CO₂";
 const char INTL_LEQ_A[] PROGMEM = "LAeq";
 const char INTL_LA_MIN[] PROGMEM = "LA min";
 const char INTL_LA_MAX[] PROGMEM = "LA max";

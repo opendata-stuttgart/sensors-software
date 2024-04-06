@@ -1,6 +1,7 @@
 /*
  *	airRohr firmware
- *	Copyright (C) 2016-2018  Code for Stuttgart a.o.
+ *  Copyright (C) 2016-2021  Code for Stuttgart a.o.
+ *  Copyright (C) 2021-2024  Sensor.Community a.o.
  *
  *  Serbian translations
  *
@@ -18,11 +19,13 @@ const char INTL_NETWORKS_FOUND[] PROGMEM = "Pronađene mreže: ";
 const char INTL_AB_HIER_NUR_ANDERN[] PROGMEM = "Napredna podešavanja (samo ako znate šta radite)";
 const char INTL_SAVE[] PROGMEM = "Sačuvaj";
 const char INTL_SENSORS[] PROGMEM = "Senzori";
-const char INTL_MORE_SENSORS[] PROGMEM = "More Sensors";
+const char INTL_MORE_SENSORS[] PROGMEM = "Više senzora";
 const char INTL_SDS011[] PROGMEM = "SDS011 ({pm})";
 const char INTL_PMS[] PROGMEM = "Plantower PMS(1,3,5,6,7)003 ({pm})";
 const char INTL_HPM[] PROGMEM = "Honeywell PM ({pm})";
 const char INTL_NPM[] PROGMEM = "Tera Sensor Next PM ({pm})";
+const char INTL_NPM_FULLTIME[] PROGMEM = "Next PM fulltime";
+const char INTL_IPS[] PROGMEM = "Piera Systems IPS-7100 ({pm})";
 const char INTL_SPS30[] PROGMEM = "Sensirion SPS30 ({pm})";
 const char INTL_PPD42NS[] PROGMEM = "PPD42NS ({pm})";
 const char INTL_DHT22[] PROGMEM = "DHT22 ({t}, {h})";
@@ -30,13 +33,16 @@ const char INTL_HTU21D[] PROGMEM = "HTU21D ({t}, {h})";
 const char INTL_BMP180[] PROGMEM = "BMP180 ({t}, {p})";
 const char INTL_BMX280[] PROGMEM = "BME280 ({t}, {h}, {p}), BMP280 ({t}, {p})";
 const char INTL_SHT3X[] PROGMEM = "SHT3X ({t}, {h})";
+const char INTL_SCD30[] PROGMEM = "SCD30 ({t}, {h}, CO₂)";
 const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "Korekcija u dB(A)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "Korekcija u °C";
+const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "[[height_above_sealevel]]";
+const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "[[pressure_at_sealevel]]";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Autorizacija";
-#define INTL_REPORT_ISSUE "Пријавите проблем"
+#define INTL_REPORT_ISSUE "Prijavite problem"
 
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "WiFi senzor u konfiguracionom režimu";
 const char INTL_FS_WIFI_NAME[] PROGMEM = "Naziv";
@@ -52,9 +58,17 @@ const char INTL_LCD2004_27[] PROGMEM = "LCD 2004 (I2C: 0x27)";
 const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Prikaži WiFi podatke";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Pokaži informacije o uređaju";
-const char INTL_DEBUG_LEVEL[] PROGMEM = "Nivo&nbsp;korekcije";
+
+#define INTL_STATIC_IP_TEXT "[[static_ip_text]]"
+const char INTL_STATIC_IP[] PROGMEM = "[[static_ip]]";
+const char INTL_STATIC_SUBNET[] PROGMEM = "[[static_subnet]]";
+const char INTL_STATIC_GATEWAY[] PROGMEM = "[[static_gateway]]";
+const char INTL_STATIC_DNS[] PROGMEM = "[[static_dns]]";
+
+const char INTL_DEBUG_LEVEL[] PROGMEM = "Nivo&nbsp;otklanjanja grešaka";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Merni interval";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Trajanje ruter režima";
+const char INTL_POWERSAVE[] PROGMEM = "[[powersave]]";
 const char INTL_MORE_APIS[] PROGMEM = "Više API-ja";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Pošalji podatke mom API-ju";
 const char INTL_SERVER[] PROGMEM = "Server";
@@ -62,7 +76,7 @@ const char INTL_PATH[] PROGMEM = "Putanja";
 const char INTL_PORT[] PROGMEM = "Port";
 const char INTL_USER[] PROGMEM = "Korisnik";
 const char INTL_PASSWORD[] PROGMEM = "Lozinka";
-const char INTL_MEASUREMENT[] PROGMEM = "Measurement";
+const char INTL_MEASUREMENT[] PROGMEM = "Merenje";
 const char INTL_SEND_TO[] PROGMEM = "Pošalji na {v}";
 const char INTL_READ_FROM[] PROGMEM = "Pročitaj iz {v}";
 const char INTL_SENSOR_IS_REBOOTING[] PROGMEM = "Senzor se restartuje.";
@@ -72,7 +86,7 @@ const char INTL_RESTART_SENSOR[] PROGMEM = "Restartuj senzor";
 #define INTL_HOME "Naslovna"
 #define INTL_BACK_TO_HOME "Povratak na naslovnu stranicu"
 const char INTL_CURRENT_DATA[] PROGMEM = "Trenutni podaci";
-const char INTL_DEVICE_STATUS[] PROGMEM = "Status уређаја";
+const char INTL_DEVICE_STATUS[] PROGMEM = "Status uređaja";
 #define INTL_ACTIVE_SENSORS_MAP "Mapa aktivnih senzora (spoljni link)"
 #define INTL_CONFIGURATION_DELETE "Izbriši konfiguraciju"
 #define INTL_CONFIGURATION_REALLY_DELETE "Jeste li sigurni da želite da izbrišete konfiguraciju?"
@@ -99,6 +113,8 @@ const char INTL_PARTICULATE_MATTER[] PROGMEM = "suspendovane čestice";
 const char INTL_TEMPERATURE[] PROGMEM = "temperatura";
 const char INTL_HUMIDITY[] PROGMEM = "vlažnost";
 const char INTL_PRESSURE[] PROGMEM = "vazdušni pritisak";
+const char INTL_DEW_POINT[] PROGMEM = "[[dew_point]]";
+const char INTL_CO2_PPM[] PROGMEM = "ppm CO₂";
 const char INTL_LEQ_A[] PROGMEM = "LAeq";
 const char INTL_LA_MIN[] PROGMEM = "LA min";
 const char INTL_LA_MAX[] PROGMEM = "LA max";

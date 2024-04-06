@@ -78,15 +78,15 @@ Additional Libraries needed for building:
 
 ## Source Layout
 
-| Dateiname                                 | Beschreibung                                                                                               |
-| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `airrohr-firmware.ino`                      | Sourcecode der eigentlichen Firmware                                                                       |
-| `ext_def.h`                                 | grundsätzliche Konfiguration der Parameter (WLAN, Sensoren, APIs)                                          |
-| `html-content.h`                            | allgemeine HTML-Sourcen und Bilder für HTML- und Text-Ausgaben                                             |
-| `intl_xx.h`                                 | Dateien mit übersetzten Texten für die Internationalisierung, 'xx' ist der 2 letter ISO code der 'Sprache' |
-| `intl_template.h`                           | Vorlage für Übersetzungen                                                                                  |
-| `astyle.rc`                                 | Formatierungsvorlage für Astyle                                                                            |
-| `ppd42ns-wificonfig-ppd-sds-dht.spiffs.bin` | Binary mit leerem Dateisystem, zum Löschen der Konfiguration, siehe Anleitung im Wiki                      |
+| File                                        | Description                                                                                             |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `airrohr-firmware.ino`                      | Source code of the actual firmware                                                                       |
+| `ext_def.h`                                 | Basic configuration of the parameters (WLAN, sensors, APIs)                                              |
+| `html-content.h`                            | General HTML sources and images for HTML and text output                                                 |
+| `intl_xx.h`                                 | Files with translated texts for internationalization, 'xx' is the 2 letter ISO code of the 'language'    |
+| `intl_template.h`                           | Template for translations                                                                                |
+| `astyle.rc`                                 | Formatting template for Astyle                                                                           |
+| `ppd42ns-wificonfig-ppd-sds-dht.spiffs.bin` | Binary with an empty file system, to delete the configuration, see the instructions in the wiki          |
 
 
 ## Translations
@@ -97,6 +97,25 @@ output seen by normal users. Only debug output is remaining EN by default.
 Please take look at the existing translations and try to adhere and improve
 consistency accross and within the particular translation.
 
+
+## Reference list of all known I2C addresses used by the I2C device by instances that **Airrohr Firmware** is aware of
+
+
+| Device        | Class              | Address declaration          | Declaration location              | I2C address(es)                      |
+| --------------| ------------------ | -----------------------------| --------------------------------- | ------------------------------------ |
+| LCD 1602      | LiquidCrystal_I2C  | -                            | `airrohr-firmware.ino` row 4024   | 0x27 or 0x3F                         |
+| LCD 2004      | LiquidCrystal_I2C  | -                            | `airrohr-firmware.ino` row 4033   | 0x27 or 0x3F                         |
+| HTU21D        | Adafruit_HTU21DF   | HTU21DF_I2CADDR(0x40)        | `Adafruit_HTU21DF.h`     		    | 0x40                                 |
+| SHT31         | Adafruit_SHT31     | SHT31_DEFAULT_ADDR 0x44      | `Adafruit_STH31.h`                | 0x44                                 |
+| DNMS          | -                  | DNMS_I2C_ADDRESS 0x55        | `dnms_i2c.h`                      | 0x55                                 |
+| SCD30         | SCD30              | SCD30_ADDRESS 0x61           | `SparkFun_SCD30_Arduino_Library.h`| 0x61                                 |
+| SPS30         | -                  | SPS_I2C_ADDRESS0x69          | `sps30_i2c.h`                     | 0x69                                 |
+| BMP280        | BMX280             | const                        | `airrohr-firmware.ino`            | 0x77 (default) or 0x76               |
+| BME280        | BMX280             | const                        | `airrohr-firmware.ino`            | 0x77 (default) or 0x76               |
+| BM085:        | Adafruit_BMP085    | BMP085_I2CADDR 0x77          | `Adafruit_BM085.h`                | 0x77                                 |
+| BM180:        | Adafruit_BMP085    | BMP085_I2CADDR 0x77          | `Adafruit_BM085.h`                | 0x77                                 |
+
+Do not forget to update the table above when you are implementing a new I2C device.
 
 ## TODOs
 
