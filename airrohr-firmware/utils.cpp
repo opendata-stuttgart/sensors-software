@@ -1,7 +1,8 @@
 /************************************************************************
  *                                                                      *
  *    airRohr firmware                                                  *
- *    Copyright (C) 2016-2020  Code for Stuttgart a.o.                  *
+ *    Copyright (C) 2016-2021  Code for Stuttgart a.o.                  *
+ *    Copyright (C) 2021-2024  Sensor.Community a.o.                    *
  *    Copyright (C) 2019-2020  Dirk Mueller                             *
  *                                                                      *
  * This program is free software: you can redistribute it and/or modify *
@@ -161,7 +162,7 @@ String delayToString(unsigned time_ms) {
 }
 
 #if defined(ESP8266)
-BearSSL::X509List x509_dst_root_ca(dst_root_ca_x3);
+BearSSL::X509List x509_dst_root_ca(dst_root_ca_x1);
 
 void configureCACertTrustAnchor(WiFiClientSecure* client) {
 	constexpr time_t fw_built_year = (__DATE__[ 7] - '0') * 1000 + \
@@ -245,9 +246,16 @@ void add_Value2Json(String& res, const __FlashStringHelper* type, const __FlashS
 float readCorrectionOffset(const char* correction) {
 	char* pEnd = nullptr;
 	// Avoiding atof() here as this adds a lot (~ 9kb) of code size
+	// which btw is really bad, because now we have a lot more work for everyone
+	// TODO: fix this mess to use fixed point
 	float r = float(strtol(correction, &pEnd, 10));
 	if (pEnd && pEnd[0] == '.' && pEnd[1] >= '0' && pEnd[1] <= '9') {
-		r += (r >= 0.0f ? 1.0f : -1.0f) * ((pEnd[1] - '0') / 10.0f);
+		bool isNegative = correction[0] == '-';
+		for (int i = 0; correction[i] == ' '; i++) {
+			isNegative = correction[i + 1] == '-';
+		}
+
+		r += (isNegative ? -1.0f : 1.0f) * ((pEnd[1] - '0') / 10.0f);
 	}
 	return r;
 }

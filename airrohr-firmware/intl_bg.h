@@ -1,6 +1,7 @@
 /*
  *	airRohr firmware
- *	Copyright (C) 2016-2018 Code for Stuttgart a.o.
+ *  Copyright (C) 2016-2021  Code for Stuttgart a.o.
+ *  Copyright (C) 2021-2024  Sensor.Community a.o.
  *
  *  Bulgarian translations
  *
@@ -68,7 +69,7 @@ const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Информация за ус�
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;Level";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Интервал на измерване";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Продължителност като рутер";
-const char INTL_POWERSAVE[] PROGMEM = "";
+const char INTL_POWERSAVE[] PROGMEM = "[[powersave]]";
 const char INTL_MORE_APIS[] PROGMEM = "Още API";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Изпращане към собствено API";
 const char INTL_SERVER[] PROGMEM = "Сървър";
@@ -113,8 +114,8 @@ const char INTL_PARTICULATE_MATTER[] PROGMEM = "Прахови частици";
 const char INTL_TEMPERATURE[] PROGMEM = "Температура";
 const char INTL_HUMIDITY[] PROGMEM = "Влажност на въздуха";
 const char INTL_PRESSURE[] PROGMEM = "Атмосферно налягане";
-const char INTL_VOC[] PROGMEM = "";
-const char INTL_NOX[] PROGMEM = "";
+const char INTL_VOC[] PROGMEM = "[[voc]]";
+const char INTL_NOX[] PROGMEM = "[[nox]]";
 const char INTL_DEW_POINT[] PROGMEM = "Точка на оросяване";
 const char INTL_CO2_PPM[] PROGMEM = "ppm CO₂";
 const char INTL_LEQ_A[] PROGMEM = "LAeq";

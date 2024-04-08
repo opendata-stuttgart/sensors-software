@@ -7,6 +7,7 @@
  *                                                                      *
  *    airRohr firmware                                                  *
  *    Copyright (C) 2016-2021  Code for Stuttgart a.o.                  *
+ *    Copyright (C) 2021-2024  Sensor.Community a.o.                    *
  *    Copyright (C) 2019-2020  Dirk Mueller                             *
  *                                                                      *
  * This program is free software: you can redistribute it and/or modify *
@@ -47,17 +48,17 @@
  *                                                                      *
  ************************************************************************
  *
- * latest build using lib 3.1.0
- * DATA:    [====      ]  41.5% (used 34000 bytes from 81920 bytes)
- * PROGRAM: [======    ]  58.0% (used 605529 bytes from 1044464 bytes)
- *  
+ * latest build using lib 3.0.2 using -O2
+ * DATA:    [====      ]  44.3% (used 36280 bytes from 81920 bytes)
+ * PROGRAM: [======    ]  64.0% (used 668011 bytes from 1044464 bytes)
+ *
  ************************************************************************/
  
 #include <WString.h>
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2021-134-B4"
+#define SOFTWARE_VERSION_STR "NRZ-2024-136-B1-SEN5X"
 String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
@@ -248,7 +249,7 @@ namespace cfg
 	}
 }
 
-#define JSON_BUFFER_SIZE 2300
+#define JSON_BUFFER_SIZE 2800
 
 LoggerConfig loggerConfigs[LoggerCount];
 
@@ -1245,13 +1246,12 @@ static void readConfig(bool oldconfig = false)
 	debug_outln_info(F("opened config file..."));
 	DynamicJsonDocument json(JSON_BUFFER_SIZE);
 	DeserializationError err = deserializeJson(json, configFile.readString());
+	debug_outln_info(F("parsing json: "), err.f_str());
 	configFile.close();
 #pragma GCC diagnostic pop
 
 	if (!err)
 	{
-		serializeJsonPretty(json, Debug);
-		debug_outln_info(F("parsed json..."));
 		for (unsigned e = 0; e < sizeof(configShape) / sizeof(configShape[0]); ++e)
 		{
 			ConfigShapeEntry c;
@@ -1276,6 +1276,12 @@ static void readConfig(bool oldconfig = false)
 				break;
 			};
 		}
+
+		if (cfg::debug > DEBUG_MIN_INFO)
+		{
+			serializeJsonPretty(json, Debug); Debug.print('\n');
+		}
+
 		String writtenVersion(json["SOFTWARE_VERSION"].as<const char *>());
 		if (writtenVersion.length() && writtenVersion[0] == 'N' && SOFTWARE_VERSION != writtenVersion)
 		{
@@ -1314,6 +1320,13 @@ static void readConfig(bool oldconfig = false)
 		if (boolFromJSON(json, F("bmp280_read")) || boolFromJSON(json, F("bme280_read")))
 		{
 			cfg::bmx280_read = true;
+			rewriteConfig = true;
+		}
+
+		if (strlen(cfg::fs_ssid) == 0)
+		{
+			snprintf_P(cfg::fs_ssid, LEN_FS_SSID, PSTR("%s%s"), SSID_BASENAME, esp_chipid.c_str());
+			debug_outln_info(F("Setting default AP SSID to "), cfg::fs_ssid);
 			rewriteConfig = true;
 		}
 	}
@@ -1622,11 +1635,13 @@ static String form_select_lang()
 				 "<option value='HU'>Magyar (HU)</option>"
 				 "<option value='PL'>Polski (PL)</option>"
 				 "<option value='PT'>Português (PT)</option>"
+				 "<option value='BR'>Português brasileiro (BR)</option>"
 				 "<option value='RO'>Română (RO)</option>"
 				 "<option value='RS'>Srpski (RS)</option>"
 				 "<option value='RU'>Русский (RU)</option>"
 				 "<option value='SI'>Slovenščina (SI)</option>"
 				 "<option value='SK'>Slovák (SK)</option>"
+				 "<option value='FI'>Suomi (FI)</option>"
 				 "<option value='SE'>Svenska (SE)</option>"
 				 "<option value='TR'>Türkçe (TR)</option>"
 				 "<option value='UA'>український (UA)</option>"
@@ -3059,7 +3074,14 @@ static void wifiConfig()
 
 	debug_outln_info(FPSTR(DBG_TXT_CONNECTING_TO), cfg::wlanssid);
 
-	WiFi.begin(cfg::wlanssid, cfg::wlanpwd);
+	if( *cfg::wlanpwd ) // non-empty password
+	{
+		WiFi.begin(cfg::wlanssid, cfg::wlanpwd);
+	}
+	else  // empty password: WiFi AP without a password, e.g. "freifunk" or the like
+	{
+		WiFi.begin(cfg::wlanssid); // since somewhen, the espressif API changed semantics: no password need the 1 args call since.
+	}
 
 	debug_outln_info(F("---- Result Webconfig ----"));
 	debug_outln_info(F("WLANSSID: "), cfg::wlanssid);
@@ -3149,7 +3171,11 @@ static void connectWifi()
 	WiFi.hostname(cfg::fs_ssid);
 	if (addr_static_ip.fromString(cfg::static_ip) && addr_static_subnet.fromString(cfg::static_subnet) && addr_static_gateway.fromString(cfg::static_gateway) && addr_static_dns.fromString(cfg::static_dns))
 	{
-		WiFi.config(addr_static_ip, addr_static_subnet, addr_static_gateway, addr_static_dns, addr_static_dns);
+		//ESP argument order is: ip, gateway, subnet, dns1
+		//Arduino arg order is:  ip, dns, gateway, subnet.
+		//To allow compatibility, check first octet of 3rd arg. If 255, interpret as ESP order, otherwise Arduino order.
+		//Here ESP order is used
+		WiFi.config(addr_static_ip, addr_static_gateway, addr_static_subnet, addr_static_dns, addr_static_dns);
 	}
 #endif
 
@@ -3280,10 +3306,13 @@ static unsigned long sendData(const LoggerEntry logger, const String &data, cons
 			debug_outln_info(F("Succeeded - "), s_Host);
 			send_success = true;
 		}
-		else if (result >= HTTP_CODE_BAD_REQUEST)
+		else
 		{
 			debug_outln_info(F("Request failed with error: "), String(result));
-			debug_outln_info(F("Details:"), http.getString());
+			if (result >= HTTP_CODE_BAD_REQUEST)
+			{
+				debug_outln_info(F("Details:"), http.getString());
+			}
 		}
 		http.end();
 	}
@@ -3334,7 +3363,6 @@ static unsigned long sendSensorCommunity(const String &data, const int pin, cons
  *****************************************************************/
 static void create_influxdb_string_from_data(String &data_4_influxdb, const String &data)
 {
-	debug_outln_verbose(F("Parse JSON for influx DB: "), data);
 	DynamicJsonDocument json2data(JSON_BUFFER_SIZE);
 	DeserializationError err = deserializeJson(json2data, data);
 	if (!err)
@@ -4978,9 +5006,13 @@ static bool fwDownloadStream(WiFiClientSecure &client, const String &url, Stream
 		http.end();
 	}
 
+	debug_outln_verbose(F("bytes written: "), String(bytes_written));
+
 	if (bytes_written > 0)
 		return true;
 
+	last_update_returncode = bytes_written ;
+	Debug.println( http.errorToString(bytes_written) );
 	return false;
 }
 
@@ -5017,6 +5049,14 @@ static bool fwDownloadStreamFile(WiFiClientSecure &client, const String &url, co
 static void twoStageOTAUpdate()
 {
 
+// Disable Auto-Update (broken when using Arduino Core > 3.x.x)
+	if (cfg::auto_update)
+	{
+		debug_outln_info(F("Disabling Auto-Update..."));
+		cfg::auto_update = false;
+	}
+// End of Disable Auto-Update
+
 	if (!cfg::auto_update)
 		return;
 
@@ -5042,6 +5082,7 @@ static void twoStageOTAUpdate()
 	BearSSL::Session clientSession;
 
 	client.setBufferSizes(1024, TCP_MSS > 1024 ? 2048 : 1024);
+	client.setCiphersLessSecure();
 	client.setSession(&clientSession);
 	configureCACertTrustAnchor(&client);
 
@@ -5988,27 +6029,27 @@ static void powerOnTestSensors()
 		NPM_temp_humi();
 		delay(2000); 
 
-	if(!cfg::npm_fulltime) {
-		is_NPM_running = NPM_start_stop();
-		delay(2000); //prevent any buffer overload on ESP82666
-	}else{
-		is_NPM_running = true;
-	}
+		if(!cfg::npm_fulltime) {
+			is_NPM_running = NPM_start_stop();
+			delay(2000); //prevent any buffer overload on ESP82666
+		}else{
+			is_NPM_running = true;
+		}
 	}
 
 	if (cfg::ips_read)
 	{
-	IPS_cmd(PmSensorCmd3::Factory); //set to Factory
-	delay(1000);
-	IPS_version_date();
-	delay(1000);
-	IPS_cmd(PmSensorCmd3::Smoke); // no smoke detection
-	delay(1000);
-	IPS_cmd(PmSensorCmd3::Interval); //Set interval to 0 = manual mode
-	delay(1000);
-	IPS_cmd(PmSensorCmd3::Stop); 
-	delay(1000);
-	is_IPS_running = false;
+		IPS_cmd(PmSensorCmd3::Factory); //set to Factory
+		delay(1000);
+		IPS_version_date();
+		delay(1000);
+		IPS_cmd(PmSensorCmd3::Smoke); // no smoke detection
+		delay(1000);
+		IPS_cmd(PmSensorCmd3::Interval); //Set interval to 0 = manual mode
+		delay(1000);
+		IPS_cmd(PmSensorCmd3::Stop); 
+		delay(1000);
+		is_IPS_running = false;
 	}
 
 
@@ -6054,7 +6095,7 @@ static void powerOnTestSensors()
 
 	if (cfg::bmx280_read)
 	{
-		debug_outln_info(F("Read BMxE280..."));
+		debug_outln_info(F("Read BMx280..."));
 		if (!initBMX280(bmx280_default_i2c_address) && !initBMX280(bmx280_alternate_i2c_address)) {
 			debug_outln_error(F("Check BMx280 wiring"));
 			bmx280_init_failed = true;
@@ -6079,10 +6120,10 @@ static void powerOnTestSensors()
 			debug_outln_error(F("Check SCD30 wiring"));
 			scd30_init_failed = true;
 		}
-		else
+/*		else
 		{
 			scd30.setMeasurementInterval(30);
-		}
+		} */
 	}
 
 	if (cfg::ds18b20_read)
@@ -6732,7 +6773,7 @@ void loop(void)
 			data.remove(data.length() - 1);
 		}
 		data += "]}";
-		Debug.println(data);
+		debug_outln_verbose(F("Data to send: "), data);
 		yield();
 
 		sum_send_time += sendDataToOptionalApis(data);

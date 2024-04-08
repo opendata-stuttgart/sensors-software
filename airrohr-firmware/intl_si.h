@@ -1,6 +1,7 @@
 /*
  *  airRohr firmware
- *  Copyright (C) 2016-2018 Code for Stuttgart a.o. 
+ *  Copyright (C) 2016-2021  Code for Stuttgart a.o.
+ *  Copyright (C) 2021-2024  Sensor.Community a.o.
  *
  *  Slovenian translation
  *
@@ -38,8 +39,8 @@ const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "popravek v dB(A)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "Popravek v °C";
-const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "";
-const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "";
+const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "[[height_above_sealevel]]";
+const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "[[pressure_at_sealevel]]";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Preverjanje pristnosti";
 #define INTL_REPORT_ISSUE "Prijavite težavo"
@@ -59,16 +60,16 @@ const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Prikaz informacij o Wifi";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Prikaz informacij o napravi";
 
-#define INTL_STATIC_IP_TEXT ""
-const char INTL_STATIC_IP[] PROGMEM = "";
-const char INTL_STATIC_SUBNET[] PROGMEM = "";
-const char INTL_STATIC_GATEWAY[] PROGMEM = "";
-const char INTL_STATIC_DNS[] PROGMEM = "";
+#define INTL_STATIC_IP_TEXT "[[static_ip_text]]"
+const char INTL_STATIC_IP[] PROGMEM = "[[static_ip]]";
+const char INTL_STATIC_SUBNET[] PROGMEM = "[[static_subnet]]";
+const char INTL_STATIC_GATEWAY[] PROGMEM = "[[static_gateway]]";
+const char INTL_STATIC_DNS[] PROGMEM = "[[static_dns]]";
 
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;raven";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Interval merjenja (s)";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Trajanje načina usmerjevalnika";
-const char INTL_POWERSAVE[] PROGMEM = "";
+const char INTL_POWERSAVE[] PROGMEM = "[[powersave]]";
 const char INTL_MORE_APIS[] PROGMEM = "Več API-jev";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Pošiljanje podatkov v API po meri";
 const char INTL_SERVER[] PROGMEM = "Strežnik";
@@ -113,9 +114,9 @@ const char INTL_PARTICULATE_MATTER[] PROGMEM = "trdni delci";
 const char INTL_TEMPERATURE[] PROGMEM = "temperatura";
 const char INTL_HUMIDITY[] PROGMEM = "vlažnost";
 const char INTL_PRESSURE[] PROGMEM = "zračni tlak";
-const char INTL_VOC[] PROGMEM = "";
-const char INTL_NOX[] PROGMEM = "";
-const char INTL_DEW_POINT[] PROGMEM = "";
+const char INTL_VOC[] PROGMEM = "[[voc]]";
+const char INTL_NOX[] PROGMEM = "[[nox]]";
+const char INTL_DEW_POINT[] PROGMEM = "[[dew_point]]";
 const char INTL_CO2_PPM[] PROGMEM = "ppm CO₂";
 const char INTL_LEQ_A[] PROGMEM = "LAeq";
 const char INTL_LA_MIN[] PROGMEM = "LA min";
