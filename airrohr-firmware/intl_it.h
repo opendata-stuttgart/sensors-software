@@ -38,8 +38,8 @@ const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "Correzione in dB(A)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "Correzione in °C";
-const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "[[height_above_sealevel]]";
-const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "[[pressure_at_sealevel]]";
+const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "[[Altitudine]]";
+const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "[[Pressione al livello del mare]]";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Autorizzazione";
 #define INTL_REPORT_ISSUE "Segnala un problema"
