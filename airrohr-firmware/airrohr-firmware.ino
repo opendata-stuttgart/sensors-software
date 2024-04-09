@@ -58,7 +58,7 @@
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2024-136-B1"
+#define SOFTWARE_VERSION_STR "NRZ-2024-135"
 String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************
