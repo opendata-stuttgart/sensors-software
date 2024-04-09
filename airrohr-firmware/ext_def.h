@@ -300,7 +300,7 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 #define MHZ19_READ 0
 
 // automatic firmware updates
-#define AUTO_UPDATE 0
+#define AUTO_UPDATE 1
 
 // use beta firmware
 #define USE_BETA 0
