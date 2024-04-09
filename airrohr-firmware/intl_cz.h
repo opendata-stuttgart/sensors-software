@@ -125,7 +125,7 @@ const char INTL_TIME_UTC[] PROGMEM = "Čas (UTC)";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "Síla signálu";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "Kvalita signálu";
 #define INTL_NUMBER_OF_MEASUREMENTS "Počet měření"
-#define INTL_TIME_SENDING_MS "Počet měření"
+#define INTL_TIME_SENDING_MS "Doba nahrávání"
 #define INTL_SENSOR "Senzor"
 #define INTL_PARAMETER "Parametr"
 #define INTL_VALUE "Hodnota"

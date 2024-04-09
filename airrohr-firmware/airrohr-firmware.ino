@@ -48,9 +48,9 @@
  *                                                                      *
  ************************************************************************
  *
- * latest build using lib 2.7.4 with -O3
- * DATA:    [====      ]  41.6% (used 34104 bytes from 81920 bytes)
- * PROGRAM: [=======   ]  66.5% (used 694547 bytes from 1044464 bytes)
+ * latest build
+ * RAM:   [====      ]  41.8% (used 34220 bytes from 81920 bytes)
+ * Flash: [=======   ]  67.1% (used 701191 bytes from 1044464 bytes)
  *
  ************************************************************************/
  
@@ -58,7 +58,7 @@
 #include <pgmspace.h>
 
 // increment on change
-#define SOFTWARE_VERSION_STR "NRZ-2024-135"
+#define SOFTWARE_VERSION_STR "NRZ-2024-136-B1"
 String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 
 /*****************************************************************

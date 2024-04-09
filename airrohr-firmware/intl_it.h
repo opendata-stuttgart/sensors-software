@@ -38,8 +38,8 @@ const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "Correzione in dB(A)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "Correzione in °C";
-const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "[[height_above_sealevel]]";
-const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "[[pressure_at_sealevel]]";
+const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "[[Altitudine]]";
+const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "[[Pressione al livello del mare]]";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Autorizzazione";
 #define INTL_REPORT_ISSUE "Segnala un problema"
@@ -59,16 +59,16 @@ const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Visualizza informazioni del wi-fi";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Visualizza informazioni del dispositivo";
 
-#define INTL_STATIC_IP_TEXT "[[static_ip_text]]"
-const char INTL_STATIC_IP[] PROGMEM = "[[static_ip]]";
-const char INTL_STATIC_SUBNET[] PROGMEM = "[[static_subnet]]";
-const char INTL_STATIC_GATEWAY[] PROGMEM = "[[static_gateway]]";
-const char INTL_STATIC_DNS[] PROGMEM = "[[static_dns]]";
+#define INTL_STATIC_IP_TEXT "Testo IP statico"
+const char INTL_STATIC_IP[] PROGMEM = "IP statico";
+const char INTL_STATIC_SUBNET[] PROGMEM = "Subnet statico";
+const char INTL_STATIC_GATEWAY[] PROGMEM = "Gateway statico";
+const char INTL_STATIC_DNS[] PROGMEM = "DNS statico";
 
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;Level";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "intervallo di misura";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Durata della modalità router";
-const char INTL_POWERSAVE[] PROGMEM = "[[powersave]]";
+const char INTL_POWERSAVE[] PROGMEM = "Modalità risparmio energetico";
 const char INTL_MORE_APIS[] PROGMEM = "Altre API";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Invia i dati alla propria API";
 const char INTL_SERVER[] PROGMEM = "Server";

@@ -15,9 +15,9 @@ const char WWW_PASSWORD[] PROGMEM = "";
 #define FS_PWD "airrohrcfg"
 
 // Where to send the data?
-#define SEND2SENSORCOMMUNITY 0
+#define SEND2SENSORCOMMUNITY 1
 #define SSL_SENSORCOMMUNITY 0
-#define SEND2MADAVI 0
+#define SEND2MADAVI 1
 #define SSL_MADAVI 0
 #define SEND2SENSEMAP 0
 #define SEND2FSAPP 0
