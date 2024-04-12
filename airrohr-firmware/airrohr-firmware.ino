@@ -596,13 +596,13 @@ float last_value_NPM_N1 = -1.0;
 float last_value_NPM_N10 = -1.0;
 float last_value_NPM_N25 = -1.0;
 
-float last_value_IPS_P0 = -1.0; //PM1
-float last_value_IPS_P1 = -1.0;	//PM10
-float last_value_IPS_P2 = -1.0;	//PM2.5
+float last_value_IPS_P0 = -1.0;  //PM1
+float last_value_IPS_P1 = -1.0;  //PM10
+float last_value_IPS_P2 = -1.0;  //PM2.5
 float last_value_IPS_P01 = -1.0; //PM0.1
 float last_value_IPS_P03 = -1.0; //PM0.3 //ATTENTION P4 = PM4 POUR SPS30
 float last_value_IPS_P05 = -1.0; //PM0.5
-float last_value_IPS_P5 = -1.0; //PM5
+float last_value_IPS_P5 = -1.0;  //PM5
 float last_value_IPS_N1 = -1.0;
 float last_value_IPS_N10 = -1.0;
 float last_value_IPS_N25 = -1.0;
@@ -638,6 +638,8 @@ uint8_t sntp_time_set;
 unsigned long count_sends = 0;
 unsigned long last_display_millis = 0;
 uint8_t next_display_count = 0;
+
+unsigned long last_scd30_millis = 0;
 
 struct struct_wifiInfo
 {
@@ -733,7 +735,7 @@ static String SDS_version_date()
 			{
 				char tmp[20];
 				snprintf_P(tmp, sizeof(tmp), PSTR("%02d-%02d-%02d(%02x%02x)"),
-						   data[1], data[2], data[3], data[4], data[5]);
+							data[1], data[2], data[3], data[4], data[5]);
 				last_value_SDS_version = tmp;
 				break;
 			}
@@ -747,7 +749,6 @@ static String SDS_version_date()
 /*****************************************************************
  * read Next PM sensor serial and firmware date                   *
  *****************************************************************/
-
 static uint8_t NPM_get_state()
 {
 	uint8_t result;
@@ -974,8 +975,6 @@ static void NPM_fan_speed()
 	}
 }
 
-
-
 static String NPM_temp_humi() 
 {
 	uint16_t NPM_temp;
@@ -1034,11 +1033,9 @@ static String NPM_temp_humi()
 			return String(NPM_temp / 100.0f) + " / "+ String(NPM_humi / 100.0f);
 }
 
-
 /*****************************************************************
- * read IPS-7100 sensor serial and firmware date                   *
-*****************************************************************/
-
+ * read IPS-7100 sensor serial and firmware date                 *
+ *****************************************************************/
 static String IPS_version_date()
 {
 	debug_outln_info(F("Version IPS..."));
@@ -1072,9 +1069,9 @@ static String IPS_version_date()
 static void disable_unneeded_nmea()
 {
 	serialGPS->println(F("$PUBX,40,GLL,0,0,0,0*5C")); // Geographic position, latitude / longitude
-													  //	serialGPS->println(F("$PUBX,40,GGA,0,0,0,0*5A"));       // Global Positioning System Fix Data
+//	serialGPS->println(F("$PUBX,40,GGA,0,0,0,0*5A")); // Global Positioning System Fix Data
 	serialGPS->println(F("$PUBX,40,GSA,0,0,0,0*4E")); // GPS DOP and active satellites
-													  //	serialGPS->println(F("$PUBX,40,RMC,0,0,0,0*47"));       // Recommended minimum specific GPS/Transit data
+//	serialGPS->println(F("$PUBX,40,RMC,0,0,0,0*47")); // Recommended minimum specific GPS/Transit data
 	serialGPS->println(F("$PUBX,40,GSV,0,0,0,0*59")); // GNSS satellites in view
 	serialGPS->println(F("$PUBX,40,VTG,0,0,0,0*5E")); // Track made good and ground speed
 }
@@ -1571,7 +1568,8 @@ static bool webserver_request_auth()
 	return true;
 }
 
-static void sendHttpRedirect() {
+static void sendHttpRedirect()
+{
 	const IPAddress defaultIP(
 		default_ip_first_octet, 
 		default_ip_second_octet, 
@@ -2421,7 +2419,6 @@ static void webserver_status()
 static void webserver_serial()
 {
 	String s(Debug.popLines());
-
 	server.send(s.length() ? 200 : 204, FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN), s);
 }
 
@@ -2655,7 +2652,6 @@ static void webserver_metrics_endpoint()
 /*****************************************************************
  * Webserver Images                                              *
  *****************************************************************/
-
 static void webserver_favicon()
 {
 	server.sendHeader(F("Cache-Control"), F("max-age=2592000, public"));
@@ -2871,7 +2867,7 @@ static void wifiConfig()
 	{
 		WiFi.begin(cfg::wlanssid, cfg::wlanpwd);
 	}
-	else  // empty password: WiFi AP without a password, e.g. "freifunk" or the like
+	else	// empty password: WiFi AP without a password, e.g. "freifunk" or the like
 	{
 		WiFi.begin(cfg::wlanssid); // since somewhen, the espressif API changed semantics: no password need the 1 args call since.
 	}
@@ -2964,10 +2960,10 @@ static void connectWifi()
 	WiFi.hostname(cfg::fs_ssid);
 	if (addr_static_ip.fromString(cfg::static_ip) && addr_static_subnet.fromString(cfg::static_subnet) && addr_static_gateway.fromString(cfg::static_gateway) && addr_static_dns.fromString(cfg::static_dns))
 	{
-		//ESP argument order is: ip, gateway, subnet, dns1
-		//Arduino arg order is:  ip, dns, gateway, subnet.
-		//To allow compatibility, check first octet of 3rd arg. If 255, interpret as ESP order, otherwise Arduino order.
-		//Here ESP order is used
+		// ESP argument order is: ip, gateway, subnet, dns1
+		// Arduino arg order is:  ip, dns, gateway, subnet.
+		// To allow compatibility, check first octet of 3rd arg. If 255, interpret as ESP order, otherwise Arduino order.
+		// Here ESP order is used
 		WiFi.config(addr_static_ip, addr_static_gateway, addr_static_subnet, addr_static_dns, addr_static_dns);
 	}
 #endif
@@ -3889,7 +3885,6 @@ static __noinline void fetchSensorHPM(String &s)
 /*****************************************************************
  * read Tera Sensor Next PM sensor sensor values                 *
  *****************************************************************/
-
 static void fetchSensorNPM(String &s)
 {
 
@@ -4042,11 +4037,11 @@ static void fetchSensorNPM(String &s)
 			last_value_NPM_N25 = float(npm_pm25_sum_pcs) / (npm_val_count * 1000.0f);
 
 			add_Value2Json(s, F("NPM_P0"), F("PM1: "), last_value_NPM_P0);
-			add_Value2Json(s, F("NPM_P1"), F("PM10:  "), last_value_NPM_P1);
+			add_Value2Json(s, F("NPM_P1"), F("PM10: "), last_value_NPM_P1);
 			add_Value2Json(s, F("NPM_P2"), F("PM2.5: "), last_value_NPM_P2);
 
 			add_Value2Json(s, F("NPM_N1"), F("NC1.0: "), last_value_NPM_N1);
-			add_Value2Json(s, F("NPM_N10"), F("NC10:  "), last_value_NPM_N10);
+			add_Value2Json(s, F("NPM_N10"), F("NC10: "), last_value_NPM_N10);
 			add_Value2Json(s, F("NPM_N25"), F("NC2.5: "), last_value_NPM_N25);
 
 			debug_outln_info(FPSTR(DBG_TXT_SEP));
@@ -4099,11 +4094,9 @@ static void fetchSensorNPM(String &s)
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_NPM));
 }
 
-
 /*****************************************************************
- * read Piera Systems IPS-7100 sensor sensor values                 *
+ * read Piera Systems IPS-7100 sensor sensor values              *
  *****************************************************************/
-
 static void fetchSensorIPS(String &s)
 {
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_IPS));
@@ -4221,7 +4214,7 @@ static void fetchSensorIPS(String &s)
 
 	//char *ptr;
 
-    // SI EXCEPTION 28 DECLENCHÈE FLASHER SUR AUTRE PRISE USB.
+	// SI EXCEPTION 28 DECLENCHÈE FLASHER SUR AUTRE PRISE USB.
 
 	ips_pm01_sum_pcs += strtoul(N01_serial.c_str(),NULL,10);
 	ips_pm03_sum_pcs += strtoul(N03_serial.c_str(),NULL,10);
@@ -4310,18 +4303,18 @@ static void fetchSensorIPS(String &s)
 			last_value_IPS_N5 = float(ips_pm5_sum_pcs) / (ips_val_count * 1000.0f);
 
 			add_Value2Json(s, F("IPS_P0"), F("PM1: "), last_value_IPS_P0);
-			add_Value2Json(s, F("IPS_P1"), F("PM10:  "), last_value_IPS_P1);
+			add_Value2Json(s, F("IPS_P1"), F("PM10: "), last_value_IPS_P1);
 			add_Value2Json(s, F("IPS_P2"), F("PM2.5: "), last_value_IPS_P2);
 			add_Value2Json(s, F("IPS_P01"), F("PM0.1: "), last_value_IPS_P01);
-			add_Value2Json(s, F("IPS_P03"), F("PM0.3:  "), last_value_IPS_P03);
+			add_Value2Json(s, F("IPS_P03"), F("PM0.3: "), last_value_IPS_P03);
 			add_Value2Json(s, F("IPS_P05"), F("PM0.5: "), last_value_IPS_P05);
 			add_Value2Json(s, F("IPS_P5"), F("PM5: "), last_value_IPS_P5);
 
 			add_Value2Json(s, F("IPS_N1"), F("NC1.0: "), last_value_IPS_N1);
-			add_Value2Json(s, F("IPS_N10"), F("NC10:  "), last_value_IPS_N10);
+			add_Value2Json(s, F("IPS_N10"), F("NC10: "), last_value_IPS_N10);
 			add_Value2Json(s, F("IPS_N25"), F("NC2.5: "), last_value_IPS_N25);
 			add_Value2Json(s, F("IPS_N01"), F("NC0.1: "), last_value_IPS_N01);
-			add_Value2Json(s, F("IPS_N03"), F("NC0.3:  "), last_value_IPS_N03);
+			add_Value2Json(s, F("IPS_N03"), F("NC0.3: "), last_value_IPS_N03);
 			add_Value2Json(s, F("IPS_N05"), F("NC0.5: "), last_value_IPS_N05);
 			add_Value2Json(s, F("IPS_N5"), F("NC5: "), last_value_IPS_N5);
 
@@ -4399,6 +4392,7 @@ static void fetchSensorIPS(String &s)
 	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_IPS));
 
 }
+
 /*****************************************************************
  * read PPD42NS sensor values                                    *
  *****************************************************************/
@@ -4474,7 +4468,7 @@ static __noinline void fetchSensorPPD(String &s)
 }
 
 /*****************************************************************
-   read SPS30 PM sensor values
+ *  read SPS30 PM sensor values                                  *
  *****************************************************************/
 static void fetchSensorSPS30(String &s)
 {
@@ -4494,13 +4488,13 @@ static void fetchSensorSPS30(String &s)
 	add_Value2Json(s, F("SPS30_P0"), F("PM1.0: "), last_value_SPS30_P0);
 	add_Value2Json(s, F("SPS30_P2"), F("PM2.5: "), last_value_SPS30_P2);
 	add_Value2Json(s, F("SPS30_P4"), F("PM4.0: "), last_value_SPS30_P4);
-	add_Value2Json(s, F("SPS30_P1"), F("PM 10: "), last_value_SPS30_P1);
+	add_Value2Json(s, F("SPS30_P1"), F("PM10: "), last_value_SPS30_P1);
 	add_Value2Json(s, F("SPS30_N05"), F("NC0.5: "), last_value_SPS30_N05);
 	add_Value2Json(s, F("SPS30_N1"), F("NC1.0: "), last_value_SPS30_N1);
 	add_Value2Json(s, F("SPS30_N25"), F("NC2.5: "), last_value_SPS30_N25);
 	add_Value2Json(s, F("SPS30_N4"), F("NC4.0: "), last_value_SPS30_N4);
-	add_Value2Json(s, F("SPS30_N10"), F("NC10:  "), last_value_SPS30_N10);
-	add_Value2Json(s, F("SPS30_TS"), F("TPS:   "), last_value_SPS30_TS);
+	add_Value2Json(s, F("SPS30_N10"), F("NC10: "), last_value_SPS30_N10);
+	add_Value2Json(s, F("SPS30_TS"), F("TPS: "), last_value_SPS30_TS);
 
 	debug_outln_info(F("SPS30 read counter: "), String(SPS30_read_counter));
 	debug_outln_info(F("SPS30 read error counter: "), String(SPS30_read_error_counter));
@@ -4517,7 +4511,7 @@ static void fetchSensorSPS30(String &s)
 }
 
 /*****************************************************************
-   read DNMS values
+ * read DNMS values                                              *
  *****************************************************************/
 static void fetchSensorDNMS(String &s)
 {
@@ -5057,7 +5051,7 @@ static void display_values()
 	}
 	if (cfg::ips_read)
 	{
-		screens[screen_count++] = 11;  //A VOIR POUR AJOUTER DES ÈCRANS
+		screens[screen_count++] = 11;	//A VOIR POUR AJOUTER DES ÈCRANS
 	}
 	if (cfg::sps30_read)
 	{
@@ -5186,19 +5180,19 @@ static void display_values()
 			display_lines[2] += String(count_sends);
 			break;
 		case 9:
-		    display_header = F("Tera Next PM");
+			display_header = F("Tera Next PM");
 			display_lines[0] = std::move(tmpl(F("PM1: {v} µg/m³"), check_display_value(pm01_value, -1, 1, 6)));
 			display_lines[1] = std::move(tmpl(F("PM2.5: {v} µg/m³"), check_display_value(pm25_value, -1, 1, 6)));
 			display_lines[2] = std::move(tmpl(F("PM10: {v} µg/m³"), check_display_value(pm10_value, -1, 1, 6)));
 			break;
 		case 10:
-		    display_header = F("Tera Next PM");
+			display_header = F("Tera Next PM");
 			display_lines[0] = current_state_npm;
 			display_lines[1] = F("T_NPM / RH_NPM");
 			display_lines[2] = current_th_npm;
 			break;
 		case 11:
-		    display_header = F("Piera IPS-7100");
+			display_header = F("Piera IPS-7100");
 			display_lines[0] = std::move(tmpl(F("PM1: {v} µg/m³"), check_display_value(pm01_value, -1, 1, 6)));
 			display_lines[1] = std::move(tmpl(F("PM2.5: {v} µg/m³"), check_display_value(pm25_value, -1, 1, 6)));
 			display_lines[2] = std::move(tmpl(F("PM10: {v} µg/m³"), check_display_value(pm10_value, -1, 1, 6)));
@@ -5419,7 +5413,7 @@ static bool initBMX280(char addr)
 }
 
 /*****************************************************************
-   Init SPS30 PM Sensor
+ * Init SPS30 PM Sensor                                          *
  *****************************************************************/
 static void initSPS30()
 {
@@ -5452,7 +5446,7 @@ static void initSPS30()
 }
 
 /*****************************************************************
-   Init DNMS - Digital Noise Measurement Sensor
+ * Init DNMS - Digital Noise Measurement Sensor                  *
  *****************************************************************/
 static void initDNMS()
 {
@@ -5475,7 +5469,7 @@ static void initDNMS()
 }
 
 /*****************************************************************
-   Functions
+ * Functions                                                     *
  *****************************************************************/
 
 static void powerOnTestSensors()
@@ -5962,13 +5956,14 @@ else if (cfg::ips_read)
 
 	starttime = millis(); // store the start time
 	last_update_attempt = time_point_device_start_ms = starttime;
+	last_display_millis = last_scd30_millis = starttime;
 	if (cfg::npm_read)
 	{
-		last_display_millis = starttime_NPM = starttime;
+		starttime_NPM = starttime;
 	}
 	else
 	{
-		last_display_millis = starttime_SDS = starttime;
+		starttime_SDS = starttime;
 	}
 }
 
@@ -5979,7 +5974,7 @@ void loop(void)
 {
 	unsigned long sleep = SLEEPTIME_MS;
 	String result_PPD, result_SDS, result_PMS, result_HPM, result_NPM, result_IPS;
-	String result_GPS, result_DNMS;
+	String result_GPS, result_DNMS, result_SCD30;
 
 	unsigned sum_send_time = 0;
 
@@ -6059,7 +6054,8 @@ void loop(void)
 			starttime_NPM = act_milli;
 			fetchSensorNPM(result_NPM);
 		}	
-	}else if(cfg::ips_read)
+	}
+	if(cfg::ips_read)
 	{
 		if ((msSince(starttime_IPS) > SAMPLETIME_IPS_MS) || send_now)
 		{
@@ -6067,25 +6063,20 @@ void loop(void)
 			fetchSensorIPS(result_IPS);
 		}	
 	}
-	else
+	if ((msSince(starttime_SDS) > SAMPLETIME_SDS_MS) || send_now)
 	{
-		if ((msSince(starttime_SDS) > SAMPLETIME_SDS_MS) || send_now)
+		starttime_SDS = act_milli;
+		if (cfg::sds_read)
 		{
-			starttime_SDS = act_milli;
-			if (cfg::sds_read)
-			{
-				fetchSensorSDS(result_SDS);
-			}
-
-			if (cfg::pms_read)
-			{
-				fetchSensorPMS(result_PMS);
-			}
-
-			if (cfg::hpm_read)
-			{
-				fetchSensorHPM(result_HPM);
-			}
+			fetchSensorSDS(result_SDS);
+		}
+		if (cfg::pms_read)
+		{
+			fetchSensorPMS(result_PMS);
+		}
+		if (cfg::hpm_read)
+		{
+			fetchSensorHPM(result_HPM);
 		}
 	}
 
@@ -6103,6 +6094,12 @@ void loop(void)
 			fetchSensorGPS(result_GPS);
 			starttime_GPS = act_milli;
 		}
+	}
+
+	if ((msSince(last_scd30_millis) > SCD30_UPDATE_INTERVAL_MS) && cfg::scd30_read && (!scd30_init_failed))
+	{
+		fetchSensorSCD30(result_SCD30);
+		last_scd30_millis = act_milli;
 	}
 
 	if ((msSince(last_display_millis) > DISPLAY_UPDATE_INTERVAL_MS) &&

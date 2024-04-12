@@ -48,19 +48,20 @@
  ******************************************************************/
 constexpr const unsigned long SLEEPTIME_MS = 250;
 constexpr const unsigned long SAMPLETIME_MS = 30000;									// time between two measurements of the PPD42NS
-constexpr const unsigned long SAMPLETIME_SDS_MS = 1000;								// time between two measurements of the SDS011, PMSx003, Honeywell PM sensor
+constexpr const unsigned long SAMPLETIME_SDS_MS = 1000;									// time between two measurements of the SDS011, PMSx003, Honeywell PM sensor
 constexpr const unsigned long WARMUPTIME_SDS_MS = 15000;								// time needed to "warm up" the sensor before we can take the first measurement
 constexpr const unsigned long READINGTIME_SDS_MS = 5000;								// how long we read data from the PM sensors
 constexpr const unsigned long SAMPLETIME_NPM_MS = 1000;
 constexpr const unsigned long WARMUPTIME_NPM_MS = 15000; 
-constexpr const unsigned long READINGTIME_NPM_MS = 15000;                // how long we read data from the PM sensors
+constexpr const unsigned long READINGTIME_NPM_MS = 15000;                				// how long we read data from the PM sensors
 constexpr const unsigned long SAMPLETIME_IPS_MS = 1000;
 constexpr const unsigned long WARMUPTIME_IPS_MS = 15000; 
 constexpr const unsigned long READINGTIME_IPS_MS = 15000; 
 constexpr const unsigned long SAMPLETIME_GPS_MS = 1000;
 constexpr const unsigned long DISPLAY_UPDATE_INTERVAL_MS = 5000;						// time between switching display to next "screen"
+constexpr const unsigned long SCD30_UPDATE_INTERVAL_MS = 30000;							// time between updating SCD30 data
 constexpr const unsigned long ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
-constexpr const unsigned long PAUSE_BETWEEN_UPDATE_ATTEMPTS_MS = ONE_DAY_IN_MS;		// check for firmware updates once a day
+constexpr const unsigned long PAUSE_BETWEEN_UPDATE_ATTEMPTS_MS = ONE_DAY_IN_MS;			// check for firmware updates once a day
 constexpr const unsigned long DURATION_BEFORE_FORCED_RESTART_MS = ONE_DAY_IN_MS * 28;	// force a reboot every ~4 weeks
 
 // Definition GPIOs for Zero based Arduino Feather M0 LoRaWAN
