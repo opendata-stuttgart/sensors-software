@@ -67,7 +67,7 @@ const char INTL_STATIC_DNS[] PROGMEM = "DNS sunucusu";
 
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Hata ayıklama&nbsp;seviyesi";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = " Ölçüm aralığı (s)";
-const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Süre yönlendirici modu (Router)";
+const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Yönlendirici modu için süre";
 const char INTL_POWERSAVE[] PROGMEM = "Güç tasarrufu";
 const char INTL_MORE_APIS[] PROGMEM = "Daha fazla Uygulama Programlama Arayüzü (API)";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Uygulama Programlama Arayüzüne (API) veri gönder";
@@ -125,7 +125,7 @@ const char INTL_TIME_UTC[] PROGMEM = "Saat(UTC)";
 const char INTL_SIGNAL_STRENGTH[] PROGMEM = "sinyal gücü";
 const char INTL_SIGNAL_QUALITY[] PROGMEM = "sinyal kalitesi";
 #define INTL_NUMBER_OF_MEASUREMENTS "Ölçüm sayısı"
-#define INTL_TIME_SENDING_MS "Yüklemede harcanan süre"
+#define INTL_TIME_SENDING_MS "Ölçüm iletim süresi"
 #define INTL_SENSOR "Sensör(Algılayıcı)"
 #define INTL_PARAMETER "Parametre"
 #define INTL_VALUE "Değer"
