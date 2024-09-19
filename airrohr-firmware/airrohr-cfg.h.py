@@ -75,7 +75,7 @@ Bool		ssl_influx
 Bool        enable_battery_monitor
 UInt        battery_u_min
 UInt        battery_u_max
-UInt        adc_divider_u_max
+UInt        ina219_calibration
 """
 
 with open("airrohr-cfg.h", "w") as h:

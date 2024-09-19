@@ -99,7 +99,7 @@ enum ConfigShapeId {
 	Config_enable_battery_monitor,
 	Config_battery_u_min,
 	Config_battery_u_max,
-	Config_adc_divider_u_max,
+	Config_ina219_calibration,
 };
 static constexpr char CFG_KEY_CURRENT_LANG[] PROGMEM = "current_lang";
 static constexpr char CFG_KEY_WLANSSID[] PROGMEM = "wlanssid";
@@ -175,7 +175,7 @@ static constexpr char CFG_KEY_SSL_INFLUX[] PROGMEM = "ssl_influx";
 static constexpr char CFG_KEY_ENABLE_BATTERY_MONITOR[] PROGMEM = "enable_battery_monitor";
 static constexpr char CFG_KEY_BATTERY_U_MIN[] PROGMEM = "battery_u_min";
 static constexpr char CFG_KEY_BATTERY_U_MAX[] PROGMEM = "battery_u_max";
-static constexpr char CFG_KEY_ADC_DIVIDER_U_MAX[] PROGMEM = "adc_divider_u_max";
+static constexpr char CFG_KEY_INA219_CALIBRATION[] PROGMEM = "ina219_calibration";
 static constexpr ConfigShapeEntry configShape[] PROGMEM = {
 	{ Config_Type_String, sizeof(cfg::current_lang)-1, CFG_KEY_CURRENT_LANG, cfg::current_lang },
 	{ Config_Type_String, sizeof(cfg::wlanssid)-1, CFG_KEY_WLANSSID, cfg::wlanssid },
@@ -251,5 +251,5 @@ static constexpr ConfigShapeEntry configShape[] PROGMEM = {
 	{ Config_Type_Bool, 0, CFG_KEY_ENABLE_BATTERY_MONITOR, &cfg::enable_battery_monitor },
 	{ Config_Type_UInt, 0, CFG_KEY_BATTERY_U_MIN, &cfg::battery_u_min },
 	{ Config_Type_UInt, 0, CFG_KEY_BATTERY_U_MAX, &cfg::battery_u_max },
-	{ Config_Type_UInt, 0, CFG_KEY_ADC_DIVIDER_U_MAX, &cfg::adc_divider_u_max },
+	{ Config_Type_UInt, 0, CFG_KEY_INA219_CALIBRATION, &cfg::ina219_calibration },
 };

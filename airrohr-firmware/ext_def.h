@@ -338,14 +338,15 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = "feinstaub";
 // Show device info on displays
 #define DISPLAY_DEVICE_INFO 1
 
+// Using INA219 based Volt & Current metter board
 #define ENABLE_BATTERY_MONITOR 0
-
-// Adc preset maximum input voltage applied to the voltage devider's input
-#define ADC_DIVIDER_U_MAX 5120
 
 // Battery preset fully charged and discharged states voltages
 #define BATTERY_U_MAX 4200
 #define BATTERY_U_MIN 2800
+
+// INA219 default calibration range of 32V, 2A
+#define INA219_CALIBRATION 1
 
 // Set debug level for serial output?
 #define DEBUG 3

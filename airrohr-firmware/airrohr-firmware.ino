@@ -205,13 +205,11 @@ namespace cfg
 	bool display_wifi_info = DISPLAY_WIFI_INFO;
 	bool display_device_info = DISPLAY_DEVICE_INFO;
 
-	// ADC settings
-	unsigned adc_divider_u_max = ADC_DIVIDER_U_MAX;
-
 	// battery monitor measurement settings
 	bool enable_battery_monitor = ENABLE_BATTERY_MONITOR;
 	unsigned battery_u_max = BATTERY_U_MAX;
 	unsigned battery_u_min = BATTERY_U_MIN;
+	unsigned ina219_calibration = INA219_CALIBRATION;
 
 	// API settings
 	bool ssl_madavi = SSL_MADAVI;
@@ -254,7 +252,7 @@ namespace cfg
 	}
 }
 
-#define JSON_BUFFER_SIZE 2300
+#define JSON_BUFFER_SIZE 2500
 
 LoggerConfig loggerConfigs[LoggerCount];
 
@@ -630,10 +628,15 @@ String last_data_string;
 int last_signal_strength;
 int last_disconnect_reason;
 
-uint32_t battery_analog_value = 0;
-uint32_t battery_charge = 0;
-uint32_t battery_sum = 0;
 uint32_t battery_val_count = 0;
+uint32_t battery_voltage_sum = 0;
+uint32_t battery_voltage_mV = 0;
+uint32_t battery_status = 0;
+uint32_t current_draw_sum = 0;
+uint32_t current_draw_mA = 0;
+uint32_t power_consumption_sum = 0;
+uint32_t power_consumption_mW = 0;
+bool ina219_is_in_power_save = true;
 
 String esp_chipid;
 String esp_mac_id;
@@ -676,8 +679,9 @@ IPAddress addr_static_gateway;
 IPAddress addr_static_dns;
 
 /*****************************************************************
- * INA219 declaration                                             *
+ * INA219 declaration                                            *
  *****************************************************************/
+const uint8_t ina219_i2c_addresses[] = {0x40, 0x41, 0x44, 0x45}; // 0x40 is the default address
 Adafruit_INA219 ina219;
 
 #define msSince(timestamp_before) (act_milli - (timestamp_before))
@@ -1281,6 +1285,18 @@ static bool writeConfig()
 			break;
 		};
 	}
+	
+	/* NOTE: I suggest to keep this here for future use when new settings needs to be added */
+	/*
+	debug_outln_verbose(F("ConfigShape element count: "), String(sizeof(configShape) / sizeof(configShape[0])));
+	debug_outln_verbose(F("Json memory usage: "), String(json.memoryUsage()));
+	debug_outln_verbose(F("Json capacity: "), String(json.capacity()));
+	debug_outln_verbose(F("Configuration contents (config.json):"));
+	if(cfg::debug > DEBUG_MED_INFO)
+	{
+		serializeJson(json, Debug);
+	}
+	*/
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -1413,6 +1429,52 @@ static void end_html_page(String &page_content)
 		server.sendContent(page_content);
 	}
 	server.sendContent_P(WEB_PAGE_FOOTER);
+}
+
+static void add_form_select(
+	String &page_content, 
+	const ConfigShapeId cfgid, 
+	const __FlashStringHelper *names[], 
+	uint32_t *values,
+	const __FlashStringHelper *label,
+	uint32_t val_size)
+{
+	RESERVE_STRING(s, XLARGE_STR);
+	ConfigShapeEntry c;
+	memcpy_P(&c, &configShape[cfgid], sizeof(ConfigShapeEntry));
+
+	String tmp;
+	s = F("<tr>"
+          "<td>{i}:&nbsp;</td>"
+          "<td style='width:5em'>"
+          "<select name='{n1}' id='{n2}' style='width: 100%'>");
+	s.replace("{i}", label);
+	s.replace("{n1}", String(c.cfg_key()));
+	s.replace("{n2}", String(c.cfg_key()));
+
+	for (uint32_t i = 0; i < val_size; i++)
+	{
+		tmp = F("<option value='{v}' {s}>{o}</option>");
+		tmp.replace("{v}", String(values[i]));
+		if (*c.cfg_val.as_uint == i)
+		{
+			s.replace("{s}", F("selected"));
+		}
+		else
+		{
+			s.replace("{s}", emptyString);
+		};
+		tmp.replace("{o}", names[i]);
+
+		s.concat(tmp);
+	}
+
+	tmp = F("</select>"
+           "</td>"
+           "</tr>");
+	s.concat(tmp);
+
+	page_content += s;
 }
 
 static void add_form_input(String &page_content, const ConfigShapeId cfgid, const __FlashStringHelper *info, const int length)
@@ -1727,31 +1789,8 @@ static void webserver_config_send_body_get(String &page_content)
 	server.sendContent(page_content);
 	// page_content = emptyString;
 	
-	page_content += FPSTR(BR_TAG);
-	add_form_checkbox(Config_enable_battery_monitor, FPSTR(INTL_ENABLE_BATTERY_MONITOR));
-	page_content += F("<table id='battery_monitor_table'>");
-	add_form_input(page_content, Config_battery_u_min, FPSTR(INTL_BATTERY_U_MIN), 5);
-	add_form_input(page_content, Config_battery_u_max, FPSTR(INTL_BATTERY_U_MAX), 5);
-	add_form_input(page_content, Config_adc_divider_u_max, FPSTR(INTL_ADC_DIVIDER_U_MAX), 5);
-	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
-	
-	page_content += F("<script type='text/javascript'>"
-    	"  var $ = function (e) { "
-    	"      return document.getElementById(e); "
-        "  }; "
-        "  function updateBatteryMonitor() { "
-        "      $('battery_u_min').disabled = $('battery_u_max').disabled = $('adc_divider_u_max').disabled = !$('enable_battery_monitor').checked; "
-        "      if($('enable_battery_monitor').checked){ "
-        "          $('battery_monitor_table').style.display = 'block'; "
-        "      } else { "
-        "          $('battery_monitor_table').style.display = 'none'; "
-        "      } "
-        "  }; "
-        "  updateBatteryMonitor(); "
-        "  $('enable_battery_monitor').onchange = updateBatteryMonitor; "
-		"</script>");
 
-	server.sendContent(page_content);
+
 	page_content = FPSTR(WEB_BR_LF_B);
 	page_content += F(INTL_FIRMWARE);
 	page_content += FPSTR(WEB_B_BR);
@@ -1775,6 +1814,34 @@ static void webserver_config_send_body_get(String &page_content)
 	page_content += FPSTR(BR_TAG);
 
 	add_form_checkbox(Config_powersave, FPSTR(INTL_POWERSAVE));
+	add_form_checkbox(Config_enable_battery_monitor, FPSTR(INTL_ENABLE_BATTERY_MONITOR));
+	page_content += F("<table id='battery_monitor_table'>");
+	unsigned ina219_values[3] = {1, 2, 3};
+	const __FlashStringHelper *ina219_info[3] = {FPSTR(INTL_INA219_CAL_32V_2A), FPSTR(INTL_INA219_CAL_32V_1A), FPSTR(INTL_INA219_CAL_16V_400MA)};
+	add_form_select(page_content, Config_ina219_calibration, ina219_info, ina219_values, FPSTR(INTL_INA219_SELECT_CALIBRATION), 3);
+	add_form_input(page_content, Config_battery_u_min, FPSTR(INTL_BATTERY_U_MIN), 5);
+	add_form_input(page_content, Config_battery_u_max, FPSTR(INTL_BATTERY_U_MAX), 5);
+	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
+	
+	page_content += F("<script type='text/javascript'>"
+    	"  var $ = function (e) { "
+    	"      return document.getElementById(e); "
+        "  }; "
+        "  function updateBatteryMonitor() { "
+        "      $('battery_u_min').disabled = $('battery_u_max').disabled = !$('enable_battery_monitor').checked; "
+        "      if($('enable_battery_monitor').checked){ "
+        "          $('battery_monitor_table').style.display = 'block'; "
+        "      } else { "
+        "          $('battery_monitor_table').style.display = 'none'; "
+        "      } "
+        "  }; "
+        "  updateBatteryMonitor(); "
+        "  $('enable_battery_monitor').onchange = updateBatteryMonitor; "
+		"</script>");
+
+	server.sendContent(page_content);
+	
+	page_content = FPSTR(BR_TAG);
 	page_content += FPSTR(TABLE_TAG_OPEN);
 	add_form_input(page_content, Config_debug, FPSTR(INTL_DEBUG_LEVEL), 1);
 	add_form_input(page_content, Config_sending_intervall_ms, FPSTR(INTL_MEASUREMENT_INTERVAL), 5);
@@ -2370,9 +2437,18 @@ static void webserver_status()
 		add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), last_value_SDS_version);
 	}
 	if (cfg::enable_battery_monitor){
-		// String battery_state = F(String(battery_charge) + " % (" + String(battery_analog_value / 1000.0) + "V)");
-		String battery_state = String(battery_charge) + " % (" + String(battery_analog_value / 1000.0) + "V)";
-		add_table_row_from_value(page_content, FPSTR(INTL_BATTERY_CHARGE), battery_state);
+		String battery_state_str = String(battery_voltage_mV / 1000.0) + "V | " + String(battery_status) + "%";
+		add_table_row_from_value(page_content, FPSTR(INTL_BATTERY_CHARGE), battery_state_str);
+		
+		String current_draw_str = current_draw_mA >= 1000
+			? String(static_cast<float>(current_draw_mA) / 1000.0) + "A"
+			: String(current_draw_mA) + "mA";
+		add_table_row_from_value(page_content, FPSTR(INTL_CURRENT_DRAW), current_draw_str);
+		
+		String power_consumption_str = power_consumption_mW >= 1000
+				? String(static_cast<float>(power_consumption_mW) / 1000.0) + "W"
+				: String(power_consumption_mW) + "mW";
+		add_table_row_from_value(page_content, FPSTR(INTL_POWER_CONSUMPTION), power_consumption_str);
 	}
 	if (cfg::npm_read)
 	{
@@ -4542,38 +4618,70 @@ static void fetchSensorSPS30(String &s)
 }
 
 /*****************************************************************
-   read Battery voltage
+   read Battery state
  *****************************************************************/
-static void readBatteryVoltage() {
+static void readBatteryState() {
 	battery_val_count++;
-	if(battery_val_count > 3){
-		battery_sum = 0;
+
+	if(battery_val_count > 3) {
+		if(!ina219_is_in_power_save)
+		{
+			ina219_is_in_power_save = true;
+			debug_outln_verbose(F("INA219 is going to sleep..."));
+			ina219.powerSave(ina219_is_in_power_save);
+			debug_outln_info(FPSTR(DBG_TXT_SEP));
+		}
+	
+		battery_voltage_sum = 0;
+		current_draw_sum = 0;
+		power_consumption_sum = 0;
 		if(msSince(battery_monitor_period) <= READINGTIME_ADC_MS) 
-					return;
-		
+			return;
+
 		battery_monitor_period = act_milli;
 		battery_val_count = 0;
+
 		return;		
 	}
 
-	String dbg_reading = "Battery voltage #" + String(battery_val_count);
-	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), dbg_reading);
-	battery_sum += analogRead(ADC_PIN);
+	ina219_is_in_power_save = false;
+	ina219.powerSave(ina219_is_in_power_save);
+	/* NOTE: According the TI's INA219 documentation: "Full recovery from Power-Down requires 40 μs."
+	 * 		 Still, let's be more generous here.
+	 */
+	delayMicroseconds(200);
+	debug_outln_verbose(F("INA219 is awake."));	
+
+	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_INA219));
+	debug_outln_verbose(F("Reading #"), String(battery_val_count));
+
+	float voltage = ina219.getBusVoltage_V();
+	battery_voltage_sum += static_cast<int>(voltage * 1000);
+	battery_voltage_mV = battery_voltage_sum / battery_val_count;
+
+	uint32_t current_draw = static_cast<int>(ina219.getCurrent_mA());
+	current_draw_sum += current_draw;
+	current_draw_mA = current_draw_sum / battery_val_count;
 	
-	float battery_avg_value = battery_sum / static_cast<float>(battery_val_count);
-	float ratio = cfg::adc_divider_u_max / static_cast<float>(ADC_RANGE_MAX);
-	battery_analog_value = round(battery_avg_value * ratio);
-	debug_outln_verbose(F("Battery analog value (mV): "), String(battery_analog_value));
-	String bat_min_max = String(cfg::battery_u_min) + " / " + String(cfg::battery_u_max);
+	uint32_t power_consumption = static_cast<int>(ina219.getPower_mW());
+	power_consumption_sum += power_consumption;
+	power_consumption_mW = power_consumption_sum / battery_val_count;
+	debug_outln_verbose(F("Battery voltge (mV): "), String(battery_voltage_mV));
 
-	// This will fix issues with the map() function when the value of the 'battery_analog_value' is outside of the predefined range by any circumstances.
-	uint32_t battery_voltage = (battery_analog_value < (uint32_t)cfg::battery_u_min) ? (uint32_t)cfg::battery_u_min : battery_analog_value;
-	battery_voltage = (battery_voltage > (uint32_t)cfg::battery_u_max) ? (uint32_t)cfg::battery_u_max : battery_voltage;
+	// NOTE: This will fix issues with the map() function when the value of the 'battery_analog_value' is outside of the predefined range by any circumstances.
+	uint32_t battery_voltage_trimmed = (battery_voltage_mV < cfg::battery_u_min) 
+        ? cfg::battery_u_min 
+        : (battery_voltage_mV > cfg::battery_u_max) 
+	        ? cfg::battery_u_max
+	        : battery_voltage_mV;
 
-	battery_charge = map(battery_voltage, cfg::battery_u_min, cfg::battery_u_max, 0, 100);
+	battery_status = map(battery_voltage_trimmed, cfg::battery_u_min, cfg::battery_u_max, 0, 100);
 
-	debug_outln_verbose(F("Battery capacity (%): "), String(battery_charge));
-	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), F("Battery voltage"));
+	debug_outln_verbose(F("Battery status (%): "), String(battery_status));
+	debug_outln_verbose(F("Current draw (mA): "), String(current_draw_mA));
+	debug_outln_verbose(F("Power consumption (mW): "), String(power_consumption_mW));
+
+	debug_outln_verbose(FPSTR(DBG_TXT_END_READING), FPSTR(SENSORS_INA219));
 
 	battery_monitor_period = act_milli; 
 }
@@ -4582,11 +4690,15 @@ static void readBatteryVoltage() {
    send Battery status
  *****************************************************************/
 static void sendBatteryStatus(String& s) {
-	float battery_voltage = battery_analog_value / 1000.0;
-	add_Value2Json(s, F("Battery_voltage"), String(battery_voltage));
-	add_Value2Json(s, F("battery_charge"), String(battery_charge));
-	debug_outln_info(F("Battery (V): "), String(battery_voltage));
-	debug_outln_info(F("Battery (%): "), String(battery_charge)); 
+	float battery_voltage_data = battery_voltage_mV / 1000.0;
+	add_Value2Json(s, F("battery_voltage_V"), String(battery_voltage_data));
+	add_Value2Json(s, F("battery_status"), String(battery_status));
+	add_Value2Json(s, F("current_draw_mA"), String(current_draw_mA));
+	add_Value2Json(s, F("power_consumption_mW"), String(power_consumption_mW));
+	debug_outln_info(F("Battery (V): "), String(battery_voltage_data));
+	debug_outln_info(F("Battery (%): "), String(battery_status)); 
+	debug_outln_info(F("Current (mA): "), String(current_draw_mA)); 
+	debug_outln_info(F("Power (mW): "), String(power_consumption_mW)); 
 	debug_outln_info(FPSTR(DBG_TXT_SEP));
 }
 
@@ -5488,6 +5600,29 @@ static bool initBMX280(char addr)
 }
 
 /*****************************************************************
+ * Init INA219                                                   *
+ *****************************************************************/
+static bool initINA219()
+{
+	int n = sizeof(ina219_i2c_addresses) / sizeof(ina219_i2c_addresses[0]);
+	bool result = false;
+	for(int i = 0; i < n; i++)
+	{
+		ina219 = Adafruit_INA219(ina219_i2c_addresses[i]);
+		debug_out(String(F("Trying INA219 sensor on ")) + String(ina219_i2c_addresses[i], HEX), DEBUG_MIN_INFO);
+			if(!ina219.begin()){
+				debug_outln_info(FPSTR(DBG_TXT_NOT_FOUND));
+			} else {
+				debug_outln_info(FPSTR(DBG_TXT_FOUND));
+				result = true;
+				break;
+			}	
+	}
+
+	return result;
+}
+
+/*****************************************************************
    Init SPS30 PM Sensor
  *****************************************************************/
 static void initSPS30()
@@ -5756,7 +5891,6 @@ static void powerOnTestSensors()
 	{
 		oneWire.begin(ONEWIRE_PIN);
 		ds18b20.begin(); // Start DS18B20
-		debug_outln_info(F("Read DS18B20..."));
 	}
 
 	if (cfg::dnms_read)
@@ -5765,15 +5899,34 @@ static void powerOnTestSensors()
 		initDNMS();
 	}
 
-	if (cfg::enable_battery_monitor){
-		if(!ina219.begin()){
+	if (cfg::enable_battery_monitor)
+	{
+		debug_outln_info(F("Read INA219..."));
+		if(!initINA219())
+		{
 			debug_outln_error(F("Check INA219 wiring"));
 			ina219_init_failed = true;
 		} else {
-			
+			switch(cfg::ina219_calibration)
+			{
+				case 2:
+					ina219.setCalibration_32V_1A();
+					debug_outln_verbose(F("INA219 callibration's set to 32V, 1A"));
+					break;
+				case 3:
+					ina219.setCalibration_16V_400mA();
+					debug_outln_verbose(F("INA219 callibration's set to 16V, 400mA"));
+					break;
+				case 1:
+				default:
+					ina219.setCalibration_32V_2A();
+					debug_outln_verbose(F("INA219 callibration's set to 32V, 2A"));
+					break;
+			}
+
+			ina219.powerSave(true);
 		}
 	}
-
 }
 
 static void logEnabledAPIs()
@@ -6128,10 +6281,12 @@ void loop(void)
 		}
 	}
 
-	if(cfg::enable_battery_monitor && !send_now){
-		if (msSince(battery_start_time) > SAMPLETIME_BAT_MS){
+	if(cfg::enable_battery_monitor && !send_now)
+	{
+		if (msSince(battery_start_time) > SAMPLETIME_BAT_MS)
+		{
 			battery_start_time = act_milli;
-			readBatteryVoltage();
+			readBatteryState();
 		}
 	}
 
