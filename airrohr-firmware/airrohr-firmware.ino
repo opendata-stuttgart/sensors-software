@@ -1297,17 +1297,15 @@ static bool writeConfig()
 	}
 	
 	/* NOTE: I suggest to keep this here for future use when new settings needs to be added */
-	/*
-	debug_outln_verbose(F("ConfigShape element count: "), String(sizeof(configShape) / sizeof(configShape[0])));
-	debug_outln_verbose(F("Json memory usage: "), String(json.memoryUsage()));
-	debug_outln_verbose(F("Json capacity: "), String(json.capacity()));
-	debug_outln_verbose(F("Configuration contents (config.json):"));
-	if(cfg::debug > DEBUG_MED_INFO)
-	{
-		serializeJson(json, Debug);
-	}
-	*/
-
+	// debug_outln_verbose(F("ConfigShape element count: "), String(sizeof(configShape) / sizeof(configShape[0])));
+	// debug_outln_verbose(F("Json memory usage: "), String(json.memoryUsage()));
+	// debug_outln_verbose(F("Json capacity: "), String(json.capacity()));
+	// debug_outln_verbose(F("Configuration contents (config.json):"));
+	// if(cfg::debug > DEBUG_MED_INFO)
+	// {
+	// 	serializeJson(json, Debug);
+	// }
+	
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
@@ -6242,7 +6240,8 @@ void loop(void)
 {
 	unsigned long sleep = SLEEPTIME_MS;
 	String result_PPD, result_SDS, result_PMS, result_HPM, result_NPM, result_IPS;
-	String result_GPS, result_DNMS;
+	String result_GPS, result_DNMS, result_SCD30;
+	String result_BAT;
 
 	unsigned sum_send_time = 0;
 
