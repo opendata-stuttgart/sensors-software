@@ -129,10 +129,15 @@ const char INTL_SIGNAL_QUALITY[] PROGMEM = "Jelminőség";
 #define INTL_SENSOR "Szenzor"
 #define INTL_PARAMETER "Paraméter"
 #define INTL_VALUE "Érték"
-const char INTL_ENABLE_BATTERY_MONITOR[] PROGMEM = "Engedélyezze az akkumulátorfigyelőt";
-const char INTL_BATTERY_CHARGE[] PROGMEM = "Akkumulátortöltő";
+const char INTL_ENABLE_BATTERY_MONITOR[] PROGMEM = "Engedélyezze az akkumulátorfigyelőt (INA219)";
+const char INTL_BATTERY_STATE[] PROGMEM = "Az akkumulátor állapota";
+const char INTL_CURRENT_DRAW[] PROGMEM = "Áramfelvétel";
+const char INTL_POWER_CONSUMPTION[] PROGMEM = "Energiafogyasztás";
 const char INTL_BATTERY_U_MIN[] PROGMEM = "Akkumulátor U min (mV):";
 const char INTL_BATTERY_U_MAX[] PROGMEM = "Akkumulátor U max (mV):";
-const char INTL_ADC_DIVIDER_U_MAX[] PROGMEM = "ADA elválasztó U max (mV):";
+const char INTL_INA219_SELECT_CALIBRATION[] PROGMEM = "Válassza ki a kalibrálást";
+const char INTL_INA219_CAL_32V_2A[] PROGMEM = "32V, 2A";
+const char INTL_INA219_CAL_32V_1A[] PROGMEM = "32V, 1A";
+const char INTL_INA219_CAL_16V_400MA[] PROGMEM = "16V, 400mA";
 
 #include "./airrohr-logo-common.h"

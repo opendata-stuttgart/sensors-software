@@ -74,6 +74,7 @@ Additional Libraries needed for building:
 * [LiquidCrystal I2C](https://github.com/marcoschwartz/LiquidCrystal_I2C) (1.1.2)
 * [EspSoftwareSerial](https://github.com/plerup/espsoftwareserial)(6.3.0)
 * [TinyGPS++](http://arduiniana.org/libraries/tinygpsplus/) (1.0.2) (GNU Lesser Public License >=2.1)
+* [Adafruit INA219](https://github.com/adafruit/Adafruit_INA219) (1.1.1) (BSD)
 
 
 ## Source Layout
@@ -114,6 +115,7 @@ consistency accross and within the particular translation.
 | BME280        | BMX280             | const                        | `airrohr-firmware.ino`            | 0x77 (default) or 0x76               |
 | BM085:        | Adafruit_BMP085    | BMP085_I2CADDR 0x77          | `Adafruit_BM085.h`                | 0x77                                 |
 | BM180:        | Adafruit_BMP085    | BMP085_I2CADDR 0x77          | `Adafruit_BM085.h`                | 0x77                                 |
+| INA219        | Adafruit_INA219    | ina219_i2c_addresses[]       | `Adafruit_INA219.h`               | 0x40 (default), 0x41, 0x44, 0x45     |
 
 Do not forget to update the table above when you are implementing a new I2C device.
 

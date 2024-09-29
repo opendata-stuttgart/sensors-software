@@ -129,10 +129,15 @@ const char INTL_SIGNAL_QUALITY[] PROGMEM = "якість сигналу";
 #define INTL_SENSOR "Сенсор"
 #define INTL_PARAMETER "Параметр"
 #define INTL_VALUE "Значення"
-const char INTL_ENABLE_BATTERY_MONITOR[] PROGMEM = "Активуйте монітор батареї";
-const char INTL_BATTERY_CHARGE[] PROGMEM = "Заряд акумулятора";
+const char INTL_ENABLE_BATTERY_MONITOR[] PROGMEM = "Активуйте монітор батареї (INA219)";
+const char INTL_BATTERY_STATE[] PROGMEM = "Стан батареї";
+const char INTL_CURRENT_DRAW[] PROGMEM = "Споживання струму";
+const char INTL_POWER_CONSUMPTION[] PROGMEM = "Споживана потужність";
 const char INTL_BATTERY_U_MIN[] PROGMEM = "U min на батареї (mV):";
 const char INTL_BATTERY_U_MAX[] PROGMEM = "U max на батареї (mV):";
-const char INTL_ADC_DIVIDER_U_MAX[] PROGMEM = "U max при подільника на АЦП (mV):";
+const char INTL_INA219_SELECT_CALIBRATION[] PROGMEM = "Виберіть калібрування";
+const char INTL_INA219_CAL_32V_2A[] PROGMEM = "32V, 2A";
+const char INTL_INA219_CAL_32V_1A[] PROGMEM = "32V, 1A";
+const char INTL_INA219_CAL_16V_400MA[] PROGMEM = "16V, 400mA";
 
 #include "./airrohr-logo-common.h"

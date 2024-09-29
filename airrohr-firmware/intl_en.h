@@ -130,7 +130,7 @@ const char INTL_SIGNAL_QUALITY[] PROGMEM = "signal quality";
 #define INTL_PARAMETER "Parameter"
 #define INTL_VALUE "Value"
 const char INTL_ENABLE_BATTERY_MONITOR[] PROGMEM = "Enable battery monitor (INA219)";
-const char INTL_BATTERY_CHARGE[] PROGMEM = "Battery status";
+const char INTL_BATTERY_STATE[] PROGMEM = "Battery status";
 const char INTL_CURRENT_DRAW[] PROGMEM = "Current draw";
 const char INTL_POWER_CONSUMPTION[] PROGMEM = "Power consumption";
 const char INTL_BATTERY_U_MIN[] PROGMEM = "Battery U min (mV)";

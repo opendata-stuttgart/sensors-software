@@ -129,10 +129,15 @@ const char INTL_SIGNAL_QUALITY[] PROGMEM = "Calidad de Señal";
 #define INTL_SENSOR "Sensor"
 #define INTL_PARAMETER "Parámetro"
 #define INTL_VALUE "Valor"
-const char INTL_ENABLE_BATTERY_MONITOR[] PROGMEM = "Habilitar monitor de batería";
-const char INTL_BATTERY_CHARGE[] PROGMEM = "Bateria cargada";
+const char INTL_ENABLE_BATTERY_MONITOR[] PROGMEM = "Habilitar monitor de batería (INA219)";
+const char INTL_BATTERY_STATE[] PROGMEM = "Estado de la batería";
+const char INTL_CURRENT_DRAW[] PROGMEM = "Consumo de corriente";
+const char INTL_POWER_CONSUMPTION[] PROGMEM = "Consumo de energía";
 const char INTL_BATTERY_U_MIN[] PROGMEM = "Batería U min (mV):";
 const char INTL_BATTERY_U_MAX[] PROGMEM = "Batería U max (mV):";
-const char INTL_ADC_DIVIDER_U_MAX[] PROGMEM = "Divisor CAD U max (mV):";
+const char INTL_INA219_SELECT_CALIBRATION[] PROGMEM = "Seleccionar calibración";
+const char INTL_INA219_CAL_32V_2A[] PROGMEM = "32V, 2A";
+const char INTL_INA219_CAL_32V_1A[] PROGMEM = "32V, 1A";
+const char INTL_INA219_CAL_16V_400MA[] PROGMEM = "16V, 400mA";
 
 #include "./airrohr-logo-common.h"

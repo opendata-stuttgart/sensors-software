@@ -129,10 +129,15 @@ const char INTL_SIGNAL_QUALITY[] PROGMEM = "signalo kokybė";
 #define INTL_SENSOR "Jutiklis"
 #define INTL_PARAMETER "Parametras"
 #define INTL_VALUE "Vertė"
-const char INTL_ENABLE_BATTERY_MONITOR[] PROGMEM = "Įgalinti akumuliatoriaus monitorių";
-const char INTL_BATTERY_CHARGE[] PROGMEM = "Baterijos įkrovimas";
+const char INTL_ENABLE_BATTERY_MONITOR[] PROGMEM = "Įgalinti akumuliatoriaus monitorių (INA219)";
+const char INTL_BATTERY_STATE[] PROGMEM = "Baterijos būsena";
+const char INTL_CURRENT_DRAW[] PROGMEM = "Srovės trauka";
+const char INTL_POWER_CONSUMPTION[] PROGMEM = "Energijos suvartojimas";
 const char INTL_BATTERY_U_MIN[] PROGMEM = "Baterija U min (mV)";
 const char INTL_BATTERY_U_MAX[] PROGMEM = "Baterija U max (mV)";
-const char INTL_ADC_DIVIDER_U_MAX[] PROGMEM = "ADC daliklis U max (mV)";
+const char INTL_INA219_SELECT_CALIBRATION[] PROGMEM = "Pasirinkite kalibravimą";
+const char INTL_INA219_CAL_32V_2A[] PROGMEM = "32V, 2A";
+const char INTL_INA219_CAL_32V_1A[] PROGMEM = "32V, 1A";
+const char INTL_INA219_CAL_16V_400MA[] PROGMEM = "16V, 400mA";
 
 #include "./airrohr-logo-common.h"

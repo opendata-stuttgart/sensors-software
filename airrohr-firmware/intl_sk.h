@@ -129,10 +129,15 @@ const char INTL_SIGNAL_QUALITY[] PROGMEM = "kvalita signálu";
 #define INTL_SENSOR "Senzor"
 #define INTL_PARAMETER "Parameter"
 #define INTL_VALUE "Hodnota"
-const char INTL_ENABLE_BATTERY_MONITOR[] PROGMEM = "Povoliť sledovanie batérie";
-const char INTL_BATTERY_CHARGE[] PROGMEM = "Nabitie batérie";
+const char INTL_ENABLE_BATTERY_MONITOR[] PROGMEM = "Povoliť sledovanie batérie (INA219)";
+const char INTL_BATTERY_STATE[] PROGMEM = "Stav batérie";
+const char INTL_CURRENT_DRAW[] PROGMEM = "Odber prúdu";
+const char INTL_POWER_CONSUMPTION[] PROGMEM = "Spotreba energie";
 const char INTL_BATTERY_U_MIN[] PROGMEM = "Batéria U min (mV):";
 const char INTL_BATTERY_U_MAX[] PROGMEM = "Batéria U max (mV):";
-const char INTL_ADC_DIVIDER_U_MAX[] PROGMEM = "ADP rozdeľovač U max (mV):";
+const char INTL_INA219_SELECT_CALIBRATION[] PROGMEM = "Vyberte kalibráciu";
+const char INTL_INA219_CAL_32V_2A[] PROGMEM = "32V, 2A";
+const char INTL_INA219_CAL_32V_1A[] PROGMEM = "32V, 1A";
+const char INTL_INA219_CAL_16V_400MA[] PROGMEM = "16V, 400mA";
 
 #include "./airrohr-logo-common.h"

@@ -49,8 +49,8 @@
  ************************************************************************
  *
  * latest build
- * RAM:   [====      ]  41.8% (used 34220 bytes from 81920 bytes)
- * Flash: [=======   ]  67.1% (used 701191 bytes from 1044464 bytes)
+ * RAM:   [====      ]  41.8% (used 34276 bytes from 81920 bytes)
+ * Flash: [=======   ]  67.8% (used 708175 bytes from 1044464 bytes)
  *
  ************************************************************************/
  
@@ -2449,15 +2449,21 @@ static void webserver_status()
 		add_table_row_from_value(page_content, FPSTR(SENSORS_SDS011), last_value_SDS_version);
 	}
 	if (cfg::enable_battery_monitor){
-		String battery_state_str = String(battery_voltage_mV / 1000.0) + "V | " + String(battery_status) + "%";
-		add_table_row_from_value(page_content, FPSTR(INTL_BATTERY_CHARGE), battery_state_str);
+		String battery_state_str = ina219_init_failed
+			? "- V | - %"
+			: String(battery_voltage_mV / 1000.0) + "V | " + String(battery_status) + "%";
+		add_table_row_from_value(page_content, FPSTR(INTL_BATTERY_STATE), battery_state_str);
 		
-		String current_draw_str = current_draw_mA >= 1000
-			? String(static_cast<float>(current_draw_mA) / 1000.0) + "A"
-			: String(current_draw_mA) + "mA";
+		String current_draw_str = ina219_init_failed 
+			? "- mA"
+			: current_draw_mA >= 1000
+				? String(static_cast<float>(current_draw_mA) / 1000.0) + "A"
+				: String(current_draw_mA) + "mA";
 		add_table_row_from_value(page_content, FPSTR(INTL_CURRENT_DRAW), current_draw_str);
 		
-		String power_consumption_str = power_consumption_mW >= 1000
+		String power_consumption_str = ina219_init_failed
+			? "- mW"
+			: power_consumption_mW >= 1000
 				? String(static_cast<float>(power_consumption_mW) / 1000.0) + "W"
 				: String(power_consumption_mW) + "mW";
 		add_table_row_from_value(page_content, FPSTR(INTL_POWER_CONSUMPTION), power_consumption_str);
@@ -5636,7 +5642,8 @@ static bool initINA219()
 	{
 		ina219 = Adafruit_INA219(ina219_i2c_addresses[i]);
 		debug_out(String(F("Trying INA219 sensor on ")) + String(ina219_i2c_addresses[i], HEX), DEBUG_MIN_INFO);
-			if(!ina219.begin()){
+			if(!ina219.begin())
+			{
 				debug_outln_info(FPSTR(DBG_TXT_NOT_FOUND));
 			} else {
 				debug_outln_info(FPSTR(DBG_TXT_FOUND));
@@ -6309,7 +6316,7 @@ void loop(void)
 		}
 	}
 
-	if(cfg::enable_battery_monitor && !send_now)
+	if(cfg::enable_battery_monitor && !ina219_init_failed && !send_now)
 	{
 		if (msSince(battery_start_time) > SAMPLETIME_BAT_MS)
 		{

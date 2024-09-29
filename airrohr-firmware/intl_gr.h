@@ -129,10 +129,15 @@ const char INTL_SIGNAL_QUALITY[] PROGMEM = "ποιότητα σήματος";
 #define INTL_SENSOR "Αισθητήρας"
 #define INTL_PARAMETER "Παράμετρος"
 #define INTL_VALUE "Αξία"
-const char INTL_ENABLE_BATTERY_MONITOR[] PROGMEM = "Ενεργοποίηση οθόνης μπαταρίας";
-const char INTL_BATTERY_CHARGE[] PROGMEM = "Φόρτιση μπαταρίας";
+const char INTL_ENABLE_BATTERY_MONITOR[] PROGMEM = "Ενεργοποίηση οθόνης μπαταρίας (INA219)";
+const char INTL_BATTERY_STATE[] PROGMEM = "Κατάσταση μπαταρίας";
+const char INTL_CURRENT_DRAW[] PROGMEM = "Τραβήξτε ρεύμα";
+const char INTL_POWER_CONSUMPTION[] PROGMEM = "Κατανάλωση ρεύματος";
 const char INTL_BATTERY_U_MIN[] PROGMEM = "Μπαταρία U min (mV)";
 const char INTL_BATTERY_U_MAX[] PROGMEM = "Μπαταρία U max (mV)";
-const char INTL_ADC_DIVIDER_U_MAX[] PROGMEM = "Διαχωριστικό ADC U max (mV)";
+const char INTL_INA219_SELECT_CALIBRATION[] PROGMEM = "Επιλέξτε βαθμονόμηση";
+const char INTL_INA219_CAL_32V_2A[] PROGMEM = "32V, 2A";
+const char INTL_INA219_CAL_32V_1A[] PROGMEM = "32V, 1A";
+const char INTL_INA219_CAL_16V_400MA[] PROGMEM = "16V, 400mA";
 
 #include "./airrohr-logo-common.h"
