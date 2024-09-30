@@ -48,9 +48,9 @@
  *                                                                      *
  ************************************************************************
  *
- * latest build using lib 3.1.0
- * DATA:    [====      ]  42.2% (used 34592 bytes from 81920 bytes)
- * PROGRAM: [======    ]  58.8% (used 614105 bytes from 1044464 bytes)
+ * latest build using lib 2.6.2
+ * DATA:    [====      ]  41.7% (used 34128 bytes from 81920 bytes)
+ * PROGRAM: [======    ]  67.2% (used 701371 bytes from 1044464 bytes)
  *  
  ************************************************************************/
  
