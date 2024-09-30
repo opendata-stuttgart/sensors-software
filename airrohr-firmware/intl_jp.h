@@ -129,5 +129,15 @@ const char INTL_SIGNAL_QUALITY[] PROGMEM = "信号品質";
 #define INTL_SENSOR "センサー"
 #define INTL_PARAMETER "パラメータ"
 #define INTL_VALUE "価値"
+const char INTL_ENABLE_BATTERY_MONITOR[] PROGMEM = "バッテリーモニターを有効にする (INA219)";
+const char INTL_BATTERY_STATE[] PROGMEM = "バッテリーの状態";
+const char INTL_CURRENT_DRAW[] PROGMEM = "消費電流";
+const char INTL_POWER_CONSUMPTION[] PROGMEM = "消費電力";
+const char INTL_BATTERY_U_MIN[] PROGMEM = "電池 U min (mV)";
+const char INTL_BATTERY_U_MAX[] PROGMEM = "電池 U max (mV)";
+const char INTL_INA219_SELECT_CALIBRATION[] PROGMEM = "キャリブレーションを選択";
+const char INTL_INA219_CAL_32V_2A[] PROGMEM = "32V, 2A";
+const char INTL_INA219_CAL_32V_1A[] PROGMEM = "32V, 1A";
+const char INTL_INA219_CAL_16V_400MA[] PROGMEM = "16V, 400mA";
 
 #include "./airrohr-logo-common.h"

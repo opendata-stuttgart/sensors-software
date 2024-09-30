@@ -96,6 +96,10 @@ enum ConfigShapeId {
 	Config_pwd_influx,
 	Config_measurement_name_influx,
 	Config_ssl_influx,
+	Config_enable_battery_monitor,
+	Config_battery_u_min,
+	Config_battery_u_max,
+	Config_ina219_calibration,
 };
 static constexpr char CFG_KEY_CURRENT_LANG[] PROGMEM = "current_lang";
 static constexpr char CFG_KEY_WLANSSID[] PROGMEM = "wlanssid";
@@ -168,6 +172,10 @@ static constexpr char CFG_KEY_USER_INFLUX[] PROGMEM = "user_influx";
 static constexpr char CFG_KEY_PWD_INFLUX[] PROGMEM = "pwd_influx";
 static constexpr char CFG_KEY_MEASUREMENT_NAME_INFLUX[] PROGMEM = "measurement_name_influx";
 static constexpr char CFG_KEY_SSL_INFLUX[] PROGMEM = "ssl_influx";
+static constexpr char CFG_KEY_ENABLE_BATTERY_MONITOR[] PROGMEM = "enable_battery_monitor";
+static constexpr char CFG_KEY_BATTERY_U_MIN[] PROGMEM = "battery_u_min";
+static constexpr char CFG_KEY_BATTERY_U_MAX[] PROGMEM = "battery_u_max";
+static constexpr char CFG_KEY_INA219_CALIBRATION[] PROGMEM = "ina219_calibration";
 static constexpr ConfigShapeEntry configShape[] PROGMEM = {
 	{ Config_Type_String, sizeof(cfg::current_lang)-1, CFG_KEY_CURRENT_LANG, cfg::current_lang },
 	{ Config_Type_String, sizeof(cfg::wlanssid)-1, CFG_KEY_WLANSSID, cfg::wlanssid },
@@ -240,4 +248,8 @@ static constexpr ConfigShapeEntry configShape[] PROGMEM = {
 	{ Config_Type_Password, sizeof(cfg::pwd_influx)-1, CFG_KEY_PWD_INFLUX, cfg::pwd_influx },
 	{ Config_Type_String, sizeof(cfg::measurement_name_influx)-1, CFG_KEY_MEASUREMENT_NAME_INFLUX, cfg::measurement_name_influx },
 	{ Config_Type_Bool, 0, CFG_KEY_SSL_INFLUX, &cfg::ssl_influx },
+	{ Config_Type_Bool, 0, CFG_KEY_ENABLE_BATTERY_MONITOR, &cfg::enable_battery_monitor },
+	{ Config_Type_UInt, 0, CFG_KEY_BATTERY_U_MIN, &cfg::battery_u_min },
+	{ Config_Type_UInt, 0, CFG_KEY_BATTERY_U_MAX, &cfg::battery_u_max },
+	{ Config_Type_UInt, 0, CFG_KEY_INA219_CALIBRATION, &cfg::ina219_calibration },
 };

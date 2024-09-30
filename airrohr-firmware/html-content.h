@@ -24,6 +24,8 @@ const char DBG_TXT_CONNECTING_TO[] PROGMEM = "Connecting to ";
 const char DBG_TXT_FOUND[] PROGMEM = " ... found";
 const char DBG_TXT_NOT_FOUND[] PROGMEM = " ... not found";
 const char DBG_TXT_SEP[] PROGMEM = "----";
+const char DBG_TXT_VOLTAGE[] PROGMEM = "Voltage (V): ";
+const char DBG_TXT_CAPACITY[] PROGMEM = "Capacity (%): ";
 
 const char SENSORS_SDS011[] PROGMEM = "SDS011";
 const char SENSORS_PPD42NS[] PROGMEM = "PPD42NS";
@@ -41,6 +43,7 @@ const char SENSORS_BMP180[] PROGMEM = "BMP180";
 const char SENSORS_BME280[] PROGMEM = "BME280";
 const char SENSORS_BMP280[] PROGMEM = "BMP280";
 const char SENSORS_DNMS[] PROGMEM = "DNMS";
+const char SENSORS_INA219[] PROGMEM = "INA219";
 
 const char WEB_PAGE_HEADER[] PROGMEM = "<!DOCTYPE html><html lang='" INTL_LANG "'>\
 <head>\

@@ -129,5 +129,15 @@ const char INTL_SIGNAL_QUALITY[] PROGMEM = "signaalin laatu";
 #define INTL_SENSOR "Anturi"
 #define INTL_PARAMETER "Parametri"
 #define INTL_VALUE "Arvo"
+const char INTL_ENABLE_BATTERY_MONITOR[] PROGMEM = "Ota akkumonitori käyttöön (INA219)";
+const char INTL_BATTERY_STATE[] PROGMEM = "Akun tila";
+const char INTL_CURRENT_DRAW[] PROGMEM = "Virranotto";
+const char INTL_POWER_CONSUMPTION[] PROGMEM = "Virrankulutus";
+const char INTL_BATTERY_U_MIN[] PROGMEM = "Akku U min (mV)";
+const char INTL_BATTERY_U_MAX[] PROGMEM = "Akku U max (mV)";
+const char INTL_INA219_SELECT_CALIBRATION[] PROGMEM = "Valitse kalibrointi";
+const char INTL_INA219_CAL_32V_2A[] PROGMEM = "32V, 2A";
+const char INTL_INA219_CAL_32V_1A[] PROGMEM = "32V, 1A";
+const char INTL_INA219_CAL_16V_400MA[] PROGMEM = "16V, 400mA";
 
 #include "./airrohr-logo-common.h"

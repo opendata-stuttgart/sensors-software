@@ -129,5 +129,16 @@ const char INTL_SIGNAL_QUALITY[] PROGMEM = "kvalitet signala";
 #define INTL_SENSOR "Senzor"
 #define INTL_PARAMETER "Parametar"
 #define INTL_VALUE "Vrednost"
+const char INTL_ENABLE_BATTERY_MONITOR[] PROGMEM = "Активирајте монитор батерије (INA219)";
+const char INTL_BATTERY_STATE[] PROGMEM = "Статус батерије";
+const char INTL_CURRENT_DRAW[] PROGMEM = "Повлачење струје";
+const char INTL_POWER_CONSUMPTION[] PROGMEM = "Потрошња енергије";
+const char INTL_BATTERY_U_MIN[] PROGMEM = "U min на батерије (mV):";
+const char INTL_BATTERY_U_MAX[] PROGMEM = "U max на батерије (mV):";
+const char INTL_INA219_SELECT_CALIBRATION[] PROGMEM = "Изаберите калибрацију";
+const char INTL_INA219_CAL_32V_2A[] PROGMEM = "32V, 2A";
+const char INTL_INA219_CAL_32V_1A[] PROGMEM = "32V, 1A";
+const char INTL_INA219_CAL_16V_400MA[] PROGMEM = "16V, 400mA";
+
 
 #include "./airrohr-logo-common.h"
