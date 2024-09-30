@@ -1,6 +1,7 @@
 /*
  *	airRohr firmware
- *	Copyright (C) 2016-2018 Code for Stuttgart a.o.
+ *  Copyright (C) 2016-2021  Code for Stuttgart a.o.
+ *  Copyright (C) 2021-2024  Sensor.Community a.o.
  *
  *  German translations
  *
@@ -67,7 +68,7 @@ const char INTL_STATIC_DNS[] PROGMEM = "DNS Server";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;Level";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Messintervall";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Dauer&nbsp;Routermodus";
-const char INTL_POWERSAVE[] PROGMEM = "Energie sparen";
+const char INTL_POWERSAVE[] PROGMEM = "Energiesparen";
 const char INTL_MORE_APIS[] PROGMEM = "Weitere APIs";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "An eigene API senden";
 const char INTL_SERVER[] PROGMEM = "Server";

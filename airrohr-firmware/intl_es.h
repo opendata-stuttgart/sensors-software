@@ -1,6 +1,7 @@
 /*
  *	airRohr firmware
- *	Copyright (C) 2016-2018 Code for Stuttgart a.o.
+ *  Copyright (C) 2016-2021  Code for Stuttgart a.o.
+ *  Copyright (C) 2021-2024  Sensor.Community a.o.
  *
  *  Spanish translations
  *
@@ -37,8 +38,8 @@ const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS ({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "Corrección en dB (A)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "Corrección en °C";
-const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "";
-const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "";
+const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "[[height_above_sealevel]]";
+const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "[[pressure_at_sealevel]]";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Autorización";
 #define INTL_REPORT_ISSUE "Reportar un problema"
@@ -58,16 +59,16 @@ const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "Mostrar información de WiFi";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Mostrar información del dispositivo";
 
-#define INTL_STATIC_IP_TEXT ""
-const char INTL_STATIC_IP[] PROGMEM = "";
-const char INTL_STATIC_SUBNET[] PROGMEM = "";
-const char INTL_STATIC_GATEWAY[] PROGMEM = "";
-const char INTL_STATIC_DNS[] PROGMEM = "";
+#define INTL_STATIC_IP_TEXT "[[static_ip_text]]"
+const char INTL_STATIC_IP[] PROGMEM = "[[static_ip]]";
+const char INTL_STATIC_SUBNET[] PROGMEM = "[[static_subnet]]";
+const char INTL_STATIC_GATEWAY[] PROGMEM = "[[static_gateway]]";
+const char INTL_STATIC_DNS[] PROGMEM = "[[static_dns]]";
 
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;Level";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Intervalo de medición";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Duración del modo enrutador";
-const char INTL_POWERSAVE[] PROGMEM = "";
+const char INTL_POWERSAVE[] PROGMEM = "[[powersave]]";
 const char INTL_MORE_APIS[] PROGMEM = "Otros API";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Mandar a propio API";
 const char INTL_SERVER[] PROGMEM = "Servidor";
@@ -106,7 +107,7 @@ const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Ajustar Debug a ";
 #define INTL_CONFIG_CAN_NOT_BE_DELETED "Configuración no puede ser borrada"
 #define INTL_CONFIG_NOT_FOUND "Configuración no encontrada"
 const char INTL_TIME_TO_FIRST_MEASUREMENT[] PROGMEM = "Otros {v} segundos a la primera medición.";
-const char INTL_TIME_SINCE_LAST_MEASUREMENT[] PROGMEM = "segundos desde la última medición.";
+const char INTL_TIME_SINCE_LAST_MEASUREMENT[] PROGMEM = " segundos desde la última medición.";
 const char INTL_PARTICLES_PER_LITER[] PROGMEM = "Partículas/litro";
 const char INTL_PARTICULATE_MATTER[] PROGMEM = "partículas finas";
 const char INTL_TEMPERATURE[] PROGMEM = "Temperatura";

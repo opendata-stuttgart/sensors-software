@@ -1,6 +1,7 @@
 /*
  *	airRohr firmware
- *	Copyright (C) 2016-2018 Code for Stuttgart a.o.
+ *  Copyright (C) 2016-2021  Code for Stuttgart a.o.
+ *  Copyright (C) 2021-2024  Sensor.Community a.o.
  *
  *  Ukrainian translations
  *
@@ -106,7 +107,7 @@ const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Зневадження: ";
 #define INTL_CONFIG_CAN_NOT_BE_DELETED "Конфігурацію не можна видалити"
 #define INTL_CONFIG_NOT_FOUND "Конфігурацію не знайдено"
 const char INTL_TIME_TO_FIRST_MEASUREMENT[] PROGMEM = "Ще {v} секунд до першого вимірювання";
-const char INTL_TIME_SINCE_LAST_MEASUREMENT[] PROGMEM = "секунд від останнього вимірювання.";
+const char INTL_TIME_SINCE_LAST_MEASUREMENT[] PROGMEM = " секунд від останнього вимірювання.";
 const char INTL_PARTICLES_PER_LITER[] PROGMEM = "часток/літр";
 const char INTL_PARTICULATE_MATTER[] PROGMEM = "Вимірювач дрібних часток";
 const char INTL_TEMPERATURE[] PROGMEM = "температура";

@@ -1,6 +1,7 @@
 /*
  *	airRohr firmware
- *	Copyright (C) 2016-2018 Code for Stuttgart a.o.
+ *  Copyright (C) 2016-2021  Code for Stuttgart a.o.
+ *  Copyright (C) 2021-2024  Sensor.Community a.o.
  *
  *  Polish translations
  *
@@ -67,7 +68,7 @@ const char INTL_STATIC_DNS[] PROGMEM = "Statyczny DNS";
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Poziom&nbsp;debugowania";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Czas między pomiarami (sek.)";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Czas trwania w trybie routera (sek.)";
-const char INTL_POWERSAVE[] PROGMEM = "";
+const char INTL_POWERSAVE[] PROGMEM = "Oszczędzanie energii";
 const char INTL_MORE_APIS[] PROGMEM = "Kolejne API";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Wysyłaj dane do własnego API";
 const char INTL_SERVER[] PROGMEM = "Adres serwera";
@@ -105,8 +106,8 @@ const char INTL_DEBUG_SETTING_TO[] PROGMEM = "Ustawiono poziom debugowania na ";
 #define INTL_CONFIG_DELETED "Usunięto konfigurację"
 #define INTL_CONFIG_CAN_NOT_BE_DELETED "Konfiguracja nie może zostać usunięta"
 #define INTL_CONFIG_NOT_FOUND "Nie znaleziono konfiguracji"
-const char INTL_TIME_TO_FIRST_MEASUREMENT[] = "Pozostało {v} sekund do pierwszego pomiaru.";
-const char INTL_TIME_SINCE_LAST_MEASUREMENT[] = " sekund od ostatniego pomiaru.";
+const char INTL_TIME_TO_FIRST_MEASUREMENT[] PROGMEM = "Pozostało {v} sekund do pierwszego pomiaru.";
+const char INTL_TIME_SINCE_LAST_MEASUREMENT[] PROGMEM = " sekund od ostatniego pomiaru.";
 const char INTL_PARTICLES_PER_LITER[] PROGMEM = "cząsteczek/litr";
 const char INTL_PARTICULATE_MATTER[] PROGMEM = "Pył zawieszony";
 const char INTL_TEMPERATURE[] PROGMEM = "Temperatura";
