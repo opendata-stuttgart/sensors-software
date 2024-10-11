@@ -87,7 +87,11 @@ String SOFTWARE_VERSION(SOFTWARE_VERSION_STR);
 #include <WiFiClient.h>
 #include <WiFiClientSecure.h>
 #include <HardwareSerial.h>
-#include <hwcrypto/sha.h>
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL (4, 4, 0)
+	#include <sha/sha_parallel_engine.h>  
+#else
+	#include <hwcrypto/sha.h>
+#endif
 #include <WebServer.h>
 #include <ESPmDNS.h>
 #endif
