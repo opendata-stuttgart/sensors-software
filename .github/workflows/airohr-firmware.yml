@@ -27,6 +27,21 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
+
+      - name: Load cached ~/.platformio
+        uses: actions/cache@v2
+        with:
+          path: ~/.platformio
+          key: platformio-${{ hashFiles('**/platformio.ini') }}
+          restore-keys: platformio-
+
+      - name: Load cached ./.pio
+        uses: actions/cache@v2
+        with:
+          path: ./.pio
+          key: pio-${{ hashFiles('**/platformio.ini') }}
+          restore-keys: pio-
+
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip
