@@ -2921,7 +2921,9 @@ static void waitForWifiToConnect(int maxRetries)
  * WiFi auto connecting script                                   *
  *****************************************************************/
 
+#if defined(ESP8266)
 static WiFiEventHandler disconnectEventHandler;
+#endif
 
 static void connectWifi()
 {
