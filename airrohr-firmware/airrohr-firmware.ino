@@ -48,10 +48,10 @@
  *                                                                      *
  ************************************************************************
  *
- * latest build
- * RAM:   [====      ]  41.8% (used 34220 bytes from 81920 bytes)
- * Flash: [=======   ]  67.1% (used 701191 bytes from 1044464 bytes)
- *
+ * latest build using lib 2.6.2
+ * DATA:    [====      ]  41.7% (used 34128 bytes from 81920 bytes)
+ * PROGRAM: [======    ]  67.2% (used 701371 bytes from 1044464 bytes)
+ *  
  ************************************************************************/
  
 #include <WString.h>
@@ -660,6 +660,8 @@ IPAddress addr_static_ip;
 IPAddress addr_static_subnet;
 IPAddress addr_static_gateway;
 IPAddress addr_static_dns;
+
+
 
 #define msSince(timestamp_before) (act_milli - (timestamp_before))
 
@@ -1401,6 +1403,7 @@ static void end_html_page(String &page_content)
 		server.sendContent(page_content);
 	}
 	server.sendContent_P(WEB_PAGE_FOOTER);
+
 }
 
 static void add_form_input(String &page_content, const ConfigShapeId cfgid, const __FlashStringHelper *info, const int length)
@@ -2709,6 +2712,8 @@ static void webserver_not_found()
  *****************************************************************/
 static void setup_webserver()
 {
+	//server.addHandler( new AllRequestHandler());
+
 	server.on("/", webserver_root);
 	server.on(F("/config"), webserver_config);
 	server.on(F("/wifi"), webserver_wifi);
@@ -2725,6 +2730,7 @@ static void setup_webserver()
 	server.on(F("/favicon.ico"), webserver_favicon);
 	server.on(F(STATIC_PREFIX), webserver_static);
 	server.onNotFound(webserver_not_found);
+	
 
 	debug_outln_info(F("Starting Webserver... "), WiFi.localIP().toString());
 	server.begin();
@@ -5972,7 +5978,6 @@ else if (cfg::ips_read)
  *****************************************************************/
 void loop(void)
 {
-	unsigned long sleep = SLEEPTIME_MS;
 	String result_PPD, result_SDS, result_PMS, result_HPM, result_NPM, result_IPS;
 	String result_GPS, result_DNMS, result_SCD30;
 
@@ -5982,10 +5987,11 @@ void loop(void)
 	act_milli = millis();
 	send_now = msSince(starttime) > cfg::sending_intervall_ms;
 
-	if (send_now)
-	{
-		sleep = 0;
-	}
+	unsigned int pastTime = act_milli - last_page_load;
+	bool keepAlive = pastTime < KEEP_ALIVE_TIME_MS;
+	unsigned long sleep = send_now || keepAlive 
+		? 0 
+		: SLEEPTIME_MS;
 
 	// Wait at least 30s for each NTP server to sync
 	if (!sntp_time_set && send_now &&
@@ -6306,7 +6312,7 @@ void loop(void)
 
 	// Sleep if all of the tasks have an event in the future. The chip can then
 	// enter a lower power mode.
-	if (cfg::powersave) {
+	if (cfg::powersave && sleep > 0) {
 		delay(sleep);
 	}
 
