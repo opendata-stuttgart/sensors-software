@@ -2976,8 +2976,15 @@ static void connectWifi()
 	WiFi.setHostname(cfg::fs_ssid);
 #endif
 
-	WiFi.begin(cfg::wlanssid, cfg::wlanpwd); // Start WiFI
-
+	if( *cfg::wlanpwd ) // non-empty password
+	{
+		WiFi.begin(cfg::wlanssid, cfg::wlanpwd); // Start WiFI
+	}
+	else  // empty password: WiFi AP without a password, e.g. "freifunk" or the like
+	{
+		WiFi.begin(cfg::wlanssid); // since somewhen, the espressif API changed semantics: no password need arg 2 to be nullptr (or omitted) since.
+	}
+	
 	debug_outln_info(FPSTR(DBG_TXT_CONNECTING_TO), cfg::wlanssid);
 
 	waitForWifiToConnect(40);
