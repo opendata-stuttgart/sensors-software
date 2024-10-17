@@ -146,6 +146,7 @@ namespace cfg
 	char www_password[LEN_CFG_PASSWORD];
 
 	// wifi credentials
+	bool wlan_nopwd_enabled = WLAN_NOPWD_ENABLED;
 	char wlanssid[LEN_WLANSSID];
 	char wlanpwd[LEN_CFG_PASSWORD];
 
@@ -1653,6 +1654,8 @@ static void webserver_config_send_body_get(String &page_content)
 		page_content += F("<div id='wifilist'>" INTL_WIFI_NETWORKS "</div><br/>");
 	}
 	page_content += FPSTR(TABLE_TAG_OPEN);
+	add_form_checkbox(Config_wlan_nopwd_enabled, FPSTR(INTL_NOPWD));
+	static constexpr char CFG_KEY_WLAN_NOPWD_ENABLED[] PROGMEM = "wlan_nopwd_enabled";
 	add_form_input(page_content, Config_wlanssid, FPSTR(INTL_FS_WIFI_NAME), LEN_WLANSSID - 1);
 	add_form_input(page_content, Config_wlanpwd, FPSTR(INTL_PASSWORD), LEN_CFG_PASSWORD - 1);
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
@@ -2867,7 +2870,7 @@ static void wifiConfig()
 
 	debug_outln_info(FPSTR(DBG_TXT_CONNECTING_TO), cfg::wlanssid);
 
-	if( *cfg::wlanpwd ) // non-empty password
+	if( *cfg::wlanpwd && !cfg::wlan_nopwd_enabled ) // non-empty password
 	{
 		WiFi.begin(cfg::wlanssid, cfg::wlanpwd);
 	}
@@ -2976,7 +2979,7 @@ static void connectWifi()
 	WiFi.setHostname(cfg::fs_ssid);
 #endif
 
-	if( *cfg::wlanpwd ) // non-empty password
+	if( *cfg::wlanpwd && !cfg::wlan_nopwd_enabled ) // non-empty password
 	{
 		WiFi.begin(cfg::wlanssid, cfg::wlanpwd); // Start WiFI
 	}
@@ -2987,7 +2990,7 @@ static void connectWifi()
 	
 	debug_outln_info(FPSTR(DBG_TXT_CONNECTING_TO), cfg::wlanssid);
 
-	waitForWifiToConnect(40);
+	waitForWifiToConnect(40);  // xx half seconds
 	debug_outln_info(emptyString);
 	if (WiFi.status() != WL_CONNECTED)
 	{

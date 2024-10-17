@@ -42,6 +42,7 @@ const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "[[height_above_sealevel]]";
 const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "[[pressure_at_sealevel]]";
 const char INTL_NEO6M[] PROGMEM = "GPS（NEO 6M）";
 const char INTL_BASICAUTH[] PROGMEM = "认证";
+const char INTL_NOPWD[] PROGMEM = "没有WiFi密码";
 #define INTL_REPORT_ISSUE "报告问题"
 
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "WiFi传感器在配置模式下";
