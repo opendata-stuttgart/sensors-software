@@ -406,6 +406,7 @@ enum
 	NPM_REPLY_CHECKSUM_4 = 1
 } NPM_waiting_for_4; //for change
 
+#if defined (NPM_FORCE_FAN_SPEED) && (NPM_FORCE_FAN_SPEED>0)
 enum
 {
 	NPM_REPLY_HEADER_5 = 5,
@@ -413,6 +414,7 @@ enum
 	NPM_REPLY_DATA_5 = 2,
 	NPM_REPLY_CHECKSUM_5 = 1
 } NPM_waiting_for_5; //for fan speed
+#endif //NPM_FORCE_FAN_SPEED setting
 
 enum
 {
@@ -750,7 +752,7 @@ static String SDS_version_date()
 
 static uint8_t NPM_get_state()
 {
-	uint8_t result;
+	uint8_t result = 0xFF;
 	NPM_waiting_for_4 = NPM_REPLY_HEADER_4;
 	debug_outln_info(F("State NPM..."));
 	NPM_cmd(PmSensorCmd2::State);
@@ -798,7 +800,7 @@ static uint8_t NPM_get_state()
 
 static bool NPM_start_stop()
 {
-	bool result;
+	bool result(false);
 	NPM_waiting_for_4 = NPM_REPLY_HEADER_4;
 	debug_outln_info(F("Switch start/stop NPM..."));
 	NPM_cmd(PmSensorCmd2::Change);
@@ -919,7 +921,9 @@ static String NPM_version_date()
 	return last_value_NPM_version;
 }
 
-static void NPM_fan_speed()
+// recently nowhere called
+#if defined (NPM_FORCE_FAN_SPEED) && (NPM_FORCE_FAN_SPEED>0)
+void NPM_fan_speed()
 {
 
 	NPM_waiting_for_5 = NPM_REPLY_HEADER_5;
@@ -973,13 +977,14 @@ static void NPM_fan_speed()
 		}
 	}
 }
+#endif //NPM_FORCE_FAN_SPEED setting
 
 
 
 static String NPM_temp_humi() 
 {
-	uint16_t NPM_temp;
-	uint16_t NPM_humi;
+	uint16_t NPM_temp(0);
+	uint16_t NPM_humi(0);
 	NPM_waiting_for_8 = NPM_REPLY_HEADER_8;
 	debug_outln_info(F("Temperature/Humidity in Next PM..."));
 	NPM_cmd(PmSensorCmd2::Temphumi);
@@ -3571,13 +3576,13 @@ static __noinline void fetchSensorPMS(String &s)
 	char buffer;
 	int value;
 	int len = 0;
-	int pm1_serial = 0;
-	int pm10_serial = 0;
-	int pm25_serial = 0;
-	int checksum_is = 0;
-	int checksum_should = 0;
-	bool checksum_ok = false;
-	int frame_len = 24; // min. frame length
+	int pm1_serial(0);
+	int pm10_serial(0);
+	int pm25_serial(0);
+	int checksum_is(0);
+	int checksum_should(0);
+	bool checksum_ok(false);
+	int frame_len(24); // min. frame length
 
 	debug_outln_verbose(FPSTR(DBG_TXT_START_READING), FPSTR(SENSORS_PMSx003));
 	if (msSince(starttime) < (cfg::sending_intervall_ms - (WARMUPTIME_SDS_MS + READINGTIME_SDS_MS)))
@@ -3676,19 +3681,17 @@ static __noinline void fetchSensorPMS(String &s)
 				};
 				if (checksum_ok && (msSince(starttime) > (cfg::sending_intervall_ms - READINGTIME_SDS_MS)))
 				{
-					if ((!isnan(pm1_serial)) && (!isnan(pm10_serial)) && (!isnan(pm25_serial)))
-					{
-						pms_pm1_sum += pm1_serial;
-						pms_pm10_sum += pm10_serial;
-						pms_pm25_sum += pm25_serial;
-						UPDATE_MIN_MAX(pms_pm1_min, pms_pm1_max, pm1_serial);
-						UPDATE_MIN_MAX(pms_pm25_min, pms_pm25_max, pm25_serial);
-						UPDATE_MIN_MAX(pms_pm10_min, pms_pm10_max, pm10_serial);
-						debug_outln_verbose(F("PM1 (sec.): "), String(pm1_serial));
-						debug_outln_verbose(F("PM2.5 (sec.): "), String(pm25_serial));
-						debug_outln_verbose(F("PM10 (sec.) : "), String(pm10_serial));
-						pms_val_count++;
-					}
+					pms_pm1_sum += pm1_serial;
+					pms_pm10_sum += pm10_serial;
+					pms_pm25_sum += pm25_serial;
+					UPDATE_MIN_MAX(pms_pm1_min, pms_pm1_max, pm1_serial);
+					UPDATE_MIN_MAX(pms_pm25_min, pms_pm25_max, pm25_serial);
+					UPDATE_MIN_MAX(pms_pm10_min, pms_pm10_max, pm10_serial);
+					debug_outln_verbose(F("PM1 (sec.): "), String(pm1_serial));
+					debug_outln_verbose(F("PM2.5 (sec.): "), String(pm25_serial));
+					debug_outln_verbose(F("PM10 (sec.) : "), String(pm10_serial));
+					pms_val_count++;
+
 					len = 0;
 					checksum_ok = false;
 					pm1_serial = 0;
@@ -3934,12 +3937,12 @@ static void fetchSensorNPM(String &s)
 				uint8_t data[12];
 				uint8_t checksum[1];
 				uint8_t test[16];
-				uint16_t N1_serial;
-				uint16_t N25_serial;
-				uint16_t N10_serial;
-				uint16_t pm1_serial;
-				uint16_t pm25_serial;
-				uint16_t pm10_serial;
+				uint16_t N1_serial(0);
+				uint16_t N25_serial(0);
+				uint16_t N10_serial(0);
+				uint16_t pm1_serial(0);
+				uint16_t pm25_serial(0);
+				uint16_t pm10_serial(0);
 
 				switch (NPM_waiting_for_16)
 				{
@@ -4878,13 +4881,17 @@ static void display_values()
 	float h_value = -1.0;
 	float p_value = -1.0;
 	String t_sensor, h_sensor, p_sensor;
+	#if defined (UNUSED_PMSIZE_COUNTERS)
 	float pm001_value = -1.0;
 	float pm003_value = -1.0;
 	float pm005_value = -1.0;
+	#endif //defined (UNUSED_PMSIZE_COUNTERS)
 	float pm25_value = -1.0;
 	float pm01_value = -1.0;
 	float pm04_value = -1.0;
+	#if defined (UNUSED_PMSIZE_COUNTERS)
 	float pm05_value = -1.0;
+	#endif //defined (UNUSED_PMSIZE_COUNTERS)
 	float pm10_value = -1.0;
 	String pm01_sensor;
 	String pm10_sensor;
@@ -4893,13 +4900,17 @@ static void display_values()
 	String pm003_sensor;
 	String pm005_sensor;
 	String pm05_sensor;
+	#if defined (UNUSED_PMSIZE_COUNTERS)
 	float nc001_value = -1.0;
 	float nc003_value = -1.0;
+	#endif //defined (UNUSED_PMSIZE_COUNTERS)
 	float nc005_value = -1.0;
 	float nc010_value = -1.0;
 	float nc025_value = -1.0;
 	float nc040_value = -1.0;
+	#if defined (UNUSED_PMSIZE_COUNTERS)
 	float nc050_value = -1.0;
+	#endif //defined (UNUSED_PMSIZE_COUNTERS)
 	float nc100_value = -1.0;
 	float la_eq_value = -1.0;
 	float la_max_value = -1.0;
@@ -4953,10 +4964,12 @@ static void display_values()
 		pm01_value = last_value_IPS_P0;
 		pm10_value = last_value_IPS_P1;
 		pm25_value = last_value_IPS_P2;
+		#if defined (UNUSED_PMSIZE_COUNTERS)
 		pm001_value = last_value_IPS_P01;
 		pm003_value = last_value_IPS_P03;
 		pm005_value = last_value_IPS_P05;
 		pm05_value = last_value_IPS_P5;
+		#endif //defined (UNUSED_PMSIZE_COUNTERS)
 		pm001_sensor = FPSTR(SENSORS_IPS);
 		pm003_sensor = FPSTR(SENSORS_IPS);
 		pm005_sensor = FPSTR(SENSORS_IPS);
@@ -4967,10 +4980,14 @@ static void display_values()
 		nc010_value = last_value_IPS_N1;
 		nc100_value = last_value_IPS_N10;
 		nc025_value = last_value_IPS_N25;
+		#if defined (UNUSED_PMSIZE_COUNTERS)
 		nc001_value = last_value_IPS_N01;
 		nc003_value = last_value_IPS_N03;
+		#endif //defined (UNUSED_PMSIZE_COUNTERS)
 		nc005_value = last_value_IPS_N05;
+		#if defined (UNUSED_PMSIZE_COUNTERS)
 		nc050_value = last_value_IPS_N5;
+		#endif //defined (UNUSED_PMSIZE_COUNTERS)
 	}
 	if (cfg::sps30_read)
 	{
@@ -5564,8 +5581,10 @@ static void powerOnTestSensors()
 				// 	is_NPM_running = NPM_start_stop();
 				// 	delay(5000);
 				// }
-				// NPM_fan_speed();
-				// delay(5000);
+				#if defined (NPM_FORCE_FAN_SPEED) && (NPM_FORCE_FAN_SPEED>0)
+				NPM_fan_speed();
+				delay(5000);
+				#endif //NPM_FORCE_FAN_SPEED setting
 			}
 			if (bitRead(test_state, 6) == 1)
 			{
