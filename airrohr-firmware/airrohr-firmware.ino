@@ -1655,7 +1655,6 @@ static void webserver_config_send_body_get(String &page_content)
 	}
 	page_content += FPSTR(TABLE_TAG_OPEN);
 	add_form_checkbox(Config_wlan_nopwd_enabled, FPSTR(INTL_NOPWD));
-	static constexpr char CFG_KEY_WLAN_NOPWD_ENABLED[] PROGMEM = "wlan_nopwd_enabled";
 	add_form_input(page_content, Config_wlanssid, FPSTR(INTL_FS_WIFI_NAME), LEN_WLANSSID - 1);
 	add_form_input(page_content, Config_wlanpwd, FPSTR(INTL_PASSWORD), LEN_CFG_PASSWORD - 1);
 	page_content += FPSTR(TABLE_TAG_CLOSE_BR);
@@ -2868,14 +2867,14 @@ static void wifiConfig()
 	dnsServer.stop();
 	delay(100);
 
-	debug_outln_info(FPSTR(DBG_TXT_CONNECTING_TO), cfg::wlanssid);
-
 	if( *cfg::wlanpwd && !cfg::wlan_nopwd_enabled ) // non-empty password
 	{
+		debug_outln_info(FPSTR(DBG_TXT_CONNECTING_TO), cfg::wlanssid);
 		WiFi.begin(cfg::wlanssid, cfg::wlanpwd);
 	}
 	else  // empty password: WiFi AP without a password, e.g. "freifunk" or the like
 	{
+		debug_outln_info(FPSTR(DBG_TXT_CONNECTING_NOPWD_TO), cfg::wlanssid);
 		WiFi.begin(cfg::wlanssid); // since somewhen, the espressif API changed semantics: no password need the 1 args call since.
 	}
 
@@ -2981,14 +2980,15 @@ static void connectWifi()
 
 	if( *cfg::wlanpwd && !cfg::wlan_nopwd_enabled ) // non-empty password
 	{
+		debug_outln_info(FPSTR(DBG_TXT_CONNECTING_TO), cfg::wlanssid);
 		WiFi.begin(cfg::wlanssid, cfg::wlanpwd); // Start WiFI
 	}
 	else  // empty password: WiFi AP without a password, e.g. "freifunk" or the like
 	{
+		debug_outln_info(FPSTR(DBG_TXT_CONNECTING_NOPWD_TO), cfg::wlanssid);
 		WiFi.begin(cfg::wlanssid); // since somewhen, the espressif API changed semantics: no password need arg 2 to be nullptr (or omitted) since.
 	}
 	
-	debug_outln_info(FPSTR(DBG_TXT_CONNECTING_TO), cfg::wlanssid);
 
 	waitForWifiToConnect(40);  // xx half seconds
 	debug_outln_info(emptyString);
