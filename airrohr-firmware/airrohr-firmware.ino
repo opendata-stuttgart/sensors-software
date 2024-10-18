@@ -675,7 +675,8 @@ static void debug_outln_WiFi(wl_status_t wl_status);
  *****************************************************************/
 static void display_debug(const String &text1, const String &text2)
 {
-	debug_outln_info(F("output debug text to displays..."));
+	debug_outln_info(text1);
+	debug_outln_info(text2);
 	if (oled_ssd1306)
 	{
 		oled_ssd1306->clear();
@@ -3051,7 +3052,6 @@ static void debug_outln_WiFi(wl_status_t wl_status)
 			break;
 	} //swend
 	display_debug(FPSTR("WiFi status:"), String(statusmsg));
-	debug_outln_info(statusmsg,static_cast<int>(wl_status));
 }
 
 
