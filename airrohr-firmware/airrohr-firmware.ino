@@ -3019,34 +3019,38 @@ static void connectWifi()
 
 static void debug_outln_WiFi(wl_status_t wl_status)
 {
-	switch( wl_status )
+	const __FlashStringHelper* statusmsg;
+
+	switch(wl_status)
 	{
 		case WL_IDLE_STATUS:
-			debug_outln_info(FPSTR("WiFi IDLE"));
+			statusmsg = FPSTR("WiFi IDLE");
 			break;
 		case WL_NO_SSID_AVAIL:
-			debug_outln_info(FPSTR("WRONG|UNAVAIL SSID"));
+			statusmsg = FPSTR("WRONG|UNAVAIL SSID");
 			break;
 		case WL_SCAN_COMPLETED:
-			debug_outln_info(FPSTR("SCAN COMPLETED"));
+			statusmsg = FPSTR("SCAN COMPLETED");
 			break;
 		case WL_CONNECTED:
-			debug_outln_info(FPSTR("CONNECTED"));
+			statusmsg = FPSTR("CONNECTED");
 			break;
 		case WL_CONNECT_FAILED:
-			debug_outln_info(FPSTR("CONNECT FAILED"));
+			statusmsg = FPSTR("CONNECT FAILED");
 			break;
 		case WL_CONNECTION_LOST:
-			debug_outln_info(FPSTR("CONNECTION LOST"));
+			statusmsg = FPSTR("CONNECTION LOST");
 			break;
 		case WL_DISCONNECTED:
-			debug_outln_info(FPSTR("DISCONNECTED"));
+			statusmsg = FPSTR("DISCONNECTED");
 			break;
 		case WL_NO_SHIELD:   // for compatibility with WiFi Shield library
 		default:
-			debug_outln_info(FPSTR("unknown|missing wifi"));
+			statusmsg = FPSTR("unknown|missing wifi");
 			break;
 	} //swend
+	display_debug(FPSTR("WiFi status:"), String(statusmsg));
+	debug_outln_info(statusmsg,static_cast<int>(wl_status));
 }
 
 
