@@ -2911,10 +2911,11 @@ static void wifiConfig()
 static void waitForWifiToConnect(int maxRetries)
 {
 	int retryCount = 0;
-	while ((WiFi.status() != WL_CONNECTED) && (retryCount < maxRetries))
+	wl_status_t wl_status;
+	while (((wl_status = WiFi.status()) != WL_CONNECTED) && (retryCount < maxRetries))
 	{
 		delay(500);
-		debug_out(".", DEBUG_MIN_INFO);
+		debug_outln_WiFi(wl_status);
 		++retryCount;
 	}
 }
