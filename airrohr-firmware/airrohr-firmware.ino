@@ -665,6 +665,12 @@ const char data_first_part[] PROGMEM = "{\"software_version\": \"" SOFTWARE_VERS
 const char JSON_SENSOR_DATA_VALUES[] PROGMEM = "sensordatavalues";
 
 /*****************************************************************
+ * local forward declarations                                    *
+ *****************************************************************/
+// send detailed WiFi failure staus to debug
+static void debug_outln_WiFi(wl_status_t wl_status);
+
+/*****************************************************************
  * display values                                                *
  *****************************************************************/
 static void display_debug(const String &text1, const String &text2)
@@ -3009,6 +3015,40 @@ static void connectWifi()
 		MDNS.addServiceTxt("http", "tcp", "PATH", "/config");
 	}
 }
+
+
+static void debug_outln_WiFi(wl_status_t wl_status)
+{
+	switch( wl_status )
+	{
+		case WL_IDLE_STATUS:
+			debug_outln_info(FPSTR("WiFi IDLE"));
+			break;
+		case WL_NO_SSID_AVAIL:
+			debug_outln_info(FPSTR("WRONG|UNAVAIL SSID"));
+			break;
+		case WL_SCAN_COMPLETED:
+			debug_outln_info(FPSTR("SCAN COMPLETED"));
+			break;
+		case WL_CONNECTED:
+			debug_outln_info(FPSTR("CONNECTED"));
+			break;
+		case WL_CONNECT_FAILED:
+			debug_outln_info(FPSTR("CONNECT FAILED"));
+			break;
+		case WL_CONNECTION_LOST:
+			debug_outln_info(FPSTR("CONNECTION LOST"));
+			break;
+		case WL_DISCONNECTED:
+			debug_outln_info(FPSTR("DISCONNECTED"));
+			break;
+		case WL_NO_SHIELD:   // for compatibility with WiFi Shield library
+		default:
+			debug_outln_info(FPSTR("unknown|missing wifi"));
+			break;
+	} //swend
+}
+
 
 static WiFiClient *getNewLoggerWiFiClient(const LoggerEntry logger)
 {
