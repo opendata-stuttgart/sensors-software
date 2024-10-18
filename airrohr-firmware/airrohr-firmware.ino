@@ -665,11 +665,18 @@ const char data_first_part[] PROGMEM = "{\"software_version\": \"" SOFTWARE_VERS
 const char JSON_SENSOR_DATA_VALUES[] PROGMEM = "sensordatavalues";
 
 /*****************************************************************
+ * local forward declarations                                    *
+ *****************************************************************/
+// send detailed WiFi failure staus to debug
+static void debug_outln_WiFi(wl_status_t wl_status);
+
+/*****************************************************************
  * display values                                                *
  *****************************************************************/
 static void display_debug(const String &text1, const String &text2)
 {
-	debug_outln_info(F("output debug text to displays..."));
+	debug_outln_info(text1);
+	debug_outln_info(text2);
 	if (oled_ssd1306)
 	{
 		oled_ssd1306->clear();
@@ -2905,10 +2912,11 @@ static void wifiConfig()
 static void waitForWifiToConnect(int maxRetries)
 {
 	int retryCount = 0;
-	while ((WiFi.status() != WL_CONNECTED) && (retryCount < maxRetries))
+	wl_status_t wl_status;
+	while (((wl_status = WiFi.status()) != WL_CONNECTED) && (retryCount < maxRetries))
 	{
 		delay(500);
-		debug_out(".", DEBUG_MIN_INFO);
+		debug_outln_WiFi(wl_status);
 		++retryCount;
 	}
 }
@@ -3009,6 +3017,43 @@ static void connectWifi()
 		MDNS.addServiceTxt("http", "tcp", "PATH", "/config");
 	}
 }
+
+
+static void debug_outln_WiFi(wl_status_t wl_status)
+{
+	const __FlashStringHelper* statusmsg;
+
+	switch(wl_status)
+	{
+		case WL_IDLE_STATUS:
+			statusmsg = FPSTR("WiFi IDLE");
+			break;
+		case WL_NO_SSID_AVAIL:
+			statusmsg = FPSTR("WRONG|UNAVAIL SSID");
+			break;
+		case WL_SCAN_COMPLETED:
+			statusmsg = FPSTR("SCAN COMPLETED");
+			break;
+		case WL_CONNECTED:
+			statusmsg = FPSTR("CONNECTED");
+			break;
+		case WL_CONNECT_FAILED:
+			statusmsg = FPSTR("CONNECT FAILED");
+			break;
+		case WL_CONNECTION_LOST:
+			statusmsg = FPSTR("CONNECTION LOST");
+			break;
+		case WL_DISCONNECTED:
+			statusmsg = FPSTR("DISCONNECTED");
+			break;
+		case WL_NO_SHIELD:   // for compatibility with WiFi Shield library
+		default:
+			statusmsg = FPSTR("unknown|missing wifi");
+			break;
+	} //swend
+	display_debug(FPSTR("WiFi status:"), String(statusmsg));
+}
+
 
 static WiFiClient *getNewLoggerWiFiClient(const LoggerEntry logger)
 {

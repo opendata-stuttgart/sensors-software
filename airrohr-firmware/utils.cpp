@@ -372,6 +372,10 @@ void debug_outln_info(const __FlashStringHelper* text, float value) {
 	debug_outln_info(text, String(value));
 }
 
+void debug_outln_info(const __FlashStringHelper* text, int value) {
+	debug_outln_info(text, String(value));
+}
+
 void debug_outln_verbose(const __FlashStringHelper* text, const String& option) {
 	debug_level_check(DEBUG_MED_INFO);
 	Debug.print(text);
