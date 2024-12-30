@@ -1500,6 +1500,7 @@ static String form_select_lang()
 				 "<option value='ES'>Español (ES)</option>"
 				 "<option value='FR'>Français (FR)</option>"
 				 "<option value='GR'>Ελληνικά (GR)</option>"
+				 "<option value='HR'>Hrvatski (HR)</option>"
 				 "<option value='IT'>Italiano (IT)</option>"
 				 "<option value='JP'>日本語 (JP)</option>"
 				 "<option value='LT'>Lietuvių kalba (LT)</option>"

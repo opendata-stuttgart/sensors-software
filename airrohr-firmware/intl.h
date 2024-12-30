@@ -25,6 +25,8 @@
 #include "intl_fr.h"
 #elif defined(INTL_GR)
 #include "intl_gr.h"
+#elif defined(INTL_HR)
+#include "intl_hr.h"
 #elif defined(INTL_HU)
 #include "intl_hu.h"
 #elif defined(INTL_IT)
