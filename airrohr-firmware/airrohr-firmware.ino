@@ -5408,7 +5408,8 @@ static bool initBMX280(char addr)
 			BMX280::MODE_FORCED,
 			BMX280::SAMPLING_X1,
 			BMX280::SAMPLING_X1,
-			BMX280::SAMPLING_X1);
+			BMX280::SAMPLING_X1,
+			BMX280::IIR_16);
 		return true;
 	}
 	else
