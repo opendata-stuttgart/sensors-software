@@ -129,6 +129,7 @@ void BMX280::setSampling(sensor_mode mode,
                                   sensor_sampling tempSampling,
                                   sensor_sampling pressSampling,
                                   sensor_sampling humSampling,
+                                  iir_filter iirFilter,
                                   standby_duration duration) {
 
   _measReg.mode = mode;
@@ -140,6 +141,7 @@ void BMX280::setSampling(sensor_mode mode,
 
   config _configReg;
   _configReg.t_sb = duration;
+  _configReg.filter = iirFilter;
 
   // making sure sensor is in sleep mode before setting configuration
   // as it otherwise may be ignored
