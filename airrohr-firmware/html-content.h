@@ -7,7 +7,7 @@ const char TXT_CONTENT_TYPE_IMAGE_PNG[] PROGMEM = "image/png";
 
 const char DBG_TXT_TEMPERATURE[] PROGMEM = "Temperature (°C): ";
 const char DBG_TXT_HUMIDITY[] PROGMEM = "Humidity (%): ";
-const char DBG_TXT_PRESSURE[] PROGMEM = "Pressure (hPa): ";
+const char DBG_TXT_PRESSURE[] PROGMEM = "Pressure (Pa): ";
 const char DBG_TXT_CO2PPM[] PROGMEM = "CO₂ (ppm): ";
 const char DBG_TXT_START_READING[] PROGMEM = "R/ ";
 const char DBG_TXT_END_READING[] PROGMEM = "/R ";
