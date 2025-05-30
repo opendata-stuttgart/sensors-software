@@ -5772,7 +5772,10 @@ static void setupNetworkTime()
 							twoStageOTAUpdate();
 							last_update_attempt = millis();
 						}
-						sntp_time_set++;
+						if (sntp_time_set < 255)
+						{
+							sntp_time_set++;
+						}
 					});
 #endif
 	strcpy_P(ntpServer1, NTP_SERVER_1);
