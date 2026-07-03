@@ -92,7 +92,7 @@ const char INTL_DEVICE_STATUS[] PROGMEM = "Enhetsstatus";
 #define INTL_CONFIGURATION_REALLY_DELETE "Ska konfigurationen tas bort?"
 #define INTL_DELETE "Ta bort"
 #define INTL_CANCEL "Avbryt"
-#define INTL_REALLY_RESTART_SENSOR "Config.json kunde inte hittas"
+#define INTL_REALLY_RESTART_SENSOR "Verkligen starta om sensor?"
 #define INTL_RESTART "Starta om"
 const char INTL_SAVE_AND_RESTART[] PROGMEM = "Spara och starta om";
 #define INTL_FIRMWARE "Firmware"
