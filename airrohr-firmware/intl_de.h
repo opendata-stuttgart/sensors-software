@@ -137,6 +137,6 @@ const char INTL_SIGNAL_QUALITY[] PROGMEM = "Qualität";
 #define INTL_REACHABLE "erreichbar"
 #define INTL_YES "Ja"
 #define INTL_NO "Nein"
-#define INTL_LAST_OVER_THE_AIR "Letzter OTA"
+#define INTL_LAST_OVER_THE_AIR "Letztes OTA"
 
 #include "./airrohr-logo-common.h"
