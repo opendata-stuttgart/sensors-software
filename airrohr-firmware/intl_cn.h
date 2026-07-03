@@ -1,6 +1,7 @@
 /* 
  *  airRohr firmware
- *  Copyright (C) 2016-2018 Code for Stuttgart a.o. 
+ *  Copyright (C) 2016-2021  Code for Stuttgart a.o.
+ *  Copyright (C) 2021-2024  Sensor.Community a.o.
  *
  *  Chinese translation
  * 
@@ -23,6 +24,8 @@ const char INTL_SDS011[] PROGMEM = "SDS011({pm})";
 const char INTL_PMS[] PROGMEM = "Plantower PMS(1,3,5,6,7)003 ({pm})";
 const char INTL_HPM[] PROGMEM = "Honeywell PM ({pm})";
 const char INTL_NPM[] PROGMEM = "Tera传感器下一个PM({pm})";
+const char INTL_NPM_FULLTIME[] PROGMEM = "Next PM fulltime";
+const char INTL_IPS[] PROGMEM = "Piera Systems IPS-7100 ({pm})";
 const char INTL_SPS30[] PROGMEM = "Sensirion SPS30 ({pm})";
 const char INTL_PPD42NS[] PROGMEM = "PPD42NS({pm})";
 const char INTL_DHT22[] PROGMEM = "DHT22 ({t}, {h})";
@@ -35,8 +38,8 @@ const char INTL_DS18B20[] PROGMEM = "DS18B20({t})";
 const char INTL_DNMS[] PROGMEM = "DNMS({l_a})";
 const char INTL_DNMS_CORRECTION[] PROGMEM = "修正，单位：dB(A)";
 const char INTL_TEMP_CORRECTION[] PROGMEM = "以℃为单位进行校正";
-const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "";
-const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "";
+const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "[[height_above_sealevel]]";
+const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "[[pressure_at_sealevel]]";
 const char INTL_NEO6M[] PROGMEM = "GPS（NEO 6M）";
 const char INTL_BASICAUTH[] PROGMEM = "认证";
 #define INTL_REPORT_ISSUE "报告问题"
@@ -56,15 +59,16 @@ const char INTL_LCD2004_3F[] PROGMEM = "LCD 2004 (I2C: 0x3F)";
 const char INTL_DISPLAY_WIFI_INFO[] PROGMEM = "显示Wifi信息";
 const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "显示设备信息";
 
-#define INTL_STATIC_IP_TEXT ""
-const char INTL_STATIC_IP[] PROGMEM = "";
-const char INTL_STATIC_SUBNET[] PROGMEM = "";
-const char INTL_STATIC_GATEWAY[] PROGMEM = "";
-const char INTL_STATIC_DNS[] PROGMEM = "";
+#define INTL_STATIC_IP_TEXT "[[static_ip_text]]"
+const char INTL_STATIC_IP[] PROGMEM = "[[static_ip]]";
+const char INTL_STATIC_SUBNET[] PROGMEM = "[[static_subnet]]";
+const char INTL_STATIC_GATEWAY[] PROGMEM = "[[static_gateway]]";
+const char INTL_STATIC_DNS[] PROGMEM = "[[static_dns]]";
 
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;级别";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "测量间隔(秒)";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "持续时间路由器模式";
+const char INTL_POWERSAVE[] PROGMEM = "[[powersave]]";
 const char INTL_MORE_APIS[] PROGMEM = "更多API";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "发送数据到自定义API";
 const char INTL_SERVER[] PROGMEM = "服务器";
@@ -109,7 +113,7 @@ const char INTL_PARTICULATE_MATTER[] PROGMEM = "颗粒物";
 const char INTL_TEMPERATURE[] PROGMEM = "温度";
 const char INTL_HUMIDITY[] PROGMEM = "湿度";
 const char INTL_PRESSURE[] PROGMEM = "气压";
-const char INTL_DEW_POINT[] PROGMEM = "";
+const char INTL_DEW_POINT[] PROGMEM = "[[dew_point]]";
 const char INTL_CO2_PPM[] PROGMEM = "ppm CO₂";
 const char INTL_LEQ_A[] PROGMEM = "LAeq";
 const char INTL_LA_MIN[] PROGMEM = "LA min";

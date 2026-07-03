@@ -1,7 +1,8 @@
 /************************************************************************
  *                                                                      *
  *    airRohr firmware                                                  *
- *    Copyright (C) 2016-2020  Code for Stuttgart a.o.                  *
+ *    Copyright (C) 2016-2021  Code for Stuttgart a.o.                  *
+ *    Copyright (C) 2021-2024  Sensor.Community a.o.                    *
  *    Copyright (C) 2019-2020  Dirk Mueller                             *
  *                                                                      *
  * This program is free software: you can redistribute it and/or modify *
@@ -84,9 +85,14 @@ namespace cfg {
 
 #if defined(ESP8266)
 extern SoftwareSerial serialSDS;
+extern SoftwareSerial serialNPM;
+extern SoftwareSerial serialIPS;
 #endif
 #if defined(ESP32)
 #define serialSDS (Serial1)
+#define serialGPS (&(Serial2))
+#define serialNPM (Serial1)
+#define serialIPS (Serial1)
 #endif
 
 enum class PmSensorCmd {
@@ -98,7 +104,28 @@ enum class PmSensorCmd {
 enum class PmSensorCmd2 { // for NPM
 	State,
 	Change,
-	Concentration
+	Concentration,
+	Version,
+	Speed,
+	Temphumi
+};
+
+enum class PmSensorCmd3 { // for IPS7100
+	Factory,
+	Manual,
+	Auto,
+	Reset,
+	Interval,
+	Get,
+	//Version,
+	//Clean,
+	//Autoclean,
+	Start,
+	Stop,
+	Smoke,
+	//CRC,
+	Lowdata,
+	Baud
 };
 
 /*****************************************************************
@@ -144,8 +171,14 @@ extern bool SDS_cmd(PmSensorCmd cmd);
 extern bool PMS_cmd(PmSensorCmd cmd);
 extern bool HPM_cmd(PmSensorCmd cmd);
 extern void NPM_cmd(PmSensorCmd2 cmd);
+extern void IPS_cmd(PmSensorCmd3 cmd);
 extern bool NPM_checksum_valid_4(const uint8_t (&data)[4]);
+extern bool NPM_checksum_valid_5(const uint8_t (&data)[5]);
+extern bool NPM_checksum_valid_6(const uint8_t (&data)[6]);
+extern bool NPM_checksum_valid_8(const uint8_t (&data)[8]);
 extern bool NPM_checksum_valid_16(const uint8_t (&data)[16]);
+extern void NPM_data_reader(uint8_t data[], size_t size);
+extern String NPM_state(uint8_t bytedata);
 
 extern bool isNumeric(const String& str);
 

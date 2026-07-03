@@ -1,6 +1,7 @@
 /*
  *	airRohr firmware
- *	Copyright (C) 2016-2018 Code for Stuttgart a.o.
+ *  Copyright (C) 2016-2021  Code for Stuttgart a.o.
+ *  Copyright (C) 2021-2024  Sensor.Community a.o.
  *
  *  Bulgarian translations
  *
@@ -22,6 +23,9 @@ const char INTL_MORE_SENSORS[] PROGMEM = "Още Сензори";
 const char INTL_SDS011[] PROGMEM = "SDS011 ({pm})";
 const char INTL_PMS[] PROGMEM = "Plantower PMS(1,3,5,6,7)003 ({pm})";
 const char INTL_HPM[] PROGMEM = "Honeywell сензора за прахови частици";
+const char INTL_NPM[] PROGMEM = "Tera Sensor Next PM ({pm})";
+const char INTL_NPM_FULLTIME[] PROGMEM = "Next PM fulltime";
+const char INTL_IPS[] PROGMEM = "Piera Systems IPS-7100 ({pm})";
 const char INTL_SPS30[] PROGMEM = "Sensirion SPS30 ({pm})";
 const char INTL_PPD42NS[] PROGMEM = "PPD42NS ({pm})";
 const char INTL_DHT22[] PROGMEM = "DHT22 ({t}, {h})";
@@ -64,6 +68,7 @@ const char INTL_DISPLAY_DEVICE_INFO[] PROGMEM = "Информация за ус�
 const char INTL_DEBUG_LEVEL[] PROGMEM = "Debug&nbsp;Level";
 const char INTL_MEASUREMENT_INTERVAL[] PROGMEM = "Интервал на измерване";
 const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Продължителност като рутер";
+const char INTL_POWERSAVE[] PROGMEM = "[[powersave]]";
 const char INTL_MORE_APIS[] PROGMEM = "Още API";
 const char INTL_SEND_TO_OWN_API[] PROGMEM = "Изпращане към собствено API";
 const char INTL_SERVER[] PROGMEM = "Сървър";
