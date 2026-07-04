@@ -42,6 +42,7 @@ const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "[[height_above_sealevel]]";
 const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "[[pressure_at_sealevel]]";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Aktiver BasicAuth";
+const char INTL_NOPWD[] PROGMEM = "uden WiFi-adgangskode";
 #define INTL_REPORT_ISSUE "Rapporter et problem"
 
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "Wi-Fi sensor i opsætningsmode";

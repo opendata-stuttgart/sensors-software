@@ -42,6 +42,7 @@ const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "[[height_above_sealevel]]";
 const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "[[pressure_at_sealevel]]";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Preverjanje pristnosti";
+const char INTL_NOPWD[] PROGMEM = "Bez hesla WiFi";
 #define INTL_REPORT_ISSUE "Prijavite težavo"
 
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "Senzor WiFi v načinu konfiguracije";

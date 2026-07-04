@@ -42,6 +42,7 @@ const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "Hoogte boven zeeniveau (m)";
 const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "Luchtdruk op zeeniveau";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Toegang beperken";
+const char INTL_NOPWD[] PROGMEM = "zonder wifi-wachtwoord";
 #define INTL_REPORT_ISSUE "Een probleem melden"
 
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "Netwerknaam en -wachtwoord van de fijnstofsensor";

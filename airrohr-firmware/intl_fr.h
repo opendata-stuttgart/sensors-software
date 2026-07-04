@@ -42,6 +42,7 @@ const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "Altitude en m";
 const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "Press. atm. au niveau de la mer en hPa";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Activer BasicAuth";
+const char INTL_NOPWD[] PROGMEM = "Sans mot de passe WiFi";
 #define INTL_REPORT_ISSUE "Signaler un problème"
 
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "Nom du capteur wifi en mode de configuration";

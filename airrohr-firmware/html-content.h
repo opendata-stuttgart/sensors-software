@@ -21,6 +21,7 @@ const char DBG_TXT_SENDING_TO[] PROGMEM = "## Sending to ";
 const char DBG_TXT_SDS011_VERSION_DATE[] PROGMEM = "SDS011 version date";
 const char DBG_TXT_NPM_VERSION_DATE[] PROGMEM = "Next PM version date";
 const char DBG_TXT_CONNECTING_TO[] PROGMEM = "Connecting to ";
+const char DBG_TXT_CONNECTING_NOPWD_TO[] PROGMEM = "Connecting w/o passwd ";
 const char DBG_TXT_FOUND[] PROGMEM = " ... found";
 const char DBG_TXT_NOT_FOUND[] PROGMEM = " ... not found";
 const char DBG_TXT_SEP[] PROGMEM = "----";

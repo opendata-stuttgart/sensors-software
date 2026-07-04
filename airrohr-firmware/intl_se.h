@@ -42,6 +42,7 @@ const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "Höjd över havet";
 const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "Lufttryck vid havsytan";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Aktivera BasicAuth";
+const char INTL_NOPWD[] PROGMEM = "[[no WiFi password]]";
 #define INTL_REPORT_ISSUE "Rapportera ett problem"
 
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "WiFi-sensor i konfigurationsläge";
