@@ -4,7 +4,6 @@
 // Wifi config
 const char WLANSSID[] PROGMEM = "Freifunk-disabled";
 const char WLANPWD[] PROGMEM = "";
-#define WLAN_NOPWD_ENABLED 0
 
 // BasicAuth config
 const char WWW_USERNAME[] PROGMEM = "admin";
