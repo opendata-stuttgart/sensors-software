@@ -42,7 +42,6 @@ const char INTL_HEIGHT_ABOVE_SEALEVEL[] PROGMEM = "Висота над рівн�
 const char INTL_PRESSURE_AT_SEALEVEL[] PROGMEM = "тиск на рівні моря";
 const char INTL_NEO6M[] PROGMEM = "GPS (NEO 6M)";
 const char INTL_BASICAUTH[] PROGMEM = "Авторизація";
-const char INTL_NOPWD[] PROGMEM = "без пароля WiFi";
 #define INTL_REPORT_ISSUE "Повідомте про проблему"
 
 const char INTL_FS_WIFI_DESCRIPTION[] PROGMEM = "WiFi сенсор в режимі конфігурації";
