@@ -161,6 +161,7 @@ extern void debug_outln_info(const __FlashStringHelper* text);
 extern void debug_outln_verbose(const __FlashStringHelper* text);
 extern void debug_outln_info(const __FlashStringHelper* text, const String& option);
 extern void debug_outln_info(const __FlashStringHelper* text, float value);
+extern void debug_outln_info(const __FlashStringHelper* text, int value);
 extern void debug_outln_verbose(const __FlashStringHelper* text, const String& option);
 extern void debug_outln_info_bool(const __FlashStringHelper* text, const bool option);
 
