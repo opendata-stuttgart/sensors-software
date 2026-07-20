@@ -31,6 +31,7 @@ const char WWW_PASSWORD[] PROGMEM = "";
 
 // OpenSenseMap
 #define SENSEBOXID ""
+#define OSEM_DEVICE_API_KEY ""
 
 enum LoggerEntry {
     LoggerSensorCommunity,

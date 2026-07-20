@@ -209,6 +209,7 @@ namespace cfg
 	bool ssl_madavi = SSL_MADAVI;
 	bool ssl_dusti = SSL_SENSORCOMMUNITY;
 	char senseboxid[LEN_SENSEBOXID] = SENSEBOXID;
+	char osem_device_api_key[LEN_OSEM_DEVICE_API_KEY] = OSEM_DEVICE_API_KEY;
 
 	char host_influx[LEN_HOST_INFLUX];
 	char url_influx[LEN_URL_INFLUX];
@@ -1810,6 +1811,7 @@ static void webserver_config_send_body_get(String &page_content)
 	add_form_checkbox(Config_send2sensemap, FPSTR(WEB_OPENSENSEMAP));
 	page_content += FPSTR(TABLE_TAG_OPEN);
 	add_form_input(page_content, Config_senseboxid, F("senseBox&nbsp;ID"), LEN_SENSEBOXID - 1);
+	add_form_input(page_content, Config_osem_device_api_key, F("openSenseMap&nbsp;device&nbsp;API&nbsp;key"), LEN_OSEM_DEVICE_API_KEY - 1);
 
 	server.sendContent(page_content);
 	page_content = FPSTR(TABLE_TAG_CLOSE_BR);
@@ -3094,7 +3096,10 @@ static unsigned long sendData(const LoggerEntry logger, const String &data, cons
 		{
 			http.addHeader(F("X-PIN"), String(pin));
 		}
-
+		if (cfg::send2sensemap && (*cfg::osem_device_api_key))
+		{
+			http.addHeader(F("x-osem-device-api-key"), String(cfg::osem_device_api_key));
+		}
 		result = http.POST(data);
 
 		if (result >= HTTP_CODE_OK && result <= HTTP_CODE_ALREADY_REPORTED)
