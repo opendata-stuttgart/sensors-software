@@ -52,6 +52,19 @@ public:
 
   /**************************************************************************/
   /*!
+      @brief  IIR filter
+  */
+  /**************************************************************************/
+  enum iir_filter {
+    IIR_NONE = 0b000,
+    IIR_2 = 0b001,
+    IIR_4 = 0b010,
+    IIR_8 = 0b011,
+    IIR_16 = 0b100
+  };
+
+  /**************************************************************************/
+  /*!
       @brief  power modes
   */
   /**************************************************************************/
@@ -82,6 +95,7 @@ public:
                    sensor_sampling tempSampling = SAMPLING_X16,
                    sensor_sampling pressSampling = SAMPLING_X16,
                    sensor_sampling humSampling = SAMPLING_X16,
+                   iir_filter iirFilter = IIR_NONE,
                    standby_duration duration = STANDBY_MS_0_5);
 
   void takeForcedMeasurement();
@@ -146,14 +160,18 @@ protected:
     // 111 = 20 ms
     uint8_t t_sb : 3; ///< inactive duration (standby time) in normal mode
 
-    // unused - don't set
-    uint8_t none : 1;     ///< unused - don't set
+    // Controls the time constant of the IIR filter
+    // 000 = off
+    // 001 = 2
+    // 010 = 4
+    // 011 = 8
+    // 100, others = 16
+    uint8_t filter : 3; ///< Controls the time constant of the IIR filter
+    uint8_t none : 1; ///< unused - don't set
     uint8_t spi3w_en : 1; ///< unused - don't set
-
-    uint8_t _unused : 3;
-
+    
     /// @return combined config register
-    uint8_t get() { return (t_sb << 5); }
+    uint8_t get() { return (t_sb << 5) | (filter << 2); }
   };
 
   /**************************************************************************/
