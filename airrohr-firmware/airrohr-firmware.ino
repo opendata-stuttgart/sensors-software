@@ -3486,7 +3486,7 @@ static void fetchSensorSDS(String &s)
 	}
 	else
 	{
-		if (!is_SDS_running)
+		if (!is_SDS_running || serialSDS.available() < SDS_waiting_for)
 		{
 			is_SDS_running = SDS_cmd(PmSensorCmd::Start);
 			SDS_waiting_for = SDS_REPLY_HDR;
