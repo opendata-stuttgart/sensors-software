@@ -1,3 +1,5 @@
+#include <bearssl/bearssl_ssl.h>
+
 #if defined(ESP8266)
 #define SENSOR_BASENAME "esp8266-"
 #define OTA_BASENAME "/airrohr"

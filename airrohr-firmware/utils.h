@@ -39,7 +39,11 @@
 #include <WiFiClient.h>
 #include <WiFiClientSecure.h>
 #include <HardwareSerial.h>
-#include <hwcrypto/sha.h>
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL (4, 4, 0)
+	#include <sha/sha_parallel_engine.h>  
+#else
+	#include <hwcrypto/sha.h>
+#endif
 #include <freertos/queue.h>
 #endif
 
@@ -94,6 +98,7 @@ extern SoftwareSerial serialIPS;
 #define serialNPM (Serial1)
 #define serialIPS (Serial1)
 #endif
+
 
 enum class PmSensorCmd {
 	Start,

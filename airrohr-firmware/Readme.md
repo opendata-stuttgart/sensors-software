@@ -13,6 +13,14 @@
 
 Please refer to [Contributing README](./Contributing.md) for details.
 
+## ESP32 support
+
+The support is still experimental. Run the following to complile the code for the [ES32 WROOM board](https://docs.platformio.org/en/latest/boards/espressif32/denky32.html):
+
+```
+pio run --environment esp32
+```
+
 ## WiFi configuration
 For German Version see: [Konfiguration der Sensoren](https://github.com/opendata-stuttgart/meta/wiki/Konfiguration-der-Sensoren)
 
