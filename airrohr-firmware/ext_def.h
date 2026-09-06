@@ -83,7 +83,11 @@ static const char FW_DOWNLOAD_HOST[] PROGMEM = "firmware.sensor.community";
 
 static const char FW_2ND_LOADER_URL[] PROGMEM = OTA_BASENAME "/loader-002.bin";
 
+#if LWIP_IPV6
+static const char NTP_SERVER_1[] PROGMEM = "2.pool.ntp.org";
+#else
 static const char NTP_SERVER_1[] PROGMEM = "0.pool.ntp.org";
+#endif
 static const char NTP_SERVER_2[] PROGMEM = "1.pool.ntp.org";
 
 // define own API

@@ -1,3 +1,26 @@
+NRZ-2026-136-B3
+* Enable IPv6 and prefer IPv6 connections on dual-stack networks
+* Prevent configured passwords to be exposed through the web UI
+* Minor bug fixes and cosmetics
+* Change setting of compiler optimization to -O2 for optimal performance and filesize
+
+NRZ-2024-136-B2
+* support openSenseMap device API keys
+* Add BME280 IIR filtering
+* Add Croatian language
+* Add status page translations
+* Reduce the number of SDS011 errors
+* Minor bug fixes and cosmetics
+* Update Github Actions CI workflow
+
+NRZ-2024-136-B1
+* next beta version
+* Sensor.Community API, Madavi API and Auto Updates are enabled by default for first config
+
+NRZ-2024-135
+online since 2024-04-09
+* same as NRZ-2024-134-B5
+
 NRZ-2024-134-B5
 * Go back to Arduino Core 2.7.4 as a workaround for stalling OTA downloads
 * Change setting of compiler optimization to -O3 for better performance

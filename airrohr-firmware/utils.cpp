@@ -273,7 +273,7 @@ LoggingSerial Debug;
 #if defined(ESP8266)
 LoggingSerial::LoggingSerial()
     : HardwareSerial(UART0)
-    , m_buffer(new circular_queue<uint8_t>(LARGE_STR))
+    , m_buffer(new circular_queue<uint8_t>(XLARGE_STR))
 {
 }
 #endif
